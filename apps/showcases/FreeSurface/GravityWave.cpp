@@ -308,8 +308,9 @@ int main(int argc, char** argv)
    const real_t reynoldsNumber = physicsParameters.getParameter< real_t >("reynoldsNumber");
    const real_t waveNumber     = real_c(2) * math::pi / real_c(domainSize[0]);
    const real_t waveFrequency  = reynoldsNumber * viscosity / real_c(domainSize[0]) / initialAmplitude;
-   const real_t forceY         = -(waveFrequency * waveFrequency) / waveNumber / std::tanh(waveNumber * liquidDepth);
-   const Vector3< real_t > force(real_c(0), forceY, real_c(0));
+   const real_t gravitationalAccelerationY =
+      -(waveFrequency * waveFrequency) / waveNumber / std::tanh(waveNumber * liquidDepth);
+   const Vector3< real_t > acceleration(real_c(0), gravitationalAccelerationY, real_c(0));
 
    const bool enableWetting  = physicsParameters.getParameter< bool >("enableWetting");
    const real_t contactAngle = physicsParameters.getParameter< real_t >("contactAngle");
@@ -320,7 +321,7 @@ int main(int argc, char** argv)
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(contactAngle);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(timesteps);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(viscosity);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(force);
+   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(acceleration);
 
    // read model parameters from parameter file
    const auto modelParameters               = walberlaEnv.config()->getOneBlock("ModelParameters");
@@ -329,7 +330,6 @@ int main(int argc, char** argv)
    const std::string excessMassDistributionModel =
       modelParameters.getParameter< std::string >("excessMassDistributionModel");
    const std::string curvatureModel          = modelParameters.getParameter< std::string >("curvatureModel");
-   const bool enableForceWeighting           = modelParameters.getParameter< bool >("enableForceWeighting");
    const bool useSimpleMassExchange          = modelParameters.getParameter< bool >("useSimpleMassExchange");
    const real_t cellConversionThreshold      = modelParameters.getParameter< real_t >("cellConversionThreshold");
    const real_t cellConversionForceThreshold = modelParameters.getParameter< real_t >("cellConversionForceThreshold");
@@ -340,7 +340,6 @@ int main(int argc, char** argv)
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(pdfRefillingModel);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(excessMassDistributionModel);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(curvatureModel);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(enableForceWeighting);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(useSimpleMassExchange);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(cellConversionThreshold);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(cellConversionForceThreshold);
@@ -362,11 +361,11 @@ int main(int argc, char** argv)
       createNonUniformBlockForest(domainSize, cellsPerBlock, numBlocks, periodicity);
 
    // add force field
-   const BlockDataID forceFieldID =
-      field::addToStorage< VectorField_T >(blockForest, "Force field", force, field::fzyx, uint_c(1));
+   const BlockDataID forceDensityFieldID = field::addToStorage< VectorField_T >(
+      blockForest, "Force density field", Vector3< real_t >(real_c(0)), field::fzyx, uint_c(1));
 
    // create lattice model
-   const LatticeModel_T latticeModel = LatticeModel_T(collisionModel, ForceModel_T(forceFieldID));
+   const LatticeModel_T latticeModel = LatticeModel_T(collisionModel, ForceModel_T(forceDensityFieldID));
 
    // add pdf field
    const BlockDataID pdfFieldID = lbm::addPdfFieldToStorage(blockForest, "PDF field", latticeModel, field::fzyx);
@@ -435,8 +434,48 @@ int main(int argc, char** argv)
    // might not detect solid flags correctly
    freeSurfaceBoundaryHandling->initFlagsFromFillLevel();
 
+   // initialize sine profile such that there is exactly one period in the domain, i.e., with wavelength=domainSize[0];
+   // every length is normalized with domainSize[0]
+   for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+   {
+      ScalarField_T* const fillField = blockIt->getData< ScalarField_T >(fillFieldID);
+
+      WALBERLA_FOR_ALL_CELLS(fillFieldIt, fillField, {
+         // cell in block-local coordinates
+         const Cell localCell = fillFieldIt.cell();
+
+         // get cell in global coordinates
+         Cell globalCell = fillFieldIt.cell();
+         blockForest->transformBlockLocalToGlobalCell(globalCell, *blockIt, localCell);
+
+         // Monte-Carlo like estimation of the fill level:
+         // create uniformly-distributed sample points in each cell and count the number of points below the sine
+         // profile; this fraction of points is used as the fill level to initialize the profile
+         uint_t numPointsBelow = uint_c(0);
+
+         for (uint_t xSample = uint_c(0); xSample <= fillLevelInitSamples; ++xSample)
+         {
+            // value of the sine-function
+            const real_t functionValue = initializationProfile(real_c(globalCell[0]) + real_c(xSample) * stepsize,
+                                                               initialAmplitude, liquidDepth, real_c(domainSize[0]));
+
+            for (uint_t ySample = uint_c(0); ySample <= fillLevelInitSamples; ++ySample)
+            {
+               const real_t yPoint = real_c(globalCell[1]) + real_c(ySample) * stepsize;
+               // with operator <, a fill level of 1 can not be reached when the line is equal to the cell's top border;
+               // with operator <=, a fill level of 0 can not be reached when the line is equal to the cell's bottom
+               // border
+               if (yPoint < functionValue) { ++numPointsBelow; }
+            }
+         }
+
+         // fill level is fraction of points below sine profile
+         fillField->get(localCell) = real_c(numPointsBelow) / real_c(numTotalPoints);
+      }) // WALBERLA_FOR_ALL_CELLS
+   }
+
    // communication after initialization
-   Communication_T communication(blockForest, flagFieldID, fillFieldID, forceFieldID);
+   Communication_T communication(blockForest, flagFieldID, fillFieldID, forceDensityFieldID);
    communication();
 
    PdfCommunication_T pdfCommunication(blockForest, pdfFieldID);
@@ -457,7 +496,11 @@ int main(int argc, char** argv)
    else { bubbleModel = std::make_shared< bubble_model::BubbleModelConstantPressure >(real_c(1)); }
 
    // initialize hydrostatic pressure
-   initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, force, liquidDepth);
+   initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, acceleration, liquidDepth);
+
+   // initialize force density field
+   initForceDensityField< PdfField_T, FlagField_T, VectorField_T, ScalarField_T >(
+      blockForest, forceDensityFieldID, fillFieldID, pdfFieldID, flagFieldID, flagInfo, acceleration);
 
    // set density in non-liquid or non-interface cells to one (after initializing with hydrostatic pressure)
    setDensityInNonFluidCellsToOne< FlagField_T, PdfField_T >(blockForest, flagInfo, flagFieldID, pdfFieldID);
@@ -485,9 +528,9 @@ int main(int argc, char** argv)
 
    // add boundary handling for standard boundaries and free surface boundaries
    const SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T > dynamicsHandler(
-      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceFieldID, normalFieldID, curvatureFieldID,
+      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID, normalFieldID, curvatureFieldID,
       freeSurfaceBoundaryHandling, bubbleModel, pdfReconstructionModel, pdfRefillingModel, excessMassDistributionModel,
-      relaxationRate, force, surfaceTension, enableForceWeighting, useSimpleMassExchange, cellConversionThreshold,
+      relaxationRate, acceleration, surfaceTension, useSimpleMassExchange, cellConversionThreshold,
       cellConversionForceThreshold);
 
    dynamicsHandler.addSweeps(timeloop);
@@ -513,7 +556,7 @@ int main(int argc, char** argv)
 
    // add VTK output
    addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T >(
-      blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceFieldID,
+      blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID,
       geometryHandler.getCurvatureFieldID(), geometryHandler.getNormalFieldID(),
       geometryHandler.getObstNormalFieldID());
 

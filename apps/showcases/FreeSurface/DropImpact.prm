@@ -32,7 +32,6 @@ ModelParameters
    pdfRefillingModel             EquilibriumRefilling;
    excessMassDistributionModel   EvenlyAllInterface;
    curvatureModel                FiniteDifferenceMethod;
-   enableForceWeighting          false;
    useSimpleMassExchange         false;
    enableBubbleModel             false;
    enableBubbleSplits            false; // only used if enableBubbleModel=true
@@ -77,16 +76,16 @@ VTK
 
       writers
       {
+         fill_level;
+         mapped_flag;
          velocity;
          density;
-         //pdf;
-         flag;
-         fill_level;
-         force;
          curvature;
          normal;
          obstacle_normal;
-         mapped_flag;
+         //pdf;
+         //flag;
+         //force_density;
       }
 
       inclusion_filters

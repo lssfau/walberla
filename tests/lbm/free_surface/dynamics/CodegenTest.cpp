@@ -27,6 +27,7 @@
 #include "core/debug/TestSubsystem.h"
 
 #include "lbm/field/AddToStorage.h"
+#include "lbm/free_surface/InitFunctions.h"
 #include "lbm/free_surface/bubble_model/Geometry.h"
 #include "lbm/free_surface/dynamics/SurfaceDynamicsHandler.h"
 #include "lbm/free_surface/surface_geometry/SurfaceGeometryHandler.h"
@@ -44,8 +45,9 @@ namespace free_surface
 namespace CodegenTest
 {
 
-using ScalarField_T = GhostLayerField< real_t, 1 >;
-using VectorField_T = GhostLayerField< Vector3< real_t >, 1 >;
+using ScalarField_T          = GhostLayerField< real_t, 1 >;
+using VectorField_T          = GhostLayerField< Vector3< real_t >, 1 >;
+using VectorFieldFlattened_T = GhostLayerField< real_t, 3 >;
 
 template< bool useCodegen >
 void runSimulation()
@@ -54,6 +56,7 @@ void runSimulation()
    using ForceModel_T     = lbm::force_model::GuoField< VectorField_T >;
    using LatticeModel_T   = typename std::conditional< useCodegen, lbm::GeneratedLatticeModel_FreeSurface,
                                                      lbm::D3Q19< CollisionModel_T, true, ForceModel_T, 2 > >::type;
+   using PdfField_T       = lbm::PdfField< LatticeModel_T >;
 
    using Communication_T = blockforest::SimpleCommunication< typename LatticeModel_T::CommunicationStencil >;
 
@@ -76,38 +79,44 @@ void runSimulation()
                                           true, true, true);                                    // periodicity
 
    // physics parameters
-   const real_t dropDiameter     = real_c(2);
-   const real_t relaxationRate   = real_c(1.8);
-   const real_t surfaceTension   = real_c(1e-5);
-   const bool enableWetting      = false;
-   const real_t contactAngle     = real_c(0);
-   const Vector3< real_t > force = Vector3< real_t >(real_c(1e-5), real_c(0), real_c(0));
+   const real_t dropDiameter            = real_c(2);
+   const real_t relaxationRate          = real_c(1.8);
+   const real_t surfaceTension          = real_c(1e-5);
+   const bool enableWetting             = false;
+   const real_t contactAngle            = real_c(0);
+   const Vector3< real_t > acceleration = Vector3< real_t >(real_c(1e-5), real_c(0), real_c(0));
 
    // model parameters
    const std::string pdfReconstructionModel      = "NormalBasedKeepCenter";
    const std::string pdfRefillingModel           = "EquilibriumRefilling";
    const std::string excessMassDistributionModel = "EvenlyAllInterface";
    const std::string curvatureModel              = "FiniteDifferenceMethod";
-   const bool enableForceWeighting               = false;
    const bool useSimpleMassExchange              = false;
    const real_t cellConversionThreshold          = real_c(1e-2);
    const real_t cellConversionForceThreshold     = real_c(1e-1);
 
    // add force field
-   const BlockDataID forceFieldID =
-      field::addToStorage< VectorField_T >(blockForest, "Force field", force, field::fzyx, uint_c(1));
+   std::shared_ptr< BlockDataID > forceDensityFieldIDPtr = nullptr;
 
    std::shared_ptr< LatticeModel_T > latticeModel;
 
    // create lattice model
    if constexpr (useCodegen)
    {
-      latticeModel = std::make_shared< LatticeModel_T >(force[0], force[1], force[2], relaxationRate);
+      // add force field of type 'GhostLayerField< real_t, 3 >' as required by pystencils
+      forceDensityFieldIDPtr = std::make_shared< BlockDataID >(field::addToStorage< VectorFieldFlattened_T >(
+         blockForest, "Force density field (codegen)", real_c(0), field::fzyx, uint_c(1)));
+      latticeModel           = std::make_shared< LatticeModel_T >(*forceDensityFieldIDPtr, relaxationRate);
    }
    else
    {
-      latticeModel = std::make_shared< LatticeModel_T >(CollisionModel_T(relaxationRate), ForceModel_T(forceFieldID));
+      forceDensityFieldIDPtr = std::make_shared< BlockDataID >(field::addToStorage< VectorField_T >(
+         blockForest, "Force density field", Vector3< real_t >(0), field::fzyx, uint_c(1)));
+      latticeModel =
+         std::make_shared< LatticeModel_T >(CollisionModel_T(relaxationRate), ForceModel_T(*forceDensityFieldIDPtr));
    }
+
+   WALBERLA_ASSERT_NOT_NULLPTR(forceDensityFieldIDPtr);
 
    // add various fields
    const BlockDataID pdfFieldID = lbm::addPdfFieldToStorage(blockForest, "PDF field", *latticeModel, field::fzyx);
@@ -117,7 +126,8 @@ void runSimulation()
    // add boundary handling
    const std::shared_ptr< FreeSurfaceBoundaryHandling_T > freeSurfaceBoundaryHandling =
       std::make_shared< FreeSurfaceBoundaryHandling_T >(blockForest, pdfFieldID, fillFieldID);
-   const BlockDataID flagFieldID = freeSurfaceBoundaryHandling->getFlagFieldID();
+   const BlockDataID flagFieldID                                      = freeSurfaceBoundaryHandling->getFlagFieldID();
+   const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo = freeSurfaceBoundaryHandling->getFlagInfo();
 
    // add drop to fill level field
    const geometry::Sphere sphereDrop(Vector3< real_t >(real_c(0.5) * real_c(domainSize[0]),
@@ -129,8 +139,20 @@ void runSimulation()
    // initialize flag field from fill level field
    freeSurfaceBoundaryHandling->initFlagsFromFillLevel();
 
-   // initial Communication_Tunication
-   Communication_T(blockForest, pdfFieldID, fillFieldID, flagFieldID, forceFieldID)();
+   if constexpr (useCodegen)
+   {
+      initForceDensityFieldCodegen< PdfField_T, FlagField_T, VectorFieldFlattened_T, ScalarField_T >(
+         blockForest, *forceDensityFieldIDPtr, fillFieldID, pdfFieldID, flagFieldID, flagInfo, acceleration);
+   }
+   else
+   {
+      // initialize force density field
+      initForceDensityField< PdfField_T, FlagField_T, VectorField_T, ScalarField_T >(
+         blockForest, *forceDensityFieldIDPtr, fillFieldID, pdfFieldID, flagFieldID, flagInfo, acceleration);
+   }
+
+   // initial communication
+   Communication_T(blockForest, pdfFieldID, fillFieldID, flagFieldID, *forceDensityFieldIDPtr)();
 
    // add bubble model
    const std::shared_ptr< bubble_model::BubbleModelConstantPressure > bubbleModel =
@@ -154,11 +176,12 @@ void runSimulation()
    geometryHandler.addSweeps(timeloop);
 
    // add boundary handling for standard boundaries and free surface boundaries
-   SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T, useCodegen > dynamicsHandler(
-      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceFieldID, normalFieldID, curvatureFieldID,
-      freeSurfaceBoundaryHandling, bubbleModel, pdfReconstructionModel, pdfRefillingModel, excessMassDistributionModel,
-      relaxationRate, force, surfaceTension, enableForceWeighting, useSimpleMassExchange, cellConversionThreshold,
-      cellConversionForceThreshold);
+   const SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T, useCodegen,
+                                 VectorFieldFlattened_T >
+      dynamicsHandler(blockForest, pdfFieldID, flagFieldID, fillFieldID, *forceDensityFieldIDPtr, normalFieldID,
+                      curvatureFieldID, freeSurfaceBoundaryHandling, bubbleModel, pdfReconstructionModel,
+                      pdfRefillingModel, excessMassDistributionModel, relaxationRate, acceleration, surfaceTension,
+                      useSimpleMassExchange, cellConversionThreshold, cellConversionForceThreshold);
 
    dynamicsHandler.addSweeps(timeloop);
 
@@ -172,35 +195,35 @@ void runSimulation()
       WALBERLA_FOR_ALL_CELLS(fillFieldIt, fillField, {
          if (fillFieldIt.cell() == Cell(cell_idx_c(1), cell_idx_c(1), cell_idx_c(1)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.504035), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.512081), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(2), cell_idx_c(1), cell_idx_c(1)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.538017), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.529967), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(1)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.504035), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.512081), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(2), cell_idx_c(2), cell_idx_c(1)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.538017), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.529967), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(1), cell_idx_c(1), cell_idx_c(2)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.504035), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.512081), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(2), cell_idx_c(1), cell_idx_c(2)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.538017), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.529967), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(2)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.504035), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.512081), real_c(1e-4));
          }
          if (fillFieldIt.cell() == Cell(cell_idx_c(2), cell_idx_c(2), cell_idx_c(2)))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.538017), real_c(1e-4));
+            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.529967), real_c(1e-4));
          }
       }); // WALBERLA_FOR_ALL_CELLS
    }

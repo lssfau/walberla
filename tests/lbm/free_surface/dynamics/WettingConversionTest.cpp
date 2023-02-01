@@ -83,8 +83,8 @@ std::vector< Cell > runSimulation(uint_t timesteps, real_t contactAngle)
       field::addToStorage< ScalarField_T >(blockForest, "Fill level field", real_c(0.0), field::fzyx, uint_c(1));
 
    // add dummy force field
-   BlockDataID forceFieldID = field::addToStorage< VectorField_T >(
-      blockForest, "Force field", Vector3< real_t >(real_c(0)), field::fzyx, uint_c(1));
+   BlockDataID forceDensityFieldID = field::addToStorage< VectorField_T >(
+      blockForest, "Force density field", Vector3< real_t >(real_c(0)), field::fzyx, uint_c(1));
 
    // add boundary handling
    const std::shared_ptr< FreeSurfaceBoundaryHandling_T > freeSurfaceBoundaryHandling =
@@ -103,7 +103,7 @@ std::vector< Cell > runSimulation(uint_t timesteps, real_t contactAngle)
    freeSurfaceBoundaryHandling->initFlagsFromFillLevel();
 
    // initial communication
-   Communication_T(blockForest, pdfFieldID, fillFieldID, flagFieldID, forceFieldID)();
+   Communication_T(blockForest, pdfFieldID, fillFieldID, flagFieldID, forceDensityFieldID)();
 
    // add (dummy) bubble model
    const bool disableSplits = true; // necessary if a gas bubble could split
@@ -124,9 +124,9 @@ std::vector< Cell > runSimulation(uint_t timesteps, real_t contactAngle)
 
    // add surface dynamics handler
    SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T > dynamicsHandler(
-      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceFieldID, normalFieldID, curvatureFieldID,
+      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID, normalFieldID, curvatureFieldID,
       freeSurfaceBoundaryHandling, bubbleModel, "NormalBasedKeepCenter", "EquilibriumRefilling", "EvenlyNewInterface",
-      relaxRate, Vector3< real_t >(real_c(0)), real_c(1e-2), false, false, real_c(1e-3), real_c(1e-1));
+      relaxRate, Vector3< real_t >(real_c(0)), real_c(1e-2), false, real_c(1e-3), real_c(1e-1));
    dynamicsHandler.addSweeps(timeloop);
 
    timeloop.run();

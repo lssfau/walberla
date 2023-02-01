@@ -46,8 +46,9 @@ namespace free_surface
 {
 namespace GravityWaveCodegen
 {
-using ScalarField_T = GhostLayerField< real_t, 1 >;
-using VectorField_T = GhostLayerField< Vector3< real_t >, 1 >;
+using ScalarField_T          = GhostLayerField< real_t, 1 >;
+using VectorField_T          = GhostLayerField< Vector3< real_t >, 1 >;
+using VectorFieldFlattened_T = GhostLayerField< real_t, 3 >;
 
 using LatticeModel_T        = lbm::GravityWaveLatticeModel;
 using LatticeModelStencil_T = LatticeModel_T::Stencil;
@@ -309,8 +310,8 @@ int main(int argc, char** argv)
    const real_t reynoldsNumber = physicsParameters.getParameter< real_t >("reynoldsNumber");
    const real_t waveNumber     = real_c(2) * math::pi / real_c(domainSize[0]);
    const real_t waveFrequency  = reynoldsNumber * viscosity / real_c(domainSize[0]) / initialAmplitude;
-   const real_t forceY         = -(waveFrequency * waveFrequency) / waveNumber / std::tanh(waveNumber * liquidDepth);
-   const Vector3< real_t > force(real_c(0), forceY, real_c(0));
+   const real_t accelerationY  = -(waveFrequency * waveFrequency) / waveNumber / std::tanh(waveNumber * liquidDepth);
+   const Vector3< real_t > acceleration(real_c(0), accelerationY, real_c(0));
 
    const bool enableWetting  = physicsParameters.getParameter< bool >("enableWetting");
    const real_t contactAngle = physicsParameters.getParameter< real_t >("contactAngle");
@@ -321,7 +322,7 @@ int main(int argc, char** argv)
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(contactAngle);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(timesteps);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(viscosity);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(force);
+   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(acceleration);
 
    // read model parameters from parameter file
    const auto modelParameters               = walberlaEnv.config()->getOneBlock("ModelParameters");
@@ -330,7 +331,6 @@ int main(int argc, char** argv)
    const std::string excessMassDistributionModel =
       modelParameters.getParameter< std::string >("excessMassDistributionModel");
    const std::string curvatureModel          = modelParameters.getParameter< std::string >("curvatureModel");
-   const bool enableForceWeighting           = modelParameters.getParameter< bool >("enableForceWeighting");
    const bool useSimpleMassExchange          = modelParameters.getParameter< bool >("useSimpleMassExchange");
    const real_t cellConversionThreshold      = modelParameters.getParameter< real_t >("cellConversionThreshold");
    const real_t cellConversionForceThreshold = modelParameters.getParameter< real_t >("cellConversionForceThreshold");
@@ -341,7 +341,6 @@ int main(int argc, char** argv)
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(pdfRefillingModel);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(excessMassDistributionModel);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(curvatureModel);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(enableForceWeighting);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(useSimpleMassExchange);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(cellConversionThreshold);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(cellConversionForceThreshold);
@@ -363,11 +362,11 @@ int main(int argc, char** argv)
       createNonUniformBlockForest(domainSize, cellsPerBlock, numBlocks, periodicity);
 
    // add force field
-   const BlockDataID forceFieldID =
-      field::addToStorage< VectorField_T >(blockForest, "Force field", force, field::fzyx, uint_c(1));
+   const BlockDataID forceDensityFieldID =
+      field::addToStorage< VectorFieldFlattened_T >(blockForest, "Force field", real_c(0), field::fzyx, uint_c(1));
 
    // create lattice model
-   LatticeModel_T latticeModel = LatticeModel_T(force[0], force[1], force[2], relaxationRate);
+   LatticeModel_T latticeModel = LatticeModel_T(forceDensityFieldID, relaxationRate);
 
    // add pdf field
    const BlockDataID pdfFieldID = lbm::addPdfFieldToStorage(blockForest, "PDF field", latticeModel, field::fzyx);
@@ -437,7 +436,7 @@ int main(int argc, char** argv)
    freeSurfaceBoundaryHandling->initFlagsFromFillLevel();
 
    // communication after initialization
-   Communication_T communication(blockForest, flagFieldID, fillFieldID, forceFieldID);
+   Communication_T communication(blockForest, flagFieldID, fillFieldID, forceDensityFieldID);
    communication();
 
    PdfCommunication_T pdfCommunication(blockForest, pdfFieldID);
@@ -458,7 +457,11 @@ int main(int argc, char** argv)
    else { bubbleModel = std::make_shared< bubble_model::BubbleModelConstantPressure >(real_c(1)); }
 
    // initialize hydrostatic pressure
-   initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, force, liquidDepth);
+   initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, acceleration, liquidDepth);
+
+   // initialize force density field
+   initForceDensityFieldCodegen< PdfField_T, FlagField_T, VectorFieldFlattened_T, ScalarField_T >(
+      blockForest, forceDensityFieldID, fillFieldID, pdfFieldID, flagFieldID, flagInfo, acceleration);
 
    // set density in non-liquid or non-interface cells to 1 (after initializing with hydrostatic pressure)
    setDensityInNonFluidCellsToOne< FlagField_T, PdfField_T >(blockForest, flagInfo, flagFieldID, pdfFieldID);
@@ -485,11 +488,12 @@ int main(int argc, char** argv)
    const ConstBlockDataID normalFieldID    = geometryHandler.getConstNormalFieldID();
 
    // add boundary handling for standard boundaries and free surface boundaries
-   const SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T, true > dynamicsHandler(
-      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceFieldID, normalFieldID, curvatureFieldID,
-      freeSurfaceBoundaryHandling, bubbleModel, pdfReconstructionModel, pdfRefillingModel, excessMassDistributionModel,
-      relaxationRate, force, surfaceTension, enableForceWeighting, useSimpleMassExchange, cellConversionThreshold,
-      cellConversionForceThreshold);
+   const SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T, true,
+                                 VectorFieldFlattened_T >
+      dynamicsHandler(blockForest, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID, normalFieldID,
+                      curvatureFieldID, freeSurfaceBoundaryHandling, bubbleModel, pdfReconstructionModel,
+                      pdfRefillingModel, excessMassDistributionModel, relaxationRate, acceleration, surfaceTension,
+                      useSimpleMassExchange, cellConversionThreshold, cellConversionForceThreshold);
 
    dynamicsHandler.addSweeps(timeloop);
 
@@ -513,8 +517,9 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(symmetryEvaluator, "Evaluator: symmetry norm");
 
    // add VTK output
-   addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T >(
-      blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceFieldID,
+   addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T,
+                 true, VectorFieldFlattened_T >(
+      blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID,
       geometryHandler.getCurvatureFieldID(), geometryHandler.getNormalFieldID(),
       geometryHandler.getObstNormalFieldID());
 
