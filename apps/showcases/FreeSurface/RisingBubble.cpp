@@ -122,9 +122,9 @@ class CenterOfMassComputer
          Vector3< cell_idx_t >(cellSum[0], cellSum[1], cellSum[2]); // use Vector3 to limit calls to MPI-reduce to one
       mpi::allReduceInplace< cell_idx_t >(cellSumVector, mpi::SUM);
 
-      (*centerOfMass_)[0] = real_c(cellSum[0]) / real_c(cellCount);
-      (*centerOfMass_)[1] = real_c(cellSum[1]) / real_c(cellCount);
-      (*centerOfMass_)[2] = real_c(cellSum[2]) / real_c(cellCount);
+      (*centerOfMass_)[0] = real_c(cellSumVector[0]) / real_c(cellCount);
+      (*centerOfMass_)[1] = real_c(cellSumVector[1]) / real_c(cellCount);
+      (*centerOfMass_)[2] = real_c(cellSumVector[2]) / real_c(cellCount);
    }
 
  private:
