@@ -501,13 +501,13 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(loadBalancer, "Sweep: load balancing");
 
    // add sweep for evaluating the column height at the origin
-   const std::shared_ptr< cell_idx_t > currentColumnHeight = std::make_shared< cell_idx_t >(columnHeight);
+   const std::shared_ptr< cell_idx_t > currentColumnHeight = std::make_shared< cell_idx_t >(cell_idx_c(columnHeight));
    const ColumnHeightEvaluator< FreeSurfaceBoundaryHandling_T > heightEvaluator(
       blockForest, freeSurfaceBoundaryHandling, domainSize, evaluationFrequency, currentColumnHeight);
    timeloop.addFuncAfterTimeStep(heightEvaluator, "Evaluator: column height");
 
    // add sweep for evaluating the column width (distance of front to origin)
-   const std::shared_ptr< cell_idx_t > currentColumnWidth = std::make_shared< cell_idx_t >(columnWidth);
+   const std::shared_ptr< cell_idx_t > currentColumnWidth = std::make_shared< cell_idx_t >(cell_idx_c(columnWidth));
    const ColumnWidthEvaluator< FreeSurfaceBoundaryHandling_T > widthEvaluator(
       blockForest, freeSurfaceBoundaryHandling, domainSize, evaluationFrequency, currentColumnWidth);
    timeloop.addFuncAfterTimeStep(widthEvaluator, "Evaluator: column width");

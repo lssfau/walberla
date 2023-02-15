@@ -512,7 +512,7 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(loadBalancer, "Sweep: load balancing");
 
    // add sweep for evaluating the column height at the origin
-   const std::shared_ptr< cell_idx_t > currentColumnHeight = std::make_shared< cell_idx_t >(columnHeight);
+   const std::shared_ptr< cell_idx_t > currentColumnHeight = std::make_shared< cell_idx_t >(cell_idx_c(columnHeight));
    const ColumnHeightEvaluator< FreeSurfaceBoundaryHandling_T > heightEvaluator(
       blockForest, freeSurfaceBoundaryHandling, domainSize,
       Vector3< real_t >(real_c(0.5) * real_c(domainSize[0]), real_c(0), real_c(0.5) * real_c(domainSize[2])),

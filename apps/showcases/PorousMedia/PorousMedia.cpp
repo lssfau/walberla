@@ -275,8 +275,9 @@ class AvgDiffEvaluator
 
       for (auto blockIterator = blocks_->begin(); blockIterator != blocks_->end(); ++blockIterator)
       {
-         BoundaryHandling_T* boundaryHandling = blockIterator->getData< BoundaryHandling_T >(boundaryHandlingID_);
-         AvgField_T* velDensAvgField          = blockIterator->getData< AvgField_T >(avgFieldID_);
+         BoundaryHandling_T* boundaryHandling =
+            blockIterator->template getData< BoundaryHandling_T >(boundaryHandlingID_);
+         AvgField_T* velDensAvgField = blockIterator->template getData< AvgField_T >(avgFieldID_);
 
          // compute space-average over all fluid cells of the time-averaged quantities
          // clang-format off
@@ -398,9 +399,10 @@ class VelDensAverager
 
       for (auto blockIterator = blocks_->begin(); blockIterator != blocks_->end(); ++blockIterator)
       {
-         PdfField_T* pdfField                 = blockIterator->getData< PdfField_T >(pdfFieldID_);
-         BoundaryHandling_T* boundaryHandling = blockIterator->getData< BoundaryHandling_T >(boundaryHandlingID_);
-         AvgField_T* velDensAvgField          = blockIterator->getData< AvgField_T >(avgFieldID_);
+         PdfField_T* pdfField = blockIterator->template getData< PdfField_T >(pdfFieldID_);
+         BoundaryHandling_T* boundaryHandling =
+            blockIterator->template getData< BoundaryHandling_T >(boundaryHandlingID_);
+         AvgField_T* velDensAvgField = blockIterator->template getData< AvgField_T >(avgFieldID_);
 
          // clang-format off
          WALBERLA_FOR_ALL_CELLS_XYZ(velDensAvgField,
@@ -475,9 +477,10 @@ class GradientComputer
 
       for (auto blockIterator = blocks_->begin(); blockIterator != blocks_->end(); ++blockIterator)
       {
-         GradientField_T* gradientField       = blockIterator->getData< GradientField_T >(gradientFieldID_);
-         AvgField_T* velDensAvgField          = blockIterator->getData< AvgField_T >(avgFieldID_);
-         BoundaryHandling_T* boundaryHandling = blockIterator->getData< BoundaryHandling_T >(boundaryHandlingID_);
+         GradientField_T* gradientField = blockIterator->template getData< GradientField_T >(gradientFieldID_);
+         AvgField_T* velDensAvgField    = blockIterator->template getData< AvgField_T >(avgFieldID_);
+         BoundaryHandling_T* boundaryHandling =
+            blockIterator->template getData< BoundaryHandling_T >(boundaryHandlingID_);
 
          // compute dx for the level that the block resides on
          const uint_t blockLevel         = blocks_->getLevel(*blockIterator);
@@ -589,9 +592,10 @@ class InstStorer
 
       for (auto blockIterator = blocks_->begin(); blockIterator != blocks_->end(); ++blockIterator)
       {
-         PdfField_T* pdfField                 = blockIterator->getData< PdfField_T >(pdfFieldID_);
-         BoundaryHandling_T* boundaryHandling = blockIterator->getData< BoundaryHandling_T >(boundaryHandlingID_);
-         InstField_T* instField               = blockIterator->getData< InstField_T >(instFieldID_);
+         PdfField_T* pdfField = blockIterator->template getData< PdfField_T >(pdfFieldID_);
+         BoundaryHandling_T* boundaryHandling =
+            blockIterator->template getData< BoundaryHandling_T >(boundaryHandlingID_);
+         InstField_T* instField = blockIterator->template getData< InstField_T >(instFieldID_);
 
          // compute dx for the level that the block resides on
          const uint_t blockLevel         = blocks_->getLevel(*blockIterator);
@@ -697,7 +701,7 @@ class VelDensPointEvaluator
          if (blockIterator->getAABB().contains(evalCoord_))
          {
             Cell localCell       = blocks_->getBlockLocalCell(*blockIterator, evalCoord_);
-            PdfField_T* pdfField = blockIterator->getData< PdfField_T >(pdfFieldID_);
+            PdfField_T* pdfField = blockIterator->template getData< PdfField_T >(pdfFieldID_);
 
             velocity = pdfField->getVelocity(localCell);
             density  = pdfField->getDensity(localCell);
@@ -778,8 +782,9 @@ class PressureDropEvaluator
          blocks_->transformGlobalToBlockLocalCellInterval(lowerBlockLocalCellBB, *blockIterator, lowerBlockCellBB);
          blocks_->transformGlobalToBlockLocalCellInterval(upperBlockLocalCellBB, *blockIterator, upperBlockCellBB);
 
-         PdfField_T* pdfField                 = blockIterator->getData< PdfField_T >(pdfFieldID_);
-         BoundaryHandling_T* boundaryHandling = blockIterator->getData< BoundaryHandling_T >(boundaryHandlingID_);
+         PdfField_T* pdfField = blockIterator->template getData< PdfField_T >(pdfFieldID_);
+         BoundaryHandling_T* boundaryHandling =
+            blockIterator->template getData< BoundaryHandling_T >(boundaryHandlingID_);
 
          // sum density of relevant cells
          // clang-format off
