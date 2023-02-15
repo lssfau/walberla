@@ -59,11 +59,11 @@ include( CTest )
 option ( WALBERLA_DOUBLE_ACCURACY           "Floating point accuracy, defaults to double"     ON )
 option ( WALBERLA_ENABLE_GUI                "Compile with GUI"                                   )
 
-option ( WALBERLA_BUILD_TESTS               "Build Testcases"                                    )
+option ( WALBERLA_BUILD_TESTS               "Build Testcases"                                 ON )
 option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                                ON )
-option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                        )
+option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                     ON )
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
-option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                OFF )
+option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                 ON )
 option ( WALBERLA_BUILD_DOC                 "Build Documentation"                             ON )
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
@@ -1336,8 +1336,6 @@ install( FILES ${walberla_BINARY_DIR}/src/waLBerlaDefinitions.h DESTINATION walb
 # test
 if ( WALBERLA_BUILD_TESTS )
     add_subdirectory ( tests )
-else()
-    add_subdirectory( tests EXCLUDE_FROM_ALL )
 endif()
 
 
