@@ -71,9 +71,8 @@ class ExcessMassDistributionSweepBase
    /********************************************************************************************************************
     * Determines the number of a cell's neighboring liquid and interface cells.
     *******************************************************************************************************************/
-   void getNumberOfEvenlyLiquidAndAllInterfacePreferInterfaceNeighbors(const FlagField_T* flagField, const Cell& cell,
-                                                                       uint_t& liquidNeighbors,
-                                                                       uint_t& interfaceNeighbors);
+   void getNumberOfLiquidAndInterfaceNeighbors(const FlagField_T* flagField, const Cell& cell, uint_t& liquidNeighbors,
+                                               uint_t& interfaceNeighbors, uint_t& newInterfaceNeighbors);
 
    ExcessMassDistributionModel excessMassDistributionModel_;
    BlockDataID fillFieldID_;
@@ -171,6 +170,8 @@ class ExcessMassDistributionSweepInterfaceWeighted
  * Distribute the excess mass evenly among
  *  - all neighboring liquid and interface cells (see p. 47 in master thesis of M. Lehmann, 2019)
  *  - all neighboring interface cells and only to liquid cells if there exists no neighboring interface cell
+ *  - new neighboring interface cells, if not available to old interface cells and only to liquid cells if there exists
+ *    no neighboring interface cell
  *
  * Neither the fill level, nor the density of liquid cells is modified. Instead, the excess mass is stored in an
  * additional field.

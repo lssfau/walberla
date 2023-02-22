@@ -275,7 +275,7 @@ void runSimulation(const ExcessMassDistributionModel& excessMassDistributionMode
       }
       else
       {
-         if (excessMassDistributionModel.isEvenlyLiquidAndAllInterfacePreferInterfaceType())
+         if (excessMassDistributionModel.isEvenlyAllInterfaceFallbackLiquidType())
          {
             const ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T, ScalarField_T,
                                                                  VectorField_T >
@@ -876,7 +876,7 @@ void runSimulation(const ExcessMassDistributionModel& excessMassDistributionMode
          }
 
          if (excessMassDistributionModel.getModelType() ==
-             ExcessMassDistributionModel::ExcessMassModel::EvenlyLiquidAndAllInterface)
+             ExcessMassDistributionModel::ExcessMassModel::EvenlyAllInterfaceAndLiquid)
          {
             // left block
             if (globalCell == Cell(cell_idx_c(0), cell_idx_c(0), cell_idx_c(0)))
@@ -990,7 +990,7 @@ void runSimulation(const ExcessMassDistributionModel& excessMassDistributionMode
          }
 
          if (excessMassDistributionModel.getModelType() ==
-             ExcessMassDistributionModel::ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface)
+             ExcessMassDistributionModel::ExcessMassModel::EvenlyAllInterfaceFallbackLiquid)
          {
             // left block
             if (globalCell == Cell(cell_idx_c(0), cell_idx_c(0), cell_idx_c(0)))
@@ -1102,6 +1102,120 @@ void runSimulation(const ExcessMassDistributionModel& excessMassDistributionMode
                WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
             }
          }
+
+         if (excessMassDistributionModel.getModelType() ==
+             ExcessMassDistributionModel::ExcessMassModel::EvenlyNewInterfaceFallbackLiquid)
+         {
+            // left block
+            if (globalCell == Cell(cell_idx_c(0), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(1), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.7), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(2), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.5), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(0), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(1), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(2), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.5), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(0), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.590909090909091), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(2), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.5), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            // right block
+            if (globalCell == Cell(cell_idx_c(3), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.595), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(4), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.615277777777778), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(5), cell_idx_c(0), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(3), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(4), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.605952380952381), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(5), cell_idx_c(1), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(3), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.5), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(4), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(0.573958333333333), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+
+            if (globalCell == Cell(cell_idx_c(5), cell_idx_c(2), cell_idx_c(0)))
+            {
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*fillFieldIt, real_c(1), real_c(1e-4));
+               WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(*excessMassFieldIt, real_c(0), real_c(1e-4));
+            }
+         }
       }) // WALBERLA_FOR_ALL_CELLS
    }
 
@@ -1137,11 +1251,15 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT("Testing model " << model.getFullModelSpecification());
    runSimulation(model);
 
-   model = ExcessMassDistributionModel("EvenlyLiquidAndAllInterface");
+   model = ExcessMassDistributionModel("EvenlyAllInterfaceAndLiquid");
    WALBERLA_LOG_INFO_ON_ROOT("Testing model " << model.getFullModelSpecification());
    runSimulation(model);
 
-   model = ExcessMassDistributionModel("EvenlyLiquidAndAllInterfacePreferInterface");
+   model = ExcessMassDistributionModel("EvenlyAllInterfaceFallbackLiquid");
+   WALBERLA_LOG_INFO_ON_ROOT("Testing model " << model.getFullModelSpecification());
+   runSimulation(model);
+
+   model = ExcessMassDistributionModel("EvenlyNewInterfaceFallbackLiquid");
    WALBERLA_LOG_INFO_ON_ROOT("Testing model " << model.getFullModelSpecification());
    runSimulation(model);
 

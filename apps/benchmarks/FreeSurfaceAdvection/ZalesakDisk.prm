@@ -1,0 +1,96 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 100, 100, 1 >;
+   periodicity                   < 0, 0, 0 >;
+}
+
+DomainParameters
+{
+   domainWidth       200;
+}
+
+PhysicsParameters
+{
+   timestepsFullRotation 12570;  // angularVelocity = 2 * pi / timestepsFullRotation
+   timesteps             12571;
+
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   useSimpleMassExchange         false;
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+}
+
+EvaluationParameters
+{
+   evaluationFrequency 12570;
+   performanceLogFrequency 10000;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1; FreeSlip{} }
+   //Border { direction E;  walldistance -1; FreeSlip{} }
+
+   // Y
+   //Border { direction N;  walldistance -1; FreeSlip{} }
+   //Border { direction S;  walldistance -1; FreeSlip{} }
+
+   // Z
+   //Border { direction T;  walldistance -1; FreeSlip{} }
+   //Border { direction B;  walldistance -1; FreeSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 0;
+   baseFolder     mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency       12570;
+      ghostLayers          0;
+      baseFolder           vtk-out;
+      samplingResolution   1;
+
+      writers
+      {
+         fill_level;
+         mapped_flag;
+         velocity;
+         density;
+         //curvature;
+         //normal;
+         //obstacle_normal;
+         //pdf;
+         //flag;
+      }
+
+      inclusion_filters
+      {
+         //liquidInterfaceFilter; // only include liquid and interface cells in VTK output
+      }
+
+      before_functions
+      {
+         //ghost_layer_synchronization;   // only needed if writing the ghost layer
+         gas_cell_zero_setter;            // sets velocity=0 and density=1 all gas cells before writing VTK output
+      }
+   }
+
+   domain_decomposition
+   {
+      writeFrequency             0;
+      baseFolder                 vtk-out;
+      outputDomainDecomposition  true;
+   }
+}

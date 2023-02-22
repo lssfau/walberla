@@ -79,18 +79,23 @@ void ExcessMassDistributionSweepInterfaceEvenly< LatticeModel_T, FlagField_T, Sc
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T, typename VectorField_T >
 void ExcessMassDistributionSweepBase< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T >::
-   getNumberOfEvenlyLiquidAndAllInterfacePreferInterfaceNeighbors(const FlagField_T* flagField, const Cell& cell,
-                                                                  uint_t& liquidNeighbors, uint_t& interfaceNeighbors)
+   getNumberOfLiquidAndInterfaceNeighbors(const FlagField_T* flagField, const Cell& cell, uint_t& liquidNeighbors,
+                                          uint_t& interfaceNeighbors, uint_t& newInterfaceNeighbors)
 {
-   interfaceNeighbors = uint_c(0);
-   liquidNeighbors    = uint_c(0);
+   newInterfaceNeighbors = uint_c(0);
+   interfaceNeighbors    = uint_c(0);
+   liquidNeighbors       = uint_c(0);
 
    for (auto d = LatticeModel_T::Stencil::beginNoCenter(); d != LatticeModel_T::Stencil::end(); ++d)
    {
       const Cell neighborCell = Cell(cell.x() + d.cx(), cell.y() + d.cy(), cell.z() + d.cz());
       auto neighborFlags      = flagField->get(neighborCell);
 
-      if (isFlagSet(neighborFlags, flagInfo_.interfaceFlag)) { ++interfaceNeighbors; }
+      if (isFlagSet(neighborFlags, flagInfo_.interfaceFlag))
+      {
+         ++interfaceNeighbors;
+         if (isFlagSet(neighborFlags, flagInfo_.convertedFlag)) { ++newInterfaceNeighbors; }
+      }
       else
       {
          if (isFlagSet(neighborFlags, flagInfo_.liquidFlag)) { ++liquidNeighbors; }
@@ -147,7 +152,8 @@ void ExcessMassDistributionSweepInterfaceEvenly< LatticeModel_T, FlagField_T, Sc
 
    if (interfaceNeighbors == uint_c(0))
    {
-      WALBERLA_LOG_WARNING("No interface cell is in the neighborhood to distribute excess mass to. Mass is lost.");
+      WALBERLA_LOG_WARNING(
+         "No interface cell is in the neighborhood to distribute excess mass to. Mass is lost/gained.");
       return;
    }
 
@@ -285,7 +291,8 @@ void ExcessMassDistributionSweepInterfaceWeighted< LatticeModel_T, FlagField_T, 
 
    if (interfaceNeighbors == uint_c(0))
    {
-      WALBERLA_LOG_WARNING("No interface cell is in the neighborhood to distribute excess mass to. Mass is lost.");
+      WALBERLA_LOG_WARNING(
+         "No interface cell is in the neighborhood to distribute excess mass to. Mass is lost/gained.");
       return;
    }
 
@@ -505,7 +512,9 @@ void ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T,
             // calculate excess fill level
             const real_t excessFill = newGas ? fillField->get(cell) : (fillField->get(cell) - real_c(1.0));
 
-            // store excess mass such that it can be distributed below
+            // store excess mass such that it can be distributed below (no += here because cell was an interface cell
+            // that can not have an excess mass stored in the field; any excess mass is added to the interface cell's
+            // fill level)
             srcExcessMassField->get(cell) = excessFill * pdfField->getDensity(cell);
 
             if (newGas) { fillField->get(cell) = real_c(0.0); }
@@ -533,28 +542,41 @@ void ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T,
    using Base_T = ExcessMassDistributionSweepBase_T;
 
    // get number of liquid and interface neighbors
-   uint_t liquidNeighbors    = uint_c(0);
-   uint_t interfaceNeighbors = uint_c(0);
-   Base_T::getNumberOfEvenlyLiquidAndAllInterfacePreferInterfaceNeighbors(flagField, cell, liquidNeighbors,
-                                                                          interfaceNeighbors);
-   const uint_t EvenlyLiquidAndAllInterfacePreferInterfaceNeighbors = liquidNeighbors + interfaceNeighbors;
+   uint_t liquidNeighbors       = uint_c(0);
+   uint_t interfaceNeighbors    = uint_c(0);
+   uint_t newInterfaceNeighbors = uint_c(0);
+   Base_T::getNumberOfLiquidAndInterfaceNeighbors(flagField, cell, liquidNeighbors, interfaceNeighbors,
+                                                  newInterfaceNeighbors);
+   const uint_t liquidAndInterfaceNeighbors = liquidNeighbors + interfaceNeighbors;
 
-   if (EvenlyLiquidAndAllInterfacePreferInterfaceNeighbors == uint_c(0))
+   if (liquidAndInterfaceNeighbors == uint_c(0))
    {
       WALBERLA_LOG_WARNING(
-         "No liquid or interface cell is in the neighborhood to distribute excess mass to. Mass is lost.");
+         "No liquid or interface cell is in the neighborhood to distribute excess mass to. Mass is lost/gained.");
       return;
    }
 
-   const bool preferInterface =
-      Base_T::excessMassDistributionModel_.getModelType() ==
-         ExcessMassDistributionModel::ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface &&
-      interfaceNeighbors > uint_c(0);
+   // check if there are neighboring new interface cells
+   const bool preferNewInterface = Base_T::excessMassDistributionModel_.getModelType() ==
+                                      ExcessMassDistributionModel::ExcessMassModel::EvenlyNewInterfaceFallbackLiquid &&
+                                   newInterfaceNeighbors > uint_c(0);
+
+   // check if there are neighboring interface cells
+   const bool preferInterface = (Base_T::excessMassDistributionModel_.getModelType() ==
+                                    ExcessMassDistributionModel::ExcessMassModel::EvenlyAllInterfaceFallbackLiquid ||
+                                 !preferNewInterface) &&
+                                interfaceNeighbors > uint_c(0) &&
+                                Base_T::excessMassDistributionModel_.getModelType() !=
+                                   ExcessMassDistributionModel::ExcessMassModel::EvenlyAllInterfaceAndLiquid;
 
    // compute mass to be distributed to neighboring cells
    real_t deltaMass;
-   if (preferInterface) { deltaMass = excessMass / real_c(interfaceNeighbors); }
-   else { deltaMass = excessMass / real_c(EvenlyLiquidAndAllInterfacePreferInterfaceNeighbors); }
+   if (preferNewInterface) { deltaMass = excessMass / real_c(newInterfaceNeighbors); }
+   else
+   {
+      if (preferInterface) { deltaMass = excessMass / real_c(interfaceNeighbors); }
+      else { deltaMass = excessMass / real_c(liquidAndInterfaceNeighbors); }
+   }
 
    // distribute the excess mass
    for (auto pushDir = LatticeModel_T::Stencil::beginNoCenter(); pushDir != LatticeModel_T::Stencil::end(); ++pushDir)
@@ -571,20 +593,35 @@ void ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T,
          continue;
       }
 
-      if (flagField->isFlagSet(neighborCell, Base_T::flagInfo_.interfaceFlag))
+      // distribute excess mass to newly converted interface cell
+      if (flagField->isMaskSet(neighborCell, Base_T::flagInfo_.convertedFlag | Base_T::flagInfo_.interfaceFlag))
       {
          // get density of neighboring interface cell
          const real_t neighborDensity = pdfField->getDensity(neighborCell);
 
-         // add excess mass directly to fill level for neighboring interface cells
+         // add excess mass directly to fill level for newly converted neighboring interface cells
          fillField->get(neighborCell) += deltaMass / neighborDensity;
       }
       else
       {
-         if (flagField->isFlagSet(neighborCell, Base_T::flagInfo_.liquidFlag) && !preferInterface)
+         // distribute excess mass to old interface cell
+         if (flagField->isFlagSet(neighborCell, Base_T::flagInfo_.interfaceFlag) && !preferNewInterface)
          {
-            // add excess mass to excessMassField for neighboring liquid cells
-            dstExcessMassField->get(neighborCell) += deltaMass;
+            // get density of neighboring interface cell
+            const real_t neighborDensity = pdfField->getDensity(neighborCell);
+
+            // add excess mass directly to fill level for neighboring interface cells
+            fillField->get(neighborCell) += deltaMass / neighborDensity;
+         }
+         else
+         {
+            // distribute excess mass to liquid cell
+            if (flagField->isFlagSet(neighborCell, Base_T::flagInfo_.liquidFlag) && !preferInterface &&
+                !preferNewInterface)
+            {
+               // add excess mass to excessMassField for neighboring liquid cells
+               dstExcessMassField->get(neighborCell) += deltaMass;
+            }
          }
       }
    }

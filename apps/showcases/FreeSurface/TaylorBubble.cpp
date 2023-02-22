@@ -405,9 +405,12 @@ int main(int argc, char** argv)
       blockForest, freeSurfaceBoundaryHandling, evaluationFrequency, centerOfMass);
    timeloop.addFuncAfterTimeStep(centerOfMassComputer, "Evaluator: center of mass");
 
-   const std::shared_ptr< real_t > totalMass = std::make_shared< real_t >(real_c(0));
+   // add evaluator for total and excessive mass (mass that is currently undistributed)
+   const std::shared_ptr< real_t > totalMass  = std::make_shared< real_t >(real_c(0));
+   const std::shared_ptr< real_t > excessMass = std::make_shared< real_t >(real_c(0));
    const TotalMassComputer< FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T > totalMassComputer(
-      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, evaluationFrequency, totalMass);
+      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, dynamicsHandler.getConstExcessMassFieldID(),
+      evaluationFrequency, totalMass, excessMass);
    timeloop.addFuncAfterTimeStep(totalMassComputer, "Evaluator: total mass");
 
    // add VTK output
@@ -447,19 +450,19 @@ int main(int argc, char** argv)
             const real_t dragForce = real_c(4) / real_c(3) * gravitationalAccelerationZ * real_c(bubbleDiameter) /
                                      (riseVelocity * riseVelocity);
 
-            WALBERLA_LOG_DEVEL("time step = " << t);
-            WALBERLA_LOG_DEVEL("\t\tcenterOfMass = " << *centerOfMass << "\n\t\triseVelocity = " << riseVelocity
-                                                     << "\n\t\tdragForce = " << dragForce);
-            WALBERLA_LOG_DEVEL("\t\ttotalMass = " << *totalMass);
+            WALBERLA_LOG_DEVEL("time step = " << t << "\n\t\tcenterOfMass = " << *centerOfMass
+                                              << "\n\t\triseVelocity = " << riseVelocity
+                                              << "\n\t\tdragForce = " << dragForce << "\n\t\ttotalMass = " << *totalMass
+                                              << "\n\t\texcessMass = " << *excessMass);
 
             const std::vector< real_t > resultVector{ (*centerOfMass)[2], riseVelocity, dragForce };
 
             writeVectorToFile(resultVector, t, filename);
          }
-
-         timestepOld     = t;
-         centerOfMassOld = *centerOfMass;
       }
+
+      timestepOld     = t;
+      centerOfMassOld = *centerOfMass;
 
       // stop simulation before bubble hits the top wall
       if ((*centerOfMass)[2] > stoppingHeight) { break; }

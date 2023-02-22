@@ -391,6 +391,14 @@ int main(int argc, char** argv)
 
    dynamicsHandler.addSweeps(timeloop);
 
+   // add evaluator for total and excessive mass (mass that is currently undistributed)
+   const std::shared_ptr< real_t > totalMass  = std::make_shared< real_t >(real_c(0));
+   const std::shared_ptr< real_t > excessMass = std::make_shared< real_t >(real_c(0));
+   const TotalMassComputer< FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T > totalMassComputer(
+      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, dynamicsHandler.getConstExcessMassFieldID(),
+      evaluationFrequency, totalMass, excessMass);
+   timeloop.addFuncAfterTimeStep(totalMassComputer, "Evaluator: total mass");
+
    // add load balancing
    LoadBalancer< FlagField_T, CommunicationStencil_T, LatticeModelStencil_T > loadBalancer(
       blockForest, communication, pdfCommunication, bubbleModel, uint_c(50), uint_c(10), uint_c(5),
@@ -436,9 +444,10 @@ int main(int argc, char** argv)
          const std::vector< real_t > resultVector{ tNonDimensional, positionNonDimensional };
          if (t % evaluationFrequency == uint_c(0))
          {
-            WALBERLA_LOG_DEVEL("time step = " << t);
-            WALBERLA_LOG_DEVEL("\t\ttNonDimensional = " << tNonDimensional
-                                                        << "\n\t\tpositionNonDimensional = " << positionNonDimensional);
+            WALBERLA_LOG_DEVEL("time step = " << t << "\n\t\ttNonDimensional = " << tNonDimensional
+                                              << "\n\t\tpositionNonDimensional = " << positionNonDimensional
+                                              << "\n\t\ttotal mass = " << *totalMass
+                                              << "\n\t\texcess mass = " << *excessMass);
             writeVectorToFile(resultVector, filename);
          }
       }
