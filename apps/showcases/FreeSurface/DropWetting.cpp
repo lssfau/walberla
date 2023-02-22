@@ -29,6 +29,7 @@
 #include "lbm/field/AddToStorage.h"
 #include "lbm/free_surface/LoadBalancing.h"
 #include "lbm/free_surface/SurfaceMeshWriter.h"
+#include "lbm/free_surface/TotalMassComputer.h"
 #include "lbm/free_surface/VtkWriter.h"
 #include "lbm/free_surface/bubble_model/Geometry.h"
 #include "lbm/free_surface/dynamics/SurfaceDynamicsHandler.h"
@@ -368,6 +369,14 @@ int main(int argc, char** argv)
       blockForest, freeSurfaceBoundaryHandling, fillFieldID, dropHeight, evaluationFrequency);
    timeloop.addFuncAfterTimeStep(dropHeightEvaluator, "Evaluator: drop height");
 
+   // add evaluator for total and excessive mass (mass that is currently undistributed)
+   const std::shared_ptr< real_t > totalMass  = std::make_shared< real_t >(real_c(0));
+   const std::shared_ptr< real_t > excessMass = std::make_shared< real_t >(real_c(0));
+   const TotalMassComputer< FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T > totalMassComputer(
+      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, dynamicsHandler.getConstExcessMassFieldID(),
+      evaluationFrequency, totalMass, excessMass);
+   timeloop.addFuncAfterTimeStep(totalMassComputer, "Evaluator: total mass");
+
    // add VTK output
    addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T >(
       blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID,
@@ -395,8 +404,7 @@ int main(int argc, char** argv)
       // check convergence
       if (t % evaluationFrequency == uint_c(0))
       {
-         WALBERLA_LOG_DEVEL_ON_ROOT("time step = " << t)
-         WALBERLA_LOG_DEVEL_ON_ROOT("\t\tdrop height = " << *dropHeight)
+         WALBERLA_LOG_DEVEL_ON_ROOT("time step = " << t << "\n\t\tdrop height = " << *dropHeight)
          if (std::abs(formerDropHeight - *dropHeight) / *dropHeight < convergenceThreshold)
          {
             WALBERLA_LOG_DEVEL_ON_ROOT("Final converged drop height=" << *dropHeight);

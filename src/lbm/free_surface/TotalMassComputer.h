@@ -50,10 +50,10 @@ class TotalMassComputer
                      const std::weak_ptr< const FreeSurfaceBoundaryHandling_T >& freeSurfaceBoundaryHandling,
                      const ConstBlockDataID& pdfFieldID, const ConstBlockDataID& fillFieldID,
                      const ConstBlockDataID& excessMassFieldID, uint_t frequency,
-                     const std::shared_ptr< real_t >& totalMass)
+                     const std::shared_ptr< real_t >& totalMass, const std::shared_ptr< real_t >& excessMass)
       : blockForest_(blockForest), freeSurfaceBoundaryHandling_(freeSurfaceBoundaryHandling), pdfFieldID_(pdfFieldID),
-        fillFieldID_(fillFieldID), excessMassFieldID_(excessMassFieldID), totalMass_(totalMass), frequency_(frequency),
-        executionCounter_(uint_c(0))
+        fillFieldID_(fillFieldID), excessMassFieldID_(excessMassFieldID), totalMass_(totalMass),
+        excessMass_(excessMass), frequency_(frequency), executionCounter_(uint_c(0))
    {}
 
    void operator()()
@@ -66,11 +66,10 @@ class TotalMassComputer
       auto freeSurfaceBoundaryHandling = freeSurfaceBoundaryHandling_.lock();
       WALBERLA_CHECK_NOT_NULLPTR(freeSurfaceBoundaryHandling);
 
-      if (executionCounter_ == uint_c(0)) { computeMass(blockForest, freeSurfaceBoundaryHandling); }
-      else
+      // only evaluate in given frequencies
+      if (executionCounter_ % frequency_ == uint_c(0) || executionCounter_ == uint_c(0))
       {
-         // only evaluate in given frequencies
-         if (executionCounter_ % frequency_ == uint_c(0)) { computeMass(blockForest, freeSurfaceBoundaryHandling); }
+         computeMass(blockForest, freeSurfaceBoundaryHandling);
       }
 
       ++executionCounter_;
@@ -82,7 +81,8 @@ class TotalMassComputer
       const BlockDataID flagFieldID = freeSurfaceBoundaryHandling->getFlagFieldID();
       const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo = freeSurfaceBoundaryHandling->getFlagInfo();
 
-      real_t mass = real_c(0);
+      real_t mass       = real_c(0);
+      real_t excessMass = real_c(0);
 
       for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
       {
@@ -104,6 +104,8 @@ class TotalMassComputer
                {
                   const real_t density = pdfField->getDensity(pdfFieldIt.cell());
                   mass += *fillFieldIt * density + *excessMassFieldIt;
+
+                  if (excessMass_ != nullptr) { excessMass += *excessMassFieldIt; }
                }
             }) // WALBERLA_FOR_ALL_CELLS_OMP
          }
@@ -122,8 +124,13 @@ class TotalMassComputer
       }
 
       mpi::allReduceInplace< real_t >(mass, mpi::SUM);
-
       *totalMass_ = mass;
+
+      if (excessMass_ != nullptr)
+      {
+         mpi::allReduceInplace< real_t >(excessMass, mpi::SUM);
+         *excessMass_ = excessMass;
+      }
    };
 
  private:
@@ -135,6 +142,7 @@ class TotalMassComputer
    const ConstBlockDataID excessMassFieldID_ = ConstBlockDataID();
 
    std::shared_ptr< real_t > totalMass_;
+   std::shared_ptr< real_t > excessMass_ = nullptr; // mass stored in the excessMassField
 
    uint_t frequency_;
    uint_t executionCounter_;

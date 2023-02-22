@@ -1,17 +1,17 @@
 BlockForestParameters
 {
-   cellsPerBlock                 < 10, 10, 10 >;
+   cellsPerBlock                 < 20, 20, 20 >;
    periodicity                   < 1, 1, 1 >;
    loadBalancingFrequency        0;
-   printLoadBalancingStatistics  true;
+   printLoadBalancingStatistics  false;
 }
 
 DomainParameters
 {
-   dropDiameter      50;
+   dropDiameter      20;
    dropCenterFactor  < 1, 1, 1 >;    // values multiplied with dropDiameter
-   poolHeightFactor  0;                // value multiplied with dropDiameter
-   domainSizeFactor  < 2, 2, 4 >;   // values multiplied with dropDiameter
+   poolHeightFactor  0;              // value multiplied with dropDiameter
+   domainSizeFactor  < 2, 2, 4 >;    // values multiplied with dropDiameter
 }
 
 PhysicsParameters
@@ -31,14 +31,16 @@ ModelParameters
    excessMassDistributionModel   EvenlyAllInterface;
    curvatureModel                FiniteDifferenceMethod;
    useSimpleMassExchange         false;
-   enableBubbleModel             false;
-   enableBubbleSplits            false; // only used if enableBubbleModel=true
    cellConversionThreshold       1e-2;
    cellConversionForceThreshold  1e-1;
+
+   enableBubbleModel             false;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
 }
 
 EvaluationParameters
 {
+   evaluationFrequency 100;
    performanceLogFrequency 10000;
 }
 
@@ -59,7 +61,7 @@ BoundaryParameters
 
 MeshOutputParameters
 {
-   writeFrequency 10000;
+   writeFrequency 1000;
    baseFolder mesh-out;
 }
 
@@ -67,7 +69,7 @@ VTK
 {
    fluid_field
    {
-      writeFrequency 10000;
+      writeFrequency 1000;
       ghostLayers 0;
       baseFolder vtk-out;
       samplingResolution 1;

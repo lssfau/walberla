@@ -1,53 +1,46 @@
 BlockForestParameters
 {
-   cellsPerBlock                 < 50, 50, 1 >;
-   periodicity                   < 0, 0, 1 >;
-   loadBalancingFrequency        0;
-   printLoadBalancingStatistics  false;
+   cellsPerBlock                 < 25, 25, 25 >;
+   periodicity                   < 1, 1, 1 >;
 }
 
 DomainParameters
 {
-   domainWidth       100;
+   domainWidth       50;
 }
 
 PhysicsParameters
 {
-   reynoldsNumber    100; // Re = angularVelocity * domainWidth * 0.5 * domainWidth / kin. viscosity
-   relaxationRate    1.8;
-   enableWetting     false;
-   contactAngle      0; // only used if enableWetting=true
-   timesteps         1000000;
+   timestepsToInitialPosition 3000;
+   timesteps                  3001;
+
 }
 
 ModelParameters
 {
    pdfReconstructionModel        OnlyMissing;
-   pdfRefillingModel             EquilibriumRefilling;
    excessMassDistributionModel   EvenlyAllInterface;
    curvatureModel                FiniteDifferenceMethod;
    useSimpleMassExchange         false;
    cellConversionThreshold       1e-2;
    cellConversionForceThreshold  1e-1;
-
-   enableBubbleModel             True;
-   enableBubbleSplits            false; // only used if enableBubbleModel=true
 }
 
 EvaluationParameters
 {
+   evaluationFrequency 300;
    performanceLogFrequency 10000;
 }
 
 BoundaryParameters
 {
    // X
-   Border { direction W;  walldistance -1; FreeSlip{} }
-   Border { direction E;  walldistance -1; FreeSlip{} }
+   //Border { direction W;  walldistance -1; FreeSlip{} }
+   //Border { direction E;  walldistance -1; FreeSlip{} }
 
    // Y
-   Border { direction N;  walldistance -1; FreeSlip{} }
-   Border { direction S;  walldistance -1; FreeSlip{} }
+   //Border { direction N;  walldistance -1; FreeSlip{} }
+   //Border { direction S;  walldistance -1; FreeSlip{} }
 
    // Z
    //Border { direction T;  walldistance -1; FreeSlip{} }
@@ -56,7 +49,7 @@ BoundaryParameters
 
 MeshOutputParameters
 {
-   writeFrequency 0;
+   writeFrequency 300;
    baseFolder     mesh-out;
 }
 
@@ -64,7 +57,7 @@ VTK
 {
    fluid_field
    {
-      writeFrequency       4241;
+      writeFrequency       300;
       ghostLayers          0;
       baseFolder           vtk-out;
       samplingResolution   1;
@@ -80,7 +73,6 @@ VTK
          //obstacle_normal;
          //pdf;
          //flag;
-         //force_density;
       }
 
       inclusion_filters

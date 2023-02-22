@@ -512,6 +512,14 @@ int main(int argc, char** argv)
       blockForest, freeSurfaceBoundaryHandling, domainSize, evaluationFrequency, currentColumnWidth);
    timeloop.addFuncAfterTimeStep(widthEvaluator, "Evaluator: column width");
 
+   // add evaluator for total and excessive mass (mass that is currently undistributed)
+   const std::shared_ptr< real_t > totalMass  = std::make_shared< real_t >(real_c(0));
+   const std::shared_ptr< real_t > excessMass = std::make_shared< real_t >(real_c(0));
+   const TotalMassComputer< FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T > totalMassComputer(
+      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, dynamicsHandler.getConstExcessMassFieldID(),
+      evaluationFrequency, totalMass, excessMass);
+   timeloop.addFuncAfterTimeStep(totalMassComputer, "Evaluator: total mass");
+
    // add VTK output
    addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T >(
       blockForest, timeloop, walberlaEnv.config(), flagInfo, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID,
@@ -543,9 +551,14 @@ int main(int argc, char** argv)
          const real_t H = real_c(*currentColumnHeight) / columnHeight;
          const std::vector< real_t > resultVector{ T, Z, H };
 
-         WALBERLA_LOG_DEVEL_ON_ROOT("time step =" << t);
-         WALBERLA_LOG_DEVEL_ON_ROOT("\t\tT = " << T << "\n\t\tZ = " << Z << "\n\t\tH = " << H);
-         WALBERLA_ROOT_SECTION() { writeNumberVector(resultVector, t, filename); }
+         WALBERLA_ROOT_SECTION()
+         {
+            WALBERLA_LOG_DEVEL("time step =" << t);
+            WALBERLA_LOG_DEVEL("\t\tT = " << T << "\n\t\tZ = " << Z << "\n\t\tH = " << H << "\n\t\ttotal mass = "
+                                          << *totalMass << "\n\t\texcess mass = " << *excessMass);
+
+            writeNumberVector(resultVector, t, filename);
+         }
 
          // simulation is considered converged
          if (Z >= real_c(domainSize[0]) / columnWidth - real_c(0.5))

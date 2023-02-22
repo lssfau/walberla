@@ -103,7 +103,7 @@ class SurfaceDynamicsHandler
                         "generate the Smagorinsky model directly into the kernel.");
       }
 
-      if (excessMassDistributionModel_.isEvenlyLiquidAndAllInterfacePreferInterfaceType())
+      if (excessMassDistributionModel_.isEvenlyAllInterfaceFallbackLiquidType())
       {
          // add additional field for storing excess mass in liquid cells
          excessMassFieldID_ =
@@ -389,14 +389,16 @@ class SurfaceDynamicsHandler
          }
          else
          {
-            if (excessMassDistributionModel_.isEvenlyLiquidAndAllInterfacePreferInterfaceType())
+            if (excessMassDistributionModel_.isEvenlyAllInterfaceFallbackLiquidType())
             {
                const ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T, ScalarField_T,
                                                                     VectorField_T >
                   distributeMassSweep(excessMassDistributionModel_, fillFieldID_, flagFieldID_, pdfFieldID_, flagInfo,
                                       excessMassFieldID_);
                timeloop.add()
+                  // perform this sweep also on "onlyLBM" blocks because liquid cells also exchange excess mass here
                   << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::fullFreeSurface)
+                  << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::onlyLBM)
                   << Sweep(emptySweep, "Empty sweep: distribute excess mass")
                   << AfterFunction(CommunicationCorner_T(blockForest_, fillFieldID_, excessMassFieldID_),
                                    "Communication: after excess mass distribution sweep")

@@ -39,6 +39,7 @@ ModelParameters
 
 EvaluationParameters
 {
+   evaluationFrequency 5000;
    performanceLogFrequency 5000;
 }
 

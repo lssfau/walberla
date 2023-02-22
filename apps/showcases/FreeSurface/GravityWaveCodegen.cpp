@@ -516,6 +516,14 @@ int main(int argc, char** argv)
                                                                evaluationFrequency, symmetryNorm);
    timeloop.addFuncAfterTimeStep(symmetryEvaluator, "Evaluator: symmetry norm");
 
+   // add evaluator for total and excessive mass (mass that is currently undistributed)
+   const std::shared_ptr< real_t > totalMass  = std::make_shared< real_t >(real_c(0));
+   const std::shared_ptr< real_t > excessMass = std::make_shared< real_t >(real_c(0));
+   const TotalMassComputer< FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T > totalMassComputer(
+      blockForest, freeSurfaceBoundaryHandling, pdfFieldID, fillFieldID, dynamicsHandler.getConstExcessMassFieldID(),
+      evaluationFrequency, totalMass, excessMass);
+   timeloop.addFuncAfterTimeStep(totalMassComputer, "Evaluator: total mass");
+
    // add VTK output
    addVTKOutput< LatticeModel_T, FreeSurfaceBoundaryHandling_T, PdfField_T, FlagField_T, ScalarField_T, VectorField_T,
                  true, VectorFieldFlattened_T >(
@@ -549,10 +557,11 @@ int main(int argc, char** argv)
          const std::vector< real_t > resultVector{ tNonDimensional, positionNonDimensional, *symmetryNorm };
          if (t % evaluationFrequency == uint_c(0))
          {
-            WALBERLA_LOG_DEVEL("time step = " << t);
-            WALBERLA_LOG_DEVEL("\t\ttNonDimensional = " << tNonDimensional
-                                                        << "\n\t\tpositionNonDimensional = " << positionNonDimensional
-                                                        << "\n\t\tsymmetryNorm = " << *symmetryNorm);
+            WALBERLA_LOG_DEVEL("time step = " << t << "\n\t\ttNonDimensional = " << tNonDimensional
+                                              << "\n\t\tpositionNonDimensional = " << positionNonDimensional
+                                              << "\n\t\tsymmetryNorm = " << *symmetryNorm << "\n\t\ttotal mass = "
+                                              << *totalMass << "\n\t\texcess mass = " << *excessMass);
+
             writeVectorToFile(resultVector, filename);
          }
       }

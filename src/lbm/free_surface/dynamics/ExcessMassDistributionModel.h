@@ -63,15 +63,21 @@ namespace free_surface
  *       cells, i.e., cells that are non-newly converted to interface. Falls back to WeightedAllInterface if not
  * applicable.
  *
- *  - EvenlyLiquidAndAllInterface:
+ *  - EvenlyAllInterfaceAndLiquid:
  *      Excess mass is distributed evenly among all neighboring interface and liquid cells (see p.47 in master thesis of
  *      M. Lehmann, 2019). The excess mass distributed to liquid cells does neither modify the cell's density nor fill
  *      level. Instead, it is stored in an additional excess mass field. Therefore, not only the converted interface
  *      cells' excess mass is distributed, but also the excess mass of liquid cells stored in this additional field.
  *
- *  - EvenlyLiquidAndAllInterfacePreferInterface:
- *      Similar to EvenlyLiquidAndAllInterface, however, excess mass is preferably distributed to interface cells. It is
+ *  - EvenlyAllInterfaceFallbackLiquid:
+ *      Similar to EvenlyAllInterfaceAndLiquid, however, excess mass is preferably distributed to interface cells. It is
  *      distributed to liquid cells only if there are no neighboring interface cells available.
+ *
+ *  - EvenlyNewInterfaceFallbackLiquid:
+ *      Similar to EvenlyAllInterfaceFallbackLiquid, however, excess mass is preferably distributed to newly
+ *      converted interface cells. If there are no newly converted interface cells, the excess mass is distributed to
+ *      old interface cells. The excess mass is distributed to neighboring liquid cells only if there are no neighboring
+ *      interface cells available.
  * ********************************************************************************************************************/
 class ExcessMassDistributionModel
 {
@@ -83,8 +89,9 @@ class ExcessMassDistributionModel
       WeightedAllInterface,
       WeightedNewInterface,
       WeightedOldInterface,
-      EvenlyLiquidAndAllInterface,
-      EvenlyLiquidAndAllInterfacePreferInterface
+      EvenlyAllInterfaceAndLiquid,
+      EvenlyAllInterfaceFallbackLiquid,
+      EvenlyNewInterfaceFallbackLiquid
    };
 
    ExcessMassDistributionModel(const std::string& modelName) : modelName_(modelName), modelType_(chooseType(modelName))
@@ -107,9 +114,11 @@ class ExcessMassDistributionModel
          break;
       case ExcessMassModel::WeightedOldInterface:
          break;
-      case ExcessMassModel::EvenlyLiquidAndAllInterface:
+      case ExcessMassModel::EvenlyAllInterfaceAndLiquid:
          break;
-      case ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface:
+      case ExcessMassModel::EvenlyAllInterfaceFallbackLiquid:
+         break;
+      case ExcessMassModel::EvenlyNewInterfaceFallbackLiquid:
          break;
       }
    }
@@ -130,10 +139,12 @@ class ExcessMassDistributionModel
              modelType_ == ExcessMassModel::WeightedNewInterface || modelType_ == ExcessMassModel::WeightedOldInterface;
    }
 
-   inline bool isEvenlyLiquidAndAllInterfacePreferInterfaceType() const
+   inline bool isEvenlyAllInterfaceFallbackLiquidType() const
    {
-      return modelType_ == ExcessMassModel::EvenlyLiquidAndAllInterface ||
-             modelType_ == ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface;
+      return modelType_ == ExcessMassModel::EvenlyAllInterfaceAndLiquid ||
+             modelType_ == ExcessMassModel::EvenlyAllInterfaceFallbackLiquid ||
+             modelType_ == ExcessMassModel::EvenlyNewInterfaceFallbackLiquid;
+      ;
    }
 
    static inline std::initializer_list< const ExcessMassModel > getTypeIterator() { return listOfAllEnums; }
@@ -153,14 +164,19 @@ class ExcessMassDistributionModel
 
       if (!string_icompare(modelName, "WeightedOldInterface")) { return ExcessMassModel::WeightedOldInterface; }
 
-      if (!string_icompare(modelName, "EvenlyLiquidAndAllInterface"))
+      if (!string_icompare(modelName, "EvenlyAllInterfaceAndLiquid"))
       {
-         return ExcessMassModel::EvenlyLiquidAndAllInterface;
+         return ExcessMassModel::EvenlyAllInterfaceAndLiquid;
       }
 
-      if (!string_icompare(modelName, "EvenlyLiquidAndAllInterfacePreferInterface"))
+      if (!string_icompare(modelName, "EvenlyAllInterfaceFallbackLiquid"))
       {
-         return ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface;
+         return ExcessMassModel::EvenlyAllInterfaceFallbackLiquid;
+      }
+
+      if (!string_icompare(modelName, "EvenlyNewInterfaceFallbackLiquid"))
+      {
+         return ExcessMassModel::EvenlyNewInterfaceFallbackLiquid;
       }
 
       WALBERLA_ABORT("The specified PDF reinitialization model " << modelName << " is not available.");
@@ -190,11 +206,14 @@ class ExcessMassDistributionModel
          modelName = "WeightedOldInterface";
          break;
 
-      case ExcessMassModel::EvenlyLiquidAndAllInterface:
-         modelName = "EvenlyLiquidAndAllInterface";
+      case ExcessMassModel::EvenlyAllInterfaceAndLiquid:
+         modelName = "EvenlyAllInterfaceAndLiquid";
          break;
-      case ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface:
-         modelName = "EvenlyLiquidAndAllInterfacePreferInterface";
+      case ExcessMassModel::EvenlyAllInterfaceFallbackLiquid:
+         modelName = "EvenlyAllInterfaceFallbackLiquid";
+         break;
+      case ExcessMassModel::EvenlyNewInterfaceFallbackLiquid:
+         modelName = "EvenlyNewInterfaceFallbackLiquid";
          break;
       }
       return modelName;
@@ -203,10 +222,15 @@ class ExcessMassDistributionModel
    std::string modelName_;
    ExcessMassModel modelType_;
    static constexpr std::initializer_list< const ExcessMassModel > listOfAllEnums = {
-      ExcessMassModel::EvenlyAllInterface,          ExcessMassModel::EvenlyNewInterface,
-      ExcessMassModel::EvenlyOldInterface,          ExcessMassModel::WeightedAllInterface,
-      ExcessMassModel::WeightedNewInterface,        ExcessMassModel::WeightedOldInterface,
-      ExcessMassModel::EvenlyLiquidAndAllInterface, ExcessMassModel::EvenlyLiquidAndAllInterfacePreferInterface
+      ExcessMassModel::EvenlyAllInterface,
+      ExcessMassModel::EvenlyNewInterface,
+      ExcessMassModel::EvenlyOldInterface,
+      ExcessMassModel::WeightedAllInterface,
+      ExcessMassModel::WeightedNewInterface,
+      ExcessMassModel::WeightedOldInterface,
+      ExcessMassModel::EvenlyAllInterfaceAndLiquid,
+      ExcessMassModel::EvenlyAllInterfaceFallbackLiquid,
+      ExcessMassModel::EvenlyNewInterfaceFallbackLiquid
    };
 
 }; // class ExcessMassDistributionModel

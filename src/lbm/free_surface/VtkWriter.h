@@ -56,7 +56,7 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
                   const BlockDataID& forceDensityFieldID, const BlockDataID& curvatureFieldID,
                   const BlockDataID& normalFieldID, const BlockDataID& obstacleNormalFieldID)
 {
-   using value_type = typename FlagField_T::value_type;
+   using value_type       = typename FlagField_T::value_type;
    const auto blockForest = blockForestPtr.lock();
    WALBERLA_CHECK_NOT_NULLPTR(blockForest);
 
@@ -89,27 +89,34 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
          std::make_shared< VTKWriter< VectorField_T, float > >(obstacleNormalFieldID, "obstacle_normal"));
       if constexpr (useCodegen)
       {
-         writers.push_back(
-            std::make_shared< VTKWriter< VectorFieldFlattened_T, float > >(forceDensityFieldID, "force_density"));
+         if (forceDensityFieldID != BlockDataID())
+         {
+            writers.push_back(
+               std::make_shared< VTKWriter< VectorFieldFlattened_T, float > >(forceDensityFieldID, "force_density"));
+         }
       }
       else
       {
-         writers.push_back(std::make_shared< VTKWriter< VectorField_T, float > >(forceDensityFieldID, "force_density"));
+         if (forceDensityFieldID != BlockDataID())
+         {
+            writers.push_back(
+               std::make_shared< VTKWriter< VectorField_T, float > >(forceDensityFieldID, "force_density"));
+         }
       }
 
       // map flagIDs to integer values
       const auto flagMapper =
          std::make_shared< field::FlagFieldMapping< FlagField_T, value_type > >(flagFieldID, "mapped_flag");
-      flagMapper->addMapping(flagIDs::liquidFlagID, numeric_cast<value_type>(1));
-      flagMapper->addMapping(flagIDs::interfaceFlagID, numeric_cast<value_type>(2));
-      flagMapper->addMapping(flagIDs::gasFlagID, numeric_cast<value_type>(3));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::noSlipFlagID, numeric_cast<value_type>(4));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::freeSlipFlagID, numeric_cast<value_type>(6));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::ubbFlagID, numeric_cast<value_type>(6));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::ubbInflowFlagID, numeric_cast<value_type>(7));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureFlagID, numeric_cast<value_type>(8));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureOutflowFlagID, numeric_cast<value_type>(9));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::outletFlagID, numeric_cast<value_type>(10));
+      flagMapper->addMapping(flagIDs::liquidFlagID, numeric_cast< value_type >(1));
+      flagMapper->addMapping(flagIDs::interfaceFlagID, numeric_cast< value_type >(2));
+      flagMapper->addMapping(flagIDs::gasFlagID, numeric_cast< value_type >(3));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::noSlipFlagID, numeric_cast< value_type >(4));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::freeSlipFlagID, numeric_cast< value_type >(6));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::ubbFlagID, numeric_cast< value_type >(6));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::ubbInflowFlagID, numeric_cast< value_type >(7));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureFlagID, numeric_cast< value_type >(8));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureOutflowFlagID, numeric_cast< value_type >(9));
+      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::outletFlagID, numeric_cast< value_type >(10));
 
       writers.push_back(flagMapper);
 
