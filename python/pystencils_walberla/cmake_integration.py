@@ -9,19 +9,41 @@ Usage example:
     codegen.register(['MyClass.h', 'MyClass.cpp'], functionReturningTwoStringsForHeaderAndCpp)
 
 """
+import argparse
 import json
 import os
-import sys
-import warnings
 
 __all__ = ['CodeGeneration', 'ManualCodeGenerationContext']
+
+DEFAULT_CMAKE_VARS = {'WALBERLA_BUILD_WITH_OPENMP': False,
+                      'WALBERLA_OPTIMIZE_FOR_LOCALHOST': False,
+                      'WALBERLA_DOUBLE_ACCURACY': True,
+                      'WALBERLA_BUILD_WITH_MPI': True,
+                      'WALBERLA_BUILD_WITH_CUDA': False,
+                      "CODEGEN_CFG": ""}
+
+PARSE_HELPER = {"on":  True,  "1": True,  "yes": True,  "true":  True,
+                "off": False, "0": False, "no":  False, "false": False}
 
 
 class CodeGeneration:
     def __init__(self):
-        expected_files, cmake_vars = parse_json_args()
-        self.context = CodeGenerationContext(cmake_vars)
-        self.expected_files = expected_files
+        parser = argparse.ArgumentParser(description='Code Generation script for waLBerla.')
+        parser.add_argument('-f', '--files', nargs='*',
+                            help='List all files that will be generated with absolute path',
+                            default=[])
+        parser.add_argument('-c', '--cmake-args', type=json.loads,
+                            help='Provide CMake configuration (will be used in the codegen config)',
+                            default=DEFAULT_CMAKE_VARS)
+        parser.add_argument('-l', '--list-only',
+                            help="Script will not generate files but list files it would generated without this option")
+        args = parser.parse_args()
+
+        cmake_args = {key: PARSE_HELPER.get(str(value).lower(), value) for key, value in args.cmake_args.items()}
+
+        self.context = CodeGenerationContext(cmake_args)
+        self.expected_files = args.files
+        self.list_only = True if args.list_only else False
 
     def __enter__(self):
         return self.context
@@ -41,35 +63,6 @@ class CodeGeneration:
                 error_message += "Unexpected generated files {}\n".format([os.path.basename(p) for p in only_generated])
             if len(only_in_cmake) > 0 or len(only_generated) > 0:
                 raise ValueError(error_message)
-
-
-def parse_json_args():
-    default = {'EXPECTED_FILES': [],
-               'CMAKE_VARS': {'WALBERLA_BUILD_WITH_OPENMP': False,
-                              'WALBERLA_OPTIMIZE_FOR_LOCALHOST': False,
-                              'WALBERLA_DOUBLE_ACCURACY': True,
-                              'WALBERLA_BUILD_WITH_MPI': True,
-                              'WALBERLA_BUILD_WITH_CUDA': False,
-                              "CODEGEN_CFG": ""}
-               }
-
-    if len(sys.argv) == 2:
-        try:
-            parsed = json.loads(sys.argv[1])
-        except json.JSONDecodeError:
-            warnings.warn("Could not parse JSON arguments: " + sys.argv[1])
-            parsed = default
-    else:
-        parsed = default
-    expected_files = parsed['EXPECTED_FILES']
-    cmake_vars = {}
-    for key, value in parsed['CMAKE_VARS'].items():
-        if str(value).lower() in ("on", "1", "yes", "true"):
-            value = True
-        elif str(value).lower() in ("off", "0", "no", "false"):
-            value = False
-        cmake_vars[key] = value
-    return expected_files, cmake_vars
 
 
 class CodeGenerationContext:

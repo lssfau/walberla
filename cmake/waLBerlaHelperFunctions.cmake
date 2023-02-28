@@ -61,25 +61,23 @@ function( waLBerla_generate_target_from_python )
         list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}/${filename})
     endforeach()
 
-    string (REPLACE ";" "\", \"" jsonFileList "${generatedWithAbsolutePath}" )
-    set(pythonParameters
-          "\\\{\"EXPECTED_FILES\": [\"${jsonFileList}\"], \"CMAKE_VARS\" : \\\{  "
-          "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
-          "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
-          "\"CODEGEN_CFG\": \"${codegenCfg}\","
-          "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
-          "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
-          "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\} \\\}"
-          )
-    string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
-    string(REPLACE "\n" "" pythonParameters ${pythonParameters})  # remove newline characters
+    set(cmakeVars "\\\{  "
+            "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
+            "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
+            "\"CODEGEN_CFG\": \"${codegenCfg}\","
+            "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
+            "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
+            "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\}"
+            )
+    string(REPLACE "\"" "\\\"" cmakeVars ${cmakeVars})   # even one more quoting level required
+    string(REPLACE "\n" "" cmakeVars ${cmakeVars})  # remove newline characters
 
     set( WALBERLA_PYTHON_DIR ${walberla_SOURCE_DIR}/python)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
 
     add_custom_command(OUTPUT ${generatedWithAbsolutePath}
           DEPENDS ${sourceFile}
-          COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${Python_EXECUTABLE} ${sourceFile} ${pythonParameters}
+          COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${Python_EXECUTABLE} ${sourceFile} -f ${generatedWithAbsolutePath} -c ${cmakeVars}
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
 
     add_library(${PYGEN_NAME} ${generatedWithAbsolutePath})
