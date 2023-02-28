@@ -3,7 +3,6 @@ from dataclasses import replace
 import sympy as sp
 import pystencils as ps
 
-from pystencils.fast_approximation import insert_fast_divisions, insert_fast_sqrts
 from pystencils.simp.subexpression_insertion import insert_zeros, insert_aliases, insert_constants,\
     insert_symbol_times_minus_one
 
