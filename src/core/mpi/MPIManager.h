@@ -122,6 +122,7 @@ public:
    bool hasCartesianSetup() const { return cartesianSetup_;  }
    /// Rank is valid after calling createCartesianComm() or useWorldComm()
    bool rankValid()         const { return rank_ >= 0;       }
+   bool hasWorldCommSetup()  const { return rankValid() && !hasCartesianSetup();}
 
    /// Indicates whether MPI-IO can be used with the current MPI communicator; certain versions of OpenMPI produce
    /// segmentation faults when using MPI-IO with a 3D Cartesian MPI communicator (see waLBerla issue #73)
@@ -135,13 +136,13 @@ public:
 private:
 
    /// Rank in MPI_COMM_WORLD
-   int worldRank_;
+   int worldRank_{0};
 
    /// Rank in the custom communicator
-   int rank_;
+   int rank_{-1};
 
    /// Total number of processes
-   int numProcesses_;
+   int numProcesses_{1};
 
    /// Use this communicator for all MPI calls
    /// this is in general not equal to MPI_COMM_WORLD
@@ -150,20 +151,17 @@ private:
    MPI_Comm comm_;
 
    /// Indicates whether initializeMPI has been called. If true, MPI_Finalize is called upon destruction
-   bool isMPIInitialized_;
+   bool isMPIInitialized_{false};
 
    /// Indicates whether a Cartesian communicator has been created
-   bool cartesianSetup_;
+   bool cartesianSetup_{false};
 
-   bool currentlyAborting_;
+   bool currentlyAborting_{false};
 
-   bool finalizeOnDestruction_;
+   bool finalizeOnDestruction_{false};
 
    // Singleton
-   MPIManager() : worldRank_(0), rank_(-1), numProcesses_(1), comm_(MPI_COMM_NULL),
-                  isMPIInitialized_(false), cartesianSetup_(false), currentlyAborting_(false),
-                  finalizeOnDestruction_(false)
-   { WALBERLA_NON_MPI_SECTION() { rank_ = 0; } }
+   MPIManager() : comm_(MPI_COMM_NULL) { WALBERLA_NON_MPI_SECTION() { rank_ = 0; } }
 
 }; // class MPIManager
 

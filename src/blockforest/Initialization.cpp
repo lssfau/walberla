@@ -50,7 +50,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
                                                                       CellInterval * requestedDomainSize,
                                                                       const bool keepGlobalBlockInformation )
 {
-   if( !!config )
+   if( config != nullptr )
    {
       auto block = config->getGlobalBlock();
       if( block ) {
@@ -200,17 +200,17 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
 //**********************************************************************************************************************
 
 shared_ptr< BlockForest >
-createBlockForest(      const AABB& domainAABB,
-                        const uint_t numberOfXBlocks,         const uint_t numberOfYBlocks,         const uint_t numberOfZBlocks,
-                        const uint_t numberOfXProcesses,      const uint_t numberOfYProcesses,      const uint_t numberOfZProcesses,
-                        const bool   xPeriodic /* = false */, const bool   yPeriodic /* = false */, const bool   zPeriodic /* = false */,
-                        const bool keepGlobalBlockInformation /* = false */ ) {
+   createBlockForest(      const AABB& domainAABB,
+                     const uint_t numberOfXBlocks,         const uint_t numberOfYBlocks,         const uint_t numberOfZBlocks,
+                     const uint_t numberOfXProcesses,      const uint_t numberOfYProcesses,      const uint_t numberOfZProcesses,
+                     const bool   xPeriodic /* = false */, const bool   yPeriodic /* = false */, const bool   zPeriodic /* = false */,
+                     const bool keepGlobalBlockInformation /* = false */ ) {
 
    const uint_t numberOfProcesses = numberOfXProcesses * numberOfYProcesses * numberOfZProcesses;
 
    if( numeric_cast< int >( numberOfProcesses ) != MPIManager::instance()->numProcesses() )
       WALBERLA_ABORT( "The number of requested processes (" << numberOfProcesses << ") doesn't match the number "
-                                                                                    "of active MPI processes (" << MPIManager::instance()->numProcesses() << ")!" );
+                                                                                   "of active MPI processes (" << MPIManager::instance()->numProcesses() << ")!" );
 
    // initialize SetupBlockForest = determine domain decomposition
 
@@ -227,10 +227,14 @@ createBlockForest(      const AABB& domainAABB,
    WALBERLA_MPI_SECTION()
    {
       auto mpiManager = MPIManager::instance();
-      //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
-      if ( ! mpiManager->rankValid() )
+      if (!mpiManager->hasWorldCommSetup())
       {
-         mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
+         //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
+         if ( ! mpiManager->rankValid() )
+         {
+            mpiManager->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic,
+                                            yPeriodic, zPeriodic);
+         }
 
          processIdMap.resize( numberOfProcesses );
 
@@ -244,12 +248,13 @@ createBlockForest(      const AABB& domainAABB,
             }
          }
       }
+
    }
 
    // calculate process distribution
 
    sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, &processIdMap ),
-                        numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
+                       numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
 
