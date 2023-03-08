@@ -77,6 +77,22 @@ class ParticleAndVolumeFractionMapping
       {
          if (mappingParticleSelector_(idx, *ac_)) { update(idx); }
       }
+
+      // normalize the sum of all overlap fractions of a cell to 1
+      for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
+      {
+         ParticleAndVolumeFractionField_T* particleAndVolumeFractionField =
+            blockIt->getData< ParticleAndVolumeFractionField_T >(particleAndVolumeFractionFieldID_);
+
+         WALBERLA_FOR_ALL_CELLS_XYZ(
+            particleAndVolumeFractionField, real_t fractionSum = 0.0;
+            for (auto& e
+                 : particleAndVolumeFractionField->get(x, y, z)) fractionSum += e.second;
+            if (fractionSum > 1.0) {
+               for (auto& e : particleAndVolumeFractionField->get(x, y, z))
+                  e.second /= fractionSum;
+            })
+      }
    }
 
  private:
