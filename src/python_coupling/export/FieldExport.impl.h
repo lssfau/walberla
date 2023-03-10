@@ -360,7 +360,7 @@ class AddToStorageExporter
  public:
    AddToStorageExporter(const shared_ptr< StructuredBlockForest >& blocks, const std::string& name, py::object& dtype, uint_t fs,
                         uint_t gl, Layout layout, real_t initValue, uint_t alignment)
-      : blocks_(blocks), name_(name), dtype_(dtype), fs_(fs), gl_(gl), layout_(layout), initValue_(initValue), alignment_(alignment), found_(false)
+      : blocks_(blocks), name_(name), dtype_(dtype), fs_(fs), gl_(gl), layout_(layout), initValue_(initValue), alignment_(alignment)
    {}
 
    template< typename FieldType >
@@ -376,8 +376,8 @@ class AddToStorageExporter
          typedef internal::GhostLayerFieldDataHandling< GhostLayerField< T, F_SIZE > > DataHandling;
          auto dataHandling = walberla::make_shared< DataHandling >(blocks_, gl_, initValue_, layout_, alignment_);
          blocks_->addBlockData(dataHandling, name_);
+         found_ = true;
       }
-      found_ = true;
    }
 
    bool successful() const { return found_; }
@@ -391,7 +391,7 @@ class AddToStorageExporter
    Layout layout_;
    real_t initValue_;
    uint_t alignment_;
-   mutable bool found_;
+   mutable bool found_{false};
 };
 
 template< typename... FieldTypes >

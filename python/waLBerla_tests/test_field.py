@@ -52,7 +52,7 @@ class FieldModuleTest(unittest.TestCase):
     def test_gather(self):
         blocks = createUniformBlockGrid(blocks=(10, 4, 3), cellsPerBlock=(2, 2, 2),
                                         periodic=(True, True, True), oneBlockPerProcess=False)
-        wlb.field.addToStorage(blocks, "test", dtype=np.int, fSize=3)
+        wlb.field.addToStorage(blocks, "test", dtype=np.int64, fSize=3)
 
         for block in blocks:
             offset_in_global_domain = blocks.transformLocalToGlobal(block, wlb.Cell(0, 0, 0))[:]
