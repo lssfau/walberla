@@ -72,8 +72,8 @@ using FreeSurfaceBoundaryHandling_T = FreeSurfaceBoundaryHandling< LatticeModel_
 inline Vector3< real_t > velocityProfile(real_t angularVelocity, Cell globalCell, const Vector3< real_t >& domainCenter)
 {
    // add 0.5 to get Cell's center
-   const real_t velocityX = -angularVelocity * ((real_c(globalCell.y()) + real_c(0.5)) - domainCenter[0]);
-   const real_t velocityY = angularVelocity * ((real_c(globalCell.x()) + real_c(0.5)) - domainCenter[1]);
+   const real_t velocityX = -angularVelocity * ((real_c(globalCell.y()) + real_c(0.5)) - domainCenter[1]);
+   const real_t velocityY = angularVelocity * ((real_c(globalCell.x()) + real_c(0.5)) - domainCenter[0]);
 
    return Vector3< real_t >(velocityX, velocityY, real_c(0));
 }

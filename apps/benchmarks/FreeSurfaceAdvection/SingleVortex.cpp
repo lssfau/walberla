@@ -80,14 +80,16 @@ inline Vector3< real_t > velocityProfile(Cell globalCell, real_t timePeriod, uin
    const real_t xToDomainCenter = x - real_c(0.5);
    const real_t yToDomainCenter = y - real_c(0.5);
    const real_t r     = real_c(std::sqrt(xToDomainCenter * xToDomainCenter + yToDomainCenter * yToDomainCenter));
-   const real_t rTerm = (real_c(1) - real_c(2) * r) * (real_c(1) - real_c(2) * r);
+   const real_t tmp   = real_c(1) - real_c(2) * r;
+   const real_t rTerm = tmp * tmp;
 
    const real_t timeTerm = real_c(std::cos(math::pi * real_t(timestep) / timePeriod));
 
-   const real_t velocityX = real_c(std::sin(real_c(2) * math::pi * y)) * real_c(std::sin(math::pi * x)) *
-                            real_c(std::sin(math::pi * x)) * timeTerm;
-   const real_t velocityY = -real_c(std::sin(real_c(2) * math::pi * x)) * real_c(std::sin(math::pi * y)) *
-                            real_c(std::sin(math::pi * y)) * timeTerm;
+   const real_t sinpix = real_c(std::sin(math::pi * x));
+   const real_t sinpiy = real_c(std::sin(math::pi * y));
+
+   const real_t velocityX = real_c(std::sin(real_c(2) * math::pi * y)) * sinpix * sinpix * timeTerm;
+   const real_t velocityY = -real_c(std::sin(real_c(2) * math::pi * x)) * sinpiy * sinpiy * timeTerm;
    const real_t velocityZ = rTerm * timeTerm;
 
    return Vector3< real_t >(velocityX, velocityY, velocityZ);
@@ -111,7 +113,7 @@ int main(int argc, char** argv)
    auto domainParameters    = walberlaEnv.config()->getOneBlock("DomainParameters");
    const uint_t domainWidth = domainParameters.getParameter< uint_t >("domainWidth");
 
-   const real_t bubbleDiameter          = real_c(domainWidth) * real_c(0.075);
+   const real_t bubbleDiameter          = real_c(domainWidth) * real_c(0.3);
    const Vector3< real_t > bubbleCenter = domainWidth * Vector3< real_t >(real_c(0.5), real_c(0.75), real_c(0.25));
 
    // define domain size
@@ -226,8 +228,7 @@ int main(int argc, char** argv)
    }
 
    // create the spherical bubble
-   const geometry::Sphere sphereBubble(real_c(domainWidth) * Vector3< real_t >(real_c(0.5), real_c(0.75), real_c(0.25)),
-                                       real_c(domainWidth) * real_c(0.15));
+   const geometry::Sphere sphereBubble(bubbleCenter, bubbleDiameter * real_c(0.5));
    bubble_model::addBodyToFillLevelField< geometry::Sphere >(*blockForest, fillFieldID, sphereBubble, true);
 
    // initialize domain boundary conditions from config file
