@@ -19,8 +19,9 @@
 // This benchmark simulates the advection of a spherical bubble in a vortex field with very high deformation. The vortex
 // field changes periodically so that the bubble returns to its initial position, where it should take its initial form.
 // The relative geometrical error of the bubble's shape after one period is evaluated. There is no LBM flow simulation
-// performed here. It is a test case for the FSLBM's mass advection only. This benchmark is based on Viktor Haag's
-// master thesis (https://www10.cs.fau.de/publications/theses/2017/Haag_MT_2017.pdf).
+// performed here. It is a test case for the FSLBM's mass advection only. This benchmark is based on the work from
+// Liovic et al. (doi: 10.1016/j.compfluid.2005.09.003). The setup is identical as in Viktor Haag's master thesis
+// (https://www10.cs.fau.de/publications/theses/2017/Haag_MT_2017.pdf).
 //======================================================================================================================
 
 #include "core/Environment.h"
@@ -226,8 +227,7 @@ int main(int argc, char** argv)
    }
 
    // create the spherical bubble
-   const geometry::Sphere sphereBubble(real_c(domainWidth) * Vector3< real_t >(real_c(0.5), real_c(0.75), real_c(0.25)),
-                                       real_c(domainWidth) * real_c(0.15));
+   const geometry::Sphere sphereBubble(bubbleCenter, bubbleDiameter * real_c(0.5));
    bubble_model::addBodyToFillLevelField< geometry::Sphere >(*blockForest, fillFieldID, sphereBubble, true);
 
    // initialize domain boundary conditions from config file

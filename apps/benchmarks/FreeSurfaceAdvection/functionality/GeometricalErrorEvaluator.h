@@ -15,7 +15,7 @@
 //
 //! \file GeometricalErrorEvaluator.h
 //! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
-//! \brief Compute the geometrical error in free-surface advection test cases.
+//! \brief Compute the relative geometrical error in free-surface advection test cases.
 //======================================================================================================================
 
 #include "blockforest/StructuredBlockForest.h"
@@ -85,7 +85,7 @@ class GeometricalErrorEvaluator
             {
                initialFillLevelSum_ += *initialfillFieldIt;
             }
-         }) // WALBERLA_FOR_ALL_CELLS
+         }) // WALBERLA_FOR_ALL_CELLS_OMP
       }
 
       mpi::allReduceInplace< real_t >(initialFillLevelSum_, mpi::SUM);
@@ -98,7 +98,6 @@ class GeometricalErrorEvaluator
       const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo = freeSurfaceBoundaryHandling->getFlagInfo();
 
       real_t geometricalError = real_c(0);
-      real_t fillLevelSum     = real_c(0);
 
       for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
       {
@@ -107,14 +106,12 @@ class GeometricalErrorEvaluator
          const FlagField_T* const flagField          = blockIt->getData< const FlagField_T >(flagFieldID);
 
          WALBERLA_FOR_ALL_CELLS_OMP(initialfillFieldIt, initialfillField, fillFieldIt, fillField, flagFieldIt,
-                                    flagField, omp parallel for schedule(static) reduction(+:geometricalError)
-                                                                                 reduction(+:fillLevelSum), {
+                                    flagField, omp parallel for schedule(static) reduction(+:geometricalError), {
             if (flagInfo.isInterface(flagFieldIt) || flagInfo.isLiquid(flagFieldIt))
             {
                geometricalError += real_c(std::abs(*initialfillFieldIt - *fillFieldIt));
-               fillLevelSum += *fillFieldIt;
             }
-         }) // WALBERLA_FOR_ALL_CELLS
+         }) // WALBERLA_FOR_ALL_CELLS_OMP
       }
 
       mpi::allReduceInplace< real_t >(geometricalError, mpi::SUM);
