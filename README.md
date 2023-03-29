@@ -80,7 +80,7 @@ Many thanks go to waLBerla's [contributors](AUTHORS.txt)
 If you use waLBerla in a publication, please cite the following articles:
 
 Overview:
-- M. Bauer et al, *waLBerla: A block-structured high-performance framework for
+- M. Bauer et al., *waLBerla: A block-structured high-performance framework for
   multiphysics simulations*. Computers & Mathematics with Applications, 2020.
   https://doi.org/10.1016/j.camwa.2020.01.007.
 
@@ -94,13 +94,23 @@ LBM - Particle Coupling:
   fully resolved lattice Boltzmann simulations*. Computers & Fluids, 2017.
   https://doi.org/10.1016/j.compfluid.2017.05.033
 
+Free-surface LBM:
+- C. Schwarzmeier et al., *Comparison of free-surface and conservative Allen-Cahn phase-field
+  lattice Boltzmann method*. Journal of Computational Physics, 2023.
+  https://doi.org/10.1016/j.jcp.2022.111753
+
+Allen-Cahn phase-field LBM
+- M. Holzer et al., *Highly efficient lattice Boltzmann multiphase simulations of immiscible
+  fluids at high-density ratios on CPUs and GPUs through code generation*. The International Journal of High Performance Computing Applications, 2021.
+  https://doi.org/10.1177/10943420211016525
+
 MESA-PD:
 - S. Eibl and U. Rüde, *A Modular and Extensible Software Architecture for Particle Dynamics*.
   Proceedings Of The 8Th International Conference On Discrete Element Methods.
   https://mercurylab.co.uk/dem8/full-papers/#page-content
 
 Carbon Nanotubes:
-- G. Drozdov et al, *Densification of single-walled carbon nanotube films:
+- G. Drozdov et al., *Densification of single-walled carbon nanotube films:
   Mesoscopic distinct element method simulations and experimental validation*.
   Journal of Applied Physics, 2020. https://doi.org/10.1063/5.0025505
 
