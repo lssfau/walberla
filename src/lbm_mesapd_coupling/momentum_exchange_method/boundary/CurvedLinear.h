@@ -80,7 +80,8 @@ public:
 
    inline CurvedLinear( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField_T * const pdfField, const FlagField_T * const flagField,
                         ParticleField_T * const particleField, const shared_ptr<ParticleAccessor_T>& ac,
-                        const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block );
+                        const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block,
+                        std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct = nullptr );
 
    void pushFlags( std::vector< FlagUID >& uids ) const { uids.push_back( uid_ ); }
 
@@ -119,6 +120,8 @@ private:
    const StructuredBlockStorage & blockStorage_;
    const IBlock & block_;
 
+   std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct_;
+
    real_t lengthScalingFactor_;
    real_t forceScalingFactor_;
 
@@ -128,8 +131,10 @@ private:
 template< typename LatticeModel_T, typename FlagField_T, typename ParticleAccessor_T >
 inline CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::CurvedLinear( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField_T * const pdfField, const FlagField_T * const flagField,
                                                                                       ParticleField_T * const particleField, const shared_ptr<ParticleAccessor_T>& ac,
-                                                                                      const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block ):
-Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), flagField_( flagField ), particleField_( particleField ), ac_( ac ), domainMask_(domain), blockStorage_( blockStorage ), block_( block )
+                                                                                      const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block,
+                                                                                      std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct ):
+Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), flagField_( flagField ), particleField_( particleField ),
+ac_( ac ), domainMask_(domain), blockStorage_( blockStorage ), block_( block ), hydrostaticDensityFct_(hydrostaticDensityFct)
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
@@ -159,12 +164,12 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
    WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
    WALBERLA_ASSERT_EQUAL  ( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                                // current implementation of this boundary condition
-   WALBERLA_ASSERT_UNEQUAL( particleField_->get(nx,ny,nz), ac_->getInvalidUid() );
 
    // determine distance to real boundary, i.e. delta value
    // cell center of the near-boundary fluid cell
    Cell nearBoundaryCell(x,y,z);
    Vector3< real_t > cellCenter = blockStorage_.getBlockLocalCellCenter(block_, nearBoundaryCell);
+   WALBERLA_ASSERT_UNEQUAL( particleField_->get(nx,ny,nz), ac_->getInvalidUid(), x << " " << y << " " << z  << " -> " << nx << " " << ny << " " << nz << " " << cellCenter);
 
    // direction of the ray (from the fluid cell center to the boundary cell)
    Vector3< real_t > direction( lengthScalingFactor_ * real_c( stencil::cx[ dir ] ),
@@ -173,7 +178,7 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
 
    //get particle index
    auto particleIdx = ac_->uidToIdx(particleField_->get( nx, ny, nz ));
-   WALBERLA_ASSERT_UNEQUAL( particleIdx, ac_->getInvalidIdx(), "Index of particle is invalid!" );
+   WALBERLA_ASSERT_UNEQUAL( particleIdx, ac_->getInvalidIdx(), "Index of particle is invalid! " << x << " " << y << " " << z  << " -> " << nx << " " << ny << " " << nz << " " << cellCenter << " UID:" << particleField_->get( nx, ny, nz ) );
 
    real_t delta = real_t(0);
    real_t pdf_new = real_t(0);
@@ -268,8 +273,17 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
       // as a consequence, some (non-zero) PDF contributions would be missing after summing up the force contributions
       // those would need to be added artificially, see e.g. Ernst, Dietzel, Sommerfeld - A lattice Boltzmann method for simulating transport and agglomeration of resolved particles, Acta Mech, 2013
       // instead, we use the trick there that we just require the deviations from the equilibrium to get the correct force as it is already used for the incompressible case
-      pdf_old -= LatticeModel_T::w[ Stencil_T::idx[dir] ];
-      pdf_new -= LatticeModel_T::w[ Stencil_T::idx[dir] ];
+      if (hydrostaticDensityFct_ == nullptr)
+      {
+         pdf_old -= LatticeModel_T::w[Stencil_T::idx[dir]];
+         pdf_new -= LatticeModel_T::w[Stencil_T::idx[dir]];
+      }
+      else
+      {
+         const real_t rhoHydStat = hydrostaticDensityFct_(cellCenter);
+         pdf_old -= rhoHydStat * LatticeModel_T::w[Stencil_T::idx[dir]];
+         pdf_new -= rhoHydStat * LatticeModel_T::w[Stencil_T::idx[dir]];
+      }
    }
 
    // MEM: F = pdf_old + pdf_new - common

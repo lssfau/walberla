@@ -85,7 +85,7 @@ void initFlagsFromFillLevels(const std::weak_ptr< StructuredBlockForest >& block
          // set flags only in non-boundary and non-obstacle cells
          if (!handling->isBoundary(fillFieldIt.x(), fillFieldIt.y(), fillFieldIt.z()))
          {
-            if (*fillFieldIt <= real_c(0))
+            if (floatIsEqual(*fillFieldIt, real_c(0), real_c(1e-14)))
             {
                // set gas flag
                handling->forceFlag(flagInfo.gasFlag, fillFieldIt.x(), fillFieldIt.y(), fillFieldIt.z());
