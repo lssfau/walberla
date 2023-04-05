@@ -1,0 +1,147 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 50, 20, 40 >;
+   periodicity                   < 1, 1, 0 >;
+   loadSnapshot                  false;
+   storeSnapshot                 true;
+   snapshotFrequency             10000;
+   snapshotBaseFolder            snapshots;
+}
+
+DomainParameters
+{
+   domainSize         <3200, 60, 160>;
+   wavePeriods        1;      // never set to 0 -> division by zero, even if you initialize a flat particle bed
+   liquidHeightFactor 2.9655; // h_0 / d (water height / avg particle diameter) -> from experiment [E1 = 2.9655, E4 = 3.5862]
+   floorHeightFactor  4.1393;  // from domain bottom to sine's average
+   initialAmplitude   0;     // defined from minimum peak to maximum peak as by Pascal et al. (2021)
+}
+
+PIDParameters
+{
+    targetMeanVelocityMagnitude 0.02;
+    proportionalGain            2e-4;
+    derivativeGain              1e-6;
+    integralGain                2e-4;
+    maxRamp                     1e-4;
+    minActuatingVariable        0;
+    maxActuatingVariable        1e-3;
+}
+
+PhysicsParameters
+{
+   enableWetting     false;
+   timesteps         2000000;
+   Re                3100; // [E1=3100, E4=4800]
+   Fr                1.31; // [E1=1.31, E4=1.45]
+   We                15.6188;   // [E1=15.6188 , E4=30.2493]
+}
+
+ParticleParameters
+{
+    inFileName spheres_out.dat;
+    bedCopiesInX 1;
+    bedCopiesInY 1;
+    densityRatio 2.55;
+    fixingHeightFactor 1.5; // proportional to the mean particle diameter
+    frictionCoefficient 0.5;
+    restitutionCoefficient 0.97;
+    numSubCycles 10;
+    useLubricationCorrection true;
+    useNoSlipParticles false;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 10000;
+   evaluationFrequency     1000;
+   baseFolderName          eval;
+}
+
+StabilityChecker
+{
+   checkFrequency 0;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1; NoSlip{} }
+   //Border { direction E;  walldistance -1; NoSlip{} }
+
+   // Y
+   //Border { direction N;  walldistance -1; NoSlip{} }
+   //Border { direction S;  walldistance -1; NoSlip{} }
+
+   // Z
+   Border { direction T;  walldistance -1; NoSlip{} }
+   Border { direction B;  walldistance -1; NoSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 0;
+   baseFolder     mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency       1000;
+      ghostLayers          0;
+      baseFolder           vtk-out;
+      samplingResolution   1;
+
+      writers
+      {
+         fill_level;
+         mapped_flag;
+         velocity;
+         density;
+         //curvature;
+         //normal;
+         //obstacle_normal;
+         //pdf;
+         //flag;
+         //force;
+      }
+
+      CellBB_filter {
+         min < 0, 29, 0 >;
+         max < 3200, 30, 160 >;
+      }
+
+      inclusion_filters
+      {
+         CellBB_filter;
+         //liquidInterfaceFilter; // only include liquid and interface cells in VTK output
+      }
+
+      before_functions
+      {
+         //ghost_layer_synchronization; // only needed if writing the ghost layer
+         gas_cell_zero_setter;          // sets velocity=0 and density=1 all gas cells before writing VTK output
+      }
+   }
+   domain_decomposition
+   {
+      writeFrequency             10000000000;
+      baseFolder                 vtk-out;
+      outputDomainDecomposition  true;
+   }
+}

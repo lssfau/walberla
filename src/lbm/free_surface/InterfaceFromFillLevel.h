@@ -44,7 +44,7 @@ inline bool isInterfaceFromFillLevel(const ScalarField_T& fillField, cell_idx_t 
    real_t fillLevel = fillField.get(x, y, z);
 
    // this cell is regular gas cell
-   if (fillLevel <= real_c(0.0)) { return false; }
+   if (floatIsEqual(fillLevel, real_c(0.0), real_c(1e-14))) { return false; }
 
    // this cell is regular interface cell
    if (fillLevel < real_c(1.0)) { return true; }

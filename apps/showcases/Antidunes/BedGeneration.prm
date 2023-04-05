@@ -1,0 +1,20 @@
+BedGeneration{
+    domainSize_SI < 0.8, 0.015, 0.2 >;
+    blocks < 3, 3, 1 >;
+    diameter_SI 0.0029;
+    gravity_SI 9.81;
+    densityFluid_SI 1000;
+    densityParticle_SI 2550;
+    generationSpacing_SI 0.005;
+    initialVelocity_SI 1;
+    dt_SI 5e-5;
+    frictionCoefficient 0.5;
+    restitutionCoefficient 0.1;
+    collisionTime_SI 5e-4;
+    poissonsRatio 0.22;
+    timeSteps 10000;
+    visSpacing 100;
+    outFileName spheres_out.dat;
+    denseBottomLayer False;
+    bottomLayerOffsetFactor 1.0;
+}

@@ -47,6 +47,7 @@ class SimpleCommunication : public communication::UniformBufferedScheme< Stencil
    using VectorFieldFlattened_T = GhostLayerField< real_t, 3 >;
    using PdfField_T             = GhostLayerField< real_t, Stencil_T::Size >;
    using UintScalarField_T      = GhostLayerField< uint_t, 1 >;
+   using IDScalarField_T        = walberla::GhostLayerField< walberla::id_t, 1 >;
 
    using FlagField16_T = FlagField< uint16_t >;
    using FlagField32_T = FlagField< uint32_t >;
@@ -148,17 +149,24 @@ class SimpleCommunication : public communication::UniformBufferedScheme< Stencil
                      }
                      else
                      {
-                        if (firstBlock.isDataClassOrSubclassOf< UintScalarField_T >(fieldId))
+                        if (firstBlock.isDataClassOrSubclassOf< IDScalarField_T >(fieldId))
                         {
-                           this->addPackInfo(make_shared< PackInfo< UintScalarField_T > >(fieldId));
+                           this->addPackInfo(make_shared< PackInfo< IDScalarField_T > >(fieldId));
                         }
                         else
                         {
-                           if (firstBlock.isDataClassOrSubclassOf< VectorFieldFlattened_T >(fieldId))
+                           if (firstBlock.isDataClassOrSubclassOf< UintScalarField_T >(fieldId))
                            {
-                              this->addPackInfo(make_shared< PackInfo< VectorFieldFlattened_T > >(fieldId));
+                              this->addPackInfo(make_shared< PackInfo< UintScalarField_T > >(fieldId));
                            }
-                           else { WALBERLA_ABORT("Problem with UID"); }
+                           else
+                           {
+                              if (firstBlock.isDataClassOrSubclassOf< VectorFieldFlattened_T >(fieldId))
+                              {
+                                 this->addPackInfo(make_shared< PackInfo< VectorFieldFlattened_T > >(fieldId));
+                              }
+                              else { WALBERLA_ABORT("Problem with UID"); }
+                           }
                         }
                      }
                   }

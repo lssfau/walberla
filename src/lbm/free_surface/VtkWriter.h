@@ -87,6 +87,7 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
       writers.push_back(std::make_shared< VTKWriter< VectorField_T, float > >(normalFieldID, "normal"));
       writers.push_back(
          std::make_shared< VTKWriter< VectorField_T, float > >(obstacleNormalFieldID, "obstacle_normal"));
+
       if constexpr (useCodegen)
       {
          if (forceDensityFieldID != BlockDataID())

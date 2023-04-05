@@ -72,7 +72,8 @@ public:
 
    inline SimpleBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField_T * const pdfField, const FlagField_T * const flagField,
                     ParticleField_T * const particleField, const shared_ptr<ParticleAccessor_T>& ac,
-                    const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block );
+                    const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block,
+                    std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct = nullptr );
 
    void pushFlags( std::vector< FlagUID >& uids ) const { uids.push_back( uid_ ); }
 
@@ -110,6 +111,8 @@ private:
    const StructuredBlockStorage & blockStorage_;
    const IBlock & block_;
 
+   std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct_;
+
    real_t lengthScalingFactor_;
    real_t forceScalingFactor_;
 
@@ -119,8 +122,10 @@ private:
 template< typename LatticeModel_T, typename FlagField_T, typename ParticleAccessor_T >
 inline SimpleBB< LatticeModel_T, FlagField_T, ParticleAccessor_T >::SimpleBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField_T * const pdfField, const FlagField_T * const flagField,
                                                                               ParticleField_T * const particleField, const shared_ptr<ParticleAccessor_T>& ac,
-                                                                              const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block ):
-Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), flagField_( flagField ), particleField_( particleField ), ac_( ac ), domainMask_(domain), blockStorage_( blockStorage ), block_( block )
+                                                                              const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block,
+                                                                              std::function<real_t(const Vector3<real_t>&)> hydrostaticDensityFct):
+Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), flagField_( flagField ), particleField_( particleField ), ac_( ac ), domainMask_(domain),
+blockStorage_( blockStorage ), block_( block ), hydrostaticDensityFct_(hydrostaticDensityFct)
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
@@ -213,8 +218,17 @@ inline void SimpleBB< LatticeModel_T, FlagField_T, ParticleAccessor_T >::treatDi
       // as a consequence, some (non-zero) PDF contributions would be missing after summing up the force contributions
       // those would need to be added artificially, see e.g. Ernst, Dietzel, Sommerfeld - A lattice Boltzmann method for simulating transport and agglomeration of resolved particles, Acta Mech, 2013
       // instead, we use the trick there that we just require the deviations from the equilibrium to get the correct force as it is already used for the incompressible case
-      pdf_old -= LatticeModel_T::w[ Stencil_T::idx[dir] ];
-      pdf_new -= LatticeModel_T::w[ Stencil_T::idx[dir] ];
+       if (hydrostaticDensityFct_ == nullptr)
+       {
+          pdf_old -= LatticeModel_T::w[Stencil_T::idx[dir]];
+          pdf_new -= LatticeModel_T::w[Stencil_T::idx[dir]];
+       }
+       else
+       {
+          const real_t rhoHydStat = hydrostaticDensityFct_(cellCenter);
+          pdf_old -= rhoHydStat * LatticeModel_T::w[Stencil_T::idx[dir]];
+          pdf_new -= rhoHydStat * LatticeModel_T::w[Stencil_T::idx[dir]];
+       }
    }
 
    // MEM: F = pdf_old + pdf_new - common
