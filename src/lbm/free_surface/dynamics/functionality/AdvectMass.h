@@ -178,7 +178,19 @@ real_t advectMass(const FlagField_T* flagField, const ConstScalarIt_T& fillSrc, 
       }
 
       // PDF pointing from neighbor to current cell
-      const real_t neighborPdf = pdfFieldIt.neighbor(*dir, dir.toInvIdx());
+      real_t neighborPdf = real_c(0);
+      if (!isFreeSlip) { neighborPdf = pdfFieldIt.neighbor(*dir, dir.toInvIdx()); }
+      else
+      {
+         // get PDF reflected at free slip boundary condition
+         stencil::Direction neighborPdfDir = *dir;
+
+         if (freeSlipDir[0] != cell_idx_c(0)) { neighborPdfDir = stencil::mirrorX[neighborPdfDir]; }
+         if (freeSlipDir[1] != cell_idx_c(0)) { neighborPdfDir = stencil::mirrorY[neighborPdfDir]; }
+         if (freeSlipDir[2] != cell_idx_c(0)) { neighborPdfDir = stencil::mirrorZ[neighborPdfDir]; }
+         neighborPdf = pdfFieldIt.neighbor(freeSlipDir[0], freeSlipDir[1], freeSlipDir[2],
+                                           LatticeModel_T::Stencil::idx[neighborPdfDir]);
+      }
 
       // PDF pointing to neighbor
       const real_t localPdf = pdfFieldIt.getF(dir.toIdx());
