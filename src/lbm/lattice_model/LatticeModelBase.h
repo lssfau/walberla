@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -83,7 +83,8 @@ public:
    LatticeModelBase( const CollisionModel_T & cm, const ForceModel_T & fm ) :
       collisionModel_( cm ), forceModel_( fm ) {
 
-      if (Compressible && forceModel_.constant)
+      if (Compressible && forceModel_.constant &&
+          !std::is_same< typename ForceModel::tag, force_model::None_tag >::value)
       {
          WALBERLA_LOG_WARNING_ON_ROOT("WARNING: You are using a compressible lattice model with a constant force "
                                       "model. You should consider using a field-based force model, and adjust the body "
@@ -132,8 +133,8 @@ public:
 protected:
 
    virtual void config( IBlock & block, StructuredBlockStorage & sbs ) = 0;
-   
-   
+
+
 
    CollisionModel_T collisionModel_;
    ForceModel_T     forceModel_;
