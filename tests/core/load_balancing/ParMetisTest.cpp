@@ -82,8 +82,8 @@ int main( int argc, char * argv[] )
 
    typedef field::GhostLayerField< int64_t, 1 > FieldType;
 
-   auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t(-1), field::zyxf, uint_t(1) );
-   auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t(-1), field::zyxf, uint_t(1) );
+   auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t(-1), field::fzyx, uint_t(1) );
+   auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t(-1), field::fzyx, uint_t(1) );
 
    auto & domain    = *( blocks->begin()->getData< FieldType >( domainId    ) );
    auto & partField = *( blocks->begin()->getData< FieldType >( partFieldId ) );

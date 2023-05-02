@@ -582,14 +582,14 @@ int main( int argc, char **argv )
                                                  lbm::force_model::SimpleConstant( Vector3<real_t> ( setup.forcing, real_t(0), real_t(0) ) ) );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                         uint_t(1), field::zyxf );
+                                                                         uint_t(1), field::fzyx );
 
    // add PDF field, for MR boundary condition only
    BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, " pre collision pdf field", latticeModel,
                                                                                Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                               uint_t(1), field::zyxf );
+                                                                               uint_t(1), field::fzyx );
 
    // initialize already with the Poiseuille flow profile
    initPDF( blocks, pdfFieldID, setup);
@@ -598,7 +598,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::fzyx );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

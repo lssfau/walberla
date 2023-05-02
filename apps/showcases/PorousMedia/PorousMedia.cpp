@@ -1371,7 +1371,7 @@ int main(int argc, char** argv)
 
    // add field for particle creation (bodies)
    BlockDataID bodyFieldID =
-      field::addToStorage< BodyField_T >(blocks, "body field", nullptr, field::zyxf, FieldGhostLayers, false);
+      field::addToStorage< BodyField_T >(blocks, "body field", nullptr, field::fzyx, FieldGhostLayers, false);
 
    // add boundary handling
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

@@ -288,9 +288,9 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( omega );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3<real_t>(real_t(0)), real_t(1),
-                                                                         FieldGhostLayers, field::zyxf );
+                                                                         FieldGhostLayers, field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
@@ -304,7 +304,7 @@ int main( int argc, char **argv )
    auto planeShape = ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(real_t(1), real_t(0), real_t(0)) );
 
    // add particle field
-   BlockDataID particleFieldID = field::addToStorage<lbm_mesapd_coupling::ParticleField_T>( blocks, "particle field", accessor->getInvalidUid(), field::zyxf, FieldGhostLayers );
+   BlockDataID particleFieldID = field::addToStorage<lbm_mesapd_coupling::ParticleField_T>( blocks, "particle field", accessor->getInvalidUid(), field::fzyx, FieldGhostLayers );
 
    // add boundary handling
    using BoundaryHandling_T = MyBoundaryHandling<ParticleAccessor_T>::Type;

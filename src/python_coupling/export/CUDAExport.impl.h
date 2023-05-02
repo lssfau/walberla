@@ -345,7 +345,7 @@ void exportModuleToPython(py::module_ &m)
          bool usePitchedMem, uint_t ghostLayers, Layout layout) {
         return internal::addToStorage<GpuFields...>(blocks, name, dtype, fSize, ghostLayers, layout, usePitchedMem);
       },
-      "blocks"_a, "name"_a, "dtype"_a, "fSize"_a=1, "usePitchedMem"_a=false, "ghostLayers"_a=uint(1), "layout"_a=zyxf);
+      "blocks"_a, "name"_a, "dtype"_a, "fSize"_a=1, "usePitchedMem"_a=false, "ghostLayers"_a=uint(1), "layout"_a=fzyx);
 
    m2.def(
       "createPackInfo",

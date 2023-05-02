@@ -576,23 +576,23 @@ int main(int argc, char** argv)
 
    // create force field
    BlockDataID forceFieldID = field::addToStorage< Vec3Field_T >(blocks, "force field", Vector3< real_t >(real_t(0)),
-                                                                 field::zyxf, FieldGhostLayers);
+                                                                 field::fzyx, FieldGhostLayers);
 
    // create omega field
    BlockDataID omegaFieldID =
-      field::addToStorage< ScalarField_T >(blocks, "omega field", real_t(0), field::zyxf, FieldGhostLayers);
+      field::addToStorage< ScalarField_T >(blocks, "omega field", real_t(0), field::fzyx, FieldGhostLayers);
 
    // create the lattice model
    LatticeModel_T latticeModel = LatticeModel_T(omegaFieldID, ForceModel_T(forceFieldID));
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(
-      blocks, "pdf field (zyxf)", latticeModel, Vector3< real_t >(real_t(0)), real_t(1), uint_t(1), field::zyxf);
+      blocks, "pdf field (fzyx)", latticeModel, Vector3< real_t >(real_t(0)), real_t(1), uint_t(1), field::fzyx);
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage< BodyField_T >(blocks, "body field", nullptr, field::zyxf);
+   BlockDataID bodyFieldID = field::addToStorage< BodyField_T >(blocks, "body field", nullptr, field::fzyx);
 
    // add boundary handling
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
@@ -600,44 +600,44 @@ int main(int argc, char** argv)
 
    // field to store fluid velolcity
    BlockDataID velocityFieldID =
-      field::addToStorage< Vec3Field_T >(blocks, "velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers);
+      field::addToStorage< Vec3Field_T >(blocks, "velocity field", initialFluidVelocity, field::fzyx, FieldGhostLayers);
 
    BlockDataID oldVelocityFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers);
+      blocks, "old velocity field", initialFluidVelocity, field::fzyx, FieldGhostLayers);
    BlockDataID swappedOldVelocityFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "swapped old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers);
+      blocks, "swapped old velocity field", initialFluidVelocity, field::fzyx, FieldGhostLayers);
 
    // field to store curl of fluid velocity
    BlockDataID velocityCurlFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "velocity curl field", Vector3< real_t >(real_c(0)), field::zyxf, FieldGhostLayers);
+      blocks, "velocity curl field", Vector3< real_t >(real_c(0)), field::fzyx, FieldGhostLayers);
 
    // field to store velocity gradient
    BlockDataID velocityGradientFieldID = field::addToStorage< TensorField_T >(
-      blocks, "velocity gradient field", Matrix3< real_t >(real_c(0)), field::zyxf, FieldGhostLayers);
+      blocks, "velocity gradient field", Matrix3< real_t >(real_c(0)), field::fzyx, FieldGhostLayers);
 
    // field to store time derivative of fluid velocity
    BlockDataID timeDerivativeVelocityFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "time derivative velocity field", Vector3< real_t >(real_c(0)), field::zyxf, FieldGhostLayers);
+      blocks, "time derivative velocity field", Vector3< real_t >(real_c(0)), field::fzyx, FieldGhostLayers);
 
    // create solid volume fraction field
    BlockDataID svfFieldID =
-      field::addToStorage< ScalarField_T >(blocks, "svf field", real_t(0), field::zyxf, FieldGhostLayers);
+      field::addToStorage< ScalarField_T >(blocks, "svf field", real_t(0), field::fzyx, FieldGhostLayers);
 
    // create pressure field
    BlockDataID pressureFieldID =
-      field::addToStorage< ScalarField_T >(blocks, "pressure field", real_t(0), field::zyxf, FieldGhostLayers);
+      field::addToStorage< ScalarField_T >(blocks, "pressure field", real_t(0), field::fzyx, FieldGhostLayers);
 
    // field to store pressure gradient
    BlockDataID pressureGradientFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "pressure gradient field", Vector3< real_t >(real_c(0)), field::zyxf, FieldGhostLayers);
+      blocks, "pressure gradient field", Vector3< real_t >(real_c(0)), field::fzyx, FieldGhostLayers);
 
    BlockDataID dragForceFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "drag force field", Vector3< real_t >(real_t(0)), field::zyxf, FieldGhostLayers);
+      blocks, "drag force field", Vector3< real_t >(real_t(0)), field::fzyx, FieldGhostLayers);
 
    BlockDataID amForceFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "am force field", Vector3< real_t >(real_t(0)), field::zyxf, FieldGhostLayers);
+      blocks, "am force field", Vector3< real_t >(real_t(0)), field::fzyx, FieldGhostLayers);
    BlockDataID liftForceFieldID = field::addToStorage< Vec3Field_T >(
-      blocks, "lift force field", Vector3< real_t >(real_t(0)), field::zyxf, FieldGhostLayers);
+      blocks, "lift force field", Vector3< real_t >(real_t(0)), field::fzyx, FieldGhostLayers);
 
    // map planes into the LBM simulation -> act as no-slip boundaries
    pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage,

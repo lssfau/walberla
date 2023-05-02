@@ -410,14 +410,14 @@ int main(int argc, char** argv)
 
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(
-      blocks, "pdf field (zyxf)", latticeModel, Vector3< real_t >(real_c(0), real_c(0), real_c(0)), real_c(1),
-      uint_t(1), field::zyxf);
+      blocks, "pdf field (fzyx)", latticeModel, Vector3< real_t >(real_c(0), real_c(0), real_c(0)), real_c(1),
+      uint_t(1), field::fzyx);
 
    // add particle and volume fraction field
    BlockDataID particleAndVolumeFractionFieldID =
       field::addToStorage< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
          blocks, "particle and volume fraction field",
-         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::zyxf, 0);
+         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::fzyx, 0);
    // map bodies and calculate solid volume fraction initially
    lbm_mesapd_coupling::psm::ParticleAndVolumeFractionMapping particleMapping(
       blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(), particleAndVolumeFractionFieldID, 4);

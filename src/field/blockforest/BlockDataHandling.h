@@ -413,17 +413,17 @@ public:
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
                              const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize = internal::defaultSize,
                              const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
-      blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize ), alloc_(alloc)
+      blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( fzyx ), calculateSize_( calculateSize ), alloc_(alloc)
    {}
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
                              const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize = internal::defaultSize,
                              const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
-      blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize ), alloc_(alloc)
+      blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( fzyx ), calculateSize_( calculateSize ), alloc_(alloc)
    {}
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
-                             const Value_T & initValue, const Layout layout = zyxf,
+                             const Value_T & initValue, const Layout layout = fzyx,
                              const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize = internal::defaultSize,
                              const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize ), alloc_(alloc)
@@ -480,13 +480,13 @@ public:
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
                                       const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize = internal::defaultSize,
                                       const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
-      blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize ), alloc_(alloc)
+      blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( fzyx ), calculateSize_( calculateSize ), alloc_(alloc)
    {}
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
                                       const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize = internal::defaultSize,
                                       const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
-      blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize ), alloc_(alloc)
+      blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( fzyx ), calculateSize_( calculateSize ), alloc_(alloc)
    {}
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,

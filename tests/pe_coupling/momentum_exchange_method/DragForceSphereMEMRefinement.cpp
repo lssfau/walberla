@@ -536,15 +536,15 @@ int main( int argc, char **argv )
                                                  lbm::force_model::SimpleConstant( Vector3<real_t> ( setup.extForce, 0, 0 ) ) );
 
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_c(1),
-                                                                         FieldGhostLayers, field::zyxf );
+                                                                         FieldGhostLayers, field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::fzyx, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

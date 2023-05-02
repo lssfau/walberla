@@ -145,7 +145,7 @@ inline Curved< LatticeModel_T, FlagField_T >::Curved( const BoundaryUID & bounda
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
    WALBERLA_ASSERT( flagField_->isRegistered( domainMask_ )  );   
-   weights_ = make_shared<WeightField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField_->nrOfGhostLayers(), field::zyxf );
+   weights_ = make_shared<WeightField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField_->nrOfGhostLayers(), field::fzyx );
 }
 
 

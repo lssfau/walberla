@@ -147,12 +147,12 @@ inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    if (flagField != nullptr)
-      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
+      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    else
-      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
 
    if (StoreForce)
-      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
 }
 
 

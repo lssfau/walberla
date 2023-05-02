@@ -67,7 +67,7 @@ public:
          WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
 
          if (StoreForce)
-            force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+            force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
       }
 
    void pushFlags( std::vector< FlagUID >& uids ) const { uids.push_back( uid_ ); }

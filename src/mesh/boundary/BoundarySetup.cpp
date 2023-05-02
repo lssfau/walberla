@@ -89,7 +89,7 @@ void BoundarySetup::allocateOrResetVoxelizationField()
    }
    else
    {
-      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t(0), field::zyxf, numGhostLayers_ ) );
+      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t(0), field::fzyx, numGhostLayers_ ) );
    }
 
    WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ );

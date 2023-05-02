@@ -284,7 +284,7 @@ namespace field {
         zfact_            ( other.zfact_*cell_idx_t(fSize_/fSize2) ),
         allocator_        ( std::shared_ptr<FieldAllocator<T>>(other.allocator_, reinterpret_cast<FieldAllocator<T>*>(other.allocator_.get())) )
    {
-      WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf);
+      WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf)
       static_assert(fSize_ % fSize2 == 0, "number of field components do not match");
       static_assert(std::is_same<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>::value, "field types are incompatible for flattening");
       allocator_->incrementReferenceCount ( values_ );
@@ -357,7 +357,7 @@ namespace field {
 
       layout_ = l;
 
-      WALBERLA_ASSERT(layout_ == zyxf || layout_ == fzyx);
+      WALBERLA_ASSERT(layout_ == zyxf || layout_ == fzyx)
 
       if (layout_ == fzyx ) {
          values_ = allocator_->allocate(fSize_, zSize_, ySize_, xSize_, zAllocSize_, yAllocSize_, xAllocSize_);

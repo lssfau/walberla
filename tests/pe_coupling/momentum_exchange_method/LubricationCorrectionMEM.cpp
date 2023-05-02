@@ -891,15 +891,15 @@ int main( int argc, char **argv )
    BlockDataID pdfFieldID = useFZYX ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
                                                                  Vector3< real_t >( real_t(0), real_t(0), real_t(0) ), real_t(1),
                                                                  uint_t(1), field::fzyx ) :
-                                      lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
+                                      lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
                                                                  Vector3< real_t >( real_t(0), real_t(0), real_t(0) ), real_t(1),
-                                                                 uint_t(1), field::zyxf );
+                                                                 uint_t(1), field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::fzyx );
 
    // add boundary handling & initialize outer domain boundaries (moving walls on the front, back, top, and bottom plane)
    BlockDataID boundaryHandlingID;

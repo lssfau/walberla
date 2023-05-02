@@ -63,7 +63,7 @@ namespace cuda {
       typedef T value_type;
 
       GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSize,
-                uint_t _nrOfGhostLayers, const Layout & _layout = zyxf, bool usePitchedMem = true );
+                uint_t _nrOfGhostLayers, const Layout & _layout = fzyx, bool usePitchedMem = true );
 
       ~GPUField();
 

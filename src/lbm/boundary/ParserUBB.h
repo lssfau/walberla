@@ -299,17 +299,17 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForc
 
    if(flagField != NULL)
    {
-      parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
-      velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
+      parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
+      velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    }
    else
    {
-      parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), pdfField->nrOfGhostLayers(),  field::zyxf );
-      velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), pdfField->nrOfGhostLayers(),  field::zyxf );
+      parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), pdfField->nrOfGhostLayers(),  field::fzyx );
+      velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), pdfField->nrOfGhostLayers(),  field::fzyx );
    }
 
    if (StoreForce)
-      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
 }
 
 

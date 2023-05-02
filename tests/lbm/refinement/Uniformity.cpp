@@ -394,7 +394,7 @@ int main( int argc, char ** argv )
    // check constant velocity
 
    //typedef GhostLayerField<real_t,1> ErrorField;
-   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t(0), field::zyxf, FieldGhostLayers );
+   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t(0), field::fzyx, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {

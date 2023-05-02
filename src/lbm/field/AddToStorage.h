@@ -158,7 +158,7 @@ private:
 template< typename LatticeModel_T, typename BlockStorage_T >
 BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                                   const LatticeModel_T & latticeModel,
-                                  const field::Layout & layout = field::zyxf,
+                                  const field::Layout & layout = field::fzyx,
                                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
                                   const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
@@ -173,7 +173,7 @@ template< typename LatticeModel_T, typename BlockStorage_T >
 BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                                   const LatticeModel_T & latticeModel,
                                   const uint_t ghostLayers,
-                                  const field::Layout & layout = field::zyxf,
+                                  const field::Layout & layout = field::fzyx,
                                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
                                   const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
@@ -189,7 +189,7 @@ template< typename LatticeModel_T, typename BlockStorage_T >
 BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                                   const LatticeModel_T & latticeModel,
                                   const Vector3< real_t > & initialVelocity, const real_t initialDensity,
-                                  const field::Layout & layout = field::zyxf,
+                                  const field::Layout & layout = field::fzyx,
                                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
                                   const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
@@ -206,7 +206,7 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
                                   const LatticeModel_T & latticeModel,
                                   const Vector3< real_t > & initialVelocity, const real_t initialDensity,
                                   const uint_t ghostLayers,
-                                  const field::Layout & layout = field::zyxf,
+                                  const field::Layout & layout = field::fzyx,
                                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
                                   const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
@@ -227,7 +227,7 @@ struct PdfFieldCreator : public domain_decomposition::BlockDataCreator< lbm::Pdf
    PdfFieldCreator( const shared_ptr< StructuredBlockStorage > & blocks,
                     const std::string & identifier, const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors,
                     const LatticeModel_T & latticeModel,
-                    const field::Layout & layout = field::zyxf,
+                    const field::Layout & layout = field::fzyx,
                     const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr) :
       domain_decomposition::BlockDataCreator< lbm::PdfField< LatticeModel_T > >( make_shared< internal::PdfFieldHandling< LatticeModel_T > >(
                                                                                     blocks, latticeModel, false, Vector3<real_t>(0), real_t(1), uint_t(1), layout, alloc ),
@@ -237,7 +237,7 @@ struct PdfFieldCreator : public domain_decomposition::BlockDataCreator< lbm::Pdf
    PdfFieldCreator( const shared_ptr< StructuredBlockStorage > & blocks,
                     const std::string & identifier, const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors,
                     const LatticeModel_T & latticeModel, const uint_t ghostLayers,
-                    const field::Layout & layout = field::zyxf,
+                    const field::Layout & layout = field::fzyx,
                     const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr) :
       domain_decomposition::BlockDataCreator< lbm::PdfField< LatticeModel_T > >( make_shared< internal::PdfFieldHandling< LatticeModel_T > >(
                                                                                     blocks, latticeModel, false, Vector3<real_t>(0), real_t(1), ghostLayers, layout, alloc ),
@@ -247,7 +247,7 @@ struct PdfFieldCreator : public domain_decomposition::BlockDataCreator< lbm::Pdf
    PdfFieldCreator( const shared_ptr< StructuredBlockStorage > & blocks,
                     const std::string & identifier, const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors,
                     const LatticeModel_T & latticeModel, const Vector3< real_t > & initialVelocity, const real_t initialDensity,
-                    const field::Layout & layout = field::zyxf,
+                    const field::Layout & layout = field::fzyx,
                     const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr) :
       domain_decomposition::BlockDataCreator< lbm::PdfField< LatticeModel_T > >( make_shared< internal::PdfFieldHandling< LatticeModel_T > >(
                                                                                     blocks, latticeModel, true, initialVelocity, initialDensity, uint_t(1), layout, alloc ),
@@ -257,7 +257,7 @@ struct PdfFieldCreator : public domain_decomposition::BlockDataCreator< lbm::Pdf
    PdfFieldCreator( const shared_ptr< StructuredBlockStorage > & blocks,
                     const std::string & identifier, const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors,
                     const LatticeModel_T & latticeModel, const Vector3< real_t > & initialVelocity, const real_t initialDensity, const uint_t ghostLayers,
-                    const field::Layout & layout = field::zyxf,
+                    const field::Layout & layout = field::fzyx,
                     const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr) :
       domain_decomposition::BlockDataCreator< lbm::PdfField< LatticeModel_T > >( make_shared< internal::PdfFieldHandling< LatticeModel_T > >(
                                                                                     blocks, latticeModel, true, initialVelocity, initialDensity, ghostLayers, layout, alloc ),

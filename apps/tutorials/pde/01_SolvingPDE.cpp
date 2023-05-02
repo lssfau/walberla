@@ -252,10 +252,10 @@ int main( int argc, char ** argv )
 
    // add fields with ghost layers to all blocks
    // source and destination fields for the unknowns u
-   BlockDataID srcID = field::addToStorage< ScalarField >( blocks, "src", real_c(0), field::zyxf, uint_c(1));
-   BlockDataID dstID = field::addToStorage< ScalarField >( blocks, "dst", real_c(0), field::zyxf, uint_c(1));
+   BlockDataID srcID = field::addToStorage< ScalarField >( blocks, "src", real_c(0), field::fzyx, uint_c(1));
+   BlockDataID dstID = field::addToStorage< ScalarField >( blocks, "dst", real_c(0), field::fzyx, uint_c(1));
    // field to store the function f
-   BlockDataID rhsID = field::addToStorage< ScalarField >( blocks, "rhs", real_c(0), field::zyxf, uint_c(1));
+   BlockDataID rhsID = field::addToStorage< ScalarField >( blocks, "rhs", real_c(0), field::fzyx, uint_c(1));
 
    // initialize the field
    initRHS( blocks, rhsID );

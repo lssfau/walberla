@@ -87,7 +87,7 @@ public:
       }
 
       if (StoreForce)
-         force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+         force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
    }
    DynamicUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
                const uint_t level, const VelocityFunctor_T & velocity, const AABB & aabb ) :

@@ -153,12 +153,12 @@ int main( int argc, char** argv )
                                                       true,
                                                       false, false, false );
 
-   BlockDataID srcId = field::addToStorage< PdeField_T >( blocks, "u (src)", real_t(0), field::zyxf, uint_t(1) );
-   BlockDataID dstId = field::addToStorage< PdeField_T >( blocks, "u (dst)", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID srcId = field::addToStorage< PdeField_T >( blocks, "u (src)", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID dstId = field::addToStorage< PdeField_T >( blocks, "u (dst)", real_t(0), field::fzyx, uint_t(1) );
 
    initU( blocks, srcId, dstId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::fzyx, uint_t(1) );
 
    initF( blocks, fId );
 

@@ -150,7 +150,7 @@ template< typename GhostLayerField_T, typename BlockStorage_T >
 BlockDataID addToStorage( const shared_ptr< BlockStorage_T > & blocks,
                           const std::string & identifier,
                           const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-                          const Layout layout = zyxf,
+                          const Layout layout = fzyx,
                           const uint_t nrOfGhostLayers = uint_t(1),
                           const bool alwaysInitialize = false,
                           const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
@@ -185,7 +185,7 @@ BlockDataID addToStorage( const shared_ptr< BlockStorage_T > & blocks,
                           const std::string & identifier,
                           const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize,
                           const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-                          const Layout layout = zyxf,
+                          const Layout layout = fzyx,
                           const uint_t nrOfGhostLayers = uint_t(1),
                           const bool alwaysInitialize = false,
                           const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
@@ -297,7 +297,7 @@ struct Creator : public domain_decomposition::BlockDataCreator< GhostLayerField_
             const Set<SUID> & requiredSelectors,
             const Set<SUID> & incompatibleSelectors,
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-            const Layout layout = zyxf,
+            const Layout layout = fzyx,
             const uint_t nrOfGhostLayers = uint_t(1),
             const bool /*alwaysInitialize*/ = false,
             const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
@@ -315,7 +315,7 @@ struct Creator : public domain_decomposition::BlockDataCreator< GhostLayerField_
             const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-            const Layout layout = zyxf,
+            const Layout layout = fzyx,
             const uint_t nrOfGhostLayers = uint_t(1) ) :
       domain_decomposition::BlockDataCreator< GhostLayerField_T >( shared_ptr< DefaultBlockDataHandling< GhostLayerField_T > >(),
                                                                    identifier, requiredSelectors, incompatibleSelectors )
@@ -336,7 +336,7 @@ struct Creator< GhostLayerField_T,
             const Set<SUID> & requiredSelectors,
             const Set<SUID> & incompatibleSelectors,
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-            const Layout layout = zyxf,
+            const Layout layout = fzyx,
             const uint_t nrOfGhostLayers = uint_t(1),
             const bool alwaysInitialize = false,
             const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
@@ -362,7 +362,7 @@ struct Creator< GhostLayerField_T,
             const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
-            const Layout layout = zyxf,
+            const Layout layout = fzyx,
             const uint_t nrOfGhostLayers = uint_t(1) ) :
       domain_decomposition::BlockDataCreator< GhostLayerField_T >( shared_ptr< DefaultBlockDataHandling< GhostLayerField_T > >(),
                                                                    identifier, requiredSelectors, incompatibleSelectors )

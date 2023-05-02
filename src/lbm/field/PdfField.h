@@ -101,7 +101,7 @@ public:
              const LatticeModel_T & _latticeModel,
              const bool initialize = true, const Vector3< real_t > & initialVelocity = Vector3< real_t >( real_t(0.0) ),
              const real_t initialDensity = real_t(1.0),
-             const uint_t ghostLayers = uint_t(1), const field::Layout & _layout = field::zyxf,
+             const uint_t ghostLayers = uint_t(1), const field::Layout & _layout = field::fzyx,
              const shared_ptr< field::FieldAllocator<real_t> > & alloc = shared_ptr< field::FieldAllocator<real_t> >() );
 
    ~PdfField() override = default;

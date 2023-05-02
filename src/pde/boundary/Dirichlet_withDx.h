@@ -133,7 +133,7 @@ inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUI
 
    WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
 
-   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
+   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::fzyx );
 
    for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
       dx_[d.toIdx()] = Vector3<real_t>(stencil::cx[d.toIdx()]*blocks.dx(), stencil::cy[d.toIdx()]*blocks.dy(), stencil::cz[d.toIdx()]*blocks.dz() ).sqrLength();

@@ -682,15 +682,15 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                         uint_t(1), field::zyxf );
+                                                                         uint_t(1), field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::fzyx );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

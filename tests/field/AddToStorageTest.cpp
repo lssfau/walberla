@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
                                                        );
    typedef GhostLayerField<Vector3<uint_t>,1> VectorField;
    typedef GhostLayerField<uint_t, 3> FlattenedField;
-   BlockDataID fieldID = field::addToStorage<VectorField>( blocks, "Field" );
+   BlockDataID fieldID = field::addToStorage<VectorField>( blocks, "Field", Vector3<uint_t>(uint_c(0)), field::zyxf );
    BlockDataID flattenedID = field::addFlattenedShallowCopyToStorage<VectorField>( blocks, fieldID, "flattened Field");
 
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
@@ -58,9 +58,9 @@ int main( int argc, char ** argv )
          }
       }
    }
-   
+
    BlockDataID copyID = field::addCloneToStorage<VectorField>( blocks, fieldID, "copied Field");
-   
+
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       VectorField * field = blockIt->getData<VectorField>( fieldID );

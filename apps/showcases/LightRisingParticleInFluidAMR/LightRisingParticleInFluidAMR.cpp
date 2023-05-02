@@ -896,15 +896,15 @@ int main(int argc, char** argv) {
       shared_ptr< lbm::internal::PdfFieldHandling< LatticeModel_T > > dataHandling =
               make_shared< lbm::internal::PdfFieldHandling< LatticeModel_T > >(blocks, latticeModel, false,
                       Vector3<real_t>(real_t(0)), real_t(1),
-                      FieldGhostLayers, field::zyxf );
+                      FieldGhostLayers, field::fzyx );
 
       pdfFieldID = blocks->loadBlockData( readCheckPointFileName+"_lbm.txt", dataHandling, "pdf field" );
 
    } else {
       // add PDF field
-      pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(blocks, "pdf field (zyxf)", latticeModel,
+      pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(blocks, "pdf field (fzyx)", latticeModel,
               Vector3<real_t>(real_t(0)), real_t(1),
-              FieldGhostLayers, field::zyxf);
+              FieldGhostLayers, field::fzyx);
    }
 
    // add flag field
@@ -916,11 +916,11 @@ int main(int argc, char** argv) {
    // add particle field
    BlockDataID particleFieldID = field::addToStorage<ParticleField_T>(blocks, "particle field",
          accessor->getInvalidUid(),
-         field::zyxf,
+         field::fzyx,
          FieldGhostLayers);
 
    // add velocity field and utility
-   BlockDataID velocityFieldID = field::addToStorage<VelocityField_T>( blocks, "velocity field", Vector3<real_t>(real_t(0)), field::zyxf, uint_t(2) );
+   BlockDataID velocityFieldID = field::addToStorage<VelocityField_T>( blocks, "velocity field", Vector3<real_t>(real_t(0)), field::fzyx, uint_t(2) );
 
    typedef lbm::VelocityFieldWriter< PdfField_T, VelocityField_T > VelocityFieldWriter_T;
    BlockSweepWrapper< VelocityFieldWriter_T > velocityFieldWriter( blocks, VelocityFieldWriter_T( pdfFieldID, velocityFieldID ) );
@@ -929,7 +929,7 @@ int main(int argc, char** argv) {
    velocityCommunicationScheme->addPackInfo( make_shared< field::refinement::PackInfo<VelocityField_T, stencil::D3Q27> >( velocityFieldID ) );
 
    // add q criterion field (only needed for mesh output)
-   BlockDataID qCriterionFieldID = field::addToStorage<QCriterionField_T>(blocks, "q criterion field", real_t(0), field::zyxf, uint_t(1));
+   BlockDataID qCriterionFieldID = field::addToStorage<QCriterionField_T>(blocks, "q criterion field", real_t(0), field::fzyx, uint_t(1));
 
    typedef lbm::QCriterionFieldWriter<VelocityField_T, QCriterionField_T, FluidFilter_T> QCriterionFieldWriter_T;
    BlockSweepWrapper<QCriterionFieldWriter_T> qCriterionFieldWriter(blocks, QCriterionFieldWriter_T(blocks, velocityFieldID,

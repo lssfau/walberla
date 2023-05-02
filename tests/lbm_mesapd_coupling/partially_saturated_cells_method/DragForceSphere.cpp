@@ -398,7 +398,7 @@ int main(int argc, char** argv)
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(
-      blocks, "pdf field (zyxf)", latticeModel, Vector3< real_t >(real_t(0)), real_t(1), uint_t(1), field::zyxf);
+      blocks, "pdf field (fzyx)", latticeModel, Vector3< real_t >(real_t(0)), real_t(1), uint_t(1), field::fzyx);
 
    ///////////////
    // TIME LOOP //
@@ -416,7 +416,7 @@ int main(int argc, char** argv)
    BlockDataID particleAndVolumeFractionFieldID =
       field::addToStorage< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
          blocks, "particle and volume fraction field",
-         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::zyxf, 0);
+         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::fzyx, 0);
    lbm_mesapd_coupling::psm::ParticleAndVolumeFractionMapping particleMapping(
       blocks, accessor, lbm_mesapd_coupling::GlobalParticlesSelector(), particleAndVolumeFractionFieldID, 4);
    particleMapping();

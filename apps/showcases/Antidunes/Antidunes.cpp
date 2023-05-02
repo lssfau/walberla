@@ -655,7 +655,7 @@ int main(int argc, char** argv)
    }
 
    BlockDataID particleFieldID = field::addToStorage< lbm_mesapd_coupling::ParticleField_T >(
-      blockForest, "Particle field", particleAccessor->getInvalidUid(), field::zyxf, uint_c(2));
+      blockForest, "Particle field", particleAccessor->getInvalidUid(), field::fzyx, uint_c(2));
 
    auto densityReferenceHeight = absoluteLiquidHeight;
    auto hydrostaticDensityFct  = [force, densityReferenceHeight](const Vector3< real_t >& position) {

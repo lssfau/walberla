@@ -79,9 +79,9 @@ void test()
    blockforest::BlockForestEvaluation evaluation(sbf->getBlockForest());
    WALBERLA_LOG_INFO_ON_ROOT("BlockForest:\n" << evaluation.toString())
 
-   // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::zyxf, uint_t(3), false,
+   // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::fzyx, uint_t(3), false,
    // None, Empty );
-   auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_t(3), 0.0, field::zyxf);
+   auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_t(3), 0.0, field::fzyx);
    auto originalFieldId = sbf->addBlockData(dataHandling, "OriginalField", None, Empty);
 
    math::seedRandomGenerator(numeric_cast< std::mt19937::result_type >(MPIManager::instance()->rank()));

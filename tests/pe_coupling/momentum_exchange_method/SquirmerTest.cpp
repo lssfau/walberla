@@ -314,14 +314,14 @@ int main(int argc, char **argv) {
    LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::TRT::constructWithMagicNumber(omega));
 
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage<LatticeModel_T>(blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage<LatticeModel_T>(blocks, "pdf field (fzyx)", latticeModel,
                                                                       FieldGhostLayers);
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", nullptr, field::zyxf);
+   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", nullptr, field::fzyx);
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(

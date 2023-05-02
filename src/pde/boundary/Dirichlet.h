@@ -167,7 +167,7 @@ inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUI
    )
 #endif
 
-   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
+   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::fzyx );
 
 }
 
