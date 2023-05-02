@@ -571,14 +571,14 @@ int main(int argc, char** argv)
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(blocks, "pdf field", latticeModel, inflowVec,
-                                                                        densityFluid, uint_t(1), field::zyxf);
+                                                                        densityFluid, uint_t(1), field::fzyx);
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    // add particle field
    BlockDataID particleFieldID = field::addToStorage< lbm_mesapd_coupling::ParticleField_T >(
-      blocks, "particle field", accessor->getInvalidUid(), field::zyxf, FieldGhostLayers);
+      blocks, "particle field", accessor->getInvalidUid(), field::fzyx, FieldGhostLayers);
 
    // add boundary handling
    using BoundaryHandling_T       = MyBoundaryHandling< ParticleAccessor_T >::Type;

@@ -73,8 +73,8 @@ int main(int argc, char **argv )
 
    BlockDataID pdfField     = lbm::addPdfFieldToStorage( blocks, "PdfField", latticeModel );
 
-   BlockDataID scalarField1 = field::addToStorage<ScalarField>( blocks, "ScalarFieldOneGl", real_t(0), field::zyxf,  1 );
-   BlockDataID scalarField2 = field::addToStorage<ScalarField>( blocks, "ScalarFieldTwoGl", real_t(0), field::zyxf,  2 );
+   BlockDataID scalarField1 = field::addToStorage<ScalarField>( blocks, "ScalarFieldOneGl", real_t(0), field::fzyx,  1 );
+   BlockDataID scalarField2 = field::addToStorage<ScalarField>( blocks, "ScalarFieldTwoGl", real_t(0), field::fzyx,  2 );
    BlockDataID vectorField  = field::addToStorage<VectorField>( blocks, "VectorField", Vector3<real_t>(0,0,0) );
    BlockDataID flagField    = field::addFlagFieldToStorage<FField>( blocks, "FlagField" );
 

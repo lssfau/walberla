@@ -60,7 +60,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up fields for finest level
    uId_.push_back( uFieldId );
    fId_.push_back( fFieldId );
-   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::zyxf, uint_t(1) ) );
+   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::fzyx, uint_t(1) ) );
 
    // Check that coarsest grid has more than one cell per dimension
    auto   block = blocks->begin();
@@ -91,9 +91,9 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
       auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
-      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
-      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
-      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
+      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
 
       for ( auto & w: weights_[lvl] )
       {
@@ -104,8 +104,8 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    // Set up fields for CG on coarsest level
    auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
-   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
-   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
+   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
+   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
 
    // Set up communication
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
@@ -167,7 +167,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up fields for finest level
    uId_.push_back( uFieldId );
    fId_.push_back( fFieldId );
-   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::zyxf, uint_t(1) ) );
+   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::fzyx, uint_t(1) ) );
    stencilId_.push_back( stencilFieldId );
 
    // Check that coarsest grid has more than one cell per dimension
@@ -197,10 +197,10 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
       auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
-      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
-      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
-      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
-      stencilId_.push_back( field::addToStorage< StencilField_T >( blocks, "w_"+std::to_string(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
+      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      stencilId_.push_back( field::addToStorage< StencilField_T >( blocks, "w_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
    }
 
    // CoarsenStencilFieldsDCA<Stencil_T>( blocks, stencilId_, numLvl, uint_t(2)) ();  // scaling by ( 1/h^2 )^lvl
@@ -209,8 +209,8 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    // Set up fields for CG on coarsest level
    auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
-   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
-   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
+   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
+   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
 
    // Set up communication
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )

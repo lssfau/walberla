@@ -427,13 +427,13 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( omega, ForceModel_T( Vector3<real_t> ( setup.extForce, 0, 0 ) ) );
 
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_c(1),
-                                                                         uint_t(1), field::zyxf );
+                                                                         uint_t(1), field::fzyx );
 
    // add body and volume fraction field
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",
-                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::zyxf, 0 );
+                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::fzyx, 0 );
 
    // map bodies and calculate solid volume fraction initially
    pe_coupling::BodyAndVolumeFractionMapping bodyMapping( blocks, globalBodyStorage, bodyStorageID, bodyAndVolumeFractionFieldID );

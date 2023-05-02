@@ -902,20 +902,20 @@ int main( int argc, char **argv )
 
    // add PDF field
    // initial velocity in domain = inflow velocity
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel, uInfty, real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel, uInfty, real_t(1), uint_t(1), field::fzyx );
 
    // add PDF field (needed to store pre collision values for MEM_MR scheme)
-   BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "nqOdd field (zyxf)", latticeModel, uInfty, real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "nqOdd field (fzyx)", latticeModel, uInfty, real_t(1), uint_t(1), field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::fzyx );
 
    // add body and volume fraction field
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",
-                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::zyxf, 0 );
+                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::fzyx, 0 );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

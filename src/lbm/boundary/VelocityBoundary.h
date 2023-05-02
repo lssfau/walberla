@@ -143,9 +143,9 @@ inline VelocityBoundary< LatticeModel_T, flag_t >::VelocityBoundary( const Bound
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    if (flagField != NULL)
-      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
+      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    else
-      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+      vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
 }
 
 

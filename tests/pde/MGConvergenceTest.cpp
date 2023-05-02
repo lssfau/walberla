@@ -267,12 +267,12 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
 
    WALBERLA_LOG_RESULT_ON_ROOT("Discretization dx: " << dx << ", " << dy << ", " << dz);
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::fzyx, uint_t(1) );
 
    initU(blocks, uId);
    // initURect( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::fzyx, uint_t(1) );
 
    SweepTimeloop timeloop( blocks, uint_t(1) );
 

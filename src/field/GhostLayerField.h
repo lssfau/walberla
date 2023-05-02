@@ -78,13 +78,13 @@ namespace field {
 
 
       GhostLayerField( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl,
-                      const Layout & layout = zyxf,
+                      const Layout & layout = fzyx,
                       const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
       GhostLayerField( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl,
-                       const T & initValue, const Layout & layout = zyxf,
+                       const T & initValue, const Layout & layout = fzyx,
                        const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
       GhostLayerField( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl,
-                       const std::vector<T> & fValues, const Layout & layout = zyxf,
+                       const std::vector<T> & fValues, const Layout & layout = fzyx,
                        const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
       ~GhostLayerField() override = default;
@@ -95,7 +95,7 @@ namespace field {
                  uint_t ySizeWithoutGhostLayer,
                  uint_t zSizeWithoutGhostLayer,
                  uint_t nrGhostLayers,
-                 const Layout & layout = zyxf,
+                 const Layout & layout = fzyx,
                  const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
 

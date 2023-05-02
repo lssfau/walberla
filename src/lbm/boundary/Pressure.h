@@ -125,9 +125,9 @@ inline Pressure< LatticeModel_T, flag_t>::Pressure( const BoundaryUID & boundary
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    if (flagField != NULL)
-      latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
+      latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    else
-      latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+      latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );
 }
 
 

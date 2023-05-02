@@ -123,9 +123,9 @@ inline DiffusionDirichlet< LatticeModel_T, flag_t >::DiffusionDirichlet( const B
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
    if (flagField != nullptr)
-      sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
+      sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    else
-      sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField->nrOfGhostLayers(), field::zyxf );
+      sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField->nrOfGhostLayers(), field::fzyx );
 }
 
 

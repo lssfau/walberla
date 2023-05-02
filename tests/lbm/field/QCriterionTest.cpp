@@ -54,7 +54,7 @@ int main( int argc, char ** argv )
 
    auto numberOfCells = uint_t(40);
 
-   VelocityField_T velocityField(numberOfCells, numberOfCells, numberOfCells, uint_t(1));
+   VelocityField_T velocityField(numberOfCells, numberOfCells, numberOfCells, uint_t(1), field::zyxf);
 
    FluidFilter_T filter(numberOfCells);
 

@@ -216,13 +216,13 @@ void createSimulationSetup( shared_ptr< StructuredBlockForest > blocks, shared_p
    LM_T latticeModel = LM_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
 
    // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LM_T >( blocks, "pdf field (zyxf)", latticeModel, velocity, real_t(1), uint_t(1), field::zyxf );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LM_T >( blocks, "pdf field (fzyx)", latticeModel, velocity, real_t(1), uint_t(1), field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add particle field
-   BlockDataID particleFieldID = field::addToStorage<lbm_mesapd_coupling::ParticleField_T>( blocks, "particle field", accessor->getInvalidUid(), field::zyxf, FieldGhostLayers );
+   BlockDataID particleFieldID = field::addToStorage<lbm_mesapd_coupling::ParticleField_T>( blocks, "particle field", accessor->getInvalidUid(), field::fzyx, FieldGhostLayers );
 
    // add boundary handling
    using BoundaryHandling_T = typename MyBoundaryHandling<LM_T,ParticleAccessor_T>::Type;

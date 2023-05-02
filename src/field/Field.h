@@ -100,18 +100,18 @@ namespace field {
 
 
       Field( uint_t xSize, uint_t ySize, uint_t zSize,
-             const Layout & layout = zyxf,
+             const Layout & layout = fzyx,
              const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
       Field( uint_t xSize, uint_t ySize, uint_t zSize,
-             const T & initValue, const Layout & layout = zyxf,
+             const T & initValue, const Layout & layout = fzyx,
              const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
       Field( uint_t xSize, uint_t ySize, uint_t zSize,
-             const std::vector<T> & fValues, const Layout & layout = zyxf,
+             const std::vector<T> & fValues, const Layout & layout = fzyx,
              const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
       virtual ~Field();
 
 
-      void init( uint_t xSize, uint_t ySize, uint_t zSize, const Layout & layout = zyxf,
+      void init( uint_t xSize, uint_t ySize, uint_t zSize, const Layout & layout = fzyx,
                  shared_ptr<FieldAllocator<T> > alloc = shared_ptr<FieldAllocator<T> >(),
                  uint_t innerGhostLayerSizeForAlignedAlloc = 0 );
 

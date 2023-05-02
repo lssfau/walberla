@@ -30,8 +30,8 @@ int main (int argc, char** argv)
    WALBERLA_ASSERT_EQUAL(cells_per_block*processes, L, "Number of processes per direction must evenly divide " << L);
    
    auto blocks = blockforest::createUniformBlockGrid(num_blocks,num_blocks,num_blocks, cells_per_block,cells_per_block,cells_per_block, 1.0, processes,processes,processes, true,true,true);
-   BlockDataID originalFieldId = field::addToStorage<Field_T>( blocks, "original", real_t(0), field::zyxf, 1 );
-   BlockDataID fftFieldId = field::addToStorage<Field_T>( blocks, "result", real_t(0), field::zyxf, 1 );
+   BlockDataID originalFieldId = field::addToStorage<Field_T>( blocks, "original", real_t(0), field::fzyx, 1 );
+   BlockDataID fftFieldId = field::addToStorage<Field_T>( blocks, "result", real_t(0), field::fzyx, 1 );
    
    auto comm = blockforest::communication::UniformBufferedScheme< stencil::D3Q7 >( blocks );
    comm.addPackInfo(make_shared< field::communication::PackInfo< Field_T > >( fftFieldId ));

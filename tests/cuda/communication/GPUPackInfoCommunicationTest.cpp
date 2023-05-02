@@ -54,7 +54,7 @@ using GPUFieldType = cuda::GPUField< DataType >;
 using CommSchemeType = blockforest::communication::UniformBufferedScheme<StencilType>;
 using GPUPackInfoType = cuda::communication::GPUPackInfo< GPUFieldType >;
 
-static std::vector< cuda::Layout > fieldLayouts = { cuda::fzyx, cuda::zyxf };
+static std::vector< cuda::Layout > fieldLayouts = { cuda::fzyx, cuda::fzyx };
 static uint_t fieldLayoutIndex = 0;
 
 

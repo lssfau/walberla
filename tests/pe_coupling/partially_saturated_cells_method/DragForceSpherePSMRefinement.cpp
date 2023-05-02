@@ -540,16 +540,16 @@ int main( int argc, char **argv )
    LatticeModel_T latticeModel = LatticeModel_T( omega, lbm::force_model::SimpleConstant( Vector3<real_t> ( setup.extForce, 0, 0 ) ) );
 
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
                                                                          Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_c(1),
-                                                                         FieldGhostLayers, field::zyxf );
+                                                                         FieldGhostLayers, field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body and volume fraction field
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",
-                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::zyxf, FieldGhostLayers );
+                                                                                                   std::vector<BodyAndVolumeFraction_T>(), field::fzyx, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

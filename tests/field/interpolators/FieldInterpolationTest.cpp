@@ -399,9 +399,9 @@ int main(int argc, char **argv) {
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers, false, initFlagField );
 
    // data fields
-   BlockDataID scalarFieldID         = field::addToStorage< ScalarField_T >( blocks, "scalar field", real_t(0), field::zyxf, FieldGhostLayers );
-   BlockDataID vectorFieldID         = field::addToStorage< Vec3Field_T >( blocks, "vec3 field", Vector3<real_t>(real_t(0)), field::zyxf, FieldGhostLayers );
-   BlockDataID multiComponentFieldID = field::addToStorage< MultiComponentField_T >( blocks, "multi component field", real_t(0), field::zyxf, FieldGhostLayers );
+   BlockDataID scalarFieldID         = field::addToStorage< ScalarField_T >( blocks, "scalar field", real_t(0), field::fzyx, FieldGhostLayers );
+   BlockDataID vectorFieldID         = field::addToStorage< Vec3Field_T >( blocks, "vec3 field", Vector3<real_t>(real_t(0)), field::fzyx, FieldGhostLayers );
+   BlockDataID multiComponentFieldID = field::addToStorage< MultiComponentField_T >( blocks, "multi component field", real_t(0), field::fzyx, FieldGhostLayers );
 
    initScalarField(blocks, scalarFieldID);
    initVectorField(blocks, vectorFieldID );

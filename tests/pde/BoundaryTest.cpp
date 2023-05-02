@@ -295,12 +295,12 @@ int main( int argc, char** argv )
                                                       true,
                                                       false, false, false );
 
-   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t(0), field::zyxf, uint_t(1) );
-   BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::zyxf, uint_t(1) );
-   BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::zyxf, uint_t(1) );
-   BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::fzyx, uint_t(1) );
 
-   BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t(0), field::fzyx, uint_t(1) );
 
    initRHS( blocks, rhsId );
 

@@ -179,7 +179,7 @@ int main(int argc, char** argv)
    BlockDataID particleAndVolumeFractionFieldID =
       field::addToStorage< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
          blocks, "particle and volume fraction field",
-         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::zyxf, 0);
+         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::fzyx, 0);
 
    // calculate fraction
    lbm_mesapd_coupling::psm::ParticleAndVolumeFractionMapping particleMapping(

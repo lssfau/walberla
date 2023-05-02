@@ -190,7 +190,7 @@ int main( int argc, char ** argv )
    BlockDataID fieldID = field::addToStorage<ScalarField>( blocks,      // block storage
                                                            "My Field",  // name
                                                            real_c(0),   // initial value
-                                                           field::zyxf, // layout (not relevant for scalar fields)
+                                                           field::fzyx, // layout (not relevant for scalar fields)
                                                            uint_c(1)    // number of ghost layers
                                                            );
 

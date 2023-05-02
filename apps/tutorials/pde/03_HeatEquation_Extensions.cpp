@@ -304,10 +304,10 @@ int main( int argc, char ** argv )
 
    // add fields with ghost layers to all blocks
    // source and destination fields for the unknowns u, required by the Jacobi method
-   BlockDataID srcID = field::addToStorage< ScalarField >( blocks, "src", real_c(0), field::zyxf, uint_c(1));
-   BlockDataID dstID = field::addToStorage< ScalarField >( blocks, "dst", real_c(0), field::zyxf, uint_c(1));
+   BlockDataID srcID = field::addToStorage< ScalarField >( blocks, "src", real_c(0), field::fzyx, uint_c(1));
+   BlockDataID dstID = field::addToStorage< ScalarField >( blocks, "dst", real_c(0), field::fzyx, uint_c(1));
    // field to store the right-hand side of the equation
-   BlockDataID rhsID = field::addToStorage< ScalarField >( blocks, "rhs", real_c(0), field::zyxf, uint_c(1));
+   BlockDataID rhsID = field::addToStorage< ScalarField >( blocks, "rhs", real_c(0), field::fzyx, uint_c(1));
 
    // set the field to the initial condition u(x,y,0)
    initU( blocks, srcID );

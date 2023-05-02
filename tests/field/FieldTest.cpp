@@ -580,7 +580,7 @@ void fieldPointerTest()
 template<uint_t fSize>
 void flattenTest()
 {
-   Field<Vector3<uint_t>, fSize> field ( 2,2,1 );
+   Field<Vector3<uint_t>, fSize> field ( 2,2,1,field::zyxf );
 
    for( cell_idx_t x = 0; x < cell_idx_c(field.xSize()); ++x )
       for( cell_idx_t y = 0; y < cell_idx_c(field.ySize()); ++y )
@@ -594,7 +594,7 @@ void flattenTest()
 
    shared_ptr<Field<uint_t, 3*fSize>> flattened(field.flattenedShallowCopy());
 
-   Field<uint_t, 3*fSize> cmp ( 2,2,1 );
+   Field<uint_t, 3*fSize> cmp ( 2,2,1,field::zyxf );
    WALBERLA_CHECK_EQUAL(cmp.xSize(), flattened->xSize());
    WALBERLA_CHECK_EQUAL(cmp.ySize(), flattened->ySize());
    WALBERLA_CHECK_EQUAL(cmp.zSize(), flattened->zSize());
@@ -626,7 +626,7 @@ void flattenTest()
 template<uint_t fSize>
 void ghostFlattenTest()
 {
-   GhostLayerField<Vector3<uint_t>, fSize> field ( 2,2,1, 1 );
+   GhostLayerField<Vector3<uint_t>, fSize> field ( 2,2,1,1,field::zyxf );
 
    for( cell_idx_t x = -cell_idx_c(field.nrOfGhostLayers()); x < cell_idx_c(field.xSize()+field.nrOfGhostLayers()); ++x )
       for( cell_idx_t y = -cell_idx_c(field.nrOfGhostLayers()); y < cell_idx_c(field.ySize()+field.nrOfGhostLayers()); ++y )
@@ -640,7 +640,7 @@ void ghostFlattenTest()
 
    shared_ptr<GhostLayerField<uint_t, 3*fSize>> flattened(field.flattenedShallowCopy());
 
-   GhostLayerField<uint_t, 3*fSize> cmp ( 2,2,1, 1 );
+   GhostLayerField<uint_t, 3*fSize> cmp ( 2,2,1,1,field::zyxf );
    WALBERLA_CHECK_EQUAL(cmp.xSize(), flattened->xSize());
    WALBERLA_CHECK_EQUAL(cmp.ySize(), flattened->ySize());
    WALBERLA_CHECK_EQUAL(cmp.zSize(), flattened->zSize());
