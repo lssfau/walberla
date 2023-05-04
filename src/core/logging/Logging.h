@@ -654,7 +654,7 @@ public:
    }\
 }
 #else
-#define WALBERLA_LOG_INFO(msg) (void(0))
+#define WALBERLA_LOG_INFO(msg) (void(0));
 #endif
 #ifdef WALBERLA_LOGLEVEL_INFO
 #define WALBERLA_LOG_INFO_ON_ROOT(msg){\
@@ -666,7 +666,7 @@ public:
    }}\
 }
 #else
-#define WALBERLA_LOG_INFO_ON_ROOT(msg) (void(0))
+#define WALBERLA_LOG_INFO_ON_ROOT(msg) (void(0));
 #endif
 
 //////////////
@@ -682,7 +682,7 @@ public:
    }\
 }
 #else
-#define WALBERLA_LOG_PROGRESS(msg) (void(0))
+#define WALBERLA_LOG_PROGRESS(msg) (void(0));
 #endif
 #ifdef WALBERLA_LOGLEVEL_PROGRESS
 #define WALBERLA_LOG_PROGRESS_ON_ROOT(msg){\
@@ -694,7 +694,7 @@ public:
    }}\
 }
 #else
-#define WALBERLA_LOG_PROGRESS_ON_ROOT(msg) (void(0))
+#define WALBERLA_LOG_PROGRESS_ON_ROOT(msg) (void(0));
 #endif
 
 ////////////
@@ -710,7 +710,7 @@ public:
    }\
 }
 #else
-#define WALBERLA_LOG_DETAIL(msg) (void(0))
+#define WALBERLA_LOG_DETAIL(msg) (void(0));
 #endif
 #ifdef WALBERLA_LOGLEVEL_DETAIL
 #define WALBERLA_LOG_DETAIL_ON_ROOT(msg){\
@@ -722,7 +722,7 @@ public:
    }}\
 }
 #else
-#define WALBERLA_LOG_DETAIL_ON_ROOT(msg) (void(0))
+#define WALBERLA_LOG_DETAIL_ON_ROOT(msg) (void(0));
 #endif
 
 /////////////
