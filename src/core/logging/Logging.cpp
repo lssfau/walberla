@@ -43,25 +43,35 @@ const std::string Logging::TRACING_TAG  = std::string( "[TRACING ]" );
 const uint_t Logging::TAG_WIDTH       = uint_t(10);
 const uint_t Logging::TIMESTAMP_WIDTH = uint_t(17);
 
-
-
 void Logging::setStreamLogLevel( LogLevel logLevel )
 {
 #ifndef WALBERLA_LOGLEVEL_INFO
    if( logLevel == INFO )
-      logWarning( "You are trying to set the stream log level to INFO, but INFO logs are deactivated by CMake!", "Logging::setStreamLogLevel", -1 );
+      logWarning( "You are trying to set the stream log level to INFO, but INFO logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=INFO to activate INFO logs.",
+                  "Logging::setStreamLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_PROGRESS
    if( logLevel == PROGRESS )
-      logWarning( "You are trying to set the stream log level to PROGRESS, but PROGRESS logs are deactivated by CMake!", "Logging::setStreamLogLevel", -1 );
+      logWarning( "You are trying to set the stream log level to PROGRESS, but PROGRESS logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=PROGRESS to activate PROGRESS logs.",
+                 "Logging::setStreamLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_DETAIL
    if( logLevel == DETAIL )
-      logWarning( "You are trying to set the stream log level to DETAIL, but DETAIL logs are deactivated by CMake!", "Logging::setStreamLogLevel", -1 );
+      logWarning( "You are trying to set the stream log level to DETAIL, but DETAIL logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=DETAIL to activate DETAIL logs.",
+                  "Logging::setStreamLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_TRACING
    if( logLevel == TRACING )
-      logWarning( "You are trying to set the stream log level to TRACING, but TRACING logs are deactivated by CMake!", "Logging::setStreamLogLevel", -1 );
+      logWarning( "You are trying to set the stream log level to TRACING, but TRACING logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=TRACING to activate TRACING logs.",
+                  "Logging::setStreamLogLevel", -1 );
 #endif
    streamLogLevel_ = logLevel;
 }
@@ -72,19 +82,31 @@ void Logging::setFileLogLevel( LogLevel logLevel )
 {
 #ifndef WALBERLA_LOGLEVEL_INFO
    if( logLevel == INFO )
-      logWarning( "You are trying to set the file log level to INFO, but INFO logs are deactivated by CMake!", "Logging::setFileLogLevel", -1 );
+      logWarning( "You are trying to set the file log level to INFO, but INFO logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=INFO to activate INFO logs.",
+                  "Logging::setFileLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_PROGRESS
    if( logLevel == PROGRESS )
-      logWarning( "You are trying to set the file log level to PROGRESS, but PROGRESS logs are deactivated by CMake!", "Logging::setFileLogLevel", -1 );
+      logWarning( "You are trying to set the file log level to PROGRESS, but PROGRESS logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=PROGRESS to activate PROGRESS logs.",
+                  "Logging::setFileLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_DETAIL
    if( logLevel == DETAIL )
-      logWarning( "You are trying to set the file log level to DETAIL, but DETAIL logs are deactivated by CMake!", "Logging::setFileLogLevel", -1 );
+      logWarning( "You are trying to set the file log level to DETAIL, but DETAIL logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=DETAIL to activate DETAIL logs.",
+                  "Logging::setFileLogLevel", -1 );
 #endif
 #ifndef WALBERLA_LOGLEVEL_TRACING
    if( logLevel == TRACING )
-      logWarning( "You are trying to set the file log level to TRACING, but TRACING logs are deactivated by CMake!", "Logging::setFileLogLevel", -1 );
+      logWarning( "You are trying to set the file log level to TRACING, but TRACING logs are deactivated by CMake!"
+                  "The current WALBERLA_LOGLEVEL is: " WALBERLA_LOGLEVEL_STRING "!"
+                  "Set WALBERLA_LOGLEVEL=TRACING to activate TRACING logs.",
+                  "Logging::setFileLogLevel", -1 );
 #endif
    fileLogLevel_ = logLevel;
 }

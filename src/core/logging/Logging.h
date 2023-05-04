@@ -186,7 +186,7 @@ private:
 
 
 inline Logging::Logging() : singleton::Singleton<Logging>(),
-   streamLogLevel_( INFO ), fileLogLevel_( INFO ),
+   streamLogLevel_( WALBERLA_LOGLEVEL ), fileLogLevel_( WALBERLA_LOGLEVEL ),
    processId_( uint_c( mpi::MPIManager::instance()->worldRank() ) ),
    numberOfProcesses_( uint_c( mpi::MPIManager::instance()->numProcesses() ) ),
    startTime_( timing::WcPolicy::getTimestamp() ), showTimeStamp_( true ), logCallerPath_( false )
