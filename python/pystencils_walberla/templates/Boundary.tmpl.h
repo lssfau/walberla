@@ -238,10 +238,12 @@ public:
         {%endif%}
         {%else%}
         auto flagWithGLayers = flagField->xyzSizeWithGhostLayer();
+        {% if single_link %}
         {{dtype}} dot = 0.0; {{dtype}} maxn = 0.0;
         cell_idx_t calculated_idx = 0;
         cell_idx_t dx = 0; cell_idx_t dy = 0; {%if dim == 3%}  cell_idx_t dz = 0; {% endif %}
         cell_idx_t sum_x = 0; cell_idx_t sum_y = 0; {%if dim == 3%} cell_idx_t sum_z = 0; {%endif %}
+        {% endif -%}
         for( auto it = flagField->beginWithGhostLayerXYZ(); it != flagField->end(); ++it )
         {
             {% if single_link -%}
