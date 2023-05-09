@@ -136,22 +136,30 @@ namespace initializer {
    template<typename Flag_T>
    void BoundarySetter<FlagField<Flag_T>>::set( cell_idx_t x, cell_idx_t y, cell_idx_t z )
    {
-      flagField_->addFlag( x, y, z, flag_ );
+      //Check if no flag is set yet to avoid multiple flags per cell on initialization
+      if(flagField_->get(x,y,z) == Flag_T(0))
+         flagField_->addFlag( x, y, z, flag_ );
    }
 
    template<typename Flag_T>
    void BoundarySetter<FlagField<Flag_T>>::set( const CellInterval & ci )
    {
-      for( auto it = flagField_->beginSliceXYZ(ci); it != flagField_->end(); ++it )
-         field::addFlag(it, flag_);
+      for( auto it = flagField_->beginSliceXYZ(ci); it != flagField_->end(); ++it ) {
+         //Check if no flag is set yet to avoid multiple flags per cell on initialization
+         if(*it == Flag_T(0))
+            field::addFlag(it, flag_);
+      }
    }
 
    template<typename Flag_T>
    template< typename CellIterator >
    void BoundarySetter<FlagField<Flag_T> >::set( const CellIterator & begin, const CellIterator & end )
    {
-      for(auto it = begin; it != end; ++it)
-         flagField_->addFlag(it->x(), it->y(), it->z(), flag_);
+      for(auto it = begin; it != end; ++it) {
+         //Check if no flag is set yet to avoid multiple flags per cell on initialization
+         if(flagField_->get(it->x(),it->y(),it->z()) == Flag_T(0))
+            flagField_->addFlag(it->x(), it->y(), it->z(), flag_);
+      }
    }
 
 } // namespace initializer
