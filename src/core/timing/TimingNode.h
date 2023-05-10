@@ -120,7 +120,7 @@ void TimingNode<TP>::swap(TimingNode<TP>& tt)
 template< typename TP >  // Timing policy
 const Timer<TP>& findTimer( const TimingNode<TP>& tn, const std::string& name)
 {
-   auto pos = name.find_first_of(".");
+   auto pos = name.find_first_of('.');
    if (pos != std::string::npos)
    {
       WALBERLA_ASSERT_UNEQUAL( tn.tree_.find(name.substr(0, pos)), tn.tree_.end(), "Could not find timer: " << name.substr(0, pos) );
@@ -139,7 +139,7 @@ const Timer<TP>& findTimer( const TimingNode<TP>& tn, const std::string& name)
 template< typename TP >  // Timing policy
 bool timerExists( const TimingNode<TP>& tn, const std::string& name )
 {
-   auto pos = name.find_first_of(".");
+   auto pos = name.find_first_of('.');
    if (pos != std::string::npos)
    {
       if( tn.tree_.find(name.substr(0, pos)) != tn.tree_.end() )

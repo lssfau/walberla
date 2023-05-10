@@ -168,7 +168,8 @@ template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ); // -> Uint.cpp
 
 template<> inline uint_t uintMSBPosition< uint32_t >( uint32_t value ) {
 
-   uint32_t i, j;
+   uint32_t i;
+   uint32_t j;
 
    j = value >> 16;
    if( j != 0 ) {
