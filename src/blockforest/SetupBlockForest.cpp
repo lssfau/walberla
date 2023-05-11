@@ -1205,7 +1205,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
                                     const memory_t perProcessMemoryLimit,
                                     const bool reorderProcessesByBFS, const bool insertBufferProcesses )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." )
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." )
 
    if( minBufferProcessesFraction < real_t(0) || minBufferProcessesFraction >= real_t(1))
       WALBERLA_ABORT( "Load balancing failed: \'buffer processes fraction\' must be in [0,1). "
@@ -1235,7 +1235,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
                                     const memory_t perProcessMemoryLimit,
                                     const bool reorderProcessesByBFS, const bool insertBufferProcesses )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." )
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." )
    
    balanceLoadHelper( function, numberOfProcesses, numberOfBufferProcesses, perProcessMemoryLimit, reorderProcessesByBFS, insertBufferProcesses );
 }

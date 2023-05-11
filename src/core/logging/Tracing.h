@@ -38,7 +38,7 @@
 #ifdef WALBERLA_LOGLEVEL_TRACING
 #  define WALBERLA_TRACE_IN walberla::logging::Tracer walberlaTracingObject( __FUNCTION__, __FILE__, __LINE__ )
 #else
-#  define WALBERLA_TRACE_IN (void(0))
+#  define WALBERLA_TRACE_IN (void(0));
 #endif
 
 

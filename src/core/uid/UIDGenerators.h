@@ -166,7 +166,8 @@ template< typename UINT > size_t logBase2( UINT value ); // 1000 -> 3, 0010 -> 1
 
 template<> inline size_t logBase2< uint64_t >( uint64_t value ) {
 
-   uint64_t i, j;
+   uint64_t i;
+   uint64_t j;
 
    i = value >> 32;
    if( i != 0 ) {
@@ -189,7 +190,8 @@ template<> inline size_t logBase2< uint64_t >( uint64_t value ) {
 
 template<> inline size_t logBase2< uint32_t >( uint32_t value ) {
 
-   uint32_t i, j;
+   uint32_t i;
+   uint32_t j;
 
    j = value >> 16;
    if( j != 0 ) {
@@ -273,7 +275,7 @@ public:
 
    static uint_type firstUID() { return 1; }
 
-   static uint_type nextUID( const uint_type uid ) { WALBERLA_ASSERT( false ); return 1; }
+   static uint_type nextUID( const uint_type /*uid*/ ) { WALBERLA_ASSERT( false ); return 1; }
 
    static uint_type toIndex( const uint_type uid ) { WALBERLA_ASSERT_EQUAL( uid, 1 ); return 0; }
 
