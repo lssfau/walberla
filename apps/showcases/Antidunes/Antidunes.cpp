@@ -19,7 +19,8 @@
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
 //
-// This showcase simulates antidunes, i.e., particulate dunes that travel in opposite stream-wise direction.
+// This showcase simulates antidunes, i.e., particulate dunes that travel in opposite stream-wise direction. See
+// simulation results published in https://doi.org/10.1017/jfm.2023.262.
 //======================================================================================================================
 
 #include "blockforest/Initialization.h"
@@ -93,8 +94,9 @@ namespace walberla
 {
 namespace antidunes
 {
-using ScalarField_T = GhostLayerField< real_t, 1 >;
-using VectorField_T = GhostLayerField< Vector3< real_t >, 1 >;
+using ScalarField_T          = GhostLayerField< real_t, 1 >;
+using VectorField_T          = GhostLayerField< Vector3< real_t >, 1 >;
+using VectorFieldFlattened_T = GhostLayerField< real_t, 3 >;
 
 using LatticeModel_T        = lbm::AntidunesLatticeModel;
 using LatticeModelStencil_T = LatticeModel_T::Stencil;
@@ -154,6 +156,93 @@ class ScalarFieldHandling : public field::BlockDataHandling< ScalarField_T >
    }
 }; // class ScalarFieldHandling
 
+// data handling for loading a field of type VectorFieldFlattened_T from file
+template< typename VectorFieldFlattened_T >
+class VectorFieldFlattenedHandling : public field::BlockDataHandling< VectorFieldFlattened_T >
+{
+ public:
+   VectorFieldFlattenedHandling(const weak_ptr< StructuredBlockStorage >& blocks, uint_t numberGhostLayer)
+      : blocks_(blocks), numberGhostLayer_(numberGhostLayer)
+   {}
+
+ protected:
+   VectorFieldFlattened_T* allocate(IBlock* const block) override { return allocateDispatch(block); }
+
+   VectorFieldFlattened_T* reallocate(IBlock* const block) override { return allocateDispatch(block); }
+
+ private:
+   weak_ptr< StructuredBlockStorage > blocks_;
+   uint_t numberGhostLayer_;
+
+   VectorFieldFlattened_T* allocateDispatch(IBlock* const block)
+   {
+      WALBERLA_ASSERT_NOT_NULLPTR(block);
+
+      auto blocks = blocks_.lock();
+      WALBERLA_CHECK_NOT_NULLPTR(blocks);
+
+      return new VectorFieldFlattened_T(blocks->getNumberOfXCells(*block), blocks->getNumberOfYCells(*block),
+                                        blocks->getNumberOfZCells(*block), numberGhostLayer_, field::fzyx);
+   }
+}; // class VectorFieldFlattenedHandling
+
+// sweep for computing the force density from the fluid density and fill level
+template< typename LatticeModel_T, typename FlagField_T, typename VectorFieldFlattened_T, typename ScalarField_T >
+class ForceDensityCodegenSweep
+{
+ public:
+   ForceDensityCodegenSweep(BlockDataID forceDensityFieldID, ConstBlockDataID pdfFieldID, ConstBlockDataID flagFieldID,
+                            ConstBlockDataID fillFieldID,
+                            const walberla::free_surface::FlagInfo< FlagField_T >& flagInfo,
+                            std::shared_ptr< Vector3< real_t > > globalAcceleration)
+      : forceDensityFieldID_(forceDensityFieldID), pdfFieldID_(pdfFieldID), flagFieldID_(flagFieldID),
+        fillFieldID_(fillFieldID), flagInfo_(flagInfo), globalAcceleration_(globalAcceleration)
+   {}
+
+   void operator()(IBlock* const block)
+   {
+      VectorFieldFlattened_T* const forceDensityField = block->getData< VectorFieldFlattened_T >(forceDensityFieldID_);
+      const PdfField_T* const pdfField                = block->getData< const PdfField_T >(pdfFieldID_);
+      const FlagField_T* const flagField              = block->getData< const FlagField_T >(flagFieldID_);
+      const ScalarField_T* const fillField            = block->getData< const ScalarField_T >(fillFieldID_);
+
+      WALBERLA_FOR_ALL_CELLS(forceDensityFieldIt, forceDensityField, pdfFieldIt, pdfField, flagFieldIt, flagField,
+                             fillFieldIt, fillField, {
+                                flag_t flag = *flagFieldIt;
+
+                                // set force density in cells to acceleration * density * fillLevel (see equation 15
+                                // in Koerner et al., 2005);
+                                if (flagInfo_.isInterface(flag))
+                                {
+                                   const real_t density   = pdfField->getDensity(pdfFieldIt.cell());
+                                   forceDensityFieldIt[0] = (*globalAcceleration_)[0] * *fillFieldIt * density;
+                                   forceDensityFieldIt[1] = (*globalAcceleration_)[1] * *fillFieldIt * density;
+                                   forceDensityFieldIt[2] = (*globalAcceleration_)[2] * *fillFieldIt * density;
+                                }
+                                else
+                                {
+                                   if (flagInfo_.isLiquid(flag))
+                                   {
+                                      const real_t density   = pdfField->getDensity(pdfFieldIt.cell());
+                                      forceDensityFieldIt[0] = (*globalAcceleration_)[0] * density;
+                                      forceDensityFieldIt[1] = (*globalAcceleration_)[1] * density;
+                                      forceDensityFieldIt[2] = (*globalAcceleration_)[2] * density;
+                                   }
+                                }
+                             }) // WALBERLA_FOR_ALL_CELLS
+   }
+
+ private:
+   using flag_t = typename FlagField_T::flag_t;
+
+   BlockDataID forceDensityFieldID_;
+   ConstBlockDataID pdfFieldID_;
+   ConstBlockDataID flagFieldID_;
+   ConstBlockDataID fillFieldID_;
+   walberla::free_surface::FlagInfo< FlagField_T > flagInfo_;
+   std::shared_ptr< Vector3< real_t > > globalAcceleration_;
+}; // class ForceDensitySweep
+
 // function describing the global initialization profile
 inline real_t initializationProfile(real_t x, real_t amplitude, real_t offset, real_t wavelength)
 {
@@ -167,31 +256,31 @@ real_t getHydrostaticDensity(real_t height, real_t referenceHeight, real_t gravi
 
 void initializePoiseuilleProfile(StructuredBlockForest& forest, const BlockDataID& pdfFieldID,
                                  const ConstBlockDataID& fillFieldID, const real_t& averageBedHeight,
-                                 const real_t& averageFluidHeight, const real_t& forcingX, const real_t& viscosity,
+                                 const real_t& averageFluidHeight, const real_t& accelerationX, const real_t& viscosity,
                                  real_t amplitude, real_t wavelength)
 {
    WALBERLA_LOG_INFO_ON_ROOT("Initializing Poiseuille velocity profile");
 
-   const real_t rho = real_t(1);
+   const real_t rho = real_c(1);
 
    for (auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt)
    {
-      auto pdfField                        = blockIt->getData< PdfField_T >(pdfFieldID);
+      PdfField_T* const pdfField           = blockIt->getData< PdfField_T >(pdfFieldID);
       const ScalarField_T* const fillField = blockIt->getData< const ScalarField_T >(fillFieldID);
 
       WALBERLA_FOR_ALL_CELLS_XYZ(
          pdfField, const Vector3< real_t > coord = forest.getBlockLocalCellCenter(*blockIt, Cell(x, y, z));
 
-         Vector3< real_t > velocity(real_t(0));
+         Vector3< real_t > velocity(real_c(0));
 
          auto localBedHeight = initializationProfile(coord[0], amplitude, averageBedHeight, wavelength);
          auto heightAboveBed = coord[2] - localBedHeight;
 
          const real_t fillLevel = fillField->get(x, y, z);
 
-         if (heightAboveBed >= 0_r && fillLevel > 0_r) {
-            velocity[0] =
-               forcingX / (real_t(2) * viscosity) * heightAboveBed * (2_r * averageFluidHeight - heightAboveBed);
+         if (heightAboveBed >= real_c(0) && fillLevel > real_c(0)) {
+            velocity[0] = accelerationX / (real_c(2) * viscosity) * heightAboveBed *
+                          (real_c(2) * averageFluidHeight - heightAboveBed);
          } pdfField->setToEquilibrium(x, y, z, velocity, rho);)
    }
 }
@@ -286,12 +375,15 @@ class MeanVelocityComputer
                meanVelocityX += velocity[0];
                meanVelocityY += velocity[1];
                meanVelocityZ += velocity[2];
+
+               //++cellCount;
             }
                                     }) // WALBERLA_FOR_ALL_CELLS_OMP
       }
 
       Vector3< real_t > meanVelocity(meanVelocityX, meanVelocityY, meanVelocityZ);
       mpi::allReduceInplace< real_t >(meanVelocity, mpi::SUM);
+      // mpi::allReduceInplace< uint_t >(cellCount, mpi::SUM);
 
       meanVelocity *= averagingFactor_;
       *meanVelocity_ = meanVelocity;
@@ -310,10 +402,10 @@ class MeanVelocityComputer
 class ForcingAdjuster
 {
  public:
-   ForcingAdjuster(const shared_ptr< StructuredBlockStorage >& blocks, const BlockDataID& pdfFieldID,
-                   real_t targetVelocity, real_t externalForcing, real_t proportionalGain, real_t derivativeGain,
-                   real_t integralGain, real_t maxRamp, real_t minActuatingVariable, real_t maxActuatingVariable)
-      : blocks_(blocks), pdfFieldID_(pdfFieldID), currentExternalForcing_(externalForcing),
+   ForcingAdjuster(const shared_ptr< StructuredBlockStorage >& blocks, real_t targetVelocity, real_t externalForcing,
+                   real_t proportionalGain, real_t derivativeGain, real_t integralGain, real_t maxRamp,
+                   real_t minActuatingVariable, real_t maxActuatingVariable)
+      : blocks_(blocks), currentExternalForcing_(externalForcing),
         pid_(targetVelocity, externalForcing, proportionalGain, derivativeGain, integralGain, maxRamp,
              minActuatingVariable, maxActuatingVariable)
    {
@@ -333,13 +425,6 @@ class ForcingAdjuster
 
       // send updated external forcing to all other processes
       mpi::broadcastObject(currentExternalForcing_);
-
-      for (auto block = blocks_->begin(); block != blocks_->end(); ++block)
-      {
-         // get the field data out of the block
-         auto pdf                     = block->getData< PdfField_T >(pdfFieldID_);
-         pdf->latticeModel().force_0_ = currentExternalForcing_;
-      }
    }
 
    real_t getExternalForcing() { return currentExternalForcing_; }
@@ -351,7 +436,6 @@ class ForcingAdjuster
 
  private:
    shared_ptr< StructuredBlockStorage > blocks_;
-   BlockDataID pdfFieldID_;
 
    real_t currentExternalForcing_;
    PIDController pid_;
@@ -398,7 +482,7 @@ int main(int argc, char** argv)
 
    // compute number of blocks as defined by domainSize and cellsPerBlock
    Vector3< uint_t > numBlocks;
-   for (uint i = 0; i <= 2; ++i)
+   for (uint_t i = uint_c(0); i <= uint_c(2); ++i)
    {
       numBlocks[i] = domainSize[i] / cellsPerBlock[i];
       WALBERLA_CHECK_EQUAL(numBlocks[i] * cellsPerBlock[i], domainSize[i],
@@ -436,9 +520,9 @@ int main(int argc, char** argv)
    const uint_t particleNumSubCycles           = particleParameters.getParameter< uint_t >("numSubCycles");
    const bool useLubricationCorrection         = particleParameters.getParameter< bool >("useLubricationCorrection");
    const bool useNoSlipParticles               = particleParameters.getParameter< bool >("useNoSlipParticles");
-   const real_t particlePoissonsRatio          = 0.22_r;
-   const real_t particleKappa = real_t(2) * (real_t(1) - particlePoissonsRatio) / (real_t(2) - particlePoissonsRatio);
-   real_t particleCollisionTimeNonDim = 4_r;
+   const real_t particlePoissonsRatio          = real_c(0.22);
+   const real_t particleKappa = real_c(2) * (real_c(1) - particlePoissonsRatio) / (real_c(2) - particlePoissonsRatio);
+   real_t particleCollisionTimeNonDim = real_c(4);
    bool useOpenMP                     = false;
    const uint_t vtkSpacingParticles =
       configPtr->getOneBlock("VTK").getOneBlock("fluid_field").getParameter< uint_t >("writeFrequency");
@@ -454,8 +538,8 @@ int main(int argc, char** argv)
    const real_t We          = physicsParameters.getParameter< real_t >("We");
 
    // get avgDiameter and scaling factor
-   real_t avgParticleDiameter   = 0_r;
-   real_t particleScalingFactor = 0_r;
+   real_t avgParticleDiameter   = real_c(0);
+   real_t particleScalingFactor = real_c(0);
    getAvgDiameterScalingFactor(particleInFileName, domainSize, bedCopiesInX, bedCopiesInY, avgParticleDiameter,
                                particleScalingFactor);
    const real_t liquidHeight         = avgParticleDiameter * liquidHeightFactor;
@@ -468,18 +552,19 @@ int main(int argc, char** argv)
    const real_t absoluteLiquidHeight = liquidHeight + floorHeight;
 
    const real_t viscosity      = targetMeanVelocityMagnitude * liquidHeight / Re;
-   const real_t relaxationRate = real_t(1.0) / (real_t(3) * viscosity + real_t(0.5));
+   const real_t relaxationRate = real_c(1.0) / (real_c(3) * viscosity + real_c(0.5));
 
-   const real_t gravity = (targetMeanVelocityMagnitude / Fr) * (targetMeanVelocityMagnitude / Fr) / liquidHeight;
-   const real_t fx      = real_t(3) * targetMeanVelocityMagnitude * viscosity / (liquidHeight * liquidHeight);
-   Vector3< real_t > force(fx, real_t(0.0), -gravity);
+   const real_t gravity       = (targetMeanVelocityMagnitude / Fr) * (targetMeanVelocityMagnitude / Fr) / liquidHeight;
+   const real_t accelerationX = real_c(3) * targetMeanVelocityMagnitude * viscosity / (liquidHeight * liquidHeight);
+   std::shared_ptr< Vector3< real_t > > acceleration =
+      std::make_shared< Vector3< real_t > >(accelerationX, real_c(0.0), -gravity);
 
    const real_t surfaceTension =
-      real_t(1.0) * targetMeanVelocityMagnitude * targetMeanVelocityMagnitude * liquidHeight / We;
+      real_c(1.0) * targetMeanVelocityMagnitude * targetMeanVelocityMagnitude * liquidHeight / We;
 
    // compute SI dx and dt
-   const real_t viscosity_SI = real_t(1.0016e-6); // kinemtic viscosity of water at 20°C at 1 bar
-   const real_t dx_SI        = 1_r / particleScalingFactor;
+   const real_t viscosity_SI = real_c(1.0016e-6); // kinemtic viscosity of water at 20°C at 1 bar
+   const real_t dx_SI        = real_c(1) / particleScalingFactor;
    const real_t dt_SI        = viscosity / viscosity_SI * dx_SI * dx_SI;
 
    WALBERLA_LOG_INFO_ON_ROOT("\nPhysical parameters:")
@@ -487,7 +572,7 @@ int main(int argc, char** argv)
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(floorHeight);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(dx_SI);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(dt_SI);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(force);
+   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(*acceleration);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(relaxationRate);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(viscosity);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(absoluteLiquidHeight);
@@ -509,6 +594,7 @@ int main(int argc, char** argv)
    const std::string pdfRefillingModel      = modelParameters.getParameter< std::string >("pdfRefillingModel");
    const std::string excessMassDistributionModel =
       modelParameters.getParameter< std::string >("excessMassDistributionModel");
+   const walberla::free_surface::ExcessMassDistributionModel excessMassModel(excessMassDistributionModel);
    const std::string curvatureModel          = modelParameters.getParameter< std::string >("curvatureModel");
    const bool useSimpleMassExchange          = modelParameters.getParameter< bool >("useSimpleMassExchange");
    const real_t cellConversionThreshold      = modelParameters.getParameter< real_t >("cellConversionThreshold");
@@ -530,15 +616,16 @@ int main(int argc, char** argv)
          file.open(snapshotBaseFolder + "/" + checkpointConfigFile);
          if (file.fail()) WALBERLA_ABORT("Error: " << checkpointConfigFile << " could not be opened!");
          file >> beginTimeStep;
-         file >> force[0];
+         file >> (*acceleration)[0];
          file.close();
       }
       mpi::broadcastObject(beginTimeStep);
-      mpi::broadcastObject(force);
+      mpi::broadcastObject(*acceleration);
 
       WALBERLA_LOG_INFO_ON_ROOT("Successfully read config parameters from checkpoint config file:")
       WALBERLA_LOG_INFO_ON_ROOT(" - beginTimeStep = " << beginTimeStep)
-      WALBERLA_LOG_INFO_ON_ROOT(" - force = < " << force[0] << ", " << force[1] << ", " << force[2] << " >")
+      WALBERLA_LOG_INFO_ON_ROOT(" - acceleration = < " << (*acceleration)[0] << ", " << (*acceleration)[1] << ", "
+                                                       << (*acceleration)[2] << " >")
    }
 
    if (loadSnapshot)
@@ -594,12 +681,25 @@ int main(int argc, char** argv)
    const auto vtkParameters      = configPtr->getOneBlock("VTK");
    const auto vtkFluidParameters = vtkParameters.getOneBlock("fluid_field");
 
-   LatticeModel_T latticeModel = LatticeModel_T(force[0], force[1], force[2], relaxationRate);
-
    BlockDataID pdfFieldID;
    const std::string pdfFieldFile("pdfField.file");
    BlockDataID fillFieldID;
    const std::string fillFieldFile("fillField.file");
+   BlockDataID excessMassFieldID;
+   const std::string excessMassFieldFile("excessMassField.file");
+
+   // force density field must be added here to create lattice model
+   BlockDataID forceDensityFieldID =
+      field::addToStorage< VectorFieldFlattened_T >(blockForest, "Force field", real_c(0), field::fzyx, uint_c(1));
+
+   if (excessMassModel.isEvenlyAllInterfaceFallbackLiquidType())
+   {
+      // add additional field for storing excess mass in liquid cells
+      excessMassFieldID =
+         field::addToStorage< ScalarField_T >(blockForest, "Excess mass", real_c(0), field::fzyx, uint_c(1));
+   }
+
+   LatticeModel_T latticeModel = LatticeModel_T(forceDensityFieldID, relaxationRate);
 
    if (loadSnapshot)
    {
@@ -616,17 +716,28 @@ int main(int argc, char** argv)
       fillFieldID =
          (blockForest->getBlockStorage())
             .loadBlockData(snapshotBaseFolder + "/" + fillFieldFile, fillFieldDataHandling, "Fill level field");
+
+      // load fill level field from file
+      std::shared_ptr< ScalarFieldHandling< ScalarField_T > > excessMassFieldDataHandling =
+         std::make_shared< ScalarFieldHandling< ScalarField_T > >(blockForest, uint_c(1));
+      excessMassFieldID = (blockForest->getBlockStorage())
+                             .loadBlockData(snapshotBaseFolder + "/" + excessMassFieldFile, excessMassFieldDataHandling,
+                                            "Excess mass field");
    }
    else
    {
       // add PDF field
       pdfFieldID =
          lbm::addPdfFieldToStorage(blockForest, "PDF field", latticeModel,
-                                   Vector3< real_t >(targetMeanVelocityMagnitude, 0, 0), real_t(1.0), field::fzyx);
+                                   Vector3< real_t >(targetMeanVelocityMagnitude, 0, 0), real_c(1.0), field::fzyx);
 
       // add fill level field (initialized with 0, i.e., gas everywhere)
       fillFieldID =
          field::addToStorage< ScalarField_T >(blockForest, "Fill level field", real_c(0.0), field::fzyx, uint_c(2));
+
+      // add fill level field (initialized with 0, i.e., gas everywhere)
+      excessMassFieldID =
+         field::addToStorage< ScalarField_T >(blockForest, "Excess mass field", real_c(0.0), field::fzyx, uint_c(1));
    }
 
    // MesaPD data structures
@@ -658,9 +769,9 @@ int main(int argc, char** argv)
       blockForest, "Particle field", particleAccessor->getInvalidUid(), field::fzyx, uint_c(2));
 
    auto densityReferenceHeight = absoluteLiquidHeight;
-   auto hydrostaticDensityFct  = [force, densityReferenceHeight](const Vector3< real_t >& position) {
-      uint_t forceComponent = 2; // gravity is here strictly only acting in z direction!
-      return getHydrostaticDensity(position[forceComponent], densityReferenceHeight, force[forceComponent]);
+   auto hydrostaticDensityFct  = [acceleration, densityReferenceHeight](const Vector3< real_t >& position) {
+      uint_t forceComponent = uint_c(2); // gravity is here strictly only acting in z direction!
+      return getHydrostaticDensity(position[forceComponent], densityReferenceHeight, (*acceleration)[forceComponent]);
    };
 
    // add boundary handling
@@ -724,7 +835,7 @@ int main(int argc, char** argv)
       }
 
       initializePoiseuilleProfile(*blockForest, pdfFieldID, fillFieldID, floorHeight, liquidHeight + real_c(0.5),
-                                  force[0], viscosity, sinusAmplitude, sinusWavelength);
+                                  (*acceleration)[0], viscosity, sinusAmplitude, sinusWavelength);
    }
 
    // initialize domain boundary conditions from config file
@@ -739,7 +850,7 @@ int main(int argc, char** argv)
    lbm_mesapd_coupling::MovingParticleMappingKernel< AntidunesBoundaryHandling_T::BoundaryHandling_T >
       movingParticleMappingKernel(blockForest, antidunesBoundaryHandling->getHandlingID(), particleFieldID);
 
-   uint_t numParticles = 0;
+   uint_t numParticles = uint_c(0);
    // initialize bottom solid sine profile
    if (!loadSnapshot)
    {
@@ -747,14 +858,14 @@ int main(int argc, char** argv)
          return pos[2] < initializationProfile(pos[0], sinusAmplitude, sinusOffset, sinusWavelength);
       };
 
-      real_t maxParticleHeight = 0_r;
+      real_t maxParticleHeight = real_c(0);
       initSpheresFromFile(particleInFileName, *particleStorage, *mesapdDomain, particleDensityRatio, domainSize,
                           createParticleFct, simulationDomainAABB, bedCopiesInX, bedCopiesInY, numParticles,
                           maxParticleHeight, particleScalingFactor);
       WALBERLA_LOG_INFO_ON_ROOT("Max particle height " << maxParticleHeight);
       if ((sinusOffset + sinusAmplitude) > maxParticleHeight)
          WALBERLA_ABORT("Created particle bed is below desired sinus shape!");
-      if (2_r * sinusAmplitude > (maxParticleHeight - particleFixingHeight))
+      if (real_c(2) * sinusAmplitude > (maxParticleHeight - particleFixingHeight))
          WALBERLA_ABORT("Created mobile particle bed is not high enough for desired sinus shape!");
       if (useNoSlipParticles && (particleFixingHeight < maxParticleHeight))
          WALBERLA_ABORT("You are using no-slip BCs on particles (which does not set hydrodynamic forces) but do not "
@@ -771,13 +882,13 @@ int main(int argc, char** argv)
    }
    else
    {
-      real_t avgParticleDiameterTest = 0_r;
+      real_t avgParticleDiameterTest = real_c(0);
       particleStorage->forEachParticle(
          false, mesa_pd::kernel::SelectLocal(), *particleAccessor,
          [&numParticles, &avgParticleDiameterTest](const size_t idx, auto& ac) {
             auto sp = static_cast< mesa_pd::data::Sphere* >(ac.getBaseShape(idx).get());
             ++numParticles;
-            avgParticleDiameterTest += 2_r * sp->getRadius();
+            avgParticleDiameterTest += real_c(2) * sp->getRadius();
          },
          *particleAccessor);
       mpi::allReduceInplace(numParticles, mpi::SUM);
@@ -785,7 +896,7 @@ int main(int argc, char** argv)
       avgParticleDiameterTest /= real_c(numParticles);
       WALBERLA_LOG_INFO_ON_ROOT("Read particles from check pointing file with avg diameter of "
                                 << avgParticleDiameterTest)
-      if (std::abs(avgParticleDiameterTest - avgParticleDiameter) / avgParticleDiameterTest > 0.05)
+      if (std::abs(avgParticleDiameterTest - avgParticleDiameter) / avgParticleDiameterTest > real_c(0.05))
       {
          WALBERLA_ABORT("Particle diameters not correct.")
       }
@@ -793,12 +904,12 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT("Created " << numParticles << " particles");
 
    // create planes
-   createPlane(*particleStorage, simulationDomainAABB.minCorner(), Vector3< real_t >(0, 0, 1));
-   createPlane(*particleStorage, simulationDomainAABB.maxCorner(), Vector3< real_t >(0, 0, -1));
+   createPlane(*particleStorage, simulationDomainAABB.minCorner(), Vector3< real_t >(real_c(0), real_c(0), real_c(1)));
+   createPlane(*particleStorage, simulationDomainAABB.maxCorner(), Vector3< real_t >(real_c(0), real_c(0), real_c(-1)));
 
-   const real_t blockSyncExtension    = real_t(2.5);
-   real_t maxPossibleParticleDiameter = avgParticleDiameter * 1.1_r;
-   if (maxPossibleParticleDiameter < 2_r * real_c(cellsPerBlock.min()) - blockSyncExtension)
+   const real_t blockSyncExtension    = real_c(2.5);
+   real_t maxPossibleParticleDiameter = avgParticleDiameter * real_c(1.1);
+   if (maxPossibleParticleDiameter < real_c(2) * real_c(cellsPerBlock.min()) - blockSyncExtension)
    {
       WALBERLA_LOG_INFO_ON_ROOT("Using next neighbor sync for particles");
       syncCall = [particleStorage, mesapdDomain, blockSyncExtension]() {
@@ -814,7 +925,7 @@ int main(int argc, char** argv)
          mesa_pd::mpi::SyncGhostOwners syncGhostOwnersFunc;
          syncGhostOwnersFunc(*particleStorage, *mesapdDomain, blockSyncExtension);
       };
-      for (uint_t i = 0; i < uint_c(std::ceil(maxPossibleParticleDiameter / real_c(cellsPerBlock.min()))); ++i)
+      for (uint_t i = uint_c(0); i < uint_c(std::ceil(maxPossibleParticleDiameter / real_c(cellsPerBlock.min()))); ++i)
          syncCall();
    }
 
@@ -833,8 +944,16 @@ int main(int argc, char** argv)
    // might not detect solid flags correctly
    antidunesBoundaryHandling->initFlagsFromFillLevel();
 
+   // initialize hydrostatic pressure
+   if (!loadSnapshot) { initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, hydrostaticDensityFct); }
+
+   // initialize force density field
+   walberla::free_surface::initForceDensityFieldCodegen< PdfField_T, FlagField_T, VectorFieldFlattened_T,
+                                                         ScalarField_T >(
+      blockForest, forceDensityFieldID, fillFieldID, pdfFieldID, flagFieldID, flagInfo, *acceleration);
+
    // communication after initialization
-   Communication_T communication(blockForest, flagFieldID, fillFieldID);
+   Communication_T communication(blockForest, flagFieldID, fillFieldID, forceDensityFieldID);
    communication();
 
    PdfCommunication_T pdfCommunication(blockForest, pdfFieldID);
@@ -843,9 +962,6 @@ int main(int argc, char** argv)
    // add bubble model
    std::shared_ptr< walberla::free_surface::bubble_model::BubbleModelBase > bubbleModel =
       std::make_shared< walberla::free_surface::bubble_model::BubbleModelConstantPressure >(real_c(1));
-
-   // initialize hydrostatic pressure
-   if (!loadSnapshot) { initHydrostaticPressure< PdfField_T >(blockForest, pdfFieldID, hydrostaticDensityFct); }
 
    // set density in non-liquid or non-interface cells to 1 (after initializing with hydrostatic pressure)
    // setDensityInNonFluidCellsToOne< FlagField_T, PdfField_T >(blockForest, flagInfo, flagFieldID, pdfFieldID);
@@ -919,6 +1035,16 @@ int main(int argc, char** argv)
    timeloop.add() << Sweep(antidunesBoundaryHandling->getBoundarySweep(), "Sweep: boundary handling",
                            Set< SUID >::emptySet(), StateSweep::onlyGasAndBoundary)
                   << Sweep(emptySweep(), "Empty sweep: boundary handling", StateSweep::onlyGasAndBoundary);
+
+   // add sweep for weighting force in interface cells with fill level and density
+   // different version for codegen because pystencils does not support 'Ghostlayerfield<Vector3(), 1>'
+   const ForceDensityCodegenSweep< LatticeModel_T, FlagField_T, VectorFieldFlattened_T, ScalarField_T >
+      forceDensityCodegenSweep(forceDensityFieldID, pdfFieldID, flagFieldID, fillFieldID, flagInfo, acceleration);
+   timeloop.add() << Sweep(forceDensityCodegenSweep, "Sweep: force weighting", Set< SUID >::emptySet(),
+                           StateSweep::onlyGasAndBoundary)
+                  << Sweep(emptySweep(), "Empty sweep: force weighting", StateSweep::onlyGasAndBoundary)
+                  << AfterFunction(Communication_T(blockForest, forceDensityFieldID),
+                                   "Communication: after force weighting sweep");
 
    // sweep for
    // - reconstruction of PDFs in interface cells
@@ -1004,20 +1130,65 @@ int main(int argc, char** argv)
    // - update the bubble model
    // IMPORTANT REMARK: this sweep computes the mass via the density, i.e., the PDF field must be up-to-date and the
    // PdfRefillingSweep must have been performed
-   const walberla::free_surface::ExcessMassDistributionSweepInterfaceEvenly< LatticeModel_T, FlagField_T, ScalarField_T,
-                                                                             VectorField_T >
-      distributeMassSweep(excessMassDistributionModel, fillFieldID, flagFieldID, pdfFieldID, flagInfo);
-   timeloop.add() << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::fullFreeSurface)
-                  << Sweep(emptySweep(), "Empty sweep: distribute excess mass")
-                  << AfterFunction(Communication_T(blockForest, fillFieldID),
-                                   "Communication: after excess mass distribution sweep")
-                  << AfterFunction(blockforest::UpdateSecondGhostLayer< ScalarField_T >(blockForest, fillFieldID),
-                                   "Second ghost layer update: after excess mass distribution sweep (fill level field)")
-                  // update bubble model, i.e., perform registered bubble merges/splits; bubble merges/splits are
-                  // already detected and registered by CellConversionSweep
-                  << AfterFunction(
-                        std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
-                        "Sweep: bubble model update");
+   if (excessMassModel.isEvenlyType())
+   {
+      const walberla::free_surface::ExcessMassDistributionSweepInterfaceEvenly< LatticeModel_T, FlagField_T,
+                                                                                ScalarField_T, VectorField_T >
+         distributeMassSweep(excessMassModel, fillFieldID, flagFieldID, pdfFieldID, flagInfo);
+      timeloop.add()
+         << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::fullFreeSurface)
+         << Sweep(emptySweep(), "Empty sweep: distribute excess mass")
+         << AfterFunction(Communication_T(blockForest, fillFieldID),
+                          "Communication: after excess mass distribution sweep")
+         << AfterFunction(blockforest::UpdateSecondGhostLayer< ScalarField_T >(blockForest, fillFieldID),
+                          "Second ghost layer update: after excess mass distribution sweep (fill level field)")
+         // update bubble model, i.e., perform registered bubble merges/splits; bubble merges/splits are
+         // already detected and registered by CellConversionSweep
+         << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
+                          "Sweep: bubble model update");
+   }
+   else
+   {
+      if (excessMassModel.isWeightedType())
+      {
+         const walberla::free_surface::ExcessMassDistributionSweepInterfaceWeighted< LatticeModel_T, FlagField_T,
+                                                                                     ScalarField_T, VectorField_T >
+            distributeMassSweep(excessMassModel, fillFieldID, flagFieldID, pdfFieldID, flagInfo, normalFieldID);
+         timeloop.add()
+            << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::fullFreeSurface)
+            << Sweep(emptySweep(), "Empty sweep: distribute excess mass")
+            << AfterFunction(Communication_T(blockForest, fillFieldID),
+                             "Communication: after excess mass distribution sweep")
+            << AfterFunction(blockforest::UpdateSecondGhostLayer< ScalarField_T >(blockForest, fillFieldID),
+                             "Second ghost layer update: after excess mass distribution sweep (fill level field)")
+            // update bubble model, i.e., perform registered bubble merges/splits; bubble merges/splits
+            // are already detected and registered by CellConversionSweep
+            << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
+                             "Sweep: bubble model update");
+      }
+      else
+      {
+         if (excessMassModel.isEvenlyAllInterfaceFallbackLiquidType())
+         {
+            const walberla::free_surface::ExcessMassDistributionSweepInterfaceAndLiquid< LatticeModel_T, FlagField_T,
+                                                                                         ScalarField_T, VectorField_T >
+               distributeMassSweep(excessMassModel, fillFieldID, flagFieldID, pdfFieldID, flagInfo, excessMassFieldID);
+            timeloop.add()
+               // perform this sweep also on "onlyLBM" blocks because liquid cells also exchange excess mass here
+               << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::fullFreeSurface)
+               << Sweep(distributeMassSweep, "Sweep: excess mass distribution", StateSweep::onlyLBM)
+               << Sweep(emptySweep(), "Empty sweep: distribute excess mass")
+               << AfterFunction(Communication_T(blockForest, fillFieldID, excessMassFieldID),
+                                "Communication: after excess mass distribution sweep")
+               << AfterFunction(blockforest::UpdateSecondGhostLayer< ScalarField_T >(blockForest, fillFieldID),
+                                "Second ghost layer update: after excess mass distribution sweep (fill level field)")
+               // update bubble model, i.e., perform registered bubble merges/splits; bubble
+               // merges/splits are already detected and registered by CellConversionSweep
+               << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
+                                "Sweep: bubble model update");
+         }
+      }
+   }
 
    // reset all flags that signal cell conversions (except "keepInterfaceForWettingFlag")
    walberla::free_surface::ConversionFlagsResetSweep< FlagField_T > resetConversionFlagsSweep(flagFieldID, flagInfo);
@@ -1095,13 +1266,13 @@ int main(int argc, char** argv)
 
    // add sweep for evaluating the fluid's mean velocity
    const std::shared_ptr< Vector3< real_t > > meanVelocity = std::make_shared< Vector3< real_t > >(real_c(0));
-   const real_t velocityAveragingFactor = 1_r / (liquidHeight * real_c(domainSize[0]) * real_c(domainSize[1]));
+   const real_t velocityAveragingFactor = real_c(1) / (liquidHeight * real_c(domainSize[0]) * real_c(domainSize[1]));
    MeanVelocityComputer< AntidunesBoundaryHandling_T, PdfField_T, FlagField_T > meanVelocityComputer(
       blockForest, antidunesBoundaryHandling, pdfFieldID, meanVelocity, velocityAveragingFactor);
 
    // PID Controller
    shared_ptr< ForcingAdjuster > forcingAdjuster =
-      make_shared< ForcingAdjuster >(blockForest, pdfFieldID, targetMeanVelocityMagnitude, force[0], proportionalGain,
+      make_shared< ForcingAdjuster >(blockForest, targetMeanVelocityMagnitude, (*acceleration)[0], proportionalGain,
                                      derivativeGain, integralGain, maxRamp, minActuatingVariable, maxActuatingVariable);
 
    if (loadSnapshot) { forcingAdjuster->loadPIDSnapshot(snapshotBaseFolder + "/" + "pidState.file"); }
@@ -1143,18 +1314,18 @@ int main(int argc, char** argv)
                        "Communication: after PDF reconstruction sweep") // unsure if necessary but added for consistency
       << AfterFunction(pdfCommunication, "PDF Communication");
 
-   real_t timeStepSizeParticles = real_t(1) / real_t(particleNumSubCycles);
+   real_t timeStepSizeParticles = real_c(1) / real_c(particleNumSubCycles);
    mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(timeStepSizeParticles);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeParticles);
    mesa_pd::kernel::LinearSpringDashpot collisionResponse(1);
-   collisionResponse.setFrictionCoefficientDynamic(0, 0, particleFrictionCoefficient);
+   collisionResponse.setFrictionCoefficientDynamic(size_t(0), size_t(0), particleFrictionCoefficient);
    mesa_pd::mpi::ReduceProperty reduceProperty;
    mesa_pd::mpi::ReduceContactHistory reduceAndSwapContactHistory;
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
    real_t particleCollisionTime = particleCollisionTimeNonDim * avgParticleDiameter;
    lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(
-      viscosity, [](real_t r) { return (real_t(0.001 + real_t(0.00007) * r)) * r; });
+      viscosity, [](real_t r) { return (real_c(0.001 + real_c(0.00007) * r)) * r; });
 
    WALBERLA_LOG_INFO_ON_ROOT("Will use particle time step size of "
                              << timeStepSizeParticles << " and collision time of " << particleCollisionTime);
@@ -1168,7 +1339,7 @@ int main(int argc, char** argv)
                               totalFluidMass);
 
    BedloadTransportEvaluator< ParticleAccessor_T > bedloadTransportEvaluator(
-      particleAccessor, 1_r / real_c(domainSize[0] * domainSize[1]), numParticles);
+      particleAccessor, real_c(1) / real_c(domainSize[0] * domainSize[1]), numParticles);
    auto bedLoadTransportFileName = baseFolderName + "/bedload.txt";
    WALBERLA_LOG_INFO_ON_ROOT("Writing bedload info to file " << bedLoadTransportFileName);
 
@@ -1193,7 +1364,7 @@ int main(int argc, char** argv)
       evalInfoFile.close();
    }
 
-   Vector3< real_t > totalHydrodynamicForceOnParticles(0_r); // only root will have valid values
+   Vector3< real_t > totalHydrodynamicForceOnParticles(real_c(0)); // only root will have valid values
 
    for (uint_t t = beginTimeStep; t != timesteps; ++t)
    {
@@ -1253,7 +1424,7 @@ int main(int argc, char** argv)
                {
                   if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *mesapdDomain))
                   {
-                     auto meff = real_t(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
+                     auto meff = real_c(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
                      collisionResponse.setStiffnessAndDamping(0, 0, particleRestitutionCoefficient,
                                                               particleCollisionTime, particleKappa, meff);
                      collisionResponse(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(),
@@ -1273,11 +1444,11 @@ int main(int argc, char** argv)
          // add external forces
          particleStorage->forEachParticle(
             useOpenMP, mesa_pd::kernel::SelectLocal(), *particleAccessor,
-            [particleDensityRatio, force](const size_t idx, auto& ac) {
-               mesa_pd::addForceAtomic(
-                  idx, ac,
-                  ac.getVolume(idx) *
-                     Vector3< real_t >(force[0], force[1], (particleDensityRatio - real_t(1)) * force[2]));
+            [particleDensityRatio, acceleration](const size_t idx, auto& ac) {
+               mesa_pd::addForceAtomic(idx, ac,
+                                       ac.getVolume(idx) *
+                                          Vector3< real_t >((*acceleration)[0], (*acceleration)[1],
+                                                            (particleDensityRatio - real_c(1)) * (*acceleration)[2]));
             },
             *particleAccessor);
 
@@ -1329,12 +1500,13 @@ int main(int argc, char** argv)
 
             WALBERLA_LOG_DEVEL("____________________________________________________________________");
             WALBERLA_LOG_DEVEL("time step = " << t);
-            const real_t froudeNumber = (*meanVelocity)[0] / real_c(std::sqrt(liquidHeight * std::abs(force[2])));
+            const real_t froudeNumber =
+               (*meanVelocity)[0] / real_c(std::sqrt(liquidHeight * std::abs((*acceleration)[2])));
 
             const real_t reynoldsNumber = (*meanVelocity)[0] * liquidHeight / viscosity;
 
             const real_t weberNumber =
-               real_t(1.0) * (*meanVelocity)[0] * (*meanVelocity)[0] * liquidHeight / surfaceTension;
+               real_c(1.0) * (*meanVelocity)[0] * (*meanVelocity)[0] * liquidHeight / surfaceTension;
 
             WALBERLA_LOG_DEVEL(" - Total fluid mass = " << std::setprecision(16) << (*totalFluidMass));
             auto maxFluidZPos = averageDataSliceEvaluator.getMaxFluidZPos();
@@ -1346,17 +1518,19 @@ int main(int argc, char** argv)
             WALBERLA_LOG_DEVEL(" - meanVelocity = " << *meanVelocity);
 
             std::ofstream fluidInfoFile(fluidInfoFileName, std::ofstream::app);
-            fluidInfoFile << t << " " << force[0] << " " << (*meanVelocity)[0] << " " << maxFluidZPos << " "
+            fluidInfoFile << t << " " << (*acceleration)[0] << " " << (*meanVelocity)[0] << " " << maxFluidZPos << " "
                           << std::setprecision(16) << (*totalFluidMass) << "\n";
             fluidInfoFile.close();
 
             if (std::isnan(reynoldsNumber)) WALBERLA_ABORT("reynoldsNumber is inf!")
          }
 
-         WALBERLA_LOG_DEVEL_ON_ROOT(" -> CurrentExternalForce in x-direction before update = " << force[0]);
+         WALBERLA_LOG_DEVEL_ON_ROOT(
+            " -> CurrentExternalAcceleration in x-direction before update = " << (*acceleration)[0]);
          (*forcingAdjuster)(meanVelocity->length());
-         force[0] = forcingAdjuster->getExternalForcing();
-         WALBERLA_LOG_DEVEL_ON_ROOT(" -> CurrentExternalForce in x-direction after update  = " << force[0]);
+         (*acceleration)[0] = forcingAdjuster->getExternalForcing();
+         WALBERLA_LOG_DEVEL_ON_ROOT(
+            " -> CurrentExternalAcceleration in x-direction after update  = " << (*acceleration)[0]);
       }
       timingPool["Evaluation"].end();
 
@@ -1368,6 +1542,7 @@ int main(int argc, char** argv)
 
             blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + pdfFieldFile, pdfFieldID);
             blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + fillFieldFile, fillFieldID);
+            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + excessMassFieldFile, excessMassFieldID);
             blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + particleStorageFile, particleStorageID);
 
             WALBERLA_ROOT_SECTION()
@@ -1378,7 +1553,7 @@ int main(int argc, char** argv)
 
                file << std::setprecision(16);
                file << t + 1 << "\n";
-               file << force[0] << "\n";
+               file << (*acceleration)[0] << "\n";
                file.close();
             }
 
@@ -1393,6 +1568,8 @@ int main(int argc, char** argv)
             {
                renameFile(snapshotBaseFolder + "/tmp_" + pdfFieldFile, snapshotBaseFolder + "/" + pdfFieldFile);
                renameFile(snapshotBaseFolder + "/tmp_" + fillFieldFile, snapshotBaseFolder + "/" + fillFieldFile);
+               renameFile(snapshotBaseFolder + "/tmp_" + excessMassFieldFile,
+                          snapshotBaseFolder + "/" + excessMassFieldFile);
                renameFile(snapshotBaseFolder + "/tmp_" + particleStorageFile,
                           snapshotBaseFolder + "/" + particleStorageFile);
                renameFile(snapshotBaseFolder + "/tmp_" + checkpointConfigFile,

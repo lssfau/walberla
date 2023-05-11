@@ -11,10 +11,10 @@ BlockForestParameters
 DomainParameters
 {
    domainSize         <3200, 60, 160>;
-   wavePeriods        1;      // never set to 0 -> division by zero, even if you initialize a flat particle bed
-   liquidHeightFactor 2.9655; // h_0 / d (water height / avg particle diameter) -> from experiment [E1 = 2.9655, E4 = 3.5862]
-   floorHeightFactor  4.1393;  // from domain bottom to sine's average
-   initialAmplitude   0;     // defined from minimum peak to maximum peak as by Pascal et al. (2021)
+   wavePeriods        1;         // never set to 0 -> division by zero, even if you initialize a flat particle bed
+   liquidHeightFactor 2.862;    // h_0 / d (water height / avg particle diameter) -> from experiment [E1=2.862, E2=3.1724, E3=3.27586, E4=3.5862]
+   floorHeightFactor  4.1393;    // from domain bottom to sine's average
+   initialAmplitude   0;         // defined from minimum peak to maximum peak as by Pascal et al. (2021)
 }
 
 PIDParameters
@@ -32,9 +32,9 @@ PhysicsParameters
 {
    enableWetting     false;
    timesteps         2000000;
-   Re                3100; // [E1=3100, E4=4800]
-   Fr                1.31; // [E1=1.31, E4=1.45]
-   We                15.6188;   // [E1=15.6188 , E4=30.2493]
+   Re                3100;       // [E1=3100, E2=3772, E3=4180, E4=4800]
+   Fr                1.31;       // [E1=1.31, E2=1.38, E3=1.44, E4=1.45]
+   We                15.6188;    // [E1=15.6188, E2=21.48, E3=25.54, E4=30.2493]
 }
 
 ParticleParameters
@@ -55,9 +55,8 @@ ModelParameters
 {
    pdfReconstructionModel        OnlyMissing;
    pdfRefillingModel             EquilibriumRefilling;
-   excessMassDistributionModel   EvenlyAllInterface;
+   excessMassDistributionModel   EvenlyNewInterfaceFallbackLiquid;
    curvatureModel                FiniteDifferenceMethod;
-   enableForceWeighting          false;
    useSimpleMassExchange         false;
    cellConversionThreshold       1e-2;
    cellConversionForceThreshold  1e-1;
