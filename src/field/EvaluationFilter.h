@@ -74,13 +74,13 @@ public:
    void operator()( const IBlock & block )
    {
       flagField_ = block.template getData< const FlagField_T >( flagFieldId_ );
-      WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
+      WALBERLA_ASSERT_NOT_NULLPTR( flagField_ )
       evaluationMask_ = flagField_->getMask( cellsToEvaluate_ );
    }
 
    bool operator()( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
+      WALBERLA_ASSERT_NOT_NULLPTR( flagField_ )
       return flagField_->isPartOfMaskSet( x, y, z, evaluationMask_ );
    }
 

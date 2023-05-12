@@ -93,8 +93,9 @@ int main( int argc, char ** argv )
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, fluidFlagUID ) ), "LB stream & collide" );
 
    // LBM stability check
+   auto checkFunction = [](PdfField_T::value_type value) {return math::finite( value );};
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< PdfField_T, FlagField_T >( walberlaEnv.config(), blocks, pdfFieldId,
-                                                                                                             flagFieldId, fluidFlagUID ) ),
+                                                                                                             flagFieldId, fluidFlagUID, checkFunction ) ),
                                   "LBM stability check" );
 
    // log remaining time

@@ -78,6 +78,12 @@ inline bool stabilityCheckerIsFinite( const Vector3<real_t> & value ) { return m
 *   about all cells that contain non-finite vales can be logged via the Logging or saved as VTK output for further
 *   investigation.
 *
+*   It is important to be aware that checking for non-finite values will not work when using FASTMATH:
+*   https://stackoverflow.com/questions/22931147/stdisinf-does-not-work-with-ffast-math-how-to-check-for-infinity
+*   https://community.intel.com/t5/Intel-C-Compiler/icx-2021-3-0-bug-isinf-wrong-result/m-p/1316407#M39279
+*
+*   Thus a different checkFunction must be used for the StabilityChecker when FASTMATH is enabled.
+*
 *   Do not create objects of class StabilityChecker directly, better use one of the various 'makeStabilityChecker'
 *   functions below!
 *
@@ -133,7 +139,7 @@ inline bool stabilityCheckerIsFinite( const Vector3<real_t> & value ) { return m
 *   for immediate registration at a time loop (see field::makeSharedFunctor).
 */
 
-template< typename Field_T, typename Filter_T = DefaultEvaluationFilter >
+template< typename Field_T, typename Filter_T = DefaultEvaluationFilter, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )>>
 class StabilityChecker
 {
 private:
@@ -188,8 +194,8 @@ private:
 
       uint8_t evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override
       {
-         WALBERLA_ASSERT( map_.find( this->block_ ) != map_.end() );
-         WALBERLA_ASSERT( map_[ this->block_ ].find( Cell(x,y,z) ) != map_[ this->block_ ].end() );
+         WALBERLA_ASSERT( map_.find( this->block_ ) != map_.end() )
+         WALBERLA_ASSERT( map_[ this->block_ ].find( Cell(x,y,z) ) != map_[ this->block_ ].end() )
 
          return ( map_[ this->block_ ][ Cell(x,y,z) ].find( f ) != map_[ this->block_ ][ Cell(x,y,z) ].end() ) ? uint8_t(1) : uint8_t(0);
       }
@@ -240,6 +246,11 @@ public:
    *                                'checkFrequency'-th time. Setting 'checkFrequency' to 1 means the stability check
    *                                is performed each time operator()() is called. Setting 'checkFrequency' to 0
    *                                disables the check entirely.
+   *   \param checkFunction         If a checkFunction is provided it is used to check each value per cell. The
+   *                                checkFunction has the signature "std::function<bool ( const typename Field_T::value_type & value )>".
+   *                                By default the checkFunction checks in each cell math::finite.
+   *                                However, this will not work if the program is compiled with fast math because NaN
+   *                                is not defined then.
    *   \param outputToStream        If true, in case a non-finite value is detected in the field, information about the
    *                                corresponding cells is logged via WALBERLA_LOG_WARNING.
    *   \param outputVTK             If true, in case a non-finite value is detected in the field, VTK output is
@@ -248,41 +259,65 @@ public:
    *   \param incompatibleSelectors Incompatible selectors
    */
    //*******************************************************************************************************************
-   StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
-                     const Filter_T & filter, const uint_t checkFrequency,
-                     const bool outputToStream = true, const bool outputVTK = true,
-                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
-                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
-      blocks_( blocks ), filter_( filter ), executionCounter_( uint_c(0) ), checkFrequency_( checkFrequency ),
-      fieldId_( fieldId ), outputToStream_( outputToStream ), outputVTK_( outputVTK ),
-      vtkBaseFolder_( internal::stabilityCheckerVTKBase ),
-      vtkExecutionFolder_( internal::stabilityCheckerVTKFolder ),
-      vtkIdentifier_( internal::stabilityCheckerVTKIdentifier ),
-      vtkBinary_( internal::stabilityCheckerVTKBinary ),
-      vtkLittleEndian_( internal::stabilityCheckerVTKLittleEndian ),
-      vtkMPIIO_( internal::stabilityCheckerVTKMPIIO ),
-      vtkForcePVTU_( internal::stabilityCheckerVTKForcePVTU ),
-      requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors ) {}
+  StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                   const Filter_T & filter, const uint_t checkFrequency,
+                   const bool outputToStream = true, const bool outputVTK = true,
+                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
+   blocks_( blocks ), fieldId_( fieldId ), filter_( filter ), checkFrequency_( checkFrequency ), checkFunction_(internal::stabilityCheckerIsFinite<typename Field_T::value_type>),
+   outputToStream_( outputToStream ), outputVTK_( outputVTK ),
+   requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
+  {
+#if defined(WALBERLA_BUILD_WITH_FASTMATH)
+     WALBERLA_LOG_WARNING_ON_ROOT("WaLBerla was build using WALBERLA_BUILD_WITH_FASTMATH. "
+                                  "The default checkFunction of the StabilityChecker checks if NaNs are obtained. "
+                                  "With FASTMATH activated NaNs are not defined and thus the checkFunction will not work. "
+                                  "To make it work provide a different checkFunction.")
+#endif
+  }
 
-   StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
-                     const uint_t checkFrequency,
-                     const bool outputToStream = true, const bool outputVTK = true,
-                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
-                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
-      blocks_( blocks ), filter_( Filter_T() ), executionCounter_( uint_c(0) ), checkFrequency_( checkFrequency ),
-      fieldId_( fieldId ), outputToStream_( outputToStream ), outputVTK_( outputVTK ),
-      vtkBaseFolder_( internal::stabilityCheckerVTKBase ),
-      vtkExecutionFolder_( internal::stabilityCheckerVTKFolder ),
-      vtkIdentifier_( internal::stabilityCheckerVTKIdentifier ),
-      vtkBinary_( internal::stabilityCheckerVTKBinary ),
-      vtkLittleEndian_( internal::stabilityCheckerVTKLittleEndian ),
-      vtkMPIIO_( internal::stabilityCheckerVTKMPIIO ),
-      vtkForcePVTU_( internal::stabilityCheckerVTKForcePVTU ),
-      requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
-   {
-      static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
-                     "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
-   }
+  StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                   const Filter_T & filter, const uint_t checkFrequency, CheckFunction_T checkFunction,
+                   const bool outputToStream = true, const bool outputVTK = true,
+                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
+   blocks_( blocks ), fieldId_( fieldId ), filter_( filter ), checkFrequency_( checkFrequency ), checkFunction_(checkFunction),
+   outputToStream_( outputToStream ), outputVTK_( outputVTK ),
+   requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors ){}
+
+
+  StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                   const uint_t checkFrequency,
+                   const bool outputToStream = true, const bool outputVTK = true,
+                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
+   blocks_( blocks ), fieldId_( fieldId ), filter_( Filter_T() ), checkFrequency_( checkFrequency ), checkFunction_(internal::stabilityCheckerIsFinite<typename Field_T::value_type>),
+   outputToStream_( outputToStream ), outputVTK_( outputVTK ),
+   requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
+  {
+#if defined(WALBERLA_BUILD_WITH_FASTMATH)
+     WALBERLA_LOG_WARNING_ON_ROOT("WaLBerla was build using WALBERLA_BUILD_WITH_FASTMATH. "
+                                  "The default checkFunction of the StabilityChecker checks if NaNs are obtained. "
+                                  "With FASTMATH activated NaNs are not defined and thus the checkFunction will not work. "
+                                  "To make it work provide a different checkFunction.")
+#endif
+     static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+                   "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
+  }
+
+  StabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                   const uint_t checkFrequency, CheckFunction_T checkFunction,
+                   const bool outputToStream = true, const bool outputVTK = true,
+                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
+   blocks_( blocks ), fieldId_( fieldId ), filter_( Filter_T() ), checkFrequency_( checkFrequency ), checkFunction_(checkFunction),
+   outputToStream_( outputToStream ), outputVTK_( outputVTK ),
+   requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
+  {
+     static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+                   "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
+  }
+
    
    void setVTKBaseFolder     ( const std::string & vtkBaseFolder      ) { vtkBaseFolder_      = vtkBaseFolder; }
    void setVTKExecutionFolder( const std::string & vtkExecutionFolder ) { vtkExecutionFolder_ = vtkExecutionFolder; }
@@ -299,30 +334,29 @@ private:
 
    void checkBlock( const IBlock * const block );
 
-
-
    weak_ptr< StructuredBlockStorage > blocks_;
+   ConstBlockDataID fieldId_;
    
    Filter_T filter_;
 
-   uint_t executionCounter_;
+   uint_t executionCounter_{uint_c(0)};
    uint_t checkFrequency_;
 
-   ConstBlockDataID fieldId_;
-
-   BlockCellsMap failedCells_;
+   CheckFunction_T checkFunction_;
 
    bool outputToStream_;
    bool outputVTK_;
-   
-   std::string vtkBaseFolder_;
-   std::string vtkExecutionFolder_;
-   std::string vtkIdentifier_;
 
-   bool vtkBinary_;
-   bool vtkLittleEndian_;
-   bool vtkMPIIO_;
-   bool vtkForcePVTU_;
+   BlockCellsMap failedCells_;
+
+   std::string vtkBaseFolder_{internal::stabilityCheckerVTKBase};
+   std::string vtkExecutionFolder_{internal::stabilityCheckerVTKFolder};
+   std::string vtkIdentifier_{internal::stabilityCheckerVTKIdentifier};
+
+   bool vtkBinary_{internal::stabilityCheckerVTKBinary};
+   bool vtkLittleEndian_{internal::stabilityCheckerVTKLittleEndian};
+   bool vtkMPIIO_{internal::stabilityCheckerVTKMPIIO};
+   bool vtkForcePVTU_{internal::stabilityCheckerVTKForcePVTU};
 
    Set<SUID> requiredSelectors_;
    Set<SUID> incompatibleSelectors_;
@@ -331,18 +365,19 @@ private:
 
 
 
-template< typename Field_T, typename Filter_T >
-void StabilityChecker< Field_T, Filter_T >::operator()()
+template< typename Field_T, typename Filter_T, typename CheckFunction_T >
+void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::operator()()
 {
    ++executionCounter_;
    if( checkFrequency_ == uint_t(0) || ( executionCounter_ - uint_c(1) ) % checkFrequency_ != 0 )
       return;
 
    auto blocks = blocks_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'StabilityChecker' for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'StabilityChecker' for a block storage object that doesn't exist anymore" )
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
       checkBlock( block.get() );
+
 
    if( outputToStream_ )
    {
@@ -377,7 +412,7 @@ void StabilityChecker< Field_T, Filter_T >::operator()()
       }
 
       if( !failedCells_.empty() )
-         WALBERLA_LOG_WARNING( oss.str() );
+         WALBERLA_LOG_WARNING( oss.str() )
    }
 
    bool abort = !failedCells_.empty();
@@ -401,17 +436,17 @@ void StabilityChecker< Field_T, Filter_T >::operator()()
          vtkWriter->write();
       }
 
-      WALBERLA_LOG_WARNING_ON_ROOT( "Field stability check failed - aborting program ..." );
-      WALBERLA_MPI_WORLD_BARRIER();
+      WALBERLA_LOG_WARNING_ON_ROOT( "Field stability check failed - aborting program ..." )
+      WALBERLA_MPI_WORLD_BARRIER()
 
-      WALBERLA_ABORT_NO_DEBUG_INFO("");
+      WALBERLA_ABORT_NO_DEBUG_INFO("")
    }
 }
 
 
 
-template< typename Field_T, typename Filter_T >
-void StabilityChecker< Field_T, Filter_T >::checkBlock( const IBlock * const block )
+template< typename Field_T, typename Filter_T, typename CheckFunction_T>
+void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::checkBlock( const IBlock * const block )
 {
    const Field_T * field = block->getData< Field_T >(  fieldId_ );
    
@@ -425,7 +460,7 @@ void StabilityChecker< Field_T, Filter_T >::checkBlock( const IBlock * const blo
          {
             for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
             {
-               if( !internal::stabilityCheckerIsFinite( field->get( x, y, z, cell_idx_c(f) ) ) )
+               if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                   failedCells_[ block ][ Cell(x,y,z) ].insert( cell_idx_c(f) );
             }
          }
@@ -452,7 +487,7 @@ void StabilityChecker< Field_T, Filter_T >::checkBlock( const IBlock * const blo
                {
                   for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
                   {
-                     if( !internal::stabilityCheckerIsFinite( field->get( x, y, z, cell_idx_c(f) ) ) )
+                     if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                      {
                         #pragma omp critical (StabilityChecker)
                         {
@@ -479,7 +514,7 @@ void StabilityChecker< Field_T, Filter_T >::checkBlock( const IBlock * const blo
                {
                   for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
                   {
-                     if( !internal::stabilityCheckerIsFinite( field->get( x, y, z, cell_idx_c(f) ) ) )
+                     if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                      {
                         #pragma omp critical (StabilityChecker)
                         {
@@ -498,12 +533,11 @@ void StabilityChecker< Field_T, Filter_T >::checkBlock( const IBlock * const blo
 }
 
 
-
 ///////////////////////////////////////////////////////////////
 // makeStabilityChecker functions without configuration file //
 ///////////////////////////////////////////////////////////////
 
-template< typename Field_T >
+template< typename Field_T>
 shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
                                                                 const uint_t checkFrequency,
                                                                 const bool outputToStream = true, const bool outputVTK = true,
@@ -514,30 +548,68 @@ shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const weak_ptr< 
    return shared_ptr< SC_T >( new SC_T( blocks, fieldId, checkFrequency, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
 }
 
+
+template< typename Field_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )>>
+shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                                                               const uint_t checkFrequency, CheckFunction_T checkFunction,
+                                                               const bool outputToStream = true, const bool outputVTK = true,
+                                                               const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                                                               const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   using SC_T = StabilityChecker<Field_T>;
+   return shared_ptr< SC_T >( new SC_T( blocks, fieldId, checkFrequency, checkFunction, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
+}
+
 template< typename Field_T, typename FlagField_T >
 shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > >
-makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks,
-                      const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
-                      const uint_t checkFrequency,
-                      const bool outputToStream = true, const bool outputVTK = true,
-                      const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
-                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+   makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks,
+                        const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
+                        const uint_t checkFrequency,
+                        const bool outputToStream = true, const bool outputVTK = true,
+                        const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    using SC_T = StabilityChecker<Field_T, FlagFieldEvaluationFilter<FlagField_T>>;
    return shared_ptr< SC_T >( new SC_T( blocks, fieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
-                                        checkFrequency, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
+                                      checkFrequency, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
+}
+
+template< typename Field_T, typename FlagField_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )>>
+shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > >
+   makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks,
+                        const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
+                        const uint_t checkFrequency, CheckFunction_T checkFunction,
+                        const bool outputToStream = true, const bool outputVTK = true,
+                        const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   using SC_T = StabilityChecker<Field_T, FlagFieldEvaluationFilter<FlagField_T>>;
+   return shared_ptr< SC_T >( new SC_T( blocks, fieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
+                                      checkFrequency, checkFunction, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
 }
 
 template< typename Field_T, typename Filter_T >
 shared_ptr< StabilityChecker< Field_T, Filter_T > >
-makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
-                      const Filter_T & filter, const uint_t checkFrequency,
-                      const bool outputToStream = true, const bool outputVTK = true,
-                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
-                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+   makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                        const Filter_T & filter, const uint_t checkFrequency,
+                        const bool outputToStream = true, const bool outputVTK = true,
+                        const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    using SC_T = StabilityChecker<Field_T, Filter_T>;
    return shared_ptr< SC_T >( new SC_T( blocks, fieldId, filter, checkFrequency, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
+}
+
+template< typename Field_T, typename Filter_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )>>
+shared_ptr< StabilityChecker< Field_T, Filter_T > >
+   makeStabilityChecker( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                        const Filter_T & filter, const uint_t checkFrequency, CheckFunction_T checkFunction,
+                        const bool outputToStream = true, const bool outputVTK = true,
+                        const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   using SC_T = StabilityChecker<Field_T, Filter_T>;
+   return shared_ptr< SC_T >( new SC_T( blocks, fieldId, filter, checkFrequency, checkFunction, outputToStream, outputVTK, requiredSelectors, incompatibleSelectors ) );
 }
 
 
@@ -577,7 +649,7 @@ inline void stabilityCheckerConfigParser( const shared_ptr< Config > & config, c
                                           std::string & defaultVTKBaseFolder, std::string & defaultVTKExecutionFolder, std::string & defaultVTKIdentifier,
                                           bool & defaultVTKBinary, bool & defaultVTKLittleEndian, bool & defaultVTKMPIIO, bool & defaultVTKForcePVTU )
 {
-   if( !!config )
+   if(config)
       stabilityCheckerConfigParser( config->getGlobalBlock(), configBlockName, defaultCheckFrequency, defaultOutputToStream, defaultOutputVTK,
                                     defaultVTKBaseFolder, defaultVTKExecutionFolder, defaultVTKIdentifier,
                                     defaultVTKBinary, defaultVTKLittleEndian, defaultVTKMPIIO, defaultVTKForcePVTU );
@@ -623,6 +695,20 @@ shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const Config_T &
    WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
 }
 
+template< typename Field_T, typename Config_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )> > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
+shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const Config_T & config,
+                                                               const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
+                                                               CheckFunction_T checkFunction,
+                                                               const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                                                               const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                                                               const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_CONFIG_PARSER( config )
+   using SC_T = StabilityChecker<Field_T>;
+   auto checker = shared_ptr< SC_T >( new SC_T( blocks, fieldId, defaultCheckFrequency, checkFunction, defaultOutputToStream, defaultOutputVTK, requiredSelectors, incompatibleSelectors ) );
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
+}
+
 template< typename Field_T, typename FlagField_T, typename Config_T > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
 shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > >
 makeStabilityChecker( const Config_T & config,
@@ -639,6 +725,23 @@ makeStabilityChecker( const Config_T & config,
    WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
 }
 
+template< typename Field_T, typename FlagField_T, typename Config_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )> > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
+shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > >
+   makeStabilityChecker( const Config_T & config,
+                        const weak_ptr< StructuredBlockStorage > & blocks,
+                        const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
+                        CheckFunction_T checkFunction,
+                        const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                        const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_CONFIG_PARSER( config )
+   using SC_T = StabilityChecker<Field_T, FlagFieldEvaluationFilter<FlagField_T>>;
+   auto checker = shared_ptr< SC_T >( new SC_T( blocks, fieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
+                                              defaultCheckFrequency, checkFunction, defaultOutputToStream, defaultOutputVTK, requiredSelectors, incompatibleSelectors ) );
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
+}
+
 template< typename Field_T, typename Filter_T, typename Config_T > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
 shared_ptr< StabilityChecker< Field_T, Filter_T > >
 makeStabilityChecker( const Config_T & config,
@@ -651,6 +754,22 @@ makeStabilityChecker( const Config_T & config,
    using SC_T = StabilityChecker<Field_T, Filter_T>;
    auto checker = shared_ptr< SC_T >( new SC_T( blocks, fieldId, filter, defaultCheckFrequency, defaultOutputToStream, defaultOutputVTK,
                                                 requiredSelectors, incompatibleSelectors ) );
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
+}
+
+template< typename Field_T, typename Filter_T, typename Config_T, typename CheckFunction_T = std::function<bool ( const typename Field_T::value_type & value )> > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
+shared_ptr< StabilityChecker< Field_T, Filter_T > >
+   makeStabilityChecker( const Config_T & config,
+                        const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId, const Filter_T & filter,
+                        CheckFunction_T checkFunction,
+                        const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                        const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
+                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   WALBERLA_FIELD_MAKE_STABILITY_CHECKER_CONFIG_PARSER( config )
+   using SC_T = StabilityChecker<Field_T, Filter_T>;
+   auto checker = shared_ptr< SC_T >( new SC_T( blocks, fieldId, filter, defaultCheckFrequency, checkFunction, defaultOutputToStream, defaultOutputVTK,
+                                              requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN()
 }
 
