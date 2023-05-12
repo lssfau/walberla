@@ -261,10 +261,15 @@ The StabilityChecker instance can be controlled via the configuration file,
 for more information see \ref docStabilityChecker.
 Since field::makeStabilityChecker returns a shared pointer, we use makeSharedFunctor in order to wrap the shared pointer into an object
 that can be passed to the time loop.
+Note that NaNs are not defined if waLBerla is build using FASTMATH. For this case the field::StabilityChecker accepts
+a checkFunction as input argument. The checkFunction receives a value of the type the field::StabilityChecker is applied on
+and returns a bool. This function is applied on each value on each cell. If no checkFunction is provided a default is used
+which is exactly the one shown in the code below.
 
 \code
+auto checkFunction = [](PdfField_T::value_type value) {return math::finite( value );};
 timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< PdfField_T, FlagField_T >(
-                                     walberlaEnv.config(), blocks, pdfFieldId, flagFieldId, fluidFlagUID ) ),
+                               walberlaEnv.config(), blocks, pdfFieldId, flagFieldId, fluidFlagUID, checkFunction ) ),
                                "LBM stability check" );
 \endcode
 

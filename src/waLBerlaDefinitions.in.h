@@ -16,6 +16,7 @@
 
 // Debugging options
 #cmakedefine WALBERLA_ENABLE_GUI
+#cmakedefine WALBERLA_BUILD_WITH_FASTMATH
 
 
 // External libraries

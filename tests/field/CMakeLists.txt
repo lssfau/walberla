@@ -28,6 +28,9 @@ waLBerla_execute_test( NAME FieldTiming  )
 waLBerla_compile_test( FILES FlagFieldTest.cpp)
 waLBerla_execute_test( NAME FlagFieldTest )
 
+waLBerla_compile_test( FILES StabilityCheckerTest.cpp DEPENDS blockforest field timeloop )
+waLBerla_execute_test( NAME StabilityCheckerTest )
+
 waLBerla_compile_test( FILES interpolators/InterpolationTest.cpp)
 waLBerla_execute_test( NAME InterpolationTest )
 
