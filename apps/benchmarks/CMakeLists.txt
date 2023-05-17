@@ -27,7 +27,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
       add_subdirectory( PhaseFieldAllenCahn )
    endif()
 
-   if ( WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_CUDA )
+   if ( WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_GPU_SUPPORT )
       add_subdirectory( UniformGridGPU )
    endif()
 

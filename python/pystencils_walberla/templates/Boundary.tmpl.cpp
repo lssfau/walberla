@@ -23,7 +23,7 @@
 #include "core/Macros.h"
 #include "{{class_name}}.h"
 {% if target == 'gpu' -%}
-#include "cuda/ErrorChecking.h"
+#include "gpu/ErrorChecking.h"
 {%- endif %}
 
 
@@ -67,7 +67,7 @@ namespace {{namespace}} {
 
 void {{class_name}}::run_impl(
    {{- ["IBlock * block", "IndexVectors::Type type",
-        kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []]
+        kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []]
        | type_identifier_list -}}
 )
 {
@@ -90,21 +90,21 @@ void {{class_name}}::run_impl(
 }
 
 void {{class_name}}::run(
-   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
 )
 {
    run_impl( {{- ["block", "IndexVectors::ALL", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
 }
 
 void {{class_name}}::inner(
-   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
 )
 {
    run_impl( {{- ["block", "IndexVectors::INNER", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
 }
 
 void {{class_name}}::outer(
-   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
 )
 {
    run_impl( {{- ["block", "IndexVectors::OUTER", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );

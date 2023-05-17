@@ -82,6 +82,7 @@ option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation" 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
 option ( WALBERLA_BUILD_WITH_CUDA	        "Enable CUDA support"                                )
+option ( WALBERLA_BUILD_WITH_HIP	           "Enable ROCm HIP support"                            )
 
 
 option ( WALBERLA_BUILD_WITH_FASTMATH       "Fast math"                                          )
@@ -219,8 +220,7 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_NEC )
 
-# Check for Clang compiler
-if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" )
+if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER MATCHES "hipcc" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" )
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" ON  )
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" OFF  )
@@ -1081,6 +1081,10 @@ endif()
 ##
 ############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CUDA )
+    if (WALBERLA_BUILD_WITH_HIP)
+       message(FATAL_ERROR "For GPU support either use CUDA or HIP. Both simultaneously is not supported.")
+    endif()
+
     include(CheckLanguage)
     check_language(CUDA)
     if( CMAKE_CUDA_COMPILER )
@@ -1102,6 +1106,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
         #CUDA_FOUND is need for our cmake mechanism
         set ( CUDA_FOUND TRUE )
+        set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE)
     else()
         message( WARNING "CUDA could not be enabled. The host compiler might not be compatible. Check CMakeFiles/CMakeError.log for more information" )
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
@@ -1125,6 +1130,38 @@ if (WALBERLA_BUILD_WITH_CUDA AND CUDA_FOUND)
 else()
     set(CODEGEN_FILE_SUFFIX "cpp")
 endif()
+############################################################################################################################
+
+
+
+############################################################################################################################
+##
+## ROCm HIP
+##
+############################################################################################################################
+if ( WALBERLA_BUILD_WITH_HIP )
+    if (WALBERLA_BUILD_WITH_CUDA)
+       message(FATAL_ERROR "For GPU support either use CUDA or HIP. Both simultaneously is not supported.")
+    endif()
+    if (${CMAKE_VERSION} VERSION_LESS "3.21.0")
+       message(FATAL_ERROR "For HIP support CMake > 3.21.0 is needed. Please install a newer version")
+    endif()
+
+    include(CheckLanguage)
+    check_language(HIP)
+
+    if( CMAKE_HIP_COMPILER )
+        enable_language(HIP)
+        # since waLBerla also supports CUDA we only use HIP on an AMD platform
+        add_compile_definitions(__HIP_PLATFORM_AMD__)
+        # include_directories(${HSA_HEADER})
+        set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE)
+    else()
+         message("HIP compiler not found. HIP support is not possible")
+        set ( WALBERLA_BUILD_WITH_HIP FALSE )
+    endif ( )
+endif ( )
+
 ############################################################################################################################
 
 

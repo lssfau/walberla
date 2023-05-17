@@ -1,0 +1,170 @@
+namespace walberla{
+
+/**
+\page tutorial_gpu01 Tutorial - GPU 1:  Game of Life on GPU
+
+\section gpu01_overview Overview
+
+In this tutorial, we will implement <a target="_blank" href="http://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a>,
+the algorithm which made cellular automata popular on graphics processing units (GPUs). This tutorial runs on NVIDIA GPUs with CUDA
+but can also run on AMD GPUs using HIP. waLBerla fully supports both libraries.
+For a basic understanding of the GPU support in waLBerla please read \ref gpuPage first.
+
+This tutorial is an extension of \ref tutorial_basics_03 to GPUs.
+
+\section gpu01_fields Creating Fields
+
+To run a simulation on a graphics processing unit (GPU), we have to allocate data on the GPU and
+write a kernel that operates on this data. In this tutorial we first allocate a field on the GPU
+and learn about functionality to transfer data between CPU and GPU fields.
+
+Since initialization and output routines are usually not time critical, they are implemented
+for CPU fields only. In waLBerla we set up the complete simulation using
+CPU fields, copy the initialized fields over to the GPU, do the complete computation there, and, in the
+end, copy everything back to do the output from the CPU field.
+So only the time critical kernels have to be written for GPU.
+
+Thus the setup code of the GPU GameOfLife program is very similar to its CPU version, which was implemented
+in a previous tutorial ( \ref tutorial_basics_03 ).
+One difference is, that fields which are often transferred from/to the GPU should be allocated with
+a different field allocator: gpu::HostFieldAllocator . This allocator uses gpuHostAlloc() instead of "new" ,
+such that the memory is marked "pinned", which means that it is always held in RAM and cannot be swapped out to disk.
+Data transfer from pinned memory is faster than from normal memory. The usage of this allocator is not
+mandatory, the data transfer functions work (slightly slower) also with normally allocated fields.
+
+\code
+ScalarField * createField( IBlock* const block, StructuredBlockStorage* const storage )
+{
+   return new ScalarField (
+            storage->getNumberOfXCells( *block ),   // number of cells in x direction per block
+            storage->getNumberOfYCells( *block ),   // number of cells in y direction per block
+            storage->getNumberOfZCells( *block ),   // number of cells in z direction per block
+            1,                                      // one ghost layer
+            real_t(0),                              // initial value
+            field::fzyx,                            // layout
+            make_shared<gpu::HostFieldAllocator<double> >()  // allocator for host pinned memory
+            );
+}
+\endcode
+
+Now we initialize the CPU field just like in the previous tutorial \ref tutorial_basics03 .
+Then two GPU fields are created: "source" and "destination" field. The helper function
+gpu::addGPUFieldToStorage() creates a gpu::GPUField field of the same size and layout of the given
+CPU field:
+\code
+BlockDataID gpuFieldSrcID = gpu::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
+BlockDataID gpuFieldDstID = gpu::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Dst" );
+\endcode
+The contents of the new GPU fields are initialized with the contents of the given CPU field.
+
+
+
+\section cuda01_kernels Writing and calling CUDA kernels
+
+After reading this page you should know what a FieldAccessor is and how to call GPU. So we can now start with writing
+a kernel for the Game of Life algorithm. We place this in a separate file with ".cu" extension (This is basically
+the only part that is different between CUDA and HIP).
+The build system then automatically detects that this file should be compiled with the CUDA C++ compiler.
+
+The kernel gets two field accessors as arguments, one for the source and one for the destination field.
+Both accessors have to be configured using the variables blockIdx and threadIdx from the CUDA or HIP library, such that afterwards
+the get() and getNeighbor() functions of the accessor class can work correctly.
+\code
+__global__ void gameOfLifeKernel( gpu::FieldAccessor<double> src, gpu::FieldAccessor<double> dst  )
+{
+   src.set( blockIdx, threadIdx );
+   dst.set( blockIdx, threadIdx );
+   int liveNeighbors = 0;
+   if ( src.getNeighbor(  1, 0,0 ) > 0.5 ) ++liveNeighbors;
+   if ( src.getNeighbor( -1, 0,0 ) > 0.5 ) ++liveNeighbors;
+   // normal Game of Life algorithm ....
+   // ...
+}
+\endcode
+
+To call this kernel we create a gpu::FieldIndexing object that receives a pointer to GPU fields. With this
+the blockDim and gridDim can be obtained as well as gpuAccess objects that contain the neighbouring information needed inside the GPU kernel.
+The kernel can be called normally with the three angle brackets.
+
+\code
+   auto srcCudaField = block->getData< gpu::GPUField<real_t> > ( gpuFieldSrcID_ );
+   auto dstCudaField = block->getData< gpu::GPUField<real_t> > ( gpuFieldDstID_ );
+
+   auto srcIndexing = gpu::FieldIndexing<real_t>::xyz( *srcCudaField );
+   auto dstIndexing = gpu::FieldIndexing<real_t>::xyz( *dstCudaField );
+
+   auto srcAccess = srcIndexing.gpuAccess();
+   auto dstAccess = dstIndexing.gpuAccess();
+
+   const dim3 gridDim = srcIndexing.gridDim();
+   const dim3 blockDim = srcIndexing.blockDim();
+
+   gameOfLifeKernel<<<gridDim, blockDim, 0, nullptr >>>(srcAccess, dstAccess );
+
+   srcCudaField->swapDataPointers( dstCudaField );
+\endcode
+
+All the computations are done on the GPU. The CPU field is not updated automatically! It was just used for
+setup reasons.
+
+\section gpu01_vtk VTK Output
+
+To see if our kernel works, we create a VTK writer. The VTK writer works on the CPU field. Thus it works exactly as in other
+examples. However, since our data is on GPU we need a `addBeforeFunction` that copies our data from host to device. This is done using the gpu::fieldCpyFunctor.
+Note that copying data is costly and thus we don't want to do this in every timestep usually. In this example it is only done every second timestep.
+
+\code
+   const uint_t vtkWriteFrequency = 2;
+   if (vtkWriteFrequency > 0)
+   {
+      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency);
+      vtkOutput->addBeforeFunction(gpu::fieldCpyFunctor<ScalarField, GPUField >(blocks, cpuFieldID, gpuFieldDstID));
+
+      auto dataWriter = make_shared< field::VTKWriter< ScalarField > >(cpuFieldID, "output");
+      vtkOutput->addCellDataWriter(dataWriter);
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+   }
+\endcode
+
+\section gpu01_comm Communication
+
+For this tutorial we use the gpu::communication::UniformGPUScheme that first collects all data in a buffer and
+sends only one message per communication step and neighbor. For the PackInfo we use the MemcpyPackInfo. It receives
+a buffer located on the GPU and fills it using memcpy operations
+If the GPU library is build with MPI support this buffer can be send to other GPUs without a copy to the CPU.
+Otherwise the copying will be done in the back by the communication class.
+
+\code
+    using CommScheme = gpu::communication::UniformGPUScheme<stencil::D2Q9 > ;
+    using Packing = gpu::communication::MemcpyPackInfo<GPUField> ;
+    const bool sendDirectlyFromGPU = false;
+    CommScheme commScheme(blocks, sendDirectlyFromGPU);
+    commScheme.addPackInfo( make_shared<Packing>(gpuFieldSrcID) );
+\endcode
+
+\section gpu01_running Running the simulation
+
+To run the simulation we would like to point out a few common pitfalls to avoid. Basically it works very similar than the
+CPU equivalent. Since all Sweeps and Function calls are registered by the timeloop we can run the simulation using
+`timeloop.run();`. However, it is important to point out that kernel calls are asynchronous. Thus for time measurement purpose
+we need to make sure that all kernels are executed before stopping the timer. This can be done using `gpuDeviceSynchronize`.
+For good measure we also run this function right before starting the timer.
+
+\code
+   WcTimer simTimer;
+   WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
+   simTimer.start();
+   timeloop.run();
+   WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
+   simTimer.end();
+   WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
+   auto time      = real_c(simTimer.last());
+   WALBERLA_LOG_RESULT_ON_ROOT("Game of life tutorial finished. Elapsed time " << time)
+\endcode
+
+\image html GameOfLifeGPU.png
+
+*/
+
+
+}

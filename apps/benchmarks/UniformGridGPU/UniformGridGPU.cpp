@@ -27,13 +27,6 @@
 #include "core/timing/RemainingTimeLogger.h"
 #include "core/timing/TimingPool.h"
 
-#include "cuda/AddGPUFieldToStorage.h"
-#include "cuda/DeviceSelectMPI.h"
-#include "cuda/FieldCopy.h"
-#include "cuda/ParallelStreams.h"
-#include "cuda/communication/UniformGPUScheme.h"
-#include "cuda/lbm/CombinedInPlaceGpuPackInfo.h"
-
 #include "field/AddToStorage.h"
 #include "field/FlagField.h"
 #include "field/communication/PackInfo.h"
@@ -53,20 +46,27 @@
 
 #include "InitShearVelocity.h"
 #include "UniformGridGPU_InfoHeader.h"
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/DeviceSelectMPI.h"
+#include "gpu/FieldCopy.h"
+#include "gpu/GPUWrapper.h"
+#include "gpu/ParallelStreams.h"
+#include "gpu/communication/UniformGPUScheme.h"
+#include "gpu/lbm/CombinedInPlaceGpuPackInfo.h"
 using namespace walberla;
 
 using FlagField_T = FlagField< uint8_t >;
 
 int main(int argc, char** argv)
 {
-   mpi::Environment env(argc, argv);
-   cuda::selectDeviceBasedOnMpiRank();
+   mpi::Environment const env(argc, argv);
+   gpu::selectDeviceBasedOnMpiRank();
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {
       WALBERLA_MPI_WORLD_BARRIER()
 
-      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+      WALBERLA_GPU_CHECK(gpuPeekAtLastError())
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                        SETUP AND CONFIGURATION                                             ///
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
       const bool initShearFlow = parameters.getParameter< bool >("initShearFlow", true);
 
       // Creating fields
-      BlockDataID pdfFieldCpuID =
+      BlockDataID const pdfFieldCpuID =
          field::addToStorage< PdfField_T >(blocks, "pdfs cpu", real_c(std::nan("")), field::fzyx);
       BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
 
@@ -96,10 +96,10 @@ int main(int argc, char** argv)
          initShearVelocity(blocks, velFieldCpuID);
       }
 
-      BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldCpuID, "pdfs on GPU", true);
+      BlockDataID const pdfFieldGpuID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldCpuID, "pdfs on GPU", true);
       // Velocity field is copied to the GPU
       BlockDataID velFieldGpuID =
-         cuda::addGPUFieldToStorage< VelocityField_T >(blocks, velFieldCpuID, "velocity on GPU", true);
+         gpu::addGPUFieldToStorage< VelocityField_T >(blocks, velFieldCpuID, "velocity on GPU", true);
 
       pystencils::UniformGridGPU_MacroSetter setterSweep(pdfFieldGpuID, velFieldGpuID);
 
@@ -116,14 +116,14 @@ int main(int argc, char** argv)
          { WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock") }
       }
 
-      Cell innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
-      bool cudaEnabledMPI = parameters.getParameter< bool >("cudaEnabledMPI", false);
+      Cell const innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
+      bool const cudaEnabledMPI = parameters.getParameter< bool >("cudaEnabledMPI", false);
       Vector3< int32_t > gpuBlockSize =
          parameters.getParameter< Vector3< int32_t > >("gpuBlockSize", Vector3< int32_t >(256, 1, 1));
 
       int streamHighPriority = 0;
       int streamLowPriority  = 0;
-      WALBERLA_CUDA_CHECK(cudaDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority))
+      WALBERLA_GPU_CHECK(gpuDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority))
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                      LB SWEEPS AND BOUNDARY HANDLING                                       ///
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
       using LbSweep      = lbm::UniformGridGPU_LbKernel;
       using PackInfoEven = lbm::UniformGridGPU_PackInfoEven;
       using PackInfoOdd  = lbm::UniformGridGPU_PackInfoOdd;
-      using cuda::communication::UniformGPUScheme;
+      using gpu::communication::UniformGPUScheme;
 
       LbSweep lbSweep(pdfFieldGpuID, omega, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2], innerOuterSplitCell);
       lbSweep.setOuterPriority(streamHighPriority);
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
-      BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
+      BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
       auto boundariesConfig   = config->getBlock("Boundaries");
       bool boundaries         = false;
       if (boundariesConfig)
@@ -174,19 +174,19 @@ int main(int argc, char** argv)
       ///                                          TIME STEP DEFINITIONS                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      auto defaultStream = cuda::StreamRAII::newPriorityStream(streamLowPriority);
+      auto defaultStream = gpu::StreamRAII::newPriorityStream(streamLowPriority);
 
-      auto boundarySweep = [&](IBlock* block, uint8_t t, cudaStream_t stream) {
+      auto boundarySweep = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
          noSlip.run(block, t, stream);
          ubb.run(block, t, stream);
       };
 
-      auto boundaryInner = [&](IBlock* block, uint8_t t, cudaStream_t stream) {
+      auto boundaryInner = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
          noSlip.inner(block, t, stream);
          ubb.inner(block, t, stream);
       };
 
-      auto boundaryOuter = [&](IBlock* block, uint8_t t, cudaStream_t stream) {
+      auto boundaryOuter = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
          noSlip.outer(block, t, stream);
          ubb.outer(block, t, stream);
       };
@@ -270,7 +270,7 @@ int main(int argc, char** argv)
       timeLoop.add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
 
       // VTK
-      uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
@@ -278,8 +278,7 @@ int main(int argc, char** argv)
          auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >(velFieldCpuID, "vel");
          vtkOutput->addCellDataWriter(velWriter);
 
-         vtkOutput->addBeforeFunction([&]() {
-            cuda::fieldCpy< VelocityField_T, cuda::GPUField< real_t > >(blocks, velFieldCpuID, velFieldGpuID);
+         vtkOutput->addBeforeFunction([&]() { gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldCpuID, velFieldGpuID);
          });
          timeLoop.addFuncAfterTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
@@ -288,12 +287,12 @@ int main(int argc, char** argv)
       ///                                               BENCHMARK                                                    ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      int warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
-      int outerIterations = parameters.getParameter< int >("outerIterations", 1);
+      int const warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
+      int const outerIterations = parameters.getParameter< int >("outerIterations", 1);
       for (int i = 0; i < warmupSteps; ++i)
          timeLoop.singleStep();
 
-      double remainingTimeLoggerFrequency =
+      real_t const remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {
@@ -304,16 +303,16 @@ int main(int argc, char** argv)
 
       for (int outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
       {
-         WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+         WALBERLA_GPU_CHECK(gpuPeekAtLastError())
 
          timeLoop.setCurrentTimeStepToZero();
          WcTimer simTimer;
-         cudaDeviceSynchronize();
-         WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+         WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
+         WALBERLA_GPU_CHECK(gpuPeekAtLastError())
          WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
          simTimer.start();
          timeLoop.run();
-         cudaDeviceSynchronize();
+         WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
          simTimer.end();
          WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
          auto time      = real_c(simTimer.last());
@@ -340,5 +339,5 @@ int main(int argc, char** argv)
       }
    }
 
-   return 0;
+   return EXIT_SUCCESS;
 }

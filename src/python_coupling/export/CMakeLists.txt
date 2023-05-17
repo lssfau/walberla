@@ -2,7 +2,8 @@ target_sources( python_coupling
     PRIVATE
     GatherExport.impl.h
     VTKExport.cpp
-    CUDAExport.h
+    GPUExport.h
+    GPUExport.impl.h
     FieldCommunicationExport.impl.h
     BasicExport.cpp
     BlockForestCommunicationExport.h
@@ -16,5 +17,4 @@ target_sources( python_coupling
     BasicExport.h
     FieldExport.impl.h
     FieldExports.h
-    CUDAExport.impl.h     
     )

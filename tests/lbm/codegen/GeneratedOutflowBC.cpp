@@ -70,12 +70,12 @@ Vector3< real_t > ShearProfile::operator()( const Cell& pos, const shared_ptr< S
 {
    Cell globalCell;
    CellInterval domain = SbF->getDomainCellBB();
-   real_t h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
+   real_t const h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
    SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
 
-   real_t u = inflow_velocity_ * (real_c(globalCell[1]) / h_y);
+   real_t const u = inflow_velocity_ * (real_c(globalCell[1]) / h_y);
 
-   Vector3< real_t > result(u, 0.0, 0.0);
+   Vector3< real_t > const result(u, 0.0, 0.0);
    return result;
 }
 
@@ -96,15 +96,12 @@ int main(int argc, char** argv)
    const real_t u_max     = parameters.getParameter< real_t >("u_max", real_c(0.05));
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
-   const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
-
    // create fields
    BlockDataID pdfFieldID     = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "PDFs");
    BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
-   BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(0.0), field::fzyx);
+   BlockDataID const densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(0.0), field::fzyx);
 
-   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+   BlockDataID const flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    pystencils::GeneratedOutflowBC_MacroSetter setterSweep(pdfFieldID, velFieldID);
    for (auto& block : *blocks)
@@ -115,7 +112,7 @@ int main(int argc, char** argv)
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock("Boundaries");
 
-   ShearProfile velocityCallback{u_max};
+   ShearProfile const velocityCallback{u_max};
    std::function< Vector3< real_t >(const Cell&, const shared_ptr< StructuredBlockForest >&, IBlock&) >
       velocity_initialisation = velocityCallback;
 
@@ -148,12 +145,8 @@ int main(int argc, char** argv)
    timeloop.add() << Sweep(outflow, "outflow boundary");
    timeloop.add() << Sweep(UpdateSweep, "LB stream & collide");
 
-   // log remaining time
-   timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
-                                 "remaining time logger");
-
    // VTK Writer
-   uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+   uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
    if (vtkWriteFrequency > 0)
    {
       auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "GeneratedOutflowBC_VTK", vtkWriteFrequency, 0, false,
@@ -170,7 +163,7 @@ int main(int argc, char** argv)
    timeloop.run();
 
    CellInterval domain = blocks->getDomainCellBB();
-   real_t h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
+   real_t const h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
    for (auto& block : *blocks)
    {
       auto velField = block.getData<VelocityField_T>(velFieldID);

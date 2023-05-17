@@ -1,5 +1,3 @@
-import jinja2
-
 # For backward compatibility with version < 3.0.0
 try:
     from jinja2 import pass_context as jinja2_context_decorator
@@ -58,7 +56,7 @@ def translate_target(target):
 
 def make_field_type(dtype, f_size, is_gpu):
     if is_gpu:
-        return f"cuda::GPUField<{dtype}>"
+        return f"gpu::GPUField<{dtype}>"
     else:
         return f"field::GhostLayerField<{dtype}, {f_size}>"
 
@@ -236,7 +234,7 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
         cell_interval: Defines the name (string) of a walberla CellInterval object in scope,
                        that defines the inner region for the kernel to loop over. Parameter has to be left to default
                        if ghost_layers_to_include is specified.
-        stream: optional name of cuda stream variable
+        stream: optional name of gpu stream variable
         spatial_shape_symbols: relevant only for gpu kernels - to determine CUDA block and grid sizes the iteration
                                region (i.e. field shape) has to be known. This can normally be inferred by the kernel
                                parameters - however in special cases like boundary conditions a manual specification
@@ -305,21 +303,21 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
                 coord_set = set(coordinates)
                 coord_set = sorted(coord_set, key=lambda e: str(e))
                 for c in coord_set:
-                    kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({c}, -{actual_gls});")
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({c}, -{actual_gls})")
                 while len(coordinates) < 4:
                     coordinates.append(0)
                 coordinates = tuple(coordinates)
                 kernel_call_lines.append(f"{param.symbol.dtype} {param.symbol.name} = {param.field_name}->dataAt"
                                          f"({coordinates[0]}, {coordinates[1]}, {coordinates[2]}, {coordinates[3]});")
                 if assume_inner_stride_one and field.index_dimensions > 0:
-                    kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({param.field_name}->layout(), field::fzyx);")
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({param.field_name}->layout(), field::fzyx)")
                 if instruction_set and assume_aligned:
                     if nontemporal and cpu_openmp and 'cachelineZero' in instruction_set:
                         kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
-                                                 f"{instruction_set['cachelineSize']}, 0);")
+                                                 f"{instruction_set['cachelineSize']}, 0)")
                     else:
                         kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
-                                                 f"{instruction_set['bytes']}, 0);")
+                                                 f"{instruction_set['bytes']}, 0)")
         elif param.is_field_stride:
             casted_stride = get_field_stride(param)
             type_str = param.symbol.dtype.c_name
@@ -331,17 +329,17 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             shape = f"{type_str}({get_end_coordinates(field)[coord]})"
             assert coord < 3
             max_value = f"{field.name}->{('x', 'y', 'z')[coord]}SizeWithGhostLayer()"
-            kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({max_value}, {shape});")
+            kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({max_value}, {shape})")
             kernel_call_lines.append(f"const {type_str} {param.symbol.name} = {shape};")
             if assume_inner_stride_one and field.index_dimensions > 0:
-                kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({field.name}->layout(), field::fzyx);")
+                kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({field.name}->layout(), field::fzyx)")
             if instruction_set and assume_aligned:
                 if nontemporal and cpu_openmp and 'cachelineZero' in instruction_set:
                     kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
-                                             f"{instruction_set['cachelineSize']}, 0);")
+                                             f"{instruction_set['cachelineSize']}, 0)")
                 else:
                     kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
-                                             f"{instruction_set['bytes']}, 0);")
+                                             f"{instruction_set['bytes']}, 0)")
 
     kernel_call_lines.append(kernel.generate_kernel_invocation_code(stream=stream,
                                                                     spatial_shape_symbols=spatial_shape_symbols))
@@ -357,11 +355,15 @@ def generate_swaps(kernel_info):
     return swaps
 
 
+# TODO: basically 3 times the same code :(
 def generate_constructor_initializer_list(kernel_info, parameters_to_ignore=None):
     if parameters_to_ignore is None:
         parameters_to_ignore = []
 
-    parameters_to_ignore += kernel_info.temporary_fields
+    varying_parameter_names = []
+    if hasattr(kernel_info, 'varying_parameters'):
+        varying_parameter_names = tuple(e[1] for e in kernel_info.varying_parameters)
+    parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
 
     parameter_initializer_list = []
     # First field pointer

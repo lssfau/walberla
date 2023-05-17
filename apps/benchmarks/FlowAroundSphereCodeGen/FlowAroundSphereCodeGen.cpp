@@ -37,13 +37,13 @@
 #include "timeloop/all.h"
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-#   include "cuda/AddGPUFieldToStorage.h"
-#   include "cuda/DeviceSelectMPI.h"
-#   include "cuda/HostFieldAllocator.h"
-#   include "cuda/NVTX.h"
-#   include "cuda/ParallelStreams.h"
-#   include "cuda/communication/GPUPackInfo.h"
-#   include "cuda/communication/UniformGPUScheme.h"
+#   include "gpu/AddGPUFieldToStorage.h"
+#   include "gpu/DeviceSelectMPI.h"
+#   include "gpu/HostFieldAllocator.h"
+#   include "gpu/NVTX.h"
+#   include "gpu/ParallelStreams.h"
+#   include "gpu/communication/GPUPackInfo.h"
+#   include "gpu/communication/UniformGPUScheme.h"
 #endif
 
 // CodeGen includes
@@ -58,7 +58,7 @@ typedef walberla::uint8_t flag_t;
 typedef FlagField< flag_t > FlagField_T;
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-typedef cuda::GPUField< real_t > GPUField;
+typedef gpu::GPUField< real_t > GPUField;
 #endif
 
 using namespace std::placeholders;
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 {
    walberla::Environment walberlaEnv(argc, argv);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-   cuda::selectDeviceBasedOnMpiRank();
+   gpu::selectDeviceBasedOnMpiRank();
 #endif
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
@@ -157,8 +157,8 @@ int main(int argc, char** argv)
       const uint_t diameter_sphere = parameters.getParameter< uint_t >("diameter_sphere", uint_t(5));
       const bool constant_inflow = parameters.getParameter< bool >("constant_inflow", true);
 
-      const double remainingTimeLoggerFrequency =
-         parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+      const real_t remainingTimeLoggerFrequency =
+         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
       // create fields
       BlockDataID pdfFieldID     = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "PDFs");
@@ -166,11 +166,11 @@ int main(int argc, char** argv)
       BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(0.0), field::fzyx);
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      BlockDataID pdfFieldIDGPU = cuda::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "PDFs on GPU", true);
+      BlockDataID pdfFieldIDGPU = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "PDFs on GPU", true);
       BlockDataID velFieldIDGPU =
-         cuda::addGPUFieldToStorage< VelocityField_T >(blocks, velFieldID, "velocity on GPU", true);
+         gpu::addGPUFieldToStorage< VelocityField_T >(blocks, velFieldID, "velocity on GPU", true);
       BlockDataID densityFieldIDGPU =
-         cuda::addGPUFieldToStorage< ScalarField_T >(blocks, densityFieldID, "density on GPU", true);
+         gpu::addGPUFieldToStorage< ScalarField_T >(blocks, densityFieldID, "density on GPU", true);
 #endif
 
       BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
       pystencils::FlowAroundSphereCodeGen_MacroSetter setterSweep(pdfFieldIDGPU, velFieldIDGPU);
       for (auto& block : *blocks)
          setterSweep(&block);
-      cuda::fieldCpy< PdfField_T, GPUField >(blocks, pdfFieldID, pdfFieldIDGPU);
+      gpu::fieldCpy< PdfField_T, GPUField >(blocks, pdfFieldID, pdfFieldIDGPU);
 #else
       pystencils::FlowAroundSphereCodeGen_MacroSetter setterSweep(pdfFieldID, velFieldID);
       for (auto& block : *blocks)
@@ -192,11 +192,11 @@ int main(int argc, char** argv)
       // This way of using alternating pack infos is temporary and will soon be replaced
       // by something more straight-forward
 
-      cuda::communication::UniformGPUScheme< Stencil_T > comEven(blocks, false);
+      gpu::communication::UniformGPUScheme< Stencil_T > comEven(blocks, false);
       comEven.addPackInfo(make_shared< PackInfoEven_T >(pdfFieldIDGPU));
       auto evenComm = std::function< void() >([&]() { comEven.communicate(nullptr); });
 
-      cuda::communication::UniformGPUScheme< Stencil_T > comODD(blocks, false);
+      gpu::communication::UniformGPUScheme< Stencil_T > comODD(blocks, false);
       comODD.addPackInfo(make_shared< PackInfoOdd_T >(pdfFieldIDGPU));
       auto oddComm = std::function< void() >([&]() { comODD.communicate(nullptr); });
 #else
@@ -270,8 +270,8 @@ int main(int argc, char** argv)
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
          vtkOutput->addBeforeFunction([&]() {
-            cuda::fieldCpy< VelocityField_T, GPUField >(blocks, velFieldID, velFieldIDGPU);
-            cuda::fieldCpy< ScalarField_T, GPUField >(blocks, densityFieldID, densityFieldIDGPU);
+            gpu::fieldCpy< VelocityField_T, GPUField >(blocks, velFieldID, velFieldIDGPU);
+            gpu::fieldCpy< ScalarField_T, GPUField >(blocks, densityFieldID, densityFieldIDGPU);
          });
 #endif
          auto velWriter     = make_shared< field::VTKWriter< VelocityField_T > >(velFieldID, "velocity");

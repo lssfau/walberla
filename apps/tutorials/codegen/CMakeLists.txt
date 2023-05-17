@@ -24,25 +24,19 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                     DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 02_LBMLatticeModelGenerationPython )
 
     #   Tutorial 3: Advanced lbmpy Code Generation
-    if(WALBERLA_BUILD_WITH_CUDA)
-        walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
-            FILE 03_AdvancedLBMCodegen.py
-            OUT_FILES   CumulantMRTSweep.cu CumulantMRTSweep.h
-                        CumulantMRTPackInfo.cu CumulantMRTPackInfo.h
-                        InitialPDFsSetter.cu InitialPDFsSetter.h
-                        CumulantMRTNoSlip.cu CumulantMRTNoSlip.h)
 
+    walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
+        FILE 03_AdvancedLBMCodegen.py
+        OUT_FILES   CumulantMRTSweep.${CODEGEN_FILE_SUFFIX} CumulantMRTSweep.h
+                    CumulantMRTPackInfo.${CODEGEN_FILE_SUFFIX} CumulantMRTPackInfo.h
+                    InitialPDFsSetter.${CODEGEN_FILE_SUFFIX} InitialPDFsSetter.h
+                    CumulantMRTNoSlip.${CODEGEN_FILE_SUFFIX} CumulantMRTNoSlip.h)
+
+    if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
         walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
                         FILES 03_AdvancedLBMCodegen.cpp
-                        DEPENDS blockforest cuda core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )
+                        DEPENDS blockforest gpu core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )
     else()
-        walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
-                FILE 03_AdvancedLBMCodegen.py
-                OUT_FILES   CumulantMRTSweep.cpp CumulantMRTSweep.h
-                CumulantMRTPackInfo.cpp CumulantMRTPackInfo.h
-                InitialPDFsSetter.cpp InitialPDFsSetter.h
-                CumulantMRTNoSlip.cpp CumulantMRTNoSlip.h)
-
         walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
                 FILES 03_AdvancedLBMCodegen.cpp
                 DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )

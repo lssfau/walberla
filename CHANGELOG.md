@@ -13,6 +13,11 @@
   - Add support for more shapes, e.g., convex polyhedron
 - MESA_PD:
    - Add extensive application for dense particle packing generation
+- AMD - HIP support
+  - Support of the ROCm Toolchain and thus AMD HIP as second GPU language
+  - All CUDA related files, namespaces, folders etc are renamed to gpu.
+  - Include "GPUWrapper.h" to use general GPU functions cudaMalloc -> gpuMalloc
+  - WALBERLA_BUILD_WITH_HIP and WALBERLA_BUILD_WITH_GPU_SUPPORT as new CMake variables introduced
 
 ### Changed
 - Update and extend phase-field LBM showcases

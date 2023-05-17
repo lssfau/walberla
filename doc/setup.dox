@@ -68,6 +68,8 @@ WALBERLA_BUILD_WITH_OPENMP         |    OFF   | Enables/Disables OpenMP support 
 WALBERLA_BUILD_TESTS		       |	OFF   | If enabled, all tests are built when running make in the root build folder. But you can always go to a specific directory in your test folder and manually run make.
 WALBERLA_BUILD_BENCHMARKS          |	ON    | Enables/Disables the automatic build of all benchmarks located in "apps/benchmarks".  
 WALBERLA_BUILD_WITH_PYTHON         |	OFF   | Enables Python Support inside waLBerla (embedded Python). Then you can use Python scripts as configuration files and start an embedded python interpreter that can access waLBerla data structures. This builds a shared library (and python module) walberla_cpp.so in "apps/pythonmodule" so that you can use walberla from python.
+WALBERLA_BUILD_WITH_CUDA           |    OFF   | Enables/Disables support to run waLBerla on NVIDIA GPUs.
+WALBERLA_BUILD_WITH_HIP            |    OFF   | Enables/Disables support to run waLBerla on AMD GPUs.
 
 For a list of all switches, see CMakeLists.txt in the root source folder.
 

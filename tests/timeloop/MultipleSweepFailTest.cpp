@@ -41,7 +41,7 @@ namespace MultipleSweepFailTest
 int main(int argc, char** argv)
 {
    debug::enterTestMode();
-   mpi::Environment env(argc, argv);
+   mpi::Environment const env(argc, argv);
 
    const std::shared_ptr< StructuredBlockForest > blockForest = blockforest::createUniformBlockGrid(
       uint_c(1), uint_c(1), uint_c(1), uint_c(1), uint_c(1), uint_c(1), real_c(1), false, false, false, false);

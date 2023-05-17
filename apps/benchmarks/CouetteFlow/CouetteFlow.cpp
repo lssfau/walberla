@@ -773,7 +773,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // remaining time logger
 
-   const double remainingTimeLoggerFrequency = configBlock.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 );
+   const real_t remainingTimeLoggerFrequency = configBlock.getParameter< real_t >( "remainingTimeLoggerFrequency", real_c(3.0) );
    timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "Remaining time logger" );
 
    // logging right before the simulation starts

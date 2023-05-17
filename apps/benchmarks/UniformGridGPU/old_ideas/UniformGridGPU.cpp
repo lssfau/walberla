@@ -14,15 +14,15 @@
 #include "timeloop/all.h"
 #include "core/math/Random.h"
 #include "geometry/all.h"
-#include "cuda/HostFieldAllocator.h"
-#include "cuda/communication/GPUPackInfo.h"
-#include "cuda/ParallelStreams.h"
-#include "cuda/NVTX.h"
+#include "gpu/HostFieldAllocator.h"
+#include "gpu/communication/GPUPackInfo.h"
+#include "gpu/ParallelStreams.h"
+#include "gpu/NVTX.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/RemainingTimeLogger.h"
-#include "cuda/AddGPUFieldToStorage.h"
-#include "cuda/communication/UniformGPUScheme.h"
-#include "cuda/DeviceSelectMPI.h"
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/communication/UniformGPUScheme.h"
+#include "gpu/DeviceSelectMPI.h"
 #include "domain_decomposition/SharedSweep.h"
 
 #include "UniformGridGPU_LatticeModel.h"
@@ -48,7 +48,7 @@ const auto Q = LatticeModel_T::Stencil::Q;
 using Stencil_T = LatticeModel_T::Stencil;
 using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
 using PdfField_T = GhostLayerField<real_t, Q>;
-using CommScheme_T = cuda::communication::UniformGPUScheme<CommunicationStencil_T>;
+using CommScheme_T = gpu::communication::UniformGPUScheme<CommunicationStencil_T>;
 using VelocityField_T = GhostLayerField<real_t, 3>;
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
@@ -56,7 +56,7 @@ using FlagField_T = FlagField<flag_t>;
 int main( int argc, char **argv )
 {
    mpi::Environment env( argc, argv );
-   cuda::selectDeviceBasedOnMpiRank();
+   gpu::selectDeviceBasedOnMpiRank();
 
    for( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
    {
@@ -96,7 +96,7 @@ int main( int argc, char **argv )
           initialComm();
       }
 
-      BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage<PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
+      BlockDataID pdfFieldGpuID = gpu::addGPUFieldToStorage<PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
 
@@ -155,13 +155,13 @@ int main( int argc, char **argv )
                                                     gpuBlockSize[0], gpuBlockSize[1],
                                                     Cell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]) );
       lbKernel.setOuterPriority( streamHighPriority );
-      UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
+      UniformGridGPU_Communication< CommunicationStencil_T, gpu::GPUField< double > >
          gpuComm( blocks, pdfFieldGpuID, (CommunicationSchemeType) communicationScheme, cudaEnabledMPI );
 
-      auto defaultStream = cuda::StreamRAII::newPriorityStream( streamLowPriority );
-      auto innerOuterStreams = cuda::ParallelStreams( streamHighPriority );
-      auto boundaryOuterStreams = cuda::ParallelStreams( streamHighPriority );
-      auto boundaryInnerStreams = cuda::ParallelStreams( streamHighPriority );
+      auto defaultStream = gpu::StreamRAII::newPriorityStream( streamLowPriority );
+      auto innerOuterStreams = gpu::ParallelStreams( streamHighPriority );
+      auto boundaryOuterStreams = gpu::ParallelStreams( streamHighPriority );
+      auto boundaryInnerStreams = gpu::ParallelStreams( streamHighPriority );
 
       uint_t currentTimeStep = 0;
 
@@ -177,12 +177,12 @@ int main( int argc, char **argv )
 
       auto overlapTimeStep = [&]()
       {
-         cuda::NvtxRange namedRange("timestep");
+         gpu::NvtxRange namedRange("timestep");
          auto innerOuterSection = innerOuterStreams.parallelSection( defaultStream );
 
          innerOuterSection.run([&]( auto innerStream )
          {
-            cuda::nameStream(innerStream, "inner stream");
+            gpu::nameStream(innerStream, "inner stream");
             for( auto &block: *blocks )
             {
                if(!disableBoundaries)
@@ -197,7 +197,7 @@ int main( int argc, char **argv )
 
          innerOuterSection.run([&]( auto outerStream )
          {
-            cuda::nameStream(outerStream, "outer stream");
+            gpu::nameStream(outerStream, "outer stream");
             gpuComm( outerStream );
 
             for( auto &block: *blocks )
@@ -215,7 +215,7 @@ int main( int argc, char **argv )
       };
 
 
-      auto boundaryStreams = cuda::ParallelStreams( streamHighPriority );
+      auto boundaryStreams = gpu::ParallelStreams( streamHighPriority );
       auto normalTimeStep = [&]()
       {
          gpuComm();
@@ -268,7 +268,7 @@ int main( int argc, char **argv )
          auto velWriter = make_shared< field::VTKWriter<VelocityField_T> >(velFieldCpuID, "vel");
          vtkOutput->addCellDataWriter(velWriter);
          vtkOutput->addBeforeFunction( [&]() {
-             cuda::fieldCpy<PdfField_T, cuda::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID );
+             gpu::fieldCpy<PdfField_T, gpu::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID );
              for( auto & block : *blocks )
                  getterSweep( &block );
          });

@@ -64,7 +64,7 @@ auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage* const stora
 
 int main(int argc, char** argv)
 {
-   mpi::Environment env(argc, argv);
+   mpi::Environment const env(argc, argv);
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
       // Creating fields
       BlockDataID pdfFieldId = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "pdfs");
       BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
-      BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
+      BlockDataID const densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
 
       // Initialize velocity on cpu
       if (initShearFlow)
@@ -111,14 +111,14 @@ int main(int argc, char** argv)
             WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock")
          }
       }
-      Cell innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
+      Cell const innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
 
       LbSweep lbSweep(pdfFieldId, omega, innerOuterSplitCell);
       pystencils::UniformGridCPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldId);
 
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
-      BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
+      BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
       auto boundariesConfig   = config->getBlock("Boundaries");
       bool boundaries         = false;
       if (boundariesConfig)
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
 
       timeLoop.add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
 
-      uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
@@ -264,12 +264,12 @@ int main(int argc, char** argv)
       ///                                               BENCHMARK                                                    ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      int warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
-      int outerIterations = parameters.getParameter< int >("outerIterations", 1);
+      int const warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
+      int const outerIterations = parameters.getParameter< int >("outerIterations", 1);
       for (int i = 0; i < warmupSteps; ++i)
          timeLoop.singleStep();
 
-      real_t remainingTimeLoggerFrequency =
+      real_t const remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {

@@ -1,9 +1,11 @@
-#include "stencil/Directions.h"
-#include "core/cell/CellInterval.h"
-#include "cuda/GPUField.h"
 #include "core/DataTypes.h"
-#include "{{class_name}}.h"
+#include "core/cell/CellInterval.h"
 
+#include "stencil/Directions.h"
+
+#include "gpu/GPUField.h"
+#include "gpu/GPUWrapper.h"
+#include "{{class_name}}.h"
 
 {% if target is equalto 'cpu' -%}
 #define FUNC_PREFIX
@@ -29,7 +31,7 @@ using walberla::stencil::Direction;
 
 
 
-void {{class_name}}::pack(Direction dir, unsigned char * byte_buffer, IBlock * block, cudaStream_t stream)
+void {{class_name}}::pack(Direction dir, unsigned char * byte_buffer, IBlock * block, gpuStream_t stream)
 {
     {{dtype}} * buffer = reinterpret_cast<{{dtype}}*>(byte_buffer);
 
@@ -59,7 +61,7 @@ void {{class_name}}::pack(Direction dir, unsigned char * byte_buffer, IBlock * b
 }
 
 
-void {{class_name}}::unpack(Direction dir, unsigned char * byte_buffer, IBlock * block, cudaStream_t stream)
+void {{class_name}}::unpack(Direction dir, unsigned char * byte_buffer, IBlock * block, gpuStream_t stream)
 {
     {{dtype}} * buffer = reinterpret_cast<{{dtype}}*>(byte_buffer);
 

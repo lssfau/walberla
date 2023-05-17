@@ -114,16 +114,16 @@ int main(int argc, char** argv)
 
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
-   const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
+   const real_t remainingTimeLoggerFrequency =
+      parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    ///////////////////
    /// Field Setup ///
    ///////////////////
 
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
-   BlockDataID pdfFieldId      = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, field::fzyx);
-   BlockDataID flagFieldId     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+   LatticeModel_T const latticeModel = LatticeModel_T(omega);
+   BlockDataID const pdfFieldId      = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, field::fzyx);
+   BlockDataID const flagFieldId     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    ////////////////////////
    /// Shear Flow Setup ///
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
 
    auto shearFlowSetup = walberlaEnv.config()->getOneBlock("ShearFlowSetup");
    ShearFlowInit shearFlowInitFunc(blocks, shearFlowSetup);
-   lbm::initializer::PdfFieldInitializer< LatticeModel_T > fieldInit(pdfFieldId, blocks);
+   lbm::initializer::PdfFieldInitializer< LatticeModel_T > const fieldInit(pdfFieldId, blocks);
    fieldInit.initDensityAndVelocity(shearFlowInitFunc);
 
    /////////////////////////

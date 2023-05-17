@@ -56,7 +56,7 @@ namespace {{namespace}} {
 
 {{kernel|generate_definitions(target, max_threads)}}
 
-void {{class_name}}::run( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
+void {{class_name}}::run( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
     {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
@@ -67,7 +67,7 @@ void {{class_name}}::run( {{- ["IBlock * block", kernel.kernel_selection_paramet
 
 void {{class_name}}::runOnCellInterval(
     {{- ["const shared_ptr<StructuredBlockStorage> & blocks", "const CellInterval & globalCellInterval", "cell_idx_t ghostLayers", "IBlock * block",
-         kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] 
+         kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] 
         | type_identifier_list -}}
 )
 {
@@ -86,7 +86,7 @@ void {{class_name}}::runOnCellInterval(
 }
 
 {%if inner_outer_split%}
-void {{class_name}}::inner( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
+void {{class_name}}::inner( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
 
@@ -98,7 +98,7 @@ void {{class_name}}::inner( {{- ["IBlock * block", kernel.kernel_selection_param
 }
 
 
-void {{class_name}}::outer( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
+void {{class_name}}::outer( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
 
