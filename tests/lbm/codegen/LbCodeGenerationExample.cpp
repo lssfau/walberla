@@ -68,8 +68,8 @@ int main(int argc, char** argv)
       parameters.getParameter< Vector3< real_t > >("initialVelocity", Vector3< real_t >());
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
-   const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
+   const real_t remainingTimeLoggerFrequency =
+      parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    // create fields
    BlockDataID forceFieldId = field::addToStorage< VectorField_T >(blocks, "Force", real_c(0.0), field::fzyx);

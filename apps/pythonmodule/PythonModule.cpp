@@ -28,8 +28,8 @@
 
 #include "stencil/all.h"
 
-#ifdef WALBERLA_BUILD_WITH_CUDA
- #include "python_coupling/export/CUDAExport.h"
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+ #include "python_coupling/export/GPUExport.h"
 #endif
 
 
@@ -75,11 +75,11 @@ struct InitObject
       pythonManager->addExporterFunction(blockforest::exportModuleToPython<stencil::D2Q5, stencil::D2Q9, stencil::D3Q7, stencil::D3Q19, stencil::D3Q27>);
       // VTK
       pythonManager->addExporterFunction( vtk::exportModuleToPython );
-      #ifdef WALBERLA_BUILD_WITH_CUDA
-            using walberla::cuda::GPUField;
+      #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+            using walberla::gpu::GPUField;
 
-            pythonManager->addExporterFunction( cuda::exportModuleToPython<GPU_FIELD_TYPES> );
-            pythonManager->addExporterFunction( cuda::exportCopyFunctionsToPython<FIELD_TYPES> );
+            pythonManager->addExporterFunction(gpu::exportModuleToPython<GPU_FIELD_TYPES> );
+            pythonManager->addExporterFunction(gpu::exportCopyFunctionsToPython<FIELD_TYPES> );
             pythonManager->addBlockDataConversion<GPU_FIELD_TYPES>();
       #endif
       //

@@ -67,6 +67,7 @@ function( waLBerla_generate_target_from_python )
             "\"CODEGEN_CFG\": \"${codegenCfg}\","
             "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
             "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
+            "\"WALBERLA_BUILD_WITH_HIP\": \"${WALBERLA_BUILD_WITH_HIP}\","
             "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\}"
             )
     string(REPLACE "\"" "\\\"" cmakeVars ${cmakeVars})   # even one more quoting level required

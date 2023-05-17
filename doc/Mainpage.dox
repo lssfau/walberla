@@ -47,6 +47,14 @@ all the basic data strcutures and concepts of the framework.
 - \ref tutorial_lbm06 \n
   This tutorial deals with the usage of different LBM boundary conditions.
 
+\subsection advanced_topics Advanced Topics
+
+\subsection gpu GPU
+
+- \ref tutorial_gpu01 \n
+  A simple tutorial for Game of Life on GPU
+
+
 \subsection codegen Code Generation
 
 - \ref tutorial_codegen01 \n

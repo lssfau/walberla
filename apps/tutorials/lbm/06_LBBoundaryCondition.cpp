@@ -383,13 +383,13 @@ int main(int argc, char** argv)
       parameters.getParameter< Vector3< real_t > >("initialVelocity", Vector3< real_t >());
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
-   const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+   const real_t remainingTimeLoggerFrequency =
+      parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    // create fields
-   LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::SRT(omega));
-   BlockDataID pdfFieldID  = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t(1));
-   BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", FieldGhostLayers);
+   LatticeModel_T const latticeModel = LatticeModel_T(lbm::collision_model::SRT(omega));
+   BlockDataID const pdfFieldID  = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t(1));
+   BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", FieldGhostLayers);
 
    // create and initialize boundary handling
 
@@ -409,11 +409,11 @@ int main(int argc, char** argv)
    setup.omega = omega;
 
    //! [timeTracker]
-   std::shared_ptr< lbm::TimeTracker > timeTracker = std::make_shared< lbm::TimeTracker >();
+   std::shared_ptr< lbm::TimeTracker > const timeTracker = std::make_shared< lbm::TimeTracker >();
    //! [timeTracker]
 
    //! [boundaryHandlingID]
-   BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
+   BlockDataID const boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
       MyBoundaryHandling(flagFieldID, pdfFieldID, setup, timeTracker), "boundary handling");
    //! [boundaryHandlingID]
 
@@ -453,7 +453,7 @@ int main(int argc, char** argv)
 
    auto vtkConfig = walberlaEnv.config()->getBlock("VTK");
 
-   uint_t writeFrequency = vtkConfig.getBlock("fluid_field").getParameter< uint_t >("writeFrequency", uint_t(100));
+   uint_t const writeFrequency = vtkConfig.getBlock("fluid_field").getParameter< uint_t >("writeFrequency", uint_t(100));
 
    auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", writeFrequency, FieldGhostLayers, false,
                                                    "vtk_out", "simulation_step", false, true, true, false, 0);

@@ -20,6 +20,7 @@ DEFAULT_CMAKE_VARS = {'WALBERLA_BUILD_WITH_OPENMP': False,
                       'WALBERLA_DOUBLE_ACCURACY': True,
                       'WALBERLA_BUILD_WITH_MPI': True,
                       'WALBERLA_BUILD_WITH_CUDA': False,
+                      'WALBERLA_BUILD_WITH_HIP': False,
                       "CODEGEN_CFG": ""}
 
 PARSE_HELPER = {"on":  True,  "1": True,  "yes": True,  "true":  True,
@@ -73,6 +74,8 @@ class CodeGenerationContext:
         self.mpi = cmake_vars['WALBERLA_BUILD_WITH_MPI']
         self.double_accuracy = cmake_vars['WALBERLA_DOUBLE_ACCURACY']
         self.cuda = cmake_vars['WALBERLA_BUILD_WITH_CUDA']
+        self.hip = cmake_vars['WALBERLA_BUILD_WITH_HIP']
+        self.gpu = self.cuda or self.hip
         self.config = cmake_vars['CODEGEN_CFG'].strip()
 
     def write_file(self, name, content):
@@ -87,13 +90,16 @@ class ManualCodeGenerationContext:
     to constructor instead of getting them from CMake
     """
 
-    def __init__(self, openmp=False, optimize_for_localhost=False, mpi=True, double_accuracy=True, cuda=False):
+    def __init__(self, openmp=False, optimize_for_localhost=False, mpi=True, double_accuracy=True,
+                 cuda=False, hip=False):
         self.openmp = openmp
         self.optimize_for_localhost = optimize_for_localhost
         self.mpi = mpi
         self.double_accuracy = double_accuracy
         self.files = dict()
         self.cuda = cuda
+        self.hip = hip
+        self.gpu = self.cuda or self.hip
         self.config = ""
 
     def write_file(self, name, content):

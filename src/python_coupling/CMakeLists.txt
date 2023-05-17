@@ -1,7 +1,7 @@
  add_library( python_coupling )
  target_link_libraries( python_coupling PUBLIC pybind11::embed core communication domain_decomposition stencil field blockforest vtk )
- if( WALBERLA_BUILD_WITH_CUDA )
-  target_link_libraries( python_coupling PUBLIC cuda )
+ if( WALBERLA_BUILD_WITH_GPU_SUPPORT )
+  target_link_libraries( python_coupling PUBLIC gpu )
  endif()
  target_sources( python_coupling
        PRIVATE

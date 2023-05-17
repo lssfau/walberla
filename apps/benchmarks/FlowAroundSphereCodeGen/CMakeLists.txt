@@ -12,9 +12,9 @@ waLBerla_generate_target_from_python(NAME FlowAroundSphereGenerated
         FlowAroundSphereCodeGen_InfoHeader.h)
 
 if (WALBERLA_BUILD_WITH_CUDA)
-    waLBerla_add_executable( NAME FlowAroundSphereCodeGen FILE FlowAroundSphereCodeGen.cpp
-            DEPENDS blockforest boundary core cuda domain_decomposition field geometry python_coupling timeloop vtk FlowAroundSphereGenerated)
+        waLBerla_add_executable( NAME FlowAroundSphereCodeGen FILE FlowAroundSphereCodeGen.cpp
+                DEPENDS blockforest boundary core gpu domain_decomposition field geometry python_coupling timeloop vtk FlowAroundSphereGenerated)
 else ()
-    waLBerla_add_executable( NAME FlowAroundSphereCodeGen FILE FlowAroundSphereCodeGen.cpp
-            DEPENDS blockforest boundary core domain_decomposition field geometry python_coupling timeloop vtk FlowAroundSphereGenerated)
+        waLBerla_add_executable( NAME FlowAroundSphereCodeGen FILE FlowAroundSphereCodeGen.cpp
+                DEPENDS blockforest boundary core domain_decomposition field geometry python_coupling timeloop vtk FlowAroundSphereGenerated)
 endif (WALBERLA_BUILD_WITH_CUDA)

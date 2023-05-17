@@ -90,7 +90,7 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'HeatEquationKernel', ac)
 \endcode
 
-The `CodeGeneration` context and the function `generate_sweep` are provided by waLBerla. `generate_sweep` takes the desired class name and the update rule. It then generates the kernel and builds a C++ class around it. We choose `HeatEquationKernel` as the class name. Through the `CodeGeneration` context, the waLBerla build system gives us access to a list of CMake variables. With `ctx.cuda` for example, we can ask if waLBerla was built with support for using NVIDIA GPUs and thus we can directly generate CUDA code with pystencils. In the scope of this first tutorial, we will not make use of this.
+The `CodeGeneration` context and the function `generate_sweep` are provided by waLBerla. `generate_sweep` takes the desired class name and the update rule. It then generates the kernel and builds a C++ class around it. We choose `HeatEquationKernel` as the class name. Through the `CodeGeneration` context, the waLBerla build system gives us access to a list of CMake variables. With `ctx.gpu` for example, we can ask if waLBerla was built with support for using GPUs (either by using CUDA for NVIDIA GPUs or HIP for AMD GPUs) and thus we can directly generate device code with pystencils. In the scope of this first tutorial, we will not make use of this.
 
 The code generation script will later be called by the build system while compiling the application. The complete script looks like this:
 

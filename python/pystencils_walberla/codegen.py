@@ -124,7 +124,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
     elif target != kernel_family.get_ast_attr('target'):
         raise ValueError('Mismatch between target parameter and AST targets.')
 
-    if not generation_context.cuda and target == Target.GPU:
+    if not (generation_context.cuda or generation_context.hip) and target == Target.GPU:
         return
 
     representative_field = {p.field_name for p in kernel_family.parameters if p.is_field_parameter}
@@ -152,7 +152,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
     header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
     source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cpp" if target == Target.CPU else "cu"
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
@@ -344,7 +344,7 @@ def generate_pack_info(generation_context, class_name: str,
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cpp" if config.target == Target.CPU else "cu"
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
@@ -446,14 +446,16 @@ class KernelInfo:
 
             indexing_dict = ast.indexing.call_parameters(spatial_shape_symbols)
             sp_printer_c = CudaSympyPrinter()
+
+            block = tuple(sp_printer_c.doprint(e) for e in indexing_dict['block'])
+            grid = tuple(sp_printer_c.doprint(e) for e in indexing_dict['grid'])
+
+            kernel_launch = f"internal_{ast.function_name}::{ast.function_name}<<<_grid, _block, 0, {stream}>>>({call_parameters});"
+
             kernel_call_lines = [
-                "dim3 _block(int(%s), int(%s), int(%s));" % tuple(sp_printer_c.doprint(e)
-                                                                  for e in indexing_dict['block']),
-                "dim3 _grid(int(%s), int(%s), int(%s));" % tuple(sp_printer_c.doprint(e)
-                                                                 for e in indexing_dict['grid']),
-                "internal_%s::%s<<<_grid, _block, 0, %s>>>(%s);" % (ast.function_name, ast.function_name,
-                                                                    stream, call_parameters),
-            ]
+                f"dim3 _block(uint32_t({block[0]}), uint32_t({block[1]}), uint32_t({block[2]}));",
+                f"dim3 _grid(uint32_t({grid[0]}), uint32_t({grid[1]}), uint32_t({grid[2]}));",
+                kernel_launch]
 
             return "\n".join(kernel_call_lines)
         else:
@@ -477,9 +479,9 @@ def get_vectorize_instruction_set(generation_context):
 def config_from_context(generation_context, target=Target.CPU, data_type=None,
                         cpu_openmp=None, cpu_vectorize_info=None, **kwargs):
 
-    if target == Target.GPU and not generation_context.cuda:
-        raise ValueError("can not generate cuda code if waLBerla is not build with CUDA. Please use "
-                         "-DWALBERLA_BUILD_WITH_CUDA=1 for configuring cmake")
+    if target == Target.GPU and not generation_context.gpu:
+        raise ValueError("can not generate device code if waLBerla is not build with CUDA or HIP. Please use "
+                         "-DWALBERLA_BUILD_WITH_CUDA=1 or -DWALBERLA_BUILD_WITH_HIP=1 for configuring cmake")
 
     default_dtype = "float64" if generation_context.double_accuracy else "float32"
     if data_type is None:

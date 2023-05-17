@@ -153,14 +153,16 @@ class KernelCallNode(AbstractKernelSelectionNode):
 
             indexing_dict = ast.indexing.call_parameters(spatial_shape_symbols)
             sp_printer_c = CudaSympyPrinter()
+
+            block = tuple(sp_printer_c.doprint(e) for e in indexing_dict['block'])
+            grid = tuple(sp_printer_c.doprint(e) for e in indexing_dict['grid'])
+
+            kernel_launch = f"internal_{ast.function_name}::{ast.function_name}<<<_grid, _block, 0, {stream}>>>({call_parameters});"
+
             kernel_call_lines = [
-                "dim3 _block(int(%s), int(%s), int(%s));" % tuple(sp_printer_c.doprint(e)
-                                                                  for e in indexing_dict['block']),
-                "dim3 _grid(int(%s), int(%s), int(%s));" % tuple(sp_printer_c.doprint(e)
-                                                                 for e in indexing_dict['grid']),
-                "internal_%s::%s<<<_grid, _block, 0, %s>>>(%s);" % (ast.function_name, ast.function_name,
-                                                                    stream, call_parameters),
-            ]
+                f"dim3 _block(uint32_t({block[0]}), uint32_t({block[1]}), uint32_t({block[2]}));",
+                f"dim3 _grid(uint32_t({grid[0]}), uint32_t({grid[1]}), uint32_t({grid[2]}));",
+                kernel_launch]
 
             return "\n".join(kernel_call_lines)
         else:

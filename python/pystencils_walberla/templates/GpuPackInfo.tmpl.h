@@ -1,11 +1,14 @@
 #pragma once
-#include "stencil/Directions.h"
-#include "core/cell/CellInterval.h"
-#include "cuda/GPUField.h"
 #include "core/DataTypes.h"
-#include "domain_decomposition/IBlock.h"
-#include "cuda/communication/GeneratedGPUPackInfo.h"
+#include "core/cell/CellInterval.h"
 
+#include "domain_decomposition/IBlock.h"
+
+#include "stencil/Directions.h"
+
+#include "gpu/GPUField.h"
+#include "gpu/GPUWrapper.h"
+#include "gpu/communication/GeneratedGPUPackInfo.h"
 
 {% if target is equalto 'cpu' -%}
 #define FUNC_PREFIX
@@ -25,7 +28,7 @@ namespace walberla {
 namespace {{namespace}} {
 
 
-class {{class_name}} : public ::walberla::cuda::GeneratedGPUPackInfo
+class {{class_name}} : public ::walberla::gpu::GeneratedGPUPackInfo
 {
 public:
     {{class_name}}( {{fused_kernel|generate_constructor_parameters(parameters_to_ignore=['buffer'])}} )
@@ -33,8 +36,8 @@ public:
     {};
     virtual ~{{class_name}}() {}
 
-    virtual void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
-    virtual void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
+    virtual void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream);
+    virtual void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream);
     virtual uint_t size  (stencil::Direction dir, IBlock * block);
 
 private:

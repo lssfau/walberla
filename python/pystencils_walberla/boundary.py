@@ -107,7 +107,7 @@ def generate_boundary(generation_context,
     header = env.get_template('Boundary.tmpl.h').render(**context)
     source = env.get_template('Boundary.tmpl.cpp').render(**context)
 
-    source_extension = "cpp" if target == Target.CPU else "cu"
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 

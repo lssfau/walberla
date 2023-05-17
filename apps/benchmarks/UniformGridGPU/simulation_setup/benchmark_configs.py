@@ -129,7 +129,7 @@ class Scenario:
         num_tries = 4
         # check multiple times e.g. may fail when multiple benchmark processes are running
         table_name = f"runs_{data['stencil']}_{data['streamingPattern']}_{data['collisionSetup']}_{prod(self.blocks)}"
-        table_name = table_name.replace("-", "_")
+        table_name = table_name.replace("-", "_")  # - not allowed for table name would lead to syntax error
         for num_try in range(num_tries):
             try:
                 checkAndUpdateSchema(result, table_name, DB_FILE)

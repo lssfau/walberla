@@ -25,11 +25,11 @@
 #include "core/math/Constants.h"
 #include "core/timing/RemainingTimeLogger.h"
 
-#include "cuda/AddGPUFieldToStorage.h"
-#include "cuda/DeviceSelectMPI.h"
-#include "cuda/NVTX.h"
-#include "cuda/ParallelStreams.h"
-#include "cuda/communication/UniformGPUScheme.h"
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/DeviceSelectMPI.h"
+#include "gpu/NVTX.h"
+#include "gpu/ParallelStreams.h"
+#include "gpu/communication/UniformGPUScheme.h"
 
 #include "field/AddToStorage.h"
 #include "field/FlagField.h"
@@ -67,13 +67,13 @@ using namespace walberla;
 
 using FlagField_T = FlagField< uint8_t >;
 
-typedef cuda::GPUField< real_t > GPUField;
-typedef cuda::GPUField< uint8_t > GPUField_int;
+typedef gpu::GPUField< real_t > GPUField;
+typedef gpu::GPUField< uint8_t > GPUField_int;
 
 int main(int argc, char** argv)
 {
    mpi::Environment Env(argc, argv);
-   cuda::selectDeviceBasedOnMpiRank();
+   gpu::selectDeviceBasedOnMpiRank();
    exportDataStructuresToPython();
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
@@ -114,17 +114,17 @@ int main(int argc, char** argv)
       BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
       // GPU fields
-      BlockDataID lb_phase_field_gpu = cuda::addGPUFieldToStorage< cuda::GPUField< real_t > >(
+      BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb phase field on GPU", Stencil_phase_T::Size, field::fzyx, 1);
-      BlockDataID lb_velocity_field_gpu = cuda::addGPUFieldToStorage< cuda::GPUField< real_t > >(
+      BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb velocity field on GPU", Stencil_hydro_T::Size, field::fzyx, 1);
       BlockDataID vel_field_gpu =
-         cuda::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
+         gpu::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
       BlockDataID phase_field_gpu =
-         cuda::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
+         gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
       // Flag field
       BlockDataID flagFieldID     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
-      BlockDataID flagFieldID_gpu = cuda::addGPUFieldToStorage< FlagField_T >(blocks, flagFieldID, "flag on GPU", true);
+      BlockDataID flagFieldID_gpu = gpu::addGPUFieldToStorage< FlagField_T >(blocks, flagFieldID, "flag on GPU", true);
 
       auto physical_parameters     = config->getOneBlock("PhysicalParameters");
       const real_t density_liquid  = physical_parameters.getParameter< real_t >("density_liquid", real_c(1.0));
@@ -195,11 +195,11 @@ int main(int argc, char** argv)
       //////////////////////
       int streamLowPriority  = 0;
       int streamHighPriority = 0;
-      auto defaultStream     = cuda::StreamRAII::newPriorityStream(streamLowPriority);
-      auto innerOuterStreams = cuda::ParallelStreams(streamHighPriority);
+      auto defaultStream     = gpu::StreamRAII::newPriorityStream(streamLowPriority);
+      auto innerOuterStreams = gpu::ParallelStreams(streamHighPriority);
 
       auto UniformGPUSchemeVelocityDistributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
+         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_velocity_based_distributions =
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       UniformGPUSchemeVelocityDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
@@ -211,7 +211,7 @@ int main(int argc, char** argv)
          std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->wait(defaultStream); });
 
       auto UniformGPUSchemePhaseField =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
+         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
       UniformGPUSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
       auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(defaultStream); });
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
       auto Comm_phase_field_wait = std::function< void() >([&]() { UniformGPUSchemePhaseField->wait(defaultStream); });
 
       auto UniformGPUSchemePhaseFieldDistributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
+         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field_distributions =
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       UniformGPUSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
@@ -255,7 +255,7 @@ int main(int argc, char** argv)
          }
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
-      cuda::fieldCpy< GPUField_int, FlagField_T >(blocks, flagFieldID_gpu, flagFieldID);
+      gpu::fieldCpy< GPUField_int, FlagField_T >(blocks, flagFieldID_gpu, flagFieldID);
 
       lbm::phase_field_LB_NoSlip phase_field_LB_NoSlip(blocks, lb_phase_field_gpu);
       lbm::hydro_LB_NoSlip hydro_LB_NoSlip(blocks, lb_velocity_field_gpu);
@@ -293,8 +293,8 @@ int main(int argc, char** argv)
             smear_interface();
          }
       }
-      cuda::fieldCpy< GPUField, PhaseField_T >(blocks, phase_field_gpu, phase_field);
-      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+      gpu::fieldCpy< GPUField, PhaseField_T >(blocks, phase_field_gpu, phase_field);
+      WALBERLA_GPU_CHECK(cudaPeekAtLastError())
 
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the PDFs")
       for (auto& block : *blocks)
@@ -314,9 +314,9 @@ int main(int argc, char** argv)
             [&]() {
                if (timeloop.getCurrentTimeStep() % dbWriteFrequency == 0)
                {
-                  cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
-                  cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
-                  WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+                  gpu::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
+                  gpu::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
+                  WALBERLA_GPU_CHECK(cudaPeekAtLastError())
 
                   if (scenario == 4)
                   {
@@ -411,17 +411,17 @@ int main(int argc, char** argv)
          timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
          "remaining time logger");
 
-      uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          const std::string path = "vtk_out";
          auto vtkOutput         = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, path,
                                                          "simulation_step", false, true, true, false, 0);
          vtkOutput->addBeforeFunction([&]() {
-            cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
-            cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
+            gpu::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
+            gpu::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
          });
-         WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+         WALBERLA_GPU_CHECK(cudaPeekAtLastError())
 
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T, float > >(phase_field, "PhaseField");
          vtkOutput->addCellDataWriter(phaseWriter);
@@ -435,20 +435,20 @@ int main(int argc, char** argv)
          timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
 
-      lbm::PerformanceEvaluation< FlagField_T > performance(blocks, flagFieldID, fluidFlagUID);
+      lbm::PerformanceEvaluation< FlagField_T > const performance(blocks, flagFieldID, fluidFlagUID);
       WcTimingPool timeloopTiming;
       WcTimer simTimer;
 
       WALBERLA_MPI_WORLD_BARRIER()
       cudaDeviceSynchronize();
-      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+      WALBERLA_GPU_CHECK(cudaPeekAtLastError())
 
       WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
       simTimer.start();
       timeloop.run(timeloopTiming);
 
       cudaDeviceSynchronize();
-      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+      WALBERLA_GPU_CHECK(cudaPeekAtLastError())
 
       simTimer.end();
       auto time = real_c(simTimer.max());

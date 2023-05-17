@@ -60,10 +60,7 @@ with CodeGeneration() as ctx:
                                             velocity.center_vector,
                                             pdfs.center_vector)
 
-    if ctx.cuda:
-        target = ps.Target.GPU
-    else:
-        target = ps.Target.CPU
+    target = ps.Target.GPU if ctx.gpu else ps.Target.CPU
 
     #   LBM Sweep
     generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)], target=target)

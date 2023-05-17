@@ -7,9 +7,9 @@
 #include "blockforest/communication/UniformDirectScheme.h"
 #include "field/communication/StencilRestrictedMPIDatatypeInfo.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"
-#include "cuda/communication/GPUPackInfo.h"
-#include "cuda/communication/UniformGPUScheme.h"
-#include "cuda/communication/MemcpyPackInfo.h"
+#include "gpu/communication/GPUPackInfo.h"
+#include "gpu/communication/UniformGPUScheme.h"
+#include "gpu/communication/MemcpyPackInfo.h"
 #include "UniformGridGPU_PackInfo.h"
 
 
@@ -36,28 +36,28 @@ public:
           _gpuCommunicationScheme(nullptr), _directScheme(nullptr)
     {
         auto generatedPackInfo = make_shared<pystencils::UniformGridGPU_PackInfo>( bdId );
-        auto memcpyPackInfo = make_shared< cuda::communication::MemcpyPackInfo< GPUFieldType > >( bdId );
+        auto memcpyPackInfo = make_shared< gpu::communication::MemcpyPackInfo< GPUFieldType > >( bdId );
         auto dataTypeInfo = make_shared< field::communication::StencilRestrictedMPIDatatypeInfo< GPUFieldType, StencilType > >( bdId );
         auto dataTypeInfoFull = make_shared< field::communication::UniformMPIDatatypeInfo<GPUFieldType> >( bdId );
 
         switch(_commSchemeType)
         {
             case GPUPackInfo_Baseline:
-                _gpuPackInfo = make_shared< cuda::communication::GPUPackInfo< GPUFieldType > >( bdId );
+                _gpuPackInfo = make_shared< gpu::communication::GPUPackInfo< GPUFieldType > >( bdId );
                 _cpuCommunicationScheme = make_shared< blockforest::communication::UniformBufferedScheme< StencilType > >( bf );
                 _cpuCommunicationScheme->addPackInfo( _gpuPackInfo );
                 break;
             case GPUPackInfo_Streams:
-                _gpuPackInfo = make_shared< cuda::communication::GPUPackInfo< GPUFieldType > >( bdId );
+                _gpuPackInfo = make_shared< gpu::communication::GPUPackInfo< GPUFieldType > >( bdId );
                 _cpuCommunicationScheme = make_shared< blockforest::communication::UniformBufferedScheme< StencilType > >( bf );
                 _cpuCommunicationScheme->addPackInfo( _gpuPackInfo );
                 break;
             case UniformGPUScheme_Baseline:
-                _gpuCommunicationScheme = make_shared< cuda::communication::UniformGPUScheme< StencilType > >( bf, cudaEnabledMPI );
+                _gpuCommunicationScheme = make_shared< gpu::communication::UniformGPUScheme< StencilType > >( bf, cudaEnabledMPI );
                 _gpuCommunicationScheme->addPackInfo( generatedPackInfo );
                 break;
             case UniformGPUScheme_Memcpy:
-                _gpuCommunicationScheme = make_shared< cuda::communication::UniformGPUScheme< StencilType > >( bf, cudaEnabledMPI );
+                _gpuCommunicationScheme = make_shared< gpu::communication::UniformGPUScheme< StencilType > >( bf, cudaEnabledMPI );
                 _gpuCommunicationScheme->addPackInfo( memcpyPackInfo );
                 break;
             case MPIDatatypes:
@@ -151,7 +151,7 @@ public:
 private:
     CommunicationSchemeType _commSchemeType;
     shared_ptr< blockforest::communication::UniformBufferedScheme< StencilType > > _cpuCommunicationScheme;
-    shared_ptr< cuda::communication::GPUPackInfo< GPUFieldType > > _gpuPackInfo;
-    shared_ptr< cuda::communication::UniformGPUScheme< StencilType > > _gpuCommunicationScheme;
+    shared_ptr< gpu::communication::GPUPackInfo< GPUFieldType > > _gpuPackInfo;
+    shared_ptr< gpu::communication::UniformGPUScheme< StencilType > > _gpuCommunicationScheme;
     shared_ptr< blockforest::communication::UniformDirectScheme<StencilType> > _directScheme;
 };

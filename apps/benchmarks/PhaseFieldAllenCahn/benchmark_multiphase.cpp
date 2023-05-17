@@ -44,11 +44,11 @@
 ////////////////////////////
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-#   include "cuda/AddGPUFieldToStorage.h"
-#   include "cuda/DeviceSelectMPI.h"
-#   include "cuda/ParallelStreams.h"
-#   include "cuda/communication/MemcpyPackInfo.h"
-#   include "cuda/communication/UniformGPUScheme.h"
+#   include "gpu/AddGPUFieldToStorage.h"
+#   include "gpu/DeviceSelectMPI.h"
+#   include "gpu/ParallelStreams.h"
+#   include "gpu/communication/MemcpyPackInfo.h"
+#   include "gpu/communication/UniformGPUScheme.h"
 #else
 #   include <blockforest/communication/UniformBufferedScheme.h>
 #endif
@@ -61,14 +61,14 @@ using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-typedef cuda::GPUField< real_t > GPUField;
+typedef gpu::GPUField< real_t > GPUField;
 #endif
 
 int main(int argc, char** argv)
 {
    mpi::Environment env(argc, argv);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-   cuda::selectDeviceBasedOnMpiRank();
+   gpu::selectDeviceBasedOnMpiRank();
 #endif
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
@@ -95,14 +95,14 @@ int main(int argc, char** argv)
       BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
       // GPU fields
-      BlockDataID lb_phase_field_gpu = cuda::addGPUFieldToStorage< cuda::GPUField< real_t > >(
+      BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb phase field on GPU", Stencil_phase_T::Size, field::fzyx, 1);
-      BlockDataID lb_velocity_field_gpu = cuda::addGPUFieldToStorage< cuda::GPUField< real_t > >(
+      BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb velocity field on GPU", Stencil_hydro_T::Size, field::fzyx, 1);
       BlockDataID vel_field_gpu =
-         cuda::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
+         gpu::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
       BlockDataID phase_field_gpu =
-         cuda::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
+         gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
 #else
       BlockDataID lb_phase_field =
          field::addToStorage< PdfField_phase_T >(blocks, "lb phase field", real_c(0.0), field::fzyx);
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
             initPhaseField_RTI(blocks, phase_field);
          }
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-         cuda::fieldCpy< GPUField, PhaseField_T >(blocks, phase_field_gpu, phase_field);
+         gpu::fieldCpy< GPUField, PhaseField_T >(blocks, phase_field_gpu, phase_field);
 #endif
          WALBERLA_LOG_INFO_ON_ROOT("initialization of the phase field done")
       }
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       const bool cudaEnabledMpi = parameters.getParameter< bool >("cudaEnabledMpi", false);
       auto Comm_velocity_based_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
+         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_velocity_based_distributions =
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_phase_field);
 
       auto Comm_phase_field_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
+         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field_distributions =
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
       Comm_phase_field_distributions.addPackInfo(generatedPackInfo_phase_field_distributions);
 #endif
 
-      BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+      BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
       auto boundariesConfig = config->getBlock("Boundaries_GPU");
@@ -206,10 +206,10 @@ int main(int argc, char** argv)
       }
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      int streamLowPriority  = 0;
-      int streamHighPriority = 0;
-      auto defaultStream     = cuda::StreamRAII::newPriorityStream(streamLowPriority);
-      auto innerOuterStreams = cuda::ParallelStreams(streamHighPriority);
+      int const streamLowPriority  = 0;
+      int const streamHighPriority = 0;
+      auto defaultStream     = gpu::StreamRAII::newPriorityStream(streamLowPriority);
+      auto innerOuterStreams = gpu::ParallelStreams(streamHighPriority);
 #endif
 
       auto timeLoop = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
@@ -296,14 +296,14 @@ int main(int argc, char** argv)
             timing::RemainingTimeLogger(timeLoop->getNrOfTimeSteps(), remainingTimeLoggerFrequency),
             "remaining time logger");
 
-      uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 1)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                          "simulation_step", false, true, true, false, 0);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
          vtkOutput->addBeforeFunction(
-            [&]() { cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu); });
+            [&]() { gpu::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu); });
 #endif
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field, "phase");
          vtkOutput->addCellDataWriter(phaseWriter);
