@@ -62,7 +62,7 @@ namespace communication {
    class CustomMemoryBuffer
    {
    public:
-      typedef uint8_t ElementType;
+      using ElementType = uint8_t;
 
       explicit CustomMemoryBuffer();
       explicit CustomMemoryBuffer( std::size_t initSize );
@@ -74,6 +74,7 @@ namespace communication {
       inline std::size_t allocSize() const { return std::size_t(end_ - begin_); }
       inline std::size_t size() const { return std::size_t(cur_ - begin_); }
       ElementType *ptr() const { return begin_; }
+      ElementType *cur() const { return cur_; }
 
       inline void clear() { cur_ = begin_; }
 

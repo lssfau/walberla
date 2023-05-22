@@ -1,13 +1,16 @@
 from dataclasses import replace
+from typing import Set
 
 import numpy as np
 
-from pystencils_walberla.codegen import generate_selective_sweep, config_from_context
-from pystencils_walberla.kernel_selection import (
-    AbstractInterfaceArgumentMapping, AbstractConditionNode, KernelCallNode)
 from pystencils import Target, TypedSymbol
 from lbmpy.creationfunctions import create_lb_ast
 from lbmpy.advanced_streaming import Timestep, is_inplace
+
+from pystencils_walberla.sweep import generate_selective_sweep
+from pystencils_walberla.kernel_selection import (
+    AbstractInterfaceArgumentMapping, AbstractConditionNode, KernelCallNode)
+from pystencils_walberla.utility import config_from_context
 
 
 class EvenIntegerCondition(AbstractConditionNode):
@@ -54,7 +57,7 @@ class TimestepTrackerMapping(AbstractInterfaceArgumentMapping):
         return f"{self.tracker_symbol.name}->getCounter()"
 
     @property
-    def headers(self):
+    def headers(self) -> Set:
         return {'"lbm/inplace_streaming/TimestepTracker.h"'}
 
 

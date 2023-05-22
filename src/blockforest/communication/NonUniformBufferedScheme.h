@@ -65,10 +65,10 @@ public:
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */
    //@{
-   explicit NonUniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
+   explicit NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf,
                                       const int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
 
-   NonUniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
+   NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf,
                              const Set<SUID> & requiredBlockSelectors, 
                              const Set<SUID> & incompatibleBlockSelectors,
                              const int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
@@ -96,6 +96,16 @@ public:
    inline void communicateEqualLevel  ( const uint_t level );
    inline void communicateCoarseToFine( const uint_t fineLevel );
    inline void communicateFineToCoarse( const uint_t fineLevel );
+
+   std::function<void()>  communicateEqualLevelFunctor(const uint_t level) {
+      return [level, this](){ NonUniformBufferedScheme::communicateEqualLevel(level);};
+   }
+   std::function<void()>  communicateCoarseToFineFunctor(const uint_t fineLevel) {
+      return [fineLevel, this](){ NonUniformBufferedScheme::communicateCoarseToFine(fineLevel);};
+   }
+   std::function<void()>  communicateFineToCoarseFunctor(const uint_t fineLevel) {
+      return [fineLevel, this](){ NonUniformBufferedScheme::communicateFineToCoarse(fineLevel);};
+   }
    //@}
    //*******************************************************************************************************************
    
@@ -190,7 +200,7 @@ protected:
 
 
 template< typename Stencil >
-NonUniformBufferedScheme<Stencil>::NonUniformBufferedScheme( weak_ptr<StructuredBlockForest> bf, const int baseTag )
+NonUniformBufferedScheme<Stencil>::NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf, const int baseTag )
    : blockForest_( bf ), localMode_( START ), baseTag_( baseTag ),
      requiredBlockSelectors_( Set<SUID>::emptySet() ), incompatibleBlockSelectors_( Set<SUID>::emptySet() )
 {
@@ -200,7 +210,7 @@ NonUniformBufferedScheme<Stencil>::NonUniformBufferedScheme( weak_ptr<Structured
 
 
 template< typename Stencil >
-NonUniformBufferedScheme<Stencil>::NonUniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
+NonUniformBufferedScheme<Stencil>::NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf,
                                                              const Set<SUID> & requiredBlockSelectors, 
                                                              const Set<SUID> & incompatibleBlockSelectors,
                                                              const int baseTag /*= 778*/ ) // waLBerla = 119+97+76+66+101+114+108+97
@@ -236,10 +246,10 @@ void NonUniformBufferedScheme<Stencil>::init()
 template< typename Stencil >
 void NonUniformBufferedScheme<Stencil>::refresh()
 {
-   WALBERLA_ASSERT( !isAnyCommunicationInProgress() );
+   WALBERLA_ASSERT( !isAnyCommunicationInProgress() )
 
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levels = forest->getNumberOfLevels();
 
    for( uint_t i = 0; i != 3; ++i )
@@ -296,7 +306,7 @@ inline void NonUniformBufferedScheme<Stencil>::addPackInfo( const PackInfo & pac
 {
    if( isAnyCommunicationInProgress() )
    {
-      WALBERLA_ABORT( "You may not add a PackInfo to a NonUniformBufferedScheme if any communication is in progress!" );
+      WALBERLA_ABORT( "You may not add a PackInfo to a NonUniformBufferedScheme if any communication is in progress!" )
    }
 
    packInfos_.push_back( packInfo );
@@ -381,7 +391,7 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateEqualLevel()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
@@ -400,7 +410,7 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateCoarseToFine()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
 
    if( levelIndex == 1 )
@@ -421,7 +431,7 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateFineToCoarse()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
    
    if( levelIndex == 1 )
@@ -442,8 +452,8 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateEqualLevel( const uint_t level )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_LESS( level, forest->getNumberOfLevels() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_LESS( level, forest->getNumberOfLevels() )
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
@@ -460,9 +470,9 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateCoarseToFine( const uint_t fineLevel )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) );
-   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
@@ -479,9 +489,9 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::startCommunicateFineToCoarse( const uint_t fineLevel )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) );
-   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
@@ -498,10 +508,10 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateEqualLevel()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( EQUAL_LEVEL, levelIndex );
 }
@@ -512,10 +522,10 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateCoarseToFine()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    if( levelIndex == 1 )
       return;
@@ -529,10 +539,10 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateFineToCoarse()
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    if( levelIndex == 1 )
       return;
@@ -546,10 +556,10 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateEqualLevel  ( const uint_t level )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_LESS( level, forest->getNumberOfLevels() );
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_LESS( level, forest->getNumberOfLevels() )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( EQUAL_LEVEL, level );
 }
@@ -560,11 +570,11 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateCoarseToFine( const uint_t fineLevel )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) );
-   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() );
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( COARSE_TO_FINE, fineLevel );
 }
@@ -575,11 +585,11 @@ template< typename Stencil >
 inline void NonUniformBufferedScheme<Stencil>::waitCommunicateFineToCoarse( const uint_t fineLevel )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) );
-   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() );
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) );
-   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( FINE_TO_COARSE, fineLevel );
 }
@@ -619,7 +629,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
       std::map< uint_t, std::vector< SendBufferFunction > > sendFunctions;
 
       auto forest = blockForest_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
 
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
@@ -638,7 +648,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
             if( !( block->neighborhoodSectionHasEquallySizedBlock(neighborIdx) ) )
                continue;
 
-            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) );
+            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
 
             const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t(0) );
 
@@ -648,13 +658,13 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
             if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
             {
                auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
-               WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() );
+               WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
                for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
                {
                   if( localMode_ == BUFFER )
                   {
-                     SendBuffer buffer;
+                     SendBuffer const buffer;
                      localBuffers.push_back( buffer );
                      const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
@@ -745,7 +755,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
       std::set< uint_t > ranksToReceiveFrom;
 
       auto forest = blockForest_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
          Block * block = dynamic_cast< Block * >( it.get() );
@@ -774,13 +784,13 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                   if( block->neighborExistsLocally( neighborIdx, n ) )
                   {
                      auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
-                     WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() );
+                     WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
                      for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
                      {
                         if( localMode_ == BUFFER )
                         {
-                           SendBuffer buffer;
+                           SendBuffer const buffer;
                            localBuffers.push_back( buffer );
                            const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
@@ -829,7 +839,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
                if( block->neighborhoodSectionHasLargerBlock(neighborIdx) )
                {
-                  WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) );
+                  WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
                   if( block->neighborExistsRemotely( neighborIdx, uint_t(0) ) &&
                       selectable::isSetSelected( block->getNeighborState( neighborIdx, 0 ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                   {
@@ -890,7 +900,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
       std::set< uint_t > ranksToReceiveFrom;
 
       auto forest = blockForest_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
 
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
@@ -910,7 +920,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                if( !( block->neighborhoodSectionHasLargerBlock(neighborIdx) ) )
                   continue;
 
-               WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) );
+               WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
 
                const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t(0) );
 
@@ -920,13 +930,13 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
                {
                   auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
-                  WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() );
+                  WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
                   for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
                   {
                      if( localMode_ == BUFFER )
                      {
-                        SendBuffer buffer;
+                        SendBuffer const buffer;
                         localBuffers.push_back( buffer );
                         const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
@@ -1144,7 +1154,7 @@ template< typename Stencil >
 void NonUniformBufferedScheme<Stencil>::receive( RecvBuffer & buffer )
 {
    auto forest = blockForest_.lock();
-   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
+   WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
 
    while( !buffer.isEmpty() )
    {
@@ -1183,7 +1193,7 @@ template< typename Stencil >
 void NonUniformBufferedScheme<Stencil>::localBufferPacking( const INDEX i, const uint_t j, const uint_t bufferIndex, const PackInfo & packInfo,
                                                             const Block * sender, const Block * receiver, const stencil::Direction & dir )
 {
-   WALBERLA_ASSERT_LESS( bufferIndex, localBuffers_[i][j].size() );
+   WALBERLA_ASSERT_LESS( bufferIndex, localBuffers_[i][j].size() )
 
    SendBuffer & buffer = localBuffers_[i][j][ bufferIndex ];
    buffer.clear();
@@ -1198,7 +1208,7 @@ void NonUniformBufferedScheme<Stencil>::localBufferPacking( const INDEX i, const
    }
    else
    {
-      WALBERLA_ASSERT( i == FINE_TO_COARSE );
+      WALBERLA_ASSERT( i == FINE_TO_COARSE )
       packInfo->packDataFineToCoarse( sender, receiver->getId(), dir, buffer );
    }
 }
@@ -1209,7 +1219,7 @@ template< typename Stencil >
 void NonUniformBufferedScheme<Stencil>::localBufferUnpacking( const INDEX i, const uint_t j, const uint_t bufferIndex, const PackInfo & packInfo,
                                                               Block * receiver, const Block * sender, const stencil::Direction & dir )
 {
-   WALBERLA_ASSERT_LESS( bufferIndex, localBuffers_[i][j].size() );
+   WALBERLA_ASSERT_LESS( bufferIndex, localBuffers_[i][j].size() )
 
    SendBuffer & sendBuffer = localBuffers_[i][j][ bufferIndex ];
    RecvBuffer recvBuffer( sendBuffer );
@@ -1224,7 +1234,7 @@ void NonUniformBufferedScheme<Stencil>::localBufferUnpacking( const INDEX i, con
    }
    else
    {
-      WALBERLA_ASSERT( i == FINE_TO_COARSE );
+      WALBERLA_ASSERT( i == FINE_TO_COARSE )
       packInfo->unpackDataFineToCoarse( receiver, sender->getId(), stencil::inverseDir[dir], recvBuffer );
    }
 }

@@ -28,6 +28,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/Environment.h"
 
+#include "gpu/GPUWrapper.h"
 #include "gpu/FieldCopy.h"
 #include "gpu/communication/UniformGPUScheme.h"
 
@@ -60,7 +61,7 @@ gpu::GPUField<int> * createSmallGPUField( IBlock * const , StructuredBlockStorag
 
 
 void testScalarField( std::shared_ptr<blockforest::StructuredBlockForest> & sbf, BlockDataID gpuFieldId ) {
-   gpu::communication::UniformGPUScheme< Stencil_T > us{ sbf };
+   gpu::communication::UniformGPUScheme< Stencil_T > us{ sbf, false, false };
    us.addPackInfo(std::make_shared< pystencils::ScalarFieldCommunicationGPU >(gpuFieldId));
 
    for( auto & block : *sbf ) {
@@ -97,10 +98,10 @@ void testScalarField( std::shared_ptr<blockforest::StructuredBlockForest> & sbf,
 }
 
 void testScalarFieldPullReduction( std::shared_ptr<blockforest::StructuredBlockForest> & sbf, BlockDataID gpuFieldId ) {
-   gpu::communication::UniformGPUScheme< Stencil_T > us1{ sbf };
+   gpu::communication::UniformGPUScheme< Stencil_T > us1{ sbf, false, false };
    us1.addPackInfo(std::make_shared< pystencils::ScalarFieldPullReductionGPU >(gpuFieldId));
 
-   gpu::communication::UniformGPUScheme< Stencil_T > us2{ sbf };
+   gpu::communication::UniformGPUScheme< Stencil_T > us2{ sbf, false, false };
    us2.addPackInfo(std::make_shared< pystencils::ScalarFieldCommunicationGPU >(gpuFieldId));
 
    for( auto & block : *sbf ) {

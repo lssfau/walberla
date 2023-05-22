@@ -17,8 +17,6 @@
 //! \\author pystencils
 //======================================================================================================================
 
-#include <cmath>
-
 #include "core/DataTypes.h"
 #include "core/Macros.h"
 #include "{{class_name}}.h"
@@ -53,9 +51,9 @@ namespace {{namespace}} {
 #pragma diag_suppress 177
 #endif
 #endif
-
+//NOLINTBEGIN(readability-non-const-parameter*)
 {{kernel|generate_definitions(target)}}
-
+//NOLINTEND(readability-non-const-parameter*)
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -85,6 +83,7 @@ void {{class_name}}::run_impl(
    uint8_t * _data_indexVector = reinterpret_cast<uint8_t*>(pointer);
 
    {{kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
+   {{kernel|generate_timestep_advancements|indent(4)}}
    {{kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize'], ignore_fields=True)|indent(4) }}
    {{kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
 }

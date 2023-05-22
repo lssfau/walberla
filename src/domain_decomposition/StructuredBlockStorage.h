@@ -284,9 +284,9 @@ public:
 
 
 
-   real_t dx( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dx_.size() ); return dx_[ level ]; } ///< cell size on level "level" in x direction
-   real_t dy( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dy_.size() ); return dy_[ level ]; } ///< cell size on level "level" in y direction
-   real_t dz( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dz_.size() ); return dz_[ level ]; } ///< cell size on level "level" in z direction
+   real_t dx( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dx_.size() ) return dx_[ level ]; } ///< cell size on level "level" in x direction
+   real_t dy( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dy_.size() ) return dy_[ level ]; } ///< cell size on level "level" in y direction
+   real_t dz( const uint_t level = 0 ) const { WALBERLA_ASSERT_LESS( level, dz_.size() ) return dz_[ level ]; } ///< cell size on level "level" in z direction
 
    void mapToPeriodicDomain( Cell& cell, const uint_t level = 0 ) const; // -> for documentation of this function see StructuredBlockStorage.cpp
 
@@ -354,7 +354,7 @@ public:
    /// Returns the block data ID required for accessing the cell bounding box of blocks - fails in debug mode if no block cell bounding boxes
    /// have been created via "createCellBoundingBoxes()". (remember: every block resides on exactly one grid level, and all blocks managed by a
    //  structured block storage are assigned a corresponding cell bounding box as block data once "createCellBoundingBoxes()" is called.)
-   inline ConstBlockDataID getBlockCellBBId() const { WALBERLA_ASSERT( blockCellBBCreated_ ); return blockCellBBId_; }
+   inline ConstBlockDataID getBlockCellBBId() const { WALBERLA_ASSERT( blockCellBBCreated_ ) return blockCellBBId_; }
 
    inline const CellInterval& getBlockCellBB( const IBlock& block ) const;
 
@@ -488,7 +488,7 @@ inline bool StructuredBlockStorage::operator==( const StructuredBlockStorage& rh
 
 inline const CellInterval& StructuredBlockStorage::getDomainCellBB( const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() );
+   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return domainCellBB_[ level ];
 }
@@ -497,7 +497,7 @@ inline const CellInterval& StructuredBlockStorage::getDomainCellBB( const uint_t
 
 inline uint_t StructuredBlockStorage::getNumberOfXCells( const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() );
+   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return uint_c( domainCellBB_[ level ].xMax() + 1 );
 }
@@ -506,7 +506,7 @@ inline uint_t StructuredBlockStorage::getNumberOfXCells( const uint_t level ) co
 
 inline uint_t StructuredBlockStorage::getNumberOfYCells( const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() );
+   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return uint_c( domainCellBB_[ level ].yMax() + 1 );
 }
@@ -515,7 +515,7 @@ inline uint_t StructuredBlockStorage::getNumberOfYCells( const uint_t level ) co
 
 inline uint_t StructuredBlockStorage::getNumberOfZCells( const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() );
+   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return uint_c( domainCellBB_[ level ].zMax() + 1 );
 }
@@ -524,8 +524,8 @@ inline uint_t StructuredBlockStorage::getNumberOfZCells( const uint_t level ) co
 
 inline uint_t StructuredBlockStorage::getNumberOfCells( const uint_t index, const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( index, uint_t(3) );
-   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() );
+   WALBERLA_ASSERT_LESS( index, uint_t(3) )
+   WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return uint_c( domainCellBB_[ level ].max()[ index ] + 1 );
 }
@@ -689,7 +689,9 @@ inline AABB StructuredBlockStorage::getAABBFromCellBB( const CellInterval& cellB
 //**********************************************************************************************************************
 inline const IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const uint_t level ) const {
 
-   real_t x, y, z;
+   real_t x;
+   real_t y;
+   real_t z;
    getCellCenter( x, y, z, cell, level );
 
    const IBlock* block = blockStorage_->getBlock(x,y,z);
@@ -712,7 +714,9 @@ inline const IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const u
 //**********************************************************************************************************************
 inline IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const uint_t level ) {
 
-   real_t x, y, z;
+   real_t x;
+   real_t y;
+   real_t z;
    getCellCenter( x, y, z, cell, level );
 
    IBlock* block = blockStorage_->getBlock(x,y,z);
@@ -736,8 +740,8 @@ inline IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const uint_t 
 //**********************************************************************************************************************
 inline const CellInterval& StructuredBlockStorage::getBlockCellBB( const IBlock& block ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
-   WALBERLA_ASSERT( blockCellBBCreated_ );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
+   WALBERLA_ASSERT( blockCellBBCreated_ )
 
    return *(block.uncheckedFastGetData< CellInterval >( blockCellBBId_ ));
 }
@@ -769,12 +773,12 @@ inline Cell StructuredBlockStorage::getBlockLocalCell( const IBlock& block, cons
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::getBlockLocalCell( Cell& localCell, const IBlock& block, const real_t x, const real_t y, const real_t z ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const AABB & aabb  = block.getAABB();
    const uint_t level = getLevel( block );
 
-   WALBERLA_ASSERT_LESS( level, levels_ );
+   WALBERLA_ASSERT_LESS( level, levels_ )
 
    localCell.x() = cell_idx_c( std::floor( ( x - aabb.xMin() ) / dx( level ) ) );
    localCell.y() = cell_idx_c( std::floor( ( y - aabb.yMin() ) / dy( level ) ) );
@@ -805,12 +809,12 @@ inline Vector3< real_t > StructuredBlockStorage::getBlockLocalCellCenter( const 
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::getBlockLocalCellCenter( const IBlock & block, const Cell & localCell, real_t & x, real_t & y, real_t & z ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const AABB & aabb  = block.getAABB();
    const uint_t level = getLevel( block );
 
-   WALBERLA_ASSERT_LESS( level, levels_ );
+   WALBERLA_ASSERT_LESS( level, levels_ )
 
    x = aabb.xMin() + ( real_c( localCell.x() ) + real_c(0.5) ) * dx( level );
    y = aabb.yMin() + ( real_c( localCell.y() ) + real_c(0.5) ) * dy( level );
@@ -842,12 +846,12 @@ inline AABB StructuredBlockStorage::getBlockLocalCellAABB( const IBlock & block,
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::getBlockLocalCellAABB( const IBlock & block, const Cell & localCell, AABB & aabb ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const AABB& blockAABB = block.getAABB();
    const uint_t level = getLevel( block );
 
-   WALBERLA_ASSERT_LESS( level, levels_ );
+   WALBERLA_ASSERT_LESS( level, levels_ )
 
    const real_t x = blockAABB.xMin() + real_c( localCell.x() ) * dx( level );
    const real_t y = blockAABB.yMin() + real_c( localCell.y() ) * dy( level );
@@ -866,7 +870,7 @@ inline void StructuredBlockStorage::getBlockLocalCellAABB( const IBlock & block,
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformGlobalToBlockLocal( Vector3<real_t> & local, const IBlock& block, const Vector3<real_t> & global ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const uint_t level = getLevel( block );
 
@@ -886,7 +890,7 @@ inline void StructuredBlockStorage::transformGlobalToBlockLocal( Vector3<real_t>
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformGlobalToBlockLocal( Vector3<real_t> & point, const IBlock& block ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const uint_t level = getLevel( block );
 
@@ -906,7 +910,7 @@ inline void StructuredBlockStorage::transformGlobalToBlockLocal( Vector3<real_t>
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformBlockLocalToGlobal( Vector3<real_t> & global, const IBlock& block, const Vector3<real_t> & local ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const uint_t level = getLevel( block );
 
@@ -927,7 +931,7 @@ inline void StructuredBlockStorage::transformBlockLocalToGlobal( Vector3<real_t>
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformBlockLocalToGlobal( Vector3<real_t> &  point, const IBlock& block ) const
 {
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const uint_t level = getLevel( block );
       
@@ -949,7 +953,7 @@ inline void StructuredBlockStorage::transformBlockLocalToGlobal( Vector3<real_t>
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformGlobalToBlockLocalCell( Cell& local, const IBlock& block, const Cell& global ) const {
 
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const CellInterval& cellBB = getBlockCellBB( block );
 
@@ -981,7 +985,7 @@ inline void StructuredBlockStorage::transformGlobalToBlockLocalCell( Cell& cell,
 //**********************************************************************************************************************
 inline void StructuredBlockStorage::transformBlockLocalToGlobalCell( Cell& global, const IBlock& block, const Cell& local ) const {
 
-   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( blockStorage_.get(), &(block.getBlockStorage()) )
 
    const CellInterval& cellBB = getBlockCellBB( block );
 

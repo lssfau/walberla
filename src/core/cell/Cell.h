@@ -50,9 +50,10 @@ public:
    //@{
    Cell() = default;
    inline Cell( const cell_idx_t _x, const cell_idx_t _y, const cell_idx_t _z ) { cell[0] = _x; cell[1] = _y; cell[2] = _z; }
- //inline Cell( const int        _x, const int        _y, const int        _z );
+   inline Cell( const Vector3<cell_idx_t> _vec ) {cell[0] = _vec[0]; cell[1] = _vec[1]; cell[2] = _vec[2];}
+
    inline Cell( const uint_t     _x, const uint_t     _y, const uint_t     _z );
-   inline Cell( const Vector3<cell_idx_t>& vec ){ cell[0] = vec[0]; cell[1] = vec[1]; cell[2] = vec[2]; };
+   inline Cell( const Vector3<uint_t> _vec );
    //@}
 
    /*! \name Arithmetic operators */
@@ -102,15 +103,6 @@ std::ostream & operator<<( std::ostream & os, const Cell & cell );
 std::istream & operator>>( std::istream & is,       Cell & cell );
 //@}
 
-
-
-// inline Cell::Cell( const int _x, const int _y, const int _z ) {
-//
-//    x() = cell_idx_c( _x ); y() = cell_idx_c( _y ); z() = cell_idx_c( _z );
-// }
-
-
-
 inline Cell::Cell( const uint_t _x, const uint_t _y, const uint_t _z )
 {
    cell[0] = cell_idx_c( _x );
@@ -118,6 +110,12 @@ inline Cell::Cell( const uint_t _x, const uint_t _y, const uint_t _z )
    cell[2] = cell_idx_c( _z );
 }
 
+inline Cell::Cell( const Vector3<uint_t> _vec )
+{
+   cell[0] = cell_idx_c( _vec[0] );
+   cell[1] = cell_idx_c( _vec[1] );
+   cell[2] = cell_idx_c( _vec[2] );
+}
 
 
 /*******************************************************************************************************************//**

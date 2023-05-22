@@ -1,0 +1,28 @@
+
+Parameters 
+{
+	omega           1.95;
+	timesteps       3000;
+
+	remainingTimeLoggerFrequency 3; // in seconds
+	vtkWriteFrequency 500;
+}
+
+DomainSetup
+{
+   Blocks    <4, 4, 4>;
+   cellsPerBlock <  32, 32, 32 >;
+
+   periodic      <  0,    1, 0 >;
+}
+
+Boundaries 
+{
+
+	Border { direction W;    walldistance -1;  flag NoSlip; }
+	Border { direction E;    walldistance -1;  flag NoSlip; }
+    Border { direction S;    walldistance -1;  flag NoSlip; }
+    Border { direction N;    walldistance -1;  flag UBB; }
+    Border { direction T;    walldistance -1;  flag NoSlip; }
+    Border { direction B;    walldistance -1;  flag NoSlip; }
+}

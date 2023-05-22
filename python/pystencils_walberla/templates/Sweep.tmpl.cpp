@@ -14,8 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \\file {{class_name}}.cpp
-//! \\ingroup lbm
-//! \\author lbmpy
+//! \\author pystencils
 //======================================================================================================================
 
 #include <cmath>

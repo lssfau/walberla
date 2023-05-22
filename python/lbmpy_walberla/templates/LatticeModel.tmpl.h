@@ -13,8 +13,8 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \\author Martin Bauer <martin.bauer@fau.de>
-//
+//! \\file {{class_name}}.h
+//! \\author lbmpy
 //======================================================================================================================
 
 #pragma once

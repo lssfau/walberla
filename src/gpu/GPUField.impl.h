@@ -34,7 +34,7 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
                        uint_t _nrOfGhostLayers, const Layout & _layout, bool usePitchedMem )
    : nrOfGhostLayers_( _nrOfGhostLayers ),
      xSize_( _xSize), ySize_( _ySize ), zSize_( _zSize ), fSize_( _fSize ),
-     layout_( _layout ), usePitchedMem_( usePitchedMem )
+     layout_( _layout ), usePitchedMem_( usePitchedMem ), timestepCounter_(0)
 {
    gpuExtent extent;
    if ( layout_ == zyxf )
@@ -61,12 +61,13 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
    }
    else
    {
-      pitchedPtr_ = make_gpuPitchedPtr( nullptr, extent.width, extent.width, extent.height );
+      pitchedPtr_ = make_gpuPitchedPtr(nullptr, extent.width, extent.width, extent.height );
       WALBERLA_GPU_CHECK ( gpuMalloc( &pitchedPtr_.ptr, extent.width * extent.height * extent.depth ) )
    }
 
-   // allocation size is stored in pitched pointer which stores the amount of padded region in bytes
-   // we keep track of the size in #elements
+   // allocation size is stored in pitched pointer
+   // pitched pointer stores the amount of padded region in bytes
+   // but we keep track of the size in #elements
    WALBERLA_ASSERT_EQUAL( pitchedPtr_.pitch % sizeof(T), 0 )
    if ( layout_ == field::fzyx )
    {

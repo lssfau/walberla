@@ -7,5 +7,7 @@ target_sources( gpu
     GPUPackInfo.h
     CustomMemoryBuffer.h
     UniformGPUScheme.h
-    GeneratedGPUPackInfo.h     
+    NonUniformGPUScheme.h
+    GeneratedGPUPackInfo.h
+    GeneratedNonUniformGPUPackInfo.h
     )

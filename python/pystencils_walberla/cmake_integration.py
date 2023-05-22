@@ -105,6 +105,12 @@ class ManualCodeGenerationContext:
     def write_file(self, name, content):
         self.files[name] = content
 
+    def write_all_files(self):
+        for name, content in self.files.items():
+            with open(name, 'w') as f:
+                f.write(content)
+        self.files = dict()
+
     def __enter__(self):
         return self
 

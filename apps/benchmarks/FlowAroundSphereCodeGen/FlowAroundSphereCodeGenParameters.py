@@ -4,10 +4,10 @@ from lbmpy.relaxationrates import relaxation_rate_from_lattice_viscosity
 
 class Scenario:
     def __init__(self):
-        self.timesteps = 1001
+        self.timesteps = 10
         self.vtkWriteFrequency = 100
 
-        self.cells = (384, 128, 128)
+        self.cells = (64, 32, 32)
         self.blocks = (1, 1, 1)
         self.periodic = (0, 0, 0)
 

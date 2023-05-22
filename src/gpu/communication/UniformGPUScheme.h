@@ -32,7 +32,7 @@
 
 #include <thread>
 
-#include "gpu/CudaRAII.h"
+#include "gpu/GPURAII.h"
 #include "gpu/GPUWrapper.h"
 #include "gpu/ParallelStreams.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
@@ -51,12 +51,14 @@ namespace communication {
    public:
        explicit UniformGPUScheme( weak_ptr<StructuredBlockForest> bf,
                                   bool sendDirectlyFromGPU = false,
+                                  bool useLocalCommunication = true,
                                   const int tag = 5432 );
 
        explicit UniformGPUScheme( weak_ptr<StructuredBlockForest> bf,
                                  const Set<SUID> & requiredBlockSelectors,
                                  const Set<SUID> & incompatibleBlockSelectors,
                                  bool sendDirectlyFromGPU = false,
+                                 bool useLocalCommunication = true,
                                  const int tag = 5432 );
 
        void addPackInfo( const shared_ptr<GeneratedGPUPackInfo> &pi );
@@ -71,7 +73,6 @@ namespace communication {
        std::function<void()> getStartCommunicateFunctor( gpuStream_t stream = nullptr );
        std::function<void()> getWaitFunctor( gpuStream_t stream = nullptr );
 
-
    private:
        void setupCommunication();
 
@@ -81,6 +82,7 @@ namespace communication {
        bool setupBeforeNextCommunication_;
        bool communicationInProgress_;
        bool sendFromGPU_;
+       bool useLocalCommunication_;
 
        using CpuBuffer_T = gpu::communication::PinnedMemoryBuffer;
        using GpuBuffer_T = gpu::communication::GPUMemoryBuffer;

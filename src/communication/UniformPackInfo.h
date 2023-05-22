@@ -153,13 +153,13 @@ protected:
 inline void UniformPackInfo::packData( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const
 {
 #ifndef NDEBUG
-   size_t sizeBefore = buffer.size();
+   size_t const sizeBefore = buffer.size();
 #endif
 
    packDataImpl( sender, dir, buffer );
 
 #ifndef NDEBUG
-   size_t sizeAfter = buffer.size();
+   size_t const sizeAfter = buffer.size();
    if( constantDataExchange() )
    {
 #ifdef _OPENMP
@@ -171,7 +171,7 @@ inline void UniformPackInfo::packData( const IBlock * sender, stencil::Direction
       if( dirEntry == blockMap.end() )
          blockMap[ dir ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( blockMap[ dir ], (sizeAfter - sizeBefore) );
+         WALBERLA_ASSERT_EQUAL( blockMap[ dir ], (sizeAfter - sizeBefore) )
 #ifdef _OPENMP
       }
 #endif

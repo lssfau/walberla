@@ -28,16 +28,18 @@
 #include "gpu/GPUWrapper.h"
 
 namespace walberla {
-namespace gpu
-{
+namespace gpu {
 
 
 #define WALBERLA_GPU_CHECK(ans) { ::walberla::gpu::checkForError((ans), __FILE__, __LINE__); }
+#define WALBERLA_GPU_CHECK_LAST_ERROR() {::walberla::gpu::checkForLastError(__FILE__, __LINE__);}
 
 
 
 inline void checkForError( gpuError_t code, const std::string & callerPath, const int line )
 {
+   // Oftentimes CUDA functions return an error code (if error has occurred) This function converts the error string in human-readable output.
+   // For general error checking use checkForLastError
   if(code != gpuSuccess)
   {
     std::stringstream ss;
@@ -46,6 +48,21 @@ inline void checkForError( gpuError_t code, const std::string & callerPath, cons
   }
 }
 
+#ifndef NDEBUG
+inline void checkForLastError( const std::string & callerPath, const int line )
+{
+   // Forces immediate checking with a synchronizing. This breaks asynchrony/concurrency structure. Thus, only in debug mode executed.
+   gpuError_t code = gpuGetLastError();
+   if(code != gpuSuccess)
+   {
+      std::stringstream ss;
+      ss << "CUDA Error: " << code << " " << cudaGetErrorName(code) << ": " << cudaGetErrorString( code );
+      Abort::instance()->abort( ss.str(), callerPath, line );
+   }
+}
+#else
+inline void checkForLastError( const std::string & /*callerPath*/, const int /*line*/ ){}
+#endif
 
 
 } // namespace gpu

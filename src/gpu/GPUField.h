@@ -125,9 +125,9 @@ namespace gpu
       bool operator==( const GPUField & other ) const;
 
       void getGhostRegion( stencil::Direction d, CellInterval & ci,
-                           cell_idx_t thickness, bool fullSlice ) const;
+                           cell_idx_t thickness, bool fullSlice = false ) const;
       void getSliceBeforeGhostLayer(stencil::Direction d, CellInterval & ci,
-                                    cell_idx_t thickness, bool fullSlice ) const
+                                    cell_idx_t thickness, bool fullSlice = false ) const
       {
          getSlice( d, ci, 0, thickness, fullSlice );
       }
@@ -139,6 +139,20 @@ namespace gpu
 
       T       * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f);
       const T * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f) const;
+
+      //** TimestepInformation *****************************************************************************************
+      /*! \name TimestepCounter */
+      //@{
+      inline uint8_t advanceTimestep()
+      {
+         timestepCounter_ = (timestepCounter_ + 1) & 1;
+         return timestepCounter_;
+      }
+      inline uint8_t getTimestep() const { return timestepCounter_; }
+      inline uint8_t getTimestepPlusOne() const { return (timestepCounter_ + 1) & 1; }
+      inline bool isEvenTimeStep() const {return (((timestepCounter_) &1) ^ 1); }
+      //@}
+      //****************************************************************************************************************
 
    protected:
       gpuPitchedPtr pitchedPtr_;
@@ -152,6 +166,7 @@ namespace gpu
       uint_t         fAllocSize_;
       Layout         layout_;
       bool           usePitchedMem_;
+      uint8_t        timestepCounter_;
    };
 
 

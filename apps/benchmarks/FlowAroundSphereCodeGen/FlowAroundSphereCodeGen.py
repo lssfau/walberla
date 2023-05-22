@@ -47,6 +47,7 @@ with CodeGeneration() as ctx:
                                                    pdfs=pdfs, density=1.0,
                                                    streaming_pattern=streaming_pattern,
                                                    previous_timestep=timesteps[0])
+    setter_assignments = setter_assignments.new_without_unused_subexpressions()
 
     # opt = {'instruction_set': 'sse', 'assume_aligned': True, 'nontemporal': False, 'assume_inner_stride_one': True}
 

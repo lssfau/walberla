@@ -9,9 +9,10 @@
 #pragma once
 
 // core includes
-#include "core/DataTypes.h"
 #include "core/cell/Cell.h"
+#include "core/DataTypes.h"
 #include "core/debug/Debug.h"
+#include "core/math/Vector3.h"
 
 // STL includes
 #include <string>
@@ -134,6 +135,39 @@ namespace stencil {
       0,  0,  0,  0,  0,  1, -1,  0,  0,  0,  0,  1,  1,  1,  1, -1, -1, -1, -1,  1,  1,  1,  1, -1, -1, -1, -1
       }
    };
+
+
+   /// Maps a (x,y,z) direction vector to its direction \ingroup stencil
+   inline Direction vectorToDirection(cell_idx_t x, cell_idx_t y, cell_idx_t z){
+      static const Direction vecToDirArr[3][3][3] = {
+         {  // x = -1
+            {BSW, SW, TSW},   // y = -1
+            {BW, W, TW},      // y = 0
+            {BNW, NW, TNW}    // y = 1
+         },
+         {  // x = 0
+            {BS, S, TS},      // y = -1
+            {B, C, T},        // y = 0
+            {BN, N, TN}       // y = 1
+         },
+         {  // x = 1
+            {BSE, SE, TSE},   // y = -1
+            {BE, E, TE},      // y = 0
+            {BNE, NE, TNE}    // y = 1
+         }
+      };
+
+      return vecToDirArr[x + 1][y + 1][z + 1];
+   }
+
+   inline Direction vectorToDirection(Vector3< cell_idx_t > vec){
+      return vectorToDirection(vec[0], vec[1], vec[2]);
+   }
+
+   inline bool isFaceDirection(Direction dir) { return 1 <= dir && dir <= 6; }
+   inline bool isEdgeDirection(Direction dir) { return 7 <= dir && dir <= 18; }
+   inline bool isCornerDirection(Direction dir) { return 19 <= dir; }
+
 
    /// The x,y,z component for each normalized direction \ingroup stencil
    const real_t cNorm[3][NR_OF_DIRECTIONS] = {

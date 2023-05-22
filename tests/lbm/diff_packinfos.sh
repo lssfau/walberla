@@ -2,5 +2,5 @@
 
 REGEX='^((#include)|(void)|(uint_t))'
 cd default_codegen
-diff -u -B <(grep -vP "$REGEX" FromKernelPackInfoPull.cpp)  <(grep -vP "$REGEX" AccessorBasedPackInfoEven.cpp) || exit 1
-diff -u -B <(grep -vP "$REGEX" FromKernelPackInfoPush.cpp)  <(grep -vP "$REGEX" AccessorBasedPackInfoOdd.cpp) || exit 1
+diff -u -B <(tail -n +20 FromKernelPackInfoPull.cpp | grep -vP "$REGEX")  <(tail -n +20 AccessorBasedPackInfoEven.cpp | grep -vP "$REGEX") || exit 1
+diff -u -B <(tail -n +20 FromKernelPackInfoPush.cpp | grep -vP "$REGEX")  <(tail -n +20 AccessorBasedPackInfoOdd.cpp | grep -vP "$REGEX") || exit 1

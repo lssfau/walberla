@@ -30,6 +30,7 @@
 #include "gpu/communication/MemcpyPackInfo.h"
 #include "gpu/communication/UniformGPUScheme.h"
 
+#include "field/AddToStorage.h"
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/initializer/ScalarFieldFromGrayScaleImage.h"
@@ -48,21 +49,6 @@ using CommScheme = gpu::communication::UniformGPUScheme<stencil::D2Q9 > ;
 using Packing = gpu::communication::MemcpyPackInfo<GPUField> ;
 
 
-ScalarField * createField( IBlock* const block, StructuredBlockStorage* const storage )
-{
-   auto xSize = storage->getNumberOfXCells( *block );
-   auto ySize = storage->getNumberOfYCells( *block );
-   auto zSize = storage->getNumberOfZCells( *block );
-   auto numberOfGhostLayers = uint_c(1);
-   auto initialValue = real_c(0);
-   auto fieldLayout = field::fzyx;
-   return new ScalarField (xSize, ySize, zSize,
-                          numberOfGhostLayers, initialValue, fieldLayout,
-                          make_shared< gpu::HostFieldAllocator<real_t> >()  // allocator for host pinned memory
-                           );
-}
-
-
 int main( int argc, char ** argv )
 {
    walberla::Environment const env( argc, argv );
@@ -78,7 +64,8 @@ int main( int argc, char ** argv )
             false, false, false );                                                   // no periodicity
 
 
-   BlockDataID const cpuFieldID = blocks->addStructuredBlockData<ScalarField>( &createField, "CPU Field" );
+   auto hostFieldAllocator = make_shared< gpu::HostFieldAllocator<real_t> >();
+   BlockDataID const cpuFieldID =field::addToStorage< ScalarField >(blocks, "CPU Field", real_c(0.0), field::fzyx, uint_c(1), hostFieldAllocator);
 
    // Initializing the field from an image
    using geometry::initializer::ScalarFieldFromGrayScaleImage;

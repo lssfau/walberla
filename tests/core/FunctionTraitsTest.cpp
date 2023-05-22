@@ -25,7 +25,7 @@
 
 using namespace walberla;
 
-// FunctionTraits are used in a similar way in cuda/Kernel.h. As explained below, special attention is required.
+// FunctionTraits are used in a similar way in gpu/Kernel.h. As explained below, special attention is required.
 template< typename F>
 struct SomeClass
 {

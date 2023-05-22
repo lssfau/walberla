@@ -14,13 +14,12 @@ foreach(streaming_pattern pull push aa esotwist)
             waLBerla_generate_target_from_python(NAME UniformGridGPUGenerated_${config}
                     FILE UniformGridGPU.py
                     CODEGEN_CFG ${config}
-                    OUT_FILES   UniformGridGPU_LbKernel.${CODEGEN_FILE_SUFFIX} UniformGridGPU_LbKernel.h
-                    UniformGridGPU_PackInfoEven.${CODEGEN_FILE_SUFFIX} UniformGridGPU_PackInfoEven.h
-                    UniformGridGPU_PackInfoOdd.${CODEGEN_FILE_SUFFIX} UniformGridGPU_PackInfoOdd.h
-                    UniformGridGPU_NoSlip.${CODEGEN_FILE_SUFFIX} UniformGridGPU_NoSlip.h
-                    UniformGridGPU_UBB.${CODEGEN_FILE_SUFFIX} UniformGridGPU_UBB.h
-                    UniformGridGPU_MacroSetter.${CODEGEN_FILE_SUFFIX} UniformGridGPU_MacroSetter.h
-                    UniformGridGPU_StreamOnlyKernel.${CODEGEN_FILE_SUFFIX} UniformGridGPU_StreamOnlyKernel.h
+                    OUT_FILES UniformGridGPUStorageSpecification.h UniformGridGPUStorageSpecification.${CODEGEN_FILE_SUFFIX}
+                    UniformGridGPUSweepCollection.h UniformGridGPUSweepCollection.${CODEGEN_FILE_SUFFIX}
+                    NoSlip.h NoSlip.${CODEGEN_FILE_SUFFIX}
+                    UBB.h UBB.${CODEGEN_FILE_SUFFIX}
+                    UniformGridGPUBoundaryCollection.h
+                    UniformGridGPU_StreamOnlyKernel.h UniformGridGPU_StreamOnlyKernel.${CODEGEN_FILE_SUFFIX}
                     UniformGridGPU_InfoHeader.h
                     )
 

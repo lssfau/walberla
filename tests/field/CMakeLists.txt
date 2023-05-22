@@ -71,6 +71,11 @@ waLBerla_generate_target_from_python(NAME CodegenJacobiCPUGeneratedJacobiKernel 
 waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp DEPENDS gui timeloop CodegenJacobiCPUGeneratedJacobiKernel)
 waLBerla_execute_test( NAME CodegenJacobiCPU )
 
+waLBerla_generate_target_from_python(NAME SweepCollectionKernel FILE codegen/SweepCollection.py
+        OUT_FILES SweepCollection.h SweepCollection.cpp)
+waLBerla_compile_test( FILES codegen/SweepCollection.cpp DEPENDS timeloop SweepCollectionKernel)
+waLBerla_execute_test( NAME SweepCollection )
+
 waLBerla_generate_target_from_python(NAME CodegenPoissonCPUGeneratedKernel FILE codegen/Poisson.py
       OUT_FILES Poisson.cpp Poisson.h )
 waLBerla_compile_test( FILES codegen/CodegenPoissonCPU.cpp DEPENDS gui timeloop CodegenPoissonCPUGeneratedKernel)

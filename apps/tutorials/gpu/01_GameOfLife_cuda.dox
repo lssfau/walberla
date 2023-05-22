@@ -33,18 +33,8 @@ Data transfer from pinned memory is faster than from normal memory. The usage of
 mandatory, the data transfer functions work (slightly slower) also with normally allocated fields.
 
 \code
-ScalarField * createField( IBlock* const block, StructuredBlockStorage* const storage )
-{
-   return new ScalarField (
-            storage->getNumberOfXCells( *block ),   // number of cells in x direction per block
-            storage->getNumberOfYCells( *block ),   // number of cells in y direction per block
-            storage->getNumberOfZCells( *block ),   // number of cells in z direction per block
-            1,                                      // one ghost layer
-            real_t(0),                              // initial value
-            field::fzyx,                            // layout
-            make_shared<gpu::HostFieldAllocator<double> >()  // allocator for host pinned memory
-            );
-}
+auto hostFieldAllocator = make_shared< gpu::HostFieldAllocator<real_t> >();
+BlockDataID const cpuFieldID =field::addToStorage< ScalarField >(blocks, "CPU Field", real_c(0.0), field::fzyx, uint_c(1), hostFieldAllocator);
 \endcode
 
 Now we initialize the CPU field just like in the previous tutorial \ref tutorial_basics03 .

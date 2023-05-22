@@ -8,6 +8,7 @@ boost-*,
 bugprone-*,
 -bugprone-branch-clone,
 -bugprone-exception-escape,
+-bugprone-easily-swappable-parameters,
 
 misc-*,
 -misc-misplaced-const,

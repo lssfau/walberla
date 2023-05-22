@@ -43,10 +43,7 @@
 #include "gpu/GPUWrapper.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
 
-namespace walberla {
-namespace gpu
-{
-namespace communication {
+namespace walberla::gpu::communication {
 
 
 /**
@@ -299,8 +296,4 @@ uint_t GPUPackInfo<GPUField_T>::numberOfGhostLayersToCommunicate( const GPUField
    }
 }
 
-
-
-} // namespace communication
-} // namespace gpu
-} // namespace walberla
+} // namespace walberla::gpu::communication

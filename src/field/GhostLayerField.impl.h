@@ -44,7 +44,7 @@ namespace field {
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    GhostLayerField<T,fSize_>::GhostLayerField( )
-      : gl_(0)
+      : gl_(0), timestepCounter_(0)
    {
    }
 
@@ -128,6 +128,7 @@ namespace field {
                                           const Layout & l, const shared_ptr<FieldAllocator<T> > &alloc)
     {
        gl_ = gl;
+       timestepCounter_ = uint8_c(0);
        uint_t innerGhostLayerSize = ( l == fzyx ) ? gl : uint_t(0);
        Field<T,fSize_>::init( _xSize + 2*gl ,
                               _ySize + 2*gl,
@@ -689,7 +690,7 @@ namespace field {
    template<typename T, uint_t fSize_>
    GhostLayerField<T,fSize_>::GhostLayerField(const GhostLayerField<T,fSize_> & other)
       : Field<T,fSize_>::Field(other),
-        gl_( other.gl_ )
+        gl_( other.gl_ ), timestepCounter_( other.timestepCounter_ )
    {
    }
 
@@ -700,7 +701,7 @@ namespace field {
    template <typename T2, uint_t fSize2>
    GhostLayerField<T,fSize_>::GhostLayerField(const GhostLayerField<T2,fSize2> & other)
       : Field<T,fSize_>::Field(other),
-        gl_( other.gl_ )
+        gl_( other.gl_ ), timestepCounter_( other.timestepCounter_ )
    {
    }
 
@@ -756,11 +757,11 @@ namespace field {
 
       // Assert that there is still space for ghost-layers after slicing
 
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->xOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->xOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->xAllocSize() - uint_c(this->xOff()) - this->xSize(), gl_ );
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->yOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->yOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->yAllocSize() - uint_c(this->yOff()) - this->ySize(), gl_ );
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->zOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->zOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->zAllocSize() - uint_c(this->zOff()) - this->zSize(), gl_ );
 
    }
@@ -771,11 +772,11 @@ namespace field {
       Field<T,fSize_>::shiftCoordinates( cx, cy, cz );
 
       // Assert that there is still space for ghost-layers after slicing
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->xOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->xOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->xAllocSize() - uint_c(this->xOff()) - this->xSize(), gl_ );
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->yOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->yOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->yAllocSize() - uint_c(this->yOff()) - this->ySize(), gl_ );
-      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->zOff()), gl_ );
+      WALBERLA_ASSERT_GREATER_EQUAL( uint_c(this->zOff()), gl_ )
       WALBERLA_ASSERT_GREATER_EQUAL( this->zAllocSize() - uint_c(this->zOff()) - this->zSize(), gl_ );
    }
 

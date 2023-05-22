@@ -35,7 +35,7 @@ target_sources( gpu
       FieldIndexing.impl.h
       Kernel.h
       ParallelStreams.h
-      CudaRAII.h
+      GPURAII.h
       DeviceSelectMPI.cpp
       )
 

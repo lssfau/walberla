@@ -141,6 +141,21 @@ void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID f
    }
 }
 
+template<typename FlagField_T>
+void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID flagFieldID,
+                                 field::FlagUID fluidFlagID, cell_idx_t numGhostLayers)
+{
+   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+   {
+      auto flagField = blockIt->template getData<FlagField_T>( flagFieldID );
+      auto fluidFlag = flagField->getOrRegisterFlag(fluidFlagID);
+      for( auto it = flagField->beginWithGhostLayerXYZ(numGhostLayers); it != flagField->end(); ++it )
+         if ( *it == 0 )
+            addFlag(it, fluidFlag);
+   }
+}
+
+
 
 } // namespace geometry
 } // namespace walberla

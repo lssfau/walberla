@@ -84,7 +84,7 @@ void testJacobi2D()
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField>( fieldID );
 
-   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 4.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 4.0))
 }
 
 
@@ -132,7 +132,7 @@ void testJacobi3D()
 
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField>( fieldID );
-   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 8.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 8.0))
 }
 
 

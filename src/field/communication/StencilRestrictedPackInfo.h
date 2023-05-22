@@ -73,10 +73,10 @@ void StencilRestrictedPackInfo<GhostLayerField_T, Stencil>::unpackData( IBlock *
       return;
 
    GhostLayerField_T * pdfField = receiver->getData< GhostLayerField_T >( fieldId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
-   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 );
+   WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
+   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 )
 
-   stencil::Direction packerDirection = stencil::inverseDir[dir];
+   stencil::Direction const packerDirection = stencil::inverseDir[dir];
 
    for(auto i = pdfField->beginGhostLayerOnlyXYZ(dir); i != pdfField->end(); ++i )
       for(uint_t f = 0; f < Stencil::d_per_d_length[packerDirection]; ++f)
@@ -94,7 +94,7 @@ void StencilRestrictedPackInfo<GhostLayerField_T, Stencil>::communicateLocal( co
    const GhostLayerField_T * sf = sender  ->getData< GhostLayerField_T >( fieldId_ );
          GhostLayerField_T * rf = receiver->getData< GhostLayerField_T >( fieldId_ );
 
-   WALBERLA_ASSERT_EQUAL( sf->xyzSize(), rf->xyzSize() );
+   WALBERLA_ASSERT_EQUAL( sf->xyzSize(), rf->xyzSize() )
 
    typename GhostLayerField_T::const_iterator srcIter = sf->beginSliceBeforeGhostLayerXYZ(dir);
    typename GhostLayerField_T::iterator       dstIter = rf->beginGhostLayerOnlyXYZ(stencil::inverseDir[dir]);
@@ -107,8 +107,8 @@ void StencilRestrictedPackInfo<GhostLayerField_T, Stencil>::communicateLocal( co
       ++srcIter;
       ++dstIter;
    }
-   WALBERLA_ASSERT( srcIter == sf->end() );
-   WALBERLA_ASSERT( dstIter == rf->end() );
+   WALBERLA_ASSERT( srcIter == sf->end() )
+   WALBERLA_ASSERT( dstIter == rf->end() )
 }
 
 
@@ -120,8 +120,8 @@ void StencilRestrictedPackInfo<GhostLayerField_T, Stencil>::packDataImpl( const 
       return;
 
    const GhostLayerField_T * pdfField = sender->getData< GhostLayerField_T >( fieldId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
-   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 );
+   WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
+   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 )
 
    for( auto i = pdfField->beginSliceBeforeGhostLayerXYZ(dir); i != pdfField->end(); ++i )
       for(uint_t f = 0; f < Stencil::d_per_d_length[dir]; ++f)

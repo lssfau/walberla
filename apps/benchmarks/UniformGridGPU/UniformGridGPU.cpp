@@ -29,12 +29,24 @@
 
 #include "field/AddToStorage.h"
 #include "field/FlagField.h"
-#include "field/communication/PackInfo.h"
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/InitBoundaryHandling.h"
 
-#include "lbm/inplace_streaming/TimestepTracker.h"
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/DeviceSelectMPI.h"
+#include "gpu/FieldCopy.h"
+#include "gpu/GPUWrapper.h"
+#include "gpu/HostFieldAllocator.h"
+#include "gpu/ParallelStreams.h"
+#include "gpu/communication/UniformGPUScheme.h"
+
+#include "lbm_generated/field/PdfField.h"
+#include "lbm_generated/field/AddToStorage.h"
+#include "lbm_generated/gpu/UniformGeneratedGPUPdfPackInfo.h"
+#include "lbm_generated/gpu/GPUPdfField.h"
+#include "lbm_generated/gpu/AddToStorage.h"
+#include "lbm_generated/evaluation/PerformanceEvaluation.h"
 
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/DictWrapper.h"
@@ -46,16 +58,20 @@
 
 #include "InitShearVelocity.h"
 #include "UniformGridGPU_InfoHeader.h"
-#include "gpu/AddGPUFieldToStorage.h"
-#include "gpu/DeviceSelectMPI.h"
-#include "gpu/FieldCopy.h"
-#include "gpu/GPUWrapper.h"
-#include "gpu/ParallelStreams.h"
-#include "gpu/communication/UniformGPUScheme.h"
-#include "gpu/lbm/CombinedInPlaceGpuPackInfo.h"
+
 using namespace walberla;
 
+using StorageSpecification_T = lbm::UniformGridGPUStorageSpecification;
+using Stencil_T = lbm::UniformGridGPUStorageSpecification::Stencil;
+
+using PdfField_T = lbm_generated::PdfField< StorageSpecification_T >;
+using GPUPdfField_T = lbm_generated::GPUPdfField< StorageSpecification_T >;
 using FlagField_T = FlagField< uint8_t >;
+using BoundaryCollection_T = lbm::UniformGridGPUBoundaryCollection< FlagField_T >;
+
+using SweepCollection_T = lbm::UniformGridGPUSweepCollection;
+
+using gpu::communication::UniformGPUScheme;
 
 int main(int argc, char** argv)
 {
@@ -76,18 +92,21 @@ int main(int argc, char** argv)
       logging::configureLogging(config);
       auto blocks = blockforest::createUniformBlockGridFromConfig(config);
 
-      Vector3< uint_t > cellsPerBlock =
-         config->getBlock("DomainSetup").getParameter< Vector3< uint_t > >("cellsPerBlock");
       // Reading parameters
       auto parameters          = config->getOneBlock("Parameters");
       const real_t omega       = parameters.getParameter< real_t >("omega", real_c(1.4));
       const uint_t timesteps   = parameters.getParameter< uint_t >("timesteps", uint_c(50));
       const bool initShearFlow = parameters.getParameter< bool >("initShearFlow", true);
+      const bool cudaEnabledMPI = parameters.getParameter< bool >("cudaEnabledMPI", false);
 
       // Creating fields
-      BlockDataID const pdfFieldCpuID =
-         field::addToStorage< PdfField_T >(blocks, "pdfs cpu", real_c(std::nan("")), field::fzyx);
-      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      const StorageSpecification_T StorageSpec = StorageSpecification_T();
+      const BlockDataID pdfFieldCpuID  = lbm_generated::addPdfFieldToStorage(blocks, "pdfs", StorageSpec, uint_c(1), field::fzyx);
+
+      auto allocator = make_shared< gpu::HostFieldAllocator<real_t> >(); // use pinned memory allocator for faster CPU-GPU memory transfers
+      const BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx, uint_c(1), allocator);
+      const BlockDataID densityFieldCpuID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx, uint_c(1), allocator);
+      const BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
 
       // Initialize velocity on cpu
       if (initShearFlow)
@@ -96,181 +115,92 @@ int main(int argc, char** argv)
          initShearVelocity(blocks, velFieldCpuID);
       }
 
-      BlockDataID const pdfFieldGpuID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldCpuID, "pdfs on GPU", true);
-      // Velocity field is copied to the GPU
-      BlockDataID velFieldGpuID =
+      const BlockDataID pdfFieldGpuID = lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldCpuID, StorageSpec, "pdfs on GPU", true);
+      const BlockDataID velFieldGpuID =
          gpu::addGPUFieldToStorage< VelocityField_T >(blocks, velFieldCpuID, "velocity on GPU", true);
+      const BlockDataID densityFieldGpuID =
+         gpu::addGPUFieldToStorage< ScalarField_T >(blocks, densityFieldCpuID, "velocity on GPU", true);
 
-      pystencils::UniformGridGPU_MacroSetter setterSweep(pdfFieldGpuID, velFieldGpuID);
-
-      // Set up initial PDF values
+      const Cell innerOuterSplit = Cell(parameters.getParameter< Vector3<cell_idx_t> >("innerOuterSplit", Vector3<cell_idx_t>(1, 1, 1)));
+      Vector3< int32_t > gpuBlockSize = parameters.getParameter< Vector3< int32_t > >("gpuBlockSize", Vector3< int32_t >(256, 1, 1));
+      SweepCollection_T sweepCollection(blocks, pdfFieldGpuID, densityFieldGpuID, velFieldGpuID, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2], omega, innerOuterSplit);
       for (auto& block : *blocks)
-         setterSweep(&block);
-
-      Vector3< int > innerOuterSplit =
-         parameters.getParameter< Vector3< int > >("innerOuterSplit", Vector3< int >(1, 1, 1));
-
-      for (uint_t i = 0; i < 3; ++i)
       {
-         if (int_c(cellsPerBlock[i]) <= innerOuterSplit[i] * 2)
-         { WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock") }
+         sweepCollection.initialise(&block);
       }
-
-      Cell const innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
-      bool const cudaEnabledMPI = parameters.getParameter< bool >("cudaEnabledMPI", false);
-      Vector3< int32_t > gpuBlockSize =
-         parameters.getParameter< Vector3< int32_t > >("gpuBlockSize", Vector3< int32_t >(256, 1, 1));
 
       int streamHighPriority = 0;
       int streamLowPriority  = 0;
       WALBERLA_GPU_CHECK(gpuDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority))
-
+      sweepCollection.setOuterPriority(streamHighPriority);
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                      LB SWEEPS AND BOUNDARY HANDLING                                       ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      using LbSweep      = lbm::UniformGridGPU_LbKernel;
-      using PackInfoEven = lbm::UniformGridGPU_PackInfoEven;
-      using PackInfoOdd  = lbm::UniformGridGPU_PackInfoOdd;
-      using gpu::communication::UniformGPUScheme;
-
-      LbSweep lbSweep(pdfFieldGpuID, omega, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2], innerOuterSplitCell);
-      lbSweep.setOuterPriority(streamHighPriority);
-
-      pystencils::UniformGridGPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldGpuID, gpuBlockSize[0], gpuBlockSize[1],
-                                                                   gpuBlockSize[2]);
+      const pystencils::UniformGridGPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldGpuID, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
 
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
-      BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
       auto boundariesConfig   = config->getBlock("Boundaries");
-      bool boundaries         = false;
       if (boundariesConfig)
       {
-         boundaries = true;
+         WALBERLA_LOG_INFO_ON_ROOT("Setting boundary conditions")
          geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
-         geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
-
-      lbm::UniformGridGPU_NoSlip noSlip(blocks, pdfFieldGpuID);
-      noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
-
-      lbm::UniformGridGPU_UBB ubb(blocks, pdfFieldGpuID);
-      ubb.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("UBB"), fluidFlagUID);
-
-      // Initial setup is the post-collision state of an even time step
-      auto tracker = make_shared< lbm::TimestepTracker >(0);
+      geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
+      BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldGpuID, fluidFlagUID);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                           COMMUNICATION SCHEME                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      UniformGPUScheme< Stencil_T > comm(blocks, cudaEnabledMPI);
-      auto packInfo =
-         make_shared< lbm::CombinedInPlaceGpuPackInfo< PackInfoEven, PackInfoOdd > >(tracker, pdfFieldGpuID);
-      comm.addPackInfo(packInfo);
+      UniformGPUScheme< Stencil_T > communication(blocks, cudaEnabledMPI);
+      auto packInfo = std::make_shared<lbm_generated::UniformGeneratedGPUPdfPackInfo< GPUPdfField_T >>(pdfFieldGpuID);
+      communication.addPackInfo(packInfo);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                          TIME STEP DEFINITIONS                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      SweepTimeloop timeLoop(blocks->getBlockStorage(), timesteps);
+      const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
 
       auto defaultStream = gpu::StreamRAII::newPriorityStream(streamLowPriority);
 
-      auto boundarySweep = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
-         noSlip.run(block, t, stream);
-         ubb.run(block, t, stream);
-      };
+      if (timeStepStrategy == "noOverlap") {
+         if (boundariesConfig){
+            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(defaultStream), "communication")
+                           << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL, defaultStream), "Boundary Conditions");
+            timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL, defaultStream), "LBM StreamCollide");
+         }else {
+            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(defaultStream), "communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL, defaultStream), "LBM StreamCollide");}
 
-      auto boundaryInner = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
-         noSlip.inner(block, t, stream);
-         ubb.inner(block, t, stream);
-      };
+      } else if (timeStepStrategy == "simpleOverlap") {
+         if (boundariesConfig){
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(defaultStream), "Start Communication")
+                           << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL, defaultStream), "Boundary Conditions");
+            timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER, defaultStream), "LBM StreamCollide Inner Frame");
+            timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER, defaultStream), "LBM StreamCollide Outer Frame");
+         }else{
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(defaultStream), "Start Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER, defaultStream), "LBM StreamCollide Inner Frame");
+            timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER,defaultStream), "LBM StreamCollide Outer Frame");}
 
-      auto boundaryOuter = [&](IBlock* block, uint8_t t, gpuStream_t stream) {
-         noSlip.outer(block, t, stream);
-         ubb.outer(block, t, stream);
-      };
-
-      auto simpleOverlapTimeStep = [&]() {
-         // Communicate post-collision values of previous timestep...
-         comm.startCommunication(defaultStream);
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundaryInner(&block, tracker->getCounter(), defaultStream);
-            lbSweep.inner(&block, tracker->getCounterPlusOne(), defaultStream);
-         }
-         comm.wait(defaultStream);
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundaryOuter(&block, tracker->getCounter(), defaultStream);
-            lbSweep.outer(&block, tracker->getCounterPlusOne(), defaultStream);
-         }
-
-         tracker->advance();
-      };
-
-      auto normalTimeStep = [&]() {
-         comm.communicate(defaultStream);
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundarySweep(&block, tracker->getCounter(), defaultStream);
-            lbSweep(&block, tracker->getCounterPlusOne(), defaultStream);
-         }
-
-         tracker->advance();
-      };
-
-      // With two-fields patterns, ghost layer cells act as constant stream-in boundaries;
-      // with in-place patterns, ghost layer cells act as wet-node no-slip boundaries.
-      auto kernelOnlyFunc = [&]() {
-         tracker->advance();
-         for (auto& block : *blocks)
-            lbSweep(&block, tracker->getCounter(), defaultStream);
-      };
-
-      // Stream only function to test a streaming pattern without executing lbm operations inside
-      auto StreamOnlyFunc = [&]() {
-         for (auto& block : *blocks)
-            StreamOnlyKernel(&block, defaultStream);
-      };
+      } else if (timeStepStrategy == "kernelOnly") {
+         timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL, defaultStream), "LBM StreamCollide");
+      } else if (timeStepStrategy == "StreamOnly") {
+         timeLoop.add() << Sweep(StreamOnlyKernel, "LBM Stream Only");
+      } else {
+         WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'")
+      }
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                             TIME LOOP SETUP                                                ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      SweepTimeloop timeLoop(blocks->getBlockStorage(), timesteps);
-
-      const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
-      std::function< void() > timeStep;
-      if (timeStepStrategy == "noOverlap")
-         timeStep = std::function< void() >(normalTimeStep);
-      else if (timeStepStrategy == "simpleOverlap")
-         timeStep = simpleOverlapTimeStep;
-      else if (timeStepStrategy == "kernelOnly")
-      {
-         WALBERLA_LOG_INFO_ON_ROOT(
-            "Running only compute kernel without boundary - this makes only sense for benchmarking!")
-         // Run initial communication once to provide any missing stream-in populations
-         comm.communicate();
-         timeStep = kernelOnlyFunc;
-      }
-      else if (timeStepStrategy == "StreamOnly")
-      {
-         WALBERLA_LOG_INFO_ON_ROOT(
-            "Running only streaming kernel without LBM - this makes only sense for benchmarking!")
-         // Run initial communication once to provide any missing stream-in populations
-         timeStep = StreamOnlyFunc;
-      }
-      else
-      {
-         WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'. Allowed values are 'noOverlap', "
-                                      "'simpleOverlap', 'kernelOnly'")
-      }
-
-      timeLoop.add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
-
       // VTK
-      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      const uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
@@ -278,7 +208,10 @@ int main(int argc, char** argv)
          auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >(velFieldCpuID, "vel");
          vtkOutput->addCellDataWriter(velWriter);
 
-         vtkOutput->addBeforeFunction([&]() { gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldCpuID, velFieldGpuID);
+         vtkOutput->addBeforeFunction([&]() {
+            for (auto& block : *blocks)
+               sweepCollection.calculateMacroscopicParameters(&block);
+            gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldCpuID, velFieldGpuID);
          });
          timeLoop.addFuncAfterTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
@@ -287,12 +220,13 @@ int main(int argc, char** argv)
       ///                                               BENCHMARK                                                    ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      int const warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
-      int const outerIterations = parameters.getParameter< int >("outerIterations", 1);
-      for (int i = 0; i < warmupSteps; ++i)
+      lbm_generated::PerformanceEvaluation<FlagField_T> const performance(blocks, flagFieldID, fluidFlagUID);
+      const uint_t warmupSteps     = parameters.getParameter< uint_t >("warmupSteps", uint_c(2));
+      const uint_t outerIterations = parameters.getParameter< uint_t >("outerIterations", uint_c(1));
+      for (uint_t i = 0; i < warmupSteps; ++i)
          timeLoop.singleStep();
 
-      real_t const remainingTimeLoggerFrequency =
+      auto remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {
@@ -301,32 +235,36 @@ int main(int argc, char** argv)
          timeLoop.addFuncAfterTimeStep(logger, "remaining time logger");
       }
 
-      for (int outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
+      for (uint_t outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
       {
          WALBERLA_GPU_CHECK(gpuPeekAtLastError())
 
          timeLoop.setCurrentTimeStepToZero();
+         WcTimingPool const timeloopTiming;
          WcTimer simTimer;
+
          WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
-         WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+         WALBERLA_GPU_CHECK( gpuPeekAtLastError() )
          WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
          simTimer.start();
          timeLoop.run();
          WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
          simTimer.end();
-         WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-         auto time      = real_c(simTimer.last());
-         auto nrOfCells = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
 
-         auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
-         WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process " << mlupsPerProcess)
-         WALBERLA_LOG_RESULT_ON_ROOT("Time per time step " << time / real_c(timesteps))
+         WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
+         double time = simTimer.max();
+         WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+         performance.logResultOnRoot(timesteps, time);
+
+         const auto reducedTimeloopTiming = timeloopTiming.getReduced();
+         WALBERLA_LOG_RESULT_ON_ROOT("Time loop timing:\n" << *reducedTimeloopTiming)
+
          WALBERLA_ROOT_SECTION()
          {
             python_coupling::PythonCallback pythonCallbackResults("results_callback");
             if (pythonCallbackResults.isCallable())
             {
-               pythonCallbackResults.data().exposeValue("mlupsPerProcess", mlupsPerProcess);
+               pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
                pythonCallbackResults.data().exposeValue("stencil", infoStencil);
                pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);
                pythonCallbackResults.data().exposeValue("collisionSetup", infoCollisionSetup);
@@ -338,6 +276,5 @@ int main(int argc, char** argv)
          }
       }
    }
-
    return EXIT_SUCCESS;
 }

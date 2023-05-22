@@ -500,7 +500,7 @@ shared_ptr<Timer<TP> > getReduced( Timer<TP>& timer, ReduceType rt, int targetRa
       break;
 
    default:
-      WALBERLA_ABORT( "Unknown reduce type" );
+      WALBERLA_ABORT( "Unknown reduce type" )
       break;
    }
 
