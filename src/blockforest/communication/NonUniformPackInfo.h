@@ -106,13 +106,13 @@ protected:
 inline void NonUniformPackInfo::packDataEqualLevel( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const
 {
 #ifndef NDEBUG
-   size_t sizeBefore = buffer.size();
+   size_t const sizeBefore = buffer.size();
 #endif
 
    packDataEqualLevelImpl( sender, dir, buffer );
 
 #ifndef NDEBUG
-   size_t sizeAfter = buffer.size();
+   size_t const sizeAfter = buffer.size();
    if( constantDataExchange() )
    {
 #ifdef _OPENMP
@@ -125,7 +125,7 @@ inline void NonUniformPackInfo::packDataEqualLevel( const Block * sender, stenci
       if( dirEntry == sizeMap.end() )
          sizeMap[ uint_t(0) ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) );
+         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) )
 #ifdef _OPENMP
       }
 #endif
@@ -138,13 +138,13 @@ inline void NonUniformPackInfo::packDataEqualLevel( const Block * sender, stenci
 inline void NonUniformPackInfo::packDataCoarseToFine( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const
 {
 #ifndef NDEBUG
-   size_t sizeBefore = buffer.size();
+   size_t const sizeBefore = buffer.size();
 #endif
 
    packDataCoarseToFineImpl( coarseSender, fineReceiver, dir, buffer );
 
 #ifndef NDEBUG
-   size_t sizeAfter = buffer.size();
+   size_t const sizeAfter = buffer.size();
    if( constantDataExchange() )
    {
 #ifdef _OPENMP
@@ -157,7 +157,7 @@ inline void NonUniformPackInfo::packDataCoarseToFine( const Block * coarseSender
       if( dirEntry == sizeMap.end() )
          sizeMap[ fineReceiver.getBranchId() ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( sizeMap[ fineReceiver.getBranchId() ], (sizeAfter - sizeBefore) );
+         WALBERLA_ASSERT_EQUAL( sizeMap[ fineReceiver.getBranchId() ], (sizeAfter - sizeBefore) )
 #ifdef _OPENMP
       }
 #endif
@@ -170,13 +170,13 @@ inline void NonUniformPackInfo::packDataCoarseToFine( const Block * coarseSender
 inline void NonUniformPackInfo::packDataFineToCoarse( const Block * fineSender, const BlockID & coarseReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const
 {
 #ifndef NDEBUG
-   size_t sizeBefore = buffer.size();
+   size_t const sizeBefore = buffer.size();
 #endif
 
    packDataFineToCoarseImpl( fineSender, coarseReceiver, dir, buffer );
 
 #ifndef NDEBUG
-   size_t sizeAfter = buffer.size();
+   size_t const sizeAfter = buffer.size();
    if( constantDataExchange() )
    {
 #ifdef _OPENMP
@@ -189,7 +189,7 @@ inline void NonUniformPackInfo::packDataFineToCoarse( const Block * fineSender, 
       if( dirEntry == sizeMap.end() )
          sizeMap[ uint_t(0) ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) );
+         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) )
 #ifdef _OPENMP
       }
 #endif

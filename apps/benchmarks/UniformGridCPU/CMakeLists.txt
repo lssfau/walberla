@@ -15,13 +15,11 @@ foreach(streaming_pattern pull push aa esotwist)
             waLBerla_generate_target_from_python(NAME UniformGridCPUGenerated_${config}
                     FILE UniformGridCPU.py
                     CODEGEN_CFG ${config}
-                    OUT_FILES   UniformGridCPU_LbKernel.cpp UniformGridCPU_LbKernel.h
-                    UniformGridCPU_PackInfoEven.cpp UniformGridCPU_PackInfoEven.h
-                    UniformGridCPU_PackInfoOdd.cpp UniformGridCPU_PackInfoOdd.h
-                    UniformGridCPU_NoSlip.cpp UniformGridCPU_NoSlip.h
-                    UniformGridCPU_UBB.cpp UniformGridCPU_UBB.h
-                    UniformGridCPU_MacroSetter.cpp UniformGridCPU_MacroSetter.h
-                    UniformGridCPU_MacroGetter.cpp UniformGridCPU_MacroGetter.h
+                    OUT_FILES UniformGridCPUStorageSpecification.h UniformGridCPUStorageSpecification.cpp
+                    UniformGridCPUSweepCollection.h UniformGridCPUSweepCollection.cpp
+                    NoSlip.cpp NoSlip.h
+                    UBB.cpp UBB.h
+                    UniformGridCPUBoundaryCollection.h
                     UniformGridCPU_StreamOnlyKernel.cpp UniformGridCPU_StreamOnlyKernel.h
                     UniformGridCPU_InfoHeader.h
                     )

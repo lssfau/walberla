@@ -314,7 +314,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
                {
                   if( localMode_ == BUFFER )
                   {
-                     SendBuffer buffer;
+                     SendBuffer const buffer;
                      localBuffers_.push_back( buffer );
                      const uint_t index = uint_c( localBuffers_.size() ) - uint_t(1);
 

@@ -202,6 +202,20 @@ namespace field {
       //@}
       //****************************************************************************************************************
 
+      //** TimestepInformation *****************************************************************************************
+      /*! \name TimestepCounter */
+      //@{
+      inline uint8_t advanceTimestep()
+      {
+         timestepCounter_ = (timestepCounter_ + 1) & 1;
+         return timestepCounter_;
+      }
+      inline uint8_t getTimestep() const { return timestepCounter_; }
+      inline uint8_t getTimestepPlusOne() const { return (timestepCounter_ + 1) & 1; }
+      inline bool isEvenTimeStep() const {return (((timestepCounter_) &1) ^ 1); }
+      //@}
+      //****************************************************************************************************************
+
    protected:
       GhostLayerField( );
 
@@ -221,6 +235,8 @@ namespace field {
 
       template <typename T2, uint_t fSize2>
       friend class GhostLayerField;
+
+      uint8_t timestepCounter_;
    };
 
 } // namespace field

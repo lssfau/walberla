@@ -19,6 +19,7 @@
 
 #pragma once
 #include "core/DataTypes.h"
+#include "core/logging/Logging.h"
 
 {% if target is equalto 'cpu' -%}
 #include "field/GhostLayerField.h"

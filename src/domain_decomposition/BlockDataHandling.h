@@ -92,21 +92,21 @@ public:
    
    void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) override
    {
-      WALBERLA_ABORT( "You are trying to serialize a block data item for which only an initialization function was registered" );
+      WALBERLA_ABORT( "You are trying to serialize a block data item for which only an initialization function was registered" )
 #ifdef __IBMCPP__
-      return NULL; // never reached, helps to suppress a warning from the IBM compiler
+      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
 #endif
    }
    T * deserialize( IBlock * const ) override
    {
-      WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" );
+      WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" )
 #ifdef __IBMCPP__
-      return NULL; // never reached, helps to suppress a warning from the IBM compiler
+      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
 #endif
    }
    void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) override
    {
-      WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" );
+      WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" )
    }
 
 private:
@@ -175,27 +175,27 @@ public:
   
    BlockData * initialize( IBlock * const block ) override
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( block );
+      WALBERLA_ASSERT_NOT_NULLPTR( block )
       T * ptr = dataHandling_->initialize( block );
       return ptr ? new BlockData( ptr ) : nullptr;
    }
    
    void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( block );
+      WALBERLA_ASSERT_NOT_NULLPTR( block )
       dataHandling_->serialize( block, id, buffer );
    }
    
    BlockData * deserialize( IBlock * const block ) override
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( block );
+      WALBERLA_ASSERT_NOT_NULLPTR( block )
       T * ptr = dataHandling_->deserialize( block );
       return ptr ? new BlockData( ptr ) : nullptr;
    }
    
    void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( block );
+      WALBERLA_ASSERT_NOT_NULLPTR( block )
       dataHandling_->deserialize( block, id, buffer );
    }   
    
@@ -269,7 +269,7 @@ public:
                          " - block state: " << block->getState() << "\n"
                          " - global state: " << uid::globalState() << "\n"
                          " - additional state: " << state << "\n" 
-                         " - \"selector\": " << selection );
+                         " - \"selector\": " << selection )
       }
       
       return dataHandling;

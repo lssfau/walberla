@@ -93,5 +93,3 @@ namespace gpu
 
 } // namespace gpu
 } // namespace walberla
-
-

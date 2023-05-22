@@ -2,13 +2,10 @@ import numpy as np
 from jinja2 import Environment, PackageLoader, StrictUndefined
 from pystencils import Field, FieldType, Target
 from pystencils.boundaries.boundaryhandling import create_boundary_kernel
-from pystencils.boundaries.createindexlist import (
-    boundary_index_array_coordinate_names, direction_member_name,
-    numpy_data_type_for_boundary_object)
+from pystencils.boundaries.createindexlist import numpy_data_type_for_boundary_object
 from pystencils.typing import TypedSymbol, create_type
-from pystencils.stencil import inverse_direction
 
-from pystencils_walberla.codegen import config_from_context
+from pystencils_walberla.utility import config_from_context, struct_from_numpy_dtype
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 from pystencils_walberla.kernel_selection import (
@@ -32,6 +29,7 @@ def generate_boundary(generation_context,
                       interface_mappings=(),
                       generate_functor=True,
                       layout='fzyx',
+                      field_timestep=None,
                       **create_kernel_params):
 
     if boundary_object.additional_data and additional_data_handler is None:
@@ -75,8 +73,9 @@ def generate_boundary(generation_context,
     else:
         raise ValueError(f"kernel_creation_function returned wrong type: {kernel.__class__}")
 
-    kernel_family = KernelFamily(selection_tree, class_name)
-    interface_spec = HighLevelInterfaceSpec(kernel_family.kernel_selection_parameters, interface_mappings)
+    kernel_family = KernelFamily(selection_tree, class_name, field_timestep=field_timestep)
+    selection_parameters = kernel_family.kernel_selection_parameters if field_timestep is None else []
+    interface_spec = HighLevelInterfaceSpec(selection_parameters, interface_mappings)
 
     if additional_data_handler is None:
         additional_data_handler = AdditionalDataHandler(stencil=neighbor_stencil)
@@ -97,8 +96,9 @@ def generate_boundary(generation_context,
         'inner_or_boundary': boundary_object.inner_or_boundary,
         'single_link': boundary_object.single_link,
         'additional_data_handler': additional_data_handler,
-        'dtype': "float" if is_float else "double",
-        'layout': layout
+        'dtype': "double" if is_float else "float",
+        'layout': layout,
+        'index_shape': index_shape
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
@@ -110,6 +110,8 @@ def generate_boundary(generation_context,
     source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
+
+    return context
 
 
 def generate_staggered_boundary(generation_context, class_name, boundary_object,
@@ -126,28 +128,3 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
                       FieldType.STAGGERED_FLUX, target=target, **kwargs)
 
 
-def struct_from_numpy_dtype(struct_name, numpy_dtype):
-    result = f"struct {struct_name} {{ \n"
-
-    equality_compare = []
-    constructor_params = []
-    constructor_initializer_list = []
-    for name, (sub_type, offset) in numpy_dtype.fields.items():
-        pystencils_type = create_type(sub_type)
-        result += f"    {pystencils_type} {name};\n"
-        if name in boundary_index_array_coordinate_names or name == direction_member_name:
-            constructor_params.append(f"{pystencils_type} {name}_")
-            constructor_initializer_list.append(f"{name}({name}_)")
-        else:
-            constructor_initializer_list.append(f"{name}()")
-        if pystencils_type.is_float():
-            equality_compare.append(f"floatIsEqual({name}, o.{name})")
-        else:
-            equality_compare.append(f"{name} == o.{name}")
-
-    result += "    %s(%s) : %s {}\n" % \
-              (struct_name, ", ".join(constructor_params), ", ".join(constructor_initializer_list))
-    result += "    bool operator==(const %s & o) const {\n        return %s;\n    }\n" % \
-              (struct_name, " && ".join(equality_compare))
-    result += "};\n"
-    return result

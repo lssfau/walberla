@@ -110,7 +110,7 @@ public:
       WALBERLA_ABORT( "BlockData access type violation! (The block data you added is of a different type than the block data you are trying to access!)" )
 #endif
 #ifdef __IBMCPP__
-      return NULL; // never reached, helps to suppress a warning from the IBM compiler
+      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
 #endif
    }
 
@@ -211,8 +211,6 @@ public:
 
    friend class           BlockStorage;
    friend class StructuredBlockStorage;
-
-public:
 
    virtual const IBlockID& getId() const = 0;
 
@@ -466,7 +464,7 @@ inline const T* IBlock::uncheckedFastGetData( const ConstBlockDataID & index ) c
    WALBERLA_ASSERT_LESS( uint_t( index ), data_.size() );
 
    if( data_[index] == nullptr )
-      return NULL;
+      return nullptr;
 
    return data_[index]->template uncheckedFastGet< T >();
 }

@@ -36,7 +36,7 @@ namespace gpu
    * Allocator that allocates a CPU! field using gpuHostAlloc without padding
    *
    * Uses gpuHostAlloc for the allocation - which allocates page-locked memory that is faster to transfer to the GPU
-   * This allocator should be used for CPU fields that are often transfered to GPU and back
+   * This allocator should be used for CPU fields that are often transferred to GPU and back
    *
    * \ingroup gpu
    *

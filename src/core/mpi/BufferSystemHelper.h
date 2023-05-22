@@ -108,7 +108,7 @@ namespace internal {
       using typename AbstractCommunication<RecvBuffer_T, SendBuffer_T>::ReceiveInfo;
 
       KnownSizeCommunication( const MPI_Comm & communicator, int tag = 0 )
-           : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
+           : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ){}
 
       ~KnownSizeCommunication() override = default;
 
@@ -121,8 +121,8 @@ namespace internal {
       MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
-      bool sending_;
-      bool receiving_;
+      bool sending_{false};
+      bool receiving_{false};
 
       std::vector<MPI_Request> sendRequests_;
       std::vector<MPI_Request> recvRequests_;
@@ -136,7 +136,7 @@ namespace internal {
       using typename AbstractCommunication<RecvBuffer_T, SendBuffer_T>::ReceiveInfo;
 
       UnknownSizeCommunication( const MPI_Comm & communicator, int tag = 0 )
-           :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
+           :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ){}
 
       ~UnknownSizeCommunication() override = default;
 
@@ -149,8 +149,8 @@ namespace internal {
       MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
-      bool sending_;
-      bool receiving_;
+      bool sending_{false};
+      bool receiving_{false};
 
       std::vector<MPI_Request> sendRequests_;
       std::list<MPISize>       outgoingBufferForSizes_;
@@ -168,7 +168,7 @@ namespace internal {
       using typename AbstractCommunication<RecvBuffer_T, SendBuffer_T>::ReceiveInfo;
 
       UnknownSizeCommunicationIProbe( const MPI_Comm & communicator, int tag = 0 )
-           :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
+           :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ){}
 
       ~UnknownSizeCommunicationIProbe() override = default;
 
@@ -181,8 +181,8 @@ namespace internal {
       MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
-      bool sending_;
-      bool receiving_;
+      bool sending_{false};
+      bool receiving_{false};
       int  pendingReceives_;
 
       std::vector<MPI_Request> sendRequests_;
@@ -196,7 +196,7 @@ namespace internal {
       using typename AbstractCommunication<RecvBuffer_T, SendBuffer_T>::ReceiveInfo;
 
       NoMPICommunication( const MPI_Comm & communicator, int tag = 0 )
-         : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), received_( false ) {}
+         : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ){}
 
       ~NoMPICommunication() override = default;
 
@@ -209,7 +209,7 @@ namespace internal {
       MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
-      bool         received_;
+      bool         received_{ false };
       RecvBuffer_T tmpBuffer_;
    };
 

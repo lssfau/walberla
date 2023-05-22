@@ -19,10 +19,10 @@
 //
 //======================================================================================================================
 #pragma once
-#include "gpu/ErrorChecking.h"
-#include "gpu/CudaRAII.h"
-
 #include <vector>
+
+#include "gpu/ErrorChecking.h"
+#include "gpu/GPURAII.h"
 
 namespace walberla {
 namespace gpu

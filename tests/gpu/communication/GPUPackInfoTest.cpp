@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file GPUFieldPackInfoTest.cpp
-//! \ingroup cuda
+//! \ingroup gpu
 //! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
 //! \brief Tests if a GPUField is correctly packed into buffers
 //

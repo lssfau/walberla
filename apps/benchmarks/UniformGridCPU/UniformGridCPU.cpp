@@ -34,7 +34,10 @@
 
 #include "geometry/InitBoundaryHandling.h"
 
-#include "lbm/communication/CombinedInPlaceCpuPackInfo.h"
+#include "lbm_generated/field/PdfField.h"
+#include "lbm_generated/field/AddToStorage.h"
+#include "lbm_generated/communication/UniformGeneratedPdfPackInfo.h"
+#include "lbm_generated/evaluation/PerformanceEvaluation.h"
 
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/DictWrapper.h"
@@ -50,21 +53,20 @@
 
 using namespace walberla;
 
-using PackInfoEven_T = lbm::UniformGridCPU_PackInfoEven;
-using PackInfoOdd_T = lbm::UniformGridCPU_PackInfoOdd;
-using LbSweep = lbm::UniformGridCPU_LbKernel;
+using StorageSpecification_T = lbm::UniformGridCPUStorageSpecification;
+using Stencil_T = lbm::UniformGridCPUStorageSpecification::Stencil;
 
+using PdfField_T = lbm_generated::PdfField< StorageSpecification_T >;
 using FlagField_T = FlagField< uint8_t >;
+using BoundaryCollection_T = lbm::UniformGridCPUBoundaryCollection< FlagField_T >;
 
-auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage* const storage) {
-   return new PdfField_T(storage->getNumberOfXCells(*block), storage->getNumberOfYCells(*block),
-                         storage->getNumberOfZCells(*block), uint_t(1), field::fzyx,
-                         make_shared< field::AllocateAligned< real_t, 64 > >());
-};
+using SweepCollection_T = lbm::UniformGridCPUSweepCollection;
+
+using blockforest::communication::UniformBufferedScheme;
 
 int main(int argc, char** argv)
 {
-   mpi::Environment const env(argc, argv);
+   const mpi::Environment env(argc, argv);
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {
@@ -74,8 +76,6 @@ int main(int argc, char** argv)
       logging::configureLogging(config);
       auto blocks = blockforest::createUniformBlockGridFromConfig(config);
 
-      Vector3< uint_t > cellsPerBlock =
-         config->getBlock("DomainSetup").getParameter< Vector3< uint_t > >("cellsPerBlock");
       // Reading parameters
       auto parameters          = config->getOneBlock("Parameters");
       const real_t omega       = parameters.getParameter< real_t >("omega", real_c(1.4));
@@ -83,9 +83,12 @@ int main(int argc, char** argv)
       const bool initShearFlow = parameters.getParameter< bool >("initShearFlow", true);
 
       // Creating fields
-      BlockDataID pdfFieldId = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "pdfs");
-      BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
-      BlockDataID const densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
+      const StorageSpecification_T StorageSpec = StorageSpecification_T();
+      auto fieldAllocator = make_shared< field::AllocateAligned< real_t, 64 > >();
+      const BlockDataID pdfFieldId  = lbm_generated::addPdfFieldToStorage(blocks, "pdfs", StorageSpec, field::fzyx, fieldAllocator);
+      const BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      const BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
+      const BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
 
       // Initialize velocity on cpu
       if (initShearFlow)
@@ -94,157 +97,76 @@ int main(int argc, char** argv)
          initShearVelocity(blocks, velFieldId);
       }
 
-      pystencils::UniformGridCPU_MacroSetter setterSweep(densityFieldId, pdfFieldId, velFieldId);
-      pystencils::UniformGridCPU_MacroGetter getterSweep(densityFieldId, pdfFieldId, velFieldId);
+      const Cell innerOuterSplit = Cell(parameters.getParameter< Vector3<cell_idx_t> >("innerOuterSplit", Vector3<cell_idx_t>(1, 1, 1)));
+      SweepCollection_T sweepCollection(blocks, pdfFieldId, densityFieldId, velFieldId, omega, innerOuterSplit);
 
-      // Set up initial PDF values
       for (auto& block : *blocks)
-         setterSweep(&block);
-
-      Vector3< int > innerOuterSplit =
-         parameters.getParameter< Vector3< int > >("innerOuterSplit", Vector3< int >(1, 1, 1));
-
-      for (uint_t i = 0; i < 3; ++i)
       {
-         if (int_c(cellsPerBlock[i]) <= innerOuterSplit[i] * 2)
-         {
-            WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock")
-         }
+         sweepCollection.initialise(&block);
       }
-      Cell const innerOuterSplitCell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
 
-      LbSweep lbSweep(pdfFieldId, omega, innerOuterSplitCell);
-      pystencils::UniformGridCPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldId);
+      const pystencils::UniformGridCPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldId);
 
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
-      BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
       auto boundariesConfig   = config->getBlock("Boundaries");
-      bool boundaries         = false;
       if (boundariesConfig)
       {
          WALBERLA_LOG_INFO_ON_ROOT("Setting boundary conditions")
-         boundaries = true;
          geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
-         geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
-
-      lbm::UniformGridCPU_NoSlip noSlip(blocks, pdfFieldId);
-      noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
-
-      lbm::UniformGridCPU_UBB ubb(blocks, pdfFieldId);
-      ubb.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("UBB"), fluidFlagUID);
+      geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
+      BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldId, fluidFlagUID);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                           COMMUNICATION SCHEME                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      // Initial setup is the post-collision state of an even time step
-      auto tracker = make_shared< lbm::TimestepTracker >(0);
-      auto packInfo =
-         make_shared< lbm::CombinedInPlaceCpuPackInfo< PackInfoEven_T , PackInfoOdd_T > >(tracker, pdfFieldId);
-
-      blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
+      auto packInfo = std::make_shared<lbm_generated::UniformGeneratedPdfPackInfo< PdfField_T >>(pdfFieldId);
+      UniformBufferedScheme< Stencil_T > communication(blocks);
       communication.addPackInfo(packInfo);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                          TIME STEP DEFINITIONS                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      SweepTimeloop timeLoop(blocks->getBlockStorage(), timesteps);
+      const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
 
-      auto boundarySweep = [&](IBlock* block, uint8_t t) {
-         noSlip.run(block, t);
-         ubb.run(block, t);
-      };
+      if (timeStepStrategy == "noOverlap") {
+         if (boundariesConfig){
+            timeLoop.add() << BeforeFunction(communication, "communication")
+                           << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL), "Boundary Conditions");
+            timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL), "LBM StreamCollide");
+         }else {
+            timeLoop.add() << BeforeFunction(communication, "communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL), "LBM StreamCollide");}
 
-      auto boundaryInner = [&](IBlock* block, uint8_t t) {
-         noSlip.inner(block, t);
-         ubb.inner(block, t);
-      };
+      } else if (timeStepStrategy == "simpleOverlap") {
+         if (boundariesConfig){
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "Start Communication")
+                           << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL), "Boundary Conditions");
+            timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER), "LBM StreamCollide Inner Frame");
+            timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER), "LBM StreamCollide Outer Frame");
+         }else{
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "Start Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER), "LBM StreamCollide Inner Frame");
+            timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
+                           << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER), "LBM StreamCollide Outer Frame");}
 
-      auto boundaryOuter = [&](IBlock* block, uint8_t t) {
-         noSlip.outer(block, t);
-         ubb.outer(block, t);
-      };
-
-      auto simpleOverlapTimeStep = [&]() {
-         // Communicate post-collision values of previous timestep...
-         communication.startCommunication();
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundaryInner(&block, tracker->getCounter());
-            lbSweep.inner(&block, tracker->getCounterPlusOne());
-         }
-         communication.wait();
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundaryOuter(&block, tracker->getCounter());
-            lbSweep.outer(&block, tracker->getCounterPlusOne());
-         }
-
-         tracker->advance();
-      };
-
-      auto normalTimeStep = [&]() {
-         communication.communicate();
-         for (auto& block : *blocks)
-         {
-            if (boundaries) boundarySweep(&block, tracker->getCounter());
-            lbSweep(&block, tracker->getCounterPlusOne());
-         }
-
-         tracker->advance();
-      };
-
-      // With two-fields patterns, ghost layer cells act as constant stream-in boundaries;
-      // with in-place patterns, ghost layer cells act as wet-node no-slip boundaries.
-      auto kernelOnlyFunc = [&]() {
-         tracker->advance();
-         for (auto& block : *blocks)
-            lbSweep(&block, tracker->getCounter());
-      };
-
-      // Stream only function to test a streaming pattern without executing lbm operations inside
-      auto StreamOnlyFunc = [&]() {
-         for (auto& block : *blocks)
-            StreamOnlyKernel(&block);
-      };
+      } else if (timeStepStrategy == "kernelOnly") {
+         timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL), "LBM StreamCollide");
+      } else if (timeStepStrategy == "StreamOnly") {
+         timeLoop.add() << Sweep(StreamOnlyKernel, "LBM Stream Only");
+      } else {
+         WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'")
+      }
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                             TIME LOOP SETUP                                                ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      SweepTimeloop timeLoop(blocks->getBlockStorage(), timesteps);
-
-      const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
-      std::function< void() > timeStep;
-      if (timeStepStrategy == "noOverlap")
-         timeStep = std::function< void() >(normalTimeStep);
-      else if (timeStepStrategy == "simpleOverlap")
-         timeStep = simpleOverlapTimeStep;
-      else if (timeStepStrategy == "kernelOnly")
-      {
-         WALBERLA_LOG_INFO_ON_ROOT(
-            "Running only compute kernel without boundary - this makes only sense for benchmarking!")
-         // Run initial communication once to provide any missing stream-in populations
-         communication.communicate();
-         timeStep = kernelOnlyFunc;
-      }
-      else if (timeStepStrategy == "StreamOnly")
-      {
-         WALBERLA_LOG_INFO_ON_ROOT(
-            "Running only streaming kernel without LBM - this makes only sense for benchmarking!")
-         // Run initial communication once to provide any missing stream-in populations
-         timeStep = StreamOnlyFunc;
-      }
-      else
-      {
-         WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'. Allowed values are 'noOverlap', "
-                                      "'simpleOverlap', 'kernelOnly'")
-      }
-
-      timeLoop.add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
-
-      uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      const uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
@@ -254,7 +176,7 @@ int main(int argc, char** argv)
 
          vtkOutput->addBeforeFunction([&]() {
            for (auto& block : *blocks){
-              getterSweep(&block);}
+              sweepCollection.calculateMacroscopicParameters(&block);}
          });
 
          timeLoop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
@@ -263,46 +185,50 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                               BENCHMARK                                                    ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      lbm_generated::PerformanceEvaluation<FlagField_T> const performance(blocks, flagFieldID, fluidFlagUID);
 
-      int const warmupSteps     = parameters.getParameter< int >("warmupSteps", 2);
-      int const outerIterations = parameters.getParameter< int >("outerIterations", 1);
-      for (int i = 0; i < warmupSteps; ++i)
+      const uint_t warmupSteps     = parameters.getParameter< uint_t >("warmupSteps", uint_c(2));
+      const uint_t outerIterations = parameters.getParameter< uint_t >("outerIterations", uint_c(1));
+      for (uint_t i = 0; i < warmupSteps; ++i)
          timeLoop.singleStep();
 
-      real_t const remainingTimeLoggerFrequency =
+      auto remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {
-         auto logger = timing::RemainingTimeLogger(timeLoop.getNrOfTimeSteps() * uint_c(outerIterations),
+         auto logger = timing::RemainingTimeLogger(timeLoop.getNrOfTimeSteps() * outerIterations,
                                                    remainingTimeLoggerFrequency);
          timeLoop.addFuncAfterTimeStep(logger, "remaining time logger");
       }
 
-      for (int outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
+      for (uint_t outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
       {
          timeLoop.setCurrentTimeStepToZero();
-         WcTimer simTimer;
-         WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
-         simTimer.start();
-         timeLoop.run();
-         simTimer.end();
-         WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-         auto time      = real_c(simTimer.last());
-         WALBERLA_MPI_SECTION()
-         {
-            walberla::mpi::reduceInplace(time, walberla::mpi::MAX);
-         }
-         auto nrOfCells = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
 
-         auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
-         WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process " << mlupsPerProcess)
-         WALBERLA_LOG_RESULT_ON_ROOT("Time per time step " << time / real_c(timesteps))
+         WcTimingPool timeloopTiming;
+         WcTimer simTimer;
+
+         WALBERLA_MPI_WORLD_BARRIER()
+         WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+
+         simTimer.start();
+         timeLoop.run(timeloopTiming);
+         simTimer.end();
+
+         WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
+         double time = simTimer.max();
+         WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+         performance.logResultOnRoot(timesteps, time);
+
+         const auto reducedTimeloopTiming = timeloopTiming.getReduced();
+         WALBERLA_LOG_RESULT_ON_ROOT("Time loop timing:\n" << *reducedTimeloopTiming)
+
          WALBERLA_ROOT_SECTION()
          {
             python_coupling::PythonCallback pythonCallbackResults("results_callback");
             if (pythonCallbackResults.isCallable())
             {
-               pythonCallbackResults.data().exposeValue("mlupsPerProcess", mlupsPerProcess);
+               pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
                pythonCallbackResults.data().exposeValue("stencil", infoStencil);
                pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);
                pythonCallbackResults.data().exposeValue("collisionSetup", infoCollisionSetup);

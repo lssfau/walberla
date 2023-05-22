@@ -40,7 +40,7 @@ Timeloop::Timeloop( uint_t nrOfTimeSteps)
 
 void Timeloop::run( const bool logTimeStep )
 {
-   WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" );
+   WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" )
    while(curTimeStep_ < nrOfTimeSteps_) {
       singleStep( logTimeStep );
       if ( stop_ ) {
@@ -48,12 +48,12 @@ void Timeloop::run( const bool logTimeStep )
          break;
       }
    }
-   WALBERLA_LOG_PROGRESS( "Timeloop finished" );
+   WALBERLA_LOG_PROGRESS( "Timeloop finished" )
 }
 
 void Timeloop::run( WcTimingPool & tp, const bool logTimeStep )
 {
-   WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" );
+   WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" )
 
    while(curTimeStep_ < nrOfTimeSteps_) {
       singleStep( tp, logTimeStep );
@@ -63,7 +63,7 @@ void Timeloop::run( WcTimingPool & tp, const bool logTimeStep )
       }
    }
 
-   WALBERLA_LOG_PROGRESS( "Timeloop finished" );
+   WALBERLA_LOG_PROGRESS( "Timeloop finished" )
 }
 
 //*******************************************************************************************************************
@@ -97,9 +97,9 @@ void Timeloop::synchronizedStop( bool stopVal )
 
 void Timeloop::singleStep( const bool logTimeStep )
 {
-   LoggingStampManager raii( make_shared<LoggingStamp>( *this ), logTimeStep );
+   LoggingStampManager const raii( make_shared<LoggingStamp>( *this ), logTimeStep );
 
-   WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ );
+   WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
    for(size_t i=0; i<beforeFunctions_.size(); ++i )
       executeSelectable( beforeFunctions_[i], uid::globalState(), "Pre-Timestep Function" );
@@ -114,9 +114,9 @@ void Timeloop::singleStep( const bool logTimeStep )
 
 void Timeloop::singleStep( WcTimingPool & tp, const bool logTimeStep )
 {
-   LoggingStampManager raii( make_shared<LoggingStamp>( *this ), logTimeStep );
+   LoggingStampManager const raii( make_shared<LoggingStamp>( *this ), logTimeStep );
 
-   WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ );
+   WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
    for(size_t i=0; i<beforeFunctions_.size(); ++i )
       executeSelectable( beforeFunctions_[i], uid::globalState(), "Pre-Timestep Function", tp );
@@ -147,7 +147,7 @@ void Timeloop::addFuncBeforeTimeStep(const Timeloop::FctHandle & h,
                                      const VoidFctNoArguments& f, const std::string & id,
                                      const Set<SUID>&r, const Set<SUID> & e )
 {
-   WALBERLA_ASSERT_LESS( h, beforeFunctions_.size() ); //invalid FctHandle
+   WALBERLA_ASSERT_LESS( h, beforeFunctions_.size() ) //invalid FctHandle
    beforeFunctions_[h].add(f,r,e,id);
 }
 
@@ -166,7 +166,7 @@ void Timeloop::addFuncAfterTimeStep(const Timeloop::FctHandle & h,
                                            const VoidFctNoArguments& f, const std::string & id,
                                            const Set<SUID>&r, const Set<SUID> & e )
 {
-   WALBERLA_ASSERT_LESS( h, afterFunctions_.size() ); //invalid FctHandle
+   WALBERLA_ASSERT_LESS( h, afterFunctions_.size() ) //invalid FctHandle
    afterFunctions_[h].add(f,r,e,id);
 }
 
@@ -182,10 +182,10 @@ void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctN
    if( exe == nullptr )
       WALBERLA_ABORT( "Trying to selecting " << what << ": "
                       << "Multiple Matches found! Check your selector " << selector << std::endl
-                      << "All registered objects: " << std::endl << selectable << std::endl );
+                      << "All registered objects: " << std::endl << selectable << std::endl )
 
 
-   WALBERLA_LOG_PROGRESS("Running " << what << " \"" << objectName << "\"" );
+   WALBERLA_LOG_PROGRESS("Running " << what << " \"" << objectName << "\"" )
 
    LIKWID_MARKER_START( objectName.c_str() );
    (*exe)();
@@ -203,9 +203,9 @@ void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctN
    if( !exe)
       WALBERLA_ABORT( "Trying to select " << what << ": "
                       << "Multiple or no matches found! Check your selector " << selector << std::endl
-                      << "All registered objects: " << std::endl << selectable << std::endl );
+                      << "All registered objects: " << std::endl << selectable << std::endl )
 
-   WALBERLA_LOG_PROGRESS("Running " << what << " \"" << objectName << "\"" );
+   WALBERLA_LOG_PROGRESS("Running " << what << " \"" << objectName << "\"" )
 
    timing[objectName].start();
    LIKWID_MARKER_START( objectName.c_str() );

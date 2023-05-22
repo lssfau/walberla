@@ -116,7 +116,7 @@ shared_ptr<TimingPool<TP> > TimingPool<TP>::getReduced( ReduceType rt, int targe
          break;
 
       default:
-         WALBERLA_ABORT( "Unknown reduce type" );
+         WALBERLA_ABORT( "Unknown reduce type" )
          break;
    }
 

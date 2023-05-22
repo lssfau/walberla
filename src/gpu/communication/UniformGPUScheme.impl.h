@@ -30,11 +30,13 @@ namespace communication {
    template<typename Stencil>
    UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
                                                 bool sendDirectlyFromGPU,
+                                                bool useLocalCommunication,
                                                 const int tag )
         : blockForest_( bf ),
           setupBeforeNextCommunication_( true ),
           communicationInProgress_( false ),
           sendFromGPU_( sendDirectlyFromGPU ),
+          useLocalCommunication_(useLocalCommunication),
           bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
           bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
           parallelSectionManager_( -1 ),
@@ -47,11 +49,13 @@ namespace communication {
                                                 const Set<SUID> & requiredBlockSelectors,
                                                 const Set<SUID> & incompatibleBlockSelectors,
                                                 bool sendDirectlyFromGPU,
+                                                bool useLocalCommunication,
                                                 const int tag )
       : blockForest_( bf ),
         setupBeforeNextCommunication_( true ),
         communicationInProgress_( false ),
         sendFromGPU_( sendDirectlyFromGPU ),
+        useLocalCommunication_(useLocalCommunication),
         bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
         bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
         parallelSectionManager_( -1 ),
@@ -86,28 +90,40 @@ namespace communication {
          auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto &iBlock : *forest )
          {
-            auto block = dynamic_cast< Block * >( &iBlock );
+            auto senderBlock = dynamic_cast< Block * >( &iBlock );
 
-            if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+            if( !selectable::isSetSelected( senderBlock->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                continue;
 
             for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir )
             {
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
-               if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
-                  continue;
-               auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
 
-               if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               if( senderBlock->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
                   continue;
 
-               for( auto &pi : packInfos_ )
+               if( !selectable::isSetSelected( senderBlock->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+                  continue;
+
+               if( senderBlock->neighborExistsLocally( neighborIdx, uint_t(0) ) && useLocalCommunication_ )
                {
-                  parallelSection.run([&](auto s) {
-                     auto size = pi->size( *dir, block );
+                  auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
+                  for (auto& pi : packInfos_)
+                  {
+                     pi->communicateLocal(*dir, senderBlock, receiverBlock, stream);
+                  }
+               }
+               else
+               {
+                  auto nProcess = mpi::MPIRank( senderBlock->getNeighborProcess( neighborIdx, uint_t( 0 )));
+
+                  for( auto &pi : packInfos_ )
+                  {
+                     parallelSection.run([&](auto s) {
+                     auto size = pi->size( *dir, senderBlock );
                      auto gpuDataPtr = bufferSystemGPU_.sendBuffer( nProcess ).advanceNoResize( size );
                      WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                     pi->pack( *dir, gpuDataPtr, block, s );
+                     pi->pack( *dir, gpuDataPtr, senderBlock, s );
 
                      if( !sendFromGPU_ )
                      {
@@ -115,12 +131,12 @@ namespace communication {
                         WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
                         WALBERLA_GPU_CHECK( gpuMemcpyAsync( cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, s ))
                      }
-                  });
+                     });
+                  }
                }
             }
          }
       }
-
       // wait for packing to finish
       WALBERLA_GPU_CHECK( gpuStreamSynchronize( stream ) );
 
@@ -181,7 +197,6 @@ namespace communication {
                   auto gpuDataPtr = gpuBuffer.advanceNoResize( size );
                   WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-
                   parallelSection.run([&](auto s) {
                      WALBERLA_GPU_CHECK( gpuMemcpyAsync( gpuDataPtr, cpuDataPtr, size,
                                                            gpuMemcpyHostToDevice, s ))
@@ -192,6 +207,7 @@ namespace communication {
          }
       }
 
+      WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
       communicationInProgress_ = false;
    }
 
@@ -216,6 +232,7 @@ namespace communication {
          for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir ) {
             // skip if block has no neighbors in this direction
             const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
+
             if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
                continue;
 
@@ -227,6 +244,9 @@ namespace communication {
             const BlockID &nBlockId = block->getNeighborId( neighborIdx, uint_t( 0 ));
 
             if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               continue;
+
+            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) && useLocalCommunication_ )
                continue;
 
             auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
@@ -287,7 +307,7 @@ namespace communication {
    }
 
    template< typename Stencil >
-   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor(gpuStream_t stream)
+   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor(cudaStream_t stream)
    {
       return [this, stream]() { wait( stream ); };
    }

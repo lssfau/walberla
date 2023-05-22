@@ -1,4 +1,6 @@
 # import warnings
+from typing import Callable, List
+
 
 import numpy as np
 import sympy as sp
@@ -18,8 +20,10 @@ from pystencils.node_collection import NodeCollection
 from pystencils.stencil import offset_to_direction_string
 from pystencils.sympyextensions import get_symmetric_part
 from pystencils.typing.transformations import add_types
-from pystencils_walberla.codegen import KernelInfo, config_from_context
+
+from pystencils_walberla.kernel_info import KernelInfo
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
+from pystencils_walberla.utility import config_from_context
 
 cpp_printer = CustomSympyPrinter()
 REFINEMENT_SCALE_FACTOR = sp.Symbol("level_scale_factor")
@@ -155,7 +159,7 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
     generation_context.write_file(f"{class_name}.cpp", source)
 
 
-def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='zyxf', refinement_scaling=None,
+def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='fzyx', refinement_scaling=None,
                            target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
                            **create_kernel_params):
 

@@ -52,11 +52,11 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
          if( s.sweep.empty() )
          {
             WALBERLA_ABORT("Selecting Sweep " << sweepIt->first << ": " <<
-                           "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" );
+                           "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" )
          }
 
          // ensure that exactly one sweep has been registered that matches the specified selectors
-         size_t numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
+         size_t const numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
 
          if (numSweeps == size_t(0)) {
             continue;
@@ -73,7 +73,7 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
          {
             std::string sweepName;
             s.sweep.getUnique( selectors + bi->getState(), sweepName );
-            WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
+            WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() )
          }
 
          (selectedSweep->function_)( bi.get() );
@@ -121,11 +121,11 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
          if( s.sweep.empty() )
          {
             WALBERLA_ABORT("Selecting Sweep " << sweepIt->first << ": " <<
-                           "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" );
+                           "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" )
          }
 
          // ensure that exactly one sweep has been registered that matches the specified selectors
-         size_t numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
+         size_t const numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
 
          if (numSweeps == size_t(0)) {
             continue;
@@ -139,7 +139,7 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
          std::string sweepName;
          Sweep * selectedSweep = s.sweep.getUnique( selectors + bi->getState(), sweepName );
 
-         WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
+         WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() )
 
          // loop over all blocks
          timing[sweepName].start();

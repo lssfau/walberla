@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file GPUFieldPackInfoTest.cpp
-//! \ingroup cuda
+//! \ingroup gpu
 //! \author João Victor Tozatti Risso <jvtrisso@inf.ufpr.br>
 //! \brief Short communication test to verify the equivalence of GPUPackInfo using a default stream and multiple
 //! streams.
@@ -37,7 +37,6 @@
 #include "stencil/Directions.h"
 #include "stencil/Iterator.h"
 
-#include <cuda_runtime.h>
 #include <vector>
 
 #include "gpu/ErrorChecking.h"
@@ -134,7 +133,7 @@ int main(int argc, char** argv)
       CommSchemeType syncCommScheme(blocks);
       syncCommScheme.addPackInfo(make_shared< GPUPackInfoType >(syncGPUFieldId));
 
-      // Setup communication scheme for asynchronous GPUPackInfo, which uses CUDA streams
+      // Setup communication scheme for asynchronous GPUPackInfo, which uses GPU streams
       CommSchemeType asyncCommScheme(blocks);
       asyncCommScheme.addPackInfo(make_shared< GPUPackInfoType >(asyncGPUFieldId));
 

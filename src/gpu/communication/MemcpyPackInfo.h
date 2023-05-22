@@ -11,20 +11,17 @@
 #include "gpu/GPUWrapper.h"
 #include "gpu/communication/GeneratedGPUPackInfo.h"
 
-namespace walberla {
-namespace gpu
-{
-namespace communication {
+namespace walberla::gpu::communication {
 
 template<typename GPUFieldType>
 class MemcpyPackInfo : public ::walberla::gpu::GeneratedGPUPackInfo
 {
 public:
-    MemcpyPackInfo( BlockDataID pdfsID_ )
-        : pdfsID(pdfsID_) {};
-    virtual ~MemcpyPackInfo() = default;
+    MemcpyPackInfo( BlockDataID pdfsID_ ) : pdfsID(pdfsID_) {};
+    ~MemcpyPackInfo() override = default;
 
     void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
+    void communicateLocal  ( stencil::Direction dir, const IBlock *sender, IBlock *receiver, gpuStream_t stream ) override;
     void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
     uint_t size(stencil::Direction dir, IBlock * block) override;
 
@@ -36,8 +33,6 @@ private:
     uint_t numberOfGhostLayersToCommunicate( const GPUFieldType * const field ) const;
 };
 
-} // namespace communication
-} // namespace gpu
-} // namespace walberla
+} // namespace walberla::gpu::communication
 
 #include "MemcpyPackInfo.impl.h"

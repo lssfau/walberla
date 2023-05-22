@@ -6,7 +6,7 @@ from lbmpy.advanced_streaming.communication import _extend_dir
 from pystencils import Assignment, Field, Target
 from pystencils.stencil import inverse_direction
 
-from pystencils_walberla.codegen import comm_directions, generate_pack_info
+from pystencils_walberla.pack_info import _comm_directions, generate_pack_info
 
 
 def generate_lb_pack_info(generation_context,
@@ -65,7 +65,7 @@ def generate_lb_pack_info(generation_context,
             if all(offset == 0 for offset in fa.offsets):
                 continue
             comm_direction = inverse_direction(fa.offsets)
-            for comm_dir in comm_directions(comm_direction):
+            for comm_dir in _comm_directions(comm_direction):
                 common_spec[(comm_dir,)].add(fa.field.center(*fa.index))
 
     full_stencil = LBStencil(Stencil.D3Q27) if stencil.D == 3 else LBStencil(Stencil.D2Q9)

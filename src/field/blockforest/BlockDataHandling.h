@@ -92,12 +92,12 @@ protected:
 
    void sizeCheck( const uint_t xSize, const uint_t ySize, const uint_t zSize )
    {
-      WALBERLA_CHECK( (xSize & uint_t(1)) == uint_t(0), "The x-size of your field must be divisible by 2." );
-      WALBERLA_CHECK( (ySize & uint_t(1)) == uint_t(0), "The y-size of your field must be divisible by 2." );
+      WALBERLA_CHECK( (xSize & uint_t(1)) == uint_t(0), "The x-size of your field must be divisible by 2." )
+      WALBERLA_CHECK( (ySize & uint_t(1)) == uint_t(0), "The y-size of your field must be divisible by 2." )
       if( Pseudo2D )
-      { WALBERLA_CHECK( zSize == uint_t(1), "The z-size of your field must be equal to 1 (pseudo 2D mode)." ); }
+      { WALBERLA_CHECK( zSize == uint_t(1), "The z-size of your field must be equal to 1 (pseudo 2D mode)." ) }
       else
-      { WALBERLA_CHECK( (zSize & uint_t(1)) == uint_t(0), "The z-size of your field must be divisible by 2." ); }
+      { WALBERLA_CHECK( (zSize & uint_t(1)) == uint_t(0), "The z-size of your field must be divisible by 2." ) }
    }
    
    InitializationFunction_T initFunction_;
@@ -110,7 +110,7 @@ template< typename Field_T, bool Pseudo2D >
 inline void BlockDataHandling< Field_T, Pseudo2D >::serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
 {
    Field_T * field = block->template getData< Field_T >(id);
-   WALBERLA_ASSERT_NOT_NULLPTR( field );
+   WALBERLA_ASSERT_NOT_NULLPTR( field )
 
 #ifndef NDEBUG
    buffer << field->xSize() << field->ySize() << field->zSize() << field->fSize();
@@ -126,7 +126,7 @@ template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child )
 {
    Field_T * field = block->template getData< Field_T >(id);
-   WALBERLA_ASSERT_NOT_NULLPTR( field );
+   WALBERLA_ASSERT_NOT_NULLPTR( field )
 
    const uint_t xSize = field->xSize();
    const uint_t ySize = field->ySize();
@@ -161,7 +161,7 @@ template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
 {
    Field_T * field = block->template getData< Field_T >(id);
-   WALBERLA_ASSERT_NOT_NULLPTR( field );
+   WALBERLA_ASSERT_NOT_NULLPTR( field )
 
    const uint_t xSize = field->xSize();
    const uint_t ySize = field->ySize();
@@ -210,10 +210,10 @@ inline void BlockDataHandling< Field_T, Pseudo2D >::deserialize( IBlock * const 
    uint_t zSender( uint_t(0) );
    uint_t fSender( uint_t(0) );
    buffer >> xSender >> ySender >> zSender >> fSender;
-   WALBERLA_ASSERT_EQUAL( xSender, field->xSize() );
-   WALBERLA_ASSERT_EQUAL( ySender, field->ySize() );
-   WALBERLA_ASSERT_EQUAL( zSender, field->zSize() );
-   WALBERLA_ASSERT_EQUAL( fSender, field->fSize() );
+   WALBERLA_ASSERT_EQUAL( xSender, field->xSize() )
+   WALBERLA_ASSERT_EQUAL( ySender, field->ySize() )
+   WALBERLA_ASSERT_EQUAL( zSender, field->zSize() )
+   WALBERLA_ASSERT_EQUAL( fSender, field->fSize() )
 #endif
 
    for( auto it = field->begin(); it != field->end(); ++it )
@@ -240,14 +240,14 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeCoarseToFine( Block * co
    uint_t zSender( uint_t(0) );
    uint_t fSender( uint_t(0) );
    buffer >> branchId >> xSender >> ySender >> zSender >> fSender;
-   WALBERLA_ASSERT_EQUAL( branchId, block->getId().getBranchId() );
-   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) );
-   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) );
+   WALBERLA_ASSERT_EQUAL( branchId, block->getId().getBranchId() )
+   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) )
+   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) )
    if( Pseudo2D )
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize ); }
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize ) }
    else
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ); }
-   WALBERLA_ASSERT_EQUAL( fSender, fSize );
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ) }
+   WALBERLA_ASSERT_EQUAL( fSender, fSize )
 #endif
 
    for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
@@ -295,14 +295,14 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeFineToCoarse( Block * co
    uint_t zSender( uint_t(0) );
    uint_t fSender( uint_t(0) );
    buffer >> branchId >> xSender >> ySender >> zSender >> fSender;
-   WALBERLA_ASSERT_EQUAL( branchId, child );
-   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) );
-   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) );
+   WALBERLA_ASSERT_EQUAL( branchId, child )
+   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) )
+   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) )
    if( Pseudo2D )
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize ); }
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize ) }
    else
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ); }
-   WALBERLA_ASSERT_EQUAL( fSender, fSize );
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ) }
+   WALBERLA_ASSERT_EQUAL( fSender, fSize )
 #endif
 
    const cell_idx_t zBegin = Pseudo2D ? cell_idx_t(0) : ( (child & uint_t(4)) ? ( cell_idx_c( zSize ) / cell_idx_t(2) ) : cell_idx_t(0) );
@@ -437,7 +437,7 @@ protected:
    GhostLayerField_T * allocate( IBlock * const block ) override
    {
       auto blocks = blocks_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" );
+      WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" )
       const Vector3< uint_t > size = calculateSize_( blocks, block );
       return internal::allocate< GhostLayerField_T >( size[0], size[1], size[2],
                                                       nrOfGhostLayers_, initValue_, layout_, alloc_ );

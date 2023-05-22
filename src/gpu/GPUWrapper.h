@@ -31,6 +31,7 @@
     #define gpuGetErrorName cudaGetErrorName
     #define gpuGetErrorString cudaGetErrorString
     #define gpuPeekAtLastError cudaPeekAtLastError
+    #define gpuGetLastError cudaGetLastError
 
     #define gpuMalloc cudaMalloc
     #define gpuMallocHost cudaMallocHost
@@ -87,6 +88,7 @@
     #define gpuGetErrorName hipGetErrorName
     #define gpuGetErrorString hipGetErrorString
     #define gpuPeekAtLastError hipPeekAtLastError
+    #define gpuGetLastError hipGetLastError
 
     #define gpuMalloc hipMalloc
     #define gpuMallocHost hipHostMalloc

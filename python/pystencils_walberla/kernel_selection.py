@@ -8,6 +8,8 @@ from pystencils.backends.cbackend import get_headers
 from pystencils.backends.cuda_backend import CudaSympyPrinter
 from pystencils.typing.typed_sympy import SHAPE_DTYPE
 
+from pystencils_walberla.utility import merge_lists_of_symbols, merge_sorted_lists
+
 
 """
 
@@ -120,6 +122,41 @@ class AbstractConditionNode(AbstractKernelSelectionNode, ABC):
         return code
 
 
+class SwitchNode(AbstractKernelSelectionNode):
+    def __init__(self, parameter_symbol, cases_dict):
+        self.cases_dict = cases_dict
+        self.parameter_symbol = parameter_symbol
+
+    @property
+    def selection_parameters(self):
+        return {self.parameter_symbol}
+
+    def collect_kernel_calls(self):
+        return reduce(lambda x, y: x | y.collect_kernel_calls(), self.cases_dict.values(), set())
+
+    def collect_selection_parameters(self):
+        return reduce(lambda x, y: x | y.collect_selection_parameters(),
+                      self.cases_dict.values(),
+                      self.selection_parameters)
+
+    def get_code(self, **kwargs):
+        def case_code(case, subtree):
+            code = f"case {case} : {{\n"
+            code += do_indent(subtree.get_code(**kwargs), width=4, first=True)
+            code += "\n    break;\n}"
+            return code
+
+        cases = [case_code(k, v) for k, v in self.cases_dict.items()]
+        switch_code = f"switch ({self.parameter_symbol.name}) {{\n"
+
+        switch_body = '\n'.join(cases)
+        switch_body = do_indent(switch_body, width=4, first=True)
+
+        switch_code += switch_body
+        switch_code += "default: break; \n}"
+        return switch_code
+
+
 class KernelCallNode(AbstractKernelSelectionNode):
     def __init__(self, ast):
         self.ast = ast
@@ -192,22 +229,29 @@ class SimpleBooleanCondition(AbstractConditionNode):
 class KernelFamily:
     def __init__(self, kernel_selection_tree: AbstractKernelSelectionNode,
                  class_name: str,
-                 temporary_fields=(), field_swaps=(), varying_parameters=()):
+                 temporary_fields=(), field_swaps=(), varying_parameters=(),
+                 field_timestep=None):
         self.kernel_selection_tree = kernel_selection_tree
         self.kernel_selection_parameters = kernel_selection_tree.get_selection_parameter_list()
         self.temporary_fields = tuple(temporary_fields)
         self.field_swaps = tuple(field_swaps)
+        self.field_timestep = field_timestep
         self.varying_parameters = tuple(varying_parameters)
 
         all_kernel_calls = self.kernel_selection_tree.collect_kernel_calls()
         all_param_lists = [k.parameters for k in all_kernel_calls]
         asts_list = [k.ast for k in all_kernel_calls]
         self.representative_ast = asts_list[0]
+        self.target = self.representative_ast.target
 
         #   Eliminate duplicates
         self.all_asts = set(asts_list)
 
-        #   Check function names for uniqueness and reformat them
+        # TODO due to backward compatibility with high level interface spec
+        if self.field_timestep is not None:
+            self.kernel_selection_parameters = []
+
+    #   Check function names for uniqueness and reformat them
         #   using the class name
         function_names = [ast.function_name.lower() for ast in self.all_asts]
         unique_names = set(function_names)
@@ -258,7 +302,7 @@ class AbstractInterfaceArgumentMapping:
         raise NotImplementedError()
 
     @property
-    def headers(self):
+    def headers(self) -> Set:
         return set()
 
 
@@ -312,34 +356,4 @@ class HighLevelInterfaceSpec:
 # ---------------------------------- Helpers --------------------------------------------------------------------------
 
 
-def merge_sorted_lists(lx, ly, sort_key=lambda x: x, identity_check_key=None):
-    if identity_check_key is None:
-        identity_check_key = sort_key
-    nx = len(lx)
-    ny = len(ly)
 
-    def recursive_merge(lx_intern, ly_intern, ix_intern, iy_intern):
-        if ix_intern == nx:
-            return ly_intern[iy_intern:]
-        if iy_intern == ny:
-            return lx_intern[ix_intern:]
-        x = lx_intern[ix_intern]
-        y = ly_intern[iy_intern]
-        skx = sort_key(x)
-        sky = sort_key(y)
-        if skx == sky:
-            if identity_check_key(x) == identity_check_key(y):
-                return [x] + recursive_merge(lx_intern, ly_intern, ix_intern + 1, iy_intern + 1)
-            else:
-                raise ValueError(f'Elements <{x}> and <{y}> with equal sort key where not identical!')
-        elif skx < sky:
-            return [x] + recursive_merge(lx_intern, ly_intern, ix_intern + 1, iy_intern)
-        else:
-            return [y] + recursive_merge(lx_intern, ly_intern, ix_intern, iy_intern + 1)
-    return recursive_merge(lx, ly, 0, 0)
-
-
-def merge_lists_of_symbols(lists):
-    def merger(lx, ly):
-        return merge_sorted_lists(lx, ly, sort_key=lambda x: x.symbol.name, identity_check_key=lambda x: x.symbol)
-    return reduce(merger, lists)

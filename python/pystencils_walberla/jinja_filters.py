@@ -4,6 +4,7 @@ try:
 except ImportError:
     from jinja2 import contextfilter as jinja2_context_decorator
 
+from collections.abc import Iterable
 import sympy as sp
 
 from pystencils import Target, Backend
@@ -43,6 +44,18 @@ delete_loop = """
     }}
 """
 
+standard_parameter_registration = """
+for (uint_t level = 0; level < blocks->getNumberOfLevels(); level++)
+{{
+    const {dtype} level_scale_factor = {dtype}(uint_t(1) << level);
+    const {dtype} one                = {dtype}(1.0);
+    const {dtype} half               = {dtype}(0.5);
+    
+    {name}Vector.push_back( {dtype}({name} / (level_scale_factor * (-{name} * half + one) + {name} * half)) );
+}}
+"""
+
+
 # the target will enter the jinja filters as string. The reason for that is, that is not easy to work with the
 # enum in the template files.
 def translate_target(target):
@@ -59,6 +72,12 @@ def make_field_type(dtype, f_size, is_gpu):
         return f"gpu::GPUField<{dtype}>"
     else:
         return f"field::GhostLayerField<{dtype}, {f_size}>"
+
+
+def field_type(field, is_gpu=False):
+    dtype = get_base_type(field.dtype)
+    f_size = get_field_fsize(field)
+    return make_field_type(dtype, f_size, is_gpu)
 
 
 def get_field_fsize(field):
@@ -147,35 +166,30 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
         is_gpu: if the field is a GhostLayerField or a GpuField
         update_member: specify if function is used inside a constructor; add _ to members
     """
-    # Determine size of f coordinate which is a template parameter
-    f_size = get_field_fsize(field)
-    field_name = field.name
-    dtype = get_base_type(field.dtype)
-    field_type = make_field_type(dtype, f_size, is_gpu)
+    wlb_field_type = field_type(field, is_gpu)
 
     if not is_temporary:
-        dtype = get_base_type(field.dtype)
-        field_type = make_field_type(dtype, f_size, is_gpu)
         if declaration_only:
-            return f"{field_type} * {field_name}_;"
+            return f"{wlb_field_type} * {field.name}_;"
         else:
             prefix = "" if no_declaration else "auto "
             if update_member:
-                return f"{prefix}{field_name}_ = block->getData< {field_type} >({field_name}ID);"
+                return f"{prefix}{field.name}_ = block->getData< {wlb_field_type} >({field.name}ID);"
             else:
-                return f"{prefix}{field_name} = block->getData< {field_type} >({field_name}ID);"
+                return f"{prefix}{field.name} = block->getData< {wlb_field_type} >({field.name}ID);"
     else:
-        assert field_name.endswith('_tmp')
-        original_field_name = field_name[:-len('_tmp')]
+        assert field.name.endswith('_tmp')
+        original_field_name = field.name[:-len('_tmp')]
         if declaration_only:
-            return f"{field_type} * {field_name}_;"
+            return f"{wlb_field_type} * {field.name}_;"
         else:
-            declaration = f"{field_type} * {field_name};"
+            declaration = f"{wlb_field_type} * {field.name};"
             tmp_field_str = temporary_fieldTemplate.format(original_field_name=original_field_name,
-                                                           tmp_field_name=field_name, type=field_type)
+                                                           tmp_field_name=field.name, type=wlb_field_type)
             return tmp_field_str if no_declaration else declaration + tmp_field_str
 
 
+# TODO fields are not sorted
 @jinja2_context_decorator
 def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_ignore=(), parameters=None,
                                             declarations_only=False, no_declarations=False, update_member=False):
@@ -211,11 +225,22 @@ def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_igno
     return result
 
 
-def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignore=(), ignore_fields=False):
+def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignore=(), ignore_fields=False,
+                                        parameter_registration=None):
     symbols = {p.field_name for p in kernel_info.parameters if p.is_field_pointer and not ignore_fields}
     symbols.update(p.symbol.name for p in kernel_info.parameters if not p.is_field_parameter)
     symbols.difference_update(parameters_to_ignore)
-    return "\n".join("auto & %s = %s%s_;" % (s, prefix, s) for s in symbols)
+    type_information = {p.symbol.name: p.symbol.dtype for p in kernel_info.parameters if not p.is_field_parameter}
+    result = []
+    registered_parameters = [] if not parameter_registration else parameter_registration.scaling_info
+    for s in symbols:
+        if s in registered_parameters:
+            dtype = type_information[s].c_name
+            result.append("const uint_t level = block->getBlockStorage().getLevel(*block);")
+            result.append(f"{dtype} & {s} = {s}Vector[level];")
+        else:
+            result.append(f"auto & {s} = {prefix}{s}_;")
+    return "\n".join(result)
 
 
 @jinja2_context_decorator
@@ -235,7 +260,7 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
                        that defines the inner region for the kernel to loop over. Parameter has to be left to default
                        if ghost_layers_to_include is specified.
         stream: optional name of gpu stream variable
-        spatial_shape_symbols: relevant only for gpu kernels - to determine CUDA block and grid sizes the iteration
+        spatial_shape_symbols: relevant only for gpu kernels - to determine GPU block and grid sizes the iteration
                                region (i.e. field shape) has to be known. This can normally be inferred by the kernel
                                parameters - however in special cases like boundary conditions a manual specification
                                may be necessary.
@@ -260,33 +285,38 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
         required_ghost_layers = 0
     else:
         # ghost layer info is ((x_gl_front, x_gl_end), (y_gl_front, y_gl_end).. )
-        required_ghost_layers = max(max(kernel_ghost_layers))
+        if isinstance(kernel_ghost_layers, int):
+            required_ghost_layers = kernel_ghost_layers
+        else:
+            required_ghost_layers = max(max(kernel_ghost_layers))
 
     kernel_call_lines = []
 
+    def get_cell_interval(field_object):
+        if isinstance(cell_interval, str):
+            return cell_interval
+        elif isinstance(cell_interval, dict):
+            return cell_interval[field_object]
+        else:
+            return None
+
     def get_start_coordinates(field_object):
-        if cell_interval is None:
+        ci = get_cell_interval(field_object)
+        if ci is None:
             return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
         else:
             assert ghost_layers_to_include == 0
-            if field_object.spatial_dimensions == 3:
-                return [sp.Symbol("{ci}.{coord}Min()".format(coord=coord_name, ci=cell_interval)) - required_ghost_layers
-                        for coord_name in ('x', 'y', 'z')]
-            elif field_object.spatial_dimensions == 2:
-                return [sp.Symbol("{ci}.{coord}Min()".format(coord=coord_name, ci=cell_interval)) - required_ghost_layers
-                        for coord_name in ('x', 'y')]
-            else:
-                raise NotImplementedError(f"Only 2D and 3D fields are supported but a field with "
-                                          f"{field_object.spatial_dimensions} dimensions was passed")
+            return [sp.Symbol(f"{ci}.{coord_name}Min()") - required_ghost_layers for coord_name in ('x', 'y', 'z')]
 
     def get_end_coordinates(field_object):
-        if cell_interval is None:
+        ci = get_cell_interval(field_object)
+        if ci is None:
             shape_names = ['xSize()', 'ySize()', 'zSize()'][:field_object.spatial_dimensions]
             offset = 2 * ghost_layers_to_include + 2 * required_ghost_layers
-            return [f"cell_idx_c({field_object.name}->{e}) + {offset}" for e in shape_names]
+            return [f"int64_c({field_object.name}->{e}) + {offset}" for e in shape_names]
         else:
             assert ghost_layers_to_include == 0
-            return [f"cell_idx_c({cell_interval}.{coord_name}Size()) + {2 * required_ghost_layers}"
+            return [f"int64_c({ci}.{coord_name}Size()) + {2 * required_ghost_layers}"
                     for coord_name in ('x', 'y', 'z')]
 
     for param in ast_params:
@@ -347,6 +377,38 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
     return "\n".join(kernel_call_lines)
 
 
+@jinja2_context_decorator
+def generate_function_collection_call(ctx, kernel_info, parameters_to_ignore=(), cell_interval=None, ghost_layers=None):
+    target = translate_target(ctx['target'])
+    is_gpu = target == Target.GPU
+
+    parameters = []
+    for param in kernel_info.parameters:
+        if param.is_field_pointer and param.field_name not in parameters_to_ignore:
+            parameters.append(param.field_name)
+
+    for param in kernel_info.parameters:
+        if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
+            parameters.append(param.symbol.name)
+
+    # TODO due to backward compatibility with high level interface spec
+    for parameter in kernel_info.kernel_selection_tree.get_selection_parameter_list():
+        if parameter.name not in parameters_to_ignore:
+            parameters.append(parameter.name)
+
+    if cell_interval:
+        assert ghost_layers is None, "If a cell interval is specified ghost layers can not be specified"
+        parameters.append(cell_interval)
+
+    if ghost_layers:
+        parameters.append(ghost_layers)
+
+    if is_gpu and "gpuStream" not in parameters_to_ignore:
+        parameters.append(f"gpuStream")
+
+    return ", ".join(parameters)
+
+
 def generate_swaps(kernel_info):
     """Generates code to swap main fields with temporary fields"""
     swaps = ""
@@ -355,119 +417,229 @@ def generate_swaps(kernel_info):
     return swaps
 
 
-# TODO: basically 3 times the same code :(
-def generate_constructor_initializer_list(kernel_info, parameters_to_ignore=None):
-    if parameters_to_ignore is None:
-        parameters_to_ignore = []
+def generate_timestep_advancements(kernel_info, advance=True):
+    """Generates code to detect even or odd timestep"""
+    if kernel_info.field_timestep:
+        field_name = kernel_info.field_timestep["field_name"]
+        advancement_function = kernel_info.field_timestep["function"]
+        if advancement_function == "advanceTimestep" and advance is False:
+            advancement_function = "getTimestepPlusOne"
+        return f"uint8_t timestep = {field_name}->{advancement_function}();"
+    return ""
 
-    varying_parameter_names = []
-    if hasattr(kernel_info, 'varying_parameters'):
-        varying_parameter_names = tuple(e[1] for e in kernel_info.varying_parameters)
-    parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
+
+def generate_constructor_initializer_list(kernel_infos, parameters_to_ignore=None, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    parameters_to_skip = []
+    if parameters_to_ignore is not None:
+        parameters_to_skip = [p for p in parameters_to_ignore]
+
+    for kernel_info in kernel_infos:
+        parameters_to_skip += kernel_info.temporary_fields
 
     parameter_initializer_list = []
     # First field pointer
-    for param in kernel_info.parameters:
-        if param.is_field_pointer and param.field_name not in parameters_to_ignore:
-            parameter_initializer_list.append(f"{param.field_name}ID({param.field_name}ID_)")
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if param.is_field_pointer and param.field_name not in parameters_to_skip:
+                parameter_initializer_list.append(f"{param.field_name}ID({param.field_name}ID_)")
+                parameters_to_skip.append(param.field_name)
 
     # Then free parameters
-    for param in kernel_info.parameters:
-        if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
-            parameter_initializer_list.append(f"{param.symbol.name}_({param.symbol.name})")
+    if parameter_registration is not None:
+        parameters_to_skip.extend(parameter_registration.scaling_info)
+
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in parameters_to_skip:
+                parameter_initializer_list.append(f"{param.symbol.name}_({param.symbol.name})")
+                parameters_to_skip.append(param.symbol.name)
 
     return ", ".join(parameter_initializer_list)
 
 
-def generate_constructor_parameters(kernel_info, parameters_to_ignore=None):
-    if parameters_to_ignore is None:
-        parameters_to_ignore = []
+# TODO check varying_parameters
+def generate_constructor_parameters(kernel_infos, parameters_to_ignore=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    parameters_to_skip = []
+    if parameters_to_ignore is not None:
+        parameters_to_skip = [p for p in parameters_to_ignore]
 
     varying_parameters = []
-    if hasattr(kernel_info, 'varying_parameters'):
-        varying_parameters = kernel_info.varying_parameters
-    varying_parameter_names = tuple(e[1] for e in varying_parameters)
-    parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
+    for kernel_info in kernel_infos:
+        if hasattr(kernel_info, 'varying_parameters'):
+            varying_parameters = kernel_info.varying_parameters
+        varying_parameter_names = tuple(e[1] for e in varying_parameters)
+        parameters_to_skip += kernel_info.temporary_fields + varying_parameter_names
 
     parameter_list = []
     # First field pointer
-    for param in kernel_info.parameters:
-        if param.is_field_pointer and param.field_name not in parameters_to_ignore:
-            parameter_list.append(f"BlockDataID {param.field_name}ID_")
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if param.is_field_pointer and param.field_name not in parameters_to_skip:
+                parameter_list.append(f"BlockDataID {param.field_name}ID_")
+                parameters_to_skip.append(param.field_name)
 
     # Then free parameters
-    for param in kernel_info.parameters:
-        if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
-            parameter_list.append(f"{param.symbol.dtype} {param.symbol.name}")
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in parameters_to_skip:
+                parameter_list.append(f"{param.symbol.dtype} {param.symbol.name}")
+                parameters_to_skip.append(param.symbol.name)
 
     varying_parameters = ["%s %s" % e for e in varying_parameters]
     return ", ".join(parameter_list + varying_parameters)
 
 
 def generate_constructor_call_arguments(kernel_info, parameters_to_ignore=None):
-    if parameters_to_ignore is None:
-        parameters_to_ignore = []
+    parameters_to_skip = []
+    if parameters_to_ignore is not None:
+        parameters_to_skip = [p for p in parameters_to_ignore]
 
     varying_parameters = []
     if hasattr(kernel_info, 'varying_parameters'):
         varying_parameters = kernel_info.varying_parameters
     varying_parameter_names = tuple(e[1] for e in varying_parameters)
-    parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
+    parameters_to_skip += kernel_info.temporary_fields + varying_parameter_names
 
     parameter_list = []
     for param in kernel_info.parameters:
-        if param.is_field_pointer and param.field_name not in parameters_to_ignore:
+        if param.is_field_pointer and param.field_name not in parameters_to_skip:
             parameter_list.append(f"{param.field_name}ID")
-        elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
+        elif not param.is_field_parameter and param.symbol.name not in parameters_to_skip:
             parameter_list.append(f'{param.symbol.name}_')
     varying_parameters = [f"{e}_" for e in varying_parameter_names]
     return ", ".join(parameter_list + varying_parameters)
 
 
 @jinja2_context_decorator
-def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=False):
-    fields = {f.name: f for f in kernel_info.fields_accessed}
+def generate_members(ctx, kernel_infos, parameters_to_ignore=None, only_fields=False, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
 
-    params_to_skip = tuple(parameters_to_ignore) + tuple(kernel_info.temporary_fields)
-    params_to_skip += tuple(e[1] for e in kernel_info.varying_parameters)
+    if parameters_to_ignore is None:
+        parameters_to_ignore = []
+
+    params_to_skip = [p for p in parameters_to_ignore]
+
+    fields = dict()
+    for kernel_info in kernel_infos:
+        for field in kernel_info.fields_accessed:
+            fields[field.name] = field
+
+    varying_parameters = []
+    for kernel_info in kernel_infos:
+        if hasattr(kernel_info, 'varying_parameters'):
+            varying_parameters = kernel_info.varying_parameters
+        varying_parameter_names = tuple(e[1] for e in varying_parameters)
+        params_to_skip += kernel_info.temporary_fields
+        params_to_skip += varying_parameter_names
+
+    target = translate_target(ctx['target'])
+    is_gpu = target == Target.GPU
+
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if only_fields and not param.is_field_parameter:
+                continue
+            if param.is_field_pointer and param.field_name not in params_to_skip:
+                result.append(f"BlockDataID {param.field_name}ID;")
+                params_to_skip.append(param.field_name)
+
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if only_fields and not param.is_field_parameter:
+                continue
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if parameter_registration and param.symbol.name in parameter_registration.scaling_info:
+                    result.append(f"std::vector<{param.symbol.dtype}> {param.symbol.name}Vector;")
+                else:
+                    result.append(f"{param.symbol.dtype} {param.symbol.name}_;")
+                params_to_skip.append(param.symbol.name)
+
+    for kernel_info in kernel_infos:
+        for field_name in kernel_info.temporary_fields:
+            f = fields[field_name]
+            if field_name in parameters_to_ignore:
+                continue
+            parameters_to_ignore.append(field_name)
+            assert field_name.endswith('_tmp')
+            original_field_name = field_name[:-len('_tmp')]
+            f_size = get_field_fsize(f)
+            field_type = make_field_type(get_base_type(f.dtype), f_size, is_gpu)
+            result.append(temporary_fieldMemberTemplate.format(type=field_type, original_field_name=original_field_name))
+
+    for kernel_info in kernel_infos:
+        if hasattr(kernel_info, 'varying_parameters'):
+            result.extend(["%s %s_;" % e for e in kernel_info.varying_parameters])
+
+    return "\n".join(result)
+
+
+@jinja2_context_decorator
+def generate_plain_parameter_list(ctx, kernel_info, cell_interval=None, ghost_layers=None, stream=None):
+    fields = {f.name: f for f in kernel_info.fields_accessed}
     target = translate_target(ctx['target'])
     is_gpu = target == Target.GPU
 
     result = []
     for param in kernel_info.parameters:
-        if only_fields and not param.is_field_parameter:
+        if not param.is_field_parameter:
             continue
-        if param.is_field_pointer and param.field_name not in params_to_skip:
-            result.append(f"BlockDataID {param.field_name}ID;")
+        if param.is_field_pointer and param.field_name:
+            f = fields[param.field_name]
+            f_size = get_field_fsize(f)
+            field_type = make_field_type(get_base_type(f.dtype), f_size, is_gpu)
+            result.append(f"{field_type} * {param.field_name}")
 
     for param in kernel_info.parameters:
-        if only_fields and not param.is_field_parameter:
-            continue
-        if not param.is_field_parameter and param.symbol.name not in params_to_skip:
-            result.append(f"{param.symbol.dtype} {param.symbol.name}_;")
-
-    for field_name in kernel_info.temporary_fields:
-        f = fields[field_name]
-        if field_name in parameters_to_ignore:
-            continue
-        assert field_name.endswith('_tmp')
-        original_field_name = field_name[:-len('_tmp')]
-        f_size = get_field_fsize(f)
-        field_type = make_field_type(get_base_type(f.dtype), f_size, is_gpu)
-        result.append(temporary_fieldMemberTemplate.format(type=field_type, original_field_name=original_field_name))
+        if not param.is_field_parameter and param.symbol.name:
+            result.append(f"{param.symbol.dtype} {param.symbol.name}")
 
     if hasattr(kernel_info, 'varying_parameters'):
         result.extend(["%s %s_;" % e for e in kernel_info.varying_parameters])
 
-    return "\n".join(result)
+    # TODO due to backward compatibility with high level interface spec
+    for parameter in kernel_info.kernel_selection_tree.get_selection_parameter_list():
+        result.append(f"{parameter.dtype} {parameter.name}")
+
+    if cell_interval:
+        result.append(f"const CellInterval & {cell_interval}")
+
+    if ghost_layers is not None:
+        if type(ghost_layers) in (int, ):
+            result.append(f"const cell_idx_t ghost_layers = {ghost_layers}")
+        else:
+            result.append(f"const cell_idx_t ghost_layers")
+
+    if is_gpu:
+        if stream is not None:
+            result.append(f"gpuStream_t stream = {stream}")
+        else:
+            result.append(f"gpuStream_t stream")
+
+    return ", ".join(result)
 
 
-def generate_destructor(kernel_info, class_name):
-    if not kernel_info.temporary_fields:
+def generate_destructor(kernel_infos, class_name):
+    temporary_fields = []
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+    for kernel_info in kernel_infos:
+        for tmp_field in kernel_info.temporary_fields:
+            if tmp_field not in temporary_fields:
+                temporary_fields.append(tmp_field)
+
+    if not temporary_fields:
         return ""
     else:
         contents = ""
-        for field_name in kernel_info.temporary_fields:
+        for field_name in temporary_fields:
             contents += delete_loop.format(original_field_name=field_name[:-len('_tmp')])
         return temporary_constructor.format(contents=contents, class_name=class_name)
 
@@ -502,6 +674,47 @@ def nested_class_method_definition_prefix(ctx, nested_class_name):
         return f"{outer_class}::{nested_class_name}"
 
 
+@jinja2_context_decorator
+def generate_parameter_registration(ctx, kernel_infos, parameter_registration):
+    if parameter_registration is None:
+        return ""
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if param.symbol.name in parameter_registration.scaling_info:
+                    result.append(standard_parameter_registration.format(dtype=param.symbol.dtype,
+                                                                         name=param.symbol.name))
+                    params_to_skip.append(param.symbol.name)
+
+    return "\n".join(result)
+
+
+@jinja2_context_decorator
+def generate_constructor(ctx, kernel_infos, parameter_registration):
+    if parameter_registration is None:
+        return ""
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if param.symbol.name in parameter_registration.scaling_info:
+                    name = param.symbol.name
+                    dtype = param.symbol.dtype
+                    result.append(standard_parameter_registration.format(dtype=dtype, name=name))
+                    params_to_skip.append(name)
+
+    return "\n".join(result)
+
+
 def generate_list_of_expressions(expressions, prepend=''):
     if len(expressions) == 0:
         return ''
@@ -518,7 +731,7 @@ def type_identifier_list(nested_arg_list):
 
     def recursive_flatten(arg_list):
         for s in arg_list:
-            if isinstance(s, str):
+            if isinstance(s, str) and len(s) > 0:
                 result.append(s)
             elif isinstance(s, TypedSymbol):
                 result.append(f"{s.dtype} {s.name}")
@@ -555,16 +768,22 @@ def add_pystencils_filters_to_jinja_env(jinja_env):
     jinja_env.filters['generate_definitions'] = generate_definitions
     jinja_env.filters['generate_declarations'] = generate_declarations
     jinja_env.filters['generate_members'] = generate_members
+    jinja_env.filters['generate_plain_parameter_list'] = generate_plain_parameter_list
     jinja_env.filters['generate_constructor_parameters'] = generate_constructor_parameters
     jinja_env.filters['generate_constructor_initializer_list'] = generate_constructor_initializer_list
     jinja_env.filters['generate_constructor_call_arguments'] = generate_constructor_call_arguments
     jinja_env.filters['generate_call'] = generate_call
+    jinja_env.filters['generate_function_collection_call'] = generate_function_collection_call
     jinja_env.filters['generate_block_data_to_field_extraction'] = generate_block_data_to_field_extraction
+    jinja_env.filters['generate_timestep_advancements'] = generate_timestep_advancements
     jinja_env.filters['generate_swaps'] = generate_swaps
     jinja_env.filters['generate_refs_for_kernel_parameters'] = generate_refs_for_kernel_parameters
     jinja_env.filters['generate_destructor'] = generate_destructor
     jinja_env.filters['generate_field_type'] = generate_field_type
     jinja_env.filters['nested_class_method_definition_prefix'] = nested_class_method_definition_prefix
+    jinja_env.filters['generate_parameter_registration'] = generate_parameter_registration
+    jinja_env.filters['generate_constructor'] = generate_constructor
     jinja_env.filters['type_identifier_list'] = type_identifier_list
     jinja_env.filters['identifier_list'] = identifier_list
     jinja_env.filters['list_of_expressions'] = generate_list_of_expressions
+    jinja_env.filters['field_type'] = field_type

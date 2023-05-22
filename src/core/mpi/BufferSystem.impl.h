@@ -231,14 +231,14 @@ void GenericBufferSystem<Rb, Sb>::setReceiverInfo( const std::set<MPIRank> & ran
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::setReceiverInfo( const std::map<MPIRank,MPISize> & ranksToRecvFrom )
 {
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_ASSERT( ! communicationRunning_ )
 
    recvInfos_.clear();
    for ( auto it = ranksToRecvFrom.begin(); it != ranksToRecvFrom.end(); ++it )
    {
       const MPIRank sender       = it->first;
       const MPISize senderSize   = it->second;
-      WALBERLA_ASSERT_GREATER( senderSize, 0 );
+      WALBERLA_ASSERT_GREATER( senderSize, 0 )
       recvInfos_[ sender ].size   = senderSize;
    }
 

@@ -6,19 +6,17 @@ import pystencils as ps
 from pystencils.simp.subexpression_insertion import insert_zeros, insert_aliases, insert_constants,\
     insert_symbol_times_minus_one
 
-from lbmpy.advanced_streaming import Timestep, is_inplace
+from lbmpy.advanced_streaming import is_inplace
 from lbmpy.advanced_streaming.utility import streaming_patterns
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import LBMConfig, LBMOptimisation, LBStencil, create_lb_collision_rule
 from lbmpy.enums import Method, Stencil
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor
-from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
+from lbmpy.moments import get_default_moment_set_for_stencil
 from lbmpy.updatekernels import create_stream_only_kernel
 
-from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep,\
-    generate_mpidtype_info_from_kernel, generate_info_header
-
-from lbmpy_walberla import generate_alternating_lbm_sweep, generate_alternating_lbm_boundary, generate_lb_pack_info
+from pystencils_walberla import CodeGeneration, generate_info_header, generate_sweep
+from lbmpy_walberla import generate_lbm_package, lbm_boundary_generator
 
 omega = sp.symbols('omega')
 omega_free = sp.Symbol('omega_free')
@@ -121,14 +119,16 @@ with CodeGeneration() as ctx:
 
     options = options_dict[collision_setup]
 
-    q = stencil.Q
-    dim = stencil.D
-    assert dim == 3, "This app supports only three-dimensional stencils"
-    pdfs, pdfs_tmp = ps.fields(f"pdfs({q}), pdfs_tmp({q}): {field_type}[3D]", layout='fzyx')
+    assert stencil.D == 3, "This application supports only three-dimensional stencils"
+    pdfs, pdfs_tmp = ps.fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): {field_type}[3D]", layout='fzyx')
     density_field, velocity_field = ps.fields(f"density, velocity(3) : {field_type}[3D]", layout='fzyx')
+    macroscopic_fields = {'density': density_field, 'velocity': velocity_field}
 
     lbm_config = LBMConfig(stencil=stencil, field_name=pdfs.name, streaming_pattern=streaming_pattern, **options)
     lbm_opt = LBMOptimisation(cse_global=True, cse_pdfs=False, symbolic_field=pdfs, field_layout='fzyx')
+
+    if lbm_config.method == Method.CENTRAL_MOMENT:
+        lbm_config = replace(lbm_config, nested_moments=get_default_moment_set_for_stencil(stencil))
 
     if not is_inplace(streaming_pattern):
         lbm_opt = replace(lbm_opt, symbolic_temporary_field=pdfs_tmp)
@@ -153,45 +153,21 @@ with CodeGeneration() as ctx:
         collision_rule = insert_aliases(collision_rule)
         collision_rule = insert_symbol_times_minus_one(collision_rule)
 
-    lb_method = collision_rule.method
+    no_slip = lbm_boundary_generator(class_name='NoSlip', flag_uid='NoSlip',
+                                     boundary_object=NoSlip())
+    ubb = lbm_boundary_generator(class_name='UBB', flag_uid='UBB',
+                                 boundary_object=UBB([0.05, 0, 0], data_type=field_type))
 
-    generate_alternating_lbm_sweep(ctx, 'UniformGridCPU_LbKernel', collision_rule, lbm_config=lbm_config,
-                                   lbm_optimisation=lbm_opt, target=ps.Target.CPU,
-                                   inner_outer_split=True, field_swaps=field_swaps,
-                                   cpu_openmp=openmp, cpu_vectorize_info=cpu_vec)
-    
-    # getter & setter
-    setter_assignments = macroscopic_values_setter(lb_method,
-                                                   density=density_field.center, velocity=velocity_field.center_vector,
-                                                   pdfs=pdfs,
-                                                   streaming_pattern=streaming_pattern,
-                                                   previous_timestep=Timestep.EVEN)
-    getter_assignments = macroscopic_values_getter(lb_method,
-                                                   density=density_field, velocity=velocity_field,
-                                                   pdfs=pdfs,
-                                                   streaming_pattern=streaming_pattern,
-                                                   previous_timestep=Timestep.EVEN)
-
-    generate_sweep(ctx, 'UniformGridCPU_MacroSetter', setter_assignments, target=ps.Target.CPU, cpu_openmp=openmp)
-    generate_sweep(ctx, 'UniformGridCPU_MacroGetter', getter_assignments, target=ps.Target.CPU, cpu_openmp=openmp)
+    generate_lbm_package(ctx, name="UniformGridCPU",
+                         collision_rule=collision_rule,
+                         lbm_config=lbm_config, lbm_optimisation=lbm_opt,
+                         nonuniform=False, boundaries=[no_slip, ubb],
+                         macroscopic_fields=macroscopic_fields,
+                         cpu_openmp=openmp, cpu_vectorize_info=cpu_vec)
 
     # Stream only kernel
     generate_sweep(ctx, 'UniformGridCPU_StreamOnlyKernel', stream_only_kernel, field_swaps=field_swaps_stream_only,
                    target=ps.Target.CPU, cpu_openmp=openmp)
-
-    # Boundaries
-    noslip = NoSlip()
-    ubb = UBB((0.05, 0, 0), data_type=field_type)
-
-    generate_alternating_lbm_boundary(ctx, 'UniformGridCPU_NoSlip', noslip, lb_method, field_name=pdfs.name,
-                                      streaming_pattern=streaming_pattern, target=ps.Target.CPU, cpu_openmp=openmp)
-    generate_alternating_lbm_boundary(ctx, 'UniformGridCPU_UBB', ubb, lb_method, field_name=pdfs.name,
-                                      streaming_pattern=streaming_pattern, target=ps.Target.CPU, cpu_openmp=openmp)
-
-    # communication
-    generate_lb_pack_info(ctx, 'UniformGridCPU_PackInfo', stencil, pdfs,
-                          streaming_pattern=streaming_pattern, target=ps.Target.CPU,
-                          always_generate_separate_classes=True)
 
     infoHeaderParams = {
         'stencil': stencil_str,
@@ -201,13 +177,10 @@ with CodeGeneration() as ctx:
         'cse_pdfs': int(lbm_opt.cse_pdfs),
     }
 
-    stencil_typedefs = {'Stencil_T': stencil,
-                        'CommunicationStencil_T': stencil}
-    field_typedefs = {'PdfField_T': pdfs,
-                      'VelocityField_T': velocity_field,
+    field_typedefs = {'VelocityField_T': velocity_field,
                       'ScalarField_T': density_field}
 
     # Info header containing correct template definitions for stencil and field
     generate_info_header(ctx, 'UniformGridCPU_InfoHeader',
-                         stencil_typedefs=stencil_typedefs, field_typedefs=field_typedefs,
+                         field_typedefs=field_typedefs,
                          additional_code=info_header.format(**infoHeaderParams))

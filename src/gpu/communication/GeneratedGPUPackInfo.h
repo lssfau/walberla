@@ -19,28 +19,25 @@
 //
 //======================================================================================================================
 
-
 #pragma once
 #include "domain_decomposition/IBlock.h"
 
-#include "stencil/Directions.h"
-
 #include "gpu/GPUWrapper.h"
 
-namespace walberla {
-namespace gpu
-{
+#include "stencil/Directions.h"
 
+namespace walberla::gpu {
 
 class GeneratedGPUPackInfo
 {
 public:
+  GeneratedGPUPackInfo() = default;
+  virtual ~GeneratedGPUPackInfo() = default;
+
    virtual void pack  ( stencil::Direction dir, unsigned char *buffer, IBlock *block, gpuStream_t stream ) = 0;
+   virtual void communicateLocal  ( stencil::Direction dir, const IBlock *sender, IBlock *receiver, gpuStream_t stream ) = 0;
    virtual void unpack( stencil::Direction dir, unsigned char *buffer, IBlock *block, gpuStream_t stream ) = 0;
    virtual uint_t size( stencil::Direction dir, IBlock *block ) = 0;
 };
 
-
-
-} //namespace gpu
-} //namespace walberla
+} //namespace walberla::gpu

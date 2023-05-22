@@ -270,21 +270,21 @@ inline bool Block::neighborhoodSectionHasSmallerBlocks( const uint_t sectionInde
 {
    WALBERLA_ASSERT_LESS( sectionIndex, 26 );
 
-   return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() > id_.getUsedBits();
+   return neighborhoodSectionHasBlocks(sectionIndex) && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() > id_.getUsedBits();
 }
 
 inline bool Block::neighborhoodSectionHasEquallySizedBlock( const uint_t sectionIndex ) const
 {
    WALBERLA_ASSERT_LESS( sectionIndex, 26 );
 
-   return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() == id_.getUsedBits();
+   return neighborhoodSectionHasBlocks(sectionIndex) && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() == id_.getUsedBits();
 }
 
 inline bool Block::neighborhoodSectionHasLargerBlock( const uint_t sectionIndex ) const
 {
    WALBERLA_ASSERT_LESS( sectionIndex, 26 );
 
-   return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() < id_.getUsedBits();
+   return neighborhoodSectionHasBlocks(sectionIndex) && neighborhoodSection_[sectionIndex][0]->id_.getUsedBits() < id_.getUsedBits();
 }
 
 
