@@ -20,10 +20,13 @@
 
 #pragma once
 
+#include "core/DataTypes.h"
+
 #include <ostream>
 #include <string>
 
-namespace walberla {
+namespace walberla
+{
 
 /**
  * Replacement for boost::uuids::uuid and boost::uuids::random_generator
@@ -34,7 +37,8 @@ class RandomUUID
 {
    friend bool operator==(const RandomUUID& lhs, const RandomUUID& rhs);
    friend bool operator!=(const RandomUUID& lhs, const RandomUUID& rhs);
-public:
+
+ public:
    using UIntType = uint64_t;
 
    RandomUUID();
@@ -47,9 +51,10 @@ public:
     */
    std::string toString() const;
 
-   UIntType getFirstUInt() const {return a_;}
-   UIntType getSecondUInt() const {return b_;}
-private:
+   UIntType getFirstUInt() const { return a_; }
+   UIntType getSecondUInt() const { return b_; }
+
+ private:
    UIntType a_; ///< first part of the uuid
    UIntType b_; ///< second part of the uuid
 };
@@ -58,4 +63,4 @@ bool operator==(const RandomUUID& lhs, const RandomUUID& rhs);
 bool operator!=(const RandomUUID& lhs, const RandomUUID& rhs);
 std::ostream& operator<<(std::ostream& os, const RandomUUID& uuid);
 
-}
+} // namespace walberla
