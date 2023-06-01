@@ -40,13 +40,4 @@ target_sources( core
       Vector2.h
       Vector3.h
       extern/exprtk.h
-      equation_system/Equation.cpp
-      equation_system/Equation.h
-      equation_system/FwdEquation.h
-      equation_system/FwdOperator.h
-      equation_system/FwdVariable.h
-      equation_system/Operator.cpp
-      equation_system/Operator.h
-      equation_system/Variable.cpp
-      equation_system/Variable.h
       )
