@@ -13,6 +13,8 @@
 // double or single precision
 #cmakedefine WALBERLA_DOUBLE_ACCURACY
 
+// Experimental half precision support.
+#cmakedefine WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 
 // Debugging options
 #cmakedefine WALBERLA_ENABLE_GUI
@@ -25,6 +27,7 @@
 #cmakedefine WALBERLA_BUILD_WITH_OPENMP
 #cmakedefine WALBERLA_BUILD_WITH_METIS
 #cmakedefine WALBERLA_BUILD_WITH_PARMETIS
+#cmakedefine WALBERLA_BUILD_WITH_LIKWID_MARKERS
 
 #cmakedefine WALBERLA_BUILD_WITH_PYTHON
 

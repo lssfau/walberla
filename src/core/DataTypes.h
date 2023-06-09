@@ -167,6 +167,33 @@ using real_t = double;
 using real_t = float;
 #endif
 
+/// Half precision support. Experimental. Use carefully.
+///
+/// This feature is experimental, since it strictly depends on the underlying architecture and compiler support.
+/// On x86 architectures, what you can expect is that the data format is supported natively only for storage and
+/// interchange. Arithmetic operations will likely involve casting to fp32 (C++ float) and truncation to fp16.
+/// Only bandwidth bound code may therefore benefit. None of this is guaranteed, and may change in the future.
+///
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+#   if defined(WALBERLA_CXX_COMPILER_IS_CLANG) || defined(WALBERLA_CXX_COMPILER_IS_GNU)
+/// Clang version must be 15 or higher for x86 half precision support.
+/// GCC version must be 12 or higher for x86 half precision support.
+/// Also support seems to require SSE, so ensure that respective instruction sets are enabled.
+/// See
+///   https://clang.llvm.org/docs/LanguageExtensions.html#half-precision-floating-point
+///   https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html
+/// for more information.
+using half    = _Float16;
+using float16 = half;
+#   else
+static_assert(false, "\n\n### Attempting to built walberla with half precision support.\n"
+                     "### However, the compiler you chose is not suited for that, or we simply have not implemented "
+                     "support for half precision and your compiler.\n");
+#   endif
+#endif
+using float32 = float;
+using float64 = double;
+
 inline constexpr real_t operator"" _r( long double t ) { return static_cast< real_t >(t); }
 inline constexpr real_t operator"" _r( unsigned long long int t ) { return static_cast< real_t >(t); }
 template< typename T > inline real_t real_c  ( T t ) { return numeric_cast< real_t >(t); } ///< cast to type real_t using "real_c(x)"
