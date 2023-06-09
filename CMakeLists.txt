@@ -102,6 +102,8 @@ option ( WALBERLA_LOG_SKIPPED               "Log skipped cmake targets"         
 
 option ( WALBERLA_GIT_SUBMODULE_AUTO        "Check submodules during cmake run"               ON )
 
+option ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT "Experimental half precision support"    OFF )
+
 # Installation Directory
 set ( CMAKE_INSTALL_PREFIX /usr/local/waLBerla CACHE STRING "The default installation directory."   )
 
@@ -476,18 +478,18 @@ endif()
 
 
 # disable Xcode 7.3+ linker deduplication pass to speed up linking in debug mode
-if ( APPLE )
-   execute_process( COMMAND ${CMAKE_LINKER} -v OUTPUT_VARIABLE LINKER_VERSION ERROR_VARIABLE LINKER_VERSION )
-   string( REGEX MATCH "ld64-[0-9\\.\\-]+" LINKER_VERSION ${LINKER_VERSION} )
-   string( REGEX MATCHALL "[^\\-]+" LINKER_VERSION ${LINKER_VERSION} )
-   list( GET LINKER_VERSION 0 LINKER_TYPE )
-   list( GET LINKER_VERSION 1 LINKER_VERSION )
-   if( LINKER_TYPE STREQUAL "ld64" AND LINKER_VERSION VERSION_GREATER 264.3.101 )
-       add_flag( CMAKE_EXE_LINKER_FLAGS_DEBUG    "-Wl,-no_deduplicate")
-       add_flag( CMAKE_MODULE_LINKER_FLAGS_DEBUG "-Wl,-no_deduplicate")
-       add_flag( CMAKE_SHARED_LINKER_FLAGS_DEBUG "-Wl,-no_deduplicate")
-   endif()
-endif()
+#if ( APPLE )
+#   execute_process( COMMAND ${CMAKE_LINKER} -v OUTPUT_VARIABLE LINKER_VERSION ERROR_VARIABLE LINKER_VERSION )
+#   string( REGEX MATCH "ld64-[0-9\\.\\-]+" LINKER_VERSION ${LINKER_VERSION} )
+#   string( REGEX MATCHALL "[^\\-]+" LINKER_VERSION ${LINKER_VERSION} )
+#   list( GET LINKER_VERSION 0 LINKER_TYPE )
+#   list( GET LINKER_VERSION 1 LINKER_VERSION )
+#   if( LINKER_TYPE STREQUAL "ld64" AND LINKER_VERSION VERSION_GREATER 264.3.101 )
+#       add_flag( CMAKE_EXE_LINKER_FLAGS_DEBUG    "-Wl,-no_deduplicate")
+#       add_flag( CMAKE_MODULE_LINKER_FLAGS_DEBUG "-Wl,-no_deduplicate")
+#       add_flag( CMAKE_SHARED_LINKER_FLAGS_DEBUG "-Wl,-no_deduplicate")
+#   endif()
+#endif()
 
 
 ############################################################################################################################
@@ -1270,6 +1272,34 @@ if ( WALBERLA_SANITIZE_UNDEFINED )
         add_flag( CMAKE_CXX_FLAGS "-fsanitize=undefined")
     endif()
 endif()
+
+############################################################################################################################
+##
+##  Half precision
+##
+############################################################################################################################
+if (WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT)
+    if (WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG)
+        message(STATUS "Configuring with *experimental* half precision (float16) support. You better know what you are doing.")
+        if (WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
+            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
+                    "Half precision support for gcc has only been tested with version >= 12. "
+                    "You are using a previous version - it may not work correctly.")
+        endif ()
+        if (WALBERLA_CXX_COMPILER_IS_CLANG AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.0)
+            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
+                    "Half precision support for clang has only been tested with version >= 15. "
+                    "You are using a previous version - it may not work correctly.")
+        endif ()
+        if (NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST)
+            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
+                    "You are not optimizing for localhost. You may encounter linker errors, or WORSE: silent incorrect fp16 arithmetic! Consider also enabling WALBERLA_OPTIMIZE_FOR_LOCALHOST!")
+        endif ()
+    else ()
+        message(FATAL_ERROR "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
+                "Half precision support is currently only available for gcc and clang.")
+    endif ()
+endif ()
 
 ############################################################################################################################
 # Documentation Generation
