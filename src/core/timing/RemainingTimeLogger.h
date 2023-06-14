@@ -23,6 +23,7 @@
 
 #include "core/logging/Logging.h"
 #include "core/timing/Timer.h"
+#include "core/DataTypes.h"
 
 #include <iomanip>
 
@@ -49,7 +50,7 @@ class RemainingTimeLogger
                        const uint_t startTimestep = 0)
       : logIntervalInSec_(logIntervalInSec), timestep_(startTimestep), nrTimesteps_(nrTimesteps),
         minOutputWidth_(minOutputWidth)
-   {}
+   { WALBERLA_UNUSED(minOutputWidth_); }
 
    void operator()()
    {
@@ -75,8 +76,9 @@ class RemainingTimeLogger
             uint_t const timeStepsRemaining = nrTimesteps_ - timestep_;
 
             real_t const remainingTime = real_c(timer_.average()) * real_c(timeStepsRemaining);
+            WALBERLA_UNUSED(remainingTime);
             WALBERLA_LOG_INFO("Estimated Remaining Time: " << std::setw(minOutputWidth_) << std::right
-                                                           << timing::timeToString(remainingTime))
+                                                           << timing::timeToString(remainingTime));
          }
 
          timer_.start();
