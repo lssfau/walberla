@@ -139,6 +139,7 @@ int main( int argc, char** argv )
          dem(acd.getIdx1(), acd.getIdx2(), *accessor, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
       }
       auto force = accessor->getForce(0);
+      WALBERLA_UNUSED(force);
 
       if(useVelocityVerlet) vvPostForce(0,*accessor);
       else implEuler(0, *accessor);

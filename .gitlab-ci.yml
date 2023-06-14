@@ -54,6 +54,7 @@ stages:
         -DWALBERLA_ENABLE_GUI=$WALBERLA_ENABLE_GUI
         -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN
         -DWALBERLA_STL_BOUNDS_CHECKS=$WALBERLA_STL_BOUNDS_CHECKS
+        -DWALBERLA_LOGLEVEL=$WALBERLA_LOGLEVEL
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
@@ -75,6 +76,7 @@ stages:
       WALBERLA_BUILD_WITH_PARMETIS: "ON"
       WALBERLA_BUILD_WITH_FFTW: "ON"
       WALBERLA_ENABLE_GUI: "OFF"
+      WALBERLA_LOGLEVEL: "DETAIL"
    artifacts:
       when: always
       reports:
@@ -1972,7 +1974,7 @@ clang-tidy:
       - cmake --version
       - mkdir $CI_PROJECT_DIR/build
       - cd $CI_PROJECT_DIR/build
-      - cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWALBERLA_BUFFER_DEBUG=ON -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=ON -DCMAKE_BUILD_TYPE=Debug -DWALBERLA_BUILD_WITH_METIS=ON -DWALBERLA_BUILD_WITH_PARMETIS=ON -DWALBERLA_BUILD_WITH_OPENMESH=ON -DWALBERLA_DOUBLE_ACCURACY=ON
+      - cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWALBERLA_BUFFER_DEBUG=ON -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=ON -DCMAKE_BUILD_TYPE=Debug -DWALBERLA_BUILD_WITH_METIS=ON -DWALBERLA_BUILD_WITH_PARMETIS=ON -DWALBERLA_BUILD_WITH_OPENMESH=ON -DWALBERLA_DOUBLE_ACCURACY=ON -DWALBERLA_LOGLEVEL=DETAIL
       - cmake . -LA
       - utilities/filterCompileCommands.py compile_commands.json
       - run-clang-tidy.py -quiet | tee clang-tidy-output.txt
@@ -2010,7 +2012,7 @@ coverage:
       - mkdir build
       - cd build
       - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
-      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=DebugOptimized -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF -DWALBERLA_BUILD_WITH_GCOV=ON
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=DebugOptimized -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF -DWALBERLA_BUILD_WITH_GCOV=ON -DWALBERLA_LOGLEVEL=DETAIL
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
       - ctest -LE longrun --output-on-failure -j $NUM_CORES --timeout 3000
@@ -2051,7 +2053,7 @@ coverage:
       - cmake --version
       - mkdir build
       - cd build
-      - cmake -LA -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE ..
+      - cmake -LA -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWALBERLA_LOGLEVEL=$WALBERLA_LOGLEVEL -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE ..
       - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4 -T Test
    after_script:
@@ -2064,6 +2066,7 @@ coverage:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+      WALBERLA_LOGLEVEL: "INFO"
    artifacts:
       when: always
       reports:
@@ -2082,7 +2085,7 @@ msvc-14.1_Hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_Hybrid_sp_dbg:
@@ -2095,7 +2098,7 @@ msvc-14.1_Hybrid_sp_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_Hybrid:
@@ -2106,7 +2109,7 @@ msvc-14.1_Hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_serial_dbg:
@@ -2120,7 +2123,7 @@ msvc-14.1_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_serial:
@@ -2133,7 +2136,7 @@ msvc-14.1_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_mpionly_dbg:
@@ -2146,7 +2149,7 @@ msvc-14.1_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.1_mpionly:
@@ -2158,7 +2161,7 @@ msvc-14.1_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-
+   
 
 
 msvc-14.2_Hybrid_dbg:
@@ -2239,13 +2242,15 @@ msvc-14.2_mpionly:
       - mpirun --version
       - mkdir build
       - cd build
-      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_PYTHON=$WALBERLA_BUILD_WITH_PYTHON -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_BUILD_WITH_CUDA=$WALBERLA_BUILD_WITH_CUDA -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DWARNING_ERROR=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_PYTHON=$WALBERLA_BUILD_WITH_PYTHON -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_BUILD_WITH_CUDA=$WALBERLA_BUILD_WITH_CUDA -DWALBERLA_LOGLEVEL=$WALBERLA_LOGLEVEL -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DWARNING_ERROR=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
       - ctest -LE "$CTEST_EXCLUDE_LABELS|cuda" -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
    after_script:
       - pip3 install lxml
       - python3 cmake/ctest2junit.py build > report.xml
+   variables:
+      WALBERLA_LOGLEVEL: "DETAIL"
    tags:
       - macmini
    artifacts:
@@ -2256,7 +2261,7 @@ msvc-14.2_mpionly:
             - python/report.xml
 
 mac_Serial_Dbg:
-   <<: *mac_build_definition
+   extends: .mac_build_template
    variables:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2266,7 +2271,7 @@ mac_Serial_Dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
 
 mac_Serial:
-   <<: *mac_build_definition
+   extends: .mac_build_template
    variables:
       CMAKE_BUILD_TYPE: "Release"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2276,7 +2281,7 @@ mac_Serial:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
 
 mac_MpiOnly_Dbg:
-   <<: *mac_build_definition
+   extends: .mac_build_template
    variables:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2287,7 +2292,7 @@ mac_MpiOnly_Dbg:
       OMPI_MCA_btl: "self,tcp"
 
 mac_MpiOnly:
-   <<: *mac_build_definition
+   extends: .mac_build_template
    variables:
       CMAKE_BUILD_TYPE: "Release"
       CTEST_EXCLUDE_LABELS: "longrun"
