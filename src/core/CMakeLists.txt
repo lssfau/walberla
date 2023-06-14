@@ -57,8 +57,6 @@ target_sources( core
          Hostname.h
          Macros.h
          MemoryUsage.h
-         MultiArrayIO.h
-         MultiArrayIO.impl.h
          NonCopyable.h
          NonCreateable.h
          OpenMP.h

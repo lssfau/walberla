@@ -22,8 +22,6 @@ target_sources( core
       Parser.h
       ParserOMP.cpp
       ParserOMP.h
-      PhysicalCheck.cpp
-      PhysicalCheck.h
       Plane.h
       Primes.cpp
       Primes.h
@@ -42,17 +40,4 @@ target_sources( core
       Vector2.h
       Vector3.h
       extern/exprtk.h
-      equation_system/Equation.cpp
-      equation_system/Equation.h
-      equation_system/EquationParser.cpp
-      equation_system/EquationParser.h
-      equation_system/EquationSystem.cpp
-      equation_system/EquationSystem.h
-      equation_system/FwdEquation.h
-      equation_system/FwdOperator.h
-      equation_system/FwdVariable.h
-      equation_system/Operator.cpp
-      equation_system/Operator.h
-      equation_system/Variable.cpp
-      equation_system/Variable.h
       )
