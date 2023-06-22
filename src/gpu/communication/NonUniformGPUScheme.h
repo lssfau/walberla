@@ -134,6 +134,12 @@ NonUniformGPUScheme< Stencil >::NonUniformGPUScheme(const weak_ptr< StructuredBl
    : blockForest_(bf), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag), parallelSectionManager_(-1),
      requiredBlockSelectors_(Set< SUID >::emptySet()), incompatibleBlockSelectors_(Set< SUID >::emptySet())
 {
+   WALBERLA_MPI_SECTION()
+   {
+#if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
+      WALBERLA_CHECK(!sendDirectlyFromGPU)
+#endif
+   }
    init();
 }
 
@@ -146,6 +152,12 @@ NonUniformGPUScheme< Stencil >::NonUniformGPUScheme(const weak_ptr< StructuredBl
      incompatibleBlockSelectors_(incompatibleBlockSelectors), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag),
      parallelSectionManager_(-1)
 {
+   WALBERLA_MPI_SECTION()
+   {
+#if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
+      WALBERLA_CHECK(!sendDirectlyFromGPU)
+#endif
+   }
    init();
 }
 
