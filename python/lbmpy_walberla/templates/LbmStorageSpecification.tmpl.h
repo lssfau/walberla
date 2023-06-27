@@ -63,19 +63,20 @@ class {{class_name}}
    using Stencil = stencil::{{stencil_name}};
    // Lattice stencil used for the communication (should be used to define which block directions need to be communicated)
    using CommunicationStencil = stencil::{{communication_stencil_name}};
-
    // If false used correction: Lattice Boltzmann Model for the Incompressible Navier–Stokes Equation, He 1997
    static const bool compressible = {% if compressible %}true{% else %}false{% endif %};
    // Cut off for the lattice Boltzmann equilibrium
-   static const int equilibriumAccuracyOrder = {{equilibriumAccuracyOrder}};
-
+   static const int equilibriumAccuracyOrder = {{equilibrium_accuracy_order}};
+   // If true the equilibrium is computed in regard to "delta_rho" and not the actual density "rho"
+   static const bool equilibriumDeviationOnly = {% if equilibrium_deviation_only -%} true {%- else -%} false {%- endif -%};
    // If streaming pattern is inplace (esotwist, aa, ...) or not (pull, push)
    static const bool inplace = {% if inplace -%} true {%- else -%} false {%- endif -%};
-
    // If true the background deviation (rho_0 = 1) is subtracted for the collision step.
    static const bool zeroCenteredPDFs = {% if zero_centered -%} true {%- else -%} false {%- endif -%};
-   // If true the equilibrium is computed in regard to "delta_rho" and not the actual density "rho"
-   static const bool deviationOnlyEquilibrium = {% if eq_deviation_only -%} true {%- else -%} false {%- endif -%};
+   // Lattice weights
+   static constexpr {{dtype}} w[{{stencil_size}}] = { {{weights}} };
+   // Inverse lattice weights
+   static constexpr {{dtype}} wInv[{{stencil_size}}] = { {{inverse_weights}} };
 
    // Compute kernels to pack and unpack MPI buffers
    class PackKernels {

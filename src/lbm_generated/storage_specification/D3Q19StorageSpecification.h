@@ -57,19 +57,20 @@ class D3Q19StorageSpecification
    using Stencil = stencil::D3Q19;
    // Lattice stencil used for the communication (should be used to define which block directions need to be communicated)
    using CommunicationStencil = stencil::D3Q19;
-
    // If false used correction: Lattice Boltzmann Model for the Incompressible Navier–Stokes Equation, He 1997
    static const bool compressible = false;
    // Cut off for the lattice Boltzmann equilibrium
    static const int equilibriumAccuracyOrder = 2;
-
+   // If true the equilibrium is computed in regard to "delta_rho" and not the actual density "rho"
+   static const bool equilibriumDeviationOnly = true;
    // If streaming pattern is inplace (esotwist, aa, ...) or not (pull, push)
    static const bool inplace = false;
-
    // If true the background deviation (rho_0 = 1) is subtracted for the collision step.
    static const bool zeroCenteredPDFs = true;
-   // If true the equilibrium is computed in regard to "delta_rho" and not the actual density "rho"
-   static const bool deviationOnlyEquilibrium = true;
+   // Lattice weights
+   static constexpr double w[19] = { 0.333333333333333,0.0555555555555556,0.0555555555555556,0.0555555555555556,0.0555555555555556,0.0555555555555556,0.0555555555555556,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778,0.0277777777777778 };
+   // Inverse lattice weights
+   static constexpr double wInv[19] = { 3.00000000000000,18.0000000000000,18.0000000000000,18.0000000000000,18.0000000000000,18.0000000000000,18.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000,36.0000000000000 };
 
    // Compute kernels to pack and unpack MPI buffers
    class PackKernels {

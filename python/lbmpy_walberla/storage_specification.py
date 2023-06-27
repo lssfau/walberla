@@ -32,15 +32,13 @@ def generate_lbm_storage_specification(generation_context, class_name: str,
 
     default_dtype = config.data_type.default_factory()
     is_float = True if issubclass(default_dtype.numpy_dtype.type, np.float32) else False
+    constant_suffix = "f" if is_float else ""
 
     cg = PackingKernelsCodegen(stencil, streaming_pattern, class_name, config)
     kernels = cg.create_uniform_kernel_families()
 
     if nonuniform:
         kernels = cg.create_nonuniform_kernel_families(kernels_dict=kernels)
-
-    values_per_cell = len(stencil)
-    dimension = len(stencil[0])
 
     # Pure storage specification
     if not stencil_name:
@@ -56,11 +54,15 @@ def generate_lbm_storage_specification(generation_context, class_name: str,
         'namespace': namespace,
         'stencil_name': stencil_name,
         'communication_stencil_name': communication_stencil_name,
+        'stencil_size': stencil.Q,
+        'dimension': stencil.D,
         'compressible': cqc.compressible,
-        'equilibriumAccuracyOrder': equilibrium.order,
+        'equilibrium_accuracy_order': equilibrium.order,
+        'equilibrium_deviation_only': equilibrium.deviation_only,
         'inplace': is_inplace(streaming_pattern),
         'zero_centered': cqc.zero_centered_pdfs,
-        'eq_deviation_only': equilibrium.deviation_only,
+        'weights': ",".join(str(w.evalf()) + constant_suffix for w in method.weights),
+        'inverse_weights': ",".join(str((1 / w).evalf()) + constant_suffix for w in method.weights),
 
         'nonuniform': nonuniform,
         'target': target.name.lower(),
@@ -68,8 +70,6 @@ def generate_lbm_storage_specification(generation_context, class_name: str,
         'is_gpu': target == Target.GPU,
         'kernels': kernels,
         'direction_sizes': cg.get_direction_sizes(),
-        'stencil_size': stencil.Q,
-        'dimension': stencil.D,
         'src_field': cg.src_field,
         'dst_field': cg.dst_field
 
