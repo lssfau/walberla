@@ -25,7 +25,8 @@
 
 #include "core/DataTypes.h"
 
-#include "ErrorChecking.h"
+#include "gpu/ErrorChecking.h"
+#include "gpu/DeviceWrapper.h"
 
 #include <tuple>
 

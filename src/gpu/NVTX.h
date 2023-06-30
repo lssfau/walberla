@@ -21,11 +21,14 @@
 
 #include "core/DataTypes.h"
 
-#include <string>
+#include "DeviceWrapper.h"
 
-#include <nvToolsExt.h>
-#include <nvToolsExtCuda.h>
-#include <nvToolsExtCudaRt.h>
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+  #include <nvToolsExt.h>
+  #include <nvToolsExtCuda.h>
+  #include <nvToolsExtCudaRt.h>
+  #include <string>
+#endif
 
 namespace walberla{
 namespace gpu
@@ -33,20 +36,30 @@ namespace gpu
 
 inline void nvtxMarker(const std::string& name, const uint32_t color=0xaaaaaa)
 {
-    nvtxEventAttributes_t eventAttrib;
-    memset(&eventAttrib, 0, NVTX_EVENT_ATTRIB_STRUCT_SIZE);
-    eventAttrib.version = NVTX_VERSION;
-    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
-    eventAttrib.colorType = NVTX_COLOR_ARGB;
-    eventAttrib.color = 0xFF000000 | color;
-    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII;
-    eventAttrib.message.ascii = name.c_str();
-    nvtxMarkEx(&eventAttrib);
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   nvtxEventAttributes_t eventAttrib;
+   memset(&eventAttrib, 0, NVTX_EVENT_ATTRIB_STRUCT_SIZE);
+   eventAttrib.version       = NVTX_VERSION;
+   eventAttrib.size          = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
+   eventAttrib.colorType     = NVTX_COLOR_ARGB;
+   eventAttrib.color         = 0xFF000000 | color;
+   eventAttrib.messageType   = NVTX_MESSAGE_TYPE_ASCII;
+   eventAttrib.message.ascii = name.c_str();
+   nvtxMarkEx(&eventAttrib);
+#else
+    WALBERLA_UNUSED(name);
+    WALBERLA_UNUSED(color);
+#endif
 }
 
 inline void nameStream(const cudaStream_t & stream, const std::string & name)
 {
-    nvtxNameCudaStreamA(stream, name.c_str());
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   nvtxNameCudaStreamA(stream, name.c_str());
+#else
+   WALBERLA_UNUSED(stream);
+   WALBERLA_UNUSED(name);
+#endif
 }
 
 class NvtxRange
@@ -54,21 +67,31 @@ class NvtxRange
 public:
     NvtxRange(const std::string & name, const uint32_t color=0xaaaaaa)
     {
-        memset(&eventAttrib, 0, NVTX_EVENT_ATTRIB_STRUCT_SIZE);
-        eventAttrib.version = NVTX_VERSION;
-        eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
-        eventAttrib.colorType = NVTX_COLOR_ARGB;
-        eventAttrib.color = 0xFF000000 | color;
-        eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII;
-        eventAttrib.message.ascii = name.c_str();
-        nvtxRangePushEx(&eventAttrib);
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+      memset(&eventAttrib, 0, NVTX_EVENT_ATTRIB_STRUCT_SIZE);
+      eventAttrib.version       = NVTX_VERSION;
+      eventAttrib.size          = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
+      eventAttrib.colorType     = NVTX_COLOR_ARGB;
+      eventAttrib.color         = 0xFF000000 | color;
+      eventAttrib.messageType   = NVTX_MESSAGE_TYPE_ASCII;
+      eventAttrib.message.ascii = name.c_str();
+      nvtxRangePushEx(&eventAttrib);
+#else
+      WALBERLA_UNUSED(name);
+      WALBERLA_UNUSED(color);
+#endif
     }
+
     ~NvtxRange()
     {
-        nvtxRangePop();
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+         nvtxRangePop();
+#endif
     }
 private:
+#if defined(WALBERLA_BUILD_WITH_CUDA)
     nvtxEventAttributes_t eventAttrib;
+#endif
 };
 
 

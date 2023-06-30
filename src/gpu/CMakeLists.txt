@@ -20,6 +20,7 @@ target_sources( gpu
       AddGPUFieldToStorage.impl.h
       GPUField.h
       GPUWrapper.h
+      DeviceWrapper.h
       FieldAccessor3D.h
       DeviceSelectMPI.h
       HostFieldAllocator.h

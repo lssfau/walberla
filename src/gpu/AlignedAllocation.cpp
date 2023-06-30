@@ -20,6 +20,7 @@
 //======================================================================================================================
 
 #include "AlignedAllocation.h"
+#include "gpu/DeviceWrapper.h"
 #include "gpu/ErrorChecking.h"
 #include "core/debug/CheckFunctions.h"
 #include "core/debug/Debug.h"
@@ -34,6 +35,11 @@ namespace gpu
 
    void *allocate_aligned_with_offset( uint_t size, uint_t alignment, uint_t offset )
    {
+      WALBERLA_NON_DEVICE_SECTION()
+      {
+         WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+      }
+
       // With 0 alignment this function makes no sense
       // use normal malloc instead
       WALBERLA_ASSERT_GREATER( alignment, 0 )
@@ -50,8 +56,8 @@ namespace gpu
          return result;
       }
 
-      void *pa;  // pointer to allocated memory
-      void *ptr; // pointer to usable aligned memory
+      void *pa = nullptr;   // pointer to allocated memory
+      void *ptr = nullptr;  // pointer to usable aligned memory
 
       WALBERLA_GPU_CHECK( gpuMalloc( &pa, size + alignment ));
       WALBERLA_CHECK_EQUAL(size_t(pa) % alignment, 0 , "GPU malloc did not return memory with requested alignment");
@@ -65,6 +71,11 @@ namespace gpu
 
    void free_aligned_with_offset( void *ptr )
    {
+      WALBERLA_NON_DEVICE_SECTION()
+      {
+         WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+      }
+
       // assume that pointer to real allocated chunk is stored just before
       // chunk that was given to user
       WALBERLA_GPU_CHECK( gpuFree( freePointers_[ptr] ));

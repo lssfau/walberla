@@ -14,8 +14,6 @@ target_sources( timeloop
       SweepTimeloop.h
       Timeloop.h
       PerformanceMeter.cpp
-      SweepTimeloop.cpp
-      Timeloop.cpp
 )
 
 ###################################################################################################

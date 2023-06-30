@@ -25,14 +25,14 @@
 
 #include <sstream>
 
-#include "gpu/GPUWrapper.h"
+#include "gpu/DeviceWrapper.h"
 
 namespace walberla {
 namespace gpu {
 
 
 #define WALBERLA_GPU_CHECK(ans) { ::walberla::gpu::checkForError((ans), __FILE__, __LINE__); }
-#define WALBERLA_GPU_CHECK_LAST_ERROR() {::walberla::gpu::checkForLastError(__FILE__, __LINE__);}
+#define WALBERLA_GPU_CHECK_LAST_ERROR() { ::walberla::gpu::checkForLastError(__FILE__, __LINE__); }
 
 
 
@@ -56,7 +56,7 @@ inline void checkForLastError( const std::string & callerPath, const int line )
    if(code != gpuSuccess)
    {
       std::stringstream ss;
-      ss << "CUDA Error: " << code << " " << cudaGetErrorName(code) << ": " << cudaGetErrorString( code );
+      ss << "CUDA Error: " << code << " " << gpuGetErrorName(code) << ": " << gpuGetErrorString( code );
       Abort::instance()->abort( ss.str(), callerPath, line );
    }
 }

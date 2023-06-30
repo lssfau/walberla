@@ -16,4 +16,5 @@ target_sources( core
          TimingTree.cpp
          TimingTree.h
          WcPolicy.h
+         DeviceSynchronizePolicy.h
       )

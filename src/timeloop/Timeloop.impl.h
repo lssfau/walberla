@@ -29,16 +29,8 @@
 namespace walberla {
 namespace timeloop {
 
-
-Timeloop::Timeloop( uint_t nrOfTimeSteps)
-   : curTimeStep_(0), nrOfTimeSteps_(nrOfTimeSteps), stop_( false )
-{
-}
-
-
-
-
-void Timeloop::run( const bool logTimeStep )
+template < typename TP >
+void Timeloop<TP>::run( const bool logTimeStep )
 {
    WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" )
    while(curTimeStep_ < nrOfTimeSteps_) {
@@ -51,7 +43,8 @@ void Timeloop::run( const bool logTimeStep )
    WALBERLA_LOG_PROGRESS( "Timeloop finished" )
 }
 
-void Timeloop::run( WcTimingPool & tp, const bool logTimeStep )
+template < typename TP >
+void Timeloop<TP>::run(timing::TimingPool<TP> & tp, const bool logTimeStep )
 {
    WALBERLA_LOG_PROGRESS( "Running timeloop for " << nrOfTimeSteps_ << " time steps" )
 
@@ -74,7 +67,9 @@ void Timeloop::run( WcTimingPool & tp, const bool logTimeStep )
 *  before reaching nrOfTimeSteps
 */
 //*******************************************************************************************************************
-void Timeloop::stop()
+
+template < typename TP >
+void Timeloop<TP>::stop()
 {
    stop_ = true;
 }
@@ -89,13 +84,16 @@ void Timeloop::stop()
 *     -> If at least on process calls synchronizedStop(true) the timeloop is stopped
 */
 //*******************************************************************************************************************
-void Timeloop::synchronizedStop( bool stopVal )
+
+template < typename TP >
+void Timeloop<TP>::synchronizedStop( bool stopVal )
 {
    stop_ = stopVal;
    mpi::allReduceInplace( stop_, mpi::LOGICAL_OR );
 }
 
-void Timeloop::singleStep( const bool logTimeStep )
+template < typename TP >
+void Timeloop<TP>::singleStep( const bool logTimeStep )
 {
    LoggingStampManager const raii( make_shared<LoggingStamp>( *this ), logTimeStep );
 
@@ -112,7 +110,8 @@ void Timeloop::singleStep( const bool logTimeStep )
    ++curTimeStep_;
 }
 
-void Timeloop::singleStep( WcTimingPool & tp, const bool logTimeStep )
+template < typename TP >
+void Timeloop<TP>::singleStep( timing::TimingPool<TP> & tp, const bool logTimeStep )
 {
    LoggingStampManager const raii( make_shared<LoggingStamp>( *this ), logTimeStep );
 
@@ -133,17 +132,17 @@ void Timeloop::singleStep( WcTimingPool & tp, const bool logTimeStep )
 //////////////////////////////////////////   Registering Functions   ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-Timeloop::FctHandle
-Timeloop::addFuncBeforeTimeStep(const VoidFctNoArguments& f, const std::string & id,
+template < typename TP >
+typename Timeloop<TP>::FctHandle
+Timeloop<TP>::addFuncBeforeTimeStep(const VoidFctNoArguments& f, const std::string & id,
                                 const Set<SUID> & r, const Set<SUID> & e )
 {
     beforeFunctions_.emplace_back(f,r,e,id );
     return beforeFunctions_.size() - 1;
 }
 
-
-void Timeloop::addFuncBeforeTimeStep(const Timeloop::FctHandle & h,
+template < typename TP >
+void Timeloop<TP>::addFuncBeforeTimeStep(const Timeloop::FctHandle & h,
                                      const VoidFctNoArguments& f, const std::string & id,
                                      const Set<SUID>&r, const Set<SUID> & e )
 {
@@ -152,17 +151,17 @@ void Timeloop::addFuncBeforeTimeStep(const Timeloop::FctHandle & h,
 }
 
 
-
-Timeloop::FctHandle
-Timeloop::addFuncAfterTimeStep(const VoidFctNoArguments& f, const std::string & id,
+template < typename TP >
+typename Timeloop<TP>::FctHandle
+Timeloop<TP>::addFuncAfterTimeStep(const VoidFctNoArguments& f, const std::string & id,
                                       const Set<SUID> & r, const Set<SUID> & e )
 {
     afterFunctions_.emplace_back(f,r,e,id );
     return afterFunctions_.size() - 1;
 }
 
-
-void Timeloop::addFuncAfterTimeStep(const Timeloop::FctHandle & h,
+template < typename TP >
+void Timeloop<TP>::addFuncAfterTimeStep(const Timeloop::FctHandle & h,
                                            const VoidFctNoArguments& f, const std::string & id,
                                            const Set<SUID>&r, const Set<SUID> & e )
 {
@@ -172,8 +171,8 @@ void Timeloop::addFuncAfterTimeStep(const Timeloop::FctHandle & h,
 
 
 
-
-void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
+template < typename TP >
+void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
                                   const Set<SUID> & selector,
                                   const std::string & what )
 {
@@ -192,10 +191,11 @@ void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctN
    LIKWID_MARKER_STOP( objectName.c_str() );
 }
 
-void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
+template < typename TP >
+void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
                                   const Set<SUID> & selector,
                                   const std::string & what,
-                                  WcTimingPool & timing )
+                                  timing::TimingPool<TP> & timing )
 {
    std::string objectName;
    const VoidFctNoArguments * exe = selectable.getUnique( selector, objectName );

@@ -22,6 +22,7 @@
 #include "GPUField.h"
 #include "ErrorChecking.h"
 #include "AlignedAllocation.h"
+#include "DeviceWrapper.h"
 #include "core/logging/Logging.h"
 
 namespace walberla {
@@ -36,40 +37,44 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
      xSize_( _xSize), ySize_( _ySize ), zSize_( _zSize ), fSize_( _fSize ),
      layout_( _layout ), usePitchedMem_( usePitchedMem ), timestepCounter_(0)
 {
+   WALBERLA_NON_DEVICE_SECTION() {
+      WALBERLA_ABORT(__FUNCTION__ << "Instantiating GPU field without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+   }
+
    gpuExtent extent;
-   if ( layout_ == zyxf )
+   if (layout_ == zyxf)
    {
       extent.width  = _fSize * sizeof(T);
-      extent.height = (_xSize + 2 * _nrOfGhostLayers );
-      extent.depth  = (_ySize + 2 * _nrOfGhostLayers ) * ( _zSize + 2 * _nrOfGhostLayers );
+      extent.height = (_xSize + 2 * _nrOfGhostLayers);
+      extent.depth  = (_ySize + 2 * _nrOfGhostLayers) * (_zSize + 2 * _nrOfGhostLayers);
    }
    else
    {
-      extent.width  = (_xSize + 2 * _nrOfGhostLayers ) * sizeof(T);
-      extent.height = (_ySize + 2 * _nrOfGhostLayers );
-      extent.depth  = (_zSize + 2 * _nrOfGhostLayers ) * _fSize;
+      extent.width  = (_xSize + 2 * _nrOfGhostLayers) * sizeof(T);
+      extent.height = (_ySize + 2 * _nrOfGhostLayers);
+      extent.depth  = (_zSize + 2 * _nrOfGhostLayers) * _fSize;
    }
 
-   if ( usePitchedMem_ )
+   if (usePitchedMem_)
    {
       size_t pitch;
       const size_t alignment = 256;
-      void * mem = allocate_pitched_with_offset( pitch, extent.width, extent.height * extent.depth, alignment,
-                                                 sizeof(T) * nrOfGhostLayers_ );
-      WALBERLA_ASSERT_EQUAL( size_t((char*)(mem) + sizeof(T) * nrOfGhostLayers_ ) % alignment, 0 )
-      pitchedPtr_ = make_gpuPitchedPtr( mem, pitch, extent.width, extent.height );
+      void* mem = allocate_pitched_with_offset(pitch, extent.width, extent.height * extent.depth, alignment,
+                                               sizeof(T) * nrOfGhostLayers_);
+      WALBERLA_ASSERT_EQUAL(size_t((char*) (mem) + sizeof(T) * nrOfGhostLayers_) % alignment, 0)
+      pitchedPtr_ = make_gpuPitchedPtr(mem, pitch, extent.width, extent.height);
    }
    else
    {
-      pitchedPtr_ = make_gpuPitchedPtr(nullptr, extent.width, extent.width, extent.height );
-      WALBERLA_GPU_CHECK ( gpuMalloc( &pitchedPtr_.ptr, extent.width * extent.height * extent.depth ) )
+      pitchedPtr_ = make_gpuPitchedPtr(nullptr, extent.width, extent.width, extent.height);
+      WALBERLA_GPU_CHECK(gpuMalloc(&pitchedPtr_.ptr, extent.width * extent.height * extent.depth))
    }
 
    // allocation size is stored in pitched pointer
    // pitched pointer stores the amount of padded region in bytes
    // but we keep track of the size in #elements
-   WALBERLA_ASSERT_EQUAL( pitchedPtr_.pitch % sizeof(T), 0 )
-   if ( layout_ == field::fzyx )
+   WALBERLA_ASSERT_EQUAL(pitchedPtr_.pitch % sizeof(T), 0)
+   if (layout_ == field::fzyx)
    {
       xAllocSize_ = pitchedPtr_.pitch / sizeof(T);
       fAllocSize_ = fSize_;

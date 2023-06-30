@@ -29,6 +29,7 @@ namespace timing {
 
 // Explicit instantiation
 template struct TimingNode<WcPolicy>;
+template struct TimingNode<DeviceSynchronizePolicy>;
 template struct TimingNode<CpuPolicy>;
 
 } // namespace timing

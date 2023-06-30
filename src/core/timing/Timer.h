@@ -25,13 +25,16 @@
 #pragma once
 
 #include "CpuPolicy.h"
+#include "DeviceSynchronizePolicy.h"
 #include "ReduceType.h"
 #include "WcPolicy.h"
-#include "core/DataTypes.h"
 
+#include "core/DataTypes.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SendBuffer.h"
+
+#include "gpu/DeviceWrapper.h"
 
 #include <iomanip>
 #include <iostream>
@@ -590,6 +593,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP
 } //namespace timing
 
 using CpuTimer = timing::Timer<timing::CpuPolicy>;
+using DeviceSynchronizeTimer = timing::Timer<timing::DeviceSynchronizePolicy>;
 using WcTimer = timing::Timer<timing::WcPolicy>;
 
 } // namespace walberla

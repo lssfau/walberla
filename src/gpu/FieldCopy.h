@@ -98,56 +98,48 @@ namespace gpu
    template<typename T, uint_t fs>
    void fieldCpy(gpu::GPUField<T> & dst, const field::Field<T,fs> & src )
    {
-      gpuMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
-
-
-      if ( dst.layout() != src.layout() ) {
-         WALBERLA_ABORT( "Cannot copy fields with different layout" )
-      }
-
-      bool canCopy = ( src.layout()     == fzyx &&
-                       dst.fAllocSize() == src.fAllocSize() &&
-                       dst.zAllocSize() == src.zAllocSize() &&
-                       dst.yAllocSize() == src.yAllocSize() &&
-                       dst.xSize()      == src.xSize() )
-                      ||
-                      ( src.layout()     == zyxf &&
-                        dst.zAllocSize() == src.zAllocSize() &&
-                        dst.yAllocSize() == src.yAllocSize() &&
-                        dst.xAllocSize() == src.xAllocSize() &&
-                        dst.fSize()      == src.fSize() );
-
-      if ( !canCopy ) {
-         WALBERLA_ABORT("Field have to have the same size ")
-      }
-
-      if ( dst.layout() == fzyx )
+      WALBERLA_DEVICE_SECTION()
       {
-         p.srcPtr = make_gpuPitchedPtr( (void*)(src.data()),          // pointer
-                                         sizeof(T) * src.xAllocSize(), // pitch
-                                         src.xAllocSize(),             // inner dimension size
-                                         src.yAllocSize()  );          // next outer dimension size
+         gpuMemcpy3DParms p;
+         memset(&p, 0, sizeof(p));
 
-         p.extent.width  = std::min( dst.xAllocSize(), src.xAllocSize() ) * sizeof(T);
-         p.extent.height = dst.yAllocSize();
-         p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
+         if (dst.layout() != src.layout()) { WALBERLA_ABORT("Cannot copy fields with different layout") }
+
+         bool canCopy =
+            (src.layout() == fzyx && dst.fAllocSize() == src.fAllocSize() && dst.zAllocSize() == src.zAllocSize() &&
+             dst.yAllocSize() == src.yAllocSize() && dst.xSize() == src.xSize()) ||
+            (src.layout() == zyxf && dst.zAllocSize() == src.zAllocSize() && dst.yAllocSize() == src.yAllocSize() &&
+             dst.xAllocSize() == src.xAllocSize() && dst.fSize() == src.fSize());
+
+         if (!canCopy) { WALBERLA_ABORT("Field have to have the same size ") }
+
+         if (dst.layout() == fzyx)
+         {
+            p.srcPtr = make_gpuPitchedPtr((void*) (src.data()),         // pointer
+                                          sizeof(T) * src.xAllocSize(), // pitch
+                                          src.xAllocSize(),             // inner dimension size
+                                          src.yAllocSize());            // next outer dimension size
+
+            p.extent.width  = std::min(dst.xAllocSize(), src.xAllocSize()) * sizeof(T);
+            p.extent.height = dst.yAllocSize();
+            p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
+         }
+         else
+         {
+            p.srcPtr = make_gpuPitchedPtr((void*) (src.data()),         // pointer
+                                          sizeof(T) * src.fAllocSize(), // pitch
+                                          src.fAllocSize(),             // inner dimension size
+                                          src.xAllocSize());            // next outer dimension size
+
+            p.extent.width  = std::min(dst.fAllocSize(), src.fAllocSize()) * sizeof(T);
+            p.extent.height = dst.xAllocSize();
+            p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
+         }
+
+         p.dstPtr = dst.pitchedPtr();
+         p.kind   = gpuMemcpyHostToDevice;
+         WALBERLA_GPU_CHECK(gpuMemcpy3D(&p))
       }
-      else
-      {
-         p.srcPtr = make_gpuPitchedPtr( (void*)(src.data()),          // pointer
-                                         sizeof(T) * src.fAllocSize(), // pitch
-                                         src.fAllocSize(),             // inner dimension size
-                                         src.xAllocSize()  );          // next outer dimension size
-
-         p.extent.width  = std::min( dst.fAllocSize(), src.fAllocSize() ) * sizeof(T);
-         p.extent.height = dst.xAllocSize();
-         p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
-      }
-
-      p.dstPtr = dst.pitchedPtr();
-      p.kind = gpuMemcpyHostToDevice;
-      WALBERLA_GPU_CHECK( gpuMemcpy3D( &p ) )
    }
 
 
@@ -155,56 +147,48 @@ namespace gpu
    template<typename T, uint_t fs>
    void fieldCpy( field::Field<T,fs> & dst, const gpu::GPUField<T> & src )
    {
-      gpuMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
-
-      if ( dst.layout() != src.layout() ) {
-         WALBERLA_ABORT( "Cannot copy fields with different layout" )
-      }
-
-      bool canCopy = ( src.layout()     == fzyx &&
-                       dst.fAllocSize() == src.fAllocSize() &&
-                       dst.zAllocSize() == src.zAllocSize() &&
-                       dst.yAllocSize() == src.yAllocSize() &&
-                       dst.xSize()      == src.xSize() )
-                      ||
-                      ( src.layout()     == zyxf &&
-                        dst.zAllocSize() == src.zAllocSize() &&
-                        dst.yAllocSize() == src.yAllocSize() &&
-                        dst.xAllocSize() == src.xAllocSize() &&
-                        dst.fSize()      == src.fSize() );
-
-      if ( !canCopy ) {
-         WALBERLA_ABORT("Field have to have the same size ")
-      }
-
-      if ( dst.layout() == fzyx )
+      WALBERLA_DEVICE_SECTION()
       {
-         p.dstPtr = make_gpuPitchedPtr( (void*)(dst.data()),          // pointer
-                                         sizeof(T) * dst.xAllocSize(), // pitch
-                                         dst.xAllocSize(),             // inner dimension size
-                                         dst.yAllocSize()  );          // next outer dimension size
+         gpuMemcpy3DParms p;
+         memset(&p, 0, sizeof(p));
 
-         p.extent.width  = std::min( dst.xAllocSize(), src.xAllocSize() ) * sizeof(T);
-         p.extent.height = dst.yAllocSize();
-         p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
+         if (dst.layout() != src.layout()) { WALBERLA_ABORT("Cannot copy fields with different layout") }
+
+         bool canCopy =
+            (src.layout() == fzyx && dst.fAllocSize() == src.fAllocSize() && dst.zAllocSize() == src.zAllocSize() &&
+             dst.yAllocSize() == src.yAllocSize() && dst.xSize() == src.xSize()) ||
+            (src.layout() == zyxf && dst.zAllocSize() == src.zAllocSize() && dst.yAllocSize() == src.yAllocSize() &&
+             dst.xAllocSize() == src.xAllocSize() && dst.fSize() == src.fSize());
+
+         if (!canCopy) { WALBERLA_ABORT("Field have to have the same size ") }
+
+         if (dst.layout() == fzyx)
+         {
+            p.dstPtr = make_gpuPitchedPtr((void*) (dst.data()),         // pointer
+                                          sizeof(T) * dst.xAllocSize(), // pitch
+                                          dst.xAllocSize(),             // inner dimension size
+                                          dst.yAllocSize());            // next outer dimension size
+
+            p.extent.width  = std::min(dst.xAllocSize(), src.xAllocSize()) * sizeof(T);
+            p.extent.height = dst.yAllocSize();
+            p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
+         }
+         else
+         {
+            p.dstPtr = make_gpuPitchedPtr((void*) (dst.data()),         // pointer
+                                          sizeof(T) * dst.fAllocSize(), // pitch
+                                          dst.fAllocSize(),             // inner dimension size
+                                          dst.xAllocSize());            // next outer dimension size
+
+            p.extent.width  = std::min(dst.fAllocSize(), src.fAllocSize()) * sizeof(T);
+            p.extent.height = dst.xAllocSize();
+            p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
+         }
+
+         p.srcPtr = src.pitchedPtr();
+         p.kind   = gpuMemcpyDeviceToHost;
+         WALBERLA_GPU_CHECK(gpuMemcpy3D(&p))
       }
-      else
-      {
-         p.dstPtr = make_gpuPitchedPtr( (void*)(dst.data()),          // pointer
-                                         sizeof(T) * dst.fAllocSize(), // pitch
-                                         dst.fAllocSize(),             // inner dimension size
-                                         dst.xAllocSize()  );          // next outer dimension size
-
-         p.extent.width  = std::min( dst.fAllocSize(), src.fAllocSize() ) * sizeof(T);
-         p.extent.height = dst.xAllocSize();
-         p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
-      }
-
-      p.srcPtr = src.pitchedPtr();
-      p.kind = gpuMemcpyDeviceToHost;
-      WALBERLA_GPU_CHECK( gpuMemcpy3D( &p ) )
-
    }
 
 } // namespace gpu

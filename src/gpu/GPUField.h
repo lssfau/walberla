@@ -28,7 +28,7 @@
 
 #include "stencil/Directions.h"
 
-#include "gpu/GPUWrapper.h"
+#include "gpu/DeviceWrapper.h"
 
 namespace walberla {
 namespace gpu
@@ -40,7 +40,7 @@ namespace gpu
 
 
    //*******************************************************************************************************************
-   /*! GhostLayerField stored on a CUDA GPU
+   /*! GhostLayerField stored on a CUDA/HIP GPU
    *
    *  Basically a wrapper around a CUDA/HIP device pointer together with size information about the field
    *  i.e. sizes in x,y,z,f directions and number of ghost layers.
@@ -155,7 +155,7 @@ namespace gpu
       //****************************************************************************************************************
 
    protected:
-      gpuPitchedPtr pitchedPtr_;
+      gpuPitchedPtr  pitchedPtr_;
       uint_t         nrOfGhostLayers_;
       uint_t         xSize_;
       uint_t         ySize_;

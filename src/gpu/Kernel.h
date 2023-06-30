@@ -236,7 +236,10 @@ namespace gpu
       // .. and launch the kernel
       static_assert( sizeof(void *) == sizeof(void (*)(void)),
                      "object pointer and function pointer sizes must be equal" );
-      WALBERLA_GPU_CHECK( gpuLaunchKernel( (void*) funcPtr_, gridDim_, blockDim_, args.data(), sharedMemSize_, stream ) )
+      WALBERLA_DEVICE_SECTION()
+      {
+         WALBERLA_GPU_CHECK(gpuLaunchKernel((void*) funcPtr_, gridDim_, blockDim_, args.data(), sharedMemSize_, stream))
+      }
    }
 
 

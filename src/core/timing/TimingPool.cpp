@@ -474,6 +474,7 @@ void TimingPool<TP>::clear ()
 
 // Explicit instantiation
 template class TimingPool<WcPolicy>;
+template class TimingPool<DeviceSynchronizePolicy>;
 template class TimingPool<CpuPolicy>;
 
 

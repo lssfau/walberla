@@ -80,7 +80,7 @@ class BasicRecursiveTimeStepGPU
    ~BasicRecursiveTimeStepGPU() = default;
 
    void operator()() { timestep(0); };
-   void addRefinementToTimeLoop(timeloop::SweepTimeloop& timeloop, uint_t level = 0);
+   void addRefinementToTimeLoop(SweepTimeloop& timeloop, uint_t level = 0);
    void test(uint_t maxLevel, uint_t level = 0);
 
  private:

@@ -167,7 +167,7 @@ int main( int argc, char ** argv )
    createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(5,5,5), 1);
    createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(15,6,6), 1);
 
-   timeloop::SweepTimeloop timeloop( forest->getBlockStorage(), 1 );
+   SweepTimeloop timeloop( forest->getBlockStorage(), 1 );
    timeloop.addFuncBeforeTimeStep( simpleLB, "refreshFunctorName" );
 
    for (int i = 0; i < 1; ++i)
