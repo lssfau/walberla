@@ -94,7 +94,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addRefinementToTimeLoop(timeloop::SweepTimeloop & timeloop, uint_t level)
+void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addRefinementToTimeLoop(SweepTimeloop & timeloop, uint_t level)
 {
    // 1.1 Collision
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level), "Refinement Cycle: streamCollide on level " + std::to_string(level));

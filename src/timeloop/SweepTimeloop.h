@@ -112,7 +112,8 @@ namespace timeloop {
     * \ingroup timeloop
     */
    //*******************************************************************************************************************
-   class SweepTimeloop : public Timeloop
+   template < typename TP = timing::WcPolicy>
+   class SweepTimeloop : public Timeloop<TP>
    {
    public:
 
@@ -121,11 +122,11 @@ namespace timeloop {
       //@{
 
       SweepTimeloop( BlockStorage & blockStorage, uint_t nrOfTimeSteps )
-         : Timeloop(nrOfTimeSteps), blockStorage_(blockStorage), nextId_(0),firstRun_(true)
+         : Timeloop<TP>(nrOfTimeSteps), blockStorage_(blockStorage), nextId_(0),firstRun_(true)
       {}
 
       SweepTimeloop( const shared_ptr<StructuredBlockStorage> & structuredBlockStorage, uint_t nrOfTimeSteps )
-         : Timeloop(nrOfTimeSteps), blockStorage_( structuredBlockStorage->getBlockStorage() ),
+         : Timeloop<TP>(nrOfTimeSteps), blockStorage_( structuredBlockStorage->getBlockStorage() ),
            nextId_(0), firstRun_(true)
       {}
 
@@ -167,7 +168,7 @@ namespace timeloop {
       }
 
       void doTimeStep(const Set<SUID> &selectors) override;
-      void doTimeStep(const Set<SUID> &selectors, WcTimingPool &tp) override;
+      void doTimeStep(const Set<SUID> &selectors, timing::TimingPool<TP> &tp) override;
 
       uint_t nextId_;
       std::vector<uint_t> sweepsToDelete_;
@@ -180,7 +181,7 @@ namespace timeloop {
 } // namespace timeloop
 } // namespace walberla
 
-
+#include "SweepTimeloop.impl.h"
 
 //======================================================================================================================
 //
@@ -189,7 +190,8 @@ namespace timeloop {
 //======================================================================================================================
 
 namespace walberla {
-   using timeloop::SweepTimeloop;
+   using SweepTimeloop = typename timeloop::SweepTimeloop < >;
+   using DeviceSynchronizeSweepTimeloop = typename timeloop::SweepTimeloop < timing::DeviceSynchronizePolicy >;
 
    using timeloop::Sweep;
    using timeloop::SweepOnBlock;

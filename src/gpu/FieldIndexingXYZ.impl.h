@@ -41,17 +41,21 @@ FieldIndexingXYZ<T>::FieldIndexingXYZ ( const GPUField<T> & field,
 {
    WALBERLA_DEBUG_SECTION()
    {
-      gpuDeviceProp prop;
-      int count;
-      gpuGetDeviceCount(&count);
-      int threadsPerBlock = std::numeric_limits<int>::max();
-      for (int i = 0; i < count; i++) {
-         gpuGetDeviceProperties(&prop, i);
-         threadsPerBlock = std::min( prop.maxThreadsPerBlock, threadsPerBlock );
+      WALBERLA_DEVICE_SECTION()
+      {
+         gpuDeviceProp prop;
+         int count;
+         gpuGetDeviceCount(&count);
+         int threadsPerBlock = std::numeric_limits< int >::max();
+         for (int i = 0; i < count; i++)
+         {
+            gpuGetDeviceProperties(&prop, i);
+            threadsPerBlock = std::min(prop.maxThreadsPerBlock, threadsPerBlock);
+         }
+         WALBERLA_ASSERT_LESS(int_c(blockDim_.x), threadsPerBlock,
+                              "InnerCoordThreadIndexing works only for fields where each dimension x,y,z is smaller "
+                                 << "than the maximal thread count per GPU block.")
       }
-      WALBERLA_ASSERT_LESS( int_c( blockDim_.x ), threadsPerBlock,
-                            "InnerCoordThreadIndexing works only for fields where each dimension x,y,z is smaller " <<
-                            "than the maximal thread count per GPU block." )
    }
 }
 

@@ -29,6 +29,7 @@ namespace timing {
 
 // Explicit instantiation
 template class TimingTree<WcPolicy>;
+template class TimingTree<DeviceSynchronizePolicy>;
 template class TimingTree<CpuPolicy>;
 
 } // namespace timing

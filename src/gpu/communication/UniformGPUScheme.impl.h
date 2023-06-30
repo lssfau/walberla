@@ -321,7 +321,7 @@ namespace communication {
    }
 
    template< typename Stencil >
-   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor(cudaStream_t stream)
+   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor(gpuStream_t stream)
    {
       return [this, stream]() { wait( stream ); };
    }

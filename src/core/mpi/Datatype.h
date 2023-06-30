@@ -40,23 +40,17 @@ namespace mpi {
 
       Datatype( MPI_Datatype datatype) : mpiDatatype_( datatype )
       {
-#ifdef WALBERLA_BUILD_WITH_MPI
-         MPI_Type_commit( &mpiDatatype_ );
-#endif
+         WALBERLA_MPI_SECTION() { MPI_Type_commit( &mpiDatatype_ ); }
       }
 
       void init( MPI_Datatype datatype )
       {
          mpiDatatype_ = datatype;
-#ifdef WALBERLA_BUILD_WITH_MPI
-         MPI_Type_commit( &mpiDatatype_ );
-#endif
+         WALBERLA_MPI_SECTION() { MPI_Type_commit( &mpiDatatype_ ); }
       }
 
       ~Datatype() {
-#ifdef WALBERLA_BUILD_WITH_MPI
-         MPI_Type_free( & mpiDatatype_ );
-#endif
+         WALBERLA_MPI_SECTION() { MPI_Type_free( & mpiDatatype_ ); }
       }
 
       operator MPI_Datatype() const {

@@ -21,6 +21,7 @@
 
 
 #include "gpu/ParallelStreams.h"
+#include "gpu/DeviceWrapper.h"
 
 namespace walberla {
 namespace gpu
@@ -30,32 +31,40 @@ namespace gpu
    ParallelSection::ParallelSection(ParallelStreams * parent, gpuStream_t mainStream)
      : parent_( parent ), mainStream_( mainStream ), counter_( 0 )
    {
-      WALBERLA_GPU_CHECK( gpuEventCreate(&startEvent_) )
-      WALBERLA_GPU_CHECK( gpuEventRecord( startEvent_, mainStream_ ) )
+      WALBERLA_DEVICE_SECTION()
+      {
+         WALBERLA_GPU_CHECK(gpuEventCreate(&startEvent_))
+         WALBERLA_GPU_CHECK(gpuEventRecord(startEvent_, mainStream_))
+      }
    }
 
    ParallelSection::~ParallelSection()
    {
-      synchronize();
-      WALBERLA_GPU_CHECK( gpuEventDestroy(startEvent_) )
+      WALBERLA_DEVICE_SECTION()
+      {
+         synchronize();
+         WALBERLA_GPU_CHECK( gpuEventDestroy(startEvent_) )
+      }
    }
 
    void ParallelSection::next()
    {
-      if( counter_ > 0 ) {
-         WALBERLA_GPU_CHECK( gpuEventRecord( parent_->events_[counter_ - 1], parent_->sideStreams_[counter_ - 1] ) )
-      }
-      else {
-         WALBERLA_GPU_CHECK( gpuEventRecord( parent_->mainEvent_, mainStream_ ) )
-      }
-      ++counter_;
+      WALBERLA_DEVICE_SECTION()
+      {
+         if (counter_ > 0)
+         {
+            WALBERLA_GPU_CHECK(gpuEventRecord(parent_->events_[counter_ - 1], parent_->sideStreams_[counter_ - 1]))
+         }
+         else { WALBERLA_GPU_CHECK(gpuEventRecord(parent_->mainEvent_, mainStream_)) }
+         ++counter_;
 
-      parent_->ensureSize( counter_ );
+         parent_->ensureSize(counter_);
 
-      WALBERLA_GPU_CHECK( gpuStreamWaitEvent( stream(), startEvent_, 0 ))
+         WALBERLA_GPU_CHECK(gpuStreamWaitEvent(stream(), startEvent_, 0))
+      }
    }
 
-   void ParallelSection::run(const std::function<void( gpuStream_t)> & f)
+   void ParallelSection::run(const std::function<void(gpuStream_t)> & f)
    {
       f( stream() );
       next();
@@ -63,18 +72,20 @@ namespace gpu
 
    void ParallelSection::synchronize()
    {
-      for( uint_t i=0; i < counter_; ++i )
-         for( uint_t j=0; j < counter_; ++j )
-         {
-            if( i == j )
-               continue;
+      WALBERLA_DEVICE_SECTION()
+      {
+         for (uint_t i = 0; i < counter_; ++i)
+            for (uint_t j = 0; j < counter_; ++j)
+            {
+               if (i == j) continue;
 
-            auto & event  = i == 0 ? parent_->mainEvent_ : parent_->events_[i - 1];
-            gpuStream_t stream = j == 0 ? mainStream_ : parent_->sideStreams_[j - 1];
-            WALBERLA_GPU_CHECK( gpuStreamWaitEvent( stream, event, 0 ))
-         }
+               auto& event        = i == 0 ? parent_->mainEvent_ : parent_->events_[i - 1];
+               gpuStream_t stream = j == 0 ? mainStream_ : parent_->sideStreams_[j - 1];
+               WALBERLA_GPU_CHECK(gpuStreamWaitEvent(stream, event, 0))
+            }
 
-      WALBERLA_GPU_CHECK( gpuEventRecord( startEvent_, mainStream_ ) )
+         WALBERLA_GPU_CHECK(gpuEventRecord(startEvent_, mainStream_))
+      }
    }
 
    gpuStream_t ParallelSection::stream()

@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include "core/DataTypes.h"
+
+#include "DeviceWrapper.h"
 #include "FieldAccessorXYZ.h"
 
 namespace walberla { namespace cell {  class CellInterval;  } }

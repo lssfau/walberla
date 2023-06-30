@@ -23,6 +23,7 @@
 #pragma once
 
 #include "stencil/Directions.h"
+#include "gpu/DeviceWrapper.h"
 
 #include "FieldAccessor.h"
 

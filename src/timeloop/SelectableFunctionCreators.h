@@ -186,7 +186,7 @@ namespace timeloop {
 
 
    private:
-      friend class SweepTimeloop;
+      template < typename TimingPolicy > friend class SweepTimeloop;
 
       BlockStorage & bs_;
 

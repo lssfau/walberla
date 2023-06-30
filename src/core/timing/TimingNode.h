@@ -494,6 +494,7 @@ void addRemainderNodes(timing::TimingNode<TP> &tn) {
 }
 
 using WcTimingNode = timing::TimingNode<timing::WcPolicy>;
+using DeviceSynchronizeTimingNode = timing::TimingNode<timing::DeviceSynchronizePolicy>;
 using CpuTimingNode = timing::TimingNode<timing::CpuPolicy>;
 
 }

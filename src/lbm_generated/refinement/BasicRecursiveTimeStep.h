@@ -71,7 +71,7 @@ class BasicRecursiveTimeStep
      };
 
    void operator() () { timestep(0); };
-   void addRefinementToTimeLoop(timeloop::SweepTimeloop & timeloop, uint_t level=0);
+   void addRefinementToTimeLoop(SweepTimeloop & timeloop, uint_t level=0);
 
  private:
    void timestep(uint_t level);

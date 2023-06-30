@@ -22,7 +22,8 @@
 
 #pragma once
 
-#include "ErrorChecking.h"
+#include "gpu/ErrorChecking.h"
+#include "gpu/DeviceWrapper.h"
 #include "field/allocation/FieldAllocator.h"
 
 
@@ -51,22 +52,37 @@ namespace gpu
       virtual T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
                                     uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3 )
       {
+         WALBERLA_NON_DEVICE_SECTION()
+         {
+            WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+         }
+
          allocSize1=size1;
          allocSize2=size2;
          allocSize3=size3;
-         void * result;
-         WALBERLA_GPU_CHECK( gpuHostAlloc( &result, size0*size1*size2*size3*sizeof(T), HostAllocFlags ) )
+         void * result = nullptr;
+         WALBERLA_GPU_CHECK(gpuHostAlloc(&result, size0 * size1 * size2 * size3 * sizeof(T), HostAllocFlags))
          return (T*)(result);
       }
 
       virtual T * allocateMemory ( uint_t size )
       {
-         T* result;
-         gpuHostAlloc( &result, size*sizeof(T), HostAllocFlags );
-         return result;
+         WALBERLA_NON_DEVICE_SECTION()
+         {
+            WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+         }
+
+         void * result = nullptr;
+         WALBERLA_GPU_CHECK(gpuHostAlloc(&result, size*sizeof(T), HostAllocFlags))
+         return (T*)(result);
       }
 
-      virtual void deallocate(T *& values) {WALBERLA_GPU_CHECK( gpuFreeHost( values ) )}
+      virtual void deallocate(T *& values) {
+         WALBERLA_NON_DEVICE_SECTION() {
+            WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
+         }
+         WALBERLA_GPU_CHECK(gpuFreeHost(values))
+      }
    };
 
 

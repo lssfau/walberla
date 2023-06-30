@@ -120,6 +120,8 @@ struct MPI_Status
 const int MPI_COMM_NULL  = 0;
 const int MPI_COMM_WORLD = 1;
 
+const int MPI_COMM_TYPE_SHARED = 0;
+
 const int MPI_SUCCESS = 1;
 
 
@@ -202,11 +204,14 @@ inline int MPI_Comm_size( MPI_Comm, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Comm_rank( MPI_Comm, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Comm_get_name( MPI_Comm, char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 
-inline int MPI_Comm_group ( MPI_Comm, MPI_Group* )           { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Comm_create( MPI_Comm, MPI_Group, MPI_Comm* ) { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Comm_free  ( MPI_Comm* )                      { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Comm_dup   ( MPI_Comm, MPI_Comm *)            { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Comm_split ( MPI_Comm, int, int, MPI_Comm *)  { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Info_create ( MPI_Info * ) { WALBERLA_MPI_FUNCTION_ERROR }
+
+inline int MPI_Comm_group ( MPI_Comm, MPI_Group* )                         { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Comm_create( MPI_Comm, MPI_Group, MPI_Comm* )               { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Comm_free  ( MPI_Comm* )                                    { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Comm_dup   ( MPI_Comm, MPI_Comm *)                          { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Comm_split ( MPI_Comm, int, int, MPI_Comm *)                { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Comm_split_type ( MPI_Comm, int, int, MPI_Info, MPI_Comm *) { WALBERLA_MPI_FUNCTION_ERROR }
 
 
 inline int MPI_Cart_create( MPI_Comm, int, int*, int*, int, MPI_Comm* ) { WALBERLA_MPI_FUNCTION_ERROR }

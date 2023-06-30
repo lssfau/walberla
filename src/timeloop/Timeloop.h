@@ -48,6 +48,8 @@ using VoidFctNoArguments = std::function<void ()>;
 * \ingroup timeloop
 */
 //*******************************************************************************************************************
+
+template < typename TP = timing::WcPolicy >
 class Timeloop : public ITimeloop
 {
 private:
@@ -109,7 +111,10 @@ public:
    //**Construction & Destruction************************************************************************************
    /*! \name Construction & Destruction */
    //@{
-   Timeloop( uint_t nrOfTimeSteps );
+   Timeloop( uint_t nrOfTimeSteps )
+      : curTimeStep_(0), nrOfTimeSteps_(nrOfTimeSteps), stop_( false )
+   {
+   }
 
    ~Timeloop() override = default;
    //@}
@@ -121,17 +126,17 @@ public:
    //@{
    void run() override                  { run(true); }
    void run( const bool logTimeStep );
-   void run( WcTimingPool & timing, const bool logTimeStep = true );
+   void run( timing::TimingPool<TP> & timing, const bool logTimeStep = true );
 
    void singleStep() override { singleStep(true); }
    void singleStep( const bool logTimeStep );
-   void singleStep( WcTimingPool & timing, const bool logTimeStep = true );
+   void singleStep( timing::TimingPool<TP> & timing, const bool logTimeStep = true );
 
    void stop() override;
    void synchronizedStop( bool stop ) override;
 
     void setCurrentTimeStepToZero()     { curTimeStep_ = 0;  }
-    void setCurrentTimeStep( uint_t ts) override { curTimeStep_ = ts; }
+    void setCurrentTimeStep( uint_t ts ) override { curTimeStep_ = ts; }
 
     //@}
    //****************************************************************************************************************
@@ -183,7 +188,7 @@ public:
 protected:
 
    virtual void doTimeStep(const Set<SUID> &selectors) = 0;
-   virtual void doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing) = 0;
+   virtual void doTimeStep(const Set<SUID> &selectors, timing::TimingPool<TP> &timing) = 0;
 
 
    void executeSelectable(const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
@@ -192,7 +197,7 @@ protected:
    void executeSelectable(const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
                           const Set<SUID> & selector,
                           const std::string & what,
-                          WcTimingPool & tp);
+                          timing::TimingPool<TP> & tp);
 
 
    uint_t curTimeStep_;   ///< current time step
@@ -210,6 +215,8 @@ protected:
 } // namespace timeloop
 } // namespace walberla
 
+#include "Timeloop.impl.h"
+
 
 
 //======================================================================================================================
@@ -219,6 +226,7 @@ protected:
 //======================================================================================================================
 
 namespace walberla {
-   using timeloop::Timeloop;
+   using Timeloop = typename timeloop::Timeloop < >;
+   using DeviceSynchronizeTimeloop = typename timeloop::Timeloop < timing::DeviceSynchronizePolicy >;
 }
 

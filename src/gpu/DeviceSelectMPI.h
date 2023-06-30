@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "gpu/DeviceWrapper.h"
 
 namespace walberla {
 namespace gpu

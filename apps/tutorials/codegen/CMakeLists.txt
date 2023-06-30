@@ -24,7 +24,6 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                     DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 02_LBMLatticeModelGenerationPython )
 
     #   Tutorial 3: Advanced lbmpy Code Generation
-
     walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
         FILE 03_AdvancedLBMCodegen.py
         OUT_FILES   CumulantMRTSweep.${CODEGEN_FILE_SUFFIX} CumulantMRTSweep.h
@@ -34,8 +33,8 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
 
     if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
         walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
-                        FILES 03_AdvancedLBMCodegen.cpp
-                        DEPENDS blockforest gpu core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )
+                FILES 03_AdvancedLBMCodegen.cpp
+                DEPENDS blockforest gpu core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )
     else()
         walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
                 FILES 03_AdvancedLBMCodegen.cpp

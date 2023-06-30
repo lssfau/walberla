@@ -249,5 +249,6 @@ namespace timing {
 
 namespace walberla {
    using WcTimingPool = timing::TimingPool<timing::WcPolicy>;
+   using DeviceSynchronizeTimingPool = timing::TimingPool<timing::DeviceSynchronizePolicy>;
    using CpuTimingPool = timing::TimingPool<timing::CpuPolicy>;
 }
