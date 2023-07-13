@@ -50,10 +50,7 @@
 #include "lbm_generated/gpu/BasicRecursiveTimeStepGPU.h"
 
 #include "python_coupling/CreateConfig.h"
-#include "python_coupling/DictWrapper.h"
 #include "python_coupling/PythonCallback.h"
-
-#include "timeloop/SweepTimeloop.h"
 
 #include <cmath>
 
@@ -80,18 +77,28 @@ class LDCRefinement
    const uint_t refinementDepth_;
 
  public:
-   LDCRefinement(const uint_t depth) : refinementDepth_(depth){};
+   explicit LDCRefinement(const uint_t depth) : refinementDepth_(depth){};
 
-   void operator()(SetupBlockForest& forest)
+   void operator()(SetupBlockForest& forest) const
    {
-      std::vector< SetupBlock* > blocks;
-      forest.getBlocks(blocks);
+      const AABB & domain = forest.getDomain();
 
-      for (auto block : blocks)
+      real_t xSize = ( domain.xSize() / real_t(12) ) * real_c( 0.99 );
+      real_t ySize = ( domain.ySize() / real_t(12) ) * real_c( 0.99 );
+
+      AABB leftCorner( domain.xMin(), domain.yMin(), domain.zMin(),
+                       domain.xMin() + xSize, domain.yMin() + ySize, domain.zMax() );
+
+      AABB rightCorner( domain.xMax() - xSize, domain.yMin(), domain.zMin(),
+                        domain.xMax(), domain.yMin() + ySize, domain.zMax() );
+
+      for(auto & block : forest)
       {
-         if (forest.atDomainYMaxBorder(*block))
+         auto & aabb = block.getAABB();
+         if( leftCorner.intersects( aabb ) || rightCorner.intersects( aabb ) )
          {
-            if (block->getLevel() < refinementDepth_) { block->setMarker(true); }
+            if( block.getLevel() < refinementDepth_)
+               block.setMarker( true );
          }
       }
    }
@@ -107,10 +114,9 @@ class LDC
    const FlagUID ubbFlagUID_;
 
  public:
-   LDC(const uint_t depth) : refinementDepth_(depth), noSlipFlagUID_("NoSlip"), ubbFlagUID_("UBB"){};
+   explicit LDC(const uint_t depth) : refinementDepth_(depth), noSlipFlagUID_("NoSlip"), ubbFlagUID_("UBB"){};
 
-   Vector3< real_t > acceleration() const { return Vector3< real_t >(0.0); }
-   RefinementSelectionFunctor refinementSelector()
+   RefinementSelectionFunctor refinementSelector() const
    {
       return LDCRefinement(refinementDepth_);
    }
@@ -119,7 +125,7 @@ class LDC
    {
       for (auto bIt = sbfs.begin(); bIt != sbfs.end(); ++bIt)
       {
-         Block& b           = dynamic_cast< Block& >(*bIt);
+         auto& b           = dynamic_cast< Block& >(*bIt);
          const uint_t level       = b.getLevel();
          auto flagField     = b.getData< FlagField_T >(flagFieldID);
          const uint8_t noslipFlag = flagField->registerFlag(noSlipFlagUID_);
@@ -140,18 +146,19 @@ class LDC
    }
 };
 
-static void createSetupBlockForest(SetupBlockForest& setupBfs, const Config::BlockHandle& domainSetup, LDC& ldcSetup, const uint_t numProcesses=uint_c(MPIManager::instance()->numProcesses()))
-{
-   Vector3< real_t > domainSize = domainSetup.getParameter< Vector3< real_t > >("domainSize");
-   Vector3< uint_t > rootBlocks = domainSetup.getParameter< Vector3< uint_t > >("rootBlocks");
-   Vector3< bool > periodic     = domainSetup.getParameter< Vector3< bool > >("periodic");
+namespace {
+void createSetupBlockForest(SetupBlockForest& setupBfs, const Config::BlockHandle& domainSetup, LDC& ldcSetup, const uint_t numProcesses=uint_c(MPIManager::instance()->numProcesses())) {
+    Vector3<real_t> domainSize = domainSetup.getParameter<Vector3<real_t> >("domainSize");
+    Vector3<uint_t> rootBlocks = domainSetup.getParameter<Vector3<uint_t> >("rootBlocks");
+    Vector3<bool> periodic = domainSetup.getParameter<Vector3<bool> >("periodic");
 
-   auto refSelection = ldcSetup.refinementSelector();
-   setupBfs.addRefinementSelectionFunction(std::function< void(SetupBlockForest&) >(refSelection));
-   const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), domainSize[0], domainSize[1], domainSize[2]);
-   setupBfs.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
-   setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
-   setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), numProcesses);
+    auto refSelection = ldcSetup.refinementSelector();
+    setupBfs.addRefinementSelectionFunction(std::function<void(SetupBlockForest &)>(refSelection));
+    const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), domainSize[0], domainSize[1], domainSize[2]);
+    setupBfs.addWorkloadMemorySUIDAssignmentFunction(blockforest::uniformWorkloadAndMemoryAssignment);
+    setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
+    setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), numProcesses);
+}
 }
 
 int main(int argc, char** argv)
@@ -203,7 +210,7 @@ int main(int argc, char** argv)
             totalCellUpdates += timesteps * math::uintPow2(level)  * numberOfCells;
             WALBERLA_LOG_INFO_ON_ROOT("Level " << level << " Blocks: " << numberOfBlocks)
          }
-         cudaDeviceProp prop;
+         cudaDeviceProp prop{};
          WALBERLA_GPU_CHECK(gpuGetDeviceProperties(&prop, 0))
 
          const uint_t totalNumberCells = setupBfs.getNumberOfBlocks() * cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2];
@@ -231,8 +238,6 @@ int main(int argc, char** argv)
       auto bfs    = std::make_shared< BlockForest >(uint_c(MPIManager::instance()->worldRank()), setupBfs);
       auto blocks = std::make_shared< StructuredBlockForest >(bfs, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2]);
       blocks->createCellBoundingBoxes();
-
-      WALBERLA_ROOT_SECTION() { vtk::writeDomainDecomposition(blocks, "domainDecomposition", "vtk_out"); }
 
       WALBERLA_LOG_INFO_ON_ROOT("Blocks created: " << blocks->getNumberOfBlocks())
       for (uint_t level = 0; level <= refinementDepth; level++)
@@ -263,6 +268,10 @@ int main(int argc, char** argv)
       {
          sweepCollection.initialise(&iBlock, 2, nullptr);
       }
+      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+      WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+      WALBERLA_MPI_BARRIER()
+      WALBERLA_LOG_INFO_ON_ROOT("Initialisation done")
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                      LB SWEEPS AND BOUNDARY HANDLING                                       ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +289,7 @@ int main(int argc, char** argv)
       auto communication = std::make_shared< NonUniformGPUScheme <CommunicationStencil_T>> (blocks, cudaEnabledMPI);
       auto packInfo = lbm_generated::setupNonuniformGPUPdfCommunication<GPUPdfField_T>(blocks, pdfFieldGpuID);
       communication->addPackInfo(packInfo);
+      WALBERLA_MPI_BARRIER()
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                          TIME STEP DEFINITIONS                                             ///
@@ -343,10 +353,14 @@ int main(int argc, char** argv)
 
       WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
       WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+      WALBERLA_MPI_BARRIER()
       WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+      WALBERLA_MPI_BARRIER()
+
       simTimer.start();
       timeLoop.run(timeloopTiming);
       WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+      WALBERLA_MPI_BARRIER()
       simTimer.end();
 
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")

@@ -38,32 +38,29 @@ namespace walberla::gpu {
 class GeneratedNonUniformGPUPackInfo
 {
  public:
-   using VoidFunction                  = std::function< void( gpuStream_t) >;
    GeneratedNonUniformGPUPackInfo() = default;
    virtual ~GeneratedNonUniformGPUPackInfo() = default;
 
    virtual bool constantDataExchange() const = 0;
-   virtual bool threadsafeReceiving() const = 0;
+   virtual bool threadsafeReceiving()  const = 0;
 
-   inline void packDataEqualLevel( const Block * sender, stencil::Direction dir, GpuBuffer_T & buffer) const;
-   virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, GpuBuffer_T & buffer) = 0;
+   inline void packDataEqualLevel( const Block * sender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream = nullptr) const;
+   virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
    virtual void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir, gpuStream_t stream) = 0;
-   virtual void getLocalEqualLevelCommFunction( std::vector< VoidFunction >& commFunctions, const Block * sender, Block * receiver, stencil::Direction dir) = 0;
 
-   inline  void packDataCoarseToFine        ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer) const;
-   virtual void unpackDataCoarseToFine      (       Block * fineReceiver, const BlockID & coarseSender, stencil::Direction dir, GpuBuffer_T & buffer) = 0;
-   virtual void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir ) = 0;
+   inline  void packDataCoarseToFine        ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream = nullptr) const;
+   virtual void unpackDataCoarseToFine      (       Block * fineReceiver, const BlockID & coarseSender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
+   virtual void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir, gpuStream_t stream) = 0;
    virtual void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
-   virtual void getLocalCoarseToFineCommFunction( std::vector< VoidFunction >& commFunctions, const Block * coarseSender, Block * fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer) = 0;
 
-   inline  void packDataFineToCoarse        ( const Block * fineSender,     const BlockID & coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer) const;
-   virtual void unpackDataFineToCoarse      (       Block * coarseReceiver, const BlockID & fineSender,     stencil::Direction dir, GpuBuffer_T & buffer) = 0;
-   virtual void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir) = 0;
+   inline  void packDataFineToCoarse        ( const Block * fineSender,     const BlockID & coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream = nullptr) const;
+   virtual void unpackDataFineToCoarse      (       Block * coarseReceiver, const BlockID & fineSender,     stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
+   virtual void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, gpuStream_t stream) = 0;
    virtual void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
-   virtual void getLocalFineToCoarseCommFunction( std::vector< VoidFunction >& commFunctions, const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer) = 0;
 
    virtual uint_t sizeEqualLevelSend( const Block * sender, stencil::Direction dir) = 0;
    virtual uint_t sizeCoarseToFineSend ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir) = 0;
+   virtual uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) = 0;
    virtual uint_t sizeFineToCoarseSend ( const Block * fineSender, stencil::Direction dir) = 0;
 
 
@@ -72,9 +69,9 @@ class GeneratedNonUniformGPUPackInfo
 #endif
 
  protected:
-   virtual void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T & buffer) const = 0;
-   virtual void packDataCoarseToFineImpl(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer) const = 0;
-   virtual void packDataFineToCoarseImpl(const Block* fineSender, const BlockID& coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer) const = 0;
+   virtual void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const = 0;
+   virtual void packDataCoarseToFineImpl(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const = 0;
+   virtual void packDataFineToCoarseImpl(const Block* fineSender, const BlockID& coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const = 0;
 
 #ifndef NDEBUG
    mutable std::map< const Block *, std::map< stencil::Direction, std::map< uint_t, size_t > > > bufferSize_;
@@ -82,13 +79,13 @@ class GeneratedNonUniformGPUPackInfo
 
 };
 
-inline void GeneratedNonUniformGPUPackInfo::packDataEqualLevel( const Block * sender, stencil::Direction dir, GpuBuffer_T & buffer ) const
+inline void GeneratedNonUniformGPUPackInfo::packDataEqualLevel( const Block * sender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const
 {
 #ifndef NDEBUG
    size_t const sizeBefore = buffer.size();
 #endif
 
-   packDataEqualLevelImpl( sender, dir, buffer );
+   packDataEqualLevelImpl( sender, dir, buffer, stream);
 
 #ifndef NDEBUG
 size_t const sizeAfter = buffer.size();
@@ -107,13 +104,13 @@ if( constantDataExchange() )
 
 
 
-inline void GeneratedNonUniformGPUPackInfo::packDataCoarseToFine( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer ) const
+inline void GeneratedNonUniformGPUPackInfo::packDataCoarseToFine( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const
 {
 #ifndef NDEBUG
    size_t const sizeBefore = buffer.size();
 #endif
 
-   packDataCoarseToFineImpl( coarseSender, fineReceiver, dir, buffer );
+   packDataCoarseToFineImpl( coarseSender, fineReceiver, dir, buffer, stream);
 
 #ifndef NDEBUG
 size_t const sizeAfter = buffer.size();
@@ -132,13 +129,13 @@ if( constantDataExchange() )
 
 
 
-inline void GeneratedNonUniformGPUPackInfo::packDataFineToCoarse( const Block * fineSender, const BlockID & coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer ) const
+inline void GeneratedNonUniformGPUPackInfo::packDataFineToCoarse( const Block * fineSender, const BlockID & coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const
 {
 #ifndef NDEBUG
    size_t const sizeBefore = buffer.size();
 #endif
 
-   packDataFineToCoarseImpl( fineSender, coarseReceiver, dir, buffer );
+   packDataFineToCoarseImpl( fineSender, coarseReceiver, dir, buffer, stream);
 
 #ifndef NDEBUG
 size_t const sizeAfter = buffer.size();

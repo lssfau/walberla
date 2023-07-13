@@ -26,7 +26,7 @@ class Scenario:
             },
             'Parameters': {
                 'omega': 1.95,
-                'timesteps': 1501,
+                'timesteps': 10001,
 
                 'refinementDepth': self.refinement_depth,
                 'writeSetupForestAndReturn': False,
@@ -37,7 +37,10 @@ class Scenario:
 
                 'remainingTimeLoggerFrequency': 3,
 
-                'vtkWriteFrequency': 500,
+                'vtkWriteFrequency': 5000,
+            },
+            'Logging': {
+                'logLevel': "info",
             }
         }
 
@@ -50,7 +53,7 @@ def validation_run():
     """Run with full periodic shear flow or boundary scenario (ldc) to check if the code works"""
     wlb.log_info_on_root("Validation run")
 
-    domain_size = (64, 64, 64)
+    domain_size = (96, 96, 96)
     cells_per_block = (32, 32, 32)
 
     root_blocks = tuple([d // c for d, c in zip(domain_size, cells_per_block)])

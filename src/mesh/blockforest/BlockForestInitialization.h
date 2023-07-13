@@ -55,10 +55,10 @@ public:
 
    void setPeriodicity( const Vector3< bool > & periodicity ) { periodicity_ = periodicity; }
 
-   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const uint_t targetNumRootBlocks, const uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
-   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const Vector3<real_t> & blockSize, const uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
+   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( uint_t targetNumRootBlocks, uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
+   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const Vector3<real_t> & blockSize, uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
 
-   shared_ptr<BlockForest>           createBlockForest          ( const uint_t targetNumRootBlocks ) const;
+   shared_ptr<BlockForest>           createBlockForest          ( uint_t targetNumRootBlocks ) const;
    shared_ptr<BlockForest>           createBlockForest          ( const Vector3<real_t> & blockSize ) const;
 
 private:
@@ -95,11 +95,11 @@ public:
 
    void setPeriodicity( const Vector3< bool > & periodicity ) { periodicity_ = periodicity; }
 
-   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const uint_t targetNumRootBlocks, const uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
-   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const Vector3<uint_t> & blockSize, const uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
+   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( uint_t targetNumRootBlocks, uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
+   shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const Vector3<uint_t> & blockSize, uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() ) ) const;
    shared_ptr<SetupBlockForest>      createSetupBlockForest     ( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const;
 
-   shared_ptr<StructuredBlockForest> createStructuredBlockForest( const uint_t targetNumRootBlocks ) const;
+   shared_ptr<StructuredBlockForest> createStructuredBlockForest( uint_t targetNumRootBlocks ) const;
    shared_ptr<StructuredBlockForest> createStructuredBlockForest( const Vector3<uint_t> & blockSize ) const;
    shared_ptr<StructuredBlockForest> createStructuredBlockForest( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const;
 

@@ -43,9 +43,7 @@
 #include <vector>
 
 
-namespace walberla {
-namespace blockforest {
-namespace communication {
+namespace walberla::blockforest::communication {
 
 
 template< typename Stencil >
@@ -66,12 +64,12 @@ public:
    /*! \name Construction & Destruction */
    //@{
    explicit NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf,
-                                      const int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
+                                      int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
 
    NonUniformBufferedScheme( const weak_ptr<StructuredBlockForest>& bf,
                              const Set<SUID> & requiredBlockSelectors, 
                              const Set<SUID> & incompatibleBlockSelectors,
-                             const int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
+                             int baseTag = 778 ); // waLBerla = 119+97+76+66+101+114+108+97
 
    ~NonUniformBufferedScheme();
    //@}
@@ -87,15 +85,17 @@ public:
    //** Synchronous Communication **************************************************************************************
    /*! \name Synchronous Communication */
    //@{
-   inline void operator() () { communicateEqualLevel(); communicateCoarseToFine(); communicateFineToCoarse(); }
+   inline void operator() () { communicate(); }
+
+   inline void communicate() {communicateEqualLevel(); communicateCoarseToFine(); communicateFineToCoarse();}
 
    inline void communicateEqualLevel();
    inline void communicateCoarseToFine();
    inline void communicateFineToCoarse();
 
-   inline void communicateEqualLevel  ( const uint_t level );
-   inline void communicateCoarseToFine( const uint_t fineLevel );
-   inline void communicateFineToCoarse( const uint_t fineLevel );
+   inline void communicateEqualLevel  ( uint_t level );
+   inline void communicateCoarseToFine( uint_t fineLevel );
+   inline void communicateFineToCoarse( uint_t fineLevel );
 
    std::function<void()>  communicateEqualLevelFunctor(const uint_t level) {
       return [level, this](){ NonUniformBufferedScheme::communicateEqualLevel(level);};
@@ -110,7 +110,7 @@ public:
    //*******************************************************************************************************************
    
 
-   LocalCommunicationMode localMode() const { return localMode_; }
+   [[nodiscard]] LocalCommunicationMode localMode() const { return localMode_; }
    inline void setLocalMode( const LocalCommunicationMode & mode );
 
 
@@ -125,9 +125,9 @@ public:
    inline void startCommunicateCoarseToFine();
    inline void startCommunicateFineToCoarse();
 
-   inline void startCommunicateEqualLevel  ( const uint_t level );
-   inline void startCommunicateCoarseToFine( const uint_t fineLevel );
-   inline void startCommunicateFineToCoarse( const uint_t fineLevel );
+   inline void startCommunicateEqualLevel  ( uint_t level );
+   inline void startCommunicateCoarseToFine( uint_t fineLevel );
+   inline void startCommunicateFineToCoarse( uint_t fineLevel );
    
    void wait() { waitCommunicateEqualLevel(); waitCommunicateCoarseToFine(); waitCommunicateFineToCoarse(); }
    std::function<void() >  getWaitFunctor() { return std::bind( &NonUniformBufferedScheme::wait, this ); }
@@ -136,9 +136,9 @@ public:
    inline void waitCommunicateCoarseToFine();
    inline void waitCommunicateFineToCoarse();
 
-   inline void waitCommunicateEqualLevel  ( const uint_t level );
-   inline void waitCommunicateCoarseToFine( const uint_t fineLevel );
-   inline void waitCommunicateFineToCoarse( const uint_t fineLevel );
+   inline void waitCommunicateEqualLevel  ( uint_t level );
+   inline void waitCommunicateCoarseToFine( uint_t fineLevel );
+   inline void waitCommunicateFineToCoarse( uint_t fineLevel );
    //@}
    //*******************************************************************************************************************
 
@@ -147,14 +147,14 @@ protected:
    void init();
    void refresh();
 
-   void startCommunicationEqualLevel  ( const uint_t index, std::set< uint_t > & participatingLevels );
-   void startCommunicationCoarseToFine( const uint_t index, const uint_t coarsestLevel, const uint_t finestLevel );
-   void startCommunicationFineToCoarse( const uint_t index, const uint_t coarsestLevel, const uint_t finestLevel );
+   void startCommunicationEqualLevel  ( uint_t index, std::set< uint_t > & participatingLevels );
+   void startCommunicationCoarseToFine( uint_t index, uint_t coarsestLevel, uint_t finestLevel );
+   void startCommunicationFineToCoarse( uint_t index, uint_t coarsestLevel, uint_t finestLevel );
 
    void resetBufferSystem( shared_ptr< mpi::OpenMPBufferSystem > & bufferSystem );
 
-   void start( const INDEX i, const uint_t j );
-   void  wait( const INDEX i, const uint_t j );
+   void start( INDEX i, uint_t j );
+   void  wait( INDEX i, uint_t j );
 
    static void writeHeader( SendBuffer & buffer, const BlockID & sender, const BlockID & receiver, const stencil::Direction & dir );
    static void  readHeader( RecvBuffer & buffer,       BlockID & sender,       BlockID & receiver,       stencil::Direction & dir );
@@ -162,17 +162,17 @@ protected:
    static void send( SendBuffer & buffer, std::vector< SendBufferFunction > & functions );
           void receive( RecvBuffer & buffer );
 
-   void localBufferPacking( const INDEX i, const uint_t j, const uint_t bufferIndex, const PackInfo & packInfo,
+   void localBufferPacking( INDEX i, uint_t j, uint_t bufferIndex, const PackInfo & packInfo,
                             const Block * sender, const Block * receiver, const stencil::Direction & dir );
-   void localBufferUnpacking( const INDEX i, const uint_t j, const uint_t bufferIndex, const PackInfo & packInfo,
+   void localBufferUnpacking( INDEX i, uint_t j, uint_t bufferIndex, const PackInfo & packInfo,
                               Block * receiver, const Block * sender, const stencil::Direction & dir );
 
-   bool isAnyCommunicationInProgress() const;
+   [[nodiscard]] bool isAnyCommunicationInProgress() const;
 
 
 
    weak_ptr<StructuredBlockForest> blockForest_;
-   uint_t forestModificationStamp_;
+   uint_t forestModificationStamp_{uint_c(0)};
 
    std::vector< PackInfo > packInfos_;
 
@@ -279,8 +279,8 @@ void NonUniformBufferedScheme<Stencil>::refresh()
    }
    
 #ifndef NDEBUG
-   for( auto p = packInfos_.begin(); p != packInfos_.end(); ++p )
-      (*p)->clearBufferSizeCheckMap();
+   for(auto & packInfo : packInfos_)
+      packInfo->clearBufferSizeCheckMap();
 #endif
    
    forestModificationStamp_ = forest->getBlockForest().getModificationStamp();
@@ -312,8 +312,8 @@ inline void NonUniformBufferedScheme<Stencil>::addPackInfo( const PackInfo & pac
    packInfos_.push_back( packInfo );
 
    for( uint_t i = 0; i != 3; ++i )
-      for( auto level = setupBeforeNextCommunication_[i].begin(); level != setupBeforeNextCommunication_[i].end(); ++level )
-          *level = char(1);
+      for(char & level : setupBeforeNextCommunication_[i])
+          level = char(1);
 }
 
 
@@ -380,8 +380,8 @@ inline void NonUniformBufferedScheme<Stencil>::setLocalMode( const LocalCommunic
       localMode_ = mode;
 
       for( uint_t i = 0; i != 3; ++i )
-         for( auto level = setupBeforeNextCommunication_[i].begin(); level != setupBeforeNextCommunication_[i].end(); ++level )
-             *level = char(1);
+         for(char & level : setupBeforeNextCommunication_[i])
+             level = char(1);
    }
 }
 
@@ -419,7 +419,7 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateCoarseToFine()
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const uint_t coarsestLevel = uint_t(0);
+   const auto coarsestLevel = uint_t(0);
    const uint_t   finestLevel = levelIndex - uint_t(1);
 
    startCommunicationCoarseToFine( levelIndex, coarsestLevel, finestLevel );
@@ -440,7 +440,7 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateFineToCoarse()
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const uint_t coarsestLevel = uint_t(0);
+   const auto coarsestLevel = uint_t(0);
    const uint_t   finestLevel = levelIndex - uint_t(1);
 
    startCommunicationFineToCoarse( levelIndex, coarsestLevel, finestLevel );
@@ -633,7 +633,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
 
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
-         Block * block = dynamic_cast< Block * >( it.get() );
+         auto * block = dynamic_cast< Block * >( it.get() );
 
          if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
             continue;
@@ -660,7 +660,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
                WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
-               for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
+               for(auto & packInfo : packInfos_)
                {
                   if( localMode_ == BUFFER )
                   {
@@ -669,14 +669,14 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                      const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
                      VoidFunction pack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferPacking, this,
-                                                      EQUAL_LEVEL, index, bufferIndex, std::cref( *packInfo ), block, neighbor, *dir );
+                                                      EQUAL_LEVEL, index, bufferIndex, std::cref( packInfo ), block, neighbor, *dir );
 
                      threadsafeLocalCommunication.push_back( pack );
 
                      VoidFunction unpack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferUnpacking, this,
-                                                        EQUAL_LEVEL, index, bufferIndex, std::cref( *packInfo ), neighbor, block, *dir  );
+                                                        EQUAL_LEVEL, index, bufferIndex, std::cref( packInfo ), neighbor, block, *dir  );
 
-                     if( (*packInfo)->threadsafeReceiving() )
+                     if( packInfo->threadsafeReceiving() )
                         threadsafeLocalCommunicationUnpack.push_back( unpack );
                      else
                         localCommunicationUnpack.push_back( unpack );
@@ -684,8 +684,8 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                   else
                   {
                      VoidFunction localCommunicationFunction = std::bind( &blockforest::communication::NonUniformPackInfo::communicateLocalEqualLevel,
-                                                                            *packInfo, block, neighbor, *dir );
-                     if( (*packInfo)->threadsafeReceiving() )
+                                                                            packInfo, block, neighbor, *dir );
+                     if( packInfo->threadsafeReceiving() )
                         threadsafeLocalCommunication.push_back( localCommunicationFunction );
                      else
                         localCommunication.push_back( localCommunicationFunction );
@@ -699,18 +699,18 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                if( !packInfos_.empty() )
                   sendFunctions[ nProcess ].push_back( std::bind( NonUniformBufferedScheme<Stencil>::writeHeader, std::placeholders::_1, block->getId(), receiverId, *dir ) );
 
-               for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-                  sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataEqualLevel, *packInfo, block, *dir, std::placeholders::_1 ) );
+               for(auto & packInfo : packInfos_)
+                  sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataEqualLevel, packInfo, block, *dir, std::placeholders::_1 ) );
             }
          }
       }
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender = sendFunctions.begin(); sender != sendFunctions.end(); ++sender )
+      for( auto & sender : sendFunctions)
       {
-         bufferSystem->addSendingFunction  ( int_c(sender->first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender->second ) );
-         bufferSystem->addReceivingFunction( int_c(sender->first), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+         bufferSystem->addSendingFunction  ( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
+         bufferSystem->addReceivingFunction( int_c(sender.first), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
       }
 
       setupBeforeNextCommunication = char(0);
@@ -758,7 +758,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
       WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
-         Block * block = dynamic_cast< Block * >( it.get() );
+         auto * block = dynamic_cast< Block * >( it.get() );
 
          if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
             continue;
@@ -786,7 +786,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                      auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
                      WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
-                     for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
+                     for(auto & packInfo : packInfos_)
                      {
                         if( localMode_ == BUFFER )
                         {
@@ -795,14 +795,14 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                            const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
                            VoidFunction pack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferPacking, this,
-                                                            COARSE_TO_FINE, index, bufferIndex, std::cref( *packInfo ), block, neighbor, *dir );
+                                                            COARSE_TO_FINE, index, bufferIndex, std::cref( packInfo ), block, neighbor, *dir );
 
                            threadsafeLocalCommunication.push_back( pack );
 
                            VoidFunction unpack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferUnpacking, this,
-                                                              COARSE_TO_FINE, index, bufferIndex, std::cref( *packInfo ), neighbor, block, *dir  );
+                                                              COARSE_TO_FINE, index, bufferIndex, std::cref( packInfo ), neighbor, block, *dir  );
 
-                           if( (*packInfo)->threadsafeReceiving() )
+                           if( packInfo->threadsafeReceiving() )
                               threadsafeLocalCommunicationUnpack.push_back( unpack );
                            else
                               localCommunicationUnpack.push_back( unpack );
@@ -810,8 +810,8 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                         else
                         {
                            VoidFunction localCommunicationFunction = std::bind( &blockforest::communication::NonUniformPackInfo::communicateLocalCoarseToFine,
-                                                                                  *packInfo, block, neighbor, *dir );
-                           if( (*packInfo)->threadsafeReceiving() )
+                                                                                  packInfo, block, neighbor, *dir );
+                           if( packInfo->threadsafeReceiving() )
                               threadsafeLocalCommunication.push_back( localCommunicationFunction );
                            else
                               localCommunication.push_back( localCommunicationFunction );
@@ -821,12 +821,11 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                   else
                   {
                      auto nProcess = block->getNeighborProcess( neighborIdx, n );
-
                      if( !packInfos_.empty() )
                         sendFunctions[ nProcess ].push_back( std::bind( NonUniformBufferedScheme<Stencil>::writeHeader, std::placeholders::_1, block->getId(), receiverId, *dir ) );
 
-                     for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-                        sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataCoarseToFine, *packInfo, block, receiverId, *dir, std::placeholders::_1 ) );
+                     for(auto & packInfo : packInfos_)
+                        sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataCoarseToFine, packInfo, block, receiverId, *dir, std::placeholders::_1 ) );
                   }
                }
             }
@@ -852,11 +851,11 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender = sendFunctions.begin(); sender != sendFunctions.end(); ++sender )
-         bufferSystem->addSendingFunction( int_c(sender->first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender->second ) );
+      for( auto sender : sendFunctions )
+         bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
 
-      for( auto receiver = ranksToReceiveFrom.begin(); receiver != ranksToReceiveFrom.end(); ++receiver )
-         bufferSystem->addReceivingFunction( int_c(*receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+      for(auto receiver : ranksToReceiveFrom)
+         bufferSystem->addReceivingFunction( int_c(receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
 
       setupBeforeNextCommunication = char(0);
    }
@@ -904,7 +903,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
 
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
-         Block * block = dynamic_cast< Block * >( it.get() );
+         auto * block = dynamic_cast< Block * >( it.get() );
 
          if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
             continue;
@@ -932,7 +931,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                   auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
                   WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
 
-                  for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
+                  for(auto & packInfo : packInfos_)
                   {
                      if( localMode_ == BUFFER )
                      {
@@ -941,14 +940,14 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                         const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
                         VoidFunction pack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferPacking, this,
-                                                         FINE_TO_COARSE, index, bufferIndex, std::cref( *packInfo ), block, neighbor, *dir );
+                                                         FINE_TO_COARSE, index, bufferIndex, std::cref( packInfo ), block, neighbor, *dir );
 
                         threadsafeLocalCommunication.push_back( pack );
 
                         VoidFunction unpack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferUnpacking, this,
-                                                           FINE_TO_COARSE, index, bufferIndex, std::cref( *packInfo ), neighbor, block, *dir  );
+                                                           FINE_TO_COARSE, index, bufferIndex, std::cref( packInfo ), neighbor, block, *dir  );
 
-                        if( (*packInfo)->threadsafeReceiving() )
+                        if( packInfo->threadsafeReceiving() )
                            threadsafeLocalCommunicationUnpack.push_back( unpack );
                         else
                            localCommunicationUnpack.push_back( unpack );
@@ -956,8 +955,8 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                      else
                      {
                         VoidFunction localCommunicationFunction = std::bind( &blockforest::communication::NonUniformPackInfo::communicateLocalFineToCoarse,
-                                                                               *packInfo, block, neighbor, *dir );
-                        if( (*packInfo)->threadsafeReceiving() )
+                                                                               packInfo, block, neighbor, *dir );
+                        if( packInfo->threadsafeReceiving() )
                            threadsafeLocalCommunication.push_back( localCommunicationFunction );
                         else
                            localCommunication.push_back( localCommunicationFunction );
@@ -971,8 +970,8 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                   if( !packInfos_.empty() )
                      sendFunctions[ nProcess ].push_back( std::bind( NonUniformBufferedScheme<Stencil>::writeHeader, std::placeholders::_1, block->getId(), receiverId, *dir ) );
 
-                  for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-                     sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataFineToCoarse, *packInfo, block, receiverId, *dir, std::placeholders::_1 ) );
+                  for(auto & packInfo : packInfos_)
+                     sendFunctions[ nProcess ].push_back( std::bind( &blockforest::communication::NonUniformPackInfo::packDataFineToCoarse, packInfo, block, receiverId, *dir, std::placeholders::_1 ) );
                }
             }
          }
@@ -997,11 +996,11 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender = sendFunctions.begin(); sender != sendFunctions.end(); ++sender )
-         bufferSystem->addSendingFunction( int_c(sender->first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender->second ) );
+      for( auto sender : sendFunctions )
+         bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
 
-      for( auto receiver = ranksToReceiveFrom.begin(); receiver != ranksToReceiveFrom.end(); ++receiver )
-         bufferSystem->addReceivingFunction( int_c(*receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+      for(auto receiver : ranksToReceiveFrom)
+         bufferSystem->addReceivingFunction( int_c(receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
 
       setupBeforeNextCommunication = char(0);
    }
@@ -1019,10 +1018,10 @@ void NonUniformBufferedScheme<Stencil>::resetBufferSystem( shared_ptr< mpi::Open
 
    bool constantSizes     = true;
    bool threadsafeReceive = true;
-   for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
+   for(auto & packInfo : packInfos_)
    {
-      if( !(*packInfo)->constantDataExchange() ) constantSizes = false;
-      if( !(*packInfo)->threadsafeReceiving()  ) threadsafeReceive = false;
+      if( !packInfo->constantDataExchange() ) constantSizes = false;
+      if( !packInfo->threadsafeReceiving()  ) threadsafeReceive = false;
    }
 
    bufferSystem->setReceiverInfo( !constantSizes );
@@ -1048,8 +1047,8 @@ void NonUniformBufferedScheme<Stencil>::start( const INDEX i, const uint_t j )
 
    if( localMode_ == START )
    {
-      for( auto function = localCommunication.begin(); function != localCommunication.end(); ++function )
-         (*function)();
+      for(auto & function : localCommunication)
+         function();
 
       const int threadsafeLocalCommunicationSize = int_c( threadsafeLocalCommunication.size() );
 #ifdef _OPENMP
@@ -1089,8 +1088,8 @@ void NonUniformBufferedScheme<Stencil>::wait( const INDEX i, const uint_t j )
 
    if( localMode_ == WAIT )
    {
-      for( auto function = localCommunication.begin(); function != localCommunication.end(); ++function )
-         (*function)();
+      for(auto & function : localCommunication)
+         function();
 
       const int threadsafeLocalCommunicationSize = int_c( threadsafeLocalCommunication.size() );
 #ifdef _OPENMP
@@ -1101,8 +1100,8 @@ void NonUniformBufferedScheme<Stencil>::wait( const INDEX i, const uint_t j )
    }
    else if( localMode_ == BUFFER )
    {
-      for( auto function = localCommunicationUnpack.begin(); function != localCommunicationUnpack.end(); ++function )
-         (*function)();
+      for(auto & function : localCommunicationUnpack)
+         function();
 
       const int threadsafeLocalCommunicationUnpackSize = int_c( threadsafeLocalCommunicationUnpack.size() );
 #ifdef _OPENMP
@@ -1144,8 +1143,8 @@ void NonUniformBufferedScheme<Stencil>::readHeader( RecvBuffer & buffer, BlockID
 template< typename Stencil >
 void NonUniformBufferedScheme<Stencil>::send( SendBuffer & buffer, std::vector< SendBufferFunction > & functions )
 {
-   for( auto function = functions.begin(); function != functions.end(); ++function )
-      (*function)( buffer );
+   for(auto & function : functions)
+      function( buffer );
 }
 
 
@@ -1171,18 +1170,18 @@ void NonUniformBufferedScheme<Stencil>::receive( RecvBuffer & buffer )
 
       if( senderLevel == receiverLevel )
       {
-         for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-            (*packInfo)->unpackDataEqualLevel( block, stencil::inverseDir[dir], buffer );
+         for(auto & packInfo : packInfos_)
+            packInfo->unpackDataEqualLevel( block, stencil::inverseDir[dir], buffer );
       }
       else if( senderLevel < receiverLevel ) // coarse to fine
       {
-         for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-            (*packInfo)->unpackDataCoarseToFine( block, sender, stencil::inverseDir[dir], buffer );
+         for(auto & packInfo : packInfos_)
+            packInfo->unpackDataCoarseToFine( block, sender, stencil::inverseDir[dir], buffer );
       }
       else if( senderLevel > receiverLevel ) // fine to coarse
       {
-         for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-            (*packInfo)->unpackDataFineToCoarse( block, sender, stencil::inverseDir[dir], buffer );
+         for(auto & packInfo : packInfos_)
+            packInfo->unpackDataFineToCoarse( block, sender, stencil::inverseDir[dir], buffer );
       }
    }
 }
@@ -1244,15 +1243,13 @@ void NonUniformBufferedScheme<Stencil>::localBufferUnpacking( const INDEX i, con
 template< typename Stencil >
 bool NonUniformBufferedScheme<Stencil>::isAnyCommunicationInProgress() const
 {
-   for( auto caseIt = communicationInProgress_.begin(); caseIt != communicationInProgress_.end(); ++caseIt )
-      for( auto levelIt = caseIt->begin(); levelIt != caseIt->end(); ++levelIt )
-         if( *levelIt )
+   for(const auto & communicationInProgres : communicationInProgress_)
+      for(bool inProgress : communicationInProgres)
+         if( inProgress )
             return true;
 
    return false;
 }
 
 
-} // namespace communication
-} // namespace blockforest
 } // namespace walberla

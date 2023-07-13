@@ -35,19 +35,16 @@
 namespace walberla {
 namespace mesh {
 
-static inline uint_t uintAbsDiff( const uint_t x, const uint_t y )
-{
-   return x > y ? x - y : y - x;
-}
+namespace {
+    inline uint_t uintAbsDiff(const uint_t x, const uint_t y) {return x > y ? x - y : y - x;}
 
-static inline void compareAABB( const AABB & oldAABB, const AABB & newAABB )
-{
-   if(oldAABB != newAABB)
-   {
-      WALBERLA_LOG_INFO_ON_ROOT( "Domain AABB has been adapted to requested block size:\n" \
-                                 "Old AABB: " << oldAABB   << "\n" \
-                                 "New AABB: " << newAABB << "\n" )
-   }
+    inline void compareAABB(const AABB &oldAABB, const AABB &newAABB) {
+        if (oldAABB != newAABB) {
+            WALBERLA_LOG_INFO_ON_ROOT("Domain AABB has been adapted to requested block size:\n" \
+                                 "Old AABB: " << oldAABB << "\n" \
+                                 "New AABB: " << newAABB << "\n")
+        }
+    }
 }
 
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb )
@@ -213,7 +210,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 
 shared_ptr<BlockForest> ComplexGeometryBlockforestCreator::createBlockForest( const uint_t targetNumRootBlocks ) const
 {
-   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( targetNumRootBlocks );
+   shared_ptr< blockforest::SetupBlockForest> const setupBlockForest = createSetupBlockForest( targetNumRootBlocks );
 
    auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
 
@@ -222,7 +219,7 @@ shared_ptr<BlockForest> ComplexGeometryBlockforestCreator::createBlockForest( co
 
 shared_ptr<BlockForest> ComplexGeometryBlockforestCreator::createBlockForest( const Vector3<real_t> & blockSize ) const
 {
-   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( blockSize );
+   shared_ptr< blockforest::SetupBlockForest> const setupBlockForest = createSetupBlockForest( blockSize );
 
    auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
 
@@ -304,7 +301,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 {
 
    Vector3<uint_t> numCells = domainSizeCells();
-   real_t domainVolume = real_c( numCells[0] ) * real_c( numCells[1] ) * real_c( numCells[2] );
+   real_t const domainVolume = real_c( numCells[0] ) * real_c( numCells[1] ) * real_c( numCells[2] );
 
    std::set< uint_t > blockSizeTested;
 
@@ -437,7 +434,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
 shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::createSetupBlockForest( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const
 {
-   uint_t numProcesses = numBlocks[0] * numBlocks[1] * numBlocks[2];
+   uint_t const numProcesses = numBlocks[0] * numBlocks[1] * numBlocks[2];
 
 
    AABB newAABB(real_t(0), real_t(0), real_t(0), real_c(numBlocks[0] * cellsPerBlock[0]) * cellSize_[0],
@@ -465,7 +462,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
 shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::createStructuredBlockForest( const uint_t targetNumRootBlocks ) const
 {
-   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( targetNumRootBlocks );
+   shared_ptr< blockforest::SetupBlockForest> const setupBlockForest = createSetupBlockForest( targetNumRootBlocks );
 
    Vector3< real_t > blockSize( setupBlockForest->getRootBlockXSize(),
                                 setupBlockForest->getRootBlockYSize(),
@@ -488,7 +485,7 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
 
 shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::createStructuredBlockForest( const Vector3<uint_t> & blockSize ) const
 {
-   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( blockSize );
+   shared_ptr< blockforest::SetupBlockForest> const setupBlockForest = createSetupBlockForest( blockSize );
 
    auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
 
@@ -501,7 +498,7 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
 
 shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::createStructuredBlockForest( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const
 {
-   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( cellsPerBlock, numBlocks );
+   shared_ptr< blockforest::SetupBlockForest> const setupBlockForest = createSetupBlockForest( cellsPerBlock, numBlocks );
 
    auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
 

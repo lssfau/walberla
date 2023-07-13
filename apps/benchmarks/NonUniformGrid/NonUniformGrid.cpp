@@ -243,23 +243,23 @@ static void refinementSelection( SetupBlockForest& forest )
    AABB rightCorner( domain.xMax() - xSize, domain.yMin(), domain.zMax() - zSize,
                      domain.xMax(), domain.yMax(), domain.zMax() );
 
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for(auto & block : forest)
    {
-      auto & aabb = block->getAABB();
+      auto & aabb = block.getAABB();
       if( leftCorner.intersects( aabb ) || rightCorner.intersects( aabb ) )
       {
-         if( block->getLevel() < ( BlockForestLevels - uint_t(1) ) )
-            block->setMarker( true );
+         if( block.getLevel() < ( BlockForestLevels - uint_t(1) ) )
+            block.setMarker( true );
       }
    }
 }
 
 static void workloadAndMemoryAssignment( SetupBlockForest & forest, const memory_t memoryPerBlock ) {
 
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for(auto & block : forest)
    {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( memoryPerBlock );
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( memoryPerBlock );
    }
 }
 
@@ -295,7 +295,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
 #ifndef NDEBUG
    WALBERLA_ASSERT_EQUAL( sforest.getNumberOfBlocks(), numberOfBlocks( workerProcesses, fineBlocksPerProcess ) );
-   for( uint_t i = uint_t(0); i != BlockForestLevels; ++i )
+   for( auto i = uint_t(0); i != BlockForestLevels; ++i )
    {
       std::vector< blockforest::SetupBlock * > blocks;
       sforest.getBlocks( blocks, i );
@@ -415,13 +415,13 @@ void ReGrid::operator()( std::vector< std::pair< const Block *, uint_t > > & min
                   domain.xMax(), domain.yMax(), domain.zMin() + real_c(0.99) * zSize );
    }
    
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      auto & aabb = it->first->getAABB();
+      auto & aabb = minTargetLevel.first->getAABB();
       if( left.intersects( aabb ) || right.intersects( aabb ) )
-         it->second = BlockForestLevels - uint_t(1);
+         minTargetLevel.second = BlockForestLevels - uint_t(1);
       else
-         it->second = uint_t(0);
+         minTargetLevel.second = uint_t(0);
    }
 }
 

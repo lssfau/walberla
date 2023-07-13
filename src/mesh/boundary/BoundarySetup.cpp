@@ -24,55 +24,56 @@
 #include "field/AddToStorage.h"
 #include "field/vtk/VTKWriter.h"
 
-namespace walberla {
-namespace mesh {
+namespace walberla::mesh {
 
-
-BoundarySetup::BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers )
+BoundarySetup::BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers, const bool doRefinementCorrection)
    : structuredBlockStorage_( structuredBlockStorage ), distanceFunction_( distanceFunction ), numGhostLayers_( numGhostLayers ), cellVectorChunkSize_( size_t(1000) )
 {
    voxelize();
 
-   try {
-      auto & blockForest = dynamic_cast< StructuredBlockForest & >( *structuredBlockStorage_ );
-      if( !blockForest.storesUniformBlockGrid() )
-         refinementCorrection( blockForest );
-   }
-   catch( const std::bad_cast &  ) {} // If it's not a BlockForest no refinement correction is done
+    if (doRefinementCorrection)
+    {
+        try {
+            auto & blockForest = dynamic_cast< StructuredBlockForest & >( *structuredBlockStorage_ );
+            if( !blockForest.storesUniformBlockGrid() )
+                refinementCorrection( blockForest );
+        }
+        catch( const std::bad_cast &  ) {} // If it's not a BlockForest no refinement correction is done
+    }
 }
 
 
 void BoundarySetup::divideAndPushCellInterval( const CellInterval & ci, std::queue< CellInterval > & outputQueue )
 {
-   WALBERLA_ASSERT( !ci.empty() );
+   WALBERLA_ASSERT( !ci.empty() )
 
    Cell newMax( ci.xMin() + std::max( cell_idx_c( ci.xSize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ),
                 ci.yMin() + std::max( cell_idx_c( ci.ySize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ),
                 ci.zMin() + std::max( cell_idx_c( ci.zSize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ) );
 
-   WALBERLA_ASSERT( ci.contains( newMax ) );
+   WALBERLA_ASSERT( ci.contains( newMax ) )
 
    Cell newMin( newMax[0] + cell_idx_c( 1 ), newMax[1] + cell_idx_c( 1 ), newMax[2] + cell_idx_c( 1 ) );
 
-   outputQueue.push( CellInterval( ci.xMin(), ci.yMin(), ci.zMin(), newMax[0], newMax[1], newMax[2] ) );
+   outputQueue.emplace( ci.xMin(), ci.yMin(), ci.zMin(), newMax[0], newMax[1], newMax[2] );
    if( newMin[2] <= ci.zMax() )
-      outputQueue.push( CellInterval( ci.xMin(), ci.yMin(), newMin[2], newMax[0], newMax[1], ci.zMax() ) );
+      outputQueue.emplace( ci.xMin(), ci.yMin(), newMin[2], newMax[0], newMax[1], ci.zMax() );
    if( newMin[1] <= ci.yMax() )
    {
-      outputQueue.push( CellInterval( ci.xMin(), newMin[1], ci.zMin(), newMax[0], ci.yMax(), newMax[2]) );
+      outputQueue.emplace( ci.xMin(), newMin[1], ci.zMin(), newMax[0], ci.yMax(), newMax[2] );
       if( newMin[2] <= ci.zMax() )
-         outputQueue.push( CellInterval( ci.xMin(), newMin[1], newMin[2], newMax[0], ci.yMax(), ci.zMax() ) );
+         outputQueue.emplace( ci.xMin(), newMin[1], newMin[2], newMax[0], ci.yMax(), ci.zMax() );
    }
    if( newMin[0] <= ci.xMax() )
    {
-      outputQueue.push( CellInterval( newMin[0], ci.yMin(), ci.zMin(), ci.xMax(), newMax[1], newMax[2] ) );
+      outputQueue.emplace( newMin[0], ci.yMin(), ci.zMin(), ci.xMax(), newMax[1], newMax[2] );
       if( newMin[2] <= ci.zMax() )
-         outputQueue.push( CellInterval( newMin[0], ci.yMin(), newMin[2], ci.xMax(), newMax[1], ci.zMax() ) );
+         outputQueue.emplace( newMin[0], ci.yMin(), newMin[2], ci.xMax(), newMax[1], ci.zMax() );
       if( newMin[1] <= ci.yMax() )
       {
-         outputQueue.push( CellInterval( newMin[0], newMin[1], ci.zMin(), ci.xMax(), ci.yMax(), newMax[2] ) );
+         outputQueue.emplace( newMin[0], newMin[1], ci.zMin(), ci.xMax(), ci.yMax(), newMax[2] );
          if( newMin[2] <= ci.zMax() )
-            outputQueue.push( CellInterval( newMin[0], newMin[1], newMin[2], ci.xMax(), ci.yMax(), ci.zMax() ) );
+            outputQueue.emplace( newMin[0], newMin[1], newMin[2], ci.xMax(), ci.yMax(), ci.zMax() );
       }
    }
 }
@@ -92,7 +93,7 @@ void BoundarySetup::allocateOrResetVoxelizationField()
       voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t(0), field::fzyx, numGhostLayers_ ) );
    }
 
-   WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ );
+   WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ )
 }
 
 void BoundarySetup::deallocateVoxelizationField()
@@ -112,8 +113,8 @@ void BoundarySetup::voxelize()
    {
       VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
 
-      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField );
-      WALBERLA_ASSERT_EQUAL( numGhostLayers_, voxelizationField->nrOfGhostLayers() );
+      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField )
+      WALBERLA_ASSERT_EQUAL( numGhostLayers_, voxelizationField->nrOfGhostLayers() )
 
       CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
       structuredBlockStorage_->transformBlockLocalToGlobalCellInterval( blockCi, block );
@@ -125,11 +126,11 @@ void BoundarySetup::voxelize()
       {
          const CellInterval & curCi = ciQueue.front();
 
-         WALBERLA_ASSERT( !curCi.empty(), "Cell Interval: " << curCi );
+         WALBERLA_ASSERT( !curCi.empty(), "Cell Interval: " << curCi )
 
-         AABB curAABB = structuredBlockStorage_->getAABBFromCellBB( curCi, structuredBlockStorage_->getLevel( block ) );
+         AABB const curAABB = structuredBlockStorage_->getAABBFromCellBB( curCi, structuredBlockStorage_->getLevel( block ) );
 
-         WALBERLA_ASSERT( !curAABB.empty(), "AABB: " << curAABB );
+         WALBERLA_ASSERT( !curAABB.empty(), "AABB: " << curAABB )
 
          Vector3<real_t> cellCenter = curAABB.center();
          structuredBlockStorage_->mapToPeriodicDomain( cellCenter );
@@ -170,7 +171,7 @@ void BoundarySetup::voxelize()
             continue;
          }
 
-         WALBERLA_ASSERT_GREATER( curCi.numCells(), uint_t(1) );
+         WALBERLA_ASSERT_GREATER( curCi.numCells(), uint_t(1) )
          divideAndPushCellInterval( curCi, ciQueue );
 
          ciQueue.pop();
@@ -184,7 +185,7 @@ void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
        || blockForest.getNumberOfYCellsPerBlock() < uint_t( 16 )
        || blockForest.getNumberOfZCellsPerBlock() < uint_t( 16 ) )
    {
-      WALBERLA_ABORT( "The mesh boundary setup requires a block size of at least 16 in each dimension, when refinement is used!" );
+      WALBERLA_ABORT( "The mesh boundary setup requires a block size of at least 16 in each dimension, when refinement is used!" )
    }
 
    for( auto & iBlock : blockForest )
@@ -253,12 +254,11 @@ void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
 
 void BoundarySetup::writeVTKVoxelfile( const std::string & identifier, bool writeGhostLayers, const std::string & baseFolder, const std::string & executionFolder )
 {
-   WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( structuredBlockStorage_ );
+   WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ )
+   WALBERLA_ASSERT_NOT_NULLPTR( structuredBlockStorage_ )
 
    field::createVTKOutput< VoxelizationField >( *voxelizationFieldId_, *structuredBlockStorage_, identifier, uint_t(1), writeGhostLayers ? numGhostLayers_ : uint_t(0), false, baseFolder, executionFolder )();
 }
 
 
-} // namespace mesh
-} // namespace walberla
+} // namespace walberla::mesh

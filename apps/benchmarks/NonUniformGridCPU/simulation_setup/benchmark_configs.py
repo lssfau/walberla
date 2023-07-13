@@ -2,12 +2,13 @@ import waLBerla as wlb
 
 
 class Scenario:
-    def __init__(self, domain_size=(32, 32, 32), root_blocks=(2, 2, 2),
-                 cells_per_block=(16, 16, 16)):
+    def __init__(self, domain_size=(64, 64, 64), root_blocks=(2, 2, 2),
+                 cells_per_block=(32, 32, 32), refinement_depth=0):
 
         self.domain_size = domain_size
         self.root_blocks = root_blocks
         self.cells_per_block = cells_per_block
+        self.refinement_depth = refinement_depth
 
         self.periodic = (0, 0, 0)
 
@@ -25,21 +26,25 @@ class Scenario:
             },
             'Parameters': {
                 'omega': 1.95,
-                'timesteps': 101,
+                'timesteps': 10001,
 
-                'refinementDepth': 1,
+                'refinementDepth': self.refinement_depth,
                 'writeSetupForestAndReturn': False,
                 'numProcesses': 1,
 
+                'cudaEnabledMPI': False,
                 'benchmarkKernelOnly': False,
 
                 'remainingTimeLoggerFrequency': 3,
 
-                'vtkWriteFrequency': 50,
+                'vtkWriteFrequency': 5000,
+            },
+            'Logging': {
+                'logLevel': "info",
             }
         }
 
-        if print_dict:
+        if print_dict and config_dict["Parameters"]["writeSetupForestAndReturn"] is False:
             wlb.log_info_on_root("Scenario:\n" + pformat(config_dict))
         return config_dict
 
@@ -47,10 +52,17 @@ class Scenario:
 def validation_run():
     """Run with full periodic shear flow or boundary scenario (ldc) to check if the code works"""
     wlb.log_info_on_root("Validation run")
-    wlb.log_info_on_root("")
+
+    domain_size = (96, 96, 96)
+    cells_per_block = (32, 32, 32)
+
+    root_blocks = tuple([d // c for d, c in zip(domain_size, cells_per_block)])
 
     scenarios = wlb.ScenarioManager()
-    scenario = Scenario()
+    scenario = Scenario(domain_size=domain_size,
+                        root_blocks=root_blocks,
+                        cells_per_block=cells_per_block,
+                        refinement_depth=1)
     scenarios.add(scenario)
 
 

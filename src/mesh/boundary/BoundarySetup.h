@@ -41,8 +41,7 @@
 
 #include <queue>
 
-namespace walberla {
-namespace mesh {
+namespace walberla::mesh {
 
 class BoundarySetup
 {
@@ -53,23 +52,23 @@ public:
 
    enum Location { INSIDE, OUTSIDE };
 
-   BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers );
+   BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, uint_t numGhostLayers, bool doRefinementCorrection = true );
 
    ~BoundarySetup() { deallocateVoxelizationField(); }
 
    template< typename BoundaryHandlingType >
-   void setDomainCells( const BlockDataID boundaryHandlingID, const Location domainLocation );
+   void setDomainCells( BlockDataID boundaryHandlingID, Location domainLocation );
 
    template< typename BoundaryHandlingType, typename BoundaryFunction, typename Stencil = stencil::D3Q27 >
-   void setBoundaries( const BlockDataID boundaryHandlingID, const BoundaryFunction & boundaryFunction, Location boundaryLocation );
+   void setBoundaries( BlockDataID boundaryHandlingID, const BoundaryFunction & boundaryFunction, Location boundaryLocation );
 
 
    template<typename FlagField_T>
-   void setFlag( const BlockDataID flagFieldID, field::FlagUID flagUID, Location boundaryLocation );
+   void setFlag( BlockDataID flagFieldID, field::FlagUID flagUID, Location boundaryLocation );
 
    // set flag with FlagUID wherever boundaryUID is set
    template< typename FlagField_T, typename BoundaryFunction, typename Stencil = stencil::D3Q27 >
-   void setBoundaryFlag(const BlockDataID flagFieldID, field::FlagUID flagUID, boundary::BoundaryUID boundaryUID,
+   void setBoundaryFlag(BlockDataID flagFieldID, field::FlagUID flagUID, boundary::BoundaryUID boundaryUID,
                         const BoundaryFunction& boundaryFunction, Location boundaryLocation);
 
    void writeVTKVoxelfile( const std::string & identifier = "voxelization", bool writeGhostLayers = false, const std::string & baseFolder = std::string("vtk_out"),
@@ -100,12 +99,12 @@ void BoundarySetup::setDomainCells( const BlockDataID boundaryHandlingId, const 
    for( auto & block : *structuredBlockStorage_ )
    {
       BoundaryHandlingType * boundaryHandling  = block.getData< BoundaryHandlingType >( boundaryHandlingId  );
-      WALBERLA_CHECK_NOT_NULLPTR( boundaryHandling, "boundaryHandlingId invalid!" );
+      WALBERLA_CHECK_NOT_NULLPTR( boundaryHandling, "boundaryHandlingId invalid!" )
 
       const VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
-      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField );
+      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField )
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, boundaryHandling->getFlagField()->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
-                                 << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" );
+                                 << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" )
 
       const uint8_t domainValue = domainLocation == INSIDE ? uint8_t(1) : uint8_t(0);
 
@@ -132,13 +131,13 @@ void BoundarySetup::setFlag( const BlockDataID flagFieldID, field::FlagUID flagU
    for( auto & block : *structuredBlockStorage_ )
    {
       FlagField_T * flagField  = block.getData< FlagField_T >( flagFieldID );
-      WALBERLA_CHECK_NOT_NULLPTR( flagField, "flagFieldID invalid!" );
+      WALBERLA_CHECK_NOT_NULLPTR( flagField, "flagFieldID invalid!" )
       auto flag = flagField->getFlag(flagUID);
 
       const VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
-      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField );
+      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField )
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, flagField->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
-                                 << numGhostLayers_ << " but your flag field has only " << flagField->nrOfGhostLayers() << " ghost layers!" );
+                                 << numGhostLayers_ << " but your flag field has only " << flagField->nrOfGhostLayers() << " ghost layers!" )
 
       const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
 
@@ -156,15 +155,15 @@ void BoundarySetup::setBoundaryFlag(const BlockDataID flagFieldID, field::FlagUI
    for (auto& block : *structuredBlockStorage_)
    {
       FlagField_T* flagField = block.getData< FlagField_T >(flagFieldID);
-      WALBERLA_CHECK_NOT_NULLPTR(flagField, "flagFieldID invalid!");
+      WALBERLA_CHECK_NOT_NULLPTR(flagField, "flagFieldID invalid!")
       auto flag = flagField->getFlag(flagUID);
 
       const VoxelizationField* voxelizationField = block.getData< VoxelizationField >(*voxelizationFieldId_);
-      WALBERLA_ASSERT_NOT_NULLPTR(voxelizationField);
+      WALBERLA_ASSERT_NOT_NULLPTR(voxelizationField)
       WALBERLA_CHECK_LESS_EQUAL(numGhostLayers_, flagField->nrOfGhostLayers(),
                                 "You want to use mesh boundary setup with "
                                    << numGhostLayers_ << " but your flag field has only "
-                                   << flagField->nrOfGhostLayers() << " ghost layers!");
+                                   << flagField->nrOfGhostLayers() << " ghost layers!")
 
       // get where the (fluid) domain is located (on the inside/outside of the mesh)
       const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
@@ -211,12 +210,12 @@ void BoundarySetup::setBoundaries( const BlockDataID boundaryHandlingID, const B
    for( auto & block : *structuredBlockStorage_ )
    {
       BoundaryHandlingType * boundaryHandling  = block.getData< BoundaryHandlingType >( boundaryHandlingID  );
-      WALBERLA_CHECK_NOT_NULLPTR( boundaryHandling, "boundaryHandlingId invalid!" );
+      WALBERLA_CHECK_NOT_NULLPTR( boundaryHandling, "boundaryHandlingId invalid!" )
 
       const VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
-      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField );
+      WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField )
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, boundaryHandling->getFlagField()->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
-                                 << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" );
+                                 << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" )
 
       const uint8_t domainValue   = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
 
@@ -244,5 +243,4 @@ void BoundarySetup::setBoundaries( const BlockDataID boundaryHandlingID, const B
    }
 }
 
-} // namespace mesh
-} // namespace walberla
+} // namespace walberla::mesh
