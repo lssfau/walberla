@@ -239,7 +239,7 @@ public:
    bool storesUniformBlockGrid() const { return depth_ == 0; }
 
    uint_t getTreeIdDigits()   const { return treeIdDigits_; }
-   uint_t getBlockIdBytes()   const { uint_t bits = treeIdDigits_ + 3 * depth_; return (bits >> 3) + (( bits & 7 ) ? uint_c(1) : uint_c(0)); }
+   uint_t getBlockIdBytes()   const { uint_t const bits = treeIdDigits_ + 3 * depth_; return (bits >> 3) + (( bits & 7 ) ? uint_c(1) : uint_c(0)); }
    
    uint_t getDepth()          const { return depth_; }
    uint_t getNumberOfLevels() const { return depth_ + uint_t(1); }
@@ -635,7 +635,7 @@ inline void BlockForest::getBlocksOverlappedByAABB( std::vector< IBlock* >& bloc
 
 inline const Block* BlockForest::getBlock( const IBlockID& id ) const {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
 
    auto it = blocks_.find( *static_cast< const BlockID* >( &id ) );
 
@@ -649,7 +649,7 @@ inline const Block* BlockForest::getBlock( const IBlockID& id ) const {
 
 inline Block* BlockForest::getBlock( const IBlockID& id ) {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
 
    auto it = blocks_.find( *static_cast< const BlockID* >( &id ) );
 
@@ -708,7 +708,7 @@ inline void BlockForest::getAllBlocks( std::vector< shared_ptr< IBlockID > >& bl
 
    for( auto block = begin(); block != end(); ++block ) {
       const IBlockID& id = block->getId();
-      WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id );
+      WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
       blocks.push_back( walberla::make_shared< BlockID >( *static_cast< const BlockID* >( &id ) ) );
    }
 }
@@ -744,7 +744,7 @@ inline bool BlockForest::blockExistsRemotely( const real_t x, const real_t y, co
 
 inline bool BlockForest::blockExists( const IBlockID& id ) const {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
 
    if( blockInformation_->active() )
       return blockInformation_->exists( *static_cast< const BlockID* >( &id ) );
@@ -763,7 +763,7 @@ inline bool BlockForest::blockExistsLocally( const IBlockID& id ) const {
 
 inline bool BlockForest::blockExistsRemotely( const IBlockID& id ) const {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
 
    if( blockInformation_->active() )
       return blockInformation_->existsRemotely( *static_cast< const BlockID* >( &id ) );
@@ -801,7 +801,7 @@ inline bool BlockForest::rootBlockExistsRemotely( const uint_t x, const uint_t y
 
 inline uint_t BlockForest::getLevel( const IBlock& block ) const {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Block* >( &block ), &block );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Block* >( &block ), &block )
 
    return static_cast< const Block* >( &block )->getLevel();
 }
@@ -810,8 +810,8 @@ inline uint_t BlockForest::getLevel( const IBlock& block ) const {
 
 inline uint_t BlockForest::getLevelFromBlockId( const BlockID& id ) const {
 
-   WALBERLA_ASSERT_GREATER_EQUAL( id.getUsedBits(), treeIdDigits_ );
-   WALBERLA_ASSERT_EQUAL( ( id.getUsedBits() - treeIdDigits_ ) % 3, 0 );
+   WALBERLA_ASSERT_GREATER_EQUAL( id.getUsedBits(), treeIdDigits_ )
+   WALBERLA_ASSERT_EQUAL( ( id.getUsedBits() - treeIdDigits_ ) % 3, 0 )
 
    return ( id.getUsedBits() - treeIdDigits_ ) / 3;
 }
@@ -820,7 +820,7 @@ inline uint_t BlockForest::getLevelFromBlockId( const BlockID& id ) const {
 
 inline uint_t BlockForest::getAABBFromBlockId( AABB& aabb, const BlockID& id ) const {
 
-   BlockReconstruction::AABBReconstruction aabbReconstruction( domain_, size_[0], size_[1], size_[2], treeIdDigits_ );
+   BlockReconstruction::AABBReconstruction const aabbReconstruction( domain_, size_[0], size_[1], size_[2], treeIdDigits_ );
 
    return aabbReconstruction( aabb, id );
 }
@@ -838,9 +838,9 @@ inline AABB BlockForest::getAABBFromBlockId( const BlockID& id ) const {
 
 inline void BlockForest::getRootBlockID( BlockID& id, const uint_t x, const uint_t y, const uint_t z ) const {
 
-   WALBERLA_ASSERT_LESS( x, size_[0] );
-   WALBERLA_ASSERT_LESS( y, size_[1] );
-   WALBERLA_ASSERT_LESS( z, size_[2] );
+   WALBERLA_ASSERT_LESS( x, size_[0] )
+   WALBERLA_ASSERT_LESS( y, size_[1] )
+   WALBERLA_ASSERT_LESS( z, size_[2] )
 
    id.clear();
    id.init( z * size_[1] * size_[0] + y * size_[0] + x, uint_c(1) << ( treeIdDigits_ - 1 ) );
@@ -1017,7 +1017,7 @@ public:
       for( auto function = functions_.begin(); function != functions_.end(); ++function, ++iter )
       {
          (*function)( *iter, blocksAlreadyMarkedForRefinement, forest );
-         WALBERLA_ASSERT_EQUAL(iter->size(), numberOfBlocks, "Number of blocks has changed during min target level determination!");
+         WALBERLA_ASSERT_EQUAL(iter->size(), numberOfBlocks, "Number of blocks has changed during min target level determination!")
       }
 
       // combine the outcome of the different functions into a single target level
@@ -1026,7 +1026,7 @@ public:
       {
          for( uint_t fct = 0; fct < functions_.size(); ++fct)
          {
-            WALBERLA_ASSERT_EQUAL(minTargetLevelsPerFunction[fct][block].first->getId(), minTargetLevels[block].first->getId());
+            WALBERLA_ASSERT_EQUAL(minTargetLevelsPerFunction[fct][block].first->getId(), minTargetLevels[block].first->getId())
             targetLevels[fct] = minTargetLevelsPerFunction[fct][block].second;
          }
          minTargetLevels[block].second = targetLevelReductionFct_(targetLevels);

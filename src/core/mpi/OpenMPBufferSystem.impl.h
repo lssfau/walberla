@@ -57,7 +57,7 @@ void GenericOpenMPBufferSystem<Rb, Sb>::addSendingFunction( MPIRank rank, const 
    dirty_ = true;
    sendRanks_.push_back( rank );
    sendFunctions_.push_back( sendFunction );
-   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() );
+   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() )
 }
 
 
@@ -72,8 +72,8 @@ void GenericOpenMPBufferSystem<Rb, Sb>::setupBufferSystem()
                    []( typename decltype(recvFunctions_)::value_type r ){ return r.first; });
    bs_.setReceiverInfo( recvRanks, sizeChangesEverytime_ );
 
-   for( auto sendRank = sendRanks_.begin(); sendRank != sendRanks_.end(); ++sendRank ) // Do NOT delete this for loop! This loop is needed ...
-      bs_.sendBuffer( *sendRank ); // ... so that the "sendBuffer(rank)" call in startCommunicationOpenMP is thread-safe!
+   for(auto sendRank : sendRanks_) // Do NOT delete this for loop! This loop is needed ...
+      bs_.sendBuffer( sendRank ); // ... so that the "sendBuffer(rank)" call in startCommunicationOpenMP is thread-safe!
 
    dirty_ = false;
 }
@@ -101,7 +101,7 @@ void GenericOpenMPBufferSystem<Rb, Sb>::startCommunicationSerial()
 {
    bs_.scheduleReceives();
 
-   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() );
+   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() )
 
    const uint_t nrOfSendFunctions = sendFunctions_.size();
 
@@ -122,7 +122,7 @@ void GenericOpenMPBufferSystem<Rb, Sb>::startCommunicationOpenMP()
 {
    bs_.scheduleReceives();
 
-   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() );
+   WALBERLA_ASSERT_EQUAL( sendRanks_.size(), sendFunctions_.size() )
 
    const int nrOfSendFunctions = int_c( sendFunctions_.size() );
 
@@ -173,7 +173,7 @@ void GenericOpenMPBufferSystem<Rb, Sb>::waitSerial()
       RecvBuffer & recvBuffer = recvIt.buffer();
 
       // call unpacking
-      WALBERLA_ASSERT( recvFunctions_.find( rank ) != recvFunctions_.end() );
+      WALBERLA_ASSERT( recvFunctions_.find( rank ) != recvFunctions_.end() )
       recvFunctions_[rank] ( recvBuffer );
    }
 }
@@ -198,19 +198,19 @@ void GenericOpenMPBufferSystem<Rb, Sb>::waitOpenMP()
       recvBuffer = bs_.waitForNext( recvRank );
 
 
-      WALBERLA_ASSERT_GREATER_EQUAL( recvRank, 0 );
-      WALBERLA_ASSERT_NOT_NULLPTR( recvBuffer );
+      WALBERLA_ASSERT_GREATER_EQUAL( recvRank, 0 )
+      WALBERLA_ASSERT_NOT_NULLPTR( recvBuffer )
 
-      WALBERLA_ASSERT( recvFunctions_.find( recvRank ) != recvFunctions_.end() );
+      WALBERLA_ASSERT( recvFunctions_.find( recvRank ) != recvFunctions_.end() )
       recvFunctions_[recvRank] ( *recvBuffer );
    }
 
    MPIRank rank;
    RecvBuffer * ret = bs_.waitForNext( rank );
-   WALBERLA_ASSERT_NULLPTR( ret ); // call last time to finish communication
+   WALBERLA_ASSERT_NULLPTR( ret ) // call last time to finish communication
    WALBERLA_UNUSED( ret );
 
-   WALBERLA_ASSERT( ! bs_.isCommunicationRunning() );
+   WALBERLA_ASSERT( ! bs_.isCommunicationRunning() )
 }
 
 

@@ -67,9 +67,9 @@ public:
    uint_t getNumberOfYCells( const IBlock& /*block*/ ) const override { return blockCells_[1]; }
    uint_t getNumberOfZCells( const IBlock& /*block*/ ) const override { return blockCells_[2]; }
 #else
-   uint_t getNumberOfXCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[0]; }
-   uint_t getNumberOfYCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[1]; }
-   uint_t getNumberOfZCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[2]; }
+   uint_t getNumberOfXCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ) return blockCells_[0]; }
+   uint_t getNumberOfYCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ) return blockCells_[1]; }
+   uint_t getNumberOfZCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ) return blockCells_[2]; }
 #endif
 
    using StructuredBlockStorage::getNumberOfCells;
@@ -231,7 +231,7 @@ inline bool StructuredBlockForest::blockExistsRemotely( const Cell& cell, const 
 
 inline uint_t StructuredBlockForest::getLevel( const IBlock& block ) const {
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Block* >( &block ), &block );
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Block* >( &block ), &block )
 
    return static_cast< const Block* >( &block )->getLevel();
 }
@@ -244,8 +244,8 @@ inline uint_t StructuredBlockForest::getNumberOfCells( const IBlock& /*block*/, 
 inline uint_t StructuredBlockForest::getNumberOfCells( const IBlock& block, const uint_t index ) const {
 #endif
 
-   WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) );
-   WALBERLA_ASSERT_LESS( index, 3 );
+   WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) )
+   WALBERLA_ASSERT_LESS( index, 3 )
 
    return blockCells_[ index ];
 }

@@ -66,22 +66,32 @@ using RefinementSelectionFunctor = SetupBlockForest::RefinementSelectionFunction
 
 class LDCRefinement
 {
- private:
+private:
    const uint_t refinementDepth_;
 
- public:
-   LDCRefinement(const uint_t depth) : refinementDepth_(depth){};
+public:
+   explicit LDCRefinement(const uint_t depth) : refinementDepth_(depth){};
 
-   void operator()(SetupBlockForest& forest)
+   void operator()(SetupBlockForest& forest) const
    {
-      std::vector< SetupBlock* > blocks;
-      forest.getBlocks(blocks);
+      const AABB & domain = forest.getDomain();
 
-      for (auto block : blocks)
+      real_t xSize = ( domain.xSize() / real_t(12) ) * real_c( 0.99 );
+      real_t ySize = ( domain.ySize() / real_t(12) ) * real_c( 0.99 );
+
+      AABB leftCorner( domain.xMin(), domain.yMin(), domain.zMin(),
+                       domain.xMin() + xSize, domain.yMin() + ySize, domain.zMax() );
+
+      AABB rightCorner( domain.xMax() - xSize, domain.yMin(), domain.zMin(),
+                        domain.xMax(), domain.yMin() + ySize, domain.zMax() );
+
+      for(auto & block : forest)
       {
-         if (forest.atDomainYMaxBorder(*block))
+         auto & aabb = block.getAABB();
+         if( leftCorner.intersects( aabb ) || rightCorner.intersects( aabb ) )
          {
-            if (block->getLevel() < refinementDepth_) { block->setMarker(true); }
+            if( block.getLevel() < refinementDepth_)
+               block.setMarker( true );
          }
       }
    }
@@ -89,17 +99,26 @@ class LDCRefinement
 
 class LDC
 {
- public:
-   LDC(const uint_t depth) : refinementDepth_(depth), noSlipFlagUID_("NoSlip"), ubbFlagUID_("UBB"){};
+private:
+   const std::string refinementProfile_;
+   const uint_t refinementDepth_;
 
-   Vector3< real_t > acceleration() const { return Vector3< real_t >(0.0); }
-   RefinementSelectionFunctor refinementSelector() { return LDCRefinement(refinementDepth_); }
+   const FlagUID noSlipFlagUID_;
+   const FlagUID ubbFlagUID_;
+
+public:
+   explicit LDC(const uint_t depth) : refinementDepth_(depth), noSlipFlagUID_("NoSlip"), ubbFlagUID_("UBB"){};
+
+   RefinementSelectionFunctor refinementSelector() const
+   {
+      return LDCRefinement(refinementDepth_);
+   }
 
    void setupBoundaryFlagField(StructuredBlockForest& sbfs, const BlockDataID flagFieldID)
    {
       for (auto bIt = sbfs.begin(); bIt != sbfs.end(); ++bIt)
       {
-         Block& b           = dynamic_cast< Block& >(*bIt);
+         auto& b           = dynamic_cast< Block& >(*bIt);
          const uint_t level       = b.getLevel();
          auto flagField     = b.getData< FlagField_T >(flagFieldID);
          const uint8_t noslipFlag = flagField->registerFlag(noSlipFlagUID_);
@@ -118,26 +137,20 @@ class LDC
          }
       }
    }
- private:
-   const std::string refinementProfile_;
-   const uint_t refinementDepth_;
-
-   const FlagUID noSlipFlagUID_;
-   const FlagUID ubbFlagUID_;
 };
 
 static void createSetupBlockForest(SetupBlockForest& setupBfs, const Config::BlockHandle& domainSetup, LDC& ldcSetup, const uint_t numProcesses=uint_c(MPIManager::instance()->numProcesses()))
 {
-   Vector3< real_t > domainSize = domainSetup.getParameter< Vector3< real_t > >("domainSize");
-   Vector3< uint_t > rootBlocks = domainSetup.getParameter< Vector3< uint_t > >("rootBlocks");
-   Vector3< bool > periodic     = domainSetup.getParameter< Vector3< bool > >("periodic");
+   Vector3<real_t> domainSize = domainSetup.getParameter<Vector3<real_t> >("domainSize");
+   Vector3<uint_t> rootBlocks = domainSetup.getParameter<Vector3<uint_t> >("rootBlocks");
+   Vector3<bool> periodic = domainSetup.getParameter<Vector3<bool> >("periodic");
 
    auto refSelection = ldcSetup.refinementSelector();
-   setupBfs.addRefinementSelectionFunction(std::function< void(SetupBlockForest&) >(refSelection));
+   setupBfs.addRefinementSelectionFunction(std::function<void(SetupBlockForest &)>(refSelection));
    const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), domainSize[0], domainSize[1], domainSize[2]);
-   setupBfs.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
+   setupBfs.addWorkloadMemorySUIDAssignmentFunction(blockforest::uniformWorkloadAndMemoryAssignment);
    setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
-   setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalance(true), numProcesses);
+   setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), numProcesses);
 }
 
 int main(int argc, char** argv)
@@ -147,7 +160,7 @@ int main(int argc, char** argv)
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {
-      WALBERLA_MPI_WORLD_BARRIER()
+      WALBERLA_MPI_BARRIER()
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                        SETUP AND CONFIGURATION                                             ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,8 +210,6 @@ int main(int argc, char** argv)
          std::make_shared< StructuredBlockForest >(bfs, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2]);
       blocks->createCellBoundingBoxes();
 
-      WALBERLA_ROOT_SECTION() { vtk::writeDomainDecomposition(blocks, "domainDecomposition", "vtk_out"); }
-
       WALBERLA_LOG_INFO_ON_ROOT("Blocks created: " << blocks->getNumberOfBlocks())
       for (uint_t level = 0; level <= refinementDepth; level++)
       {
@@ -223,6 +234,8 @@ int main(int argc, char** argv)
       {
          sweepCollection.initialise(&block, 2);
       }
+      WALBERLA_MPI_BARRIER()
+      WALBERLA_LOG_INFO_ON_ROOT("Initialisation done")
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                      LB SWEEPS AND BOUNDARY HANDLING                                       ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,9 +307,13 @@ int main(int argc, char** argv)
       WcTimingPool timeloopTiming;
       WcTimer simTimer;
 
+      WALBERLA_MPI_BARRIER()
       WALBERLA_LOG_INFO_ON_ROOT("Starting benchmark with " << timesteps << " time steps")
+      WALBERLA_MPI_BARRIER()
+
       simTimer.start();
       timeLoop.run(timeloopTiming);
+      WALBERLA_MPI_BARRIER()
       simTimer.end();
 
       WALBERLA_LOG_INFO_ON_ROOT("Benchmark finished")

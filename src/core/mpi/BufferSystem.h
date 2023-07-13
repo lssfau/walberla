@@ -245,9 +245,9 @@ protected:
 
 
    struct SendInfo {
-      SendInfo() : alreadySent(false) {}
+      SendInfo()= default;
       SendBuffer_T buffer;
-      bool alreadySent;
+      bool alreadySent{false};
    };
    std::map<MPIRank, SendInfo> sendInfos_;
 

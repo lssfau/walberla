@@ -52,7 +52,7 @@ void GenericBufferSystem<Rb, Sb>::iterator::operator++()
 {
    currentRecvBuffer_ = bufferSystem_.waitForNext( currentSenderRank_ );
    if ( ! currentRecvBuffer_ ) {
-      WALBERLA_ASSERT_EQUAL( currentSenderRank_, -1 );
+      WALBERLA_ASSERT_EQUAL( currentSenderRank_, -1 )
    } else
    {
       bufferSystem_.bytesReceived_ += currentRecvBuffer_->size() * sizeof(RecvBuffer::ElementType);
@@ -64,7 +64,7 @@ template< typename Rb, typename Sb>
 bool GenericBufferSystem<Rb, Sb>::iterator::operator==( const typename GenericBufferSystem<Rb, Sb>::iterator & other )
 {
    // only equality checks with end iterators are allowed
-   WALBERLA_ASSERT( other.currentSenderRank_ == -1 || currentSenderRank_ == -1 );
+   WALBERLA_ASSERT( other.currentSenderRank_ == -1 || currentSenderRank_ == -1 )
 
    return ( currentSenderRank_ == other.currentSenderRank_ );
 }
@@ -73,7 +73,7 @@ template< typename Rb, typename Sb>
 bool GenericBufferSystem<Rb, Sb>::iterator::operator!=( const typename GenericBufferSystem<Rb, Sb>::iterator & other )
 {
    // only equality checks with end iterators are allowed
-   WALBERLA_ASSERT( other.currentSenderRank_ == -1 || currentSenderRank_ == -1 );
+   WALBERLA_ASSERT( other.currentSenderRank_ == -1 || currentSenderRank_ == -1 )
 
    return ( currentSenderRank_ != other.currentSenderRank_ );
 }
@@ -90,7 +90,7 @@ template< typename Rb, typename Sb>
 template<typename RankIter>
 void GenericBufferSystem<Rb, Sb>::setReceiverInfo( RankIter rankBegin, RankIter rankEnd, bool changingSize )
 {
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_ASSERT( ! communicationRunning_ )
 
    recvInfos_.clear();
    for ( auto it = rankBegin; it != rankEnd; ++it )
@@ -147,7 +147,7 @@ GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const GenericBufferSystem &oth
      recvInfos_( other.recvInfos_ ),
      sendInfos_( other.sendInfos_ )
 {
-   WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" );
+   WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" )
    if( other.currentComm_ == &other.knownSizeComm_ )
       currentComm_ = &knownSizeComm_;
    else if ( other.currentComm_ == &other.unknownSizeComm_ )
@@ -163,7 +163,7 @@ GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const GenericBufferSystem &oth
 template< typename Rb, typename Sb>
 GenericBufferSystem<Rb, Sb> & GenericBufferSystem<Rb, Sb>::operator=( const GenericBufferSystem<Rb, Sb> & other )
 {
-   WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" );
+   WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" )
 
    sizeChangesEverytime_ = other.sizeChangesEverytime_;
    communicationRunning_ = other.communicationRunning_;
@@ -204,12 +204,11 @@ GenericBufferSystem<Rb, Sb> & GenericBufferSystem<Rb, Sb>::operator=( const Gene
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::setReceiverInfo( const std::set<MPIRank> & ranksToRecvFrom, bool changingSize )
 {
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_ASSERT( ! communicationRunning_ )
 
    recvInfos_.clear();
-   for ( auto it = ranksToRecvFrom.begin(); it != ranksToRecvFrom.end(); ++it )
+   for ( auto sender : ranksToRecvFrom )
    {
-      const MPIRank sender = *it;
       recvInfos_[ sender ].size = INVALID_SIZE;
    }
 
@@ -234,10 +233,10 @@ void GenericBufferSystem<Rb, Sb>::setReceiverInfo( const std::map<MPIRank,MPISiz
    WALBERLA_ASSERT( ! communicationRunning_ )
 
    recvInfos_.clear();
-   for ( auto it = ranksToRecvFrom.begin(); it != ranksToRecvFrom.end(); ++it )
+   for ( auto it : ranksToRecvFrom )
    {
-      const MPIRank sender       = it->first;
-      const MPISize senderSize   = it->second;
+      const MPIRank sender       = it.first;
+      const MPISize senderSize   = it.second;
       WALBERLA_ASSERT_GREATER( senderSize, 0 )
       recvInfos_[ sender ].size   = senderSize;
    }
@@ -269,7 +268,7 @@ void GenericBufferSystem<Rb, Sb>::setReceiverInfo( const std::map<MPIRank,MPISiz
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::setReceiverInfoFromSendBufferState( bool useSizeFromSendBuffers, bool changingSize )
 {
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_ASSERT( ! communicationRunning_ )
 
    recvInfos_.clear();
    for ( auto it = sendInfos_.begin(); it != sendInfos_.end(); ++it )
@@ -303,7 +302,7 @@ void GenericBufferSystem<Rb, Sb>::setReceiverInfoFromSendBufferState( bool useSi
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::sizeHasChanged( bool alwaysChangingSize )
 {
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_ASSERT( ! communicationRunning_ )
 
    sizeChangesEverytime_ = alwaysChangingSize;
    setCommunicationType( false );
@@ -347,7 +346,7 @@ Sb & GenericBufferSystem<Rb, Sb>::sendBuffer( MPIRank rank )
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::sendAll()
 {
-   WALBERLA_ASSERT_NOT_NULLPTR( currentComm_ ); // call setReceiverInfo first!
+   WALBERLA_ASSERT_NOT_NULLPTR( currentComm_ ) // call setReceiverInfo first!
 
    if ( !communicationRunning_ )
       startCommunication();
@@ -380,14 +379,14 @@ void GenericBufferSystem<Rb, Sb>::sendAll()
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::send( MPIRank rank )
 {
-   WALBERLA_ASSERT_NOT_NULLPTR( currentComm_ ); // call setReceiverInfo first!
+   WALBERLA_ASSERT_NOT_NULLPTR( currentComm_ ) // call setReceiverInfo first!
 
    if ( !communicationRunning_ )
       startCommunication();
 
    auto iter = sendInfos_.find(rank);
-   WALBERLA_ASSERT( iter != sendInfos_.end() );   // no send buffer was created for this rank
-   WALBERLA_ASSERT( ! iter->second.alreadySent ); // this buffer has already been sent
+   WALBERLA_ASSERT( iter != sendInfos_.end() )   // no send buffer was created for this rank
+   WALBERLA_ASSERT( ! iter->second.alreadySent ) // this buffer has already been sent
 
    if ( iter->second.buffer.size() > 0 )
    {
@@ -424,10 +423,10 @@ void GenericBufferSystem<Rb, Sb>::startCommunication()
 
    const auto tag = currentComm_->getTag();
    WALBERLA_CHECK_EQUAL(activeTags_.find(tag), activeTags_.end(),
-                        "Another communication with the same MPI tag is currently in progress.");
+                        "Another communication with the same MPI tag is currently in progress.")
    activeTags_.insert(tag);
 
-   WALBERLA_CHECK( ! communicationRunning_ );
+   WALBERLA_CHECK( ! communicationRunning_ )
 
    currentComm_->scheduleReceives( recvInfos_ );
    communicationRunning_ = true;
@@ -452,7 +451,7 @@ void GenericBufferSystem<Rb, Sb>::startCommunication()
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::endCommunication()
 {
-   WALBERLA_CHECK( communicationRunning_ );
+   WALBERLA_CHECK( communicationRunning_ )
    currentComm_->waitForSends();
 
    // Clear send buffers
@@ -482,7 +481,7 @@ void GenericBufferSystem<Rb, Sb>::endCommunication()
 template< typename Rb, typename Sb>
 Rb * GenericBufferSystem<Rb, Sb>::waitForNext( MPIRank & fromRank )
 {
-   WALBERLA_ASSERT( communicationRunning_ );
+   WALBERLA_ASSERT( communicationRunning_ )
 
    fromRank = currentComm_->waitForNextReceive( recvInfos_ );
 
@@ -531,7 +530,7 @@ void GenericBufferSystem<Rb, Sb>::setCommunicationType( const bool knownSize )
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::noRanks()
 {
-   return RankRange();
+   return {};
 }
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allRanks()
@@ -544,7 +543,7 @@ typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allR
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allRanksButRoot()
 {
-   int numProcesses = MPIManager::instance()->numProcesses();
+   int const numProcesses = MPIManager::instance()->numProcesses();
    RankRange r;
    std::generate_n( std::inserter(r, r.end()), numProcesses-1, [&]{ return MPIRank(r.size()+size_t(1)); } );
    return r;
@@ -552,7 +551,7 @@ typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allR
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::onlyRank( int includedRank )
 {
-   WALBERLA_ASSERT_LESS( includedRank, MPIManager::instance()->numProcesses() );
+   WALBERLA_ASSERT_LESS( includedRank, MPIManager::instance()->numProcesses() )
    return RankRange { includedRank };
 }
 

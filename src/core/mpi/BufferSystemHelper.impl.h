@@ -147,14 +147,14 @@ MPIRank KnownSizeCommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, Re
 
    recvRequests_[ uint_c( requestIndex ) ] = MPI_REQUEST_NULL;
 
-   MPIRank senderRank = status.MPI_SOURCE;
+   MPIRank const senderRank = status.MPI_SOURCE;
    WALBERLA_ASSERT_GREATER_EQUAL( senderRank, 0 );
 
 
 #ifndef NDEBUG
    int receivedBytes;
    MPI_Get_count( &status, MPI_BYTE, &receivedBytes );
-   WALBERLA_ASSERT_EQUAL ( recvInfos[senderRank].size, receivedBytes );
+   WALBERLA_ASSERT_EQUAL ( recvInfos[senderRank].size, receivedBytes )
 #else
    WALBERLA_UNUSED( recvInfos );
 #endif
@@ -493,10 +493,7 @@ void NoMPICommunication<Rb, Sb>::send( MPIRank receiver, const Sb & sendBuffer )
 }
 
 template< typename Rb, typename Sb>
-void NoMPICommunication<Rb, Sb>::waitForSends()
-{
-   return;
-}
+void NoMPICommunication<Rb, Sb>::waitForSends(){}
 
 template< typename Rb, typename Sb>
 void NoMPICommunication<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )

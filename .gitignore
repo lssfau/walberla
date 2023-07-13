@@ -8,6 +8,9 @@ qrc_*
 # macOS
 **/.DS_Store
 
+# CLion indexing
+*.uuid
+
 
 # Generated files
 *.out

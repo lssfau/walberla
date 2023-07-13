@@ -42,23 +42,23 @@ template< typename PdfField_T, bool inplace >
 class NonuniformGPUPackingKernelsWrapper
 {
  public:
-   void packAll(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, gpuStream_t stream = nullptr) const  = 0;
-   void unpackAll(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, gpuStream_t stream = nullptr) const = 0;
+   void packAll(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, gpuStream_t stream ) const  = 0;
+   void unpackAll(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, gpuStream_t stream ) const = 0;
    void localCopyAll(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
-                     CellInterval dstInterval, gpuStream_t stream = nullptr) const                                    = 0;
+                     CellInterval dstInterval, gpuStream_t stream ) const                                    = 0;
 
-   void packDirection(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, Direction dir, gpuStream_t stream = nullptr) const  = 0;
-   void unpackDirection(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, Direction dir, gpuStream_t stream = nullptr) const = 0;
+   void packDirection(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, Direction dir, gpuStream_t stream ) const  = 0;
+   void unpackDirection(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, Direction dir, gpuStream_t stream ) const = 0;
    void localCopyDirection(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
                            CellInterval dstInterval, Direction dir, gpuStream_t stream) const               = 0;
 
    void unpackRedistribute(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer,
-                           stencil::Direction dir, gpuStream_t stream = nullptr) const = 0;
+                           stencil::Direction dir, gpuStream_t stream ) const = 0;
 
    void packPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskFieldGPU* maskField, CellInterval ci,
-                               unsigned char* outBuffer, Direction dir, gpuStream_t stream = nullptr) const                                   = 0;
+                               unsigned char* outBuffer, Direction dir, gpuStream_t stream ) const                                   = 0;
    void zeroCoalescenceRegion(PdfField_T* dstField, CellInterval ci, Direction dir) const                      = 0;
-   void unpackCoalescence(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, Direction dir, gpuStream_t stream = nullptr) const = 0;
+   void unpackCoalescence(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, Direction dir, gpuStream_t stream ) const = 0;
 
    uint_t size(CellInterval ci, Direction dir) const                   = 0;
    uint_t size(CellInterval ci) const                                  = 0;
@@ -239,9 +239,7 @@ template< typename PdfField_T >
 class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUniformGPUPackInfo
 {
  public:
-   using VoidFunction                  = std::function< void(gpuStream_t) >;
    using LatticeStorageSpecification_T = typename PdfField_T::LatticeStorageSpecification;
-   using PackingKernels_T              = typename LatticeStorageSpecification_T::PackKernels;
    using Stencil                       = typename LatticeStorageSpecification_T::Stencil;
    using CommunicationStencil          = typename LatticeStorageSpecification_T::CommunicationStencil;
    using CommData_T                    = NonuniformGPUCommData< LatticeStorageSpecification_T >;
@@ -253,58 +251,53 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
    bool threadsafeReceiving() const override { return false; };
 
    /// Equal Level
-   void unpackDataEqualLevel(Block* receiver, Direction dir, GpuBuffer_T& buffer) override;
+   void unpackDataEqualLevel(Block* receiver, Direction dir, GpuBuffer_T& buffer, gpuStream_t stream) override;
    void communicateLocalEqualLevel(const Block* sender, Block* receiver, stencil::Direction dir,
                                    gpuStream_t stream) override;
-   void getLocalEqualLevelCommFunction(std::vector< VoidFunction >& commFunctions, const Block* sender, Block* receiver,
-                                       stencil::Direction dir) override;
 
    /// Coarse to Fine
    void unpackDataCoarseToFine(Block* fineReceiver, const BlockID& coarseSender, stencil::Direction dir,
-                               GpuBuffer_T& buffer) override;
-   void communicateLocalCoarseToFine(const Block* coarseSender, Block* fineReceiver, stencil::Direction dir) override;
+                               GpuBuffer_T& buffer, gpuStream_t stream) override;
+   void communicateLocalCoarseToFine(const Block* coarseSender, Block* fineReceiver, stencil::Direction dir, gpuStream_t stream) override;
    void communicateLocalCoarseToFine(const Block* coarseSender, Block* fineReceiver, stencil::Direction dir,
                                      GpuBuffer_T& buffer, gpuStream_t stream) override;
-   void getLocalCoarseToFineCommFunction(std::vector< VoidFunction >& commFunctions, const Block* coarseSender,
-                                         Block* fineReceiver, stencil::Direction dir, GpuBuffer_T& buffer) override;
 
    /// Fine to Coarse
    void prepareCoalescence(Block* coarseReceiver, gpuStream_t gpuStream = nullptr);
    void unpackDataFineToCoarse(Block* coarseReceiver, const BlockID& fineSender, stencil::Direction dir,
-                               GpuBuffer_T& buffer) override;
+                               GpuBuffer_T& buffer, gpuStream_t stream) override;
 
-   void communicateLocalFineToCoarse(const Block* fineSender, Block* coarseReceiver, stencil::Direction dir) override;
+   void communicateLocalFineToCoarse(const Block* fineSender, Block* coarseReceiver, stencil::Direction dir, gpuStream_t stream) override;
    void communicateLocalFineToCoarse(const Block* fineSender, Block* coarseReceiver, stencil::Direction dir,
                                      GpuBuffer_T& buffer, gpuStream_t stream) override;
-   void getLocalFineToCoarseCommFunction(std::vector< VoidFunction >& commFunctions, const Block* fineSender,
-                                         Block* coarseReceiver, stencil::Direction dir, GpuBuffer_T& buffer) override;
 
    uint_t sizeEqualLevelSend(const Block* sender, stencil::Direction dir) override;
    uint_t sizeCoarseToFineSend(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir) override;
+   uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) override;
    uint_t sizeFineToCoarseSend(const Block* fineSender, stencil::Direction dir) override;
 
  protected:
-   void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T& buffer) const override;
+   void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T& buffer, gpuStream_t stream) const override;
 
    void packDataCoarseToFineImpl(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir,
-                                 GpuBuffer_T& buffer) const override;
+                                 GpuBuffer_T& buffer, gpuStream_t stream) const override;
    void packDataFineToCoarseImpl(const Block* fineSender, const BlockID& coarseReceiver, stencil::Direction dir,
-                                 GpuBuffer_T& buffer) const override;
+                                 GpuBuffer_T& buffer, gpuStream_t stream) const override;
 
  private:
    /// Helper Functions
    /// As in PdfFieldPackInfo.h
    Vector3< cell_idx_t > getNeighborShift(const BlockID& fineBlock, stencil::Direction dir) const;
    bool areNeighborsInDirection(const Block* block, const BlockID& neighborID,
-                                const Vector3< cell_idx_t > dirVec) const;
+                                Vector3< cell_idx_t > dirVec) const;
 
-   CellInterval intervalHullInDirection(const CellInterval& ci, const Vector3< cell_idx_t > tangentialDir,
+   CellInterval intervalHullInDirection(const CellInterval& ci, Vector3< cell_idx_t > tangentialDir,
                                         cell_idx_t width) const;
-   bool skipsThroughCoarseBlock(const Block* block, const Direction dir) const;
+   bool skipsThroughCoarseBlock(const Block* block, Direction dir) const;
 
-   void getCoarseBlockCommIntervals(const BlockID& fineBlockID, const Direction dir, const PdfField_T* field,
+   void getCoarseBlockCommIntervals(const BlockID& fineBlockID, Direction dir, const PdfField_T* field,
                                     std::vector< std::pair< Direction, CellInterval > >& intervals) const;
-   void getFineBlockCommIntervals(const BlockID& fineBlockID, const Direction dir, const PdfField_T* field,
+   void getFineBlockCommIntervals(const BlockID& fineBlockID, Direction dir, const PdfField_T* field,
                                   std::vector< std::pair< Direction, CellInterval > >& intervals) const;
 
    CellInterval getCoarseBlockCoalescenceInterval(const Block* coarseBlock, const BlockID& fineBlockID, Direction dir,
@@ -324,7 +317,7 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
 template< typename PdfField_T >
 std::shared_ptr< NonuniformGeneratedGPUPdfPackInfo< PdfField_T > >
    setupNonuniformGPUPdfCommunication(const std::weak_ptr< StructuredBlockForest >& blocks,
-                                      const BlockDataID pdfFieldID,
+                                      BlockDataID pdfFieldID,
                                       const std::string& dataIdentifier = "NonuniformGPUCommData");
 
 } // namespace walberla::lbm_generated

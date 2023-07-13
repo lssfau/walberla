@@ -66,7 +66,7 @@ std::shared_ptr< NonuniformGeneratedGPUPdfPackInfo< PdfField_T > >
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::unpackDataEqualLevel(Block* receiver,
                                                                            Direction dir,
-                                                                           GpuBuffer_T & buffer)
+                                                                           GpuBuffer_T & buffer, gpuStream_t stream)
 {
    auto field = receiver->getData< PdfField_T >(pdfFieldID_);
    CellInterval ci;
@@ -74,7 +74,7 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::unpackDataEqualLevel(Block
    field->getGhostRegion(dir, ci, gls, false);
    uint_t size              = kernels_.size(ci, dir);
    auto bufferPtr = buffer.advanceNoResize(size);
-   kernels_.unpackDirection(field, ci, bufferPtr, dir);
+   kernels_.unpackDirection(field, ci, bufferPtr, dir, stream);
 }
 
 template< typename PdfField_T>
@@ -92,37 +92,10 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalEqualLevel
    kernels_.localCopyDirection(srcField, srcRegion, dstField, dstRegion, dir, stream);
 }
 
-template< typename PdfField_T>
-void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::getLocalEqualLevelCommFunction(
-   std::vector< VoidFunction >& commFunctions, const Block* sender, Block* receiver,
-   stencil::Direction dir)
-{
-   auto srcField = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
-   auto dstField = receiver->getData< PdfField_T >(pdfFieldID_);
-
-   CellInterval srcRegion;
-   CellInterval dstRegion;
-   cell_idx_t gls = skipsThroughCoarseBlock(sender, dir) ? 2 : 1;
-   srcField->getSliceBeforeGhostLayer(dir, srcRegion, gls, false);
-   dstField->getGhostRegion(stencil::inverseDir[dir], dstRegion, gls, false);
-
-//   VoidFunction t = std::bind(kernels_.localCopyDirection,
-//                                         srcField, srcRegion, dstField, dstRegion, dir, std::placeholders::_1 );
-
-//   CellInterval test(srcRegion.min(), srcRegion.max());
-//   CellInterval test2(dstRegion.min(), dstRegion.max());
-
-
-   auto commFunction = [this, srcField, srcRegion, dstField, dstRegion, dir](gpuStream_t gpuStream)
-   {
-      kernels_.localCopyDirection(srcField, srcRegion, dstField, dstRegion, dir, gpuStream);
-   };
-   commFunctions.emplace_back(commFunction);
-}
 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataEqualLevelImpl(
-   const Block* sender, stencil::Direction dir, GpuBuffer_T & buffer) const
+   const Block* sender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const
 {
    auto field = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
    CellInterval ci;
@@ -130,7 +103,7 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataEqualLevelImpl(
    field->getSliceBeforeGhostLayer(dir, ci, gls, false);
    uint_t size              = kernels_.size(ci, dir);
    auto bufferPtr = buffer.advanceNoResize(size);
-   kernels_.packDirection(field, ci, bufferPtr, dir);
+   kernels_.packDirection(field, ci, bufferPtr, dir, stream);
 }
 
 /***********************************************************************************************************************
@@ -139,7 +112,7 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataEqualLevelImpl(
 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataCoarseToFineImpl(
-   const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer) const
+   const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) const
 {
    auto field = const_cast< Block* >(coarseSender)->getData< PdfField_T >(pdfFieldID_);
 
@@ -149,15 +122,14 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataCoarseToFineImpl(
    for (auto t : intervals)
    {
       CellInterval ci          = t.second;
-      uint_t size              = kernels_.size(ci);
-      auto bufferPtr = buffer.advanceNoResize(size);
-      kernels_.packAll(field, ci, bufferPtr);
+      auto bufferPtr = buffer.advanceNoResize(kernels_.size(ci));
+      kernels_.packAll(field, ci, bufferPtr, stream);
    }
 }
 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::unpackDataCoarseToFine(
-   Block* fineReceiver, const BlockID& /*coarseSender*/, stencil::Direction dir, GpuBuffer_T & buffer)
+   Block* fineReceiver, const BlockID& /*coarseSender*/, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream)
 {
    auto field = fineReceiver->getData< PdfField_T >(pdfFieldID_);
 
@@ -170,13 +142,13 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::unpackDataCoarseToFine(
       CellInterval ci          = t.second;
       uint_t size              = kernels_.redistributeSize(ci);
       auto bufferPtr = buffer.advanceNoResize(size);
-      kernels_.unpackRedistribute(field, ci, bufferPtr, d);
+      kernels_.unpackRedistribute(field, ci, bufferPtr, d, stream);
    }
 }
 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalCoarseToFine(
-   const Block* coarseSender, Block* fineReceiver, stencil::Direction dir)
+   const Block* coarseSender, Block* fineReceiver, stencil::Direction dir, gpuStream_t stream)
 {
    auto srcField = const_cast< Block* >(coarseSender)->getData< PdfField_T >(pdfFieldID_);
    auto dstField = fineReceiver->getData< PdfField_T >(pdfFieldID_);
@@ -208,8 +180,8 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalCoarseToFi
       // TODO: This is a dirty workaround. Code-generate direct redistribution!
       unsigned char *buffer;
       WALBERLA_GPU_CHECK( gpuMalloc( &buffer, packSize))
-      kernels_.packAll(srcField, srcInterval, buffer);
-      kernels_.unpackRedistribute(dstField, dstInterval, buffer, unpackDir);
+      kernels_.packAll(srcField, srcInterval, buffer, stream);
+      kernels_.unpackRedistribute(dstField, dstInterval, buffer, unpackDir, stream);
       WALBERLA_GPU_CHECK(gpuFree(buffer))
    }
 }
@@ -251,50 +223,6 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalCoarseToFi
    }
 }
 
-template< typename PdfField_T>
-void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::getLocalCoarseToFineCommFunction(
-   std::vector< VoidFunction >& commFunctions,
-   const Block* coarseSender, Block* fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer)
-{
-   auto srcField = const_cast< Block* >(coarseSender)->getData< PdfField_T >(pdfFieldID_);
-   auto dstField = fineReceiver->getData< PdfField_T >(pdfFieldID_);
-
-   std::vector< std::pair< Direction, CellInterval > > srcIntervals;
-   getCoarseBlockCommIntervals(fineReceiver->getId(), dir, srcField, srcIntervals);
-
-   std::vector< std::pair< Direction, CellInterval > > dstIntervals;
-   getFineBlockCommIntervals(fineReceiver->getId(), stencil::inverseDir[dir], dstField, dstIntervals);
-
-   WALBERLA_ASSERT_EQUAL(srcIntervals.size(), dstIntervals.size())
-
-   for(size_t index = 0; index < srcIntervals.size(); index++)
-   {
-      CellInterval srcInterval = srcIntervals[index].second;
-
-      Direction const unpackDir      = dstIntervals[index].first;
-      CellInterval dstInterval = dstIntervals[index].second;
-
-      uint_t packSize      = kernels_.size(srcInterval);
-
-#ifndef NDEBUG
-      Direction const packDir        = srcIntervals[index].first;
-      WALBERLA_ASSERT_EQUAL(packDir, stencil::inverseDir[unpackDir])
-      uint_t unpackSize = kernels_.redistributeSize(dstInterval);
-      WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
-#endif
-
-      auto bufferPtr = buffer.advanceNoResize(packSize);
-
-      auto commFunction = [this, srcField, srcInterval, bufferPtr, dstField, dstInterval, unpackDir](gpuStream_t gpuStream)
-      {
-         kernels_.packAll(srcField, srcInterval, bufferPtr, gpuStream);
-         kernels_.unpackRedistribute(dstField, dstInterval, bufferPtr, unpackDir, gpuStream);
-      };
-      commFunctions.emplace_back(commFunction);
-   }
-}
-
-
 
 /***********************************************************************************************************************
  *                                          Fine to Coarse Communication                                               *
@@ -318,19 +246,19 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::prepareCoalescence(Block* 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::unpackDataFineToCoarse(
    Block* coarseReceiver, const walberla::BlockID& fineSender, walberla::stencil::Direction dir,
-   GpuBuffer_T & buffer)
+   GpuBuffer_T & buffer, gpuStream_t stream)
 {
    auto dstField = coarseReceiver->getData<PdfField_T>(pdfFieldID_);
 
    CellInterval ci = getCoarseBlockCoalescenceInterval(coarseReceiver, fineSender, dir, dstField);
    uint_t size = kernels_.size(ci, dir);
    unsigned char* bufferPtr = buffer.advanceNoResize(size);
-   kernels_.unpackCoalescence(dstField, ci, bufferPtr, dir);
+   kernels_.unpackCoalescence(dstField, ci, bufferPtr, dir, stream);
 }
 
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalFineToCoarse(
-   const Block* fineSender, Block* coarseReceiver, walberla::stencil::Direction dir)
+   const Block* fineSender, Block* coarseReceiver, walberla::stencil::Direction dir, gpuStream_t stream)
 {
    auto varFineSender = const_cast< Block * >(fineSender);
    auto srcField   = varFineSender->getData< PdfField_T >(pdfFieldID_);
@@ -354,8 +282,8 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalFineToCoar
    // TODO: This is a dirty workaround. Code-generate direct redistribution!
    unsigned char *buffer;
    WALBERLA_GPU_CHECK( gpuMalloc( &buffer, packSize))
-   kernels_.packPartialCoalescence(srcField, maskField, srcInterval, buffer, dir);
-   kernels_.unpackCoalescence(dstField, dstInterval, buffer, invDir);
+   kernels_.packPartialCoalescence(srcField, maskField, srcInterval, buffer, dir, stream);
+   kernels_.unpackCoalescence(dstField, dstInterval, buffer, invDir, stream);
    WALBERLA_GPU_CHECK(gpuFree(buffer))
 }
 
@@ -386,39 +314,6 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalFineToCoar
    auto bufferPtr = buffer.advanceNoResize(packSize);
    kernels_.packPartialCoalescence(srcField, maskField, srcInterval, bufferPtr, dir, stream);
    kernels_.unpackCoalescence(dstField, dstInterval, bufferPtr, invDir, stream);
-}
-
-template< typename PdfField_T>
-void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::getLocalFineToCoarseCommFunction(
-   std::vector< VoidFunction >& commFunctions,
-   const Block* fineSender, Block* coarseReceiver, walberla::stencil::Direction dir, GpuBuffer_T & buffer)
-{
-   auto varFineSender = const_cast< Block * >(fineSender);
-   auto srcField   = varFineSender->getData< PdfField_T >(pdfFieldID_);
-   auto srcCommData   = varFineSender->getData< CommData_T >(commDataID_);
-   PartialCoalescenceMaskFieldGPU * maskField = &(srcCommData->getMaskFieldGPU());
-   auto dstField = coarseReceiver->getData<PdfField_T>(pdfFieldID_);
-   Direction invDir = stencil::inverseDir[dir];
-
-   CellInterval srcInterval;
-   srcField->getGhostRegion(dir, srcInterval, 2);
-   uint_t packSize = kernels_.partialCoalescenceSize(srcInterval, dir);
-
-   CellInterval dstInterval = getCoarseBlockCoalescenceInterval(coarseReceiver, fineSender->getId(),
-                                                                invDir, dstField);
-
-#ifndef NDEBUG
-   uint_t unpackSize = kernels_.size(dstInterval, invDir);
-   WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
-#endif
-
-   auto bufferPtr = buffer.advanceNoResize(packSize);
-   auto commFunction = [this, srcField, maskField, srcInterval, bufferPtr, dir, dstField, dstInterval, invDir](gpuStream_t gpuStream)
-   {
-      kernels_.packPartialCoalescence(srcField, maskField, srcInterval, bufferPtr, dir, gpuStream);
-      kernels_.unpackCoalescence(dstField, dstInterval, bufferPtr, invDir, gpuStream);
-   };
-   commFunctions.emplace_back(commFunction);
 }
 
 
@@ -453,16 +348,35 @@ uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineSend ( c
    return size;
 }
 
+template< typename PdfField_T>
+uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir)
+{
+
+   auto field = fineReceiver->getData< PdfField_T >(pdfFieldID_);
+
+   std::vector< std::pair< Direction, CellInterval > > intervals;
+   getFineBlockCommIntervals(fineReceiver->getId(), dir, field, intervals);
+
+   uint_t size = 0;
+   for (auto t : intervals)
+   {
+      size += kernels_.redistributeSize(t.second);
+   }
+   WALBERLA_ASSERT_GREATER(size, 0)
+   return size;
+}
+
 
 
 template< typename PdfField_T>
 uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeFineToCoarseSend ( const Block * sender, stencil::Direction dir)
 {
-   auto field = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
+    auto block      = const_cast< Block* >(sender);
+    auto srcField   = block->getData< PdfField_T >(pdfFieldID_);
 
-   CellInterval ci;
-   field->getGhostRegion(dir, ci, 2);
-   return kernels_.partialCoalescenceSize(ci, dir);
+    CellInterval ci;
+    srcField->getGhostRegion(dir, ci, 2);
+    return kernels_.partialCoalescenceSize(ci, dir);
 }
 
 
@@ -470,7 +384,7 @@ uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeFineToCoarseSend ( c
 template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataFineToCoarseImpl(
    const Block* fineSender, const walberla::BlockID& /*coarseReceiver*/, walberla::stencil::Direction dir,
-   GpuBuffer_T & buffer) const
+   GpuBuffer_T & buffer, gpuStream_t stream) const
 {
    auto varBlock = const_cast< Block* >(fineSender);
    auto srcField   = varBlock->getData< PdfField_T >(pdfFieldID_);
@@ -481,7 +395,7 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::packDataFineToCoarseImpl(
    srcField->getGhostRegion(dir, ci, 2);
    uint_t size = kernels_.partialCoalescenceSize(ci, dir);
    auto bufferPtr = buffer.advanceNoResize(size);
-   kernels_.packPartialCoalescence(srcField, maskField, ci, bufferPtr, dir);
+   kernels_.packPartialCoalescence(srcField, maskField, ci, bufferPtr, dir, stream);
 }
 
 /***********************************************************************************************************************

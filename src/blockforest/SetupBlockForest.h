@@ -175,7 +175,7 @@ public:
    uint_t getMinLevel()           const;
    uint_t getMaxLevel()           const;
    uint_t getTreeIdDigits()       const { return treeIdDigits_; }
-   uint_t getBlockIdBytes()       const { uint_t bits = treeIdDigits_ + 3 * depth_; return (bits >> 3) + (( bits & 7 ) ? uint_c(1) : uint_c(0)); }
+   uint_t getBlockIdBytes()       const { uint_t const bits = treeIdDigits_ + 3 * depth_; return (bits >> 3) + (( bits & 7 ) ? uint_c(1) : uint_c(0)); }
 
    uint_t getNumberOfTrees()      const { return forest_.size(); }
    uint_t getNumberOfRootBlocks() const { return numberOfRootBlocks_; }
@@ -312,7 +312,7 @@ public:
    uint_t getNumberOfProcesses      () const { return numberOfProcesses_; }
    uint_t getNumberOfWorkerProcesses() const { return numberOfProcesses_ - numberOfBufferProcesses_; }
    uint_t getNumberOfBufferProcesses() const { return numberOfBufferProcesses_; }
-   uint_t getProcessIdBytes         () const { uint_t bits = uintMSBPosition( numberOfProcesses_ - 1 );
+   uint_t getProcessIdBytes         () const { uint_t const bits = uintMSBPosition( numberOfProcesses_ - 1 );
                                                return ( bits >> 3 ) + ( ( bits & 7 ) ? uint_c(1) : uint_c(0) ); }
 
    inline bool insertBuffersIntoProcessNetwork() const { return insertBuffersIntoProcessNetwork_; }
@@ -505,19 +505,20 @@ inline uint_t SetupBlockForest::mapForestCoordinatesToTreeIndex( const uint_t x,
 
 inline void SetupBlockForest::mapTreeIndexToForestCoordinates( const uint_t treeIndex, const uint_t xSize, const uint_t ySize,
                                                                uint_t& x, uint_t& y, uint_t& z )
-{
-              z = treeIndex / ( xSize * ySize );
-   uint_t index = treeIndex % ( xSize * ySize );
-              y = index / xSize;
-              x = index % xSize;
+                                                               {
+    uint_t const index = treeIndex % ( xSize * ySize );
+
+    z = treeIndex / ( xSize * ySize );
+    y = index / xSize;
+    x = index % xSize;
 }
 
 
 
-inline void SetupBlockForest::mapTreeIndexToForestCoordinates( const uint_t treeIndex, uint_t& x, uint_t& y, uint_t& z ) const {
+inline void SetupBlockForest::mapTreeIndexToForestCoordinates( const uint_t treeIndex, uint_t& x, uint_t& y, uint_t& z ) const
+{
 
    WALBERLA_ASSERT_LESS( treeIndex, size_[0] * size_[1] * size_[2] )
-
    mapTreeIndexToForestCoordinates( treeIndex, size_[0], size_[1], x, y, z );
 }
 
@@ -530,7 +531,8 @@ inline void SetupBlockForest::getRootBlockAABB( AABB& aabb, const uint_t x, cons
 
 
 
-inline void SetupBlockForest::getRootBlockAABB( AABB& aabb, const uint_t treeIndex ) const {
+inline void SetupBlockForest::getRootBlockAABB( AABB& aabb, const uint_t treeIndex ) const
+{
 
    uint_t x;
    uint_t y;
@@ -615,10 +617,10 @@ inline void SetupBlockForest::initWorkloadMemorySUID( const Set<SUID>& selector 
 
    if( workloadMemorySUIDAssignmentFunctions.empty() ) {
       WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: No callback functions for assigning workload, memory requirements, and SUIDs to blocks found.\n"
-                             "                               Default values (zero/nothing) will be assigned ..." );
+                             "                               Default values (zero/nothing) will be assigned ..." )
    }
    else {
-      WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Assigning workload, memory requirements, and SUIDs to blocks ..." );
+      WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Assigning workload, memory requirements, and SUIDs to blocks ..." )
    }
 
    for( uint_t i = 0; i != workloadMemorySUIDAssignmentFunctions.size(); ++i )

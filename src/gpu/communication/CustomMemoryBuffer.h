@@ -73,6 +73,7 @@ namespace communication {
       void resize( std::size_t newSize );
       inline std::size_t allocSize() const { return std::size_t(end_ - begin_); }
       inline std::size_t size() const { return std::size_t(cur_ - begin_); }
+      inline std::size_t remainingSize() const { return std::size_t(end_ - cur_); }
       ElementType *ptr() const { return begin_; }
       ElementType *cur() const { return cur_; }
 
