@@ -30,12 +30,12 @@
 
 #include "domain_decomposition/IBlock.h"
 
-#include "stencil/Directions.h"
-
 #include "gpu/ErrorChecking.h"
 #include "gpu/GPUWrapper.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
 #include "gpu/communication/GeneratedNonUniformGPUPackInfo.h"
+
+#include "stencil/Directions.h"
 
 #include <memory>
 #include <thread>
@@ -138,7 +138,8 @@ NonUniformGPUScheme< Stencil >::NonUniformGPUScheme(const weak_ptr< StructuredBl
 {
    WALBERLA_MPI_SECTION()
    {
-#if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
+// Open MPI supports compile time CUDA-aware support check
+#if (defined(OPEN_MPI) && OPEN_MPI) && !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
       WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
    }
