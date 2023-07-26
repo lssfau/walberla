@@ -61,8 +61,6 @@ IncludeCategories:
     Priority:        3
   - Regex:           '^"core/'
     Priority:        4
-  - Regex:           '^"cuda/'
-    Priority:        5
   - Regex:           '^"domain_decomposition/'
     Priority:        6
   - Regex:           '^"executiontree/'
@@ -75,6 +73,8 @@ IncludeCategories:
     Priority:        10
   - Regex:           '^"geometry/'
     Priority:        11
+  - Regex:           '^"gpu/'
+    Priority:        12
   - Regex:           '^"gui/'
     Priority:        12
   - Regex:           '^"lbm/'

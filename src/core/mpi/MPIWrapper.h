@@ -66,6 +66,9 @@ namespace mpistubs {
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #include <mpi.h>
+#if defined(OPEN_MPI) && OPEN_MPI
+#include <mpi-ext.h>
+#endif
 #if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic pop
 #endif

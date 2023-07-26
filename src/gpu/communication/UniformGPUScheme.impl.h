@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#include "core/mpi/MPIWrapper.h"
+
 #include "gpu/ParallelStreams.h"
 
 namespace walberla {
@@ -45,7 +47,8 @@ namespace communication {
    {
       WALBERLA_MPI_SECTION()
       {
-#if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
+// Open MPI supports compile time CUDA-aware support check
+#if (defined(OPEN_MPI) && OPEN_MPI) && !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
          WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
       }
