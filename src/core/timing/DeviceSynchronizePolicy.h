@@ -23,6 +23,7 @@
 #pragma once
 
 #include "gpu/DeviceWrapper.h"
+#include "gpu/ErrorChecking.h"
 
 #include "Time.h"
 
@@ -74,7 +75,7 @@ internally.
 inline double DeviceSynchronizePolicy::getTimestamp()
 {
    // synchronize device before getting timestamp
-   WALBERLA_DEVICE_SECTION() { gpuDeviceSynchronize(); }
+   WALBERLA_DEVICE_SECTION() {WALBERLA_GPU_CHECK(gpuDeviceSynchronize()) }
 
    return getWcTime();
 }

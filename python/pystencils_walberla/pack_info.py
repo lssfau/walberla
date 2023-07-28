@@ -15,7 +15,7 @@ from pystencils_walberla.kernel_info import KernelInfo
 from pystencils_walberla.utility import config_from_context
 
 
-def generate_pack_info_for_field(ctx: CodeGenerationContext, class_name: str, field: Field,
+def generate_pack_info_for_field(generation_context: CodeGenerationContext, class_name: str, field: Field,
                                  direction_subset: Optional[Tuple[Tuple[int, int, int]]] = None,
                                  operator=None, gl_to_inner=False,
                                  target=Target.CPU, data_type=None, cpu_openmp=False,
@@ -23,7 +23,7 @@ def generate_pack_info_for_field(ctx: CodeGenerationContext, class_name: str, fi
     """Creates a pack info for a pystencils field assuming a pull-type stencil, packing all cell elements.
 
     Args:
-        ctx: see documentation of `generate_sweep`
+        generation_context: see documentation of `generate_sweep`
         class_name: name of the generated class
         field: pystencils field for which to generate pack info
         direction_subset: optional sequence of directions for which values should be packed
@@ -40,18 +40,19 @@ def generate_pack_info_for_field(ctx: CodeGenerationContext, class_name: str, fi
         direction_subset = tuple((i, j, k) for i, j, k in product(*[(-1, 0, 1)] * 3))
 
     all_index_accesses = [field(*ind) for ind in product(*[range(s) for s in field.index_shape])]
-    return generate_pack_info(ctx, class_name, {direction_subset: all_index_accesses}, operator=operator,
+    return generate_pack_info(generation_context, class_name, {direction_subset: all_index_accesses}, operator=operator,
                               gl_to_inner=gl_to_inner, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
                               **create_kernel_params)
 
 
-def generate_pack_info_from_kernel(ctx: CodeGenerationContext, class_name: str, assignments: Sequence[Assignment],
-                                   kind='pull', operator=None, target=Target.CPU, data_type=None, cpu_openmp=False,
+def generate_pack_info_from_kernel(generation_context: CodeGenerationContext, class_name: str,
+                                   assignments: Sequence[Assignment], kind='pull', operator=None,
+                                   target=Target.CPU, data_type=None, cpu_openmp=False,
                                    **create_kernel_params):
     """Generates a waLBerla GPU PackInfo from a (pull) kernel.
 
     Args:
-        ctx: see documentation of `generate_sweep`
+        generation_context: see documentation of `generate_sweep`
         class_name: name of the generated class
         assignments: list of assignments from the compute kernel - generates PackInfo for "pull" part only
                      i.e. the kernel is expected to only write to the center
@@ -92,11 +93,11 @@ def generate_pack_info_from_kernel(ctx: CodeGenerationContext, class_name: str, 
                 spec[(comm_dir,)].add(fa)
     else:
         raise ValueError("Invalid 'kind' parameter")
-    return generate_pack_info(ctx, class_name, spec, operator=operator,
+    return generate_pack_info(generation_context, class_name, spec, operator=operator,
                               target=target, data_type=data_type, cpu_openmp=cpu_openmp, **create_kernel_params)
 
 
-def generate_pack_info(ctx: CodeGenerationContext, class_name: str,
+def generate_pack_info(generation_context: CodeGenerationContext, class_name: str,
                        directions_to_pack_terms: Dict[Tuple[Tuple], Sequence[Field.Access]],
                        namespace='pystencils', operator=None, gl_to_inner=False,
                        target=Target.CPU, data_type=None, cpu_openmp=False,
@@ -104,7 +105,7 @@ def generate_pack_info(ctx: CodeGenerationContext, class_name: str,
     """Generates a waLBerla GPU PackInfo
 
     Args:
-        ctx: see documentation of `generate_sweep`
+        generation_context: see documentation of `generate_sweep`
         class_name: name of the generated class
         directions_to_pack_terms: maps tuples of directions to read field accesses, specifying which values have to be
                                   packed for which direction
@@ -123,10 +124,10 @@ def generate_pack_info(ctx: CodeGenerationContext, class_name: str,
     items = sorted(items, key=lambda e: e[0])
     directions_to_pack_terms = OrderedDict(items)
 
-    config = config_from_context(ctx, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+    config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
                                  **create_kernel_params)
 
-    config_zero_gl = config_from_context(ctx, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+    config_zero_gl = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
                                          ghost_layers=0, **create_kernel_params)
 
     # Vectorisation of the pack info is not implemented.
@@ -202,9 +203,9 @@ def generate_pack_info(ctx: CodeGenerationContext, class_name: str,
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cpp" if config.target == Target.CPU else "cu"
-    ctx.write_file(f"{class_name}.h", header)
-    ctx.write_file(f"{class_name}.{source_extension}", source)
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    generation_context.write_file(f"{class_name}.h", header)
+    generation_context.write_file(f"{class_name}.{source_extension}", source)
 
 
 def generate_mpidtype_info_from_kernel(ctx: CodeGenerationContext, class_name: str,

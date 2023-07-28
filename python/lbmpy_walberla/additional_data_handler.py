@@ -1,7 +1,6 @@
 from pystencils import Target
 from pystencils.stencil import inverse_direction
 
-
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index
 from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
@@ -64,18 +63,18 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
 
         init_list += [f"const Cell n = it.cell() + Cell({offset[0]}, {offset[1]}, {offset[2]});",
                       f"int32_t ref_dir = {self._walberla_stencil.index(inv_offset)}; // dir: {direction}",
-                     "element.wnx = 0; // compute discrete normal vector of free slip wall",
-                     "element.wny = 0;",
-                     f"if( flagField->isPartOfMaskSet( n.x() + {inv_offset[0]}, n.y(), n.z(), domainFlag ) )",
-                     "{",
-                     f"   element.wnx = {inv_offset[0]};",
+                      "element.wnx = 0; // compute discrete normal vector of free slip wall",
+                      "element.wny = 0;",
+                      f"if( flagField->isPartOfMaskSet( n.x() + {inv_offset[0]}, n.y(), n.z(), domainFlag ) )",
+                      "{",
+                      f"   element.wnx = {inv_offset[0]};",
                       "   ref_dir = x_axis_mirrored_stencil_dir[ ref_dir ];",
-                     "}",
-                     f"if( flagField->isPartOfMaskSet( n.x(), n.y() + {inv_offset[1]}, n.z(), domainFlag ) )",
-                     "{",
-                     f"   element.wny = {inv_offset[1]};",
+                      "}",
+                      f"if( flagField->isPartOfMaskSet( n.x(), n.y() + {inv_offset[1]}, n.z(), domainFlag ) )",
+                      "{",
+                      f"   element.wny = {inv_offset[1]};",
                       "   ref_dir = y_axis_mirrored_stencil_dir[ ref_dir ];",
-                     "}"]
+                      "}"]
         if self._dim == 3:
             init_list += ["element.wnz = 0;",
                           f"if( flagField->isPartOfMaskSet( n.x(), n.y(), n.z() + {inv_offset[2]}, domainFlag ) )",
@@ -157,7 +156,7 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
         self._target = target
         super(OutflowAdditionalDataHandler, self).__init__(stencil=stencil)
 
-        assert sum([a != 0 for a in self._normal_direction]) == 1,\
+        assert sum([a != 0 for a in self._normal_direction]) == 1, \
             "The outflow boundary is only implemented for straight walls at the moment."
 
     @property
