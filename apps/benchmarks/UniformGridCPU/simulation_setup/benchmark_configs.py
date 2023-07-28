@@ -41,7 +41,7 @@ class Scenario:
             init_shear_flow = False
             periodic = (0, 0, 0)
 
-        self.blocks = (2, 1, 1) # block_decomposition(wlb.mpi.numProcesses())
+        self.blocks = block_decomposition(wlb.mpi.numProcesses())
 
         self.cells_per_block = cells_per_block
         self.periodic = periodic
@@ -68,7 +68,7 @@ class Scenario:
                 'blocks': self.blocks,
                 'cellsPerBlock': self.cells_per_block,
                 'periodic': self.periodic,
-                'oneBlockPerProcess': False
+                'oneBlockPerProcess': True
             },
             'Parameters': {
                 'omega': self.omega,

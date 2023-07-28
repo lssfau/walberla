@@ -10,12 +10,13 @@ from lbmpy import LBMConfig
 from lbmpy.advanced_streaming import is_inplace
 from lbmpy.methods import AbstractLbMethod
 
+from pystencils_walberla.cmake_integration import CodeGenerationContext
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.utility import config_from_context
 from lbmpy_walberla.packing_kernels import PackingKernelsCodegen
 
 
-def generate_lbm_storage_specification(generation_context, class_name: str,
+def generate_lbm_storage_specification(generation_context: CodeGenerationContext, class_name: str,
                                        method: AbstractLbMethod, lbm_config: LBMConfig, nonuniform: bool = False,
                                        target: Target = Target.CPU, data_type=None, cpu_openmp: bool = False,
                                        **create_kernel_params):
@@ -83,6 +84,6 @@ def generate_lbm_storage_specification(generation_context, class_name: str,
     header = env.get_template('LbmStorageSpecification.tmpl.h').render(**jinja_context)
     source = env.get_template('LbmStorageSpecification.tmpl.cpp').render(**jinja_context)
 
-    source_extension = "cpp" if target == Target.CPU else "cu"
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)

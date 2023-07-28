@@ -195,8 +195,8 @@ class KernelCallNode(AbstractKernelSelectionNode):
             grid = tuple(sp_printer_c.doprint(e) for e in indexing_dict['grid'])
 
             kernel_call_lines = [
-                f"dim3 _block(uint64_c({block[0]}), uint64_c({block[1]}), uint64_c({block[2]}));",
-                f"dim3 _grid(uint64_c({grid[0]}), uint64_c({grid[1]}), uint64_c({grid[2]}));",
+                f"dim3 _block(uint32_c({block[0]}), uint32_c({block[1]}), uint32_c({block[2]}));",
+                f"dim3 _grid(uint32_c({grid[0]}), uint32_c({grid[1]}), uint32_c({grid[2]}));",
                 f"internal_{fnc_name}::{fnc_name}<<<_grid, _block, 0, {stream}>>>({call_parameters});"
             ]
 

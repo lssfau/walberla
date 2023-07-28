@@ -17,6 +17,7 @@ from lbmpy.advanced_streaming.communication import _extend_dir
 from lbmpy.enums import Stencil
 from lbmpy.stencils import LBStencil
 
+from pystencils_walberla.cmake_integration import CodeGenerationContext
 from pystencils_walberla.kernel_selection import KernelFamily, KernelCallNode, SwitchNode
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.utility import config_from_context
@@ -25,7 +26,8 @@ from lbmpy_walberla.alternating_sweeps import EvenIntegerCondition
 from lbmpy_walberla.utility import timestep_suffix
 
 
-def generate_packing_kernels(generation_context, class_name: str, stencil: LBStencil, streaming_pattern: str = 'pull',
+def generate_packing_kernels(generation_context: CodeGenerationContext, class_name: str,
+                             stencil: LBStencil, streaming_pattern: str = 'pull',
                              namespace='lbm', nonuniform: bool = False,
                              target: Target = Target.CPU, data_type=None, cpu_openmp: bool = False,
                              **create_kernel_params):
@@ -72,7 +74,7 @@ def generate_packing_kernels(generation_context, class_name: str, stencil: LBSte
     header = env.get_template(f"{template_name}.tmpl.h").render(**jinja_context)
     source = env.get_template(f"{template_name}.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cpp" if target == Target.CPU else "cu"
+    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
