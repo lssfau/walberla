@@ -420,7 +420,7 @@ gcc_8_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -444,7 +444,7 @@ gcc_8_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -466,7 +466,7 @@ gcc_8_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -487,7 +487,7 @@ gcc_8_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -512,7 +512,7 @@ gcc_8_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -535,7 +535,7 @@ gcc_8_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -557,7 +557,7 @@ gcc_8_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -582,7 +582,7 @@ gcc_9_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -606,7 +606,7 @@ gcc_9_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -628,7 +628,7 @@ gcc_9_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -649,7 +649,7 @@ gcc_9_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -674,7 +674,7 @@ gcc_9_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -697,7 +697,7 @@ gcc_9_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -719,7 +719,7 @@ gcc_9_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -744,7 +744,7 @@ gcc_10_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -768,7 +768,7 @@ gcc_10_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -790,7 +790,7 @@ gcc_10_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -811,7 +811,7 @@ gcc_10_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -836,7 +836,7 @@ gcc_10_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -859,7 +859,7 @@ gcc_10_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -881,7 +881,7 @@ gcc_10_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -906,7 +906,7 @@ gcc_11_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -930,7 +930,7 @@ gcc_11_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -952,7 +952,7 @@ gcc_11_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -973,7 +973,7 @@ gcc_11_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -998,7 +998,7 @@ gcc_11_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1021,7 +1021,7 @@ gcc_11_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1043,7 +1043,7 @@ gcc_11_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1348,7 +1348,7 @@ clang_11.0_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1372,7 +1372,7 @@ clang_11.0_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -1394,7 +1394,7 @@ clang_11.0_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -1415,7 +1415,7 @@ clang_11.0_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1440,7 +1440,7 @@ clang_11.0_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1463,7 +1463,7 @@ clang_11.0_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1485,7 +1485,7 @@ clang_11.0_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1510,7 +1510,7 @@ clang_12.0_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1534,7 +1534,7 @@ clang_12.0_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -1556,7 +1556,7 @@ clang_12.0_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -1577,7 +1577,7 @@ clang_12.0_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1602,7 +1602,7 @@ clang_12.0_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1625,7 +1625,7 @@ clang_12.0_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1647,7 +1647,7 @@ clang_12.0_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1672,7 +1672,7 @@ clang_13.0_serial:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1696,7 +1696,7 @@ clang_13.0_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -1718,7 +1718,7 @@ clang_13.0_hybrid:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -1736,7 +1736,7 @@ clang_13.0_serial_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1758,7 +1758,7 @@ clang_13.0_mpionly_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1778,7 +1778,7 @@ clang_13.0_hybrid_dbg:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1798,7 +1798,7 @@ clang_13.0_hybrid_dbg_sp:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - pip3 list
       - cd ..
-      - CC=gcc CXX=g++ pip3 install pycuda
+      - CC=gcc CXX=g++ pip3 install cupy-cuda11x
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"

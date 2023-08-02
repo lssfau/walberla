@@ -52,7 +52,6 @@ using namespace pybind11::literals;
    uint64_t gpufield_ptr(const GpuField_T & gpuField)
    {
       return reinterpret_cast<uint64_t>(gpuField.pitchedPtr().ptr);
-      // return gpuField.pitchedPtr();
    }
 
    template<typename GpuField_T>
@@ -115,7 +114,7 @@ using namespace pybind11::literals;
                             py::object &dtype, uint_t fs, uint_t gl, Layout layout,
                             bool usePitchedMem )
          : blocks_( blocks ), name_( name ), dtype_(dtype), fs_( fs ),
-           gl_(gl),layout_( layout), usePitchedMem_(usePitchedMem), found_(true)
+           gl_(gl),layout_( layout), usePitchedMem_(usePitchedMem)
       {}
 
       template< typename GpuField_T>
@@ -138,7 +137,7 @@ using namespace pybind11::literals;
       uint_t gl_;
       Layout layout_;
       bool usePitchedMem_;
-      bool found_;
+      bool found_{true};
    };
 
    template<typename... GpuFields>

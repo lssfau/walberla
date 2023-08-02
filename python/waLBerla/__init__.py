@@ -42,10 +42,10 @@ if cpp_available:
         from .field_extension import extend as extend_field
         extend_field(field)  # noqa: F405
 
-    if 'cuda' in globals():
-        sys.modules[__name__ + '.cuda'] = cuda  # noqa: F405
-        from .cuda_extension import extend as extend_cuda
-        extend_cuda(cuda)  # noqa: F405
+    if 'gpu' in globals():
+        sys.modules[__name__ + '.gpu'] = gpu  # noqa: F405
+        from .gpu_extension import extend as extend_gpu
+        extend_gpu(gpu)  # noqa: F405
     if 'mpi' in globals():
         sys.modules[__name__ + '.mpi'] = mpi  # noqa: F405
 else:
