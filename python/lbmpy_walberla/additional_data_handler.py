@@ -2,7 +2,7 @@ from pystencils import Target
 from pystencils.stencil import inverse_direction
 from pystencils.typing import BasicType
 
-from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index
+from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index, Timestep, is_inplace
 from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
 from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB
@@ -27,7 +27,6 @@ def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_n
 class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, FreeSlip)
-        self._boundary_object = boundary_object
         super(FreeSlipAdditionalDataHandler, self).__init__(stencil=stencil)
 
     def data_initialisation(self, direction):
@@ -91,7 +90,6 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
 class UBBAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, UBB)
-        self._boundary_object = boundary_object
         super(UBBAdditionalDataHandler, self).__init__(stencil=stencil)
 
     @property
@@ -131,9 +129,8 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
 
 
 class OutflowAdditionalDataHandler(AdditionalDataHandler):
-    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs', pdfs_data_type=None):
+    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs', pdfs_data_type=None, zeroth_timestep=None):
         assert isinstance(boundary_object, ExtrapolationOutflow)
-        self._boundary_object = boundary_object
         self._stencil = boundary_object.stencil
         self._lb_method = boundary_object.lb_method
         self._normal_direction = boundary_object.normal_direction
@@ -146,6 +143,11 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
             pdfs_data_type = BasicType(pdfs_data_type)
             self._pdfs_data_type = pdfs_data_type.c_name
 
+        self._streaming_pattern = boundary_object.streaming_pattern
+        if zeroth_timestep:
+            self._zeroth_timestep = zeroth_timestep
+        else:
+            self._zeroth_timestep = Timestep.EVEN if is_inplace(self._streaming_pattern) else Timestep.BOTH
         super(OutflowAdditionalDataHandler, self).__init__(stencil=stencil)
 
         assert sum([a != 0 for a in self._normal_direction]) == 1, \
@@ -170,9 +172,9 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
                f"{len(self._stencil)}> >({self._field_name}{identifier}ID); "
 
     def data_initialisation(self, direction_index):
-        pdf_acc = AccessPdfValues(self._boundary_object.stencil,
-                                  streaming_pattern=self._boundary_object.streaming_pattern,
-                                  timestep=self._boundary_object.zeroth_timestep,
+        pdf_acc = AccessPdfValues(self._stencil,
+                                  streaming_pattern=self._streaming_pattern,
+                                  timestep=self._zeroth_timestep,
                                   streaming_dir='out')
 
         init_list = []
