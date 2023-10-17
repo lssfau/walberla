@@ -78,6 +78,32 @@ class {{class_name}}
    // Inverse lattice weights
    static constexpr {{dtype}} wInv[{{stencil_size}}] = { {{inverse_weights}} };
 
+   struct AccessorEVEN
+   {
+      static constexpr cell_idx_t readX[{{stencil_size}}] = { {{even_read[0]}} };
+      static constexpr cell_idx_t readY[{{stencil_size}}] = { {{even_read[1]}} };
+      static constexpr cell_idx_t readZ[{{stencil_size}}] = { {{even_read[2]}} };
+      static constexpr cell_idx_t readD[{{stencil_size}}] = { {{even_read[3]}} };
+
+      static constexpr cell_idx_t writeX[{{stencil_size}}] = { {{even_write[0]}} };
+      static constexpr cell_idx_t writeY[{{stencil_size}}] = { {{even_write[1]}} };
+      static constexpr cell_idx_t writeZ[{{stencil_size}}] = { {{even_write[2]}} };
+      static constexpr cell_idx_t writeD[{{stencil_size}}] = { {{even_write[3]}} };
+   };
+
+   struct AccessorODD
+   {
+      static constexpr cell_idx_t readX[{{stencil_size}}] = { {{odd_read[0]}} };
+      static constexpr cell_idx_t readY[{{stencil_size}}] = { {{odd_read[1]}} };
+      static constexpr cell_idx_t readZ[{{stencil_size}}] = { {{odd_read[2]}} };
+      static constexpr cell_idx_t readD[{{stencil_size}}] = { {{odd_read[3]}} };
+
+      static constexpr cell_idx_t writeX[{{stencil_size}}] = { {{odd_write[0]}} };
+      static constexpr cell_idx_t writeY[{{stencil_size}}] = { {{odd_write[1]}} };
+      static constexpr cell_idx_t writeZ[{{stencil_size}}] = { {{odd_write[2]}} };
+      static constexpr cell_idx_t writeD[{{stencil_size}}] = { {{odd_write[3]}} };
+   };
+
    // Compute kernels to pack and unpack MPI buffers
    class PackKernels {
 
@@ -96,8 +122,8 @@ class {{class_name}}
       static const bool inplace = {% if inplace -%} true {%- else -%} false {%- endif -%};
 
       /**
-       * Packs all pdfs from the given cell interval to the send buffer.
-       * */
+      * Packs all pdfs from the given cell interval to the send buffer.
+      * */
       void packAll(
          {{- [ "PdfField_T * " + src_field.name, "CellInterval & ci",
                 "unsigned char * outBuffer", kernels['packAll'].kernel_selection_parameters,
@@ -168,7 +194,7 @@ class {{class_name}}
        * @return    The required size of the buffer, in bytes
        * */
       uint_t size (CellInterval & ci, stencil::Direction dir) const {
-         return ci.numCells() * sizes[dir] * sizeof(value_type);
+         return ci.numCells() * sizes[dir] * uint_c(sizeof(value_type));
       }
 
       /**
@@ -178,7 +204,7 @@ class {{class_name}}
        * @return    The required size of the buffer, in bytes
        * */
       uint_t size (CellInterval & ci) const {
-         return ci.numCells() * {{stencil_size}} * sizeof(value_type);
+         return ci.numCells() * {{stencil_size}} * uint_c(sizeof(value_type));
       }
 
       {% if nonuniform -%}
@@ -250,6 +276,8 @@ class {{class_name}}
     private:
       const uint_t sizes[{{direction_sizes|length}}] { {{ direction_sizes | join(', ') }} };
    };
+
+   using value_type = PackKernels::value_type;
 
 };
 

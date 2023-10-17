@@ -41,12 +41,12 @@ class {{class_name}}
    enum Type { ALL = 0, INNER = 1, OUTER = 2 };
 
 
-   {{class_name}}( {{- ["const shared_ptr<StructuredBlockForest> & blocks", "BlockDataID flagID_", "BlockDataID pdfsID_", "FlagUID domainUID_", [kernel_list|generate_constructor_parameters(['indexVector', 'indexVectorSize', 'pdfs'])]] | type_identifier_list -}} )
+   {{class_name}}( {{- ["const shared_ptr<StructuredBlockForest> & blocks", "BlockDataID flagID_", "BlockDataID pdfsID_", "FlagUID domainUID_", [kernel_list|generate_constructor_parameters(['indexVector', 'indexVectorSize', 'pdfs'])], additional_constructor_arguments] | type_identifier_list -}} )
       : blocks_(blocks), flagID(flagID_), pdfsID(pdfsID_), domainUID(domainUID_)
    {
-      {% for object_name, boundary_class, kernel in zip(object_names, boundary_classes, kernel_list) -%}
+      {% for object_name, boundary_class, kernel, additional_data_handler in zip(object_names, boundary_classes, kernel_list, additional_data_handlers) -%}
 
-      {{object_name}} = std::make_shared< {{boundary_class}} >({{- ["blocks", "pdfsID", [kernel|generate_function_collection_call(['indexVector', 'indexVectorSize', 'pdfs', 'timestep', 'gpuStream'])]] | type_identifier_list -}});
+      {{object_name}} = std::make_shared< {{boundary_class}} >({{- ["blocks", "pdfsID", [kernel|generate_function_collection_call(['indexVector', 'indexVectorSize', 'pdfs', 'timestep', 'gpuStream'])], additional_data_handler.constructor_argument_name] | type_identifier_list -}});
       {% endfor %}
 
       {% for object_name, flag_uid in zip(object_names, flag_uids) -%}
@@ -105,4 +105,3 @@ class {{class_name}}
 
 }
 }
-

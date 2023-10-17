@@ -48,6 +48,10 @@
 #define RESTRICT
 #endif
 
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+using walberla::half;
+#endif
+
 namespace walberla {
 namespace {{namespace}} {
 

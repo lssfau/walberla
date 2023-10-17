@@ -17,6 +17,10 @@ class AdditionalDataHandler:
             self._walberla_stencil = stencil
 
     @property
+    def constructor_argument_name(self):
+        return ""
+
+    @property
     def constructor_arguments(self):
         return ""
 

@@ -7,9 +7,10 @@ import numpy as np
 from pystencils import Target, create_kernel
 from pystencils.config import CreateKernelConfig
 from pystencils.field import Field
+from pystencils.simp import add_subexpressions_for_field_reads
 
 from lbmpy.advanced_streaming import is_inplace, get_accessor, Timestep
-from lbmpy.creationfunctions import LbmCollisionRule
+from lbmpy.creationfunctions import LbmCollisionRule, LBMConfig, LBMOptimisation
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter, macroscopic_values_getter
 from lbmpy.updatekernels import create_lbm_kernel, create_stream_only_kernel
@@ -23,35 +24,32 @@ from .function_generator import kernel_family_function_generator
 
 
 def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmCollisionRule,
-                                  streaming_pattern='pull',
-                                  field_layout='fzyx', refinement_scaling=None,
-                                  macroscopic_fields: Dict[str, Field] = None,
+                                  lbm_config: LBMConfig, lbm_optimisation: LBMOptimisation,
+                                  refinement_scaling=None, macroscopic_fields: Dict[str, Field] = None,
                                   target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
                                   max_threads=None,
                                   **create_kernel_params):
+
     config = config_from_context(ctx, target=target, data_type=data_type,
                                  cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info, **create_kernel_params)
+
+    streaming_pattern = lbm_config.streaming_pattern
+    field_layout = lbm_optimisation.field_layout
 
     # usually a numpy layout is chosen by default i.e. xyzf - which is bad for waLBerla where at least the spatial
     # coordinates should be ordered in reverse direction i.e. zyx
     lb_method = collision_rule.method
-
-    q = lb_method.stencil.Q
-    dim = lb_method.stencil.D
 
     if field_layout == 'fzyx':
         config.cpu_vectorize_info['assume_inner_stride_one'] = True
     elif field_layout == 'zyxf':
         config.cpu_vectorize_info['assume_inner_stride_one'] = False
 
-    src_field = Field.create_generic('pdfs', dim, config.data_type['pdfs'].numpy_dtype,
-                                     index_dimensions=1, layout=field_layout, index_shape=(q,))
+    src_field = lbm_optimisation.symbolic_field
     if is_inplace(streaming_pattern):
         dst_field = src_field
     else:
-        dst_field = Field.create_generic('pdfs_tmp', dim, config.data_type['pdfs_tmp'].numpy_dtype,
-                                         index_dimensions=1, layout=field_layout,
-                                         index_shape=(q,))
+        dst_field = lbm_optimisation.symbolic_temporary_field
 
     config = replace(config, ghost_layers=0)
 
@@ -98,15 +96,17 @@ class RefinementScaling:
 def lbm_kernel_family(class_name, kernel_name,
                       collision_rule, streaming_pattern, src_field, dst_field, config: CreateKernelConfig):
 
+    default_dtype = config.data_type.default_factory()
     if kernel_name == "streamCollide":
         def lbm_kernel(field_accessor, lb_stencil):
-            return create_lbm_kernel(collision_rule, src_field, dst_field, field_accessor)
+            return create_lbm_kernel(collision_rule, src_field, dst_field, field_accessor, data_type=default_dtype)
         advance_timestep = {"field_name": src_field.name, "function": "advanceTimestep"}
         temporary_fields = ['pdfs_tmp']
         field_swaps = [('pdfs', 'pdfs_tmp')]
     elif kernel_name == "collide":
         def lbm_kernel(field_accessor, lb_stencil):
-            return create_lbm_kernel(collision_rule, src_field, dst_field, CollideOnlyInplaceAccessor())
+            return create_lbm_kernel(collision_rule, src_field, dst_field, CollideOnlyInplaceAccessor(),
+                                     data_type=default_dtype)
         advance_timestep = {"field_name": src_field.name, "function": "advanceTimestep"}
         temporary_fields = ()
         field_swaps = ()
@@ -161,6 +161,8 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
     density = macroscopic_fields.get('density', 1.0)
     velocity = macroscopic_fields.get('velocity', [0.0] * dim)
 
+    default_dtype = config.data_type.default_factory()
+
     get_timestep = {"field_name": pdfs.name, "function": "getTimestep"}
     temporary_fields = ()
     field_swaps = ()
@@ -172,6 +174,9 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
             setter = macroscopic_values_setter(lb_method,
                                                density=density, velocity=velocity, pdfs=pdfs,
                                                streaming_pattern=streaming_pattern, previous_timestep=timestep)
+
+            if default_dtype != pdfs.dtype:
+                setter = add_subexpressions_for_field_reads(setter, data_type=default_dtype)
 
             setter_ast = create_kernel(setter, config=config)
             setter_ast.function_name = 'kernel_initialise' + timestep_suffix
@@ -199,6 +204,8 @@ def get_getter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
     if density is None and velocity is None:
         return None
 
+    default_dtype = config.data_type.default_factory()
+
     get_timestep = {"field_name": pdfs.name, "function": "getTimestep"}
     temporary_fields = ()
     field_swaps = ()
@@ -210,6 +217,9 @@ def get_getter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
             getter = macroscopic_values_getter(lb_method,
                                                density=density, velocity=velocity, pdfs=pdfs,
                                                streaming_pattern=streaming_pattern, previous_timestep=timestep)
+
+            if default_dtype != pdfs.dtype:
+                getter = add_subexpressions_for_field_reads(getter, data_type=default_dtype)
 
             getter_ast = create_kernel(getter, config=config)
             getter_ast.function_name = 'kernel_getter' + timestep_suffix
