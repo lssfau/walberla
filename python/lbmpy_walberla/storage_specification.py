@@ -14,6 +14,7 @@ from pystencils_walberla.cmake_integration import CodeGenerationContext
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.utility import config_from_context
 from lbmpy_walberla.packing_kernels import PackingKernelsCodegen
+from lbmpy_walberla.utility import create_pdf_field
 
 
 def generate_lbm_storage_specification(generation_context: CodeGenerationContext, class_name: str,
@@ -36,26 +37,28 @@ def generate_lbm_storage_specification(generation_context: CodeGenerationContext
 
     default_dtype = config.data_type.default_factory()
     if issubclass(default_dtype.numpy_dtype.type, np.float64):
-        constant_suffix = ""
         data_type_string = "double"
     elif issubclass(default_dtype.numpy_dtype.type, np.float32):
-        constant_suffix = "f"
         data_type_string = "float"
     elif issubclass(default_dtype.numpy_dtype.type, np.float16):
-        constant_suffix = ""
         data_type_string = "half"
     else:
         raise ValueError(f"default datatype {default_dtype.numpy_dtype.type} is not supported. "
                          f"Supported are only np.float64, np.float32 and np.float16")
 
     symbolic_field = lbm_optimisation.symbolic_field
-    assert symbolic_field, "The symbolic pdf field must be added to LBMOptimisation as symbolic_field"
+    if not symbolic_field:
+        symbolic_field = create_pdf_field(config=config, name="pdfs_src", stencil=stencil,
+                                          field_layout=lbm_optimisation.field_layout)
+
     if is_inplace(streaming_pattern):
-        symbolic_temporary_field = symbolic_field.new_field_with_different_name("pdfs_tmp")
+        symbolic_temporary_field = create_pdf_field(config=config, name="pdfs_dst", stencil=stencil,
+                                                    field_layout=lbm_optimisation.field_layout)
     else:
-        assert lbm_optimisation.symbolic_temporary_field, \
-            "The destination field must be added to LBMOptimisation as symbolic_temporary_field"
         symbolic_temporary_field = lbm_optimisation.symbolic_temporary_field
+        if not symbolic_temporary_field:
+            symbolic_temporary_field = create_pdf_field(config=config, name="pdfs_dst", stencil=stencil,
+                                                        field_layout=lbm_optimisation.field_layout)
 
     cg = PackingKernelsCodegen(stencil, streaming_pattern, class_name, config,
                                src_field=symbolic_field, dst_field=symbolic_temporary_field)

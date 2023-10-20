@@ -51,7 +51,7 @@ def generate_lbm_package(ctx: CodeGenerationContext, name: str,
                                   **kernel_parameters)
 
     spatial_shape = None
-    if lbm_optimisation.symbolic_field.has_fixed_shape:
+    if lbm_optimisation.symbolic_field and lbm_optimisation.symbolic_field.has_fixed_shape:
         spatial_shape = lbm_optimisation.symbolic_field.spatial_shape + (lbm_config.stencil.Q, )
 
     generate_boundary_collection(ctx, f'{name}BoundaryCollection', boundary_generators=boundaries,

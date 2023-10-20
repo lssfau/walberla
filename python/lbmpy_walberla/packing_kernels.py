@@ -99,7 +99,7 @@ class PackingKernelsCodegen:
         self.dst_field = dst_field if dst_field else fields(f'pdfs_dst({stencil.Q}) :{self.data_type}[{stencil.D}D]')
 
         self.accessors = [get_accessor(streaming_pattern, t) for t in get_timesteps(streaming_pattern)]
-        self.mask_field = fields(f'mask : uint32 [{self.dim}D]')
+        self.mask_field = fields(f'mask : uint32 [{self.dim}D]', layout=src_field.layout)
 
     def create_uniform_kernel_families(self, kernels_dict=None):
         kernels = dict() if kernels_dict is None else kernels_dict

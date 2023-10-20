@@ -23,7 +23,8 @@ with CodeGeneration() as ctx:
     omega = sp.symbols("omega")
 
     stencil = LBStencil(Stencil.D3Q19)
-    pdfs, vel_field = fields(f"pdfs({stencil.Q}), velocity({stencil.D}): {data_type}[{stencil.D}D]", layout='fzyx')
+    pdfs, vel_field = fields(f"pdfs({stencil.Q}), velocity({stencil.D}): {data_type}[{stencil.D}D]",
+                             layout='fzyx')
 
     macroscopic_fields = {'velocity': vel_field}
 

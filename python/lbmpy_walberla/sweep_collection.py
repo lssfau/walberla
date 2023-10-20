@@ -18,6 +18,7 @@ from lbmpy.updatekernels import create_lbm_kernel, create_stream_only_kernel
 from pystencils_walberla.kernel_selection import KernelCallNode, KernelFamily
 from pystencils_walberla.utility import config_from_context
 from pystencils_walberla import generate_sweep_collection
+from lbmpy_walberla.utility import create_pdf_field
 
 from .alternating_sweeps import EvenIntegerCondition
 from .function_generator import kernel_family_function_generator
@@ -46,10 +47,16 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
         config.cpu_vectorize_info['assume_inner_stride_one'] = False
 
     src_field = lbm_optimisation.symbolic_field
+    if not src_field:
+        src_field = create_pdf_field(config=config, name="pdfs", stencil=lbm_config.stencil,
+                                     field_layout=lbm_optimisation.field_layout)
     if is_inplace(streaming_pattern):
         dst_field = src_field
     else:
         dst_field = lbm_optimisation.symbolic_temporary_field
+        if not dst_field:
+            dst_field = create_pdf_field(config=config, name="pdfs_tmp", stencil=lbm_config.stencil,
+                                         field_layout=lbm_optimisation.field_layout)
 
     config = replace(config, ghost_layers=0)
 
