@@ -2072,6 +2072,9 @@ coverage:
 
 mac_Serial_Dbg:
    extends: .mac_build_template
+   before_script:
+      - pip3 install pystencils==1.3.2
+      - pip3 install lbmpy==1.3.2
    variables:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2082,6 +2085,9 @@ mac_Serial_Dbg:
 
 mac_Serial:
    extends: .mac_build_template
+   before_script:
+      - pip3 install pystencils==1.3.2
+      - pip3 install lbmpy==1.3.2
    variables:
       CMAKE_BUILD_TYPE: "Release"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2092,6 +2098,9 @@ mac_Serial:
 
 mac_MpiOnly_Dbg:
    extends: .mac_build_template
+   before_script:
+      - pip3 install pystencils==1.3.2
+      - pip3 install lbmpy==1.3.2
    variables:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       CTEST_EXCLUDE_LABELS: "longrun"
@@ -2103,6 +2112,9 @@ mac_MpiOnly_Dbg:
 
 mac_MpiOnly:
    extends: .mac_build_template
+   before_script:
+      - pip3 install pystencils==1.3.2
+      - pip3 install lbmpy==1.3.2
    variables:
       CMAKE_BUILD_TYPE: "Release"
       CTEST_EXCLUDE_LABELS: "longrun"
