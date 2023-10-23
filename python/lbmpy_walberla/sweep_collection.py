@@ -73,12 +73,16 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
     function_generators.append(generator('stream', family("stream")))
     function_generators.append(generator('streamOnlyNoAdvancement', family("streamOnlyNoAdvancement")))
 
-    setter_family = get_setter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields, config)
+    config_unoptimized = replace(config, cpu_vectorize_info=None, cpu_prepend_optimizations=[], cpu_blocking=None)
+
+    setter_family = get_setter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields,
+                                      config_unoptimized)
     setter_generator = kernel_family_function_generator('initialise', setter_family,
                                                         namespace='lbm', max_threads=max_threads)
     function_generators.append(setter_generator)
 
-    getter_family = get_getter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields, config)
+    getter_family = get_getter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields,
+                                      config_unoptimized)
     getter_generator = kernel_family_function_generator('calculateMacroscopicParameters', getter_family,
                                                         namespace='lbm', max_threads=max_threads)
     function_generators.append(getter_generator)
