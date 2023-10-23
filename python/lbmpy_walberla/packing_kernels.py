@@ -83,7 +83,8 @@ def generate_packing_kernels(generation_context: CodeGenerationContext, class_na
 
 class PackingKernelsCodegen:
 
-    def __init__(self, stencil, streaming_pattern, class_name, config: CreateKernelConfig):
+    def __init__(self, stencil, streaming_pattern, class_name, config: CreateKernelConfig,
+                 src_field=None, dst_field=None):
         self.stencil = stencil
         self.dim = stencil.D
         self.values_per_cell = stencil.Q
@@ -94,10 +95,11 @@ class PackingKernelsCodegen:
         self.config = config
         self.data_type = config.data_type['pdfs'].numpy_dtype
 
-        self.src_field, self.dst_field = fields(
-            f'pdfs_src({self.values_per_cell}), pdfs_dst({self.values_per_cell}) :{self.data_type}[{self.dim}D]')
+        self.src_field = src_field if src_field else fields(f'pdfs_src({stencil.Q}) :{self.data_type}[{stencil.D}D]')
+        self.dst_field = dst_field if dst_field else fields(f'pdfs_dst({stencil.Q}) :{self.data_type}[{stencil.D}D]')
+
         self.accessors = [get_accessor(streaming_pattern, t) for t in get_timesteps(streaming_pattern)]
-        self.mask_field = fields(f'mask : uint32 [{self.dim}D]')
+        self.mask_field = fields(f'mask : uint32 [{self.dim}D]', layout=src_field.layout)
 
     def create_uniform_kernel_families(self, kernels_dict=None):
         kernels = dict() if kernels_dict is None else kernels_dict

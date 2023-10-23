@@ -1,5 +1,6 @@
 from pystencils import Target
 from pystencils.stencil import inverse_direction
+from pystencils.typing import BasicType
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index, Timestep, is_inplace
 from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
@@ -27,22 +28,6 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, FreeSlip)
         super(FreeSlipAdditionalDataHandler, self).__init__(stencil=stencil)
-
-    @property
-    def constructor_arguments(self):
-        return ""
-
-    @property
-    def initialiser_list(self):
-        return ""
-
-    @property
-    def additional_arguments_for_fill_function(self):
-        return ""
-
-    @property
-    def additional_parameters_for_fill_function(self):
-        return ""
 
     def data_initialisation(self, direction):
         def array_pattern(dtype, name, content):
@@ -101,10 +86,6 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
 
         return "\n".join(init_list)
 
-    @property
-    def additional_member_variable(self):
-        return ""
-
 
 class UBBAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
@@ -112,9 +93,13 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
         super(UBBAdditionalDataHandler, self).__init__(stencil=stencil)
 
     @property
+    def constructor_argument_name(self):
+        return "velocityCallback"
+
+    @property
     def constructor_arguments(self):
-        return ", std::function<Vector3<real_t>(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)>& " \
-               "velocityCallback "
+        return f", std::function<Vector3<real_t>(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)>& " \
+               f"{self.constructor_argument_name} "
 
     @property
     def initialiser_list(self):
@@ -144,13 +129,20 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
 
 
 class OutflowAdditionalDataHandler(AdditionalDataHandler):
-    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs', zeroth_timestep=None):
+    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs', pdfs_data_type=None, zeroth_timestep=None):
         assert isinstance(boundary_object, ExtrapolationOutflow)
         self._stencil = boundary_object.stencil
         self._lb_method = boundary_object.lb_method
         self._normal_direction = boundary_object.normal_direction
         self._field_name = field_name
         self._target = target
+        self._dtype = BasicType(boundary_object.data_type).c_name
+        if pdfs_data_type is None:
+            self._pdfs_data_type = "real_t"
+        else:
+            pdfs_data_type = BasicType(pdfs_data_type)
+            self._pdfs_data_type = pdfs_data_type.c_name
+
         self._streaming_pattern = boundary_object.streaming_pattern
         if zeroth_timestep:
             self._zeroth_timestep = zeroth_timestep
@@ -160,6 +152,10 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
 
         assert sum([a != 0 for a in self._normal_direction]) == 1, \
             "The outflow boundary is only implemented for straight walls at the moment."
+
+    @property
+    def constructor_argument_name(self):
+        return f"{self._field_name}CPUID_" if self._target == Target.GPU else ""
 
     @property
     def constructor_arguments(self):
@@ -172,7 +168,7 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
     @property
     def additional_field_data(self):
         identifier = "CPU" if self._target == Target.GPU else ""
-        return f"auto {self._field_name} = block->getData< field::GhostLayerField<real_t, " \
+        return f"auto {self._field_name} = block->getData< field::GhostLayerField<{self._pdfs_data_type}, " \
                f"{len(self._stencil)}> >({self._field_name}{identifier}ID); "
 
     def data_initialisation(self, direction_index):
@@ -183,7 +179,7 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
 
         init_list = []
         for key, value in self.get_init_dict(pdf_acc, direction_index).items():
-            init_list.append(f"element.{key} = {self._field_name}->get({value});")
+            init_list.append(f"element.{key} = {self._dtype}( {self._field_name}->get({value}) );")
 
         return "\n".join(init_list)
 

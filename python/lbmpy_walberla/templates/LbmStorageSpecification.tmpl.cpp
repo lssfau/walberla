@@ -27,30 +27,30 @@
 #   pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-/*************************************************************************************
- *                                Kernel Definitions
-*************************************************************************************/
-{{ kernels['packAll']      | generate_definitions }}
-{{ kernels['unpackAll']    | generate_definitions }}
-{{ kernels['localCopyAll'] | generate_definitions }}
-
-{{ kernels['packDirection']      | generate_definitions }}
-{{ kernels['unpackDirection']    | generate_definitions }}
-{{ kernels['localCopyDirection'] | generate_definitions }}
-
-{% if nonuniform -%}
-{{ kernels['unpackRedistribute']    | generate_definitions }}
-{{ kernels['packPartialCoalescence']    | generate_definitions }}
-{{ kernels['zeroCoalescenceRegion']    | generate_definitions }}
-{{ kernels['unpackCoalescence']    | generate_definitions }}
-{%- endif %}
-
-/*************************************************************************************
- *                                 Kernel Wrappers
-*************************************************************************************/
-
 namespace walberla {
 namespace {{namespace}} {
+
+   /*************************************************************************************
+ *                                Kernel Definitions
+*************************************************************************************/
+   {{ kernels['packAll']      | generate_definitions }}
+   {{ kernels['unpackAll']    | generate_definitions }}
+   {{ kernels['localCopyAll'] | generate_definitions }}
+
+   {{ kernels['packDirection']      | generate_definitions }}
+   {{ kernels['unpackDirection']    | generate_definitions }}
+   {{ kernels['localCopyDirection'] | generate_definitions }}
+
+   {% if nonuniform -%}
+   {{ kernels['unpackRedistribute']    | generate_definitions }}
+   {{ kernels['packPartialCoalescence']    | generate_definitions }}
+   {{ kernels['zeroCoalescenceRegion']    | generate_definitions }}
+   {{ kernels['unpackCoalescence']    | generate_definitions }}
+   {%- endif %}
+
+   /*************************************************************************************
+ *                                 Kernel Wrappers
+*************************************************************************************/
 
    void {{class_name}}::PackKernels::packAll(
       {{- [ "PdfField_T * " + src_field.name, "CellInterval & ci",
@@ -128,8 +128,8 @@ namespace {{namespace}} {
       WALBERLA_ASSERT_EQUAL(srcInterval.zSize(), dstInterval.zSize())
 
       {{kernels['localCopyDirection']
-          | generate_call(cell_interval={src_field : 'srcInterval', dst_field : 'dstInterval'}, stream='stream')
-          | indent(6) }}
+               | generate_call(cell_interval={src_field : 'srcInterval', dst_field : 'dstInterval'}, stream='stream')
+               | indent(6) }}
    }
 
    {% if nonuniform -%}

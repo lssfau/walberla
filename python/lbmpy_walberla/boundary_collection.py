@@ -15,8 +15,9 @@ from pystencils import Target
 import numpy as np
 
 
-def lbm_boundary_generator(class_name: str, flag_uid: str, boundary_object: LbBoundary, additional_data_handler=None):
-    def generation_function(ctx, lb_method, field_name='pdfs',
+def lbm_boundary_generator(class_name: str, flag_uid: str, boundary_object: LbBoundary, additional_data_handler=None,
+                           field_data_type=None):
+    def generation_function(ctx, lb_method, field_name='pdfs', spatial_shape=None,
                             streaming_pattern='pull', after_collision=True,
                             namespace='lbm',
                             **create_kernel_params):
@@ -25,6 +26,8 @@ def lbm_boundary_generator(class_name: str, flag_uid: str, boundary_object: LbBo
                                                       boundary_object=boundary_object,
                                                       lb_method=lb_method,
                                                       field_name=field_name,
+                                                      spatial_shape=spatial_shape,
+                                                      field_data_type=field_data_type,
                                                       streaming_pattern=streaming_pattern,
                                                       after_collision=after_collision,
                                                       additional_data_handler=additional_data_handler,
@@ -41,6 +44,7 @@ def generate_boundary_collection(generation_context,
                                  boundary_generators,
                                  lb_method,
                                  field_name='pdfs',
+                                 spatial_shape=None,
                                  streaming_pattern='pull',
                                  prev_timestep=Timestep.BOTH,
                                  namespace='lbm',
@@ -49,21 +53,25 @@ def generate_boundary_collection(generation_context,
     kernel_list = []
     includes = []
     boundary_classes = []
+    additional_data_handlers = []
     flag_uids = []
     object_names = []
     targets = []
 
     for boundary_generator in boundary_generators:
         boundary_functor = boundary_generator['generator']
-        context = boundary_functor(generation_context, lb_method, field_name, streaming_pattern, prev_timestep,
-                                   namespace, **create_kernel_params)
+        context = boundary_functor(generation_context, lb_method, field_name, spatial_shape,
+                                   streaming_pattern, prev_timestep, namespace, **create_kernel_params)
 
         kernel_list.append(context['kernel'])
         includes.append(f"\"{context['class_name']}.h\"")
         boundary_classes.append(f"{context['namespace']}::{context['class_name']}")
+        additional_data_handlers.append(context['additional_data_handler'])
         flag_uids.append(boundary_generator['flag_id'])
         object_names.append(f"{context['class_name']}Object")
         targets.append(f"{context['target']}")
+
+    additional_constructor_arguments = [a.constructor_arguments[2:] for a in additional_data_handlers]
 
     assert len(set(targets)) == 1
     target = targets[0]
@@ -75,6 +83,8 @@ def generate_boundary_collection(generation_context,
         'namespace': namespace,
         'includes': includes,
         'boundary_classes': boundary_classes,
+        'additional_data_handlers': additional_data_handlers,
+        'additional_constructor_arguments': additional_constructor_arguments,
         'flag_uids': flag_uids,
         'object_names': object_names
     }
@@ -94,6 +104,8 @@ def __generate_alternating_lbm_boundary(generation_context,
                                         boundary_object,
                                         lb_method,
                                         field_name='pdfs',
+                                        spatial_shape=None,
+                                        field_data_type=None,
                                         streaming_pattern='pull',
                                         after_collision=True,
                                         additional_data_handler=None,
@@ -132,13 +144,14 @@ def __generate_alternating_lbm_boundary(generation_context,
             return OddIntegerCondition(timestep_param_name, kernel_even, kernel_odd, timestep_param_dtype)
 
     timestep_advancement = {"field_name": field_name, "function": "getTimestep"}
-
     context = pystencils_walberla.boundary.generate_boundary(generation_context,
-                                                             class_name,
-                                                             boundary_object,
+                                                             class_name=class_name,
+                                                             boundary_object=boundary_object,
                                                              field_name=field_name,
                                                              neighbor_stencil=lb_method.stencil,
                                                              index_shape=[lb_method.stencil.Q],
+                                                             spatial_shape=spatial_shape,
+                                                             field_data_type=field_data_type,
                                                              kernel_creation_function=boundary_creation_function,
                                                              namespace=namespace,
                                                              additional_data_handler=additional_data_handler,

@@ -64,20 +64,20 @@ namespace {{namespace}} {
 
 class {{class_name}}
 {
-public:
-  enum Type { ALL = 0, INNER = 1, OUTER = 2 };
+ public:
+   enum Type { ALL = 0, INNER = 1, OUTER = 2 };
 
    {{class_name}}(const shared_ptr< StructuredBlockStorage > & blocks, {{kernel_list|generate_constructor_parameters}}, const Cell & outerWidth=Cell(1, 1, 1))
-     : blocks_(blocks), {{ kernel_list|generate_constructor_initializer_list(parameter_registration=parameter_scaling) }}, outerWidth_(outerWidth)
+      : blocks_(blocks), {{ kernel_list|generate_constructor_initializer_list(parameter_registration=parameter_scaling) }}, outerWidth_(outerWidth)
    {
       {{kernel_list|generate_constructor(parameter_registration=parameter_scaling) |indent(6)}}
 
+      validInnerOuterSplit_= true;
+
       for (auto& iBlock : *blocks)
       {
-         if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 ||
-             int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 ||
-             int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
-          WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock")
+         if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 || int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 || int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
+            validInnerOuterSplit_ = false;
       }
    };
 
@@ -105,54 +105,66 @@ public:
 
    std::function<void (IBlock *)> {{kernel['function_name']}}({{- ["Type type", ] | type_identifier_list -}})
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", ] | type_identifier_list -}}); };
-         case Type::OUTER:
-            return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", ] | type_identifier_list -}}); };
-         default:
-            return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", ] | type_identifier_list -}}); };
+      case Type::INNER:
+         return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", ] | type_identifier_list -}}); };
+      case Type::OUTER:
+         return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", ] | type_identifier_list -}}); };
+      default:
+         return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", ] | type_identifier_list -}}); };
       }
    }
 
    std::function<void (IBlock *)> {{kernel['function_name']}}({{- ["Type type", "const cell_idx_t ghost_layers"] | type_identifier_list -}})
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", ] | type_identifier_list -}}); };
-         case Type::OUTER:
-            return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", ] | type_identifier_list -}}); };
-         default:
-            return [{{- ["this", "ghost_layers"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "ghost_layers"] | type_identifier_list -}}); };
+      case Type::INNER:
+         return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", ] | type_identifier_list -}}); };
+      case Type::OUTER:
+         return [{{- ["this", ] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", ] | type_identifier_list -}}); };
+      default:
+         return [{{- ["this", "ghost_layers"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "ghost_layers"] | type_identifier_list -}}); };
       }
    }
 
    {% if target is equalto 'gpu' -%}
    std::function<void (IBlock *)> {{kernel['function_name']}}({{- ["Type type", "const cell_idx_t ghost_layers", "gpuStream_t gpuStream"] | type_identifier_list -}})
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", "gpuStream"] | type_identifier_list -}}); };
-         case Type::OUTER:
-            return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", "gpuStream"] | type_identifier_list -}}); };
-         default:
-            return [{{- ["this", "ghost_layers", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "ghost_layers", "gpuStream"] | type_identifier_list -}}); };
+      case Type::INNER:
+         return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", "gpuStream"] | type_identifier_list -}}); };
+      case Type::OUTER:
+         return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", "gpuStream"] | type_identifier_list -}}); };
+      default:
+         return [{{- ["this", "ghost_layers", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "ghost_layers", "gpuStream"] | type_identifier_list -}}); };
       }
    }
 
    std::function<void (IBlock *)> {{kernel['function_name']}}({{- ["Type type", "gpuStream_t gpuStream"] | type_identifier_list -}})
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", "gpuStream"] | type_identifier_list -}}); };
-         case Type::OUTER:
-            return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", "gpuStream"] | type_identifier_list -}}); };
-         default:
-            return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "cell_idx_c(0)", "gpuStream"] | type_identifier_list -}}); };
+      case Type::INNER:
+         return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Inner({{- ["block", "gpuStream"] | type_identifier_list -}}); };
+      case Type::OUTER:
+         return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}Outer({{- ["block", "gpuStream"] | type_identifier_list -}}); };
+      default:
+         return [{{- ["this", "gpuStream"] | type_identifier_list -}}](IBlock* block) { {{kernel['function_name']}}({{- ["block", "cell_idx_c(0)", "gpuStream"] | type_identifier_list -}}); };
       }
    }
    {%- endif %}
@@ -247,24 +259,24 @@ public:
          layers_.push_back(ci);
       }
 
-    {%if target is equalto 'gpu'%}
+      {%if target is equalto 'gpu'%}
       {
          auto parallelSection_ = parallelStreams_.parallelSection( gpuStream );
          for( auto & ci: layers_ )
          {
-          parallelSection_.run([&]( auto s ) {
-             {{kernel['function_name']}}CellInterval({{kernel['kernel']|generate_function_collection_call(cell_interval='ci')}});
-          });
+            parallelSection_.run([&]( auto s ) {
+               {{kernel['function_name']}}CellInterval({{kernel['kernel']|generate_function_collection_call(cell_interval='ci')}});
+            });
          }
       }
-    {% else %}
+      {% else %}
       for( auto & ci: layers_ )
       {
          {{kernel['function_name']}}CellInterval({{kernel['kernel']|generate_function_collection_call(cell_interval='ci')}});
       }
-    {% endif %}
+      {% endif %}
 
-    {{kernel['kernel']|generate_swaps|indent(9)}}
+      {{kernel['kernel']|generate_swaps|indent(9)}}
    }
    {% endfor %}
 
@@ -275,17 +287,18 @@ public:
    }
    {%endif%}
 
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      {{kernel_list|generate_members(parameter_registration=parameter_scaling)|indent(4)}}
+ private:
+   shared_ptr< StructuredBlockStorage > blocks_;
+   {{kernel_list|generate_members(parameter_registration=parameter_scaling)|indent(4)}}
 
-      Cell outerWidth_;
-      std::vector<CellInterval> layers_;
+   Cell outerWidth_;
+   std::vector<CellInterval> layers_;
+   bool validInnerOuterSplit_;
 
-      {%if target is equalto 'gpu' -%}
-      gpu::ParallelStreams parallelStreams_;
-      // std::map<BlockID, gpuStream_t > streams_;
-      {%- endif %}
+   {%if target is equalto 'gpu' -%}
+   gpu::ParallelStreams parallelStreams_;
+   // std::map<BlockID, gpuStream_t > streams_;
+   {%- endif %}
 };
 
 

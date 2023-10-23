@@ -19,7 +19,9 @@ def generate_boundary(generation_context,
                       field_name,
                       neighbor_stencil,
                       index_shape,
+                      spatial_shape=None,
                       field_type=FieldType.GENERIC,
+                      field_data_type=None,
                       kernel_creation_function=None,
                       target=Target.CPU,
                       data_type=None,
@@ -47,14 +49,17 @@ def generate_boundary(generation_context,
     del create_kernel_params['default_number_int']
     del create_kernel_params['skip_independence_check']
 
-    field_data_type = config.data_type[field_name].numpy_dtype
+    if field_data_type is None:
+        field_data_type = config.data_type[field_name].numpy_dtype
 
     index_struct_dtype = numpy_data_type_for_boundary_object(boundary_object, dim)
 
-    field = Field.create_generic(field_name, dim,
-                                 field_data_type,
-                                 index_dimensions=len(index_shape), layout=layout, index_shape=index_shape,
-                                 field_type=field_type)
+    if spatial_shape:
+        field = Field.create_fixed_size(field_name, spatial_shape, index_dimensions=len(index_shape),
+                                        dtype=field_data_type, layout=layout, field_type=field_type)
+    else:
+        field = Field.create_generic(field_name, dim, dtype=field_data_type, index_dimensions=len(index_shape),
+                                     layout=layout, index_shape=index_shape, field_type=field_type)
 
     index_field = Field('indexVector', FieldType.INDEXED, index_struct_dtype, layout=[0],
                         shape=(TypedSymbol("indexVectorSize", create_type("int32")), 1), strides=(1, 1))
@@ -126,5 +131,3 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'flux', neighbor_stencil, index_shape,
                       FieldType.STAGGERED_FLUX, target=target, **kwargs)
-
-
