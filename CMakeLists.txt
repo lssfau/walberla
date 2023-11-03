@@ -395,6 +395,8 @@ if( WALBERLA_CXX_COMPILER_IS_INTEL )
    # system headers are also supported by intel, but cmake does not recognize that
    set( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem " )
    add_flag ( CMAKE_CXX_FLAGS "-wd2928,2504,2259,1682,597" )
+   # disable icc/icpc deprecation warning
+   add_flag ( CMAKE_CXX_FLAGS "-diag-disable=10441" )
 elseif( WALBERLA_CXX_COMPILER_IS_GNU )
    add_flag ( CMAKE_CXX_FLAGS "-Wfloat-equal -Wextra" )
 elseif( WALBERLA_CXX_COMPILER_IS_NEC )
