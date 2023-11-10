@@ -21,9 +21,18 @@
 
 #pragma once
 
+// suppress conversion warning that is emitted by icpc compiler with `-Werror`
+#include "waLBerlaDefinitions.h"
+#if ( defined WALBERLA_CXX_COMPILER_IS_INTEL )
+#pragma warning(push)
+#pragma warning disable 68
+#endif
 
 #include <variant>
 
+#if ( defined WALBERLA_CXX_COMPILER_IS_INTEL )
+#pragma warning(pop)
+#endif
 
 
 namespace walberla
