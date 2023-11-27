@@ -24,15 +24,15 @@ def num_time_steps(block_size, time_steps_for_128_block=TIME_STEPS_FOR_128_BLOCK
 ldc_setup = {'Border': [
     {'direction': 'N', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'N', 'walldistance': -1, 'flag': 'UBB'},
+    {'direction': 'W', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'E', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'T', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'T', 'walldistance': -1, 'flag': 'UBB'},
     {'direction': 'B', 'walldistance': -1, 'flag': 'NoSlip'},
 ]}
 
 
 class Scenario:
-    def __init__(self, cells_per_block=(128, 128, 128), periodic=(1, 1, 1),
+    def __init__(self, cells_per_block=(128, 128, 128), periodic=(1, 1, 1), blocks_per_process=1,
                  timesteps=None, time_step_strategy="normal", omega=1.8, inner_outer_split=(1, 1, 1),
                  warmup_steps=2, outer_iterations=3, init_shear_flow=False, boundary_setup=False,
                  vtk_write_frequency=0, remaining_time_logger_frequency=-1):
@@ -41,7 +41,8 @@ class Scenario:
             init_shear_flow = False
             periodic = (0, 0, 0)
 
-        self.blocks = block_decomposition(wlb.mpi.numProcesses())
+        self.blocks_per_process = blocks_per_process
+        self.blocks = block_decomposition(self.blocks_per_process * wlb.mpi.numProcesses())
 
         self.cells_per_block = cells_per_block
         self.periodic = periodic
@@ -68,7 +69,7 @@ class Scenario:
                 'blocks': self.blocks,
                 'cellsPerBlock': self.cells_per_block,
                 'periodic': self.periodic,
-                'oneBlockPerProcess': True
+                'cartesianSetup': (self.blocks_per_process == 1)
             },
             'Parameters': {
                 'omega': self.omega,
@@ -106,7 +107,7 @@ class Scenario:
         sequenceValuesToScalars(result)
         num_tries = 4
         # check multiple times e.g. may fail when multiple benchmark processes are running
-        table_name = f"runs_{data['stencil']}_{data['streamingPattern']}_{data['collisionSetup']}_{prod(self.blocks)}"
+        table_name = f"runs"
         table_name = table_name.replace("-", "_")
         for num_try in range(num_tries):
             try:

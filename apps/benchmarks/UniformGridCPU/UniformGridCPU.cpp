@@ -68,6 +68,9 @@ int main(int argc, char** argv)
 {
    const mpi::Environment env(argc, argv);
 
+   std::string input_filename(argv[1]);
+   bool inputIsPython = string_ends_with(input_filename, ".py");
+
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {
       WALBERLA_MPI_WORLD_BARRIER()
@@ -157,7 +160,7 @@ int main(int argc, char** argv)
       } else if (timeStepStrategy == "kernelOnly") {
          timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL), "LBM StreamCollide");
       } else if (timeStepStrategy == "StreamOnly") {
-         timeLoop.add() << Sweep(StreamOnlyKernel, "LBM Stream Only");
+         timeLoop.add() << Sweep(sweepCollection.stream(SweepCollection_T::ALL), "LBM Stream-Only");
       } else {
          WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'")
       }
@@ -225,17 +228,24 @@ int main(int argc, char** argv)
 
          WALBERLA_ROOT_SECTION()
          {
-            python_coupling::PythonCallback pythonCallbackResults("results_callback");
-            if (pythonCallbackResults.isCallable())
-            {
-               pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
-               pythonCallbackResults.data().exposeValue("stencil", infoStencil);
-               pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);
-               pythonCallbackResults.data().exposeValue("collisionSetup", infoCollisionSetup);
-               pythonCallbackResults.data().exposeValue("cse_global", infoCseGlobal);
-               pythonCallbackResults.data().exposeValue("cse_pdfs", infoCsePdfs);
-               // Call Python function to report results
-               pythonCallbackResults();
+            if(inputIsPython){
+               python_coupling::PythonCallback pythonCallbackResults("results_callback");
+               if (pythonCallbackResults.isCallable())
+               {
+                  pythonCallbackResults.data().exposeValue("numProcesses", performance.processes());
+                  pythonCallbackResults.data().exposeValue("numThreads", performance.threads());
+                  pythonCallbackResults.data().exposeValue("numCores", performance.cores());
+                  pythonCallbackResults.data().exposeValue("mlups", performance.mlups(timesteps, time));
+                  pythonCallbackResults.data().exposeValue("mlupsPerCore", performance.mlupsPerCore(timesteps, time));
+                  pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
+                  pythonCallbackResults.data().exposeValue("stencil", infoStencil);
+                  pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);
+                  pythonCallbackResults.data().exposeValue("collisionSetup", infoCollisionSetup);
+                  pythonCallbackResults.data().exposeValue("cse_global", infoCseGlobal);
+                  pythonCallbackResults.data().exposeValue("cse_pdfs", infoCsePdfs);
+                  // Call Python function to report results
+                  pythonCallbackResults();
+               }
             }
          }
       }

@@ -5,7 +5,7 @@ waLBerla_link_files_to_builddir( "simulation_setup" )
 
 foreach(streaming_pattern pull push aa esotwist)
     foreach(stencil d3q19 d3q27)
-        foreach (collision_setup srt trt mrt mrt-overrelax central central-overrelax cumulant cumulant-overrelax entropic smagorinsky)
+        foreach (collision_setup srt trt w-mrt r-w-mrt cm r-cm k r-k entropic smagorinsky)
 	    # KBC methods only for D2Q9 and D3Q27 defined
 	    if (${collision_setup} STREQUAL "entropic" AND ${stencil} STREQUAL "d3q19")
 		    continue()
