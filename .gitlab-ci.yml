@@ -1865,9 +1865,10 @@ continuous_benchmark_trigger:
       --form "ref=master"
       --form "variables[WALBERLA_GITLAB_INSTANCE]=https://$CI_SERVER_HOST"
       --form "variables[WALBERLA_PROJECT_ID]=$CI_PROJECT_PATH"
-      --form "variables[WALBERLA_BRANCH]=$CI_DEFAULT_BRANCH"
+      --form "variables[WALBERLA_BRANCH]=$CI_COMMIT_BRANCH"
+      --form "variables[WALBERLA_COMMIT]=$CI_COMMIT_SHA"
       "$CB_TRIGGER_API_URL"
   rules:
     - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
-    - when: never
+    - when: manual
