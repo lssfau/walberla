@@ -10,6 +10,12 @@ waLBerla_generate_target_from_python(NAME NonUniformGridCPUGenerated
         UBB.h UBB.cpp
         NonUniformGridCPUBoundaryCollection.h
         NonUniformGridCPUInfoHeader.h)
+
+waLBerla_add_executable( NAME NonUniformGridGenerator
+                         FILES NonUniformGridGenerator.cpp LdcSetup.h
+                         DEPENDS blockforest core domain_decomposition field geometry python_coupling vtk )
+
+
 waLBerla_add_executable( NAME NonUniformGridCPU
-                         FILES NonUniformGridCPU.cpp
+                         FILES NonUniformGridCPU.cpp LdcSetup.h
                          DEPENDS blockforest boundary core domain_decomposition field geometry python_coupling timeloop vtk NonUniformGridCPUGenerated )

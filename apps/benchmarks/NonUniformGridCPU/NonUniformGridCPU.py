@@ -24,7 +24,7 @@ const bool infoCsePdfs = {cse_pdfs};
 with CodeGeneration() as ctx:
     field_type = "float64" if ctx.double_accuracy else "float32"
 
-    streaming_pattern = 'pull'
+    streaming_pattern = 'aa'
     timesteps = get_timesteps(streaming_pattern)
     stencil = LBStencil(Stencil.D3Q19)
 
@@ -33,7 +33,7 @@ with CodeGeneration() as ctx:
     density_field, velocity_field = ps.fields(f"density, velocity(3) : {field_type}[3D]", layout='fzyx')
     macroscopic_fields = {'density': density_field, 'velocity': velocity_field}
 
-    lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega,
+    lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega, compressible=True,
                            streaming_pattern=streaming_pattern)
     lbm_opt = LBMOptimisation(cse_global=False, field_layout="fzyx")
 

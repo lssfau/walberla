@@ -7,7 +7,7 @@ from pystencils.simp.subexpression_insertion import insert_zeros, insert_aliases
     insert_symbol_times_minus_one
 
 from lbmpy.advanced_streaming import is_inplace
-from lbmpy.advanced_streaming.utility import streaming_patterns
+from lbmpy.advanced_streaming.utility import streaming_patterns, get_accessor, Timestep
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import LBMConfig, LBMOptimisation, LBStencil, create_lb_collision_rule
 from lbmpy.enums import Method, Stencil
@@ -26,40 +26,40 @@ options_dict = {
     'srt': {
         'method': Method.SRT,
         'relaxation_rate': omega,
-        'compressible': False,
+        'compressible': True,
     },
     'trt': {
         'method': Method.TRT,
         'relaxation_rate': omega,
-        'compressible': False,
+        'compressible': True,
     },
-    'mrt': {
+    'r-w-mrt': {
         'method': Method.MRT,
         'relaxation_rates': [omega, 1, 1, 1, 1, 1, 1],
-        'compressible': False,
+        'compressible': True,
     },
-    'mrt-overrelax': {
+    'w-mrt': {
         'method': Method.MRT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
-        'compressible': False,
+        'compressible': True,
     },
-    'central': {
+    'r-cm': {
         'method': Method.CENTRAL_MOMENT,
         'relaxation_rate': omega,
         'compressible': True,
     },
-    'central-overrelax': {
+    'cm': {
         'method': Method.CENTRAL_MOMENT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
         'compressible': True,
     },
-    'cumulant': {
-        'method': Method.MONOMIAL_CUMULANT,
+    'r-k': {
+        'method': Method.CUMULANT,
         'relaxation_rate': omega,
         'compressible': True,
     },
-    'cumulant-overrelax': {
-        'method': Method.MONOMIAL_CUMULANT,
+    'k': {
+        'method': Method.CUMULANT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 18)],
         'compressible': True,
     },
@@ -87,9 +87,6 @@ const bool infoCseGlobal = {cse_global};
 const bool infoCsePdfs = {cse_pdfs};
 """
 
-# DEFAULTS
-optimize = True
-
 with CodeGeneration() as ctx:
     openmp = True if ctx.openmp else False
     field_type = "float64" if ctx.double_accuracy else "float32"
@@ -104,9 +101,6 @@ with CodeGeneration() as ctx:
     stencil_str = config_tokens[0]
     streaming_pattern = config_tokens[1]
     collision_setup = config_tokens[2]
-
-    if len(config_tokens) >= 4:
-        optimize = (config_tokens[3] != 'noopt')
 
     if stencil_str == "d3q27":
         stencil = LBStencil(Stencil.D3Q27)
@@ -139,19 +133,14 @@ with CodeGeneration() as ctx:
     # Sweep for Stream only. This is for benchmarking an empty streaming pattern without LBM.
     # is_inplace is set to False to ensure that the streaming is done with src and dst field.
     # If this is not the case the compiler might simplify the streaming in a way that benchmarking makes no sense.
-    accessor = CollideOnlyInplaceAccessor()
-    accessor.is_inplace = False
-    field_swaps_stream_only = [(pdfs, pdfs_tmp)]
-    stream_only_kernel = create_stream_only_kernel(stencil, pdfs, pdfs_tmp, accessor=accessor)
+    # accessor = CollideOnlyInplaceAccessor()
+    accessor = get_accessor(streaming_pattern, Timestep.EVEN)
+    #accessor.is_inplace = False
+    field_swaps_stream_only = () if accessor.is_inplace else [(pdfs, pdfs_tmp)]
+    stream_only_kernel = create_stream_only_kernel(stencil, pdfs, None if accessor.is_inplace else pdfs_tmp, accessor=accessor)
 
     # LB Sweep
     collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
-
-    if optimize:
-        collision_rule = insert_constants(collision_rule)
-        collision_rule = insert_zeros(collision_rule)
-        collision_rule = insert_aliases(collision_rule)
-        collision_rule = insert_symbol_times_minus_one(collision_rule)
 
     no_slip = lbm_boundary_generator(class_name='NoSlip', flag_uid='NoSlip',
                                      boundary_object=NoSlip())
@@ -166,7 +155,8 @@ with CodeGeneration() as ctx:
                          cpu_openmp=openmp, cpu_vectorize_info=cpu_vec)
 
     # Stream only kernel
-    generate_sweep(ctx, 'UniformGridCPU_StreamOnlyKernel', stream_only_kernel, field_swaps=field_swaps_stream_only,
+    generate_sweep(ctx, 'UniformGridCPU_StreamOnlyKernel', stream_only_kernel,
+                   field_swaps=field_swaps_stream_only,
                    target=ps.Target.CPU, cpu_openmp=openmp)
 
     infoHeaderParams = {
