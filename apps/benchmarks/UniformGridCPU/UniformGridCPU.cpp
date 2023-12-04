@@ -68,8 +68,8 @@ int main(int argc, char** argv)
 {
    const mpi::Environment env(argc, argv);
 
-   std::string input_filename(argv[1]);
-   bool inputIsPython = string_ends_with(input_filename, ".py");
+   const std::string input_filename(argv[1]);
+   const bool inputIsPython = string_ends_with(input_filename, ".py");
 
    for (auto cfg = python_coupling::configBegin(argc, argv); cfg != python_coupling::configEnd(); ++cfg)
    {

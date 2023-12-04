@@ -307,6 +307,9 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
       for (auto it : headers_[EQUAL_LEVEL][index])
          bufferSystemGPU_[EQUAL_LEVEL][index].sendBuffer(it.first).clear();
 
+   // wait until communication dependent kernels are finished
+   WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+
    // Start filling send buffers
    for (auto& iBlock : *forest)
    {
@@ -397,6 +400,9 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
       for (auto it : headers_[COARSE_TO_FINE][index])
          bufferSystemGPU_[COARSE_TO_FINE][index].sendBuffer(it.first).clear();
 
+   // wait until communication dependent kernels are finished
+   WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+
    // Start filling send buffers
    for (auto& iBlock : *forest)
    {
@@ -431,7 +437,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
                {
                   WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
                   WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.remainingSize(), pi->sizeCoarseToFineSend(coarseBlock, fineReceiverId, *dir))
-                  pi->communicateLocalCoarseToFine(coarseBlock, fineReceiverBlock, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->communicateLocalCoarseToFine(coarseBlock, fineReceiverBlock, *dir, gpuDataBuffer, nullptr);
                }
             }
             else
@@ -500,6 +506,9 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
       for (auto it : headers_[FINE_TO_COARSE][index])
          bufferSystemGPU_[FINE_TO_COARSE][index].sendBuffer(it.first).clear();
 
+   // wait until communication dependent kernels are finished
+   WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+
    // Start filling send buffers
    for (auto& iBlock : *forest)
    {
@@ -532,7 +541,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
             {
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
                WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.allocSize() - gpuDataBuffer.size(), pi->sizeFineToCoarseSend(fineBlock, *dir))
-               pi->communicateLocalFineToCoarse(fineBlock, coarseReceiverBlock, *dir, gpuDataBuffer, streams_[*dir]);
+               pi->communicateLocalFineToCoarse(fineBlock, coarseReceiverBlock, *dir, gpuDataBuffer, nullptr);
             }
          }
          else

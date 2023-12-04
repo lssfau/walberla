@@ -167,22 +167,22 @@ int main(int argc, char** argv)
 
       if (timeStepStrategy == "noOverlap") {
          if (boundariesConfig){
-            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(defaultStream), "communication")
+            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(), "communication")
                            << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL, defaultStream), "Boundary Conditions");
             timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL, defaultStream), "LBM StreamCollide");
          }else {
-            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(defaultStream), "communication")
+            timeLoop.add() << BeforeFunction(communication.getCommunicateFunctor(), "communication")
                            << Sweep(sweepCollection.streamCollide(SweepCollection_T::ALL, defaultStream), "LBM StreamCollide");}
 
       } else if (timeStepStrategy == "simpleOverlap") {
          if (boundariesConfig){
-            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(defaultStream), "Start Communication")
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "Start Communication")
                            << Sweep(boundaryCollection.getSweep(BoundaryCollection_T::ALL, defaultStream), "Boundary Conditions");
             timeLoop.add() << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER, defaultStream), "LBM StreamCollide Inner Frame");
             timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
                            << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER, defaultStream), "LBM StreamCollide Outer Frame");
          }else{
-            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(defaultStream), "Start Communication")
+            timeLoop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "Start Communication")
                            << Sweep(sweepCollection.streamCollide(SweepCollection_T::INNER, defaultStream), "LBM StreamCollide Inner Frame");
             timeLoop.add() << BeforeFunction(communication.getWaitFunctor(), "Wait for Communication")
                            << Sweep(sweepCollection.streamCollide(SweepCollection_T::OUTER,defaultStream), "LBM StreamCollide Outer Frame");}
@@ -240,14 +240,14 @@ int main(int argc, char** argv)
          WALBERLA_GPU_CHECK(gpuPeekAtLastError())
 
          timeLoop.setCurrentTimeStepToZero();
-         WcTimingPool const timeloopTiming;
+         WcTimingPool timeloopTiming;
          WcTimer simTimer;
 
          WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
          WALBERLA_GPU_CHECK( gpuPeekAtLastError() )
          WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
          simTimer.start();
-         timeLoop.run();
+         timeLoop.run(timeloopTiming);
          WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
          simTimer.end();
 

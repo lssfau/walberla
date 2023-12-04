@@ -72,7 +72,7 @@ typedef gpu::GPUField< uint8_t > GPUField_int;
 
 int main(int argc, char** argv)
 {
-   mpi::Environment Env(argc, argv);
+   const mpi::Environment Env(argc, argv);
    gpu::selectDeviceBasedOnMpiRank();
    exportDataStructuresToPython();
 
@@ -114,17 +114,17 @@ int main(int argc, char** argv)
       BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
       // GPU fields
-      BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
+      const BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb phase field on GPU", Stencil_phase_T::Size, field::fzyx, 1);
-      BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
+      const BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb velocity field on GPU", Stencil_hydro_T::Size, field::fzyx, 1);
       BlockDataID vel_field_gpu =
          gpu::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
       BlockDataID phase_field_gpu =
          gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
       // Flag field
-      BlockDataID flagFieldID     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
-      BlockDataID flagFieldID_gpu = gpu::addGPUFieldToStorage< FlagField_T >(blocks, flagFieldID, "flag on GPU", true);
+      const BlockDataID flagFieldID     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+      const BlockDataID flagFieldID_gpu = gpu::addGPUFieldToStorage< FlagField_T >(blocks, flagFieldID, "flag on GPU", true);
 
       auto physical_parameters     = config->getOneBlock("PhysicalParameters");
       const real_t density_liquid  = physical_parameters.getParameter< real_t >("density_liquid", real_c(1.0));
@@ -181,11 +181,11 @@ int main(int argc, char** argv)
                                                               interface_thickness);
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field_gpu, vel_field_gpu);
 
-      pystencils::phase_field_LB_step phase_field_LB_step(flagFieldID_gpu, lb_phase_field_gpu, phase_field_gpu,
+      const pystencils::phase_field_LB_step phase_field_LB_step(flagFieldID_gpu, lb_phase_field_gpu, phase_field_gpu,
                                                           vel_field_gpu, mobility, interface_thickness, gpuBlockSize[0],
                                                           gpuBlockSize[1], gpuBlockSize[2]);
 
-      pystencils::hydro_LB_step hydro_LB_step(flagFieldID_gpu, lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu,
+      const pystencils::hydro_LB_step hydro_LB_step(flagFieldID_gpu, lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu,
                                               gravitational_acceleration, interface_thickness, density_liquid,
                                               density_gas, surface_tension, relaxation_time_liquid, relaxation_time_gas,
                                               gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
@@ -193,8 +193,8 @@ int main(int argc, char** argv)
       ////////////////////////
       // ADD COMMUNICATION //
       //////////////////////
-      int streamLowPriority  = 0;
-      int streamHighPriority = 0;
+      const int streamLowPriority  = 0;
+      const int streamHighPriority = 0;
       auto defaultStream     = gpu::StreamRAII::newPriorityStream(streamLowPriority);
       auto innerOuterStreams = gpu::ParallelStreams(streamHighPriority);
 
@@ -204,20 +204,20 @@ int main(int argc, char** argv)
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       UniformGPUSchemeVelocityDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
       auto Comm_velocity_based_distributions =
-         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->communicate(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->communicate(); });
       auto Comm_velocity_based_distributions_start =
-         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->startCommunication(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->startCommunication(); });
       auto Comm_velocity_based_distributions_wait =
-         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->wait(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->wait(); });
 
       auto UniformGPUSchemePhaseField =
          make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
       UniformGPUSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
-      auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(defaultStream); });
+      auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(); });
       auto Comm_phase_field_start =
-         std::function< void() >([&]() { UniformGPUSchemePhaseField->startCommunication(defaultStream); });
-      auto Comm_phase_field_wait = std::function< void() >([&]() { UniformGPUSchemePhaseField->wait(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemePhaseField->startCommunication(); });
+      auto Comm_phase_field_wait = std::function< void() >([&]() { UniformGPUSchemePhaseField->wait(); });
 
       auto UniformGPUSchemePhaseFieldDistributions =
          make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
@@ -225,11 +225,11 @@ int main(int argc, char** argv)
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       UniformGPUSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
       auto Comm_phase_field_distributions =
-         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->communicate(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->communicate(); });
       auto Comm_phase_field_distributions_start =
-         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->startCommunication(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->startCommunication(); });
       auto Comm_phase_field_distributions_wait =
-         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->wait(defaultStream); });
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->wait(); });
 
       ////////////////////////
       // BOUNDARY HANDLING //
@@ -394,7 +394,7 @@ int main(int argc, char** argv)
                                                                                      targetRank, MPI_COMM_WORLD);
                   WALBERLA_EXCLUSIVE_WORLD_SECTION(targetRank)
                   {
-                     std::string path = "";
+                     const std::string path = "";
                      std::ostringstream out;
                      out << std::internal << std::setfill('0') << std::setw(6) << counter;
                      geometry::writeMesh(

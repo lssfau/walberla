@@ -19,10 +19,6 @@
 //
 //======================================================================================================================
 
-#include "core/mpi/MPIWrapper.h"
-
-#include "gpu/ParallelStreams.h"
-
 namespace walberla {
 namespace gpu
 {
@@ -30,9 +26,9 @@ namespace communication {
 
 
    template<typename Stencil>
-   UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
-                                                bool sendDirectlyFromGPU,
-                                                bool useLocalCommunication,
+   UniformGPUScheme<Stencil>::UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
+                                                const bool sendDirectlyFromGPU,
+                                                const bool useLocalCommunication,
                                                 const int tag )
         : blockForest_( bf ),
           setupBeforeNextCommunication_( true ),
@@ -41,7 +37,6 @@ namespace communication {
           useLocalCommunication_(useLocalCommunication),
           bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
           bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
-          parallelSectionManager_( -1 ),
           requiredBlockSelectors_( Set<SUID>::emptySet() ),
           incompatibleBlockSelectors_( Set<SUID>::emptySet() )
    {
@@ -52,14 +47,17 @@ namespace communication {
          WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
       }
+
+      for (uint_t i = 0; i < Stencil::Q; ++i)
+         WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
    }
 
    template<typename Stencil>
-   UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
+   UniformGPUScheme<Stencil>::UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
                                                 const Set<SUID> & requiredBlockSelectors,
                                                 const Set<SUID> & incompatibleBlockSelectors,
-                                                bool sendDirectlyFromGPU,
-                                                bool useLocalCommunication,
+                                                const bool sendDirectlyFromGPU,
+                                                const bool useLocalCommunication,
                                                 const int tag )
       : blockForest_( bf ),
         setupBeforeNextCommunication_( true ),
@@ -68,7 +66,6 @@ namespace communication {
         useLocalCommunication_(useLocalCommunication),
         bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
         bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
-        parallelSectionManager_( -1 ),
         requiredBlockSelectors_( requiredBlockSelectors ),
         incompatibleBlockSelectors_( incompatibleBlockSelectors )
    {
@@ -78,11 +75,14 @@ namespace communication {
          WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
       }
+
+      for (uint_t i = 0; i < Stencil::Q; ++i)
+         WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
    }
 
 
    template<typename Stencil>
-   void UniformGPUScheme<Stencil>::startCommunication( gpuStream_t stream )
+   void UniformGPUScheme<Stencil>::startCommunication( )
    {
       WALBERLA_ASSERT( !communicationInProgress_ )
       auto forest = blockForest_.lock();
@@ -102,9 +102,11 @@ namespace communication {
          for( auto it : headers_ )
             bufferSystemGPU_.sendBuffer( it.first ).clear();
 
+      // wait until communication dependent kernels are finished
+      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+
       // Start filling send buffers
       {
-         auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto &iBlock : *forest )
          {
             auto senderBlock = dynamic_cast< Block * >( &iBlock );
@@ -127,7 +129,7 @@ namespace communication {
                   auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
                   for (auto& pi : packInfos_)
                   {
-                     pi->communicateLocal(*dir, senderBlock, receiverBlock, stream);
+                     pi->communicateLocal(*dir, senderBlock, receiverBlock, streams_[*dir]);
                   }
                }
                else
@@ -136,26 +138,27 @@ namespace communication {
 
                   for( auto &pi : packInfos_ )
                   {
-                     parallelSection.run([&](auto s) {
                      auto size = pi->size( *dir, senderBlock );
                      auto gpuDataPtr = bufferSystemGPU_.sendBuffer( nProcess ).advanceNoResize( size );
                      WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                     pi->pack( *dir, gpuDataPtr, senderBlock, s );
+                     pi->pack( *dir, gpuDataPtr, senderBlock, streams_[*dir] );
 
                      if( !sendFromGPU_ )
                      {
                         auto cpuDataPtr = bufferSystemCPU_.sendBuffer( nProcess ).advanceNoResize( size );
                         WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
-                        WALBERLA_GPU_CHECK( gpuMemcpyAsync( cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, s ))
+                        WALBERLA_GPU_CHECK( gpuMemcpyAsync( cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir] ))
                      }
-                     });
                   }
                }
             }
          }
       }
       // wait for packing to finish
-      WALBERLA_GPU_CHECK( gpuStreamSynchronize( stream ) );
+      for (uint_t i = 0; i < Stencil::Q; ++i)
+      {
+         WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      }
 
       if( sendFromGPU_ )
          bufferSystemGPU_.sendAll();
@@ -167,7 +170,7 @@ namespace communication {
 
 
    template<typename Stencil>
-   void UniformGPUScheme<Stencil>::wait( gpuStream_t stream )
+   void UniformGPUScheme<Stencil>::wait()
    {
       WALBERLA_ASSERT( communicationInProgress_ )
 
@@ -175,7 +178,6 @@ namespace communication {
 
       if( sendFromGPU_ )
       {
-         auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemGPU_.begin(); recvInfo != bufferSystemGPU_.end(); ++recvInfo )
          {
             recvInfo.buffer().clear();
@@ -188,16 +190,13 @@ namespace communication {
                   auto size = pi->size( header.dir, block );
                   auto gpuDataPtr = recvInfo.buffer().advanceNoResize( size );
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                  parallelSection.run([&](auto s) {
-                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, s );
-                  });
+                  pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[header.dir] );
                }
             }
          }
       }
       else
       {
-         auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemCPU_.begin(); recvInfo != bufferSystemCPU_.end(); ++recvInfo )
          {
             auto &gpuBuffer = bufferSystemGPU_.sendBuffer( recvInfo.rank());
@@ -214,17 +213,17 @@ namespace communication {
                   auto gpuDataPtr = gpuBuffer.advanceNoResize( size );
                   WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                  parallelSection.run([&](auto s) {
                      WALBERLA_GPU_CHECK( gpuMemcpyAsync( gpuDataPtr, cpuDataPtr, size,
-                                                           gpuMemcpyHostToDevice, s ))
-                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, s );
-                  });
+                                                           gpuMemcpyHostToDevice, streams_[header.dir] ))
+                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[header.dir] );
                }
             }
          }
       }
-
-      WALBERLA_GPU_CHECK( gpuDeviceSynchronize() )
+      for (uint_t i = 0; i < Stencil::Q; ++i)
+      {
+         WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      }
       communicationInProgress_ = false;
    }
 
@@ -312,21 +311,21 @@ namespace communication {
    }
 
    template< typename Stencil >
-   std::function<void()> UniformGPUScheme<Stencil>::getCommunicateFunctor(gpuStream_t stream)
+   std::function<void()> UniformGPUScheme<Stencil>::getCommunicateFunctor()
    {
-      return [this, stream]() { communicate( stream ); };
+      return [this]() { communicate( ); };
    }
 
    template< typename Stencil >
-   std::function<void()> UniformGPUScheme<Stencil>::getStartCommunicateFunctor(gpuStream_t stream)
+   std::function<void()> UniformGPUScheme<Stencil>::getStartCommunicateFunctor()
    {
-      return [this, stream]() { startCommunication( stream ); };
+      return [this]() { startCommunication(); };
    }
 
    template< typename Stencil >
-   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor(gpuStream_t stream)
+   std::function<void()> UniformGPUScheme<Stencil>::getWaitFunctor()
    {
-      return [this, stream]() { wait( stream ); };
+      return [this]() { wait(); };
    }
 
 } // namespace communication
