@@ -47,7 +47,7 @@ void hostToHost()
       hostField2.set(hostField1);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void hostToDevice()
@@ -61,7 +61,7 @@ void hostToDevice()
       gpu::fieldCpy(deviceField, hostField);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void deviceToHost()
@@ -76,7 +76,7 @@ void deviceToHost()
       gpu::fieldCpy(hostField, deviceField);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiHostToHost()
@@ -100,7 +100,7 @@ void mpiHostToHost()
       MPI_Wait(&request2, MPI_STATUS_IGNORE);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiHostToDevice()
@@ -124,7 +124,7 @@ void mpiHostToDevice()
       MPI_Wait(&request2, MPI_STATUS_IGNORE);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiDeviceToHost()
@@ -148,7 +148,7 @@ void mpiDeviceToHost()
       MPI_Wait(&request2, MPI_STATUS_IGNORE);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiDeviceToDevice()
@@ -172,7 +172,7 @@ void mpiDeviceToDevice()
       MPI_Wait(&request2, MPI_STATUS_IGNORE);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiCopyHostToDevice()
@@ -199,7 +199,7 @@ void mpiCopyHostToDevice()
       gpu::fieldCpy(deviceField, hostField2);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 void mpiCopyDeviceToHost()
@@ -226,7 +226,7 @@ void mpiCopyDeviceToHost()
       MPI_Wait(&request2, MPI_STATUS_IGNORE);
    }
    double const endTime = MPI_Wtime();
-   std::cout << __FUNCTION__ << ": " << endTime - startTime << std::endl;
+   std::cout << __FUNCTION__ << ": " << endTime - startTime << '\n';
 }
 
 int main(int argc, char** argv)

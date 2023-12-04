@@ -205,7 +205,7 @@ int main(int argc, char** argv)
    const bool sendDirectlyFromGPU = false;
    gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, sendDirectlyFromGPU);
    com.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
-   auto communication = std::function< void() >([&]() { com.communicate(nullptr); });
+   auto communication = std::function< void() >([&]() { com.communicate(); });
 #else
    blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));

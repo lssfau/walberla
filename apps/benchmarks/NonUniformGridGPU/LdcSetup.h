@@ -31,9 +31,7 @@
 #include "field/FlagUID.h"
 
 using namespace walberla;
-
 using RefinementSelectionFunctor = SetupBlockForest::RefinementSelectionFunction;
-
 using FlagField_T          = FlagField< uint8_t >;
 
 class LDCRefinement
@@ -52,10 +50,10 @@ class LDCRefinement
       const real_t ySize = ( domain.ySize() / real_t(12) ) * real_c( 0.99 );
 
       const AABB leftCorner( domain.xMin(), domain.yMin(), domain.zMin(),
-                            domain.xMin() + xSize, domain.yMin() + ySize, domain.zMax() );
+                             domain.xMin() + xSize, domain.yMin() + ySize, domain.zMax() );
 
       const AABB rightCorner( domain.xMax() - xSize, domain.yMin(), domain.zMin(),
-                             domain.xMax(), domain.yMin() + ySize, domain.zMax() );
+                              domain.xMax(), domain.yMin() + ySize, domain.zMax() );
 
       for(auto & block : forest)
       {

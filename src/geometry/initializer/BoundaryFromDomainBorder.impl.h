@@ -65,7 +65,7 @@ void BoundaryFromDomainBorder<Handling>::init( const Config::BlockHandle & block
    BoundarySetter<Handling> boundarySetter;
    boundarySetter.setConfigBlock( blockHandle );
 
-   std::string directionStr = blockHandle.getParameter<std::string>( "direction" );
+   const std::string directionStr = blockHandle.getParameter<std::string>( "direction" );
    cell_idx_t  wallDistance            = blockHandle.getParameter<cell_idx_t>( "walldistance", 0 );
    cell_idx_t  ghostLayersToInitialize = blockHandle.getParameter<cell_idx_t>( "ghostLayersToInitialize", std::numeric_limits<cell_idx_t>::max() );
 
@@ -75,8 +75,8 @@ void BoundaryFromDomainBorder<Handling>::init( const Config::BlockHandle & block
    using stencil::D3Q7;
    for( auto dirIt = D3Q7::beginNoCenter(); dirIt != D3Q7::end(); ++dirIt )
    {
-      bool isAll = string_icompare( directionStr, "all" ) == 0;
-      bool isInDirectionStrings = std::find( directionStrings.begin(), directionStrings.end(),
+      const bool isAll = string_icompare( directionStr, "all" ) == 0;
+      const bool isInDirectionStrings = std::find( directionStrings.begin(), directionStrings.end(),
                                              stencil::dirToString[*dirIt] ) != directionStrings.end();
 
       if( isAll || isInDirectionStrings )
@@ -87,7 +87,7 @@ void BoundaryFromDomainBorder<Handling>::init( const Config::BlockHandle & block
    }
 
    if ( ! atLeastOneBoundarySet )
-      WALBERLA_ABORT( "Invalid Direction " << directionStr << ". Allowed values: all, N,S,W,E,T,B ");
+      WALBERLA_ABORT( "Invalid Direction " << directionStr << ". Allowed values: all, N,S,W,E,T,B ")
 }
 
 

@@ -22,12 +22,12 @@ def num_time_steps(block_size, time_steps_for_128_block=TIME_STEPS_FOR_128_BLOCK
 
 
 ldc_setup = {'Border': [
-    {'direction': 'N', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'N', 'walldistance': -1, 'flag': 'UBB'},
     {'direction': 'W', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'E', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'T', 'walldistance': -1, 'flag': 'UBB'},
+    {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'B', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'T', 'walldistance': -1, 'flag': 'NoSlip'},
 ]}
 
 

@@ -130,7 +130,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
                                               cell_idx_c(cells[1])-1,
                                               cell_idx_c(cells[2])-1 );
 
-      uint_t nrOfProcesses = uint_c( MPIManager::instance()->numProcesses() );
+      const uint_t nrOfProcesses = uint_c( MPIManager::instance()->numProcesses() );
 
       calculateCellDistribution( cells, nrOfProcesses, blocks, cellsPerBlock );
    }

@@ -19,7 +19,6 @@
 //======================================================================================================================
 
 #include "blockforest/Initialization.h"
-#include "blockforest/SetupBlockForest.h"
 #include "blockforest/loadbalancing/StaticCurve.h"
 
 #include "core/Environment.h"
@@ -54,6 +53,7 @@
 
 #include <cmath>
 
+#include "LdcSetup.h"
 #include "NonUniformGridGPUInfoHeader.h"
 using namespace walberla;
 
@@ -69,82 +69,6 @@ using BoundaryCollection_T = lbm::NonUniformGridGPUBoundaryCollection< FlagField
 using SweepCollection_T = lbm::NonUniformGridGPUSweepCollection;
 
 using gpu::communication::NonUniformGPUScheme;
-using RefinementSelectionFunctor = SetupBlockForest::RefinementSelectionFunction;
-
-class LDCRefinement
-{
- private:
-   const uint_t refinementDepth_;
-
- public:
-   explicit LDCRefinement(const uint_t depth) : refinementDepth_(depth){};
-
-   void operator()(SetupBlockForest& forest) const
-   {
-      const AABB & domain = forest.getDomain();
-
-      real_t xSize = ( domain.xSize() / real_t(12) ) * real_c( 0.99 );
-      real_t ySize = ( domain.ySize() / real_t(12) ) * real_c( 0.99 );
-
-      AABB leftCorner( domain.xMin(), domain.yMin(), domain.zMin(),
-                       domain.xMin() + xSize, domain.yMin() + ySize, domain.zMax() );
-
-      AABB rightCorner( domain.xMax() - xSize, domain.yMin(), domain.zMin(),
-                        domain.xMax(), domain.yMin() + ySize, domain.zMax() );
-
-      for(auto & block : forest)
-      {
-         auto & aabb = block.getAABB();
-         if( leftCorner.intersects( aabb ) || rightCorner.intersects( aabb ) )
-         {
-            if( block.getLevel() < refinementDepth_)
-               block.setMarker( true );
-         }
-      }
-   }
-};
-
-class LDC
-{
- private:
-   const std::string refinementProfile_;
-   const uint_t refinementDepth_;
-
-   const FlagUID noSlipFlagUID_;
-   const FlagUID ubbFlagUID_;
-
- public:
-   explicit LDC(const uint_t depth) : refinementDepth_(depth), noSlipFlagUID_("NoSlip"), ubbFlagUID_("UBB"){};
-
-   RefinementSelectionFunctor refinementSelector() const
-   {
-      return LDCRefinement(refinementDepth_);
-   }
-
-   void setupBoundaryFlagField(StructuredBlockForest& sbfs, const BlockDataID flagFieldID)
-   {
-      for (auto bIt = sbfs.begin(); bIt != sbfs.end(); ++bIt)
-      {
-         auto& b           = dynamic_cast< Block& >(*bIt);
-         const uint_t level       = b.getLevel();
-         auto flagField     = b.getData< FlagField_T >(flagFieldID);
-         const uint8_t noslipFlag = flagField->registerFlag(noSlipFlagUID_);
-         const uint8_t ubbFlag    = flagField->registerFlag(ubbFlagUID_);
-         for (auto cIt = flagField->beginWithGhostLayerXYZ(2); cIt != flagField->end(); ++cIt)
-         {
-            const Cell localCell = cIt.cell();
-            Cell globalCell(localCell);
-            sbfs.transformBlockLocalToGlobalCell(globalCell, b);
-            if (globalCell.y() >= cell_idx_c(sbfs.getNumberOfYCells(level))) { flagField->addFlag(localCell, ubbFlag); }
-            else if (globalCell.z() < 0 || globalCell.y() < 0 || globalCell.x() < 0 ||
-                     globalCell.x() >= cell_idx_c(sbfs.getNumberOfXCells(level)) || globalCell.z() >= cell_idx_c(sbfs.getNumberOfZCells(level)))
-            {
-               flagField->addFlag(localCell, noslipFlag);
-            }
-         }
-      }
-   }
-};
 
 namespace {
 void createSetupBlockForest(SetupBlockForest& setupBfs, const Config::BlockHandle& domainSetup, LDC& ldcSetup, const uint_t numProcesses=uint_c(MPIManager::instance()->numProcesses())) {

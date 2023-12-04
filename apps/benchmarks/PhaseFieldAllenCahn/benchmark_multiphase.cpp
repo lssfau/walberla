@@ -18,7 +18,6 @@
 //
 //======================================================================================================================
 #include "blockforest/Initialization.h"
-#include "blockforest/communication/UniformDirectScheme.h"
 
 #include "core/Environment.h"
 #include "core/logging/Initialization.h"
@@ -66,7 +65,7 @@ typedef gpu::GPUField< real_t > GPUField;
 
 int main(int argc, char** argv)
 {
-   mpi::Environment env(argc, argv);
+   const mpi::Environment env(argc, argv);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
    gpu::selectDeviceBasedOnMpiRank();
 #endif
@@ -92,14 +91,14 @@ int main(int argc, char** argv)
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       // CPU fields
-      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      const BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
       // GPU fields
-      BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
+      const BlockDataID lb_phase_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb phase field on GPU", Stencil_phase_T::Size, field::fzyx, 1);
-      BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
+      const BlockDataID lb_velocity_field_gpu = gpu::addGPUFieldToStorage< gpu::GPUField< real_t > >(
          blocks, "lb velocity field on GPU", Stencil_hydro_T::Size, field::fzyx, 1);
-      BlockDataID vel_field_gpu =
+      const BlockDataID vel_field_gpu =
          gpu::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
       BlockDataID phase_field_gpu =
          gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
@@ -215,15 +214,15 @@ int main(int argc, char** argv)
       auto timeLoop = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       auto normalTimeStep = [&]() {
-         Comm_velocity_based_distributions->startCommunication(defaultStream);
+         Comm_velocity_based_distributions->startCommunication();
          for (auto& block : *blocks)
             phase_field_LB_step(&block, defaultStream);
-         Comm_velocity_based_distributions->wait(defaultStream);
+         Comm_velocity_based_distributions->wait();
 
-         Comm_phase_field_distributions->startCommunication(defaultStream);
+         Comm_phase_field_distributions->startCommunication();
          for (auto& block : *blocks)
             hydro_LB_step(&block, defaultStream);
-         Comm_phase_field_distributions->wait(defaultStream);
+         Comm_phase_field_distributions->wait();
       };
       auto phase_only = [&]() {
          for (auto& block : *blocks)
