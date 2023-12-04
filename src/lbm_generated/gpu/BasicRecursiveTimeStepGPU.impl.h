@@ -243,7 +243,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    for(auto it = CommunicationStencil::beginNoCenter(); it != CommunicationStencil::end(); ++it){
       uint_t nSecIdx = blockforest::getBlockNeighborhoodSectionIndex(*it);
       // Propagate on ghost layers shadowing coarse or no blocks
-      if(!block->neighborhoodSectionHasSmallerBlocks(nSecIdx)){
+      if(block->neighborhoodSectionHasLargerBlock(nSecIdx)){
          CellInterval ci;
          pdfField->getGhostRegion(*it, ci, 1);
          sweepCollection_.streamOnlyNoAdvancementCellInterval(block, ci, gpuStream);
