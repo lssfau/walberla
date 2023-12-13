@@ -3,7 +3,11 @@ from pystencils.stencil import inverse_direction
 from pystencils.typing import BasicType
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index, Timestep, is_inplace
-from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
+# until lbmpy version 1.3.2 
+try:
+    from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
+except ImportError:
+    from lbmpy.custom_code_nodes import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
 from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB
 
