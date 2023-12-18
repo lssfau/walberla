@@ -203,7 +203,7 @@ int main(int argc, char** argv)
    // Communication
 #if defined(WALBERLA_BUILD_WITH_GPU_SUPPORT)
    const bool sendDirectlyFromGPU = false;
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, sendDirectlyFromGPU);
+   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, sendDirectlyFromGPU,  false);
    com.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
    auto communication = std::function< void() >([&]() { com.communicate(); });
 #else
