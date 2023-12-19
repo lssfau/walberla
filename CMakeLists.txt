@@ -1255,28 +1255,34 @@ endif()
 ##  Half precision
 ##
 ############################################################################################################################
-if (WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT)
-    if (WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG)
-        message(STATUS "Configuring with *experimental* half precision (float16) support. You better know what you are doing.")
-        if (WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
-            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
-                    "Half precision support for gcc has only been tested with version >= 12. "
-                    "You are using a previous version - it may not work correctly.")
-        endif ()
-        if (WALBERLA_CXX_COMPILER_IS_CLANG AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.0)
-            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
-                    "Half precision support for clang has only been tested with version >= 15. "
-                    "You are using a previous version - it may not work correctly.")
-        endif ()
-        if (NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST)
-            message(WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
-                    "You are not optimizing for localhost. You may encounter linker errors, or WORSE: silent incorrect fp16 arithmetic! Consider also enabling WALBERLA_OPTIMIZE_FOR_LOCALHOST!")
-        endif ()
-    else ()
-        message(FATAL_ERROR "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
-                "Half precision support is currently only available for gcc and clang.")
-    endif ()
-endif ()
+if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
+   ### Compiler requirements:
+   ### Within this project, there are several checks to ensure that the template parameter 'ValueType'
+   ### is a floating point number. The check is_floating_point<ValueType> is done primarily in our MPI implementation.
+   ### The IEE 754 floating type format _Float16, evaluates to true only if your compiler supports the
+   ### open C++23 standard P1467R9 (Extended floating-point types and standard names).
+   ### Compare:
+   ###  https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1467r9.html
+   ###
+   ### Right now (18.12.2023) this is the case only for gcc13.
+   ### For more information see:
+   ###   https://gcc.gnu.org/projects/cxx-status.html#:~:text=Extended%20floating%2Dpoint%20types%20and%20standard%20names
+   ###   https://clang.llvm.org/cxx_status.html#:~:text=Extended%20floating%2Dpoint%20types%20and%20standard%20names
+
+   try_compile( WALBERLA_SUPPORT_HALF_PRECISION "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestFloat16.cpp"
+         CXX_STANDARD 23 OUTPUT_VARIABLE TRY_COMPILE_OUTPUT )
+   ## message( STATUS ${TRY_COMPILE_OUTPUT} )
+   if ( NOT WALBERLA_SUPPORT_HALF_PRECISION )
+      message( FATAL_ERROR "Compiler: ${CMAKE_CXX_COMPILER} Version: ${CMAKE_CXX_COMPILER_VERSION} does not support half precision" )
+   endif ()
+
+   # Local host optimization
+   if ( NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST )
+      message( WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
+            "You are not optimizing for localhost. You may encounter linker errors, or WORSE: silent incorrect fp16 arithmetic! Consider also enabling WALBERLA_OPTIMIZE_FOR_LOCALHOST!" )
+   endif () # Local host check
+
+endif () # Check if WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT is set
 
 ############################################################################################################################
 # Documentation Generation

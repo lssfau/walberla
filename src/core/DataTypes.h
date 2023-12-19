@@ -175,21 +175,33 @@ using real_t = float;
 /// Only bandwidth bound code may therefore benefit. None of this is guaranteed, and may change in the future.
 ///
 #ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
-#   if defined(WALBERLA_CXX_COMPILER_IS_CLANG) || defined(WALBERLA_CXX_COMPILER_IS_GNU)
-/// Clang version must be 15 or higher for x86 half precision support.
-/// GCC version must be 12 or higher for x86 half precision support.
-/// Also support seems to require SSE, so ensure that respective instruction sets are enabled.
+/// FIXME: (not really right) Clang version must be 15 or higher for x86 half precision support.
+/// FIXME: (not really right) GCC version must be 12 or higher for x86 half precision support.
+/// FIXME: (I don't know) Also support seems to require SSE, so ensure that respective instruction sets are enabled.
 /// See
 ///   https://clang.llvm.org/docs/LanguageExtensions.html#half-precision-floating-point
 ///   https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html
 /// for more information.
+/// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/// Compiler requirements:
+/// Within this project, there are several checks to ensure that the template parameter 'ValueType'
+/// is a floating point number. The check is_floating_point<ValueType> is done primarily in our MPI implementation.
+/// The IEE 754 floating type format _Float16, evaluates to true only if your compiler supports the
+/// open C++23 standard P1467R9 (Extended floating-point types and standard names).
+/// Compare:
+///  https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1467r9.html
+///
+/// Right now (18.12.2023) this is the case only for gcc13.
+/// For more information see:
+///   https://gcc.gnu.org/projects/cxx-status.html#:~:text=Extended%20floating%2Dpoint%20types%20and%20standard%20names
+///   https://clang.llvm.org/cxx_status.html#:~:text=Extended%20floating%2Dpoint%20types%20and%20standard%20names
+
 using half    = _Float16;
+// Note: there are two possible float16 formats.
+// The one used right now is the IEE 754 float16 standard, consisting of a 5 bit exponent and a 10 bit mantissa.
+// Another possible half precision format would be the one from Google Brain (bfloat16) with an 8 bit exponent and a 7 bit mantissa.
+// Compare https://i10git.cs.fau.de/ab04unyc/walberla/-/issues/23
 using float16 = half;
-#   else
-static_assert(false, "\n\n### Attempting to built walberla with half precision support.\n"
-                     "### However, the compiler you chose is not suited for that, or we simply have not implemented "
-                     "support for half precision and your compiler.\n");
-#   endif
 #endif
 using float32 = float;
 using float64 = double;
@@ -228,6 +240,10 @@ inline bool realIsIdentical( const real_t a, const real_t b )
 namespace real_comparison
 {
    template< class T > struct Epsilon;
+   #ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+   using walberla::float16;
+   template<> struct Epsilon<     float16 > { static const     float16 value; };
+   #endif
    template<> struct Epsilon<       float > { static const       float value; };
    template<> struct Epsilon<      double > { static const      double value; };
    template<> struct Epsilon< long double > { static const long double value; };
@@ -253,6 +269,14 @@ inline bool floatIsEqual( float lhs, float rhs, const float epsilon = real_compa
 {
    return std::fabs( lhs - rhs ) < epsilon;
 }
+
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+inline bool floatIsEqual( walberla::float16 lhs, walberla::float16 rhs, const walberla::float16 epsilon = real_comparison::Epsilon<walberla::float16>::value )
+{
+   const auto difference = lhs - rhs;
+   return ( (difference < 0) ? -difference : difference ) < epsilon;
+}
+#endif
 
 } // namespace walberla
 
