@@ -26,6 +26,11 @@ namespace walberla {
 
 namespace real_comparison
 {
+   #ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+//   const    bfloat16 Epsilon<    bfloat16 >::value = static_cast<    bfloat16 >(1e-2); // machine eps is 2^-7
+   const     float16 Epsilon<     float16 >::value = static_cast<     float16 >(1e-3); // machine eps is 2^-10
+   // Note, depending on the kind of float16 <bfloat, float16> another Epsilon must be used.
+   #endif
    const       float Epsilon<       float >::value = static_cast<       float >(1e-4);
    const      double Epsilon<      double >::value = static_cast<      double >(1e-8);
    const long double Epsilon< long double >::value = static_cast< long double >(1e-10);
