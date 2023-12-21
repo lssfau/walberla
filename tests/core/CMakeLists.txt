@@ -222,3 +222,17 @@ if( WALBERLA_BUILD_WITH_PARMETIS )
    waLBerla_compile_test( NAME PlainParMetisTest FILES load_balancing/PlainParMetisTest.cpp )
    waLBerla_execute_test( NAME PlainParMetisTest PROCESSES 3 )
 endif()
+
+###################
+# Mixed Precision #
+###################
+
+if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
+   waLBerla_compile_test( Name Float16SupportTest FILES Float16SupportTest.cpp DEPENDS core)
+   # Actual support for float16 is available only since C++23
+   #   before is_arithmetic and is_floating_point evaluated to false,
+   #   also many STL functions are compatible with float16 only since C++23.
+   # Which features are actually supported depend on the compiler
+   target_compile_features( Float16SupportTest PUBLIC cxx_std_23 )
+   waLBerla_execute_test(NAME Float16SupportTest)
+endif ()

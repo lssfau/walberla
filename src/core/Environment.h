@@ -44,9 +44,8 @@ public:
    *
    * \param argc,argv  If command line parameters are present they have to contain at least
    *                   the path to the configuration file and optionally pairs of param-value:
-   *                   "-myParameter myValue"
-   *                   These values are then substituted in configuration files at
-   *                   positions marked with $(myParameter)
+   *                   "-blockName.parameterName=parameterValue"
+   *                   These values are then substituted in configuration files.
    *                   It is also possible to pass no command line options (see description below )
    *
    * If command line arguments are present the constructor initializes static objects

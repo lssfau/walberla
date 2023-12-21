@@ -194,11 +194,11 @@ int main(int argc, char** argv)
 
       gpu::communication::UniformGPUScheme< Stencil_T > comEven(blocks, false);
       comEven.addPackInfo(make_shared< PackInfoEven_T >(pdfFieldIDGPU));
-      auto evenComm = std::function< void() >([&]() { comEven.communicate(nullptr); });
+      auto evenComm = std::function< void() >([&]() { comEven.communicate(); });
 
       gpu::communication::UniformGPUScheme< Stencil_T > comODD(blocks, false);
       comODD.addPackInfo(make_shared< PackInfoOdd_T >(pdfFieldIDGPU));
-      auto oddComm = std::function< void() >([&]() { comODD.communicate(nullptr); });
+      auto oddComm = std::function< void() >([&]() { comODD.communicate(); });
 #else
       blockforest::communication::UniformBufferedScheme< Stencil_T > evenComm(blocks);
       evenComm.addPackInfo(make_shared< PackInfoEven_T >(pdfFieldID));

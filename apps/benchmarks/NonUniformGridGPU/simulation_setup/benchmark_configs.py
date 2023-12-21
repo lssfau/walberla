@@ -26,7 +26,7 @@ class Scenario:
             },
             'Parameters': {
                 'omega': 1.95,
-                'timesteps': 10001,
+                'timesteps': 30001,
 
                 'refinementDepth': self.refinement_depth,
                 'writeSetupForestAndReturn': False,
@@ -37,7 +37,7 @@ class Scenario:
 
                 'remainingTimeLoggerFrequency': 3,
 
-                'vtkWriteFrequency': 5000,
+                'vtkWriteFrequency': 10000,
             },
             'Logging': {
                 'logLevel': "info",

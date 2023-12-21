@@ -26,12 +26,13 @@ BASE_CONFIG = {
 }
 
 ldc_setup = {'Border': [
-    {'direction': 'N', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'N', 'walldistance': -1, 'flag': 'UBB'},
+    {'direction': 'W', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'E', 'walldistance': -1, 'flag': 'NoSlip'},
-    {'direction': 'T', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
     {'direction': 'B', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'T', 'walldistance': -1, 'flag': 'NoSlip'},
+
 ]}
 
 
@@ -55,7 +56,7 @@ def domain_block_size_ok(block_size, total_mem, gls=1, q=27, size_per_value=8):
 
 
 class Scenario:
-    def __init__(self, cells_per_block=(256, 128, 128), periodic=(1, 1, 1), cuda_blocks=(256, 1, 1),
+    def __init__(self, cells_per_block=(256, 128, 128), periodic=(1, 1, 1), cuda_blocks=(128, 1, 1),
                  timesteps=None, time_step_strategy="normal", omega=1.8, cuda_enabled_mpi=False,
                  inner_outer_split=(1, 1, 1), warmup_steps=5, outer_iterations=3,
                  init_shear_flow=False, boundary_setup=False,
@@ -110,7 +111,11 @@ class Scenario:
                 'innerOuterSplit': self.inner_outer_split,
                 'vtkWriteFrequency': self.vtk_write_frequency,
                 'remainingTimeLoggerFrequency': self.remaining_time_logger_frequency
+            },
+            'Logging': {
+                'logLevel': 'info',  # info progress detail tracing
             }
+
         }
         if self.boundary_setup:
             config_dict["Boundaries"] = ldc_setup
@@ -184,12 +189,14 @@ def overlap_benchmark():
     # no overlap
     scenarios.add(Scenario(time_step_strategy='noOverlap',
                            inner_outer_split=(1, 1, 1),
-                           cuda_enabled_mpi=cuda_enabled_mpi))
+                           cuda_enabled_mpi=cuda_enabled_mpi,
+                           outer_iterations=1))
 
     for inner_outer_split in inner_outer_splits:
         scenario = Scenario(time_step_strategy='simpleOverlap',
                             inner_outer_split=inner_outer_split,
-                            cuda_enabled_mpi=cuda_enabled_mpi)
+                            cuda_enabled_mpi=cuda_enabled_mpi,
+                            outer_iterations=1)
         scenarios.add(scenario)
 
 
@@ -228,6 +235,7 @@ def single_gpu_benchmark():
                                 cuda_blocks=cuda_block_size,
                                 time_step_strategy='kernelOnly',
                                 timesteps=num_time_steps(block_size, 2000),
+                                outer_iterations=1,
                                 additional_info=additional_info)
             scenarios.add(scenario)
 
@@ -237,18 +245,18 @@ def validation_run():
     wlb.log_info_on_root("Validation run")
     wlb.log_info_on_root("")
 
-    time_step_strategy = "noOverlap"  # "noOverlap"
+    time_step_strategy = "noOverlap"  # "simpleOverlap"
 
     scenarios = wlb.ScenarioManager()
-    scenario = Scenario(cells_per_block=(64, 64, 64),
+    scenario = Scenario(cells_per_block=(128, 128, 128),
                         time_step_strategy=time_step_strategy,
-                        timesteps=1000,
+                        timesteps=10001,
                         outer_iterations=1,
                         warmup_steps=0,
                         init_shear_flow=False,
                         boundary_setup=True,
-                        vtk_write_frequency=0,
-                        remaining_time_logger_frequency=10)
+                        vtk_write_frequency=5000,
+                        remaining_time_logger_frequency=30)
     scenarios.add(scenario)
 
 
