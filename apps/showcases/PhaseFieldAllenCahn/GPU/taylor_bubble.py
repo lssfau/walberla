@@ -118,13 +118,13 @@ class Scenario:
                                                         diameter_outer=d1,
                                                         diameter_inner=d2)
 
-        self.density_gas = parameters["density_light"]
-        self.surface_tension = parameters["surface_tension"]
+        self.density_gas = parameters.density_light
+        self.surface_tension = parameters.surface_tension
 
-        self.gravitational_acceleration = parameters["gravitational_acceleration"]
+        self.gravitational_acceleration = parameters.gravitational_acceleration
 
-        self.relaxation_time_liquid = parameters.get("relaxation_time_heavy")
-        self.relaxation_time_gas = parameters.get("relaxation_time_light")
+        self.relaxation_time_liquid = parameters.relaxation_time_heavy
+        self.relaxation_time_gas = parameters.relaxation_time_light
 
         self.cudaEnabledMpi = cuda_enabled_mpi
         self.cuda_blocks = (64, 2, 2)

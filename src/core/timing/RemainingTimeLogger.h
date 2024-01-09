@@ -46,11 +46,12 @@ namespace timing
 class RemainingTimeLogger
 {
  public:
-   RemainingTimeLogger(const uint_t nrTimesteps, const real_t logIntervalInSec = 10, const int minOutputWidth = 8,
-                       const uint_t startTimestep = 0)
-      : logIntervalInSec_(logIntervalInSec), timestep_(startTimestep), nrTimesteps_(nrTimesteps),
-        minOutputWidth_(minOutputWidth)
-   { WALBERLA_UNUSED(minOutputWidth_); }
+   RemainingTimeLogger(const uint_t nrTimesteps, const real_t logIntervalInSec = 10,
+                       const int minOutputWidth = 8, const uint_t startTimestep = 0) :
+   logIntervalInSec_(logIntervalInSec), timestep_(startTimestep), nrTimesteps_(nrTimesteps), minOutputWidth_(minOutputWidth)
+   {
+      WALBERLA_UNUSED(minOutputWidth_);
+   }
 
    void operator()()
    {
@@ -80,7 +81,6 @@ class RemainingTimeLogger
             WALBERLA_LOG_INFO("Estimated Remaining Time: " << std::setw(minOutputWidth_) << std::right
                                                            << timing::timeToString(remainingTime));
          }
-
          timer_.start();
       }
    }

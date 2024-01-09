@@ -93,7 +93,7 @@ with CodeGeneration() as ctx:
     g_updates = g_updates.new_with_substitutions(parameters.parameter_map())
 
     force_h = interface_tracking_force(C, stencil_phase, parameters)
-    hydro_force = hydrodynamic_force(g, C, method_hydro, parameters, body_force)
+    hydro_force = hydrodynamic_force(C, method_hydro, parameters, body_force)
 
     ####################
     # LBM UPDATE RULES #
@@ -108,7 +108,7 @@ with CodeGeneration() as ctx:
 
     phase_field_LB_step = sympy_cse(phase_field_LB_step)
     # ---------------------------------------------------------------------------------------------------------
-    force_Assignments = hydrodynamic_force_assignments(g, u, C, method_hydro, parameters, body_force)
+    force_Assignments = hydrodynamic_force_assignments(u, C, method_hydro, parameters, body_force)
 
     lbm_optimisation = LBMOptimisation(symbolic_field=g, symbolic_temporary_field=g_tmp)
     hydro_LB_step = create_lb_update_rule(lbm_config=lbm_config_hydro,

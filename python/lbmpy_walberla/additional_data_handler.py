@@ -9,7 +9,7 @@ try:
 except ImportError:
     from lbmpy.custom_code_nodes import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
-from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB
+from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB, DiffusionDirichlet
 
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
@@ -228,3 +228,38 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
         result['pdf_nd'] = ', '.join(pos)
 
         return result
+
+
+class DiffusionDirichletAdditionalDataHandler(AdditionalDataHandler):
+    def __init__(self, stencil, boundary_object):
+        assert isinstance(boundary_object, DiffusionDirichlet)
+        self._boundary_object = boundary_object
+        super(DiffusionDirichletAdditionalDataHandler, self).__init__(stencil=stencil)
+
+    @property
+    def constructor_arguments(self):
+        return ", std::function<real_t(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)>& " \
+               "diffusionCallback "
+
+    @property
+    def initialiser_list(self):
+        return "elementInitaliser(diffusionCallback),"
+
+    @property
+    def additional_arguments_for_fill_function(self):
+        return "blocks, "
+
+    @property
+    def additional_parameters_for_fill_function(self):
+        return " const shared_ptr<StructuredBlockForest> &blocks, "
+
+    def data_initialisation(self, *_):
+        init_list = ["real_t InitialisatonAdditionalData = elementInitaliser(Cell(it.x(), it.y(), it.z()), "
+                     "blocks, *block);", "element.concentration = InitialisatonAdditionalData;"]
+
+        return "\n".join(init_list)
+
+    @property
+    def additional_member_variable(self):
+        return "std::function<real_t(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)> " \
+               "elementInitaliser; "
