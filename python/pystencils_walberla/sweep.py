@@ -1,10 +1,11 @@
+from collections.abc import Iterable
 from typing import Callable, Sequence
-
 from jinja2 import Environment, PackageLoader, StrictUndefined
 
 from pystencils import Target, Assignment
 from pystencils import Field, create_kernel, create_staggered_kernel
 from pystencils.astnodes import KernelFunction
+from pystencils.typing import numpy_name_to_c
 
 from pystencils_walberla.cmake_integration import CodeGenerationContext
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
@@ -16,6 +17,7 @@ def generate_sweep(generation_context: CodeGenerationContext, class_name: str, a
                    namespace: str = 'pystencils', field_swaps=(), staggered=False, varying_parameters=(),
                    inner_outer_split=False, ghost_layers_to_include=0,
                    target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None, max_threads=None,
+                   block_offset=False,
                    **create_kernel_params):
     """Generates a waLBerla sweep from a pystencils representation.
 
@@ -46,6 +48,8 @@ def generate_sweep(generation_context: CodeGenerationContext, class_name: str, a
         cpu_openmp: if loops should use openMP or not.
         cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
         max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`
+        block_offset: A tuple of TypedSymbols that will function as internal variable to store
+                      storage.getBlockCellBB(block).min())
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     if staggered:
@@ -70,13 +74,13 @@ def generate_sweep(generation_context: CodeGenerationContext, class_name: str, a
                              field_swaps=field_swaps, varying_parameters=varying_parameters,
                              inner_outer_split=inner_outer_split, ghost_layers_to_include=ghost_layers_to_include,
                              cpu_vectorize_info=config.cpu_vectorize_info,
-                             cpu_openmp=config.cpu_openmp, max_threads=max_threads)
+                             cpu_openmp=config.cpu_openmp, max_threads=max_threads, block_offset=block_offset)
 
 
 def generate_selective_sweep(generation_context, class_name, selection_tree, interface_mappings=(), target=None,
                              namespace='pystencils', field_swaps=(), varying_parameters=(),
                              inner_outer_split=False, ghost_layers_to_include=0,
-                             cpu_vectorize_info=None, cpu_openmp=False, max_threads=None):
+                             cpu_vectorize_info=None, cpu_openmp=False, max_threads=None, block_offset=False):
     """Generates a selective sweep from a kernel selection tree. A kernel selection tree consolidates multiple
     pystencils ASTs in a tree-like structure. See also module `pystencils_walberla.kernel_selection`.
 
@@ -94,7 +98,10 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         ghost_layers_to_include: see documentation of `generate_sweep`
         cpu_vectorize_info: Dictionary containing information about CPU vectorization applied to the kernels
         cpu_openmp: Whether or not CPU kernels use OpenMP parallelization
-        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`
+        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__
+        block_offset: A tuple of TypedSymbols that will function as internal variable to store
+                      storage.getBlockCellBB(block).min())
+`
     """
     def to_name(f):
         return f.name if isinstance(f, Field) else f
@@ -121,6 +128,11 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
 
     interface_spec = HighLevelInterfaceSpec(kernel_family.kernel_selection_parameters, interface_mappings)
 
+    parameters_to_ignore = None
+    if isinstance(block_offset, Iterable):
+        parameters_to_ignore = [b.name for b in block_offset]
+        block_offset = tuple((b.name, numpy_name_to_c(b.dtype.numpy_dtype.name)) for b in block_offset)
+
     jinja_context = {
         'kernel': kernel_family,
         'namespace': namespace,
@@ -133,7 +145,9 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         'generate_functor': True,
         'cpu_vectorize_info': cpu_vectorize_info,
         'cpu_openmp': cpu_openmp,
-        'max_threads': max_threads
+        'max_threads': max_threads,
+        'block_offset': block_offset,
+        'parameters_to_ignore': parameters_to_ignore
     }
     header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
     source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)

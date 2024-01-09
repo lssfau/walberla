@@ -618,7 +618,7 @@ endif ()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
-   set(LBMPY_MIN_VERSION 1.3.2)
+   set(LBMPY_MIN_VERSION 1.3.3)
    execute_process(COMMAND ${Python_EXECUTABLE} -c "import lbmpy; print(lbmpy.__version__)"
          RESULT_VARIABLE LBMPY_FOUND OUTPUT_VARIABLE LBMPY_VERSION)
     if(NOT LBMPY_FOUND EQUAL 0)

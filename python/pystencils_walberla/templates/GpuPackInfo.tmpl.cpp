@@ -68,7 +68,7 @@ void {{class_name}}::pack(Direction dir, unsigned char * byte_buffer, IBlock * b
         {% endfor %}
 
         default:
-            WALBERLA_ASSERT(false);
+            return;
     }
 }
 
@@ -99,7 +99,7 @@ void {{class_name}}::unpack(Direction dir, unsigned char * byte_buffer, IBlock *
         {% endfor %}
 
         default:
-            WALBERLA_ASSERT(false);
+            return;
     }
 }
 
