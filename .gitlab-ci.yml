@@ -1871,5 +1871,6 @@ continuous_benchmark_trigger:
   rules:
     - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
-    - when: manual
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
+      when: manual
       allow_failure: true
