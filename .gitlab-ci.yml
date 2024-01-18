@@ -1872,3 +1872,4 @@ continuous_benchmark_trigger:
     - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - when: manual
+      needs: [ ]
