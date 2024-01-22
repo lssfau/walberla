@@ -91,7 +91,7 @@ with CodeGeneration() as ctx:
     g_updates = initializer_kernel_hydro_lb(method_hydro, density_field, u, g)
 
     force_h = interface_tracking_force(C, stencil_phase, parameters)
-    hydro_force = hydrodynamic_force(g, C, method_hydro, parameters, body_force)
+    hydro_force = hydrodynamic_force(C, method_hydro, parameters, body_force)
 
     ####################
     # LBM UPDATE RULES #
@@ -103,7 +103,7 @@ with CodeGeneration() as ctx:
 
     allen_cahn_update_rule = add_interface_tracking_force(allen_cahn_update_rule, force_h)
     # ---------------------------------------------------------------------------------------------------------
-    force_Assignments = hydrodynamic_force_assignments(g, u, C, method_hydro, parameters, body_force)
+    force_Assignments = hydrodynamic_force_assignments(u, C, method_hydro, parameters, body_force)
 
     lbm_optimisation = LBMOptimisation(symbolic_field=g, symbolic_temporary_field=g_tmp)
     hydro_lb_update_rule = create_lb_update_rule(lbm_config=lbm_config_hydro,

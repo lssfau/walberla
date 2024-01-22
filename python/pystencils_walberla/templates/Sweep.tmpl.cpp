@@ -57,6 +57,10 @@ namespace {{namespace}} {
 
 void {{class_name}}::run( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
 {
+   {% if block_offset -%}
+   if (!this->configured_)
+      WALBERLA_ABORT("This Sweep contains a configure function that needs to be called manually")
+         {% endif %}
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
     {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
     {{kernel|generate_call(ghost_layers_to_include=ghost_layers_to_include, stream='stream')|indent(4)}}
@@ -70,6 +74,10 @@ void {{class_name}}::runOnCellInterval(
         | type_identifier_list -}}
 )
 {
+   {% if block_offset -%}
+   if (!this->configured_)
+      WALBERLA_ABORT("This Sweep contains a configure function that needs to be called manually")
+         {% endif %}
     CellInterval ci = globalCellInterval;
     CellInterval blockBB = blocks->getBlockCellBB( *block);
     blockBB.expand( ghostLayers );
