@@ -14,7 +14,7 @@ import sympy as sp
 
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil = LBStencil(Stencil.D3Q19)
+    stencil = LBStencil(Stencil.D3Q27)
 
     pdfs, pdfs_tmp = fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): {data_type}[{stencil.D}D]",
                             layout='fzyx')

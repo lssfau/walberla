@@ -76,7 +76,7 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
                           f"   element.wnx = {inv_offset[0]};",
                           f"   element.wny = {inv_offset[1]};",
                           f"   element.wnz = {inv_offset[2]};",
-                          f"   ref_dir = {direction};",
+                          f"   ref_dir = {self._walberla_stencil.index(inv_offset)};",
                           "}"]
         elif self._dim == 2:
             init_list += ["// concave corner (neighbors are non-fluid)",
@@ -84,7 +84,7 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
                           "{",
                           f"   element.wnx = {inv_offset[0]};",
                           f"   element.wny = {inv_offset[1]};",
-                          f"   ref_dir = {direction};",
+                          f"   ref_dir = {self._walberla_stencil.index(inv_offset)};",
                           "}"]
         init_list.append("element.ref_dir = ref_dir;")
 
