@@ -1531,23 +1531,6 @@ clang_16_hybrid_dbg_sp:
       - cuda11
       - docker
 
-
-
-gcc_8_hybrid_dbg_noboost:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
-   before_script:
-      - rm -rf /opt/boost /usr/include/boost
-   variables:
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_ENABLE_GUI: "OFF"
-      WALBERLA_BUILD_WITH_PYTHON: "OFF"
-   tags:
-      - docker
-
-
-
 ###############################################################################
 ##                                                                           ##
 ##    STL Debug Build                                                        ##
