@@ -723,6 +723,12 @@ inline void BlockStorage::clearBlockData( const BlockDataID & id )
 {
    for( auto block = begin(); block != end(); ++block )
       block->deleteData( id );
+
+   //also delete block data from data handling vector
+   auto elementToErase = std::remove_if(blockDataItem_.begin(), blockDataItem_.end(),
+                                 [id](const internal::BlockDataItem& dataItem)
+                                 { return dataItem.getId() == id; });
+   blockDataItem_.erase(elementToErase, blockDataItem_.end());
 }
 
 
