@@ -172,9 +172,6 @@ waLBerla_compile_test( FILES DebugSTLTest.cpp )
 waLBerla_execute_test( NAME DebugSTLTest )
 set_tests_properties(DebugSTLTest PROPERTIES WILL_FAIL TRUE)
 
-waLBerla_compile_test( FILES FP16Test.cpp )
-waLBerla_execute_test( NAME FP16Test )
-
 waLBerla_compile_test( FILES FunctionTraitsTest.cpp )
 waLBerla_execute_test( NAME FunctionTraitsTest )
 
@@ -235,4 +232,7 @@ if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
    # Which features are actually supported depend on the compiler
    target_compile_features( Float16SupportTest PUBLIC cxx_std_23 )
    waLBerla_execute_test(NAME Float16SupportTest)
+
+   waLBerla_compile_test( FILES FP16Test.cpp )
+   waLBerla_execute_test( NAME FP16Test )
 endif ()
