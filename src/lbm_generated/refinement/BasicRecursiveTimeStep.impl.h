@@ -178,8 +178,7 @@ std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, Bo
 
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::ghostLayerPropagation(
-   Block * block)
+void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::ghostLayerPropagation(Block * block)
 {
    auto pdfField = block->getData<PdfField_T>(pdfFieldId_);
 

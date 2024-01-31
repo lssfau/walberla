@@ -1,0 +1,26 @@
+Parameters
+{
+	omega           1.95;
+	inletVelocity   0.05;
+	timesteps       1000;
+	refinementDepth 1;
+
+	remainingTimeLoggerFrequency 0; // in seconds
+	vtkWriteFrequency 0;
+}
+
+DomainSetup
+{
+   domainSize    <32, 16, 16>;
+   rootBlocks    <4, 2, 2>;
+
+   cellsPerBlock <  8, 8, 8 >;
+   periodic      <  0,    0, 1 >;
+}
+
+Logging
+{
+    logLevel info;  // info progress detail tracing
+    writeSetupForestAndReturn false;
+}
+
