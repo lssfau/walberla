@@ -1276,12 +1276,6 @@ if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
       message( FATAL_ERROR "Compiler: ${CMAKE_CXX_COMPILER} Version: ${CMAKE_CXX_COMPILER_VERSION} does not support half precision" )
    endif ()
 
-   # Local host optimization
-   if ( NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST )
-      message( WARNING "[WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT] "
-            "You are not optimizing for localhost. You may encounter linker errors, or WORSE: silent incorrect fp16 arithmetic! Consider also enabling WALBERLA_OPTIMIZE_FOR_LOCALHOST!" )
-   endif () # Local host check
-
 endif () # Check if WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT is set
 
 ############################################################################################################################

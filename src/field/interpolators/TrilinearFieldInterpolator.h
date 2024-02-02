@@ -62,7 +62,7 @@ public:
    }
 
 
-   inline bool operator==( const OwnType & other ){ return baseField_ == other.baseField_; }
+   inline bool operator==( const OwnType & other ) const { return baseField_ == other.baseField_; }
 
    template< typename ForwardIterator_T >
    inline void get( const Vector3<real_t> & position, ForwardIterator_T interpolationResultBegin )

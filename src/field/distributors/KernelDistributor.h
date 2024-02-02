@@ -62,7 +62,7 @@ public:
       WALBERLA_ASSERT(baseField.nrOfGhostLayers() > uint_t(0), "field for kernel distribution needs at least one ghost layer");
    }
 
-   inline bool operator==( const OwnType & other ){ return baseField_ == other.baseField_; }
+   inline bool operator==( const OwnType & other ) const { return baseField_ == other.baseField_; }
 
    template< typename ForwardIterator_T >
    inline void distribute( const Vector3<real_t> & position, ForwardIterator_T distributeValueBegin )

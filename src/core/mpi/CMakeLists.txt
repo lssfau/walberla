@@ -19,11 +19,14 @@ target_sources( core
       MPIIO.h
       MPIManager.cpp
       MPIManager.h
+      MPIOperation.h
       MPITextFile.cpp
       MPITextFile.h
+      MPIWrapper.cpp
       MPIWrapper.h
       OpenMPBufferSystem.h
       OpenMPBufferSystem.impl.h
+      Operation.h
       RecvBuffer.h
       Reduce.h
       SendBuffer.h

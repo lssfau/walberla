@@ -119,6 +119,10 @@ void MPIManager::finalizeMPI()
 {
    WALBERLA_MPI_SECTION()
    {
+      /// Free the custom types and operators
+      customMPITypes_.clear();
+      customMPIOperations_.clear();
+
       if (isMPIInitialized_ && !currentlyAborting_)
       {
          isMPIInitialized_ = false;

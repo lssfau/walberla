@@ -18,21 +18,26 @@
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //! \author Martin Bauer <martin.bauer@fau.de>
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Michael Zikeli <michael.zikeli@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "MPIWrapper.h"
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 #include "core/math/Uint.h"
+#include "core/mpi/Datatype.h"
+#include "core/mpi/MPIOperation.h"
+#include "core/mpi/MPIWrapper.h"
+#include "core/mpi/Operation.h"
 #include "core/singleton/Singleton.h"
 
+#include <map>
+#include <typeindex>
 
 namespace walberla {
 namespace mpi {
-
 
 
 /**
@@ -127,6 +132,87 @@ public:
    /// Indicates whether MPI-IO can be used with the current MPI communicator; certain versions of OpenMPI produce
    /// segmentation faults when using MPI-IO with a 3D Cartesian MPI communicator (see waLBerla issue #73)
    bool isCommMPIIOValid() const;
+
+   /// Return the custom MPI_Datatype stored in 'customMPITypes_' and defined by the user and passed to 'commitCustomType'.
+   template< typename CType >
+   MPI_Datatype getCustomType() const
+   {
+      WALBERLA_MPI_SECTION()
+      {
+         return customMPITypes_.at(typeid(CType)).operator MPI_Datatype();
+      }
+      WALBERLA_NON_MPI_SECTION()
+      {
+         WALBERLA_ABORT( "This should not be called, if waLBerla is compiled without MPI." );
+      }
+   }
+
+   /// Return the custom MPI_Op stored in 'customMPIOperation_' and defined by the user and passed to 'commitCustomOperation'.
+   template< typename CType >
+   MPI_Op getCustomOperation(mpi::Operation op) const
+   {
+      // FIXME the operation is actually type dependent but implementing this is not straightforward,
+      //    compare comment at declaration of 'customMPIOperations_'.
+      WALBERLA_MPI_SECTION()
+      {
+         return customMPIOperations_.at(op).operator MPI_Op();
+      }
+      WALBERLA_NON_MPI_SECTION()
+      {
+         WALBERLA_ABORT( "This should not be called, if waLBerla is compiled without MPI." );
+      }
+   }
+   //@}
+   //*******************************************************************************************************************
+
+   //** Setter Functions  **********************************************************************************************
+   /*! \name Setter Function */
+   //@{
+   ///! \brief Initializes a custom MPI_Datatype and logs it in the customMPITypes_ map.
+   ///! \param argument The argument that is expected by the constructor of mpi::Datatype
+   ///     At the point of creation 26.01.2024 this is either MPI_Datatype or const int.
+   template < typename CType, class ConstructorArgumentType >
+   void commitCustomType( ConstructorArgumentType& argument )
+   {
+      WALBERLA_MPI_SECTION()
+      {
+         if (isMPIInitialized_ && !currentlyAborting_)
+         {
+            static_assert( std::is_same_v<ConstructorArgumentType, const int> || std::is_same_v<ConstructorArgumentType, MPI_Datatype>,
+                           "mpi::Datatype has only an constructor for an int value or a MPI_Datatype." );
+            [[maybe_unused]] auto worked = std::get< 1 >( customMPITypes_.try_emplace(typeid(CType), argument) );
+            WALBERLA_ASSERT(worked, "Emplacement of type " << typeid(CType).name() << " did not work.");
+         } else {
+            WALBERLA_ABORT( "MPI must be initialized before an new MPI_Datatype can be committed." );
+         }
+      }
+      WALBERLA_NON_MPI_SECTION()
+      {
+         WALBERLA_ABORT( "This should not be called, if waLBerla is compiled without MPI." );
+      }
+   }
+
+   ///! \brief Initializes a custom MPI_Op and logs it in the customMPIOperation map
+   ///! \param op  A operator, e.g. SUM, MIN.
+   ///! \param fct The definition of the MPI_User_function used for this operator.
+   template< typename CType >
+   void commitCustomOperation( mpi::Operation op, MPI_User_function* fct )
+   {
+      WALBERLA_MPI_SECTION()
+      {
+         if (isMPIInitialized_ && !currentlyAborting_)
+         {
+            [[maybe_unused]] auto worked = std::get< 1 >(customMPIOperations_.try_emplace(op, fct));
+            WALBERLA_ASSERT(worked, "Emplacement of operation " << typeid(op).name() << " of type "
+                                                                << typeid(CType).name() << " did not work.");
+         }
+         else { WALBERLA_ABORT("MPI must be initialized before an new MPI_Op can be committed."); }
+      }
+      WALBERLA_NON_MPI_SECTION()
+      {
+         WALBERLA_ABORT( "This should not be called, if waLBerla is compiled without MPI." );
+      }
+   }
    //@}
    //*******************************************************************************************************************
 
@@ -162,6 +248,33 @@ private:
 
    // Singleton
    MPIManager() : comm_(MPI_COMM_NULL) { WALBERLA_NON_MPI_SECTION() { rank_ = 0; } }
+
+/// It is possible to commit own datatypes to MPI, that are not part of the standard. One example would be float16.
+/// With these maps, it is possible to track self defined MPI_Datatypes and MPI_Ops, to access them at any time and
+/// place in the program, also, they are automatically freed once MPIManager::finalizeMPI is called.
+/// To initialize types or operations and add them to the map, the getter functions 'commitCustomType' and
+/// 'commitCustomOperation' should be used. This can for example be done e.g. in the specialization of the MPITrait of
+/// the newly defined type. For an example see MPIWrapper.cpp
+   std::map< std::type_index, walberla::mpi::Datatype > customMPITypes_{};
+   std::map< walberla::mpi::Operation, walberla::mpi::MPIOperation > customMPIOperations_{};
+   // FIXME this must be type specific as well, but doing so is a bit more complicated.
+   //  1. Idea) Combining both maps together e.g. as std::map< typeid(CType),
+   //                                                          std::pair< MPI_DataType,
+   //                                                                     std::map< Operation,
+   //                                                                               MPI_Op > > > customMPITypesWithOps_{};
+   //           There the access is quite nasty to look at, but easily doable, the construction however is quite difficult
+   //           also one needs to make sure that the type is initialized before the operation.
+   //  2. Idea) Leaving it as two maps customMPITypes_ and customMPIOperations,
+   //           but storing a pair of typeid and operation as key for the operation map.
+   //           This way everything would look nice, but someone needs to implement a comparison operator for this pair.
+   //           I personally don't know where to put this comparison operator to, since it should not be part of the manager.
+   //  3. Idea) Since this relies on the use of MPITrait<CType> --> { MPI_Datatype, MPI_Op } someone could define a object
+   //           to store in the MPIManager there, to keep the MPIManager light and easily understandable.
+   //           I'm also not sure if the MPITrait is the right spot for this though.
+   //  For more information about the changes done in the code to allow custom defined types and operations,
+   //  check out MR !647 ( https://i10git.cs.fau.de/walberla/walberla/-/merge_requests/647 )
+
+
 
 }; // class MPIManager
 

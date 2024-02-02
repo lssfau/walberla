@@ -19,14 +19,16 @@
 //
 //======================================================================================================================
 
-#include <memory>
-#include <numeric>
-
 #include "core/DataTypes.h"
 #include "core/Environment.h"
 #include "core/logging/Logging.h"
 
+#include <numeric>
+
 namespace walberla::simple_Float16_test {
+
+
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 using walberla::floatIsEqual;
 using walberla::real_t;
 using walberla::uint_c;
@@ -90,12 +92,12 @@ void vector_test()
    fpDst_cast.assign( 10, (dst_t) 1.5 );
    fp32.assign( 10, 1.5f );
    std::copy( fpSrc.begin(), fpSrc.end(), fpDst.begin() );
-   WALBERLA_LOG_WARNING_ON_ROOT(
+   WALBERLA_LOG_INFO_ON_ROOT(
        " std::vector.assign is not able to assign "
        << typeid( src_t ).name() << " values to container of type " << precisionType << ".\n"
        << " Therefore, the floating point value for assign must be cast beforehand or std::copy must be used, since it uses a static_cast internally." );
 
-   fpSrc[5]      = 2.3;
+   fpSrc[5]      = real_c(2.3);
    fpDst_cast[5] = (dst_t) 2.3;
    fp32[5]       = 2.3f;
    fpDst[5]      = (dst_t) 2.3;
@@ -118,7 +120,7 @@ void vector_test()
       WALBERLA_CHECK_FLOAT_EQUAL( (dst_t)sumSrc, sumDst );
    }
    {
-      fpSrc.assign( 13, 1.3 );
+      fpSrc.assign(13, real_c(1.3));
       std::copy( fpSrc.begin(), fpSrc.end(), fpDst.begin() );
       const auto sumSrc = std::reduce(fpSrc.begin(), fpSrc.end());
       const auto sumDst = std::reduce(fpDst.begin(), fpDst.end());
@@ -126,8 +128,11 @@ void vector_test()
    }
 } // simple_Float16_test::vector_test()
 
+#endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+
 int main( int argc, char** argv )
 {
+#ifdef  WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
    // This check only works since C++23 and is used in many implementations, so it's important, that it works.
    WALBERLA_CHECK( std::is_arithmetic< dst_t >::value );
 
@@ -149,15 +154,17 @@ int main( int argc, char** argv )
    WALBERLA_LOG_INFO_ON_ROOT( " Start a where float32 is sufficient but float16 is not." );
    WALBERLA_CHECK_FLOAT_UNEQUAL( dst_t(1.0)-dst_t(0.3), 1.0-0.3 );
    WALBERLA_CHECK_FLOAT_EQUAL( 1.0f-0.3f, 1.0-0.3 );
+#else
+   WALBERLA_LOG_WARNING_ON_ROOT( "\nWALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT is not enabled. So this test cannot be run!\n" )
+#endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 
-   return 0;
+   return EXIT_SUCCESS;
 } // simple_Float16_test::main()
 
 } // namespace walberla::simple_Float16_test
 
 int main( int argc, char** argv )
 {
-   walberla::simple_Float16_test::main( argc, argv );
+   return walberla::simple_Float16_test::main( argc, argv );
 
-   return EXIT_SUCCESS;
 } // main()
