@@ -16,18 +16,19 @@
 //! \file Reduce.h
 //! \ingroup core
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Michael Zikeli <michael.zikeli@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "BufferDataTypeExtensions.h"
-
 #include "core/Abort.h"
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
-#include "core/mpi/MPIManager.h"
 #include "core/mpi/MPIWrapper.h"
+#include "core/mpi/Operation.h"
+
+#include "BufferDataTypeExtensions.h"
 
 #include "core/math/Vector3.h"
 
@@ -36,33 +37,10 @@
 
 
 namespace walberla {
-namespace mpi {
 
 
-
-enum Operation { MIN, MAX, SUM, PRODUCT, LOGICAL_AND, BITWISE_AND, LOGICAL_OR, BITWISE_OR, LOGICAL_XOR, BITWISE_XOR };
-
-inline MPI_Op toMPI_Op( Operation operation )
+namespace mpi
 {
-   switch( operation )
-   {
-   case MIN:         return MPI_MIN;
-   case MAX:         return MPI_MAX;
-   case SUM:         return MPI_SUM;
-   case PRODUCT:     return MPI_PROD;
-   case LOGICAL_AND: return MPI_LAND;
-   case BITWISE_AND: return MPI_BAND;
-   case LOGICAL_OR:  return MPI_LOR;
-   case BITWISE_OR:  return MPI_BOR;
-   case LOGICAL_XOR: return MPI_LXOR;
-   case BITWISE_XOR: return MPI_BXOR;
-   default:          WALBERLA_ABORT( "Unknown operation!" );
-   }
-#ifdef __IBMCPP__
-   return MPI_SUM; // never reached, helps to suppress a warning from the IBM compiler
-#endif
-}
-
 //======================================================================================================================
 /*!
  *  \brief Reduces a value over all processes in-place
@@ -91,11 +69,11 @@ void reduceInplace( T & value, Operation operation, int recvRank = 0, MPI_Comm c
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, &value, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, &value, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( &value, nullptr, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &value, nullptr, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
 }
 
@@ -128,11 +106,11 @@ inline void reduceInplace( bool & value, Operation operation, int recvRank = 0, 
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
 
    value = intValue != 0;
@@ -172,11 +150,11 @@ T reduce( const T value, Operation operation, int recvRank = 0, MPI_Comm comm = 
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( const_cast<T*>( &value ), &result, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( const_cast<T*>( &value ), &result, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( const_cast<T*>( &value ), nullptr, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( const_cast<T*>( &value ), nullptr, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
 
    return result;
@@ -213,11 +191,11 @@ inline bool reduce( const bool value, Operation operation, int recvRank = 0, MPI
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( &intValue, &intResult, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &intValue, &intResult, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
 
    return intResult != 0;
@@ -252,11 +230,11 @@ void reduceInplace( std::vector<T> & values, Operation operation, int recvRank =
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( values.empty() ? nullptr : &values[0], nullptr, int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( values.empty() ? nullptr : &values[0], nullptr, int_c( values.size() ), MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
 }
 
@@ -292,14 +270,14 @@ inline void reduceInplace( std::vector<bool> & values, Operation operation, int 
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), MPITrait<uint8_t>::operation(operation), recvRank, comm );
       size_t size = values.size();
       convert( sendBuffer, values );
       values.resize(size);
    }
    else
    {
-      MPI_Reduce( sendBuffer.empty() ? nullptr : &sendBuffer[0], nullptr, int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( sendBuffer.empty() ? nullptr : &sendBuffer[0], nullptr, int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), MPITrait<uint8_t>::operation(operation), recvRank, comm );
    }
 }
 
@@ -331,11 +309,11 @@ void reduceInplace( math::Vector3<T> & values, Operation operation, int recvRank
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, values.data(), 3, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, values.data(), 3, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( values.data(), nullptr, 3, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( values.data(), nullptr, 3, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
 }
 
@@ -367,11 +345,11 @@ inline void reduceInplace( math::Vector3<bool> & values, Operation operation, in
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( intValues.data(), nullptr, 3, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( intValues.data(), nullptr, 3, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
 
    for(uint_t i = 0; i < 3; ++i)
@@ -411,11 +389,11 @@ math::Vector3<T> reduce( const math::Vector3<T> & values, Operation operation, i
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( const_cast<T*>( values.data() ), result.data(), 3, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( const_cast<T*>( values.data() ), result.data(), 3, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( const_cast<T*>( values.data() ), nullptr, 3, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( const_cast<T*>( values.data() ), nullptr, 3, MPITrait<T>::type(), MPITrait<T>::operation(operation), recvRank, comm );
    }
 
    return result;
@@ -452,14 +430,14 @@ inline math::Vector3<bool> reduce( const math::Vector3<bool> & values, Operation
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
 
       for(uint_t i = 0; i < 3; ++i)
          results[i] = intValues[i] != 0;
    }
    else
    {
-      MPI_Reduce( intValues.data(), nullptr, 3, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( intValues.data(), nullptr, 3, MPITrait<int>::type(), MPITrait<int>::operation(operation), recvRank, comm );
    }
 
    return results;
@@ -487,7 +465,7 @@ T allReduce( const T & value, Operation operation, MPI_Comm comm = MPI_COMM_WORL
    WALBERLA_NON_MPI_SECTION() { return value; }
 
    T result;
-   MPI_Allreduce( const_cast<T*>( &value ), &result, 1, MPITrait<T>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( const_cast<T*>( &value ), &result, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), comm );
    return result;
 }
 
@@ -514,7 +492,7 @@ inline bool allReduce( const bool value, Operation operation, MPI_Comm comm = MP
 
    int intValue = value ? 1 : 0;
 
-   MPI_Allreduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), comm );
 
    return intValue != 0;
 }
@@ -539,7 +517,7 @@ void allReduceInplace( T & value, Operation operation, MPI_Comm comm = MPI_COMM_
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
-   MPI_Allreduce( MPI_IN_PLACE, &value, 1, MPITrait<T>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, &value, 1, MPITrait<T>::type(), MPITrait<T>::operation(operation), comm );
 }
 
 
@@ -562,7 +540,7 @@ inline void allReduceInplace( bool & value, Operation operation, MPI_Comm comm =
 
    int intValue = value ? 1 : 0;
 
-   MPI_Allreduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, &intValue, 1, MPITrait<int>::type(), MPITrait<int>::operation(operation), comm );
 
    value = intValue != 0;
 }
@@ -587,7 +565,7 @@ void allReduceInplace( std::vector<T> & values, Operation operation, MPI_Comm co
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
-   MPI_Allreduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), MPITrait<T>::operation(operation), comm );
 }
 
 
@@ -612,7 +590,7 @@ inline void allReduceInplace( std::vector<bool> & bools, Operation operation, MP
    std::vector<uint8_t> sendBuffer;
 
    convert( bools, sendBuffer );
-   MPI_Allreduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), MPITrait<uint8_t>::operation(operation), comm );
    auto size = bools.size();
    convert(sendBuffer, bools);
    bools.resize(size);
@@ -637,7 +615,7 @@ void allReduceInplace( math::Vector3<T> & values, Operation operation, MPI_Comm 
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
-   MPI_Allreduce( MPI_IN_PLACE, values.data(), 3, MPITrait<T>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, values.data(), 3, MPITrait<T>::type(), MPITrait<T>::operation(operation), comm );
 }
 
 
@@ -663,7 +641,7 @@ inline void allReduceInplace( math::Vector3<bool> & bools, Operation operation, 
 
    math::Vector3<int> intValues{bools[0] ? 1 : 0, bools[1] ? 1 : 0, bools[2] ? 1 : 0};
 
-   MPI_Allreduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, intValues.data(), 3, MPITrait<int>::type(), MPITrait<int>::operation(operation), comm );
 
    for(uint_t i = 0; i < 3; ++i)
    {

@@ -23,8 +23,7 @@
 #pragma once
 
 #include "core/Abort.h"
-
-
+#include "core/mpi/Operation.h"
 
 /// \cond internal
 
@@ -46,6 +45,7 @@
 #define WALBERLA_NON_MPI_SECTION() if(true)
 
 #endif
+
 
 namespace walberla {
 namespace mpistubs {
@@ -76,8 +76,6 @@ namespace mpistubs {
 #ifdef _MSC_VER
 #pragma warning ( pop )
 #endif
-
-
 
 #else // WALBERLA_BUILD_WITH_MPI
 
@@ -143,6 +141,10 @@ const MPI_Datatype MPI_UNSIGNED_LONG_LONG = 10;
 const MPI_Datatype MPI_FLOAT              = 11;
 const MPI_Datatype MPI_DOUBLE             = 12;
 const MPI_Datatype MPI_LONG_DOUBLE        = 13;
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+   const MPI_Datatype MPI_FLOAT16  = 14;
+#endif
+
 
 const int MPI_ORDER_C       = 0;
 const int MPI_ORDER_FORTRAN = 0;
@@ -151,16 +153,17 @@ const MPI_Datatype MPI_ANY_SOURCE = -2;
 const MPI_Datatype MPI_ANY_TAG    = -1;
 const MPI_Datatype MPI_DATATYPE_NULL = 0;
 
-const MPI_Op MPI_MIN  = 100;
-const MPI_Op MPI_MAX  = 101;
-const MPI_Op MPI_SUM  = 102;
-const MPI_Op MPI_PROD = 103;
-const MPI_Op MPI_LAND = 104;
-const MPI_Op MPI_BAND = 105;
-const MPI_Op MPI_LOR  = 106;
-const MPI_Op MPI_BOR  = 107;
-const MPI_Op MPI_LXOR = 108;
-const MPI_Op MPI_BXOR = 109;
+const MPI_Op MPI_OP_NULL = 99;
+const MPI_Op MPI_MIN     = 100;
+const MPI_Op MPI_MAX     = 101;
+const MPI_Op MPI_SUM     = 102;
+const MPI_Op MPI_PROD    = 103;
+const MPI_Op MPI_LAND    = 104;
+const MPI_Op MPI_BAND    = 105;
+const MPI_Op MPI_LOR     = 106;
+const MPI_Op MPI_BOR     = 107;
+const MPI_Op MPI_LXOR    = 108;
+const MPI_Op MPI_BXOR    = 109;
 
 const int MPI_PACKED = 1;
 const int MPI_UNDEFINED = -1;
@@ -265,6 +268,7 @@ inline int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*) { WALBERLA_MP
 inline int MPI_Type_create_struct(int, const int[], const MPI_Aint[], const MPI_Datatype[], MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Op_create(MPI_User_function*, int, MPI_Op*) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Op_free(MPI_Op*) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Get_processor_name( char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 
@@ -307,58 +311,104 @@ namespace mpi {
 
 
 
+
+
 /*!\class MPITrait
 // \brief Base template for the MPITrait class
 //
 // The MPITrait class template offers a translation between the C++ built-in data types and
-// the corresponding MPI data types required for send and receive operations. For a particular
-// MPITrait instantiation, the corresponding MPI data type can be obtained by calling type()
-// of the MPITrait. The following example demonstrates the application of the MPITrait class:
+// the corresponding MPI data types its respective operation required for send, receive and reduce operations.
+// For a particular MPITrait instantiation, the corresponding MPI data type can be obtained by calling type()
+// as well as calling operation( const Operation& ) to the MPI operation corresponding to the MPI data type.
+// The following example demonstrates the application of the MPITrait class:
 
-   \code
+\code
    // Initialization of the MPI communication
    int* pi;  // Integer buffer for the MPI send operation
-   ...       // Initialization of the send buffer
+...       // Initialization of the send buffer
 
    // Sending 50 integers to process 0
    MPI_Send( pi, 50, MPITrait< int >::type(), 0, 0, MPI_COMM_WORLD );
-   \endcode
-*/
+\endcode
+      */
 template< typename T >
-struct MPITrait;
+struct MPITrait
+{
+   static inline MPI_Datatype type();
+   static inline MPI_Op operation(const mpi::Operation&      );
+};
 
-
-
-/// Macro for the creation of MPITrait specializations for the supported data types.
-
-#define WALBERLA_CREATE_MPITRAIT_SPECIALIZATION(CPP_TYPE,MPI_TYPE) \
+/// Macro for specialization of the MPI supported data types in MPITrait::type().
+#define WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(CPP_TYPE, MPI_TYPE) \
    template<> \
-   struct MPITrait< CPP_TYPE > \
+   inline MPI_Datatype MPITrait< CPP_TYPE >::type() \
    { \
-      static inline MPI_Datatype type() { return (MPI_TYPE); } \
+      return (MPI_TYPE); \
    }
-
-
 
 // MPITRAIT SPECIALIZATIONS
 
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( char               , MPI_CHAR               );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( signed char        , MPI_CHAR               );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( signed short int   , MPI_SHORT              );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( signed int         , MPI_INT                );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( signed long int    , MPI_LONG               );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( signed long long   , MPI_LONG_LONG          );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( unsigned char      , MPI_UNSIGNED_CHAR      );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( unsigned short int , MPI_UNSIGNED_SHORT     );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( unsigned int       , MPI_UNSIGNED           );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( unsigned long int  , MPI_UNSIGNED_LONG      );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( unsigned long long , MPI_UNSIGNED_LONG_LONG );
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(char, MPI_CHAR)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(signed char, MPI_CHAR)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(signed short int, MPI_SHORT)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(signed int, MPI_INT)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(signed long int, MPI_LONG)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(signed long long, MPI_LONG_LONG)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(unsigned char, MPI_UNSIGNED_CHAR)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(unsigned short int, MPI_UNSIGNED_SHORT)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(unsigned int, MPI_UNSIGNED)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(unsigned long int, MPI_UNSIGNED_LONG)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(unsigned long long, MPI_UNSIGNED_LONG_LONG)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(float, MPI_FLOAT)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(double, MPI_DOUBLE)
+WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(long double, MPI_LONG_DOUBLE)
 #ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
-   WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( walberla::float16  , MPI_WCHAR              );
+template<> struct MPITrait< float16 >{
+   static MPI_Datatype type();
+   static MPI_Op operation(const mpi::Operation&      );
+};
 #endif
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( float              , MPI_FLOAT              );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( double             , MPI_DOUBLE             );
-WALBERLA_CREATE_MPITRAIT_SPECIALIZATION( long double        , MPI_LONG_DOUBLE        );
+
+
+/*!
+ *  \brief Specialization of the static operation() method of MPITrait.
+ *
+ *  It chooses a MPI_Op depending on the value type of the object the operation is performed on.
+ *
+ *  \param op The operation to be performed (op is an element of the enum mpi::Operation).
+ */
+template< typename T >
+MPI_Op MPITrait< T >::operation(const mpi::Operation& op)
+{
+   switch (op)
+   {
+   case mpi::MIN:
+      return MPI_MIN;
+   case mpi::MAX:
+      return MPI_MAX;
+   case mpi::SUM:
+      return MPI_SUM;
+   case mpi::PRODUCT:
+      return MPI_PROD;
+   case mpi::LOGICAL_AND:
+      return MPI_LAND;
+   case mpi::BITWISE_AND:
+      return MPI_BAND;
+   case mpi::LOGICAL_OR:
+      return MPI_LOR;
+   case mpi::BITWISE_OR:
+      return MPI_BOR;
+   case mpi::LOGICAL_XOR:
+      return MPI_LXOR;
+   case mpi::BITWISE_XOR:
+      return MPI_BXOR;
+   default:
+      WALBERLA_ABORT("Unknown operation!");
+   }
+#ifdef __IBMCPP__
+   return MPI_SUM; // never reached, helps to suppress a warning from the IBM compiler
+#endif
+}
 
 } // namespace walberla
 /// \endcond

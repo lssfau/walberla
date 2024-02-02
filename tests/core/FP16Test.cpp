@@ -70,7 +70,7 @@ void fp16Test( int argc, char ** argv )
    const float16 y = -1.8f16;
    const float64 z = -0.6;
    WALBERLA_LOG_INFO_ON_ROOT("   + " << (double) x << " + " << (double) y << " == " << (float64) (x + y) << " ? ")
-   WALBERLA_CHECK_FLOAT_EQUAL((float64) (x + y), z, "float16 addition does not work correctly.");
+   WALBERLA_CHECK_FLOAT_EQUAL( (x + y), (float16) z, "float16 addition does not work correctly.");
 #endif
 }
 

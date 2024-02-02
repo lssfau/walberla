@@ -30,6 +30,7 @@
 #include "WcPolicy.h"
 
 #include "core/DataTypes.h"
+#include "core/mpi/MPIManager.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SendBuffer.h"
@@ -527,7 +528,7 @@ shared_ptr<Timer<TP> > getReduced( Timer<TP>& timer, ReduceType rt, int targetRa
    }
 
    //uint_t counter, double min, double max, double total, double sumOfSquares
-   if ( targetRank < 0 || targetRank == MPIManager::instance()->worldRank() )
+   if ( targetRank < 0 || targetRank == mpi::MPIManager::instance()->worldRank() )
       return make_shared<Timer<TP> >( mpi::MPIManager::instance()->numProcesses(), min, max, total, sumOfSquares  );
 
    return nullptr;

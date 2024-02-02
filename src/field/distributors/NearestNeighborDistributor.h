@@ -59,7 +59,7 @@ public:
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask )
    {}
 
-   inline bool operator==( const OwnType & other ){ return baseField_ == other.baseField_; }
+   inline bool operator==( const OwnType & other ) const { return baseField_ == other.baseField_; }
 
    template< typename ForwardIterator_T >
    inline void distribute( const Vector3<real_t> & position, ForwardIterator_T distributeValueBegin )

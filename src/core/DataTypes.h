@@ -167,6 +167,7 @@ using real_t = double;
 using real_t = float;
 #endif
 
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 /// Half precision support. Experimental. Use carefully.
 ///
 /// This feature is experimental, since it strictly depends on the underlying architecture and compiler support.
@@ -174,7 +175,6 @@ using real_t = float;
 /// interchange. Arithmetic operations will likely involve casting to fp32 (C++ float) and truncation to fp16.
 /// Only bandwidth bound code may therefore benefit. None of this is guaranteed, and may change in the future.
 ///
-#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 /// FIXME: (not really right) Clang version must be 15 or higher for x86 half precision support.
 /// FIXME: (not really right) GCC version must be 12 or higher for x86 half precision support.
 /// FIXME: (I don't know) Also support seems to require SSE, so ensure that respective instruction sets are enabled.
@@ -202,7 +202,7 @@ using half    = _Float16;
 // Another possible half precision format would be the one from Google Brain (bfloat16) with an 8 bit exponent and a 7 bit mantissa.
 // Compare https://i10git.cs.fau.de/ab04unyc/walberla/-/issues/23
 using float16 = half;
-#endif
+#endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 using float32 = float;
 using float64 = double;
 
@@ -276,7 +276,7 @@ inline bool floatIsEqual( walberla::float16 lhs, walberla::float16 rhs, const wa
    const auto difference = lhs - rhs;
    return ( (difference < 0) ? -difference : difference ) < epsilon;
 }
-#endif
+#endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 
 } // namespace walberla
 

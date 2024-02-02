@@ -22,6 +22,7 @@
 #pragma once
 
 #include "MPIWrapper.h"
+#include "core/Abort.h"
 
 
 namespace walberla {
@@ -41,6 +42,21 @@ namespace mpi {
       Datatype( MPI_Datatype datatype) : mpiDatatype_( datatype )
       {
          WALBERLA_MPI_SECTION() { MPI_Type_commit( &mpiDatatype_ ); }
+      }
+
+      explicit Datatype(const uint_t byteSize) : mpiDatatype_(MPI_DATATYPE_NULL)
+      {
+         WALBERLA_MPI_SECTION()
+         {
+            if (MPI_Type_contiguous(int_c(byteSize), MPI_BYTE, &mpiDatatype_) != MPI_SUCCESS)
+            {
+               WALBERLA_ABORT("MPI_Type_contiguous " << typeid(mpiDatatype_).name() << " failed.");
+            }
+            if (MPI_Type_commit(&mpiDatatype_) != MPI_SUCCESS)
+            {
+               WALBERLA_ABORT("MPI_Type_commit " << typeid(mpiDatatype_).name() << " failed.");
+            }
+         }
       }
 
       void init( MPI_Datatype datatype )
