@@ -113,7 +113,8 @@ def __generate_alternating_lbm_boundary(generation_context,
                                         **create_kernel_params):
     if boundary_object.additional_data and additional_data_handler is None:
         target = create_kernel_params.get('target', Target.CPU)
-        additional_data_handler = default_additional_data_handler(boundary_object, lb_method, field_name, target=target)
+        additional_data_handler = default_additional_data_handler(boundary_object, lb_method, field_name,
+                                                                  target=target, pdfs_data_type=field_data_type)
 
     timestep_param_name = 'timestep'
     timestep_param_dtype = np.uint8

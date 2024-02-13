@@ -9,21 +9,38 @@ try:
 except ImportError:
     from lbmpy.custom_code_nodes import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
-from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB, DiffusionDirichlet
+from lbmpy.boundaries import (ExtrapolationOutflow, FreeSlip, UBB, DiffusionDirichlet,
+                              NoSlipLinearBouzidi, QuadraticBounceBack)
 
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
 
-def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_name, target=Target.CPU):
+interpolation_bc_check_template = """
+if(!isFlagSet(it.neighbor({cx}, {cy}, {cz}, 0), domainFlag)){{ 
+   //Linear-Bouzidi requires 2 fluid nodes: if the 2nd node is not available abort, 
+   //apply Bounce Back at that point. This clearly lowers the accuracy and makes inconsistent the
+   //calculation of the total force
+   element.q = -1.0;
+   WALBERLA_LOG_INFO_ON_ROOT("Warning: Bouzidi cannot be applied at least on one boundary link.")
+}} //end if to check Bouzidi applicability  
+"""
+
+
+def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_name, target=Target.CPU,
+                                    pdfs_data_type=None, zeroth_timestep=None):
     if not boundary_obj.additional_data:
         return None
-
     if isinstance(boundary_obj, FreeSlip):
         return FreeSlipAdditionalDataHandler(lb_method.stencil, boundary_obj)
     elif isinstance(boundary_obj, UBB):
         return UBBAdditionalDataHandler(lb_method.stencil, boundary_obj)
     elif isinstance(boundary_obj, ExtrapolationOutflow):
-        return OutflowAdditionalDataHandler(lb_method.stencil, boundary_obj, target=target, field_name=field_name)
+        return OutflowAdditionalDataHandler(lb_method.stencil, boundary_obj, target=target, field_name=field_name,
+                                            pdfs_data_type=pdfs_data_type, zeroth_timestep=zeroth_timestep)
+    elif isinstance(boundary_obj, NoSlipLinearBouzidi):
+        return NoSlipLinearBouzidiAdditionalDataHandler(lb_method.stencil, boundary_obj)
+    elif isinstance(boundary_obj, QuadraticBounceBack):
+        return QuadraticBounceBackAdditionalDataHandler(lb_method.stencil, boundary_obj)
     else:
         raise ValueError(f"No default AdditionalDataHandler available for boundary of type {boundary_obj.__class__}")
 
@@ -107,7 +124,51 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
 
     @property
     def initialiser_list(self):
-        return "elementInitaliser(velocityCallback),"
+        return "elementInitialiser(velocityCallback),"
+
+    @property
+    def additional_arguments_for_fill_function(self):
+        return "blocks, "
+
+    @property
+    def additional_parameters_for_fill_function(self):
+        return " const shared_ptr<StructuredBlockForest> &blocks, "
+
+    def data_initialisation(self, *_):
+        init_list = ["Vector3<real_t> InitialisationAdditionalData = elementInitialiser(Cell(it.x(), it.y(), it.z()), "
+                     "blocks, *block);", "element.vel_0 = InitialisationAdditionalData[0];",
+                     "element.vel_1 = InitialisationAdditionalData[1];"]
+        if self._dim == 3:
+            init_list.append("element.vel_2 = InitialisationAdditionalData[2];")
+
+        return "\n".join(init_list)
+
+    @property
+    def additional_member_variable(self):
+        return "std::function<Vector3<real_t>(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)> " \
+               "elementInitialiser; "
+
+
+class NoSlipLinearBouzidiAdditionalDataHandler(AdditionalDataHandler):
+    def __init__(self, stencil, boundary_object):
+        assert isinstance(boundary_object, NoSlipLinearBouzidi)
+
+        self._dtype = BasicType(boundary_object.data_type).c_name
+        self._blocks = "const shared_ptr<StructuredBlockForest>&, IBlock&)>"
+        super(NoSlipLinearBouzidiAdditionalDataHandler, self).__init__(stencil=stencil)
+
+    @property
+    def constructor_argument_name(self):
+        return "wallDistanceBouzidi"
+
+    @property
+    def constructor_arguments(self):
+        return f", std::function<{self._dtype}(const Cell &, const Cell &, {self._blocks}&" \
+               f"{self.constructor_argument_name} "
+
+    @property
+    def initialiser_list(self):
+        return f"elementInitialiser({self.constructor_argument_name}),"
 
     @property
     def additional_arguments_for_fill_function(self):
@@ -118,22 +179,72 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
         return " const shared_ptr<StructuredBlockForest> &blocks, "
 
     def data_initialisation(self, direction):
-        init_list = ["Vector3<real_t> InitialisatonAdditionalData = elementInitaliser(Cell(it.x(), it.y(), it.z()), "
-                     "blocks, *block);", "element.vel_0 = InitialisatonAdditionalData[0];",
-                     "element.vel_1 = InitialisatonAdditionalData[1];"]
-        if self._dim == 3:
-            init_list.append("element.vel_2 = InitialisatonAdditionalData[2];")
+        cx = self._walberla_stencil[direction][0]
+        cy = self._walberla_stencil[direction][1]
+        cz = self._walberla_stencil[direction][2]
+        fluid_cell = "Cell(it.x(), it.y(), it.z())"
+        boundary_cell = f"Cell(it.x() + {cx}, it.y() + {cy}, it.z() + {cz})"
+        check_str = interpolation_bc_check_template.format(cx=-cx, cy=-cy, cz=-cz)
+        init_element = f"elementInitialiser({fluid_cell}, {boundary_cell}, blocks, *block)"
+        init_list = [f"const {self._dtype} q = (({self._dtype}) {init_element});",
+                     "element.q = q;",
+                     check_str]
 
         return "\n".join(init_list)
 
     @property
     def additional_member_variable(self):
-        return "std::function<Vector3<real_t>(const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)> " \
-               "elementInitaliser; "
+        return f"std::function<{self._dtype}(const Cell &, const Cell &, {self._blocks} elementInitialiser; "
+
+
+class QuadraticBounceBackAdditionalDataHandler(AdditionalDataHandler):
+    def __init__(self, stencil, boundary_object):
+        assert isinstance(boundary_object, QuadraticBounceBack)
+
+        self._dtype = BasicType(boundary_object.data_type).c_name
+        self._blocks = "const shared_ptr<StructuredBlockForest>&, IBlock&)>"
+        super(QuadraticBounceBackAdditionalDataHandler, self).__init__(stencil=stencil)
+
+    @property
+    def constructor_argument_name(self):
+        return "wallDistanceQuadraticBB"
+
+    @property
+    def constructor_arguments(self):
+        return f", std::function<{self._dtype}(const Cell &, const Cell &, {self._blocks}&" \
+               f"{self.constructor_argument_name} "
+
+    @property
+    def initialiser_list(self):
+        return f"elementInitialiser({self.constructor_argument_name}),"
+
+    @property
+    def additional_arguments_for_fill_function(self):
+        return "blocks, "
+
+    @property
+    def additional_parameters_for_fill_function(self):
+        return " const shared_ptr<StructuredBlockForest> &blocks, "
+
+    def data_initialisation(self, direction):
+        cx = self._walberla_stencil[direction][0]
+        cy = self._walberla_stencil[direction][1]
+        cz = self._walberla_stencil[direction][2]
+        fluid_cell = "Cell(it.x(), it.y(), it.z())"
+        boundary_cell = f"Cell(it.x() + {cx}, it.y() + {cy}, it.z() + {cz})"
+        init_element = f"elementInitialiser({fluid_cell}, {boundary_cell}, blocks, *block)"
+        init_list = [f"const {self._dtype} q = (({self._dtype}) {init_element});", "element.q = q;"]
+
+        return "\n".join(init_list)
+
+    @property
+    def additional_member_variable(self):
+        return f"std::function<{self._dtype}(const Cell &, const Cell &, {self._blocks} elementInitialiser; "
 
 
 class OutflowAdditionalDataHandler(AdditionalDataHandler):
-    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs', pdfs_data_type=None, zeroth_timestep=None):
+    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs',
+                 pdfs_data_type=None, zeroth_timestep=None):
         assert isinstance(boundary_object, ExtrapolationOutflow)
         self._stencil = boundary_object.stencil
         self._lb_method = boundary_object.lb_method
