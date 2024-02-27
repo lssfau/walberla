@@ -53,7 +53,7 @@
 #                                                                            
 #===========================================================================
 
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 #if already found via finder or simulated finder in openmesh CMakeLists.txt, skip the search
 IF (NOT OPENMESH_FOUND) 
