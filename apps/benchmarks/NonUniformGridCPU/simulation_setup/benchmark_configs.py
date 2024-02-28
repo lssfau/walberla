@@ -6,6 +6,7 @@ import sys
 
 DB_FILE = os.environ.get('DB_FILE', "cpu_benchmark.sqlite3")
 
+
 class Scenario:
     def __init__(self,
                  domain_size=(64, 64, 64),
@@ -57,13 +58,15 @@ class Scenario:
                 'timesteps': self.timesteps,
                 'remainingTimeLoggerFrequency': self.logger_frequency,
                 'vtkWriteFrequency': self.vtk_write_frequency,
+                'useVTKAMRWriter': True,
+                'oneFilePerProcess': False
             },
             'Logging': {
                 'logLevel': "info",
             }
         }
 
-        if(print_dict):
+        if (print_dict):
             wlb.log_info_on_root("Scenario:\n" + pformat(config_dict))
 
         return config_dict
@@ -117,6 +120,7 @@ def validation_run():
                         write_setup_vtk=True)
     scenarios.add(scenario)
 
+
 def scaling():
     wlb.log_info_on_root("Running scaling benchmark...")
 
@@ -133,6 +137,7 @@ def scaling():
                         refinement_depth=2,
                         timesteps=10)
     scenarios.add(scenario)
+
 
 validation_run()
 # scaling()
