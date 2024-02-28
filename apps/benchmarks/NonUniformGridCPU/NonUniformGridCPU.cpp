@@ -171,11 +171,13 @@ int main(int argc, char** argv)
 
       // VTK
       const uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
+      const bool useVTKAMRWriter = parameters.getParameter< bool >("useVTKAMRWriter", false);
+      const bool oneFilePerProcess = parameters.getParameter< bool >("oneFilePerProcess", false);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
-                                                         "simulation_step", false, true, true, false, 0);
-         auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >(velFieldID, "vel");
+                                                         "simulation_step", false, true, true, false, 0, useVTKAMRWriter, oneFilePerProcess);
+         auto velWriter = make_shared< field::VTKWriter< VelocityField_T, float32 > >(velFieldID, "vel");
          vtkOutput->addCellDataWriter(velWriter);
 
          vtkOutput->addBeforeFunction([&]() {

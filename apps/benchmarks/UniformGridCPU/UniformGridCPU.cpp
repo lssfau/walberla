@@ -174,7 +174,7 @@ int main(int argc, char** argv)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                          "simulation_step", false, true, true, false, 0);
-         auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >(velFieldId, "vel");
+         auto velWriter = make_shared< field::VTKWriter< VelocityField_T, float32 > >(velFieldId, "vel");
          vtkOutput->addCellDataWriter(velWriter);
 
          vtkOutput->addBeforeFunction([&]() {
