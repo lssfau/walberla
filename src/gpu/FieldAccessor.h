@@ -78,7 +78,7 @@ namespace gpu
       __device__ __forceinline__ bool isValidPosition()  { return true; }
 
       __device__ T & get()       { return * (T*)(ptr_);                }
-      __device__ T & get( int f) { return * (T*)(ptr_ + f * fOffset_); }
+      __device__ T & get( uint_t f) { return * (T*)(ptr_ + f * fOffset_); }
 
 
       __device__ T & getNeighbor( int cx, int cy, int cz ) const
@@ -88,7 +88,7 @@ namespace gpu
                                cz * zOffset_ );
       }
 
-      __device__ T & getNeighbor( int cx, int cy, int cz, int cf )
+      __device__ T & getNeighbor( int cx, int cy, int cz, uint_t cf )
       {
          return * (T*)( ptr_ + cx * xOffset_ +
                                cy * yOffset_ +
