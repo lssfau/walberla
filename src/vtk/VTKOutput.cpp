@@ -1762,14 +1762,16 @@ void VTKOutput::writeCollectors( const bool barrier )
 
    WALBERLA_ASSERT_EQUAL( MPIManager::instance()->worldRank(), 0 );
 
+   if(!amrFileFormat_)
+      writePVD();
+
+
 
 
    for( auto collector = collectorsToWrite_.begin(); collector != collectorsToWrite_.end(); ++collector )
    {
       if( uniformGrid_ )
       {
-         writePVD();
-
          if( samplingDx_ <= real_c(0) || samplingDy_ <= real_c(0) || samplingDz_ <= real_c(0) )
             writePVTI( *collector );
          else
@@ -1782,7 +1784,6 @@ void VTKOutput::writeCollectors( const bool barrier )
       }
       else
       {
-         writePVD();
          writePVTU( *collector ); // also applies for outputDomainDecomposition_ == true and pointDataSource_ != NULL
                                   // and polylineDataSource_ != NULL (uniformGrid_ will be false)
       }
