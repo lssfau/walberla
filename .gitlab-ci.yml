@@ -186,9 +186,9 @@ icc_2022_hybrid_dbg_sp:
       - cuda11
       - docker
 
-icx_2022_serial:
+icx_2023_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -201,9 +201,9 @@ icx_2022_serial:
       - cuda11
       - docker
 
-icx_2022_mpionly:
+icx_2023_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -214,18 +214,18 @@ icx_2022_mpionly:
       - cuda11
       - docker
 
-icx_2022_hybrid:
+icx_2023_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
    tags:
       - cuda11
       - docker
 
-icx_2022_serial_dbg:
+icx_2023_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -236,9 +236,9 @@ icx_2022_serial_dbg:
       - cuda11
       - docker
 
-icx_2022_mpionly_dbg:
+icx_2023_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -247,9 +247,9 @@ icx_2022_mpionly_dbg:
       - cuda11
       - docker
 
-icx_2022_hybrid_dbg:
+icx_2023_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -257,9 +257,9 @@ icx_2022_hybrid_dbg:
       - cuda11
       - docker
 
-icx_2022_hybrid_dbg_sp:
+icx_2023_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2022:14
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:14
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
