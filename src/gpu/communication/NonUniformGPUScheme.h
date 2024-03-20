@@ -46,7 +46,7 @@ namespace walberla::gpu::communication
 template< typename Stencil >
 class NonUniformGPUScheme
 {
-public:
+ public:
    enum INDEX { EQUAL_LEVEL = 0, COARSE_TO_FINE = 1, FINE_TO_COARSE = 2 };
 
    using CpuBuffer_T = walberla::gpu::communication::PinnedMemoryBuffer;
@@ -90,7 +90,7 @@ public:
    inline void waitCommunicateCoarseToFine(uint_t fineLevel);
    inline void waitCommunicateFineToCoarse(uint_t fineLevel);
 
-private:
+ private:
    void setupCommunication();
 
    void init();
@@ -133,17 +133,21 @@ private:
 template< typename Stencil >
 NonUniformGPUScheme< Stencil >::NonUniformGPUScheme(const weak_ptr< StructuredBlockForest >& bf, bool sendDirectlyFromGPU,
                                                     const int tag)
-      : blockForest_(bf), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag),
-        requiredBlockSelectors_(Set< SUID >::emptySet()), incompatibleBlockSelectors_(Set< SUID >::emptySet())
+   : blockForest_(bf), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag),
+     requiredBlockSelectors_(Set< SUID >::emptySet()), incompatibleBlockSelectors_(Set< SUID >::emptySet())
 {
    WALBERLA_MPI_SECTION()
-   {
+      {
 // Open MPI supports compile time CUDA-aware support check
 #if (defined(OPEN_MPI) && OPEN_MPI) && !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
-      WALBERLA_CHECK(!sendDirectlyFromGPU)
+         WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
-   }
+      }
    init();
+
+   if(sendFromGPU_){WALBERLA_LOG_DETAIL_ON_ROOT("Using GPU-Direct Communication in NonUniformGPUScheme")}
+   else{WALBERLA_LOG_DETAIL_ON_ROOT("Using Communication via CPU Memory")}
+
 }
 
 template< typename Stencil >
@@ -151,16 +155,18 @@ NonUniformGPUScheme< Stencil >::NonUniformGPUScheme(const weak_ptr< StructuredBl
                                                     const Set< SUID >& requiredBlockSelectors,
                                                     const Set< SUID >& incompatibleBlockSelectors,
                                                     bool sendDirectlyFromGPU, const int tag)
-      : blockForest_(bf), requiredBlockSelectors_(requiredBlockSelectors),
-        incompatibleBlockSelectors_(incompatibleBlockSelectors), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag)
+   : blockForest_(bf), requiredBlockSelectors_(requiredBlockSelectors),
+     incompatibleBlockSelectors_(incompatibleBlockSelectors), sendFromGPU_(sendDirectlyFromGPU), baseTag_(tag)
 {
    WALBERLA_MPI_SECTION()
-   {
+      {
 #if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
-      WALBERLA_CHECK(!sendDirectlyFromGPU)
+         WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
-   }
+      }
    init();
+   if(sendFromGPU_){WALBERLA_LOG_DETAIL_ON_ROOT("Using GPU-Direct Communication in NonUniformGPUScheme")}
+   else{WALBERLA_LOG_DETAIL_ON_ROOT("Using Communication via CPU Memory")}
 }
 
 template< typename Stencil >
@@ -212,7 +218,7 @@ void NonUniformGPUScheme< Stencil >::refresh()
 
 #ifndef NDEBUG
    for (auto & packInfo : packInfos_)
-   packInfo->clearBufferSizeCheckMap();
+      packInfo->clearBufferSizeCheckMap();
 #endif
    forestModificationStamp_ = forest->getBlockForest().getModificationStamp();
 }
@@ -307,9 +313,6 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
       for (auto it : headers_[EQUAL_LEVEL][index])
          bufferSystemGPU_[EQUAL_LEVEL][index].sendBuffer(it.first).clear();
 
-   // wait until communication dependent kernels are finished
-   WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
-
    // Start filling send buffers
    for (auto& iBlock : *forest)
    {
@@ -396,10 +399,9 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
    else
       bufferSystemCPU_[COARSE_TO_FINE][index].scheduleReceives();
 
-   if (!sendFromGPU_)
-      for (auto it : headers_[COARSE_TO_FINE][index])
-         bufferSystemGPU_[COARSE_TO_FINE][index].sendBuffer(it.first).clear();
-
+   for (auto it : headers_[COARSE_TO_FINE][index]){
+      bufferSystemGPU_[COARSE_TO_FINE][index].sendBuffer(it.first).clear();
+   }
    // wait until communication dependent kernels are finished
    WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
 
@@ -444,24 +446,24 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
             {
                auto nProcess              = mpi::MPIRank(coarseBlock->getNeighborProcess(neighborIdx, n));
                GpuBuffer_T& gpuDataBuffer = bufferSystemGPU_[COARSE_TO_FINE][index].sendBuffer(nProcess);
-               gpuDataBuffer.clear();
                for (auto& pi : packInfos_)
                {
                   WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
                   WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.remainingSize(), pi->sizeCoarseToFineSend(coarseBlock, fineReceiverId, *dir))
                   if (sendFromGPU_)
                   {
-                     pi->packDataCoarseToFine(coarseBlock, fineReceiverId, *dir, gpuDataBuffer, streams_[*dir]);
+                     pi->packDataCoarseToFine(coarseBlock, fineReceiverId, *dir, gpuDataBuffer, streams_[0]);
                   }
                   else
                   {
+                     gpuDataBuffer.clear();
                      auto gpuDataPtr = gpuDataBuffer.cur();
                      // packDataCoarseToFine moves the pointer with advanceNoResize
-                     pi->packDataCoarseToFine(coarseBlock, fineReceiverId, *dir, gpuDataBuffer, streams_[*dir]);
+                     pi->packDataCoarseToFine(coarseBlock, fineReceiverId, *dir, gpuDataBuffer, streams_[0]);
                      auto size = pi->sizeCoarseToFineSend(coarseBlock, fineReceiverId, *dir);
                      auto cpuDataPtr = bufferSystemCPU_[COARSE_TO_FINE][index].sendBuffer(nProcess).advanceNoResize(size);
                      WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
-                     WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir]))
+                     WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[0]))
                   }
                }
             }
@@ -502,9 +504,8 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
    else
       bufferSystemCPU_[FINE_TO_COARSE][index].scheduleReceives();
 
-   if (!sendFromGPU_)
-      for (auto it : headers_[FINE_TO_COARSE][index])
-         bufferSystemGPU_[FINE_TO_COARSE][index].sendBuffer(it.first).clear();
+   for (auto it : headers_[FINE_TO_COARSE][index])
+      bufferSystemGPU_[FINE_TO_COARSE][index].sendBuffer(it.first).clear();
 
    // wait until communication dependent kernels are finished
    WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
@@ -548,24 +549,24 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
          {
             auto nProcess              = mpi::MPIRank(fineBlock->getNeighborProcess(neighborIdx, uint_t(0)));
             GpuBuffer_T& gpuDataBuffer = bufferSystemGPU_[FINE_TO_COARSE][index].sendBuffer(nProcess);
-            gpuDataBuffer.clear();
             for (auto& pi : packInfos_)
             {
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
                WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.remainingSize(), pi->sizeFineToCoarseSend(fineBlock, *dir))
                if (sendFromGPU_)
                {
-                  pi->packDataFineToCoarse(fineBlock, coarseReceiverId, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataFineToCoarse(fineBlock, coarseReceiverId, *dir, gpuDataBuffer, streams_[0]);
                }
                else
                {
+                  gpuDataBuffer.clear();
                   auto gpuDataPtr = gpuDataBuffer.cur();
                   // packDataFineToCoarse moves the pointer with advanceNoResize
-                  pi->packDataFineToCoarse(fineBlock, coarseReceiverId, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataFineToCoarse(fineBlock, coarseReceiverId, *dir, gpuDataBuffer, streams_[0]);
                   auto size = pi->sizeFineToCoarseSend(fineBlock, *dir);
                   auto cpuDataPtr = bufferSystemCPU_[FINE_TO_COARSE][index].sendBuffer(nProcess).advanceNoResize(size);
                   WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
-                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir]))
+                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[0]))
                }
             }
          }
@@ -672,7 +673,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateCoarseToFine(const uint_t fi
                GpuBuffer_T &gpuDataBuffer = recvInfo.buffer();
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
                pi->unpackDataCoarseToFine(fineReceiver, header.senderId, stencil::inverseDir[header.dir],
-                                          gpuDataBuffer, streams_[stencil::inverseDir[header.dir]]);
+                                          gpuDataBuffer, streams_[0]);
             }
          }
       }
@@ -696,8 +697,8 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateCoarseToFine(const uint_t fi
                WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataPtr)
 
-               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[stencil::inverseDir[header.dir]]))
-               pi->unpackDataCoarseToFine(fineReceiver, header.senderId, stencil::inverseDir[header.dir], adaptiveGPUBuffer, streams_[stencil::inverseDir[header.dir]]);
+               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[0]))
+               pi->unpackDataCoarseToFine(fineReceiver, header.senderId, stencil::inverseDir[header.dir], adaptiveGPUBuffer, streams_[0]);
             }
          }
       }
@@ -735,7 +736,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateFineToCoarse(const uint_t fi
             {
                GpuBuffer_T& gpuDataBuffer = recvInfo.buffer();
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
-               pi->unpackDataFineToCoarse(block, header.senderId, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[stencil::inverseDir[header.dir]]);
+               pi->unpackDataFineToCoarse(block, header.senderId, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[0]);
             }
          }
       }
@@ -759,8 +760,8 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateFineToCoarse(const uint_t fi
                WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataPtr)
 
-               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[stencil::inverseDir[header.dir]]))
-               pi->unpackDataFineToCoarse(block, header.senderId, stencil::inverseDir[header.dir], adaptiveGPUBuffer, streams_[stencil::inverseDir[header.dir]]);
+               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[0]))
+               pi->unpackDataFineToCoarse(block, header.senderId, stencil::inverseDir[header.dir], adaptiveGPUBuffer, streams_[0]);
             }
          }
       }
