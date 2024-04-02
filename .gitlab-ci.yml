@@ -1539,35 +1539,6 @@ clang_17_hybrid_dbg_sp:
       - cuda11
       - docker
 
-###############################################################################
-##                                                                           ##
-##    STL Debug Build                                                        ##
-##                                                                           ##
-###############################################################################
-
-gcc_10_stl_debug:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-debug-stl:10
-   before_script:
-      - rm -rf /opt/boost /usr/include/boost
-   variables:
-      CTEST_EXCLUDE_LABELS: "longrun"
-      WALBERLA_BUILD_WITH_MPI: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "ON"
-      OMP_NUM_THREADS: "4"
-      OMP_WAIT_POLICY: "PASSIVE"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUFFER_DEBUG: "OFF"
-      WALBERLA_DOUBLE_ACCURACY: "ON"
-      WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_BUILD_WITH_METIS: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_PYTHON: "OFF"
-      WALBERLA_STL_BOUNDS_CHECKS: "ON"
-   tags:
-      - docker
-
-
 
 ###############################################################################
 ##                                                                           ##
@@ -1576,7 +1547,7 @@ gcc_10_stl_debug:
 ###############################################################################
 
 doc:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
    script:
       - cmake --version
       - doxygen --version

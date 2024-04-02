@@ -1986,7 +1986,7 @@ void VTKOutput::writeVTHB( const uint_t collector ) const
 
    for( uint_t level = 0; level < files.size(); level++){
       ofs << "  <Block level=\"" << level << "\">\n";
-      uint index = 0;
+      walberla::uint_t index = 0;
       for( auto file = files[level].begin(); file != files[level].end(); ++file ){
          ofs << "   <DataSet index=\"" << index << "\" file=\"" << executionFolder_ << "_" << collector << "/" << file->filename().string() << "\"/>\n";
          index++;
