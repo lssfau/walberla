@@ -55,10 +55,12 @@
 function ( get_current_module_name  moduleNameOut )
 
     foreach( moduleDir ${ARGN} ${WALBERLA_MODULE_DIRS} )
-        get_filename_component( moduleNameShort ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE )
         file( RELATIVE_PATH moduleFolder ${moduleDir} ${CMAKE_CURRENT_SOURCE_DIR} )
         if ( NOT ${moduleFolder} MATCHES "\\.\\./.*" )
-           set ( ${moduleNameOut} ${moduleFolder} PARENT_SCOPE )
+           #append / to make cmake_path also work with one directory only
+           set( moduleFolder "${moduleFolder}/" )
+           cmake_path(GET moduleFolder PARENT_PATH moduleNameOut)
+           set(moduleName ${moduleNameOut} PARENT_SCOPE)
            return() 
         endif()
     endforeach()
