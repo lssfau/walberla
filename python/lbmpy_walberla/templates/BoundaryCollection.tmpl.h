@@ -46,7 +46,7 @@ class {{class_name}}
    {
       {% for object_name, boundary_class, kernel, additional_data_handler in zip(object_names, boundary_classes, kernel_list, additional_data_handlers) -%}
 
-      {{object_name}} = std::make_shared< {{boundary_class}} >({{- ["blocks", "pdfsID", [kernel|generate_function_collection_call(['indexVector', 'indexVectorSize', 'pdfs', 'timestep', 'gpuStream'])], additional_data_handler.constructor_argument_name] | type_identifier_list -}});
+      {{object_name}} = std::make_shared< {{boundary_class}} >({{- ["blocks", "pdfsID", [kernel|generate_function_collection_call(['indexVector', 'indexVectorSize', 'pdfs', 'timestep', 'gpuStream'], use_field_ids=True)], additional_data_handler.constructor_argument_name] | type_identifier_list -}});
       {% endfor %}
 
       {% for object_name, flag_uid in zip(object_names, flag_uids) -%}

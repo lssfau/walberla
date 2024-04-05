@@ -378,21 +378,40 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
 
 
 @jinja2_context_decorator
-def generate_function_collection_call(ctx, kernel_info, parameters_to_ignore=(), cell_interval=None, ghost_layers=None):
+def generate_function_collection_call(ctx, kernel, parameters_to_ignore=(),
+                                      cell_interval=None, ghost_layers=None, use_field_ids=False):
+
+    """Generates the function call to a pystencils kernel. It can be understood as a lightweight version of
+       `generate_call`. Thus, it will only generate the parameters needed to call the kernel as a list of strings.
+
+    Args:
+        ctx: code generation context
+        kernel: pystencils kernel
+        parameters_to_ignore: In some cases not all parameters need to be printed. This is especially the case when
+                              fixed parameters exist that are hardcoded in the jinja template.
+        cell_interval: Defines the name (string) of a walberla CellInterval object in scope.
+        ghost_layers: Defines the name (string) of a variable to define the number of used ghost_layers.
+        use_field_ids: If set to true field names will be printed with the suffix `ID_`, to indicated that
+                       a BlockDataID is passed.
+    """
+
     target = translate_target(ctx['target'])
     is_gpu = target == Target.GPU
 
     parameters = []
-    for param in kernel_info.parameters:
+    for param in kernel.parameters:
         if param.is_field_pointer and param.field_name not in parameters_to_ignore:
-            parameters.append(param.field_name)
+            if use_field_ids:
+                parameters.append(f"{param.field_name}ID_")
+            else:
+                parameters.append(param.field_name)
 
-    for param in kernel_info.parameters:
+    for param in kernel.parameters:
         if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
             parameters.append(param.symbol.name)
 
     # TODO due to backward compatibility with high level interface spec
-    for parameter in kernel_info.kernel_selection_tree.get_selection_parameter_list():
+    for parameter in kernel.kernel_selection_tree.get_selection_parameter_list():
         if parameter.name not in parameters_to_ignore:
             parameters.append(parameter.name)
 
