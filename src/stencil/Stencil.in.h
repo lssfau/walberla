@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Directions.h"
 #include "Iterator.h"
 
@@ -83,7 +81,7 @@ namespace stencil {
          /*! \name Iteration*/
          //@{
 
-         typedef stencil::Iterator<$name> iterator;
+         using iterator = stencil::Iterator<$name>;
 
          static iterator begin()           { return iterator(0); }
          static iterator beginNoCenter()   { return iterator(noCenterFirstIdx); }
@@ -182,7 +180,7 @@ namespace stencil {
 
    } // namespace internal
 
-   typedef internal::$name<> $name;
+   using $name = internal::$name<>;
 
 } // namespace stencil
 } // namespace walberla

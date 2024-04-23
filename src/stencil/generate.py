@@ -80,7 +80,9 @@ def coordinateToDirection(coord):
     return directionStr
 
 
-header = """//====================================================================================================================
+header = """#pragma once
+
+//====================================================================================================================
 //  Caution: This file has been generated automatically. All manual changes are lost when file is regenerated!
 //           Changes should be done in Stencil.in.h,and then all stencils classes can be generated again.
 //====================================================================================================================
