@@ -168,7 +168,7 @@ with CodeGeneration() as ctx:
                          nonuniform=False, boundaries=[no_slip, ubb],
                          macroscopic_fields=macroscopic_fields,
                          target=ps.Target.GPU, gpu_indexing_params=gpu_indexing_params,
-                         max_threads=max_threads)
+                         max_threads=max_threads, set_pre_collision_pdfs=False)
 
     # Stream only kernel
     vp = [('int32_t', 'cudaBlockSize0'), ('int32_t', 'cudaBlockSize1'), ('int32_t', 'cudaBlockSize2')]

@@ -152,7 +152,8 @@ with CodeGeneration() as ctx:
                          lbm_config=lbm_config, lbm_optimisation=lbm_opt,
                          nonuniform=False, boundaries=[no_slip, ubb],
                          macroscopic_fields=macroscopic_fields,
-                         cpu_openmp=openmp, cpu_vectorize_info=cpu_vec)
+                         cpu_openmp=openmp, cpu_vectorize_info=cpu_vec,
+                         set_pre_collision_pdfs=False)
 
     # Stream only kernel
     generate_sweep(ctx, 'UniformGridCPU_StreamOnlyKernel', stream_only_kernel,

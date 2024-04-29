@@ -132,7 +132,7 @@ int main(int argc, char** argv)
       SweepCollection_T sweepCollection(blocks, pdfFieldID, densityFieldID, velFieldID, omega, innerOuterSplit);
       for (auto& block : *blocks)
       {
-         sweepCollection.initialise(&block, 2);
+         sweepCollection.initialise(&block, cell_idx_c(1));
       }
       WALBERLA_MPI_BARRIER()
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation done")
