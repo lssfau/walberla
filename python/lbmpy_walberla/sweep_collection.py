@@ -28,7 +28,7 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
                                   lbm_config: LBMConfig, lbm_optimisation: LBMOptimisation,
                                   refinement_scaling=None, macroscopic_fields: Dict[str, Field] = None,
                                   target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
-                                  max_threads=None,
+                                  max_threads=None, set_pre_collision_pdfs=True,
                                   **create_kernel_params):
 
     config = config_from_context(ctx, target=target, data_type=data_type,
@@ -76,7 +76,7 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
     config_unoptimized = replace(config, cpu_vectorize_info=None, cpu_prepend_optimizations=[], cpu_blocking=None)
 
     setter_family = get_setter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields,
-                                      config_unoptimized)
+                                      config_unoptimized, set_pre_collision_pdfs)
     setter_generator = kernel_family_function_generator('initialise', setter_family,
                                                         namespace='lbm', max_threads=max_threads)
     function_generators.append(setter_generator)
@@ -167,7 +167,8 @@ def lbm_kernel_family(class_name, kernel_name,
     return family
 
 
-def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopic_fields, config: CreateKernelConfig):
+def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopic_fields,
+                      config: CreateKernelConfig, set_pre_collision_pdfs: bool):
     dim = lb_method.stencil.D
     density = macroscopic_fields.get('density', 1.0)
     velocity = macroscopic_fields.get('velocity', [0.0] * dim)
@@ -184,7 +185,8 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
             timestep_suffix = str(timestep)
             setter = macroscopic_values_setter(lb_method,
                                                density=density, velocity=velocity, pdfs=pdfs,
-                                               streaming_pattern=streaming_pattern, previous_timestep=timestep)
+                                               streaming_pattern=streaming_pattern, previous_timestep=timestep,
+                                               set_pre_collision_pdfs=set_pre_collision_pdfs)
 
             if default_dtype != pdfs.dtype:
                 setter = add_subexpressions_for_field_reads(setter, data_type=default_dtype)
@@ -198,7 +200,8 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
         timestep = Timestep.BOTH
         setter = macroscopic_values_setter(lb_method,
                                            density=density, velocity=velocity, pdfs=pdfs,
-                                           streaming_pattern=streaming_pattern, previous_timestep=timestep)
+                                           streaming_pattern=streaming_pattern, previous_timestep=timestep,
+                                           set_pre_collision_pdfs=set_pre_collision_pdfs)
 
         setter_ast = create_kernel(setter, config=config)
         setter_ast.function_name = 'kernel_initialise'

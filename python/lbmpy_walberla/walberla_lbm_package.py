@@ -20,7 +20,7 @@ def generate_lbm_package(ctx: CodeGenerationContext, name: str,
                          target: Target = Target.CPU,
                          data_type=None, pdfs_data_type=None,
                          cpu_openmp=None, cpu_vectorize_info=None,
-                         max_threads=None,
+                         max_threads=None, set_pre_collision_pdfs=True,
                          **kernel_parameters):
 
     if macroscopic_fields is None:
@@ -48,6 +48,7 @@ def generate_lbm_package(ctx: CodeGenerationContext, name: str,
                                   target=target, data_type=data_type,
                                   cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info,
                                   max_threads=max_threads,
+                                  set_pre_collision_pdfs=set_pre_collision_pdfs,
                                   **kernel_parameters)
 
     spatial_shape = None

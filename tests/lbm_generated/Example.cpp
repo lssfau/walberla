@@ -177,14 +177,14 @@ int main(int argc, char** argv)
 
    StorageSpecification_T StorageSpec = StorageSpecification_T();
    BlockDataID pdfFieldId = lbm_generated::addPdfFieldToStorage(blocks, "pdf field", StorageSpec, uint_c(2));
-   BlockDataID velFieldId = field::addToStorage< VectorField_T >(blocks, "Velocity", real_c(0.0), field::fzyx);
+   BlockDataID velFieldId = field::addToStorage< VectorField_T >(blocks, "Velocity", real_c(0.0), field::fzyx, uint_c(2));
 
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", uint_c(3));
 
    SweepCollection_T sweepCollection(blocks, pdfFieldId, velFieldId, omega);
    for (auto& block : *blocks)
    {
-      sweepCollection.initialise(&block);
+      sweepCollection.initialise(&block, cell_idx_c(1));
    }
 
    const FlagUID fluidFlagUID("Fluid");
