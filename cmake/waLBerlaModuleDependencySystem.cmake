@@ -46,20 +46,19 @@
 # Determine Module name using the current folder 
 # 
 # moduleFolder is the current source directory relative to a folder in WALBERLA_MODULE_DIRS
-# If more arguments are given, these are prepended to WALBERLA_MODULE_DIR
+# The variable moduleName will be set in PARENT_SCOPE and is the first folder in WALBERLA_MODULE_DIRS
 # Example:
 #    If CMAKE_CURRENT_SOURCE_DIR is /src/core/field and /src/ is an element in WALBERLA_MODULE_DIRS,
-#    then module name is "core/field"
+#    then moduleName is "core"
 #
 #######################################################################################################################
-function ( get_current_module_name  moduleNameOut )
+function ( get_current_module_name  )
 
     foreach( moduleDir ${ARGN} ${WALBERLA_MODULE_DIRS} )
         file( RELATIVE_PATH moduleFolder ${moduleDir} ${CMAKE_CURRENT_SOURCE_DIR} )
         if ( NOT ${moduleFolder} MATCHES "\\.\\./.*" )
            #append / to make cmake_path also work with one directory only
-           set( moduleFolder "${moduleFolder}/" )
-           cmake_path(GET moduleFolder PARENT_PATH moduleNameOut)
+           string(REGEX REPLACE "(.*)/.*" "\\1" moduleNameOut ${moduleFolder})
            set(moduleName ${moduleNameOut} PARENT_SCOPE)
            return() 
         endif()

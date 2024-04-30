@@ -39,7 +39,7 @@ function ( waLBerla_add_module )
 
     set( ALL_DEPENDENCIES ${ARG_DEPENDS} ${ARG_OPTIONAL_DEPENDS})
     # Module name is the directory relative to WALBERLA_MODULE_DIRS
-    get_current_module_name ( moduleName )
+    get_current_module_name ( )
     get_module_library_name ( moduleLibraryName ${moduleName} )
 
     # Test if all required libraries are available
@@ -234,7 +234,7 @@ function ( waLBerla_compile_test )
     cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
     # Module name is the directory relative to WALBERLA_MODULE_DIRS
-    get_current_module_name ( moduleName )
+    get_current_module_name ( )
 
     # Filename of first source file is used as name for testcase if no name was given
     if( NOT ARG_NAME )
@@ -365,7 +365,7 @@ function ( waLBerla_execute_test )
    if( ARG_NO_MODULE_LABEL )
       set_tests_properties ( ${ARG_NAME} PROPERTIES LABELS "${ARG_LABELS}" )
    else()
-      get_current_module_name ( moduleName  )
+      get_current_module_name ( )
       set_tests_properties ( ${ARG_NAME} PROPERTIES LABELS "${moduleName} ${ARG_LABELS}" )
    endif()
 
