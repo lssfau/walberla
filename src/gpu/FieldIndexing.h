@@ -44,6 +44,14 @@ namespace gpu
 template< typename T >
 class GPUField;
 
+/**
+ * \brief Utility class to generate handles to the underlying device data of a \ref GPUField.
+ *
+ * Pre-calculate memory offsets of a \ref GPUField for a given slice,
+ * cell interval, or the entire grid with or without the ghost layer,
+ * and store them in a \ref FieldAccessor handle.
+ * That handle is obtained by calling \ref gpuAccess().
+ */
 template< typename T >
 class FieldIndexing
 {

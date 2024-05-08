@@ -31,6 +31,13 @@ namespace gpu
 
 
 
+   /**
+    * \brief Handle to the underlying device data of a \ref GPUField.
+    *
+    * Encapsulate the device memory pointer and offsets necessary
+    * to calculate the address of a cell from a GPU kernel's thread
+    * coordinates in the thread block.
+    */
    template<typename T>
    class FieldAccessor
    {

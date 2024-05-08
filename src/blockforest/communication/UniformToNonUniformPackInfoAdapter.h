@@ -32,7 +32,7 @@ namespace communication {
 
 //*******************************************************************************************************************
 /*! 
- * Adapter to use a UniformPackInfo in a NonUniformBufferedScheme. No communication between coarse <-> fine blocks
+ * Adapter to use a \ref communication::UniformPackInfo in a \ref NonUniformBufferedScheme. No communication between coarse <-> fine blocks
  * happens.
  */
 //*******************************************************************************************************************
@@ -51,25 +51,25 @@ public:
    /**
    * Should return true if the amount of data that is packed for a given block in direction
    * "dir" is guaranteed to remain constant over time. False otherwise.
-   * If you are not sure what to return, return false! Returning false is always save.
+   * If you are not sure what to return, return false! Returning false is always safe.
    * Falsely return true will lead to errors! However, if the data can be guaranteed to remain
    * constant over time, returning true enables performance optimizations during the communication.
    */
    virtual bool constantDataExchange() const { return uniformPackInfo_->constantDataExchange(); }
 
    /**
-   * Must return false if calling unpackData and/or communicateLocal is not thread-safe.
+   * Must return false if calling `unpackData*()` and/or `communicateLocal*()` methods is not thread-safe.
    * True otherwise.
-   * If you are not sure what to return, return false! Returning false is always save.
-   * Falsely return true will most likely lead to errors! However, if both unpackData AND
-   * communicateLocal are thread-safe, returning true can lead to performance improvements.
+   * If you are not sure what to return, return false! Returning false is always safe.
+   * Falsely return true will most likely lead to errors! However, if both `unpackData*()` AND
+   * `communicateLocal*()` are thread-safe, returning true can lead to performance improvements.
    */
    virtual bool threadsafeReceiving() const { return uniformPackInfo_->threadsafeReceiving(); }
 
-   /// If NOT thread-safe, threadsafeReceiving must return false!
+   /// If NOT thread-safe, \ref threadsafeReceiving must return false!
    virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) { uniformPackInfo_->unpackData( receiver, dir, buffer ); }
 
-   /// If NOT thread-safe, threadsafeReceiving must return false!
+   /// If NOT thread-safe, \ref threadsafeReceiving must return false!
    virtual void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir ) { uniformPackInfo_->communicateLocal( sender, receiver, dir ); }
 
    virtual void unpackDataCoarseToFine( Block * /*fineReceiver*/, const BlockID & /*coarseSender*/, stencil::Direction /*dir*/, mpi::RecvBuffer & /*buffer*/ ) { }

@@ -37,9 +37,9 @@ auto hostFieldAllocator = make_shared< gpu::HostFieldAllocator<real_t> >();
 BlockDataID const cpuFieldID =field::addToStorage< ScalarField >(blocks, "CPU Field", real_c(0.0), field::fzyx, uint_c(1), hostFieldAllocator);
 \endcode
 
-Now we initialize the CPU field just like in the previous tutorial \ref tutorial_basics03 .
+Now we initialize the CPU field just like in the previous tutorial \ref tutorial_basics_03 .
 Then two GPU fields are created: "source" and "destination" field. The helper function
-gpu::addGPUFieldToStorage() creates a gpu::GPUField field of the same size and layout of the given
+\ref gpu::addGPUFieldToStorage() creates a \ref gpu::GPUField field of the same size and layout of the given
 CPU field:
 \code
 BlockDataID gpuFieldSrcID = gpu::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
@@ -118,10 +118,10 @@ Note that copying data is costly and thus we don't want to do this in every time
 
 \section gpu01_comm Communication
 
-For this tutorial we use the gpu::communication::UniformGPUScheme that first collects all data in a buffer and
-sends only one message per communication step and neighbor. For the PackInfo we use the MemcpyPackInfo. It receives
-a buffer located on the GPU and fills it using memcpy operations
-If the GPU library is build with MPI support this buffer can be send to other GPUs without a copy to the CPU.
+For this tutorial we use the \ref gpu::communication::UniformGPUScheme that first collects all data in a buffer and
+sends only one message per communication step and neighbor. For the `PackInfo` we use the \ref gpu::communication::MemcpyPackInfo.
+It receives a buffer located on the GPU and fills it using memcpy operations.
+If the GPU library is built with MPI support this buffer can be sent to other GPUs without a copy to the CPU.
 Otherwise the copying will be done in the back by the communication class.
 
 \code
