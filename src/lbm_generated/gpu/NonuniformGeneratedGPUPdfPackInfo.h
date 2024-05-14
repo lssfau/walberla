@@ -291,7 +291,7 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
    bool areNeighborsInDirection(const Block* block, const BlockID& neighborID,
                                 Vector3< cell_idx_t > dirVec) const;
 
-   CellInterval intervalHullInDirection(const CellInterval& ci, Vector3< cell_idx_t > tangentialDir,
+   CellInterval intervalHullInDirection(const CellInterval& ci, Vector3< cell_idx_t > dirVec,
                                         cell_idx_t width) const;
    bool skipsThroughCoarseBlock(const Block* block, Direction dir) const;
 

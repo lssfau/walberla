@@ -47,10 +47,28 @@ namespace walberla::gpu::communication {
 
 
 /**
- * Data packing/unpacking for ghost layer based communication of a gpu::GPUField
+ * \brief Data packing/unpacking for ghost layer based communication of a \ref GPUField.
+ *
+ * Encapsulate information on how to extract data from blocks that should be
+ * communicated to neighboring blocks (see \ref packDataImpl())
+ * and how to inject this data in a receiving block (see \ref unpackData()).
+ * This involves a host memory buffer and two device-to-host memory copy operations.
+ *
+ * A special method exists for communication between two blocks which are
+ * allocated on the same process (see \ref communicateLocal()).
+ * In this case the data does not have be communicated via a host buffer,
+ * but can be sent directly. This involves a single device-to-device memory
+ * copy operation.
+ *
+ * Data that is packed in direction "dir" at one block is unpacked in
+ * direction "stencil::inverseDir[dir]" at the neighboring block.
+ * This behavior must be implemented in \ref communicateLocal()!
+ *
+ * See \ref MemcpyPackInfo for a more efficient packing/unpacking method
+ * where the buffer is stored in device memory rather than in host memory.
+ *
  * \ingroup gpu
- * Template Parameters:
- *    - GPUField_T   A fully qualified GPUField.
+ * \tparam GPUField_T   A fully qualified \ref GPUField.
  */
 template<typename GPUField_T>
 class GPUPackInfo : public walberla::communication::UniformPackInfo

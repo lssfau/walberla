@@ -35,18 +35,21 @@ namespace communication {
 
 
 /**
- * \brief UniformPackInfo encapsulates information on how to extract data from blocks,
- * that should be communicated (see packData() ) to neighboring blocks
- * and how to inject this data in a receiving block (see unpackData() )
+ * \brief Data packing/unpacking for ghost layer based communication of a field.
  *
- * Another special method exists for communication between two blocks,
- * which are allocated on the same
- * process. In this case the data does not have be communicated via a buffer,
+ * Encapsulate information on how to extract data from blocks that should be
+ * communicated to neighboring blocks (see \ref packData())
+ * and how to inject this data in a receiving block (see \ref unpackData()).
+ * This involves a memory buffer and two memory copy operations.
+ *
+ * A special method exists for communication between two blocks which are
+ * allocated on the same process (see \ref communicateLocal()).
+ * In this case the data does not have be communicated via a buffer,
  * but can be copied directly.
  *
  * Data that is packed in direction "dir" at one block is unpacked in
  * direction "stencil::inverseDir[dir]" at the neighboring block. This
- * behavior must be implemented in "communicateLocal"!
+ * behavior must be implemented in \ref communicateLocal()!
  *
  * \ingroup communication
  */
@@ -65,23 +68,25 @@ public:
    /**
     * Should return true if the amount of data that is packed for a given block in direction
     * "dir" is guaranteed to remain constant over time. False otherwise.
-    * If you are not sure what to return, return false! Returning false is always save.
-    * Falsely return true will lead to errors! However, if the data can be guaranteed to remain
+    * If you are not sure what to return, return false! Returning false is always safe.
+    * Falsely returning true will lead to errors! However, if the data can be guaranteed to remain
     * constant over time, returning true enables performance optimizations during the communication.
     */
    virtual bool constantDataExchange() const = 0;
 
    /**
-    * Must return false if calling unpackData and/or communicateLocal is not thread-safe.
+    * Must return false if calling \ref unpackData and/or \ref communicateLocal is not thread-safe.
     * True otherwise.
-    * If you are not sure what to return, return false! Returning false is always save.
-    * Falsely return true will most likely lead to errors! However, if both unpackData AND
-    * communicateLocal are thread-safe, returning true can lead to performance improvements.
+    * If you are not sure what to return, return false! Returning false is always safe.
+    * Falsely returning true will most likely lead to errors! However, if both \ref unpackData AND
+    * \ref communicateLocal are thread-safe, returning true can lead to performance improvements.
     */
    virtual bool threadsafeReceiving() const = 0;
 
    /**
-    * Packs data from a block into a send buffer. Must be thread-safe! Calls packDataImpl.
+    * \brief Pack data from a block into a send buffer.
+    *
+    * Must be thread-safe! Calls \ref packDataImpl.
     *
     * @param sender     the block whose data should be packed into a buffer
     * @param dir        pack data for neighbor in this direction
@@ -91,19 +96,21 @@ public:
    inline void packData( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
 
    /**
-    * Unpacks received Data.
-    * If NOT thread-safe, threadsafeReceiving must return false!
+    * \brief Unpack received Data.
+    *
+    * If NOT thread-safe, \ref threadsafeReceiving must return false!
     *
     * @param receiver the block where the unpacked data should be stored into
     * @param dir      receive data from neighbor in this direction
-    * @param buffer
+    * @param buffer   buffer for reading the data from
     */
    virtual void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) = 0;
 
    /**
-    * Function to copy data from one local block to another local block.
+    * \brief Copy data from one local block to another local block.
+    *
     * Both blocks are allocated on the current process.
-    * If NOT thread-safe, threadsafeReceiving must return false!
+    * If NOT thread-safe, \ref threadsafeReceiving must return false!
     *
     * @param sender    id of block where the data should be copied from
     * @param receiver  id of block where the data should be copied to
@@ -134,7 +141,9 @@ public:
 protected:
 
    /**
-    * Packs data from a block into a send buffer. Must be thread-safe!
+    * \brief Pack data from a block into a send buffer.
+    *
+    * Must be thread-safe!
     *
     * @param sender     the block whose data should be packed into a buffer
     * @param dir        pack data for neighbor in this direction

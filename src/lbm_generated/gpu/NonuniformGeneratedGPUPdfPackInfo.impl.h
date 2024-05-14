@@ -425,7 +425,7 @@ inline Vector3< cell_idx_t >
 }
 
 /**
- * Returns the part of a cell interval's hull of given width in direction dirVec.
+ * Returns the part of a cell interval's hull of given \p width in direction \p dirVec.
  * @param ci        The original cell interval
  * @param dirVec    Direction Vector
  * @param width     Width of the hull

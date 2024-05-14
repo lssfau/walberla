@@ -52,28 +52,28 @@ public:
    /**
     * Should return true if the amount of data that is packed for a given block in direction
     * "dir" is guaranteed to remain constant over time. False otherwise.
-    * If you are not sure what to return, return false! Returning false is always save.
+    * If you are not sure what to return, return false! Returning false is always safe.
     * Falsely return true will lead to errors! However, if the data can be guaranteed to remain
     * constant over time, returning true enables performance optimizations during the communication.
     */
    virtual bool constantDataExchange() const = 0;
 
    /**
-    * Must return false if calling unpackData and/or communicateLocal is not thread-safe.
+    * Must return false if calling `unpackData*()` and/or `communicateLocal*()` methods is not thread-safe.
     * True otherwise.
-    * If you are not sure what to return, return false! Returning false is always save.
-    * Falsely return true will most likely lead to errors! However, if both unpackData AND
-    * communicateLocal are thread-safe, returning true can lead to performance improvements.
+    * If you are not sure what to return, return false! Returning false is always safe.
+    * Falsely return true will most likely lead to errors! However, if both `unpackData*()` AND
+    * `communicateLocal*()` are thread-safe, returning true can lead to performance improvements.
     */
    virtual bool threadsafeReceiving() const = 0;
 
-   /// Must be thread-safe! Calls packDataImpl.
+   /// Must be thread-safe! Calls \ref packDataEqualLevelImpl.
    inline void packDataEqualLevel( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
 
-   /// If NOT thread-safe, threadsafeReceiving must return false!
+   /// If NOT thread-safe, \ref threadsafeReceiving must return false!
    virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) = 0;
 
-   /// If NOT thread-safe, threadsafeReceiving must return false!
+   /// If NOT thread-safe, \ref threadsafeReceiving must return false!
    virtual void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir ) = 0;
 
    inline  void packDataCoarseToFine        ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const;

@@ -45,16 +45,20 @@ namespace gpu
    *  Basically a wrapper around a CUDA/HIP device pointer together with size information about the field
    *  i.e. sizes in x,y,z,f directions and number of ghost layers.
    *
-   *  Internally represented by a gpuPitchedPtr which is allocated with gpuMalloc3D to take padding of the
-   *  innermost coordinate into account.
+   *  Internally represented by a \c gpuPitchedPtr which is allocated with extra padding for the
+   *  innermost coordinate.
+   *  Pitched memory is a type of non-linear memory where padding is introduced
+   *  to optimize data alignment and thus reduce data access latency,
+   *  for example by avoiding shared memory bank conflicts.
    *
    *  Supports Array-of-Structures (AoS,zyxf) layout and Structure-of-Arrays (SoA, fzyx) layout, in a similar way
-   *  to field::Field
+   *  to \ref field::Field
    *
-   *  To work with the GPUField look at the gpu::fieldCpy functions to transfer a field::Field to a gpu::GPUField
+   *  To work with the \ref gpu::GPUField look at the \ref gpu::fieldCpy functions to transfer a \ref field::Field to a \ref gpu::GPUField
    *  and vice versa.
-   *  When writing device kernels for GPUFields have a look at the FieldIndexing and FieldAccessor concepts.
-   *  These simplify the "iteration" i.e. indexing of cells in GPUFields.
+   *
+   *  When writing device kernels for a \ref GPUField, have a look at the \ref FieldIndexing and \ref FieldAccessor concepts.
+   *  These simplify the "iteration" i.e. indexing of cells in a \ref GPUField.
    */
    //*******************************************************************************************************************
    template<typename T>

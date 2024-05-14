@@ -6,7 +6,7 @@ namespace walberla {
 \brief Introduction to block structure and field.
 
 This tutorial walks you through the process of creating a simple waLBerla application. 
-The source file of this tutorial can be found in apps/tutorials/01_BlocksAndFields.cpp.
+The source file of this tutorial can be found in `apps/tutorials/01_BlocksAndFields.cpp`.
 To compile and run this example, go to your build directory into `apps/tutorials` type `make`
 and run the generated executable.
 
@@ -153,7 +153,7 @@ Using this setup mechanism, waLBerla does not enforce that the fields have the s
 
 Remember: For waLBerla, a block is just a container for arbitrary data - and a field is just an "arbitrary" data item stored on each block.
 Block data does not have to be any waLBerla data structure. It is possible to store any type of data on a block, 
-so instead of using the field class, we could, for example, have used a std::vector<std::vector<double> > to store our lattice.
+so instead of using the field class, we could, for example, have used a `std::vector<std::vector<double>>` to store our lattice.
 
 The callback function can now be registered at the block storage with the following piece of code:
 
@@ -171,7 +171,7 @@ dock widget can then be used to display slices of the field.
 
 \image html tutorial_basics01_field.jpeg
 
-The next tutorial contains the writing of algorithms operating on block data: \ref tutorial02
+The next tutorial contains the writing of algorithms operating on block data: \ref tutorial_basics_02
 
 \tableofcontents
 
