@@ -67,7 +67,5 @@ waLBerla_add_executable ( NAME ObliqueWetCollision FILES ObliqueWetCollision.cpp
 
 endif()
 
-
-
 waLBerla_add_executable ( NAME ObliqueDryCollision FILES ObliqueDryCollision.cpp
       DEPENDS blockforest core mesa_pd postprocessing )

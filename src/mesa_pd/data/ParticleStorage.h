@@ -103,6 +103,8 @@ public:
       using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+      using totalDisplacement_type = walberla::real_t;
+      using collisionForceNorm_type = walberla::real_t;
       using virtualMass_type = walberla::real_t;
       using invMassIncludingVirtual_type = walberla::real_t;
       using oldLinearAcceleration_type = walberla::mesa_pd::Vec3;
@@ -239,6 +241,14 @@ public:
       oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef() {return storage_.getOldHydrodynamicTorqueRef(i_);}
       void setOldHydrodynamicTorque(oldHydrodynamicTorque_type const & v) { storage_.setOldHydrodynamicTorque(i_, v);}
       
+      totalDisplacement_type const & getTotalDisplacement() const {return storage_.getTotalDisplacement(i_);}
+      totalDisplacement_type& getTotalDisplacementRef() {return storage_.getTotalDisplacementRef(i_);}
+      void setTotalDisplacement(totalDisplacement_type const & v) { storage_.setTotalDisplacement(i_, v);}
+      
+      collisionForceNorm_type const & getCollisionForceNorm() const {return storage_.getCollisionForceNorm(i_);}
+      collisionForceNorm_type& getCollisionForceNormRef() {return storage_.getCollisionForceNormRef(i_);}
+      void setCollisionForceNorm(collisionForceNorm_type const & v) { storage_.setCollisionForceNorm(i_, v);}
+      
       virtualMass_type const & getVirtualMass() const {return storage_.getVirtualMass(i_);}
       virtualMass_type& getVirtualMassRef() {return storage_.getVirtualMassRef(i_);}
       void setVirtualMass(virtualMass_type const & v) { storage_.setVirtualMass(i_, v);}
@@ -370,6 +380,8 @@ public:
    using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+   using totalDisplacement_type = walberla::real_t;
+   using collisionForceNorm_type = walberla::real_t;
    using virtualMass_type = walberla::real_t;
    using invMassIncludingVirtual_type = walberla::real_t;
    using oldLinearAcceleration_type = walberla::mesa_pd::Vec3;
@@ -505,6 +517,14 @@ public:
    oldHydrodynamicTorque_type const & getOldHydrodynamicTorque(const size_t idx) const {return oldHydrodynamicTorque_[idx];}
    oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef(const size_t idx) {return oldHydrodynamicTorque_[idx];}
    void setOldHydrodynamicTorque(const size_t idx, oldHydrodynamicTorque_type const & v) { oldHydrodynamicTorque_[idx] = v; }
+   
+   totalDisplacement_type const & getTotalDisplacement(const size_t idx) const {return totalDisplacement_[idx];}
+   totalDisplacement_type& getTotalDisplacementRef(const size_t idx) {return totalDisplacement_[idx];}
+   void setTotalDisplacement(const size_t idx, totalDisplacement_type const & v) { totalDisplacement_[idx] = v; }
+   
+   collisionForceNorm_type const & getCollisionForceNorm(const size_t idx) const {return collisionForceNorm_[idx];}
+   collisionForceNorm_type& getCollisionForceNormRef(const size_t idx) {return collisionForceNorm_[idx];}
+   void setCollisionForceNorm(const size_t idx, collisionForceNorm_type const & v) { collisionForceNorm_[idx] = v; }
    
    virtualMass_type const & getVirtualMass(const size_t idx) const {return virtualMass_[idx];}
    virtualMass_type& getVirtualMassRef(const size_t idx) {return virtualMass_[idx];}
@@ -668,6 +688,8 @@ public:
    std::vector<hydrodynamicTorque_type> hydrodynamicTorque_ {};
    std::vector<oldHydrodynamicForce_type> oldHydrodynamicForce_ {};
    std::vector<oldHydrodynamicTorque_type> oldHydrodynamicTorque_ {};
+   std::vector<totalDisplacement_type> totalDisplacement_ {};
+   std::vector<collisionForceNorm_type> collisionForceNorm_ {};
    std::vector<virtualMass_type> virtualMass_ {};
    std::vector<invMassIncludingVirtual_type> invMassIncludingVirtual_ {};
    std::vector<oldLinearAcceleration_type> oldLinearAcceleration_ {};
@@ -718,6 +740,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getHydrodynamicTorqueRef() = rhs.getHydrodynamicTorque();
    getOldHydrodynamicForceRef() = rhs.getOldHydrodynamicForce();
    getOldHydrodynamicTorqueRef() = rhs.getOldHydrodynamicTorque();
+   getTotalDisplacementRef() = rhs.getTotalDisplacement();
+   getCollisionForceNormRef() = rhs.getCollisionForceNorm();
    getVirtualMassRef() = rhs.getVirtualMass();
    getInvMassIncludingVirtualRef() = rhs.getInvMassIncludingVirtual();
    getOldLinearAccelerationRef() = rhs.getOldLinearAcceleration();
@@ -765,6 +789,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getHydrodynamicTorqueRef() = std::move(rhs.getHydrodynamicTorqueRef());
    getOldHydrodynamicForceRef() = std::move(rhs.getOldHydrodynamicForceRef());
    getOldHydrodynamicTorqueRef() = std::move(rhs.getOldHydrodynamicTorqueRef());
+   getTotalDisplacementRef() = std::move(rhs.getTotalDisplacementRef());
+   getCollisionForceNormRef() = std::move(rhs.getCollisionForceNormRef());
    getVirtualMassRef() = std::move(rhs.getVirtualMassRef());
    getInvMassIncludingVirtualRef() = std::move(rhs.getInvMassIncludingVirtualRef());
    getOldLinearAccelerationRef() = std::move(rhs.getOldLinearAccelerationRef());
@@ -813,6 +839,8 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getHydrodynamicTorqueRef(), rhs.getHydrodynamicTorqueRef());
    std::swap(lhs.getOldHydrodynamicForceRef(), rhs.getOldHydrodynamicForceRef());
    std::swap(lhs.getOldHydrodynamicTorqueRef(), rhs.getOldHydrodynamicTorqueRef());
+   std::swap(lhs.getTotalDisplacementRef(), rhs.getTotalDisplacementRef());
+   std::swap(lhs.getCollisionForceNormRef(), rhs.getCollisionForceNormRef());
    std::swap(lhs.getVirtualMassRef(), rhs.getVirtualMassRef());
    std::swap(lhs.getInvMassIncludingVirtualRef(), rhs.getInvMassIncludingVirtualRef());
    std::swap(lhs.getOldLinearAccelerationRef(), rhs.getOldLinearAccelerationRef());
@@ -861,6 +889,8 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "hydrodynamicTorque  : " << p.getHydrodynamicTorque() << "\n" <<
          "oldHydrodynamicForce: " << p.getOldHydrodynamicForce() << "\n" <<
          "oldHydrodynamicTorque: " << p.getOldHydrodynamicTorque() << "\n" <<
+         "totalDisplacement   : " << p.getTotalDisplacement() << "\n" <<
+         "collisionForceNorm  : " << p.getCollisionForceNorm() << "\n" <<
          "virtualMass         : " << p.getVirtualMass() << "\n" <<
          "invMassIncludingVirtual: " << p.getInvMassIncludingVirtual() << "\n" <<
          "oldLinearAcceleration: " << p.getOldLinearAcceleration() << "\n" <<
@@ -979,6 +1009,8 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    hydrodynamicTorque_.emplace_back(real_t(0));
    oldHydrodynamicForce_.emplace_back(real_t(0));
    oldHydrodynamicTorque_.emplace_back(real_t(0));
+   totalDisplacement_.emplace_back(real_t(0));
+   collisionForceNorm_.emplace_back(real_t(0));
    virtualMass_.emplace_back(real_t(0));
    invMassIncludingVirtual_.emplace_back(real_t(0));
    oldLinearAcceleration_.emplace_back(real_t(0));
@@ -1052,6 +1084,8 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    hydrodynamicTorque_.pop_back();
    oldHydrodynamicForce_.pop_back();
    oldHydrodynamicTorque_.pop_back();
+   totalDisplacement_.pop_back();
+   collisionForceNorm_.pop_back();
    virtualMass_.pop_back();
    invMassIncludingVirtual_.pop_back();
    oldLinearAcceleration_.pop_back();
@@ -1112,6 +1146,8 @@ inline void ParticleStorage::reserve(const size_t size)
    hydrodynamicTorque_.reserve(size);
    oldHydrodynamicForce_.reserve(size);
    oldHydrodynamicTorque_.reserve(size);
+   totalDisplacement_.reserve(size);
+   collisionForceNorm_.reserve(size);
    virtualMass_.reserve(size);
    invMassIncludingVirtual_.reserve(size);
    oldLinearAcceleration_.reserve(size);
@@ -1157,6 +1193,8 @@ inline void ParticleStorage::clear()
    hydrodynamicTorque_.clear();
    oldHydrodynamicForce_.clear();
    oldHydrodynamicTorque_.clear();
+   totalDisplacement_.clear();
+   collisionForceNorm_.clear();
    virtualMass_.clear();
    invMassIncludingVirtual_.clear();
    oldLinearAcceleration_.clear();
@@ -1203,6 +1241,8 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), hydrodynamicTorque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicForce.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicTorque.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), totalDisplacement.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), collisionForceNorm.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), virtualMass.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), invMassIncludingVirtual.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldLinearAcceleration.size() );
@@ -1656,6 +1696,24 @@ public:
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldHydrodynamicTorque();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleTotalDisplacement
+{
+public:
+   using return_type = walberla::real_t;
+   walberla::real_t& operator()(data::Particle& p) const {return p.getTotalDisplacementRef();}
+   walberla::real_t& operator()(data::Particle&& p) const {return p.getTotalDisplacementRef();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getTotalDisplacement();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleCollisionForceNorm
+{
+public:
+   using return_type = walberla::real_t;
+   walberla::real_t& operator()(data::Particle& p) const {return p.getCollisionForceNormRef();}
+   walberla::real_t& operator()(data::Particle&& p) const {return p.getCollisionForceNormRef();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getCollisionForceNorm();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleVirtualMass

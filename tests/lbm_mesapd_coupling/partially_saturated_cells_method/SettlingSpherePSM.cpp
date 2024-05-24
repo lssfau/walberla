@@ -592,9 +592,8 @@ int main(int argc, char** argv)
 
    // set up RPD functionality
    std::function< void(void) > syncCall = [ps, rpdDomain]() {
-      const real_t overlap = real_t(1.5);
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
-      syncNextNeighborFunc(*ps, *rpdDomain, overlap);
+      syncNextNeighborFunc(*ps, *rpdDomain);
    };
 
    syncCall();

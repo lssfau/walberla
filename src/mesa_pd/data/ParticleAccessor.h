@@ -172,6 +172,14 @@ public:
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t p_idx) {return ps_->getOldHydrodynamicTorqueRef(p_idx);}
    void setOldHydrodynamicTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldHydrodynamicTorque(p_idx, v);}
    
+   walberla::real_t const & getTotalDisplacement(const size_t p_idx) const {return ps_->getTotalDisplacement(p_idx);}
+   walberla::real_t& getTotalDisplacementRef(const size_t p_idx) {return ps_->getTotalDisplacementRef(p_idx);}
+   void setTotalDisplacement(const size_t p_idx, walberla::real_t const & v) { ps_->setTotalDisplacement(p_idx, v);}
+   
+   walberla::real_t const & getCollisionForceNorm(const size_t p_idx) const {return ps_->getCollisionForceNorm(p_idx);}
+   walberla::real_t& getCollisionForceNormRef(const size_t p_idx) {return ps_->getCollisionForceNormRef(p_idx);}
+   void setCollisionForceNorm(const size_t p_idx, walberla::real_t const & v) { ps_->setCollisionForceNorm(p_idx, v);}
+   
    walberla::real_t const & getVirtualMass(const size_t p_idx) const {return ps_->getVirtualMass(p_idx);}
    walberla::real_t& getVirtualMassRef(const size_t p_idx) {return ps_->getVirtualMassRef(p_idx);}
    void setVirtualMass(const size_t p_idx, walberla::real_t const & v) { ps_->setVirtualMass(p_idx, v);}
@@ -381,6 +389,14 @@ public:
    void setOldHydrodynamicTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldHydrodynamicTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t /*p_idx*/) {return oldHydrodynamicTorque_;}
    
+   walberla::real_t const & getTotalDisplacement(const size_t /*p_idx*/) const {return totalDisplacement_;}
+   void setTotalDisplacement(const size_t /*p_idx*/, walberla::real_t const & v) { totalDisplacement_ = v;}
+   walberla::real_t& getTotalDisplacementRef(const size_t /*p_idx*/) {return totalDisplacement_;}
+   
+   walberla::real_t const & getCollisionForceNorm(const size_t /*p_idx*/) const {return collisionForceNorm_;}
+   void setCollisionForceNorm(const size_t /*p_idx*/, walberla::real_t const & v) { collisionForceNorm_ = v;}
+   walberla::real_t& getCollisionForceNormRef(const size_t /*p_idx*/) {return collisionForceNorm_;}
+   
    walberla::real_t const & getVirtualMass(const size_t /*p_idx*/) const {return virtualMass_;}
    void setVirtualMass(const size_t /*p_idx*/, walberla::real_t const & v) { virtualMass_ = v;}
    walberla::real_t& getVirtualMassRef(const size_t /*p_idx*/) {return virtualMass_;}
@@ -463,6 +479,8 @@ private:
    walberla::mesa_pd::Vec3 hydrodynamicTorque_;
    walberla::mesa_pd::Vec3 oldHydrodynamicForce_;
    walberla::mesa_pd::Vec3 oldHydrodynamicTorque_;
+   walberla::real_t totalDisplacement_;
+   walberla::real_t collisionForceNorm_;
    walberla::real_t virtualMass_;
    walberla::real_t invMassIncludingVirtual_;
    walberla::mesa_pd::Vec3 oldLinearAcceleration_;

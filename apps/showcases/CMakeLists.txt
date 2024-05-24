@@ -7,6 +7,7 @@ add_subdirectory( LightRisingParticleInFluidAMR )
 add_subdirectory( Mixer )
 add_subdirectory( ParticlePacking )
 add_subdirectory( PegIntoSphereBed )
+add_subdirectory( Piping )
 if ( WALBERLA_BUILD_WITH_CODEGEN)
 
    add_subdirectory( Antidunes )
