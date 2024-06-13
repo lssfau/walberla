@@ -1,6 +1,7 @@
 import sympy as sp
 import numpy as np
 import pystencils as ps
+from lbmpy.enums import Method, Stencil, SubgridScaleModel
 from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule, create_lb_collision_rule
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
@@ -65,7 +66,7 @@ options_dict = {
     'smagorinsky': {
         'method': 'srt',
         'stencil': 'D3Q19',
-        'smagorinsky': True,
+        'subgrid_scale_model': SubgridScaleModel.SMAGORINSKY,
         'relaxation_rate': omega,
     },
     'cumulant': {

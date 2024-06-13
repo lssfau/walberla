@@ -10,7 +10,7 @@ from lbmpy.advanced_streaming import is_inplace
 from lbmpy.advanced_streaming.utility import streaming_patterns, get_accessor, Timestep
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import LBMConfig, LBMOptimisation, LBStencil, create_lb_collision_rule
-from lbmpy.enums import Method, Stencil
+from lbmpy.enums import Method, Stencil, SubgridScaleModel
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor
 from lbmpy.moments import get_default_moment_set_for_stencil
 from lbmpy.updatekernels import create_stream_only_kernel
@@ -73,7 +73,7 @@ options_dict = {
     },
     'smagorinsky': {
         'method': Method.SRT,
-        'smagorinsky': False,
+        'subgrid_scale_model': SubgridScaleModel.SMAGORINSKY,
         'relaxation_rate': omega,
     }
 }

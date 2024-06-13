@@ -355,7 +355,10 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    real_t a = direction * direction;
    real_t b = real_t(2.) * (displacement * direction);
    real_t c = (displacement * displacement) - (radius * radius);
-   real_t discriminant = b*b - real_t(4.)*a*c;
+   // Hotfix for a floating point problem; see https://i10git.cs.fau.de/walberla/walberla/-/issues/243
+   real_t discriminant_tmp1 = b*b;
+   real_t discriminant_tmp2 = -real_t(4.)*a*c;
+   real_t discriminant = discriminant_tmp1 + discriminant_tmp2;
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
