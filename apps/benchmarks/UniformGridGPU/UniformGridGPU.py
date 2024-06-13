@@ -8,6 +8,7 @@ from pystencils.typing import TypedSymbol
 from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisions
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
+from lbmpy.enums import SubgridScaleModel
 from lbmpy.advanced_streaming import is_inplace
 from lbmpy.advanced_streaming.utility import streaming_patterns
 from lbmpy.boundaries import NoSlip, UBB
@@ -84,7 +85,7 @@ options_dict = {
     },
     'smagorinsky': {
         'method': Method.SRT,
-        'smagorinsky': False,
+        'subgrid_scale_model': SubgridScaleModel.SMAGORINSKY,
         'relaxation_rate': omega,
     }
 }
