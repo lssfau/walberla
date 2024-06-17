@@ -13,9 +13,9 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Percolation.cpp
+//! \file MaterialTransport.cpp
 //! \ingroup lbm_mesapd_coupling
-//! \author Samuel Kemmler <samuel.kemmler@fau.de>
+//! \author Ravi Ayyala Somayajula <ravi.k.ayyala@fau.de@fau.de>
 //
 //======================================================================================================================
 
@@ -64,7 +64,7 @@
 #include "PSM_InfoHeader.h"
 #include "PSM_MacroGetter.h"
 
-namespace percolation
+namespace MaterialTransport
 {
 
 ///////////
@@ -178,10 +178,6 @@ int main(int argc, char** argv)
 
    auto simulationDomain = blocks->getDomain();
 
-   ////////////
-   // MesaPD //
-   ////////////
-
    auto rpdDomain = std::make_shared< mesa_pd::domain::BlockForestDomain >(blocks->getBlockForestPointer());
 
    // Init data structures
@@ -190,45 +186,6 @@ int main(int argc, char** argv)
    using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithShape;
    auto accessor            = walberla::make_shared< ParticleAccessor_T >(ps, ss);
    auto sphereShape         = ss->create< mesa_pd::data::Sphere >(particleDiameter * real_t(0.5));
-
-   // Create spheres
-   if (useParticles)
-   {
-      // Ensure that generation domain is computed correctly
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.xMin(), real_t(0));
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.yMin(), real_t(0));
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.zMin(), real_t(0));
-
-      auto generationDomain = math::AABB::createFromMinMaxCorner(
-         math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) - generationDomainFraction[0]) / real_t(2),
-                                 simulationDomain.yMax() * (real_t(1) - generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) - generationDomainFraction[2]) / real_t(2)),
-         math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) + generationDomainFraction[0]) / real_t(2),
-                                 simulationDomain.yMax() * (real_t(1) + generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) + generationDomainFraction[2]) / real_t(2)));
-      real_t particleOffset = particleGenerationSpacing / real_t(2);
-      for (auto pt :
-           grid_generator::SCGrid(generationDomain, generationDomain.center() + generationPointOfReferenceOffset,
-                                  particleGenerationSpacing))
-      {
-         // Offset every second particle layer in flow direction to avoid channels in flow direction
-         if (useParticleOffset &&
-             uint_t(round(math::abs(generationDomain.center()[0] - pt[0]) / (particleGenerationSpacing))) % uint_t(2) !=
-                uint_t(0))
-         {
-            pt = pt + Vector3(real_t(0), particleOffset, particleOffset);
-         }
-         if (rpdDomain->isContainedInProcessSubdomain(uint_c(mpi::MPIManager::instance()->rank()), pt))
-         {
-            mesa_pd::data::Particle&& p = *ps->create();
-            p.setPosition(pt);
-            p.setInteractionRadius(particleDiameter * real_t(0.5));
-            p.setOwner(mpi::MPIManager::instance()->rank());
-            p.setShapeID(sphereShape);
-            p.setType(0);
-         }
-      }
-   }
 
    ///////////////////////
    // ADD DATA TO BLOCKS //
@@ -249,9 +206,7 @@ int main(int argc, char** argv)
    BlockDataID velFieldID  = field::addToStorage< VelocityField_T >(blocks, "velocity field", real_t(0), field::fzyx);
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
-   // Synchronize particles between the blocks for the correct mapping of ghost particles
-   mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
-   syncNextNeighborFunc(*ps, *rpdDomain);
+
 
    // Assemble boundary block string
    std::string boundariesBlockString = " Boundaries"
@@ -302,13 +257,7 @@ int main(int argc, char** argv)
    ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, relaxationRate);
    PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
                                          particleAndVolumeFractionSoA, particleSubBlockSize);
-   if (useParticles)
-   {
-      for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
-      {
-         psmSweepCollection.particleMappingSweep(&(*blockIt));
-      }
-   }
+
 
    // Initialize PDFs
    pystencils::InitializeDomainForPSM pdfSetter(
@@ -318,8 +267,7 @@ int main(int argc, char** argv)
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
-      // pdfSetter requires particle velocities at cell centers
-      if (useParticles) { psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt)); }
+
       pdfSetter(&(*blockIt));
    }
 
@@ -347,18 +295,6 @@ int main(int argc, char** argv)
    // VTK output
    if (vtkSpacing != uint_t(0))
    {
-      // Spheres
-      auto particleVtkOutput = make_shared< mesa_pd::vtk::ParticleVtkOutput >(ps);
-      particleVtkOutput->addOutput< mesa_pd::data::SelectParticleUid >("uid");
-      particleVtkOutput->addOutput< mesa_pd::data::SelectParticleLinearVelocity >("velocity");
-      particleVtkOutput->addOutput< mesa_pd::data::SelectParticleInteractionRadius >("radius");
-      // Limit output to process-local spheres
-      particleVtkOutput->setParticleSelector([sphereShape](const mesa_pd::data::ParticleStorage::iterator& pIt) {
-         return pIt->getShapeID() == sphereShape &&
-                !(mesa_pd::data::particle_flags::isSet(pIt->getFlags(), mesa_pd::data::particle_flags::GHOST));
-      });
-      auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "particles", vtkSpacing, vtkFolder);
-      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(particleVtkWriter), "VTK (sphere data)");
 
       // Fields
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid", vtkSpacing, 0, false, vtkFolder);
@@ -426,17 +362,9 @@ int main(int argc, char** argv)
    pystencils::LBMSplitSweep LBMSplitSweep(pdfFieldCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,
                                            frameWidth);
 
-   if (useParticles)
-   {
-      if (useCommunicationHiding)
-      {
-         addPSMSweepsToTimeloops(commTimeloop, timeloop, com, psmSweepCollection, PSMSplitSweep);
-      }
-      else { addPSMSweepsToTimeloop(timeloop, psmSweepCollection, PSMSweep); }
-   }
-   else
-   {
-      if (useCommunicationHiding)
+
+
+   if (useCommunicationHiding)
       {
          commTimeloop.add() << BeforeFunction([&]() { com.startCommunication(); }, "LBM Communication (start)")
                             << Sweep(deviceSyncWrapper(LBMSplitSweep.getInnerSweep()), "LBM inner sweep")
@@ -444,7 +372,7 @@ int main(int argc, char** argv)
          timeloop.add() << Sweep(deviceSyncWrapper(LBMSplitSweep.getOuterSweep()), "LBM outer sweep");
       }
       else { timeloop.add() << Sweep(deviceSyncWrapper(LBMSweep), "LBM sweep"); }
-   }
+
 
    WcTimingPool timeloopTiming;
    // TODO: maybe add warmup phase
@@ -464,8 +392,7 @@ int main(int argc, char** argv)
       if (std::getenv("DB_FILE") != nullptr) { dbFile = std::getenv("DB_FILE"); }
       else
       {
-         if (useParticles) { dbFile = "percolation_benchmark.sqlite3"; }
-         else { dbFile = "channel_flow_benchmark.sqlite3"; }
+         dbFile = "channel_concentration_flow_benchmark.sqlite3";
       }
 
       std::map< std::string, int > integerProperties;
@@ -484,14 +411,7 @@ int main(int argc, char** argv)
       integerProperties["communicationHidingXWidth"] = int(frameWidth[0]);
       integerProperties["communicationHidingYWidth"] = int(frameWidth[1]);
       integerProperties["communicationHidingZWidth"] = int(frameWidth[2]);
-      integerProperties["useParticles"]              = int(useParticles);
-      integerProperties["numParticles"]              = int(ps->size());
-      integerProperties["particleSubBlockXSize"]     = int(particleSubBlockSize[0]);
-      integerProperties["particleSubBlockYSize"]     = int(particleSubBlockSize[1]);
-      integerProperties["particleSubBlockZSize"]     = int(particleSubBlockSize[2]);
 
-      realProperties["particleDiameter"]          = double(particleDiameter);
-      realProperties["particleGenerationSpacing"] = double(particleGenerationSpacing);
 
       performanceLogger.getBestResultsForSQLOnRoot(integerProperties, realProperties, stringProperties);
 
@@ -504,4 +424,4 @@ int main(int argc, char** argv)
 
 } // namespace percolation
 
-int main(int argc, char** argv) { percolation::main(argc, argv); }
+int main(int argc, char** argv) { MaterialTransport::main(argc, argv); }

@@ -19,6 +19,7 @@ add_subdirectory( PoiseuilleChannel )
 add_subdirectory( ProbeVsExtraMessage )
 add_subdirectory( SchaeferTurek )
 add_subdirectory( UniformGrid )
+add_subdirectory( MaterialTransport )
 
 if ( WALBERLA_BUILD_WITH_PYTHON )
    add_subdirectory( FieldCommunication )
