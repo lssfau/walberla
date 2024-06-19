@@ -26,6 +26,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
       add_subdirectory( UniformGridCPU )
       add_subdirectory( PhaseFieldAllenCahn )
       add_subdirectory( NonUniformGridCPU )
+      add_subdirectory( TurbulentChannel )
    endif()
 
    if ( WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_GPU_SUPPORT )
