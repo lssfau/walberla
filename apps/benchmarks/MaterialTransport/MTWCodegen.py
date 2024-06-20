@@ -105,3 +105,188 @@ with CodeGeneration() as ctx:
         force_model=ForceModel.LUO,
         compressible=True,
     )
+
+    # =====================
+    # Generate method
+    # =====================
+
+    method = create_lb_method(lbm_config=lbm_fluid_config)
+
+    pdfs_fluid_setter = macroscopic_values_setter(
+        method, density=init_density_fluid, velocity=init_velocity_fluid, pdfs=pdfs_fluid.center_vector
+    )
+
+    pdfs_concentration_setter = macroscopic_values_setter(
+        method, density=init_density_concentration, velocity= velocity_field.center_vector,pdfs=pdfs_concentration.center_vector
+    )
+
+    # specify the target
+
+    if ctx.gpu:
+        target = ps.Target.GPU
+    else:
+        target = ps.Target.CPU
+
+    # Generate files
+
+    generate_sweep(
+        ctx,
+        "LBMFluidSweep",
+        create_lb_update_rule(lbm_config=lbm_fluid_config, lbm_optimisation=lbm_fluid_opt),
+        field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
+        target=target,
+    )
+
+    generate_sweep(
+        ctx,
+        "LBMConcentrationSweep",
+        create_lb_update_rule(lbm_config=lbm_concentration_config, lbm_optimisation=lbm_concentration_opt),
+        field_swaps=[(pdfs_concentration, pdfs_concentration_tmp)],
+        target=target,
+    )
+
+    generate_pack_info_from_kernel(
+        ctx,
+        "PackInfoFluid",
+        create_lb_update_rule(lbm_config=lbm_fluid_config, lbm_optimisation=lbm_fluid_opt),
+        target=target,
+    )
+
+    generate_pack_info_from_kernel(
+        ctx,
+        "PackInfoConcentration",
+        create_lb_update_rule(lbm_config=lbm_concentration_config, lbm_optimisation=lbm_concentration_opt),
+        target=target,
+    )
+
+    generate_sweep(ctx, "InitializeFluidDomain", pdfs_fluid_setter, target=target)
+    generate_sweep(ctx, "InitializeConcentrationDomain", pdfs_concentration_setter, target=target)
+
+    # Fluid Boundary conditions
+    generate_boundary(
+        ctx,
+        "BC_Fluid_NoSlip",
+        NoSlip(),
+        method,
+        field_name=pdfs_fluid.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    bc_velocity_fluid = sp.symbols("bc_velocity_fluid_:3")
+    generate_boundary(
+        ctx,
+        "BC_Fluid_UBB",
+        UBB(bc_velocity_fluid),
+        method,
+        field_name=pdfs_fluid.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    bc_density_fluid = sp.Symbol("bc_density_fluid")
+    generate_boundary(
+        ctx,
+        "BC_Fluid_Density",
+        FixedDensity(bc_density_fluid),
+        method,
+        field_name=pdfs_fluid.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    generate_boundary(
+        ctx,
+        "BC_Fluid_FreeSlip",
+        FreeSlip(stencil_fluid),
+        method,
+        field_name=pdfs_fluid.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+
+    # Concentration Boundary conditions
+
+    generate_boundary(
+        ctx,
+        "BC_Concentration_NoSlip",
+        NoSlip(),
+        method,
+        field_name=pdfs_concentration.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    bc_velocity_concentration = sp.symbols("bc_velocity_concentration_:3")   ## is it needed ?
+    generate_boundary(
+        ctx,
+        "BC_Fluid_UBB",
+        UBB(bc_velocity_concentration),
+        method,
+        field_name=pdfs_concentration.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    bc_density_concentration = sp.Symbol("bc_density_concentration")
+    generate_boundary(
+        ctx,
+        "BC_Concentration_Density",
+        FixedDensity(bc_density_concentration),
+        method,
+        field_name=pdfs_concentration.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    generate_boundary(
+        ctx,
+        "BC_concentration_FreeSlip",
+        FreeSlip(stencil_concentration),
+        method,
+        field_name=pdfs_concentration.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    # Info header containing correct template definitions for stencil and fields
+    infoHeaderParams = {
+        "stencil_fluid": stencil_fluid.name,
+        "stencil_concentration": stencil_concentration.name,
+        "streaming_pattern": lbm_fluid_config.streaming_pattern,
+        "collision_setup": config_tokens[0],
+        "cse_global": int(lbm_fluid_opt.cse_global),
+        "cse_pdfs": int(lbm_fluid_opt.cse_pdfs),
+    }
+
+    stencil_typedefs = {"Stencil_Fluid_T": stencil_fluid, "CommunicationStencil_Fluid_T": stencil_fluid, "Stencil_Concentration_T": stencil_concentration, "CommunicationStencil_Concentration_T": stencil_concentration}
+    field_typedefs = {
+        "PdfField_fluid_T": pdfs_fluid,
+        "DensityField_fluid_T": density_field,
+        "VelocityField_fluid_T": velocity_field,
+        "PdfField_concentration_T": pdfs_concentration,
+        "DensityField_concentration_T": concentration_field,
+    }
+
+    generate_info_header(
+        ctx,
+        "GeneralInfoHeader",
+        stencil_typedefs=stencil_typedefs,
+        field_typedefs=field_typedefs,
+        additional_code=info_header.format(**infoHeaderParams),
+    )
+
+    # Getter & setter to compute moments from pdfs
+    pdfs_fluid_getter = macroscopic_values_getter(
+        method, density=density_field, velocity=velocity_field.center_vector,pdfs=pdfs_fluid.center_vector
+    )
+
+    pdfs_concentration_getter = macroscopic_values_getter(
+        method, density=concentration_field, velocity= velocity_field.center_vector,pdfs=pdfs_concentration.center_vector
+    )
+
+    generate_sweep(ctx, "FluidMacroSetter", pdfs_fluid_setter)
+    generate_sweep(ctx, "FluidMacroGetter", pdfs_fluid_getter)
+    generate_sweep(ctx, "ConcentrationMacroSetter", pdfs_concentration_setter)
+    generate_sweep(ctx, "ConcentrationMacroGetter", pdfs_concentration_getter)
