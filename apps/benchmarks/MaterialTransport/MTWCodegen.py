@@ -28,7 +28,8 @@ from pystencils_walberla import (
 from lbmpy_walberla import generate_boundary
 
 info_header = """
-const char * infoStencil = "{stencil}";
+const char * infoStencil_fluid = "{stencil}";
+const char * infoStencil_concentration = "{stencil}";
 const char * infoStreamingPattern = "{streaming_pattern}";
 const char * infoCollisionSetup = "{collision_setup}";
 const bool infoCseGlobal = {cse_global};
@@ -47,8 +48,8 @@ with CodeGeneration() as ctx:
     pdfs_inter_fluid = sp.symbols("pdfs_inter_fluid:" + str(stencil_fluid.Q))
     pdfs_inter_concentration = sp.symbols("pdfs_inter_concentration:" + str(stencil_concentration.Q))
     layout = "fzyx"
-    config_tokens = ctx.config.split("_")
-    MaxParticlesPerCell = int(config_tokens[2])
+    #config_tokens = ctx.config.split("_")
+    MaxParticlesPerCell = int(2)
     methods = {
         "srt": Method.SRT,
         "trt": Method.TRT,
@@ -89,7 +90,7 @@ with CodeGeneration() as ctx:
     # Fluid LBM config
     lbm_fluid_config = LBMConfig(
         stencil=stencil_fluid,
-        method=methods[config_tokens[0]],
+        method=Method.SRT,
         relaxation_rate=omega,
         force=sp.symbols("F_:3"),
         force_model=ForceModel.LUO,
@@ -99,7 +100,7 @@ with CodeGeneration() as ctx:
     # Concentration LBM config
     lbm_concentration_config = LBMConfig(
         stencil=stencil_concentration,
-        method=methods[config_tokens[0]],
+        method=Method.SRT,
         relaxation_rate=omega,
         force=sp.symbols("F_:3"),
         force_model=ForceModel.LUO,
@@ -242,7 +243,7 @@ with CodeGeneration() as ctx:
 
     generate_boundary(
         ctx,
-        "BC_concentration_FreeSlip",
+        "BC_Concentration_FreeSlip",
         FreeSlip(stencil_concentration),
         method,
         field_name=pdfs_concentration.name,
@@ -255,10 +256,20 @@ with CodeGeneration() as ctx:
         "stencil_fluid": stencil_fluid.name,
         "stencil_concentration": stencil_concentration.name,
         "streaming_pattern": lbm_fluid_config.streaming_pattern,
-        "collision_setup": config_tokens[0],
+        "collision_setup": Method.SRT,
         "cse_global": int(lbm_fluid_opt.cse_global),
         "cse_pdfs": int(lbm_fluid_opt.cse_pdfs),
     }
+
+    additional_code = f"""
+    const char * infoStencil_concentration = "{stencil_concentration.name}";
+    const char * infoStencil_fluid = "{stencil_fluid.name}";
+    const char * infoStreamingPattern = "{lbm_fluid_config.streaming_pattern}";
+    const char * infoCollisionSetup = "{Method.SRT}";
+    const bool infoCseGlobal = {int(lbm_fluid_opt.cse_global)};
+    const bool infoCsePdfs = {int(lbm_fluid_opt.cse_pdfs)};
+    """
+
 
     stencil_typedefs = {"Stencil_Fluid_T": stencil_fluid, "CommunicationStencil_Fluid_T": stencil_fluid, "Stencil_Concentration_T": stencil_concentration, "CommunicationStencil_Concentration_T": stencil_concentration}
     field_typedefs = {
@@ -274,7 +285,7 @@ with CodeGeneration() as ctx:
         "GeneralInfoHeader",
         stencil_typedefs=stencil_typedefs,
         field_typedefs=field_typedefs,
-        additional_code=info_header.format(**infoHeaderParams),
+        additional_code=additional_code,
     )
 
     # Getter & setter to compute moments from pdfs
