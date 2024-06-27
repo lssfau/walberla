@@ -7,6 +7,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 FILE MTWCodegen.py
                 OUT_FILES LBMFluidSweep.h LBMFluidSweep.cpp
                 LBMConcentrationSweep.h LBMConcentrationSweep.cpp
+                LBMFluidSplitSweep.h LBMFluidSplitSweep.cpp
+                LBMConcentrationSplitSweep.h LBMConcentrationSplitSweep.cpp
                 PackInfoFluid.h PackInfoFluid.cpp
                 PackInfoConcentration.h PackInfoConcentration.cpp
                 InitializeFluidDomain.h InitializeFluidDomain.cpp
@@ -16,6 +18,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 BC_Fluid_Density.h BC_Fluid_Density.cpp
                 BC_Fluid_FreeSlip.h BC_Fluid_FreeSlip.cpp
                 BC_Concentration_NoSlip.h BC_Concentration_NoSlip.cpp
+                BC_Concentration_UBB.h BC_Concentration_UBB.cpp
                 BC_Concentration_Density.h BC_Concentration_Density.cpp
                 BC_Concentration_FreeSlip.h BC_Concentration_FreeSlip.cpp
                 FluidMacroSetter.h FluidMacroSetter.cpp
