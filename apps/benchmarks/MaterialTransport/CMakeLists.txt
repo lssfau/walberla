@@ -2,9 +2,12 @@ waLBerla_link_files_to_builddir("*.prm")
 
 if (WALBERLA_BUILD_WITH_CODEGEN)
     if (NOT WALBERLA_BUILD_WITH_GPU_SUPPORT OR (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP)))
-
+        set(coupling_method 1)
+        set(config ${coupling_method}_)
+        message(STATUS "Config value is: ${config}" )
         waLBerla_generate_target_from_python(NAME MTWCodegen
                 FILE MTWCodegen.py
+                CODEGEN_CFG ${config}
                 OUT_FILES LBMFluidSweep.h LBMFluidSweep.cpp
                 LBMConcentrationSweep.h LBMConcentrationSweep.cpp
                 LBMFluidSplitSweep.h LBMFluidSplitSweep.cpp
