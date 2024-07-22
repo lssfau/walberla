@@ -8,7 +8,7 @@ import sys
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
 
-from lbmpy.boundaries import NoSlip, UBB, FixedDensity, FreeSlip
+from lbmpy.boundaries import NoSlip, UBB, FixedDensity, FreeSlip, DiffusionDirichlet, NeumannByCopy
 from lbmpy.creationfunctions import (
     create_lb_update_rule,
     create_lb_method,
@@ -75,12 +75,12 @@ with CodeGeneration() as ctx:
 
     # Determine the output based on the coupling mode
 
-    if config_tokens[0]== "1":
+    if config_tokens[1]== "1":
         concentration_output = None
         force_on_fluid = sp.symbols("F_:3")
         print("trueeeee")
 
-    elif config_tokens[0] == "2":
+    elif config_tokens[1] == "2":
         concentration_output = {"concentration": concentration_field}
         force_on_fluid = sp.Matrix([0, 0, 0])
         print("false")
@@ -288,6 +288,18 @@ with CodeGeneration() as ctx:
         streaming_pattern="pull",
         target=target,
     )
+
+    generate_boundary(
+        ctx,
+        "BC_Concentration_Neumann",
+        NeumannByCopy(stencil_concentration),
+        method_concentration,
+        field_name=pdfs_concentration.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+
 
     # Info header containing correct template definitions for stencil and fields
     infoHeaderParams = {
