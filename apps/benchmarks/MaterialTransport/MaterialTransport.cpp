@@ -94,6 +94,9 @@ const FlagUID Concentration_Flag("Concentration");
 const FlagUID Density_Concentration_Flag("Density_Concentration");
 const FlagUID NoSlip_Concentration_Flag("NoSlip_Concentration");
 const FlagUID Inflow_Concentration_Flag("Inflow_Concentration");
+//const FlagUID Dirichlet_Concentration_Flag("Dirichlet_Concentration");
+const FlagUID Neumann_Concentration_Flag("Neumann_Concentration");
+
 
 //////////
 // MAIN //
@@ -174,19 +177,21 @@ int main(int argc, char** argv) {
       BlockDataID pdfFieldConcentrationCPUGPUID = gpu::addGPUFieldToStorage< PdfField_concentration_T >(blocks, pdfFieldConcentrationID, "pdf concentration field GPU");
 
       // Fluid velocity field on GPU
-      BlockDataID velFieldID  = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
-      BlockDataID velFieldFluidCPUGPUID = gpu::addGPUFieldToStorage< VelocityField_fluid_T >(blocks, velFieldID, "velocity fluid field GPU");
+      BlockDataID velFieldFluidID  = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+      BlockDataID velFieldFluidCPUGPUID = gpu::addGPUFieldToStorage< VelocityField_fluid_T >(blocks, velFieldFluidID, "velocity fluid field GPU");
    #else
 
       // Fluid PDFs on CPU
       BlockDataID pdfFieldFluidCPUGPUID =
          field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field CPU", real_c(std::nan("")), field::fzyx);
 
+      BlockDataID velFieldFluidCPUGPUID = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
+
       // Concentration PDFs on CPU
       BlockDataID pdfFieldConcentrationCPUGPUID =
-         field::addToStorage< PdfField_fluid_T >(blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
+         field::addToStorage< PdfField_concentration_T >(blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
 
-      BlockDataID velFieldFluidCPUGPUID = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
+
    #endif
       BlockDataID densityFluidFieldID = field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
       BlockDataID densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
@@ -195,23 +200,42 @@ int main(int argc, char** argv) {
 
 
       // Assemble boundary block string
-      std::string boundariesBlockString = " Boundaries"
+      std::string boundariesBlockString = " BoundariesFluid"
                                           "{"
-                                          "Border { direction W;    walldistance -1;  flag Inflow; }"
-                                          "Border { direction E;    walldistance -1;  flag Density; }";
+                                          "Border { direction W;    walldistance -1;  flag Inflow_Fluid; }"
+                                          "Border { direction E;    walldistance -1;  flag Density_Fluid; }";
 
       if (!periodicInY)
       {
-         boundariesBlockString += "Border { direction S;    walldistance -1;  flag NoSlip; }"
-                                  "Border { direction N;    walldistance -1;  flag NoSlip; }";
+         boundariesBlockString += "Border { direction S;    walldistance -1;  flag NoSlip_Fluid; }"
+                                  "Border { direction N;    walldistance -1;  flag NoSlip_Fluid; }";
       }
 
       if (!periodicInZ)
       {
-         boundariesBlockString += "Border { direction T;    walldistance -1;  flag NoSlip; }"
-                                  "Border { direction B;    walldistance -1;  flag NoSlip; }";
+         boundariesBlockString += "Border { direction T;    walldistance -1;  flag NoSlip_Fluid; }"
+                                  "Border { direction B;    walldistance -1;  flag NoSlip_Fluid; }";
       }
 
+      boundariesBlockString += "}";
+
+      boundariesBlockString += "\n BoundariesConcentration";
+
+      boundariesBlockString += "{"
+                                "Border { direction W;    walldistance -1;  flag Density_Concentration; }"
+                                "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
+
+      if (!periodicInY)
+      {
+         boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Concentration; }"
+                                  "Border { direction N;    walldistance -1;  flag Neumann_Concentration; }";
+      }
+
+      if (!periodicInZ)
+      {
+         boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Concentration; }"
+                                  "Border { direction B;    walldistance -1;  flag Neumann_Concentration; }";
+      }
       boundariesBlockString += "}";
       WALBERLA_ROOT_SECTION()
       {
@@ -223,11 +247,12 @@ int main(int argc, char** argv) {
 
       auto boundariesCfgFile = Config();
       boundariesCfgFile.readParameterFile("boundaries.prm");
-      auto boundariesConfig = boundariesCfgFile.getBlock("Boundaries");
+      auto boundariesConfigFluid = boundariesCfgFile.getBlock("BoundariesFluid");
+      auto boundariesConfigConcentration = boundariesCfgFile.getBlock("BoundariesConcentration");
 
 
       // map boundaries into the fluid field simulation
-      geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfig);
+      geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfigFluid);
       geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
       lbm::BC_Fluid_Density density_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(1.0));
       density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
@@ -237,28 +262,23 @@ int main(int argc, char** argv) {
       ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
 
       // map boundaries into the concentration field simulation
-      geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID, boundariesConfig);
+      geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID, boundariesConfigConcentration);
       geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
-      lbm::BC_Concentration_Density density_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, real_t(1.0));
+      lbm::BC_Concentration_Density density_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
       density_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Density_Concentration_Flag, Concentration_Flag);
-      lbm::BC_Concentration_NoSlip noSlip_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID);
-      noSlip_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, NoSlip_Concentration_Flag, Concentration_Flag);
-      lbm::BC_Concentration_UBB ubb_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, uInflow, real_t(0), real_t(0));
-      ubb_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Inflow_Concentration_Flag, Concentration_Flag);
+      lbm::BC_Concentration_Neumann neumann_concentration_bc(blocks,pdfFieldConcentrationCPUGPUID);
+      neumann_concentration_bc.fillFromFlagField<FlagField_T>(blocks,flagFieldConcentrationID,Neumann_Concentration_Flag,Concentration_Flag);
 
       ///////////////
       // TIME LOOP //
       ///////////////
-
-      pystencils::InitializeFluidDomain initializeFluidDomain(flagFieldFluidID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
-      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(flagFieldConcentrationID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
-
+      pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
+      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(0.5));
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
       {
          initializeFluidDomain(&(*blockIt));
          initializeConcentrationDomain(&(*blockIt));
       }
-
       ///////////////////////
       // ADD COMMUNICATION //
       //////////////////////
@@ -291,13 +311,13 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    // objects to get the macroscopic quantities
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils:: FluidMacroGetter(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
+   pystencils:: FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
    pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils:: ConcentrationMacroGetter(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldConcentrationID,real_t(0),real_t(0),real_t(0));
+   pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
    pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
 #endif
@@ -308,31 +328,45 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    {
 
       // Fields
-      auto vtkOutput = vtk::createVTKOutput_BlockData(blocks, "vtk files", vtkSpacing, 0, false, vtkFolder);
+      auto vtkOutput_Fluid = vtk::createVTKOutput_BlockData(blocks, "vtk files fluid", vtkSpacing, 0, false, vtkFolder);
 
-      vtkOutput->addBeforeFunction(communication_fluid);
-      vtkOutput->addBeforeFunction(communication_concentration);
+      vtkOutput_Fluid->addBeforeFunction(communication_fluid);
 
-      vtkOutput->addBeforeFunction([&]() {
+
+      vtkOutput_Fluid->addBeforeFunction([&]() {
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
          gpu::fieldCpy< PdfFieldFluid_T, gpu::GPUField< real_t > >(blocks, pdfFieldFluidID, pdfFieldFluidCPUGPUID);
-         gpu::fieldCpy< PdfField_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID, pdfFieldConcentrationCPUGPUID);
+         gpu::fieldCpy< PdfFieldConcentration_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID, pdfFieldConcentrationCPUGPUID);
+         gpu::fieldCpy< VelocityField_fluid_T, gpu::GPUField< real_t > >(blocks, velFieldFluidID, velFieldFluidCPUGPUID);
+
 #endif
          for (auto& block : *blocks)
          {
             getterSweep_fluid(&block);
-            getterSweep_concentration(&block);
          }
       });
 
-      vtkOutput->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
-      vtkOutput->addCellDataWriter(make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
-      vtkOutput->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+      auto vtkOutput_Concentration = vtk::createVTKOutput_BlockData(blocks, "vtk files concentration", vtkSpacing, 0, false, vtkFolder);
 
-      vtkOutput->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
-      vtkOutput->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
+      vtkOutput_Concentration->addBeforeFunction(communication_concentration);
 
-      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK output");
+      vtkOutput_Concentration->addBeforeFunction([&](){
+         for (auto& block : *blocks)
+         {
+            getterSweep_concentration(&block);
+
+         }
+      });
+
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
+
+      vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+      vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
+
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Fluid), "VTK output Fluid");
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Concentration), "VTK output Concentration");
    }
 
    if (vtkSpacing != uint_t(0)) { vtk::writeDomainDecomposition(blocks, "domain_decomposition", vtkFolder); }
@@ -344,7 +378,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    if (performanceLogFrequency > 0)
    {
       timeloop.addFuncAfterTimeStep(performanceLoggerFluid, "Evaluate performance logging of fluid");
-      timeloop.addFuncAfterTimeStep(performanceLoggerConcentration, "Evaluate performance logging of Concentration");
+      //timeloop.addFuncAfterTimeStep(performanceLoggerConcentration, "Evaluate performance logging of Concentration");
    }
 
    // Add LBM (fluid and concentration) communication function and boundary handling sweep
@@ -358,20 +392,21 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
                      << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
       timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
-                     << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Concentration Density)");
+                     << Sweep(deviceSyncWrapper(density_concentration_bc.getSweep()), "Boundary Handling (Concentration Density)");
    }
    timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
-   timeloop.add() << Sweep(deviceSyncWrapper(ubb_concentration_bc.getSweep()), "Boundary Handling (Concentration UBB)");
+   timeloop.add() << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
+   //timeloop.add() << Sweep(deviceSyncWrapper(ubb_concentration_bc.getSweep()), "Boundary Handling (Concentration UBB)");
    if (!periodicInY || !periodicInZ)
    {
       timeloop.add() << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (Fluid NoSlip)");
-      timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration NoSlip)");
+      //timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration NoSlip)");
    }
 
    pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
    pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(pdfFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
-   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
+   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
 
    if (useCommunicationHiding)
    {
