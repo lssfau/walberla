@@ -60,11 +60,12 @@
 
 #include "vtk/all.h"
 
-#include "PackInfoFluid.h"
-#include "PackInfoConcentration.h"
-#include "GeneralInfoHeader.h"
-#include "FluidMacroGetter.h"
 #include "ConcentrationMacroGetter.h"
+#include "FluidMacroGetter.h"
+#include "GeneralInfoHeader.h"
+#include "InitializerFunctions.h"
+#include "PackInfoConcentration.h"
+#include "PackInfoFluid.h"
 
 namespace MaterialTransport{
 ///////////
@@ -138,6 +139,7 @@ int main(int argc, char** argv) {
 
    const real_t uInflow        = numericalSetup.getParameter< real_t >("uInflow");
    const real_t relaxationRate = numericalSetup.getParameter< real_t >("relaxationRate");
+   const Vector3< real_t > Uinitialize (uInflow,0,0);
    if ((periodicInY && numYBlocks == 1) || (periodicInZ && numZBlocks == 1))
    {
       WALBERLA_LOG_WARNING_ON_ROOT("Using only 1 block in periodic dimensions can lead to unexpected behavior.")
@@ -149,6 +151,11 @@ int main(int argc, char** argv) {
    const uint_t vtkSpacing              = outputSetup.getParameter< uint_t >("vtkSpacing");
    const std::string vtkFolder          = outputSetup.getParameter< std::string >("vtkFolder");
    const uint_t performanceLogFrequency = outputSetup.getParameter< uint_t >("performanceLogFrequency");
+
+   Vector3< uint_t > domainSize;
+   domainSize[0] = numXBlocks * numXCellsPerBlock;
+   domainSize[1] = numYBlocks * numYCellsPerBlock;
+   domainSize[2] = numZBlocks * numZCellsPerBlock;
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
@@ -222,7 +229,7 @@ int main(int argc, char** argv) {
       boundariesBlockString += "\n BoundariesConcentration";
 
       boundariesBlockString += "{"
-                                "Border { direction W;    walldistance -1;  flag Density_Concentration; }"
+                                "Border { direction W;    walldistance -1;  flag Neumann_Concentration; }"
                                 "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
 
       if (!periodicInY)
@@ -272,8 +279,11 @@ int main(int argc, char** argv) {
       ///////////////
       // TIME LOOP //
       ///////////////
+      initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
+      initFluidField(blocks, velFieldFluidCPUGPUID , Uinitialize);
+
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
-      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(0.5));
+      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
       {
          initializeFluidDomain(&(*blockIt));

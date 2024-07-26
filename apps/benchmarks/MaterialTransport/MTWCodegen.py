@@ -78,12 +78,12 @@ with CodeGeneration() as ctx:
     if config_tokens[1]== "1":
         concentration_output = None
         force_on_fluid = sp.symbols("F_:3")
-        print("trueeeee")
+        print("One-way fluid-concentration coupling set")
 
     elif config_tokens[1] == "2":
         concentration_output = {"concentration": concentration_field}
         force_on_fluid = sp.Matrix([0, 0, 0])
-        print("false")
+        print("Two-way fluid-concentration coupling set")
 
     # Ensure force_on_fluid is defined in all paths before using it
 
@@ -138,7 +138,7 @@ with CodeGeneration() as ctx:
     )
 
     pdfs_concentration_setter = macroscopic_values_setter(
-        method_concentration, density=init_density_concentration, velocity= velocity_field.center_vector,pdfs=pdfs_concentration.center_vector
+        method_concentration, density=concentration_field.center, velocity= velocity_field.center_vector,pdfs=pdfs_concentration.center_vector
     )
 
     # specify the target
