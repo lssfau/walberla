@@ -171,6 +171,8 @@ int main(int argc, char** argv) {
 
    // Setting initial PDFs to nan helps to detect bugs in the initialization/BC handling
    // Depending on WALBERLA_BUILD_WITH_GPU_SUPPORT, pdfFieldCPUGPUID is either a CPU or a CPU field
+   BlockDataID velFieldFluidID;
+   BlockDataID densityConcentrationFieldID;
 
    #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       // Fluid PDFs on GPU
@@ -184,8 +186,13 @@ int main(int argc, char** argv) {
       BlockDataID pdfFieldConcentrationCPUGPUID = gpu::addGPUFieldToStorage< PdfField_concentration_T >(blocks, pdfFieldConcentrationID, "pdf concentration field GPU");
 
       // Fluid velocity field on GPU
-      BlockDataID velFieldFluidID  = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+      velFieldFluidID  = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
       BlockDataID velFieldFluidCPUGPUID = gpu::addGPUFieldToStorage< VelocityField_fluid_T >(blocks, velFieldFluidID, "velocity fluid field GPU");
+
+      // Concentration Density on GPU
+      densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
+      BlockDataID densityConcentrationFieldCPUGPUID = gpu::addGPUFieldToStorage< DensityField_concentration_T >(blocks, densityConcentrationFieldID, "density concentration field GPU");
+
    #else
 
       // Fluid PDFs on CPU
@@ -198,10 +205,11 @@ int main(int argc, char** argv) {
       BlockDataID pdfFieldConcentrationCPUGPUID =
          field::addToStorage< PdfField_concentration_T >(blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
 
+      BlockDataID densityConcentrationFieldCPUGPUID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
 
    #endif
       BlockDataID densityFluidFieldID = field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
-      BlockDataID densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
+      //BlockDataID densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
       BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field");
       BlockDataID flagFieldConcentrationID = field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field");
 
@@ -279,15 +287,23 @@ int main(int argc, char** argv) {
       ///////////////
       // TIME LOOP //
       ///////////////
+      #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
+      initFluidField(blocks, velFieldFluidID , Uinitialize);
+
+      #else
+      initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
       initFluidField(blocks, velFieldFluidCPUGPUID , Uinitialize);
+      #endif
 
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
-      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
       {
          initializeFluidDomain(&(*blockIt));
+
          initializeConcentrationDomain(&(*blockIt));
+
       }
       ///////////////////////
       // ADD COMMUNICATION //
@@ -329,7 +345,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
-   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
 #endif
 
 
@@ -345,9 +361,10 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 
       vtkOutput_Fluid->addBeforeFunction([&]() {
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-         gpu::fieldCpy< PdfFieldFluid_T, gpu::GPUField< real_t > >(blocks, pdfFieldFluidID, pdfFieldFluidCPUGPUID);
-         gpu::fieldCpy< PdfFieldConcentration_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID, pdfFieldConcentrationCPUGPUID);
+         gpu::fieldCpy< PdfField_fluid_T, gpu::GPUField< real_t > >(blocks, pdfFieldFluidID, pdfFieldFluidCPUGPUID);
+         gpu::fieldCpy< PdfField_concentration_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID, pdfFieldConcentrationCPUGPUID);
          gpu::fieldCpy< VelocityField_fluid_T, gpu::GPUField< real_t > >(blocks, velFieldFluidID, velFieldFluidCPUGPUID);
+         gpu::fieldCpy< DensityField_concentration_T, gpu::GPUField< real_t > >(blocks, densityConcentrationFieldID, densityConcentrationFieldCPUGPUID);
 
 #endif
          for (auto& block : *blocks)
@@ -368,11 +385,20 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
          }
       });
 
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
+#else
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
+#endif
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
 
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+#else
+      vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldCPUGPUID, "Concentration"));
+#endif
+
       vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
 
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Fluid), "VTK output Fluid");
