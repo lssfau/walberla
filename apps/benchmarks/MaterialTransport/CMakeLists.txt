@@ -25,10 +25,10 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 BC_Concentration_Density.h BC_Concentration_Density.${CODEGEN_FILE_SUFFIX}
                 BC_Concentration_FreeSlip.h BC_Concentration_FreeSlip.${CODEGEN_FILE_SUFFIX}
                 BC_Concentration_Neumann.h BC_Concentration_Neumann.${CODEGEN_FILE_SUFFIX}
-                FluidMacroSetter.h FluidMacroSetter.${CODEGEN_FILE_SUFFIX}
-                FluidMacroGetter.h FluidMacroGetter.${CODEGEN_FILE_SUFFIX}
-                ConcentrationMacroSetter.h ConcentrationMacroSetter.${CODEGEN_FILE_SUFFIX}
-                ConcentrationMacroGetter.h ConcentrationMacroGetter.${CODEGEN_FILE_SUFFIX}
+                FluidMacroSetter.h FluidMacroSetter.cpp
+                FluidMacroGetter.h FluidMacroGetter.cpp
+                ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
+                ConcentrationMacroGetter.h ConcentrationMacroGetter.cpp
                 GeneralInfoHeader.h
         )
 
