@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
       // map boundaries into the concentration field simulation
       geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID, boundariesConfigConcentration);
       geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
-      lbm::BC_Concentration_Density density_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
+      lbm::BC_Concentration_Density density_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, real_t(1.0));
       density_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Density_Concentration_Flag, Concentration_Flag);
       lbm::BC_Concentration_Neumann neumann_concentration_bc(blocks,pdfFieldConcentrationCPUGPUID);
       neumann_concentration_bc.fillFromFlagField<FlagField_T>(blocks,flagFieldConcentrationID,Neumann_Concentration_Flag,Concentration_Flag);
