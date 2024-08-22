@@ -5,8 +5,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
         set(coupling_method 1)
         set(config "couplingMethod_${coupling_method}")
         message(STATUS "Config value is: ${config}" )
-        waLBerla_generate_target_from_python(NAME MTWCodegen_${config}
-                FILE MTWCodegen.py
+        waLBerla_generate_target_from_python(NAME Validations_2D_${config}
+                FILE Validations_2D.py
                 CODEGEN_CFG ${config}
                 OUT_FILES LBMFluidSweep.h LBMFluidSweep.${CODEGEN_FILE_SUFFIX}
                 LBMConcentrationSweep.h LBMConcentrationSweep.${CODEGEN_FILE_SUFFIX}
@@ -25,6 +25,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 BC_Concentration_Density.h BC_Concentration_Density.${CODEGEN_FILE_SUFFIX}
                 BC_Concentration_FreeSlip.h BC_Concentration_FreeSlip.${CODEGEN_FILE_SUFFIX}
                 BC_Concentration_Neumann.h BC_Concentration_Neumann.${CODEGEN_FILE_SUFFIX}
+                BC_Fluid_Neumann.h BC_Fluid_Neumann.${CODEGEN_FILE_SUFFIX}
                 FluidMacroSetter.h FluidMacroSetter.cpp
                 FluidMacroGetter.h FluidMacroGetter.cpp
                 ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
@@ -32,10 +33,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME MaterialTransport FILES MaterialTransport.cpp InitializerFunctions.cpp
-                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegen_${config})
-        target_compile_definitions(MaterialTransport PRIVATE Weighting=2)
+        waLBerla_add_executable(NAME 2d_gaussian_plate FILES Validations_2D.cpp ../utilities/InitializerFunctions.cpp
+                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_2D_${config})
+        target_compile_definitions(2d_gaussian_plate PRIVATE Weighting=2)
     endif ()
 endif ()
-
-add_subdirectory(2D_Validations)
