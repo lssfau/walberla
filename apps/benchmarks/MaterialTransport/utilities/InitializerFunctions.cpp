@@ -27,11 +27,11 @@
 #include "field/vtk/VTKWriter.h"
 
 //#include "python_coupling/DictWrapper.h"
-//#include "GeneralInfoHeader.h"
+//#include "InitializerFunctions.h"
 
 #pragma once
 using DensityField_concentration_T = walberla::field::GhostLayerField<double, 1>;
-using VelocityField_fluid_T = walberla::field::GhostLayerField<double, 2>;
+using VelocityField_fluid_T = walberla::field::GhostLayerField<double, 3>;
 
 namespace walberla{
 
@@ -108,7 +108,7 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
          const auto cellAABB = blocks->getBlockLocalCellAABB(block, Cell(x,y,z));
          FluidVelocityField->get(x,y,z,0) = uInflow[0];
          FluidVelocityField->get(x,y,z,1) = uInflow[1];
-         //FluidVelocityField->get(x,y,z,2) = uInflow[2];
+         FluidVelocityField->get(x,y,z,2) = uInflow[2];
 
       })  // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
    }

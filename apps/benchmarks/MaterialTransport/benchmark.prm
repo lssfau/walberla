@@ -13,7 +13,7 @@ NumericalSetup
     numYCellsPerBlock 64;
     numZCellsPerBlock 64;
 
-    timeSteps 10;
+    timeSteps 300;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
@@ -22,6 +22,8 @@ NumericalSetup
     // fluid quantities in LBM units
     uInflow 0.5;
     relaxationRate 0.9;
+    uInflow 0.3;
+    relaxationRate 0.4;
 }
 
 Output
