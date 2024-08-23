@@ -63,7 +63,7 @@
 #include "ConcentrationMacroGetter.h"
 #include "FluidMacroGetter.h"
 #include "GeneralInfoHeader.h"
-#include "InitializerFunctions.h"
+#include "./utilities/InitializerFunctions.h"
 #include "PackInfoConcentration.h"
 #include "PackInfoFluid.h"
 
@@ -290,14 +290,21 @@ int main(int argc, char** argv) {
       #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
       initFluidField(blocks, velFieldFluidID , Uinitialize);
-
-      #else
-      initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
-      initFluidField(blocks, velFieldFluidCPUGPUID , Uinitialize);
-      #endif
-
+      gpu::fieldCpy< GPUField, VectorField_T >(blocks, densityConcentrationFieldID, densityConcentrationFieldCPUGPUID);
+      gpu::fieldCpy< GPUField, VectorField_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+      #else
+      initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
+      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+      pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
+      pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+
+      #endif
+
+      //pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
+      //pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
       {
          initializeFluidDomain(&(*blockIt));
@@ -345,7 +352,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
-   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID);
 #endif
 
 

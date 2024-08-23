@@ -20,8 +20,6 @@ NumericalSetup
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
     // fluid quantities in LBM units
-    uInflow 0.5;
-    relaxationRate 0.9;
     uInflow 0.3;
     relaxationRate 0.4;
 }

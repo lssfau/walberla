@@ -344,7 +344,7 @@ with CodeGeneration() as ctx:
     )
 
     pdfs_concentration_getter = macroscopic_values_getter(
-        method_concentration, density=concentration_field, velocity= velocity_field.center_vector,pdfs=pdfs_concentration.center_vector
+        method_concentration, density=concentration_field, velocity=None,pdfs=pdfs_concentration.center_vector
     )
 
     generate_sweep(ctx, "FluidMacroSetter", pdfs_fluid_setter)
