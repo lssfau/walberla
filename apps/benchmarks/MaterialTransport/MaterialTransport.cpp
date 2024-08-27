@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
          field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field CPU", real_c(std::nan("")), field::fzyx);
 
       BlockDataID velFieldFluidCPUGPUID = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
-
+      velFieldFluidID  = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
       // Concentration PDFs on CPU
       BlockDataID pdfFieldConcentrationCPUGPUID =
          field::addToStorage< PdfField_concentration_T >(blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
@@ -347,7 +347,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils:: FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
-   pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
+   pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
@@ -396,7 +396,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
 #else
-      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
 #endif
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
