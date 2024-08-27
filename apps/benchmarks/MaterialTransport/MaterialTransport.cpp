@@ -290,8 +290,9 @@ int main(int argc, char** argv) {
       #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
       initFluidField(blocks, velFieldFluidID , Uinitialize);
-      gpu::fieldCpy< GPUField, VectorField_T >(blocks, densityConcentrationFieldID, densityConcentrationFieldCPUGPUID);
-      gpu::fieldCpy< GPUField, VectorField_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
+      gpu::fieldCpy<gpu::GPUField< real_t >, DensityField_concentration_T>(blocks, densityConcentrationFieldCPUGPUID,densityConcentrationFieldID);
+      WALBERLA_LOG_INFO_ON_ROOT("code reached here on gpu");
+      gpu::fieldCpy< gpu::GPUField< real_t >, VelocityField_fluid_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       #else
@@ -350,7 +351,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
+   pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID);
 #else
    pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID);
 #endif
@@ -435,10 +436,10 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
                      << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
       timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
-                     << Sweep(deviceSyncWrapper(density_concentration_bc.getSweep()), "Boundary Handling (Concentration Density)");
+                     << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
    }
    timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
-   timeloop.add() << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
+   //timeloop.add() << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
    //timeloop.add() << Sweep(deviceSyncWrapper(ubb_concentration_bc.getSweep()), "Boundary Handling (Concentration UBB)");
    if (!periodicInY || !periodicInZ)
    {

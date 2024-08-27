@@ -13,15 +13,15 @@ NumericalSetup
     numYCellsPerBlock 64;
     numZCellsPerBlock 64;
 
-    timeSteps 300;
+    timeSteps 10;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
     // fluid quantities in LBM units
-    uInflow 0.3;
-    relaxationRate 0.4;
+    uInflow 0.5;
+    relaxationRate 0.9;
 }
 
 Output

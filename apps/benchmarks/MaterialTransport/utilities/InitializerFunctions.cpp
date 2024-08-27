@@ -56,7 +56,7 @@ void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, 
                  pow((domainAABB.center()[2] - posZ), 2)));
 
          if(distance <= radius){
-            ConcentrationField->get(x,y,z) = real_t(1.0);
+            ConcentrationField->get(x,y,z) = real_t(1.05);
          }
          else{ConcentrationField->get(x,y,z) = real_t(1.0);}
 
