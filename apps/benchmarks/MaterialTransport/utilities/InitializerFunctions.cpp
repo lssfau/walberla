@@ -29,10 +29,10 @@
 
 //#include "python_coupling/DictWrapper.h"
 //#include "InitializerFunctions.h"
-
+#include "GeneralInfoHeader.h"
 #pragma once
-using DensityField_concentration_T = walberla::field::GhostLayerField<double, 1>;
-using VelocityField_fluid_T = walberla::field::GhostLayerField<double, 3>;
+//using DensityField_concentration_T = walberla::field::GhostLayerField<double, 1>;
+//using VelocityField_fluid_T = walberla::field::GhostLayerField<double, 2>;
 
 namespace walberla{
 
@@ -85,7 +85,7 @@ void initConcentrationFieldGaussian(const shared_ptr< StructuredBlockStorage >& 
                  pow((domainAABB.center()[2] - posZ), 2)));
 
          //WALBERLA_LOG_INFO_ON_ROOT("posx " << posX << " posy " << posY << " posz " << posZ);
-         ConcentrationField->get(x,y,z) = std::exp(-(std::pow((posX-x_0[0]),2) + std::pow((posY-x_0[1]),2) + std::pow((posZ-x_0[2]),2))/(2*sigma_0*sigma_0));
+         ConcentrationField->get(x,y,z) = std::exp(-(std::pow((posX-x_0[0]),2) + std::pow((posY-x_0[1]),2) /*+ std::pow((posZ-x_0[2]),2)*/)/(2*sigma_0*sigma_0));
          ConcentrationField->get(x,y,z) = std::max(ConcentrationField->get(x,y,z),1e-15);
 
 
@@ -109,7 +109,7 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
          const auto cellAABB = blocks->getBlockLocalCellAABB(block, Cell(x,y,z));
          FluidVelocityField->get(x,y,z,0) = uInflow[0];
          FluidVelocityField->get(x,y,z,1) = uInflow[1];
-         FluidVelocityField->get(x,y,z,2) = uInflow[2];
+         //FluidVelocityField->get(x,y,z,2) = uInflow[2];
 
       })  // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
    }
@@ -131,8 +131,9 @@ void analyticalSolGaussian(const shared_ptr< StructuredBlockStorage >& blocks, B
          const real_t posZ = cellCenter[2] -0.5;
 
          //WALBERLA_LOG_INFO_ON_ROOT("posx " << posX << " posy " << posY << " posz " << posZ);
-         real_t prefactor = (sigma_0*sigma_0*sigma_0)/(std::pow((sigma_0*sigma_0 + sigma_D2),1.5));
-         AnalyticalConcentrationField->get(x,y,z) = prefactor * std::exp(-(std::pow((posX - x_0[0] - uInflow[0]*time),2) + std::pow((posY - x_0[1] - uInflow[1]*time),2) + std::pow((posZ - x_0[2] - uInflow[2]*time),2))/(2*(sigma_0*sigma_0 + sigma_D2)));
+         //real_t prefactor = (sigma_0*sigma_0*sigma_0)/(std::pow((sigma_0*sigma_0 + sigma_D2),1.5));
+         real_t prefactor = (sigma_0*sigma_0)/(sigma_0*sigma_0 + sigma_D2);
+         AnalyticalConcentrationField->get(x,y,z) = prefactor * std::exp(-(std::pow((posX - x_0[0] - uInflow[0]*time),2) + std::pow((posY - x_0[1] - uInflow[1]*time),2) /*+ std::pow((posZ - x_0[2] - uInflow[2]*time),2)*/)/(2*(sigma_0*sigma_0 + sigma_D2)));
          AnalyticalConcentrationField->get(x,y,z) = std::max(AnalyticalConcentrationField->get(x,y,z),1e-15);
 
       })  // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
@@ -186,7 +187,7 @@ std::vector<real_t> computeErrorL2(const shared_ptr< StructuredBlockStorage >& b
    mpi::allReduceInplace(cells, mpi::SUM);
    Errors[0] = Linf;
    Errors[1] = L1/cells;
-   Errors[2] = std::sqrt(L2/cells);
+   Errors[2] = std::sqrt(L2/analytical_squared);
    WALBERLA_LOG_INFO_ON_ROOT("number of cell is:"
                              << " " << cells);
    return Errors;

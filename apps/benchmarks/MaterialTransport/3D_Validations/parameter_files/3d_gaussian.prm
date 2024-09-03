@@ -1,0 +1,40 @@
+Simulation{
+    simName 3D_resolution;  // 3D_validation or 3D_resolution
+}
+
+NumericalSetup
+{
+
+    xSize   256;           // SI and LBM length are one and the same => dx_SI = dx_LB always
+    ySize   256;
+    zSize   1;
+
+    numXBlocks 2;
+    numYBlocks 2;
+    numZBlocks 1;
+
+    tSI 100;           // simulation run time in seconds
+
+    periodicInX true;  // in 2d_gaussian benchmark, all boundaries are periodic
+    periodicInY true;
+    periodicInZ true;
+
+    sendDirectlyFromGPU false; // use GPU-GPU communication
+    useCommunicationHiding false;
+    frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
+
+
+    dx_SI 1;
+
+    // fluid quantities
+    uInflowL 0;  // LBM velocity of fluid
+    kappa_SI 4; // diffusivity SI
+    kappa_L  0.1666; // diffusivity lbm
+}
+
+Output
+{
+    vtkSpacing 0;
+    vtkFolder vtk_out;
+    performanceLogFrequency 0;
+}
