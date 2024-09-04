@@ -81,7 +81,7 @@ with CodeGeneration() as ctx:
         print("One-way fluid-concentration coupling set")
 
     elif config_tokens[1] == "2":
-        concentration_output = {"concentration": concentration_field}
+        concentration_output = {"density": concentration_field}
         force_on_fluid = sp.Matrix([0, 0, 0])
         print("Two-way fluid-concentration coupling set")
 
@@ -108,7 +108,7 @@ with CodeGeneration() as ctx:
         stencil=stencil_fluid,
         method=Method.SRT,
         relaxation_rate=omega,
-        output={"velocity_fluid": velocity_field},
+        output={"velocity": velocity_field},
         force= force_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
@@ -120,7 +120,7 @@ with CodeGeneration() as ctx:
         method=Method.SRT,
         relaxation_rate=omega,
         velocity_input=velocity_field,
-        output={"concentration": concentration_output},
+        #output={"density": concentration_output},
         force=sp.symbols("F_:3"),
         force_model=ForceModel.LUO,
         compressible=True,
@@ -335,7 +335,7 @@ with CodeGeneration() as ctx:
         "GeneralInfoHeader",
         stencil_typedefs=stencil_typedefs,
         field_typedefs=field_typedefs,
-        additional_code=additional_code,
+        #additional_code=additional_code,
     )
 
     # Getter & setter to compute moments from pdfs
