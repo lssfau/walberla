@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
 
    #endif
       BlockDataID densityFluidFieldID = field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
-      //BlockDataID densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
+      densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
       BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field");
       BlockDataID flagFieldConcentrationID = field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field");
 
@@ -353,7 +353,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID);
 #else
-   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID);
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID);
 #endif
 
 
@@ -404,7 +404,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
 #else
-      vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldCPUGPUID, "Concentration"));
+      vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
 #endif
 
       vtkOutput_Concentration->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
@@ -447,9 +447,9 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       //timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration NoSlip)");
    }
 
-   pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
+   pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
-   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(pdfFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
+   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
    pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,frameWidth);
 
    if (useCommunicationHiding)
