@@ -115,7 +115,7 @@ with CodeGeneration() as ctx:
         stencil=stencil_fluid,
         method=Method.SRT,
         relaxation_rate=omega,
-        output={"velocity_fluid": velocity_field},
+        output={"velocity": velocity_field},
         #force= force_on_fluid,
         #force_model=ForceModel.LUO,
         compressible=True,
@@ -130,7 +130,7 @@ with CodeGeneration() as ctx:
         relaxation_rate=omega_c,#[omega_c,omega_c,omega_c,omega_c],
         weighted=True,
         velocity_input=velocity_field,
-        output={"concentration": concentration_field},
+        #output={"density": concentration_field},
         kernel_type="stream_pull_collide",
         #force=sp.symbols("F_:2"),
         #force_model=ForceModel.LUO,
@@ -359,7 +359,7 @@ with CodeGeneration() as ctx:
         "GeneralInfoHeader",
         stencil_typedefs=stencil_typedefs,
         field_typedefs=field_typedefs,
-        additional_code=additional_code,
+        #additional_code=additional_code,
     )
 
     # Getter & setter to compute moments from pdfs

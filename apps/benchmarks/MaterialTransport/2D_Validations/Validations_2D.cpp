@@ -483,7 +483,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 
    // Add LBM (fluid and concentration) communication function and boundary handling sweep
 
-   pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID, relaxationRateFluid);
+   pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,relaxationRateFluid);
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID,
                                                            relaxationRateConcentration);
 
