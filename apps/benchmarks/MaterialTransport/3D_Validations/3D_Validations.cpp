@@ -519,7 +519,7 @@ int main(int argc, char** argv)
 
    analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
                          Uinitialize, x_0, 0);
-   for (uint_t timeStep = 0; timeStep < timeSteps; ++timeStep)
+   for (uint_t timeStep = 1; timeStep <= timeSteps; ++timeStep)
    {
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
