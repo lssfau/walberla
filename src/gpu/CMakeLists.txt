@@ -38,6 +38,8 @@ target_sources( gpu
       ParallelStreams.h
       GPURAII.h
       DeviceSelectMPI.cpp
+      ShiftedPeriodicity.cu
+      ShiftedPeriodicity.h
       )
 
 # sources only for CUDA

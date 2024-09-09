@@ -37,11 +37,11 @@ namespace gpu
             : ptr_(ptr), xOffset_(xOffset), yOffset_(yOffset), zOffset_(zOffset), fOffset_(fOffset)
       {}
 
-      __device__ void set( uint3 blockIdx, uint3 threadIdx )
+      __device__ void set( uint3 _blockIdx, uint3 _threadIdx )
       {
-         ptr_ += threadIdx.x * xOffset_ +
-                 blockIdx.x  * yOffset_ +
-                 blockIdx.y  * zOffset_ ;
+         ptr_ += _threadIdx.x * xOffset_ +
+                 _blockIdx.x  * yOffset_ +
+                 _blockIdx.y  * zOffset_ ;
       }
 
       __device__ T & get()       { return * (T*)(ptr_);                }

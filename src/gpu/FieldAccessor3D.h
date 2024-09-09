@@ -38,17 +38,17 @@ namespace gpu
                        uint_t yOffset,
                        uint_t zOffset,
                        uint_t fOffset,
-                       const dim3 & idxDim,
-                       const dim3 & blockDim )
+                       const dim3 & _idxDim,
+                       const dim3 & _blockDim )
             : ptr_( ptr ), xOffset_( xOffset ), yOffset_( yOffset ), zOffset_( zOffset ), fOffset_( fOffset ),
-              idxDim_( idxDim ), blockDim_( blockDim )
+              idxDim_( _idxDim ), blockDim_( _blockDim )
       {}
 
-      __device__ __forceinline__ void set( const uint3& blockIdx, const uint3& threadIdx )
+      __device__ __forceinline__ void set( const uint3& _blockIdx, const uint3& _threadIdx )
       {
-         uint_t x = blockIdx.x * blockDim_.x + threadIdx.x;
-         uint_t y = blockIdx.y * blockDim_.y + threadIdx.y;
-         uint_t z = blockIdx.z * blockDim_.z + threadIdx.z;
+         uint_t x = _blockIdx.x * blockDim_.x + _threadIdx.x;
+         uint_t y = _blockIdx.y * blockDim_.y + _threadIdx.y;
+         uint_t z = _blockIdx.z * blockDim_.z + _threadIdx.z;
 
          if ( x < idxDim_.x && y < idxDim_.y && z < idxDim_.z )
          {
