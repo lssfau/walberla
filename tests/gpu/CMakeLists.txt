@@ -56,4 +56,14 @@ waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldPackInfo FILE 
 waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTestGPU.cpp
         DEPENDS blockforest core field CodegenGeneratedGPUFieldPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldPackInfoTestGPU )
+
+    if (WALBERLA_BUILD_WITH_PYTHON)
+
+        waLBerla_link_files_to_builddir( *.py )
+
+        waLBerla_compile_test( FILES TestShiftedPeriodicityGPU.cpp DEPENDS gpu blockforest field python_coupling )
+        waLBerla_execute_test( NAME TestShiftedPeriodicityGPU COMMAND $<TARGET_FILE:TestShiftedPeriodicityGPU> ${CMAKE_CURRENT_SOURCE_DIR}/TestShiftedPeriodicitySetupGPU.py )
+
+    endif()
+
 endif()

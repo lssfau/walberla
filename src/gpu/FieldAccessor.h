@@ -56,29 +56,29 @@ namespace gpu
               fOffset_(fOffset), indexingScheme_(indexingScheme )
       {}
 
-      __device__ void set( uint3 blockIdx, uint3 threadIdx )
+      __device__ void set( uint3 _blockIdx, uint3 _threadIdx )
       {
          switch ( indexingScheme_)
          {
-            case FZYX: ptr_ += blockIdx.z * fOffset_ + blockIdx.y * zOffset_ + blockIdx.x * yOffset_ + threadIdx.x * xOffset_; break;
-            case FZY : ptr_ +=                         blockIdx.y * fOffset_ + blockIdx.x * zOffset_ + threadIdx.x * yOffset_; break;
-            case FZ  : ptr_ +=                                                 blockIdx.x * fOffset_ + threadIdx.x * zOffset_; break;
-            case F   : ptr_ +=                                                                         threadIdx.x * fOffset_; break;
+            case FZYX: ptr_ += _blockIdx.z * fOffset_ + _blockIdx.y * zOffset_ + _blockIdx.x * yOffset_ + _threadIdx.x * xOffset_; break;
+            case FZY : ptr_ +=                          _blockIdx.y * fOffset_ + _blockIdx.x * zOffset_ + _threadIdx.x * yOffset_; break;
+            case FZ  : ptr_ +=                                                   _blockIdx.x * fOffset_ + _threadIdx.x * zOffset_; break;
+            case F   : ptr_ +=                                                                            _threadIdx.x * fOffset_; break;
 
-            case ZYXF: ptr_ += blockIdx.z * zOffset_ + blockIdx.y * yOffset_ + blockIdx.x * xOffset_ + threadIdx.x * fOffset_; break;
-            case ZYX : ptr_ +=                         blockIdx.y * zOffset_ + blockIdx.x * yOffset_ + threadIdx.x * xOffset_; break;
-            case ZY  : ptr_ +=                                                 blockIdx.x * zOffset_ + threadIdx.x * yOffset_; break;
-            case Z   : ptr_ +=                                                                         threadIdx.x * zOffset_; break;
+            case ZYXF: ptr_ += _blockIdx.z * zOffset_ + _blockIdx.y * yOffset_ + _blockIdx.x * xOffset_ + _threadIdx.x * fOffset_; break;
+            case ZYX : ptr_ +=                          _blockIdx.y * zOffset_ + _blockIdx.x * yOffset_ + _threadIdx.x * xOffset_; break;
+            case ZY  : ptr_ +=                                                   _blockIdx.x * zOffset_ + _threadIdx.x * yOffset_; break;
+            case Z   : ptr_ +=                                                                            _threadIdx.x * zOffset_; break;
          }
       }
 
 
-      __device__ uint_t getLinearIndex( uint3 blockIdx, uint3 threadIdx, uint3 gridDim, uint3 blockDim )
+      __device__ uint_t getLinearIndex( uint3 _blockIdx, uint3 _threadIdx, uint3 _gridDim, uint3 _blockDim )
       {
-         return threadIdx.x                              +
-                blockIdx.x * blockDim.x                  +
-                blockIdx.y * blockDim.x * gridDim.x      +
-                blockIdx.z * blockDim.x * gridDim.x * gridDim.y ;
+         return _threadIdx.x                                +
+                _blockIdx.x * _blockDim.x                   +
+                _blockIdx.y * _blockDim.x * _gridDim.x      +
+                _blockIdx.z * _blockDim.x * _gridDim.x * _gridDim.y ;
       }
 
       // This is always true for this specific field indexing class.
