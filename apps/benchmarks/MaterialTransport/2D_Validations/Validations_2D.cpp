@@ -95,6 +95,7 @@ const FlagUID Neumann_Fluid_Flag("Neumann_Fluid");
 const FlagUID Concentration_Flag("Concentration");
 const FlagUID Density_Concentration_Flag_west("Density_Concentration_west");
 const FlagUID Density_Concentration_Flag_south("Density_Concentration_south");
+const FlagUID Density_Concentration_Flag_north("Density_Concentration_north");
 const FlagUID NoSlip_Concentration_Flag("NoSlip_Concentration");
 const FlagUID Inflow_Concentration_Flag("Inflow_Concentration");
 //const FlagUID Dirichlet_Concentration_Flag("Dirichlet_Concentration");
@@ -185,6 +186,7 @@ int main(int argc, char** argv) {
    WALBERLA_LOG_INFO_ON_ROOT(" - Fluid Lattice Velocity = " << uInflow_LBM);
    WALBERLA_LOG_INFO_ON_ROOT(" - Relaxation time (Tau) Fluid = " << real_c(1/real_t(relaxationRateFluid)));
    WALBERLA_LOG_INFO_ON_ROOT(" - Relaxation time (Tau) Concentration = " << real_c(1/real_t(relaxationRateConcentration)));
+   WALBERLA_LOG_INFO_ON_ROOT("Peclet number is " << (uInflow_LBM*domainSize[1])/diffusivity);
 
 
    ///////////////////////////
@@ -308,6 +310,7 @@ int main(int argc, char** argv) {
       lbm::BC_Fluid_Neumann neumann_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
       lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, real_t(0));
       lbm::BC_Concentration_Density density_concentration_bc_south(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
+      lbm::BC_Concentration_Density density_concentration_bc_north(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
       lbm::BC_Concentration_Neumann neumann_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID);
 
       if (!periodicInX && !periodicInY && !periodicInZ &&
@@ -340,6 +343,38 @@ int main(int argc, char** argv) {
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
       }
 
+      if (!periodicInX && !periodicInY && !periodicInZ &&
+          simulationName == "2d_poisuelle") // executes for the 2d plate validation
+      {
+         geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfigFluid);
+         geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
+         density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
+         noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
+         ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
+         neumann_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Neumann_Fluid_Flag, Fluid_Flag);
+         // map boundaries into the concentration field simulation
+         geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID,
+                                                       boundariesConfigConcentration);
+         geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
+
+         density_concentration_bc_north.fillFromFlagField< FlagField_T >(
+            blocks, flagFieldConcentrationID, Density_Concentration_Flag_north, Concentration_Flag);
+
+         density_concentration_bc_west.fillFromFlagField< FlagField_T >(
+            blocks, flagFieldConcentrationID, Density_Concentration_Flag_west, Concentration_Flag);
+
+         neumann_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID,
+                                                                   Neumann_Concentration_Flag, Concentration_Flag);
+      }
+
+      // for custom boundary
+      CellInterval westface(simulationDomain.xMin(), simulationDomain.yMin(), simulationDomain.zMin(), simulationDomain.xMin(), simulationDomain.yMax(),
+                            simulationDomain.zMax());
+
+      std::function< void() >  custom = CustomDirichletBoundaryFunctor<DensityField_concentration_T>(blocks,simulationDomain,
+                                     densityConcentrationFieldCPUGPUID,
+                                     westface);
+
 ///////////////
       // TIME LOOP //
       ///////////////
@@ -354,8 +389,11 @@ int main(int argc, char** argv) {
          initConcentrationFieldGaussian(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSize,
                                         sigma_0, sigma_D, Uinitialize, x_0);
       }
-
-      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+      if(simulationName == "2d_poisuelle"){
+         WALBERLA_LOG_INFO_ON_ROOT("triggered");
+         initFluidFieldPoiseuille(blocks,velFieldFluidCPUGPUID,Uinitialize,domainSize);
+      }
+      //initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
 
       #endif
 
@@ -505,6 +543,26 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
                               "Boundary Handling (Concentration Density west)");
    }
 
+   if (simulationName == "2d_poisuelle")
+   {
+      timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
+                     << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
+      timeloop.add() << Sweep(deviceSyncWrapper(neumann_fluid_bc.getSweep()), "Boundary Handling (Fluid Neumann)");
+      //timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
+
+
+
+      timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
+                     << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()),
+                              "Boundary Handling (Concentration Neumann)");
+
+      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_north.getSweep()),
+                              "Boundary Handling (Concentration Density north)");
+
+      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()),
+                              "Boundary Handling (Concentration Density west)");
+   }
+
    if (periodicInX && periodicInY && periodicInZ &&
        simulationName == "2d_gaussian") // executes for the 2d gaussian curve validation
    {
@@ -517,7 +575,13 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    if (!periodicInX && !periodicInY && !periodicInZ &&
        simulationName == "2d_plate") // executes for the 2d plate validation
    {
-      timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
+      //timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
+      timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
+   }
+   if (!periodicInX && !periodicInY && !periodicInZ &&
+       simulationName == "2d_poisuelle") // executes for the 2d plate validation
+   {
+      //timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
       timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
    }
 
