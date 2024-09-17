@@ -107,6 +107,27 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
    }
 }
 
+void initFluidFieldPoiseuille(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& FluidFieldID,
+                    const Vector3< real_t > uInflow,Vector3< uint_t > domainSize)
+{
+   for (auto& block : *blocks)
+   {
+      WALBERLA_LOG_INFO_ON_ROOT("Velocity init reached here");
+      //WALBERLA_LOG_INFO_ON_ROOT("y height is " << domainSize[1]);
+      auto FluidVelocityField = block.getData< VelocityField_fluid_T >(FluidFieldID);
+
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {
+         Cell globalCell;
+         const auto cellAABB                 = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
+         FluidVelocityField->get(x, y, z, 0) = uInflow[0]*(1 - std::pow((y/real_c(domainSize[1])),2));
+         FluidVelocityField->get(x, y, z, 1) = 0;
+
+      }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
+   }
+}
+
+
+
 void analyticalSolGaussian(const shared_ptr< StructuredBlockStorage >& blocks,
                            BlockDataID& AnalyticalConcentrationFieldID, const math::AABB& domainAABB,
                            Vector3< uint_t > domainSize, const real_t sigma_0, const real_t diffusivity,

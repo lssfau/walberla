@@ -277,10 +277,15 @@ int main(int argc, char** argv) {
                                   "Border { direction W;    walldistance -1;  flag Density_Concentration_west; }"
                                   "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
       }
-      if (!periodicInY)
+      if (!periodicInY && simulationName == "2d_plate")
       {
          boundariesBlockString += "Border { direction S;    walldistance -1;  flag Density_Concentration_south; }"
                                   "Border { direction N;    walldistance -1;  flag Neumann_Concentration; }";
+      }
+      if (!periodicInY && simulationName == "2d_poisuelle")
+      {
+         boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Concentration; }"
+                                  "Border { direction N;    walldistance -1;  flag Density_Concentration_north; }";
       }
 
       if (!periodicInZ)
@@ -390,12 +395,15 @@ int main(int argc, char** argv) {
                                         sigma_0, sigma_D, Uinitialize, x_0);
       }
       if(simulationName == "2d_poisuelle"){
-         WALBERLA_LOG_INFO_ON_ROOT("triggered");
+         WALBERLA_LOG_INFO_ON_ROOT("Initializing Poisuelle Fluid Domain");
          initFluidFieldPoiseuille(blocks,velFieldFluidCPUGPUID,Uinitialize,domainSize);
       }
-      //initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
-
-      #endif
+      if (simulationName == "2d_plate")
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("Initializing 2d plate Fluid Domain");
+         initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+      }
+#endif
 
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(
@@ -548,7 +556,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
                      << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
       timeloop.add() << Sweep(deviceSyncWrapper(neumann_fluid_bc.getSweep()), "Boundary Handling (Fluid Neumann)");
-      //timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
+      timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
 
 
 
@@ -575,7 +583,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    if (!periodicInX && !periodicInY && !periodicInZ &&
        simulationName == "2d_plate") // executes for the 2d plate validation
    {
-      //timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
+      timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
       timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
    }
    if (!periodicInX && !periodicInY && !periodicInZ &&
