@@ -14,7 +14,7 @@ NumericalSetup
     numYCellsPerBlock 160;
     numZCellsPerBlock 1;
 
-    timeSteps 10;
+    timeSteps 10000;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
@@ -24,7 +24,7 @@ NumericalSetup
     uInflowL 0.05;  // LBM velocity of fluid
     uInflowSI 0.5;  // SI velocity of fluid
     relaxationRateFluid 0.9;  // omega fluid in LBM units
-    relaxationRateConcentration 1.38; // omega concentration in LBM units
+    relaxationRateConcentration 0.7368; // omega concentration in LBM units
 
     // grid size
     dx 0.0002;  // in m (SI)
@@ -33,7 +33,7 @@ NumericalSetup
 
 Output
 {
-    vtkSpacing 1;
+    vtkSpacing 100;
     vtkFolder vtk_out;
     performanceLogFrequency 10;
 }

@@ -1,30 +1,31 @@
 
 NumericalSetup
 {
-    simName  2d_gaussian;   // case sensitive
+    simName 2d_plate;  // case sensitive
     numXBlocks 1;
     numYBlocks 1;
     numZBlocks 1;
 
-    periodicInX true;  // in 2d_gaussian benchmark, all boundaries are periodic
-    periodicInY true;
-    periodicInZ true;
+    periodicInX false;
+    periodicInY false;
+    periodicInZ false;
 
-    numXCellsPerBlock 512;
-    numYCellsPerBlock 512;
+    numXCellsPerBlock 1600;
+    numYCellsPerBlock 160;
     numZCellsPerBlock 1;
 
-    timeSteps 200;
+    timeSteps 50000;
+
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
     // fluid quantities
-    uInflowL 0;  // LBM velocity of fluid
+    uInflowL 0.05;  // LBM velocity of fluid
     uInflowSI 0.5;  // SI velocity of fluid
     relaxationRateFluid 0.9;  // omega fluid in LBM units
-    relaxationRateConcentration 0.2; // omega concentration in LBM units
+    relaxationRateConcentration 1.38; // omega concentration in LBM units
 
     // grid size
     dx 0.0002;  // in m (SI)
@@ -33,7 +34,7 @@ NumericalSetup
 
 Output
 {
-    vtkSpacing 1;
+    vtkSpacing 500;
     vtkFolder vtk_out;
     performanceLogFrequency 10;
 }
