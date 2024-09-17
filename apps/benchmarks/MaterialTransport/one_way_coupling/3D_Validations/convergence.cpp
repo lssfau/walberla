@@ -141,13 +141,16 @@ int main(int argc, char** argv)
    const bool useCommunicationHiding  = NumericalSetup.getParameter< bool >("useCommunicationHiding");
    const Vector3< uint_t > frameWidth = NumericalSetup.getParameter< Vector3< uint_t > >("frameWidth");
 
-   const real_t uInflow_LBM = NumericalSetup.getParameter< real_t >("uInflowL");
+   const real_t uInflow_SI = NumericalSetup.getParameter< real_t >("uInflowL");
    const real_t kappa_SI    = NumericalSetup.getParameter< real_t >("kappa_SI");
    const real_t kappa_L     = NumericalSetup.getParameter< real_t >("kappa_L");
    const real_t dx_SI       = NumericalSetup.getParameter< real_t >("dx_SI");
    //const real_t uInflow_SI  = NumericalSetup.getParameter< real_t >("uInflowSI");
+   const real_t dt_SI              = real_c((dx_SI * dx_SI * kappa_L) / (kappa_SI));
+   const real_t uInflow_LBM  = (dt_SI/dx_SI)*uInflow_SI;
 
-   const Vector3< real_t > Uinitialize(uInflow_LBM, 0, 0);
+   const Vector3< real_t > Uinitialize(uInflow_LBM, uInflow_LBM, uInflow_LBM);
+   //const Vector3< real_t > Uinitialize(uInflow_LBM,0,0);
    if ((periodicInY && numYBlocks == 1) || (periodicInZ && numZBlocks == 1))
    {
       WALBERLA_LOG_WARNING_ON_ROOT("Using only 1 block in periodic dimensions can lead to unexpected behavior.")
@@ -158,20 +161,22 @@ int main(int argc, char** argv)
    const std::string vtkFolder          = outputSetup.getParameter< std::string >("vtkFolder");
    const uint_t performanceLogFrequency = outputSetup.getParameter< uint_t >("performanceLogFrequency");
 
-   const real_t dt_SI              = real_c((dx_SI * dx_SI * kappa_L) / (kappa_SI));
+
    const real_t omegaConcentration = lbm::collision_model::omegaFromViscosity(kappa_L);
 
-   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)), uint_c((zSize_SI/1)));
+   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)), uint_c((zSize_SI/dx_SI)));
    const uint_t timeSteps   = uint_c(std::ceil(tSI / dt_SI));
    const uint_t tinitial    = uint_c(0);
-   const real_t sigma_0     = real_t(10);
+   const real_t sigma_0     = real_t(1);
    const real_t diffusivity = kappa_L;
    const real_t sigma_D     = real_t(std::sqrt(2 * diffusivity * tinitial));
 
    const Vector3< real_t > x_0(real_t(domainSize[0] / 2), real_t(domainSize[1] / 2), real_t(domainSize[2] / 2));
+   //const Vector3< real_t > x_0(0.5,0.5,0.5);
    Vector3< uint_t > cellsPerBlockPerDirection(domainSize[0] / numXBlocks, domainSize[1] / numYBlocks,
                                                domainSize[2] / numZBlocks);
-
+   const real_t courant_number = (uInflow_SI*dt_SI)/dx_SI;
+   const real_t peclet_number = (xSize_SI*uInflow_SI)/kappa_SI;
    WALBERLA_LOG_INFO_ON_ROOT("Simulation setup:");
    WALBERLA_LOG_INFO_ON_ROOT(" - domain size = " << domainSize);
    WALBERLA_LOG_INFO_ON_ROOT(" - dt_SI = " << dt_SI);
@@ -180,6 +185,10 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT(" - Fluid Lattice Velocity = " << uInflow_LBM);
    WALBERLA_LOG_INFO_ON_ROOT(" - Number of time steps = " << timeSteps);
    WALBERLA_LOG_INFO_ON_ROOT(" - omega (concentration) = " << omegaConcentration);
+   WALBERLA_LOG_INFO_ON_ROOT(" - relaxation time (tau) = " << 1/(omegaConcentration));
+   WALBERLA_LOG_INFO_ON_ROOT(" - Courant number = " << courant_number);
+   WALBERLA_LOG_INFO_ON_ROOT(" - Peclet number = " <<  peclet_number);
+
 
    WALBERLA_CHECK_EQUAL(domainSize[0], cellsPerBlockPerDirection[0] * numXBlocks,
                         "number of cells in x of " << domainSize[0]
@@ -322,7 +331,7 @@ int main(int argc, char** argv)
    // map boundaries into the fluid field simulation
    lbm::BC_Fluid_Density density_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(1.0));
    lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
-   lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow_LBM, real_t(0));
+   lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow_LBM, real_t(0), real_t(0));
    lbm::BC_Fluid_Neumann neumann_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
    lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, real_t(0));
    lbm::BC_Concentration_Density density_concentration_bc_south(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
@@ -345,9 +354,17 @@ int main(int argc, char** argv)
 #else
 
 
-   initConcentrationFieldGaussian(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSize, sigma_0,
-                                  sigma_D, Uinitialize, x_0);
+   /*initConcentrationFieldGaussian(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSize, sigma_0,
+                                  sigma_D, Uinitialize, x_0);*/
    // initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
+   initConcentrationFieldSinusoidal(blocks,
+                                    densityConcentrationFieldCPUGPUID,simulationDomain,
+                                    domainSize,sigma_0,sigma_D,Uinitialize,x_0,dx_SI,dt_SI);
+
+   /*initConcentrationFieldPacket(blocks,
+                                densityConcentrationFieldCPUGPUID,simulationDomain,
+                                domainSize,sigma_0,sigma_D,
+                                Uinitialize,x_0,dx_SI,dt_SI,diffusivity);*/
 
 
    initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
@@ -517,20 +534,43 @@ int main(int argc, char** argv)
    WcTimingPool timeloopTiming;
    // TODO: maybe add warmup phase
 
-   analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
-                         Uinitialize, x_0, 0);
+   /*analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
+                         Uinitialize, x_0, 0,0);*/
+   analyticalSolSinusoidal(blocks,
+                           analyticalConcentrationFieldID,simulationDomain,
+                           domainSize,sigma_0,diffusivity,
+                           Uinitialize,x_0,0,dx_SI,dt_SI);
+   /*analyticalSolPacket(blocks,
+                       analyticalConcentrationFieldID,simulationDomain,
+                       domainSize,sigma_0,diffusivity,
+                       Uinitialize,x_0,0,dx_SI,dt_SI);*/
+   real_t cummulative_norm = 0;
+
    for (uint_t timeStep = 1; timeStep <= timeSteps; ++timeStep)
    {
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
 
-      analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
-                            Uinitialize, x_0, timeStep);
+      /*analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
+                            Uinitialize, x_0, timeStep,0);*/
+      analyticalSolSinusoidal(blocks,
+                                   analyticalConcentrationFieldID,simulationDomain,
+                                   domainSize,sigma_0,diffusivity,
+                                   Uinitialize,x_0,timeStep,dx_SI,dt_SI);
+
+      /*analyticalSolPacket(blocks,
+                          analyticalConcentrationFieldID,simulationDomain,
+                          domainSize,sigma_0,diffusivity,
+                          Uinitialize,x_0,timeStep,dx_SI,dt_SI);*/
+
       std::vector< real_t > norms = computeErrorL2(blocks, densityConcentrationFieldCPUGPUID,
                                                    analyticalConcentrationFieldID, ErrorFieldID, simulationDomain);
       WALBERLA_LOG_INFO_ON_ROOT("Infinity norm is " << norms[0] << "\n L1 norm is " << norms[1] << "\n L2 norm is "
                                                     << norms[2]);
+      cummulative_norm += norms[2];
    }
+   cummulative_norm  = cummulative_norm/timeSteps;
+   WALBERLA_LOG_INFO_ON_ROOT("cummulative L2 norm is "<< cummulative_norm);
    timeloopTiming.logResultOnRoot();
    auto timeloopTimingReduced = timeloopTiming.getReduced();
 

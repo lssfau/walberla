@@ -5,8 +5,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
         set(coupling_method 1)
         set(config "couplingMethod_${coupling_method}")
         message(STATUS "Config value is: ${config}" )
-        waLBerla_generate_target_from_python(NAME Validations_3D_${config}
-                FILE Validations_3D.py
+        waLBerla_generate_target_from_python(NAME Validations_2D_${config}
+                FILE Validations_2D.py
                 CODEGEN_CFG ${config}
                 OUT_FILES LBMFluidSweep.h LBMFluidSweep.${CODEGEN_FILE_SUFFIX}
                 LBMConcentrationSweep.h LBMConcentrationSweep.${CODEGEN_FILE_SUFFIX}
@@ -33,8 +33,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME 3d_gaussian_paper FILES 3D_Validations.cpp ../utilities/InitializerFunctions.cpp
-                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_3D_${config})
-        target_compile_definitions(3d_gaussian_paper PRIVATE Weighting=2)
+        waLBerla_add_executable(NAME 2d_gaussian_plate FILES Validations_2D.cpp ../../utilities/InitializerFunctions.cpp
+                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_2D_${config})
+        target_compile_definitions(2d_gaussian_plate PRIVATE Weighting=2)
     endif ()
 endif ()

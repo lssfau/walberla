@@ -5,15 +5,15 @@ Simulation{
 NumericalSetup
 {
 
-    xSize   256;           // SI and LBM length are one and the same => dx_SI = dx_LB always
-    ySize   256;
-    zSize   1;
+    xSize   2;           // SI and LBM length are one and the same => dx_SI = dx_LB always
+    ySize   2;
+    zSize   2;
 
-    numXBlocks 2;
-    numYBlocks 2;
+    numXBlocks 1;
+    numYBlocks 1;
     numZBlocks 1;
 
-    tSI 100;           // simulation run time in seconds
+    tSI 1.52;           // simulation run time in seconds
 
     periodicInX true;  // in 2d_gaussian benchmark, all boundaries are periodic
     periodicInY true;
@@ -24,12 +24,12 @@ NumericalSetup
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
 
-    dx_SI 1;
+    dx_SI 0.08;
 
     // fluid quantities
-    uInflowL 0;  // LBM velocity of fluid
-    kappa_SI 4; // diffusivity SI
-    kappa_L  0.1666; // diffusivity lbm
+    uInflowL 2.5;  // LBM velocity of fluid
+    kappa_SI 5e-5; // diffusivity SI
+    kappa_L  5e-5; // diffusivity lbm
 }
 
 Output

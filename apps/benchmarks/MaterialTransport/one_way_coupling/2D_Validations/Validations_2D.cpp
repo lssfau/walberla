@@ -63,9 +63,10 @@
 #include "ConcentrationMacroGetter.h"
 #include "FluidMacroGetter.h"
 #include "GeneralInfoHeader.h"
-#include "../utilities/InitializerFunctions.h"
+#include "../../utilities/InitializerFunctions.h"
 #include "PackInfoConcentration.h"
 #include "PackInfoFluid.h"
+#include "../../utilities/customBoundary.cpp"
 
 namespace MaterialTransport{
 ///////////

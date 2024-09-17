@@ -396,7 +396,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
 #else
-      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
+      vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
 #endif
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
