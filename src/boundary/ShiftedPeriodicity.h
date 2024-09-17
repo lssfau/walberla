@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#pragma once
+
 #include "blockforest/Block.h"
 #include "blockforest/BlockID.h"
 #include "blockforest/StructuredBlockForest.h"
