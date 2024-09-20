@@ -14,7 +14,7 @@ NumericalSetup
     numYCellsPerBlock 160;
     numZCellsPerBlock 1;
 
-    timeSteps 10000;
+    timeSteps 50000;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
@@ -33,7 +33,7 @@ NumericalSetup
 
 Output
 {
-    vtkSpacing 100;
+    vtkSpacing 500;
     vtkFolder vtk_out;
     performanceLogFrequency 10;
 }

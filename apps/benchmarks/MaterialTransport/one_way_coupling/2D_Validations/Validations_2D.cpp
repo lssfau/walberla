@@ -66,7 +66,6 @@
 #include "../../utilities/InitializerFunctions.h"
 #include "PackInfoConcentration.h"
 #include "PackInfoFluid.h"
-#include "../../utilities/customBoundary.cpp"
 
 namespace MaterialTransport{
 ///////////
@@ -89,7 +88,9 @@ using FlagField_T = FlagField< flag_t >;
 const FlagUID Fluid_Flag("Fluid");
 const FlagUID Density_Fluid_Flag("Density_Fluid");
 const FlagUID NoSlip_Fluid_Flag("NoSlip_Fluid");
+const FlagUID FreeSlip_Fluid_Flag("FreeSlip_Fluid");
 const FlagUID Inflow_Fluid_Flag("Inflow_Fluid");
+const FlagUID Inflow_Fluid_Flag_Poisuelle("Inflow_Fluid_Poisuelle");
 const FlagUID Neumann_Fluid_Flag("Neumann_Fluid");
 
 // Concentration Flags
@@ -232,7 +233,6 @@ int main(int argc, char** argv) {
          field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field CPU", real_c(std::nan("")), field::fzyx);
 
       BlockDataID velFieldFluidCPUGPUID = field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
-
       // Concentration PDFs on CPU
       BlockDataID pdfFieldConcentrationCPUGPUID =
          field::addToStorage< PdfField_concentration_T >(blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
@@ -249,14 +249,26 @@ int main(int argc, char** argv) {
       // Assemble boundary block string
       std::string boundariesBlockString = " BoundariesFluid";
 
-      if (!periodicInX)
+      if (!periodicInX && simulationName == "2d_poisuelle" )
       {
+         boundariesBlockString += "{"
+                                  "Border { direction W;    walldistance -1;  flag Inflow_Fluid_Poisuelle; }"
+                                  "Border { direction E;    walldistance -1;  flag Neumann_Fluid; }";
+      }
+
+      if(!periodicInX && simulationName == "2d_plate"){
          boundariesBlockString += "{"
                                   "Border { direction W;    walldistance -1;  flag Inflow_Fluid; }"
                                   "Border { direction E;    walldistance -1;  flag Density_Fluid; }";
       }
 
-      if (!periodicInY)
+      if (!periodicInY && simulationName == "2d_poisuelle")
+      {
+         boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Fluid; }"
+                                  "Border { direction N;    walldistance -1;  flag NoSlip_Fluid; }";
+      }
+
+      if (!periodicInY && simulationName == "2d_plate")
       {
          boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Fluid; }"
                                   "Border { direction N;    walldistance -1;  flag Neumann_Fluid; }";
@@ -264,8 +276,8 @@ int main(int argc, char** argv) {
 
       if (!periodicInZ)
       {
-         boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Fluid; }"
-                                  "Border { direction B;    walldistance -1;  flag Neumann_Fluid; }";
+         boundariesBlockString += "Border { direction T;    walldistance -1;  flag NoSlip_Fluid; }"
+                                  "Border { direction B;    walldistance -1;  flag NoSlip_Fluid; }";
       }
 
       boundariesBlockString += "}";
@@ -312,8 +324,48 @@ int main(int argc, char** argv) {
       // map boundaries into the fluid field simulation
       lbm::BC_Fluid_Density density_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(1.0));
       lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
+      lbm::BC_Fluid_FreeSlip freeSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
       lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow_LBM, real_t(0));
+
+      // velocity call back for poisuelle flow:
+
+      auto VelocityCallback = [](const Cell& pos, const shared_ptr< StructuredBlockForest >& SbF, IBlock& block) {
+
+
+            Cell globalCell;
+            const uint_t FieldGhostLayers = 1;
+            cell_idx_t ghost = cell_idx_c(FieldGhostLayers);
+            CellInterval domainBB = SbF->getDomainCellBB();
+            domainBB.xMin() -= ghost;
+            domainBB.xMax() += ghost;
+
+            // WEST - Inflow
+            CellInterval west(domainBB.xMin(), domainBB.yMin(),
+                              domainBB.zMin(), domainBB.xMin(),
+                              domainBB.yMax(), domainBB.zMin());
+
+            //const auto cellAABB = SbF->getBlockLocalCellAABB(block, pos);
+            //auto cellCenter = cellAABB.center();
+
+            auto h_y          = real_c(west.ySize());
+            SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
+            //WALBERLA_LOG_INFO_ON_ROOT("h_y is " << h_y << " " << "y coord is " << globalCell[1]);
+            auto y1 = real_c(globalCell[1]);
+
+            real_t u = 0.05*(1- std::pow((y1/h_y),2));
+
+            Vector3< real_t > result(u, 0.0, 0.0);
+            return result;
+
+      };
+
+         std::function< Vector3< real_t >(const Cell&, const shared_ptr< StructuredBlockForest >&, IBlock&) >
+         velocity_initialisation = std::bind(VelocityCallback,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
+
+      lbm::BC_PoisuelleUBB ubb_fluid_poisuelle (blocks,pdfFieldFluidCPUGPUID,velocity_initialisation);
       lbm::BC_Fluid_Neumann neumann_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
+
       lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, real_t(0));
       lbm::BC_Concentration_Density density_concentration_bc_south(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
       lbm::BC_Concentration_Density density_concentration_bc_north(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
@@ -356,7 +408,7 @@ int main(int argc, char** argv) {
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
          density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
          noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
-         ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
+         ubb_fluid_poisuelle.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag_Poisuelle, Fluid_Flag);
          neumann_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Neumann_Fluid_Flag, Fluid_Flag);
          // map boundaries into the concentration field simulation
          geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID,
@@ -373,15 +425,8 @@ int main(int argc, char** argv) {
                                                                    Neumann_Concentration_Flag, Concentration_Flag);
       }
 
-      // for custom boundary
-      CellInterval westface(simulationDomain.xMin(), simulationDomain.yMin(), simulationDomain.zMin(), simulationDomain.xMin(), simulationDomain.yMax(),
-                            simulationDomain.zMax());
 
-      std::function< void() >  custom = CustomDirichletBoundaryFunctor<DensityField_concentration_T>(blocks,simulationDomain,
-                                     densityConcentrationFieldCPUGPUID,
-                                     westface);
-
-///////////////
+      ///////////////
       // TIME LOOP //
       ///////////////
       #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
@@ -405,7 +450,6 @@ int main(int argc, char** argv) {
          initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
       }
 #endif
-
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(
          densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
@@ -551,15 +595,14 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()),
                               "Boundary Handling (Concentration Density west)");
    }
-
+   auto tracker = make_shared< lbm::TimestepTracker >(0);
    if (simulationName == "2d_poisuelle")
    {
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
                      << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
       timeloop.add() << Sweep(deviceSyncWrapper(neumann_fluid_bc.getSweep()), "Boundary Handling (Fluid Neumann)");
-      timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
-
-
+      timeloop.add() << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (no slip fluid)");
+      timeloop.add() << Sweep(ubb_fluid_poisuelle.getSweep(tracker), "Boundary Handling (ubb poisuelle)");
 
       timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
                      << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()),
@@ -590,7 +633,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    if (!periodicInX && !periodicInY && !periodicInZ &&
        simulationName == "2d_poisuelle") // executes for the 2d plate validation
    {
-      //timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
+      timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
       timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
    }
 

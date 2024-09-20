@@ -30,6 +30,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 FluidMacroGetter.h FluidMacroGetter.cpp
                 ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
                 ConcentrationMacroGetter.h ConcentrationMacroGetter.cpp
+                BC_PoisuelleUBB.h BC_PoisuelleUBB.cpp
                 GeneralInfoHeader.h
         )
 

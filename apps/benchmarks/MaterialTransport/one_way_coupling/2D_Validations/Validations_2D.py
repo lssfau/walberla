@@ -4,6 +4,11 @@ import pystencils as ps
 from sympy.core.add import Add
 from sympy.codegen.ast import Assignment
 import sys
+import os
+script_dir = os.path.dirname(__file__)
+print(script_dir)
+walberla_dir = os.path.join(script_dir, '..', '..', 'python')
+sys.path.append(walberla_dir)
 from lbmpy.session import *
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
@@ -28,7 +33,9 @@ from pystencils_walberla import (
     generate_sweep,
     generate_pack_info_from_kernel,
 )
-from lbmpy_walberla import generate_boundary
+from lbmpy_walberla import generate_boundary, walberla_lbm_package, generate_lbm_package, lbm_boundary_generator
+from lbmpy_walberla.boundary import generate_alternating_lbm_boundary
+from lbmpy_walberla.additional_data_handler import UBBAdditionalDataHandler
 
 info_header = """
 const char * infoStencil_fluid = "{stencil}";
@@ -237,6 +244,15 @@ with CodeGeneration() as ctx:
         streaming_pattern="pull",
         target=target,
     )
+    dim = stencil_fluid.D
+    ubb_poisuelle = UBB(lambda *args: None, dim=dim, data_type=data_type)
+    ubb_data_handler = UBBAdditionalDataHandler(stencil_fluid, ubb_poisuelle)
+
+    generate_alternating_lbm_boundary(ctx, 'BC_PoisuelleUBB', ubb_poisuelle, method_fluid,
+                                      target=target, streaming_pattern="pull",
+                                      additional_data_handler=ubb_data_handler,
+                                      layout='fzyx')
+
 
     bc_density_fluid = sp.Symbol("bc_density_fluid")
     generate_boundary(
