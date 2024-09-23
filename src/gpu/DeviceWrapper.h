@@ -146,6 +146,13 @@ inline gpuError_t gpuMemcpyAsync(void* /*dst*/, const void* /*src*/, size_t /*co
 inline gpuError_t gpuMemcpy3D(const gpuMemcpy3DParms* /*p*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 inline gpuError_t gpuMemcpy3DAsync(const gpuMemcpy3DParms* /*p*/, gpuStream_t /*stream*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 
+inline gpuError_t gpuMemset(void* /*devPtr*/, int /*value*/, size_t /*count*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuMemsetAsync(void* /*devPtr*/, int /*value*/, size_t /*count*/, gpuStream_t /*stream*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuMemset2D(void* /*devPtr*/, size_t /*pitch*/, int /*value*/, size_t /*width*/, size_t /*height*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuMemset2DAsync(void* /*devPtr*/, size_t /*pitch*/, int /*value*/, size_t /*width*/, size_t /*height*/, gpuStream_t /*stream*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuMemset3D(gpuPitchedPtr /*pitchedDevPtr*/, int /*value*/, gpuExtent /*extent*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuMemset3DAsync( gpuPitchedPtr /*pitchedDevPtr*/, int  /*value*/, gpuExtent /*extent*/, gpuStream_t /*stream*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
+
 inline gpuPos make_gpuPos(size_t /*x*/, size_t /*y*/, size_t /*z*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 inline gpuPitchedPtr make_gpuPitchedPtr (void* /*d*/, size_t /*p*/, size_t /*xsz*/, size_t /*ysz*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 inline gpuExtent make_gpuExtent(size_t /*w*/, size_t /*h*/, size_t /*d*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
