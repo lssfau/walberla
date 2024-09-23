@@ -39,6 +39,7 @@ if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
 endif ()
 
 target_link_libraries( core PUBLIC ${SERVICE_LIBS} )
+target_include_directories( core PUBLIC ${walberla_SOURCE_DIR}/src/ ${walberla_BINARY_DIR}/src/ )
 target_sources( core
       PRIVATE
          Abort.cpp
@@ -61,6 +62,7 @@ target_sources( core
          EndianIndependentSerialization.h
          Environment.h
          Filesystem.h
+         Format.hpp
          FunctionTraits.h
          GetPID.h
          Hostname.h
