@@ -4,6 +4,7 @@ import pystencils as ps
 from sympy.core.add import Add
 from sympy.codegen.ast import Assignment
 import sys
+import numpy as np
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
@@ -39,17 +40,22 @@ const bool infoCsePdfs = {cse_pdfs};
 
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil_fluid = LBStencil(Stencil.D3Q27)
-    stencil_concentration = LBStencil(Stencil.D3Q27)
+    stencil_fluid = LBStencil(Stencil.D2Q9)
+    stencil_concentration = LBStencil(Stencil.D2Q9)
     omega = sp.Symbol("omega")  # for now same for both the sweeps
     init_density_fluid = sp.Symbol("init_density_fluid")
     init_density_concentration = sp.Symbol("init_density_concentration")
-    init_velocity_fluid = sp.symbols("init_velocity_fluid_:3")
+    init_velocity_fluid = sp.symbols("init_velocity_fluid_:2")
     #init_velocity_concentration = sp.symbols("init_velocity_concentration_:3")
     pdfs_inter_fluid = sp.symbols("pdfs_inter_fluid:" + str(stencil_fluid.Q))
     pdfs_inter_concentration = sp.symbols("pdfs_inter_concentration:" + str(stencil_concentration.Q))
     rho_0 = sp.Symbol("rho_0")
-    gravity_LBM = sp.Symbol("gravity")
+    T0 = sp.Symbol("T0")
+    alpha = sp.Symbol("alpha")
+    gravity_LBM = sp.Symbol("gravityLB")
+    Sv = sp.Symbol("Sv")
+    Sq = sp.Symbol("Sq")
+
     layout = "fzyx"
     config_tokens = ctx.config.split("_")
     print(config_tokens[0]," ", config_tokens[1])
@@ -65,22 +71,22 @@ with CodeGeneration() as ctx:
 
 # Fluid PDFs and fields
     pdfs_fluid, pdfs_fluid_tmp, velocity_field, density_field = ps.fields(
-        f"pdfs_fluid({stencil_fluid.Q}), pdfs_fluid_tmp({stencil_fluid.Q}), velocity_field({stencil_fluid.D}), density_field({1}): {data_type}[3D]",
+        f"pdfs_fluid({stencil_fluid.Q}), pdfs_fluid_tmp({stencil_fluid.Q}), velocity_field({stencil_fluid.D}), density_field({1}): {data_type}[2D]",
         layout=layout,
     )
 
     # Concentration PDFs and fields
     pdfs_concentration, pdfs_concentration_tmp, concentration_field = ps.fields(
-        f"pdfs_concentration({stencil_concentration.Q}), pdfs_concentration_tmp({stencil_concentration.Q}), concentration_field({1}): {data_type}[3D]",
+        f"pdfs_concentration({stencil_concentration.Q}), pdfs_concentration_tmp({stencil_concentration.Q}), concentration_field({1}): {data_type}[2D]",
         layout=layout,
     )
-    print("concentration(0) is " ,velocity_field[0,0,0](0), concentration_field(-1))
-    force_concentration_on_fluid = sp.Matrix([0, gravity_LBM*(density_field.center - rho_0)*(concentration_field.center - 2), 0])
+
+    force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
     # Determine the output based on the coupling mode
 
     if config_tokens[1]== "1":
         concentration_output = None
-        force_on_fluid = sp.symbols("F_:3")
+        force_on_fluid = sp.symbols("F_:2")
         print("One-way fluid-concentration coupling set")
 
     elif config_tokens[1] == "2":
@@ -109,24 +115,30 @@ with CodeGeneration() as ctx:
     # Fluid LBM config
     lbm_fluid_config = LBMConfig(
         stencil=stencil_fluid,
-        method=Method.SRT,
-        relaxation_rate=omega,
+        method=Method.MRT,
+        #relaxation_rate=omega,
+        relaxation_rates=[0,1,1,Sv,Sv,Sv,Sq,Sq,Sv],
         output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
     )
-
+    #sigma_k = 1/((np.sqrt(3))/6 + 0.5)
+    #sigma_e = 1/((1/np.sqrt(3)) + 0.5)
+    sigma_k = 1.9
+    sigma_e = 1.9
     # Concentration LBM config
     lbm_concentration_config = LBMConfig(
         stencil=stencil_concentration,
         method=Method.SRT,
+        #relaxation_rates=[0,omega,omega,omega,omega,omega,omega,omega,omega],
         relaxation_rate=omega,
         velocity_input=velocity_field,
         output={"density": concentration_field},
         #force=sp.symbols("F_:3"),
         #force_model=ForceModel.LUO,
         compressible=True,
+        zero_centered=False
     )
 
     # =====================
@@ -215,7 +227,7 @@ with CodeGeneration() as ctx:
         target=target,
     )
 
-    bc_velocity_fluid = sp.symbols("bc_velocity_fluid_:3")
+    bc_velocity_fluid = sp.symbols("bc_velocity_fluid_:2")
     generate_boundary(
         ctx,
         "BC_Fluid_UBB",
@@ -260,7 +272,7 @@ with CodeGeneration() as ctx:
         target=target,
     )
 
-    bc_velocity_concentration = sp.symbols("bc_velocity_concentration_:3")   ## is it needed ?
+    bc_velocity_concentration = sp.symbols("bc_velocity_concentration_:2")   ## is it needed ?
     generate_boundary(
         ctx,
         "BC_Concentration_UBB",
@@ -275,7 +287,7 @@ with CodeGeneration() as ctx:
     generate_boundary(
         ctx,
         "BC_Concentration_Density",
-        FixedDensity(bc_density_concentration),
+        DiffusionDirichlet(bc_density_concentration),
         method_concentration,
         field_name=pdfs_concentration.name,
         streaming_pattern="pull",

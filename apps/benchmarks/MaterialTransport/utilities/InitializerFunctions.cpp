@@ -55,8 +55,9 @@ void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, 
             real_c(sqrt(pow((domainAABB.center()[0] - posX), 2) + pow((domainAABB.center()[1] - posY), 2) +
                         pow((domainAABB.center()[2] - posZ), 2)));
 
-         if (distance <= radius) { ConcentrationField->get(x, y, z) = real_t(1.05); }
-         else { ConcentrationField->get(x, y, z) = real_t(1); }
+         if (distance <= radius) { ConcentrationField->get(x, y, z) = real_t(0.0); }
+         else { ConcentrationField->get(x, y, z) = real_t(0.0); }
+         //ConcentrationField->get(x, y, z) = real_t(0.0);
       }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
    }
 

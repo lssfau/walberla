@@ -92,7 +92,8 @@ const FlagUID Inflow_Fluid_Flag("Inflow_Fluid");
 
 // Concentration Flags
 const FlagUID Concentration_Flag("Concentration");
-const FlagUID Density_Concentration_Flag("Density_Concentration");
+const FlagUID Density_Concentration_Flag_west("Density_Concentration_west");
+const FlagUID Density_Concentration_Flag_east("Density_Concentration_east");
 const FlagUID NoSlip_Concentration_Flag("NoSlip_Concentration");
 const FlagUID Inflow_Concentration_Flag("Inflow_Concentration");
 //const FlagUID Dirichlet_Concentration_Flag("Dirichlet_Concentration");
@@ -120,26 +121,35 @@ int main(int argc, char** argv) {
 
    // Read config file
    Config::BlockHandle numericalSetup = cfgFile->getBlock("NumericalSetup");
+
+   const real_t xSize_SI              = numericalSetup.getParameter< uint_t >("xSizeSI");
+   const real_t ySize_SI              = numericalSetup.getParameter< uint_t >("ySizeSI");
+   const real_t zSize_SI              = numericalSetup.getParameter< uint_t >("zSizeSI");
+
    const uint_t numXBlocks            = numericalSetup.getParameter< uint_t >("numXBlocks");
    const uint_t numYBlocks            = numericalSetup.getParameter< uint_t >("numYBlocks");
    const uint_t numZBlocks            = numericalSetup.getParameter< uint_t >("numZBlocks");
+   const uint_t cellsPerBlockPerDirection            = numericalSetup.getParameter< uint_t >("cellsPerBlockPerDirection"); // same in all directions
    WALBERLA_CHECK_EQUAL(numXBlocks * numYBlocks * numZBlocks, uint_t(MPIManager::instance()->numProcesses()),
                         "When using GPUs, the number of blocks ("
                            << numXBlocks * numYBlocks * numZBlocks << ") has to match the number of MPI processes ("
                            << uint_t(MPIManager::instance()->numProcesses()) << ")");
    const bool periodicInY                 = numericalSetup.getParameter< bool >("periodicInY");
    const bool periodicInZ                 = numericalSetup.getParameter< bool >("periodicInZ");
-   const uint_t numXCellsPerBlock         = numericalSetup.getParameter< uint_t >("numXCellsPerBlock");
-   const uint_t numYCellsPerBlock         = numericalSetup.getParameter< uint_t >("numYCellsPerBlock");
-   const uint_t numZCellsPerBlock         = numericalSetup.getParameter< uint_t >("numZCellsPerBlock");
    const bool sendDirectlyFromGPU         = numericalSetup.getParameter< bool >("sendDirectlyFromGPU");
    const bool useCommunicationHiding      = numericalSetup.getParameter< bool >("useCommunicationHiding");
    const Vector3< uint_t > frameWidth     = numericalSetup.getParameter< Vector3< uint_t > >("frameWidth");
-   const uint_t timeSteps                 = numericalSetup.getParameter< uint_t >("timeSteps");
+   const real_t tSI                 = numericalSetup.getParameter< real_t >("tSI");
+   const real_t gravity              = numericalSetup.getParameter< real_t >("gravity");
 
-   const real_t uInflow        = numericalSetup.getParameter< real_t >("uInflow");
+   const real_t Thot        = numericalSetup.getParameter< real_t >("Thot");
+   const real_t Tcold       = numericalSetup.getParameter< real_t >("Tcold");
+   const real_t Pr        = numericalSetup.getParameter< real_t >("PrandtlNumber");
+   const real_t Ra        = numericalSetup.getParameter< real_t >("RayleighNumber");
+   const real_t Ma        = numericalSetup.getParameter< real_t >("Mach");
    const real_t relaxationRate = numericalSetup.getParameter< real_t >("relaxationRate");
-   const Vector3< real_t > Uinitialize (uInflow,0,0);
+
+
    if ((periodicInY && numYBlocks == 1) || (periodicInZ && numZBlocks == 1))
    {
       WALBERLA_LOG_WARNING_ON_ROOT("Using only 1 block in periodic dimensions can lead to unexpected behavior.")
@@ -152,10 +162,50 @@ int main(int argc, char** argv) {
    const std::string vtkFolder          = outputSetup.getParameter< std::string >("vtkFolder");
    const uint_t performanceLogFrequency = outputSetup.getParameter< uint_t >("performanceLogFrequency");
 
-   Vector3< uint_t > domainSize;
-   domainSize[0] = numXBlocks * numXCellsPerBlock;
-   domainSize[1] = numYBlocks * numYCellsPerBlock;
-   domainSize[2] = numZBlocks * numZCellsPerBlock;
+   // Necessary Calculations
+
+   const real_t length_conversion = (numXBlocks * real_c(cellsPerBlockPerDirection));
+   Vector3< uint_t > domainSizeLB(uint_c((xSize_SI / length_conversion)), uint_c((ySize_SI / length_conversion)), uint_c((zSize_SI /1.0)));
+
+   const real_t uCharacteristicLB = Ma * (std::sqrt(real_c(1 / 3.0)));
+   const Vector3< real_t > Uinitialize (uCharacteristicLB,0,0);
+
+   const real_t delta_T = Thot - Tcold;
+   const real_t T0      = (Thot + Tcold) / (2 * delta_T);
+   const real_t kinematicViscosityLB = //std::sqrt(3.6 / Ra);
+      std::min((Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion, std::sqrt(3.6 / Ra));
+   const real_t thermalDiffusivityLB = kinematicViscosityLB / Pr;
+
+   const real_t time_conversion = (length_conversion*length_conversion)/(thermalDiffusivityLB);
+   const real_t gravityLB   = gravity * time_conversion * time_conversion / length_conversion;
+   const real_t alphaLB     = (uCharacteristicLB * uCharacteristicLB) / (gravityLB * delta_T * length_conversion);
+
+   const uint_t timeSteps = 10000000;//uint_c(real_c(tSI)/time_conversion);
+   const real_t rho_0 = 1.0;
+
+   const real_t Sv = 2/(6*kinematicViscosityLB + 1);
+   const real_t Sq = 8*((2 - Sv)/(8 - Sv));
+
+
+   // calculations for verification and correctness
+
+   const real_t RayleighNumber = (Pr*alphaLB*gravityLB*delta_T*length_conversion*length_conversion*length_conversion)/(kinematicViscosityLB*kinematicViscosityLB);
+   const real_t uchar = std::sqrt(Ra/Pr)*(kinematicViscosityLB/length_conversion);
+   const real_t machnumber = uchar*std::sqrt(3);
+
+   WALBERLA_LOG_INFO_ON_ROOT("kinematic viscosity is "<< kinematicViscosityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Thermal Diffusivity LB is "<< thermalDiffusivityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("ratio is "  << length_conversion/thermalDiffusivityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number is "<< RayleighNumber);
+   WALBERLA_LOG_INFO_ON_ROOT("Characteristic velocity is "<< uchar << " " << uCharacteristicLB );
+   WALBERLA_LOG_INFO_ON_ROOT("Mach number is "<< machnumber);
+   WALBERLA_LOG_INFO_ON_ROOT("Domain size in lattice is "<< domainSizeLB[0]);
+   WALBERLA_LOG_INFO_ON_ROOT("alpha LB is "<< alphaLB);
+   WALBERLA_LOG_INFO_ON_ROOT("gravity LB is "<< gravityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Temperature difference delta_t is "<< delta_T);
+   WALBERLA_LOG_INFO_ON_ROOT("dx_SI is  "<< length_conversion << "  dt_SI is " << time_conversion);
+   WALBERLA_LOG_INFO_ON_ROOT("Number of time steps is "<< timeSteps);
+
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
@@ -163,7 +213,7 @@ int main(int argc, char** argv) {
 
    const bool periodicInX                     = false;
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
-      numXBlocks, numYBlocks, numZBlocks, numXCellsPerBlock, numYCellsPerBlock, numZCellsPerBlock, real_t(1), uint_t(0),
+      numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection,cellsPerBlockPerDirection,1, real_t(1), uint_t(0),
       false, false, periodicInX, periodicInY, periodicInZ, // periodicity
       false);
 
@@ -217,8 +267,8 @@ int main(int argc, char** argv) {
       // Assemble boundary block string
       std::string boundariesBlockString = " BoundariesFluid"
                                           "{"
-                                          "Border { direction W;    walldistance -1;  flag Inflow_Fluid; }"
-                                          "Border { direction E;    walldistance -1;  flag Density_Fluid; }";
+                                          "Border { direction W;    walldistance -1;  flag NoSlip_Fluid; }"
+                                          "Border { direction E;    walldistance -1;  flag NoSlip_Fluid; }";
 
       if (!periodicInY)
       {
@@ -237,8 +287,8 @@ int main(int argc, char** argv) {
       boundariesBlockString += "\n BoundariesConcentration";
 
       boundariesBlockString += "{"
-                                "Border { direction W;    walldistance -1;  flag Neumann_Concentration; }"
-                                "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
+                                "Border { direction W;    walldistance -1;  flag Density_Concentration_west; }"
+                                "Border { direction E;    walldistance -1;  flag Density_Concentration_east; }";
 
       if (!periodicInY)
       {
@@ -273,14 +323,16 @@ int main(int argc, char** argv) {
       density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
       lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
       noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
-      lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow, real_t(0), real_t(0));
+      lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(0), real_t(0));
       ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
 
       // map boundaries into the concentration field simulation
       geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID, boundariesConfigConcentration);
       geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
-      lbm::BC_Concentration_Density density_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID, real_t(1.0));
-      density_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Density_Concentration_Flag, Concentration_Flag);
+      lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, Thot);
+      density_concentration_bc_west.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Density_Concentration_Flag_west, Concentration_Flag);
+      lbm::BC_Concentration_Density density_concentration_bc_east(blocks, pdfFieldConcentrationCPUGPUID, Tcold);
+      density_concentration_bc_east.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID, Density_Concentration_Flag_east, Concentration_Flag);
       lbm::BC_Concentration_Neumann neumann_concentration_bc(blocks,pdfFieldConcentrationCPUGPUID);
       neumann_concentration_bc.fillFromFlagField<FlagField_T>(blocks,flagFieldConcentrationID,Neumann_Concentration_Flag,Concentration_Flag);
 
@@ -296,9 +348,9 @@ int main(int argc, char** argv) {
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       #else
-      initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
+      initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSizeLB);
       initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
-      pystencils::InitializeFluidDomain initializeFluidDomain(densityConcentrationFieldID,densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,7,real_t(1),real_t(1));
+      pystencils::InitializeFluidDomain initializeFluidDomain(densityConcentrationFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID);
 
       #endif
@@ -347,7 +399,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils:: FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
 #else
-   pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidID,7,real_t(1));
+   pystencils::FluidMacroGetter getterSweep_fluid(densityConcentrationFieldID,densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidID,T0,alphaLB,gravityLB,rho_0);
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
@@ -419,39 +471,49 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    // Add performance logging
    lbm::PerformanceLogger< FlagField_T > performanceLoggerFluid(blocks, flagFieldFluidID, Fluid_Flag, performanceLogFrequency);
    lbm::PerformanceLogger< FlagField_T > performanceLoggerConcentration(blocks, flagFieldConcentrationID, Concentration_Flag, performanceLogFrequency);
-   if (performanceLogFrequency > 0)
+   /*if (performanceLogFrequency > 0)
    {
       timeloop.addFuncAfterTimeStep(performanceLoggerFluid, "Evaluate performance logging of fluid");
       //timeloop.addFuncAfterTimeStep(performanceLoggerConcentration, "Evaluate performance logging of Concentration");
-   }
+   }*/
 
    // Add LBM (fluid and concentration) communication function and boundary handling sweep
    if (useCommunicationHiding)
    {
       timeloop.add() << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
-      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc.getSweep()), "Boundary Handling (Concentration Density)");
+      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()), "Boundary Handling (Concentration Density)");
    }
    else
    {
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
-                     << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Fluid Density)");
+                     << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (No slip fluid)");
       timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
                      << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
+      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()), "Boundary Handling (Concentration Density west)");
+      timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_east.getSweep()), "Boundary Handling (Concentration Density east)");
+
    }
-   timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
+   //timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()), "Boundary Handling (Fluid UBB)");
    //timeloop.add() << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()), "Boundary Handling (Concentration Neumann)");
    //timeloop.add() << Sweep(deviceSyncWrapper(ubb_concentration_bc.getSweep()), "Boundary Handling (Concentration UBB)");
-   if (!periodicInY || !periodicInZ)
+   /*if (!periodicInY || !periodicInZ)
    {
       timeloop.add() << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (Fluid NoSlip)");
       //timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration NoSlip)");
-   }
+   }*/
 
-   pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,7,relaxationRate,real_t(1));
+
+   //pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID);
+   //pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,frameWidth);
+
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,relaxationRate);
-   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,7,relaxationRate,real_t(1),frameWidth);
    pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,relaxationRate,frameWidth);
 
+   pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Sq,Sv,T0,alphaLB,gravityLB,rho_0);
+   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Sq,Sv,T0,alphaLB,gravityLB,rho_0,frameWidth);
+
+   //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,relaxationRate,rho_0);
+   //pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,rho_0,relaxationRate,frameWidth);
    if (useCommunicationHiding)
    {
       commTimeloop.add() << BeforeFunction([&]() { com_fluid.startCommunication(); }, "LBM fluid Communication (start)")
