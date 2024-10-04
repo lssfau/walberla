@@ -204,4 +204,53 @@ std::vector< real_t > computeErrorL2(const shared_ptr< StructuredBlockStorage >&
    return Errors;
 }
 
+std::vector< real_t > NusseltNumbers(const shared_ptr< StructuredBlockStorage >& blocks,
+                             BlockDataID& ConcentrationFieldID,BlockDataID& VelocityFieldID, const math::AABB& domainAABB,
+                             Vector3< uint_t > domainSize,const real_t delta_theta)
+{
+   std::vector< real_t > nusseltNumbers{ 0, 0, 0 };
+   real_t nusseltx_domain = 0;
+   real_t nusseltx_zero = 0;
+   real_t nusseltx_half = 0;
+   const real_t Nx = real_c(domainSize[0]);
+   const real_t Ny = real_c(domainSize[1]);
+
+   for (auto& block : *blocks)
+   {
+      auto ConcentrationField = block.getData< DensityField_concentration_T >(ConcentrationFieldID);
+      auto VelocityField = block.getData< DensityField_fluid_T >(VelocityFieldID);
+      Block& b                          = dynamic_cast< Block& >(block);
+      uint_t level                      = b.getLevel();
+      CellInterval xyz                  = ConcentrationField->xyzSize();
+
+      for (auto cellIt = xyz.begin(); cellIt != xyz.end(); ++cellIt)
+      {
+         Cell globalCell;
+         blocks->transformBlockLocalToGlobalCell(globalCell, block, *cellIt);
+         Vector3< real_t > pos = blocks->getCellCenter(globalCell, level);
+         const real_t qx = VelocityField->get(*cellIt)*ConcentrationField->get(*cellIt) - (ConcentrationField->get(cellIt->x() +1 ,cellIt->y(),0) -ConcentrationField->get(cellIt->x(),cellIt->y(),0) );
+         nusseltx_domain += qx;
+
+         if(pos[0] == real_c(0)){
+            nusseltx_zero += qx;
+         }
+         if(pos[0] == real_c(domainSize[0]/2)){
+            nusseltx_half += qx;
+         }
+
+      }
+   }
+   mpi::allReduceInplace(nusseltx_domain, mpi::SUM);
+   mpi::allReduceInplace(nusseltx_zero, mpi::SUM);
+   mpi::allReduceInplace(nusseltx_half, mpi::SUM);
+   nusseltx_domain /= Nx*Ny*delta_theta;
+   nusseltx_zero   /= Ny*delta_theta;
+   nusseltx_half   /= Nx*delta_theta;
+   nusseltNumbers[0] = nusseltx_zero;
+   nusseltNumbers[1] = nusseltx_half;
+   nusseltNumbers[2] = nusseltx_domain;
+
+   return nusseltNumbers;
+}
+
 } // namespace walberla
