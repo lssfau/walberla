@@ -2,15 +2,15 @@
 NumericalSetup
 {
     // product of number of blocks should be equal to number of used processes
-    xSizeSI  220;
-    ySizeSI  220;
+    xSizeSI  64;
+    ySizeSI  64;
     zSizeSI  1;
 
     numXBlocks 2;
     numYBlocks 2;
     numZBlocks 1;
 
-    cellsPerBlockPerDirection 190;
+    cellsPerBlockPerDirection 128;
 
     periodicInY false;
     periodicInZ false;
@@ -25,14 +25,14 @@ NumericalSetup
     Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
     Tcold 0;
     PrandtlNumber 0.71;
-    RayleighNumber 1000000;
-    Mach 0.01;
-    relaxationRate 1.9;
+    RayleighNumber 10000000;
+    Mach 0.1;
+    relaxationRate 1.5;
 }
 
 Output
 {
-    vtkSpacing 200;
+    vtkSpacing 1000;
     vtkFolder vtk_out_srt_srt;
 
     performanceLogFrequency 10;

@@ -154,8 +154,6 @@ int main(int argc, char** argv) {
    {
       WALBERLA_LOG_WARNING_ON_ROOT("Using only 1 block in periodic dimensions can lead to unexpected behavior.")
    }
-   const real_t viscosity = lbm::collision_model::viscosityFromOmega(relaxationRate);
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(viscosity)
 
    Config::BlockHandle outputSetup      = cfgFile->getBlock("Output");
    const uint_t vtkSpacing              = outputSetup.getParameter< uint_t >("vtkSpacing");
@@ -172,8 +170,8 @@ int main(int argc, char** argv) {
 
    const real_t delta_T = Thot - Tcold;
    const real_t T0      = (Thot + Tcold) / (2 * delta_T);
-   const real_t kinematicViscosityLB = //std::sqrt(3.6 / Ra);
-      std::min((Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion, std::sqrt(3.6 / Ra));
+   const real_t kinematicViscosityLB = (Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion;
+      //std::min((Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion, std::sqrt(3.6 / Ra));
    const real_t thermalDiffusivityLB = kinematicViscosityLB / Pr;
 
    const real_t time_conversion = (length_conversion*length_conversion)/(thermalDiffusivityLB);
@@ -185,16 +183,20 @@ int main(int argc, char** argv) {
 
    const real_t Sv = 2/(6*kinematicViscosityLB + 1);
    const real_t Sq = 8*((2 - Sv)/(8 - Sv));
-
-
+   const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
+   const real_t omega_t = lbm::collision_model::omegaFromViscosity(thermalDiffusivityLB);
+   //const real_t omega_t = 1/(0.5 + 4.5*thermalDiffusivityLB);
    // calculations for verification and correctness
 
    const real_t RayleighNumber = (Pr*alphaLB*gravityLB*delta_T*length_conversion*length_conversion*length_conversion)/(kinematicViscosityLB*kinematicViscosityLB);
    const real_t uchar = std::sqrt(Ra/Pr)*(kinematicViscosityLB/length_conversion);
    const real_t machnumber = uchar*std::sqrt(3);
+   const real_t thermal_diffusivity_2 = (Ma/std::sqrt(3))/(std::sqrt(Ra*Pr))*length_conversion;
 
+   WALBERLA_LOG_INFO_ON_ROOT("length conversion is "<< length_conversion << " " << "time conversion is " << time_conversion);
    WALBERLA_LOG_INFO_ON_ROOT("kinematic viscosity is "<< kinematicViscosityLB);
-   WALBERLA_LOG_INFO_ON_ROOT("Thermal Diffusivity LB is "<< thermalDiffusivityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Omega fluid is "<< omega_f << "omega temperature is " << omega_t);
+   WALBERLA_LOG_INFO_ON_ROOT("Thermal Diffusivity LB is "<< thermalDiffusivityLB << " " << thermal_diffusivity_2);
    WALBERLA_LOG_INFO_ON_ROOT("ratio is "  << length_conversion/thermalDiffusivityLB);
    WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number is "<< RayleighNumber);
    WALBERLA_LOG_INFO_ON_ROOT("Characteristic velocity is "<< uchar << " " << uCharacteristicLB );
@@ -506,14 +508,14 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    //pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID);
    //pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,frameWidth);
 
-   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,relaxationRate);
-   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,relaxationRate,frameWidth);
+   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t);
+   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t,frameWidth);
 
    pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Sq,Sv,T0,alphaLB,gravityLB,rho_0);
    pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Sq,Sv,T0,alphaLB,gravityLB,rho_0,frameWidth);
 
-   //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,relaxationRate,rho_0);
-   //pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,rho_0,relaxationRate,frameWidth);
+   //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0);
+   //pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0,frameWidth);
    if (useCommunicationHiding)
    {
       commTimeloop.add() << BeforeFunction([&]() { com_fluid.startCommunication(); }, "LBM fluid Communication (start)")

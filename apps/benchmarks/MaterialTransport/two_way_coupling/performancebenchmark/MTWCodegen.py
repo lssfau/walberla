@@ -55,6 +55,7 @@ with CodeGeneration() as ctx:
     gravity_LBM = sp.Symbol("gravityLB")
     Sv = sp.Symbol("Sv")
     Sq = sp.Symbol("Sq")
+    omega_f = sp.Symbol("omega_f")
 
     layout = "fzyx"
     config_tokens = ctx.config.split("_")
@@ -116,7 +117,7 @@ with CodeGeneration() as ctx:
     lbm_fluid_config = LBMConfig(
         stencil=stencil_fluid,
         method=Method.MRT,
-        #relaxation_rate=omega,
+        #relaxation_rate=omega_f,
         relaxation_rates=[0,1,1,Sv,Sv,Sv,Sq,Sq,Sv],
         output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
