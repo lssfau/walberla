@@ -54,6 +54,12 @@ class NonuniformPackingKernelsWrapper
    void localCopyDirection(PdfField_T* srcField, CellInterval& srcInterval, PdfField_T* dstField,
                            CellInterval& dstInterval, Direction dir) const                                    = 0;
 
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir) const = 0;
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskField* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir) const = 0;
+
    void unpackRedistribute(PdfField_T* dstField, CellInterval& ci, unsigned char* inBuffer,
                            stencil::Direction dir) const = 0;
 
@@ -108,6 +114,18 @@ class NonuniformPackingKernelsWrapper< PdfField_T, false >
                            CellInterval& dstInterval, Direction dir) const
    {
       kernels_.localCopyDirection(srcField, srcInterval, dstField, dstInterval, dir);
+   }
+
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir) const
+   {
+      kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, dir);
+   }
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskField* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir) const
+   {
+      kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir);
    }
 
    void unpackRedistribute(PdfField_T* dstField, CellInterval& ci, unsigned char* inBuffer,
@@ -194,10 +212,33 @@ class NonuniformPackingKernelsWrapper< PdfField_T, true >
       kernels_.localCopyDirection(srcField, srcInterval, dstField, dstInterval, dir, timestep);
    }
 
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir) const
+   {
+      uint8_t timestep = srcField->getTimestep();
+      WALBERLA_ASSERT(!((dstField->getTimestep() & 1) ^ 1), "When the course to fine step is executed, the fine Field must "
+                                                            "be on an odd timestep, while the source field could either be "
+                                                            "on an even or an odd state.")
+      kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, dir, timestep);
+   }
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskField* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir) const
+   {
+      uint8_t timestep = dstField->getTimestep();
+      WALBERLA_ASSERT((srcField->getTimestep() & 1) ^ 1, "When the fine to coarse step is executed, the fine Field must "
+                                                         "be on an even timestep, while the source field could either be "
+                                                         "on an even or an odd state.")
+      kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir, timestep);
+   }
+
    void unpackRedistribute(PdfField_T* dstField, CellInterval& ci, unsigned char* inBuffer,
                            stencil::Direction dir) const
    {
       uint8_t timestep = dstField->getTimestep();
+      WALBERLA_ASSERT(!((dstField->getTimestep() & 1) ^ 1), "When the course to fine step is executed, the fine Field must "
+                                                            "be on an odd timestep, while the source field could either be "
+                                                            "on an even or an odd state.")
       kernels_.unpackRedistribute(dstField, ci, inBuffer, dir, timestep);
    }
 
@@ -205,6 +246,9 @@ class NonuniformPackingKernelsWrapper< PdfField_T, true >
                                unsigned char* outBuffer, Direction dir) const
    {
       uint8_t timestep = srcField->getTimestep();
+      WALBERLA_ASSERT((srcField->getTimestep() & 1) ^ 1, "When the fine to coarse step is executed, the fine Field must "
+                                                         "be on an even timestep, while the source field could either be "
+                                                         "on an even or an odd state.")
       kernels_.packPartialCoalescence(srcField, maskField, ci, outBuffer, dir, timestep);
    }
 

@@ -68,9 +68,35 @@ class D3Q27StorageSpecification
    // If true the background deviation (rho_0 = 1) is subtracted for the collision step.
    static const bool zeroCenteredPDFs = true;
    // Lattice weights
-   static constexpr double w[27] = { 0.296296296296296,0.0740740740740741,0.0740740740740741,0.0740740740740741,0.0740740740740741,0.0740740740740741,0.0740740740740741,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.0185185185185185,0.00462962962962963,0.00462962962962963,0.00462962962962963,0.00462962962962963,0.00462962962962963,0.00462962962962963,0.00462962962962963,0.00462962962962963 };
+   static constexpr double w[27] = { double(0.296296296296296), double(0.0740740740740741), double(0.0740740740740741), double(0.0740740740740741), double(0.0740740740740741), double(0.0740740740740741), double(0.0740740740740741), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.0185185185185185), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963), double(0.00462962962962963) };
    // Inverse lattice weights
-   static constexpr double wInv[27] = { 3.37500000000000,13.5000000000000,13.5000000000000,13.5000000000000,13.5000000000000,13.5000000000000,13.5000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,54.0000000000000,216.000000000000,216.000000000000,216.000000000000,216.000000000000,216.000000000000,216.000000000000,216.000000000000,216.000000000000 };
+   static constexpr double wInv[27] = { double(3.37500000000000), double(13.5000000000000), double(13.5000000000000), double(13.5000000000000), double(13.5000000000000), double(13.5000000000000), double(13.5000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(54.0000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000), double(216.000000000000) };
+
+   struct AccessorEVEN
+   {
+      static constexpr cell_idx_t readX[27] = { 0, 0, 0, 1, -1, 0, 0, 1, -1, 1, -1, 0, 0, 1, -1, 0, 0, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1 };
+      static constexpr cell_idx_t readY[27] = { 0, -1, 1, 0, 0, 0, 0, -1, -1, 1, 1, -1, 1, 0, 0, -1, 1, 0, 0, -1, -1, 1, 1, -1, -1, 1, 1 };
+      static constexpr cell_idx_t readZ[27] = { 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1 };
+      static constexpr cell_idx_t readD[27] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+
+      static constexpr cell_idx_t writeX[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeY[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeZ[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeD[27] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+   };
+
+   struct AccessorODD
+   {
+      static constexpr cell_idx_t readX[27] = { 0, 0, 0, 1, -1, 0, 0, 1, -1, 1, -1, 0, 0, 1, -1, 0, 0, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1 };
+      static constexpr cell_idx_t readY[27] = { 0, -1, 1, 0, 0, 0, 0, -1, -1, 1, 1, -1, 1, 0, 0, -1, 1, 0, 0, -1, -1, 1, 1, -1, -1, 1, 1 };
+      static constexpr cell_idx_t readZ[27] = { 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1 };
+      static constexpr cell_idx_t readD[27] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+
+      static constexpr cell_idx_t writeX[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeY[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeZ[27] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      static constexpr cell_idx_t writeD[27] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+   };
 
    // Compute kernels to pack and unpack MPI buffers
    class PackKernels {
@@ -84,8 +110,8 @@ class D3Q27StorageSpecification
       static const bool inplace = false;
 
       /**
-       * Packs all pdfs from the given cell interval to the send buffer.
-       * */
+      * Packs all pdfs from the given cell interval to the send buffer.
+      * */
       void packAll(PdfField_T * pdfs_src, CellInterval & ci, unsigned char * outBuffer) const;
 
       /**
@@ -124,7 +150,7 @@ class D3Q27StorageSpecification
        * @return    The required size of the buffer, in bytes
        * */
       uint_t size (CellInterval & ci, stencil::Direction dir) const {
-         return ci.numCells() * sizes[dir] * sizeof(value_type);
+         return ci.numCells() * sizes[dir] * uint_c(sizeof(value_type));
       }
 
       /**
@@ -134,7 +160,7 @@ class D3Q27StorageSpecification
        * @return    The required size of the buffer, in bytes
        * */
       uint_t size (CellInterval & ci) const {
-         return ci.numCells() * 27 * sizeof(value_type);
+         return ci.numCells() * 27 * uint_c(sizeof(value_type));
       }
 
       
@@ -142,6 +168,8 @@ class D3Q27StorageSpecification
     private:
       const uint_t sizes[27] { 0, 9, 9, 9, 9, 9, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1 };
    };
+
+   using value_type = PackKernels::value_type;
 
 };
 

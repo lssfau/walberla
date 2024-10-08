@@ -45,9 +45,9 @@ namespace lbm {
 #pragma diag_suppress 177
 #endif
 #endif
-
+//NOLINTBEGIN(readability-non-const-parameter*)
 namespace internal_ubbd3q19_even {
-static FUNC_PREFIX void ubbd3q19_even(const uint8_t * RESTRICT const _data_indexVector, double * RESTRICT  _data_pdfs, int64_t const _stride_pdfs_0, int64_t const _stride_pdfs_1, int64_t const _stride_pdfs_2, int64_t const _stride_pdfs_3, int32_t indexVectorSize, double u_x, double u_y, double u_z)
+static FUNC_PREFIX void ubbd3q19_even(uint8_t * RESTRICT const _data_indexVector, double * RESTRICT  _data_pdfs, int64_t const _stride_pdfs_0, int64_t const _stride_pdfs_1, int64_t const _stride_pdfs_2, int64_t const _stride_pdfs_3, int32_t indexVectorSize, double u_x, double u_y, double u_z)
 {
    
    const int32_t f_in_inv_dir_idx [] = { 0,2,1,4,3,6,5,10,9,8,7,16,15,18,17,12,11,14,13 }; 
@@ -56,7 +56,7 @@ static FUNC_PREFIX void ubbd3q19_even(const uint8_t * RESTRICT const _data_index
    const int32_t f_in_inv_offsets_z [] = { 0,0,0,0,0,1,-1,0,0,0,0,1,1,1,1,-1,-1,-1,-1 }; 
    
    
-   const double weights [] = {0.33333333333333333, 0.055555555555555556, 0.055555555555555556, 0.055555555555555556, 0.055555555555555556, 0.055555555555555556, 0.055555555555555556, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778, 0.027777777777777778};
+   const double weights [] = {((double)(0.33333333333333333)), ((double)(0.055555555555555556)), ((double)(0.055555555555555556)), ((double)(0.055555555555555556)), ((double)(0.055555555555555556)), ((double)(0.055555555555555556)), ((double)(0.055555555555555556)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778)), ((double)(0.027777777777777778))};
    
    
    
@@ -66,15 +66,16 @@ static FUNC_PREFIX void ubbd3q19_even(const uint8_t * RESTRICT const _data_index
    
    for (int64_t ctr_0 = 0; ctr_0 < indexVectorSize; ctr_0 += 1)
    {
-      const int32_t x = *((int32_t * )(& _data_indexVector[16*ctr_0]));
-      const int32_t y = *((int32_t * )(& _data_indexVector[16*ctr_0 + 4]));
-      const int32_t z = *((int32_t * )(& _data_indexVector[16*ctr_0 + 8]));
-      const int32_t dir = *((int32_t * )(& _data_indexVector[16*ctr_0 + 12]));
-      _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*f_in_inv_offsets_x[dir] + _stride_pdfs_1*y + _stride_pdfs_1*f_in_inv_offsets_y[dir] + _stride_pdfs_2*z + _stride_pdfs_2*f_in_inv_offsets_z[dir] + _stride_pdfs_3*f_in_inv_dir_idx[dir]] = (u_x*6.0*((double)(neighbour_offset_x[dir])) + u_y*6.0*((double)(neighbour_offset_y[dir])) + u_z*6.0*((double)(neighbour_offset_z[dir])))*-1.0*weights[dir] + _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir];
+      const int32_t x = *((int32_t *  )(& _data_indexVector[16*ctr_0]));
+      const int32_t y = *((int32_t *  )(& _data_indexVector[16*ctr_0 + 4]));
+      const int32_t z = *((int32_t *  )(& _data_indexVector[16*ctr_0 + 8]));
+      const int32_t dir = *((int32_t *  )(& _data_indexVector[16*ctr_0 + 12]));
+      _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*f_in_inv_offsets_x[dir] + _stride_pdfs_1*y + _stride_pdfs_1*f_in_inv_offsets_y[dir] + _stride_pdfs_2*z + _stride_pdfs_2*f_in_inv_offsets_z[dir] + _stride_pdfs_3*f_in_inv_dir_idx[dir]] = -(u_x*6.0*((double)(neighbour_offset_x[dir])) + u_y*6.0*((double)(neighbour_offset_y[dir])) + u_z*6.0*((double)(neighbour_offset_z[dir])))*weights[dir] + _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir];
    }
 }
 }
 
+//NOLINTEND(readability-non-const-parameter*)
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -101,8 +102,8 @@ void UBBD3Q19::run_impl(IBlock * block, IndexVectors::Type type)
 
    uint8_t timestep = pdfs->getTimestep();
    auto & u_y = u_y_;
-    auto & u_x = u_x_;
     auto & u_z = u_z_;
+    auto & u_x = u_x_;
    WALBERLA_ASSERT_GREATER_EQUAL(0, -int_c(pdfs->nrOfGhostLayers()))
     double * RESTRICT  _data_pdfs = pdfs->dataAt(0, 0, 0, 0);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());

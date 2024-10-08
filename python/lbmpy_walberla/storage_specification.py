@@ -113,8 +113,8 @@ def generate_lbm_storage_specification(generation_context: CodeGenerationContext
         'kernels': kernels,
         'direction_sizes': cg.get_direction_sizes(),
         'src_field': cg.src_field,
-        'dst_field': cg.dst_field
-
+        'dst_field': cg.dst_field,
+        'block_wise': cg.block_wise
     }
     if nonuniform:
         jinja_context['mask_field'] = cg.mask_field

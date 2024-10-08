@@ -7,8 +7,10 @@ import sympy as sp
 from jinja2 import Environment, PackageLoader, StrictUndefined
 
 from pystencils import Assignment, CreateKernelConfig, create_kernel, Field, FieldType, fields, Target
+from pystencils.astnodes import LoopOverCoordinate
+from pystencils.integer_functions import int_div
 from pystencils.stencil import offset_to_direction_string
-from pystencils.typing import TypedSymbol
+from pystencils.typing import TypedSymbol, BasicType, PointerType, FieldPointerSymbol
 from pystencils.stencil import inverse_direction
 from pystencils.bit_masks import flag_cond
 
@@ -18,7 +20,7 @@ from lbmpy.enums import Stencil
 from lbmpy.stencils import LBStencil
 
 from pystencils_walberla.cmake_integration import CodeGenerationContext
-from pystencils_walberla.kernel_selection import KernelFamily, KernelCallNode, SwitchNode
+from pystencils_walberla.kernel_selection import KernelFamily, KernelCallNode, SwitchNode, AbortNode
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.utility import config_from_context
 
@@ -101,6 +103,23 @@ class PackingKernelsCodegen:
         self.accessors = [get_accessor(streaming_pattern, t) for t in get_timesteps(streaming_pattern)]
         self.mask_field = fields(f'mask : uint32 [{self.dim}D]', layout=src_field.layout)
 
+        self.block_wise = True
+        if not self.inplace or not self.config.target == Target.GPU:
+            self.block_wise = False
+
+        self.index = TypedSymbol("index", dtype=BasicType(np.int64))
+        self.index_shape = TypedSymbol("_size_0", dtype=BasicType(np.int64))
+        self.src_ptr_type = PointerType(self.src_field.dtype, const=True, restrict=True, double_pointer=True)
+        self.src_ptr = FieldPointerSymbol(self.src_field.name, self.src_field.dtype, const=True)
+        self.dst_ptr_type = PointerType(self.dst_field.dtype, const=False, restrict=True, double_pointer=True)
+        self.dst_ptr = FieldPointerSymbol(self.dst_field.name, self.dst_field.dtype, const=False)
+
+        self.data_src = TypedSymbol(f"_data_{self.src_field.name}_dp", dtype=self.src_ptr_type)
+        self.data_dst = TypedSymbol(f"_data_{self.dst_field.name}_dp", dtype=self.dst_ptr_type)
+
+        self.f = sp.IndexedBase(self.data_src, shape=self.index_shape)
+        self.d = sp.IndexedBase(self.data_dst, shape=self.index_shape)
+
     def create_uniform_kernel_families(self, kernels_dict=None):
         kernels = dict() if kernels_dict is None else kernels_dict
 
@@ -115,6 +134,8 @@ class PackingKernelsCodegen:
 
     def create_nonuniform_kernel_families(self, kernels_dict=None):
         kernels = dict() if kernels_dict is None else kernels_dict
+        kernels['localCopyRedistribute'] = self.get_local_copy_redistribute_kernel_family()
+        kernels['localPartialCoalescence'] = self.get_local_copy_partial_coalescence_kernel_family()
         kernels['unpackRedistribute'] = self.get_unpack_redistribute_kernel_family()
         kernels['packPartialCoalescence'] = self.get_pack_partial_coalescence_kernel_family()
         kernels['zeroCoalescenceRegion'] = self.get_zero_coalescence_region_kernel_family()
@@ -231,7 +252,10 @@ class PackingKernelsCodegen:
         dir_string = offset_to_direction_string(comm_dir)
         streaming_dirs = self.get_streaming_dirs(comm_dir)
         src, dst = self._stream_out_accs(timestep)
-        assignments = []
+        assignments = list()
+        if self.block_wise:
+            assignments.append(Assignment(self.src_ptr, self.f[self.index]))
+            assignments.append(Assignment(self.dst_ptr, self.d[self.index]))
         dir_indices = sorted(self.stencil.index(d) for d in streaming_dirs)
         if len(dir_indices) == 0:
             return None
@@ -283,15 +307,59 @@ class PackingKernelsCodegen:
         return create_kernel(assignments, config=config)
 
     def get_unpack_redistribute_kernel_family(self):
-        return self._construct_directionwise_kernel_family(self.get_unpack_redistribute_ast)
+        return self._construct_directionwise_kernel_family(self.get_unpack_redistribute_ast,
+                                                           exclude_time_step=Timestep.EVEN)
 
     def get_local_copy_redistribute_ast(self, comm_dir, timestep):
-        #   TODO
-        raise NotImplementedError()
+        assert not all(d == 0 for d in comm_dir)
+        ctr = [LoopOverCoordinate.get_loop_counter_symbol(i) for i in range(self.stencil.D)]
+
+        dir_string = offset_to_direction_string(comm_dir)
+        streaming_dirs = self.get_streaming_dirs(inverse_direction(comm_dir))
+        dir_indices = sorted(self.stencil.index(d) for d in streaming_dirs)
+        if len(dir_indices) == 0:
+            return None
+
+        # for inplace streaming the dst (fine grid) must always be on odd state
+        dst_timestep = Timestep.ODD if self.inplace else Timestep.BOTH
+
+        _, dst = self._stream_out_accs(dst_timestep)
+        src, _ = self._stream_out_accs(timestep)
+
+        src_abs = self.src_field.new_field_with_different_name(self.src_field.name)
+        src_abs.field_type = FieldType.CUSTOM
+
+        orthos = self.orthogonal_principals(comm_dir)
+        sub_dirs = self.contained_principals(comm_dir)
+        orthogonal_combinations = self.linear_combinations(orthos)
+        subdir_combinations = self.linear_combinations_nozero(sub_dirs)
+        second_gl_dirs = [o + s for o, s in product(orthogonal_combinations, subdir_combinations)]
+        negative_dir_correction = np.array([(1 if d == -1 else 0) for d in comm_dir])
+        assignments = []
+        for offset in orthogonal_combinations:
+            o = offset + negative_dir_correction
+            for d in range(self.values_per_cell):
+                field_acc = dst[d].get_shifted(*o)
+                src_access = [int_div(ctr[i], 2) + o for i, o in enumerate(src[d].offsets)]
+                assignments.append(Assignment(field_acc, src_abs.absolute_access(src_access, (d, ))))
+
+        for offset in second_gl_dirs:
+            o = offset + negative_dir_correction
+            for d in dir_indices:
+                field_acc = dst[d].get_shifted(*o)
+                src_access = [int_div(ctr[i], 2) + o for i, o in enumerate(src[d].offsets)]
+                assignments.append(Assignment(field_acc, src_abs.absolute_access(src_access, (d, ))))
+
+        function_name = f'localCopyRedistribute_{dir_string}' + timestep_suffix(timestep)
+        iteration_slice = tuple(slice(None, None, 2) for _ in range(self.dim))
+        config = CreateKernelConfig(function_name=function_name, iteration_slice=iteration_slice,
+                                    data_type=self.data_type, ghost_layers=0, allow_double_writes=True,
+                                    cpu_openmp=self.config.cpu_openmp, target=self.config.target)
+
+        return create_kernel(assignments, config=config)
 
     def get_local_copy_redistribute_kernel_family(self):
-        #   TODO
-        raise NotImplementedError()
+        return self._construct_directionwise_kernel_family(self.get_local_copy_redistribute_ast)
 
     # --------------------------- Pack / Unpack / LocalCopy Fine to Coarse ---------------------------------------------
 
@@ -322,7 +390,8 @@ class PackingKernelsCodegen:
         return ast
 
     def get_pack_partial_coalescence_kernel_family(self):
-        return self._construct_directionwise_kernel_family(self.get_pack_partial_coalescence_ast)
+        return self._construct_directionwise_kernel_family(self.get_pack_partial_coalescence_ast,
+                                                           exclude_time_step=Timestep.ODD)
 
     def get_unpack_coalescence_ast(self, comm_dir, timestep):
         config = replace(self.config, ghost_layers=0)
@@ -370,12 +439,53 @@ class PackingKernelsCodegen:
     def get_zero_coalescence_region_kernel_family(self):
         return self._construct_directionwise_kernel_family(self.get_zero_coalescence_region_ast)
 
-    #   TODO
     def get_local_copy_partial_coalescence_ast(self, comm_dir, timestep):
-        raise NotImplementedError()
+        assert not all(d == 0 for d in comm_dir)
+        ctr = [LoopOverCoordinate.get_loop_counter_symbol(i) for i in range(self.stencil.D)]
+
+        dir_string = offset_to_direction_string(comm_dir)
+        streaming_dirs = self.get_streaming_dirs(comm_dir)
+        dir_indices = sorted(self.stencil.index(d) for d in streaming_dirs)
+
+        if len(dir_indices) == 0:
+            return None
+        buffer = sp.symbols(f"b_:{self.values_per_cell}")
+
+        # for inplace streaming the src (fine grid) must always be on even state
+        src_timestep = Timestep.ODD if self.inplace else Timestep.BOTH
+
+        src, _ = self._stream_in_accs(src_timestep)
+        _, dst = self._stream_in_accs(timestep.next())
+        mask = self.mask_field
+
+        dst_abs = self.dst_field.new_field_with_different_name(self.dst_field.name)
+        dst_abs.field_type = FieldType.CUSTOM
+
+        coalescence_factor = sp.Rational(1, 2 ** self.dim)
+
+        offsets = list(product(*((0, 1) for _ in comm_dir)))
+        assignments = []
+        for i, d in enumerate(dir_indices):
+            acc = 0
+            for o in offsets:
+                acc += flag_cond(d, mask[o], src[d].get_shifted(*o))
+            assignments.append(Assignment(buffer[i], acc))
+
+        for i, d in enumerate(dir_indices):
+            index = dst[d].index
+            dst_access = [int_div(ctr[i], 2) + o for i, o in enumerate(dst[d].offsets)]
+            assignments.append(Assignment(dst_abs.absolute_access(dst_access, index),
+                                          dst_abs.absolute_access(dst_access, index) + coalescence_factor * buffer[i]))
+
+        iteration_slice = tuple(slice(None, None, 2) for _ in range(self.dim))
+        config = replace(self.config, iteration_slice=iteration_slice, ghost_layers=0)
+
+        ast = create_kernel(assignments, config=config)
+        ast.function_name = f'localPartialCoalescence_{dir_string}' + timestep_suffix(timestep)
+        return ast
 
     def get_local_copy_partial_coalescence_kernel_family(self):
-        raise NotImplementedError()
+        return self._construct_directionwise_kernel_family(self.get_local_copy_partial_coalescence_ast)
 
     # ------------------------------------------ Utility ---------------------------------------------------------------
 
@@ -425,7 +535,7 @@ class PackingKernelsCodegen:
 
     # --------------------------- Private Members ----------------------------------------------------------------------
 
-    def _construct_directionwise_kernel_family(self, create_ast_callback):
+    def _construct_directionwise_kernel_family(self, create_ast_callback, exclude_time_step=None):
         subtrees = []
         direction_symbol = TypedSymbol('dir', dtype='stencil::Direction')
         for t in get_timesteps(self.streaming_pattern):
@@ -439,7 +549,10 @@ class PackingKernelsCodegen:
                     continue
                 kernel_call = KernelCallNode(ast)
                 cases_dict[f"stencil::{dir_string}"] = kernel_call
-            subtrees.append(SwitchNode(direction_symbol, cases_dict))
+            if exclude_time_step is not None and t == exclude_time_step:
+                subtrees.append(AbortNode("This function can not be called! Please contact the waLBerla team"))
+            else:
+                subtrees.append(SwitchNode(direction_symbol, cases_dict))
 
         if not self.inplace:
             tree = subtrees[0]

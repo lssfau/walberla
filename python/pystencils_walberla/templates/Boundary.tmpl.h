@@ -110,6 +110,9 @@ public:
             {%- endif %}
         }
 
+
+
+
     private:
         std::vector<CpuIndexVector> cpuVectors_{NUM_TYPES};
 
@@ -119,12 +122,88 @@ public:
         {%- endif %}
     };
 
+    {% if calculate_force -%}
+
+    struct ForceStruct {
+       double F_0;
+       double F_1;
+       double F_2;
+       ForceStruct() : F_0(double_c(0.0)), F_1(double_c(0.0)), F_2(double_c(0.0)) {}
+       bool operator==(const ForceStruct & o) const {
+          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && floatIsEqual(F_2, o.F_2);
+       }
+    };
+
+    class ForceVector
+    {
+     public:
+       ForceVector() = default;
+       bool operator==(ForceVector const &other) const { return other.cpuVector_ == cpuVector_; }
+
+       {% if target == 'gpu' -%}
+       ~ForceVector() {if(!gpuVector_.empty()){WALBERLA_GPU_CHECK(gpuFree( gpuVector_[0] ))}}
+       {% endif -%}
+
+       std::vector<ForceStruct> & forceVector() { return cpuVector_; }
+       ForceStruct * pointerCpu()  { return cpuVector_.data(); }
+       bool empty() {return cpuVector_.empty();}
+
+       {% if target == 'gpu' -%}
+       ForceStruct * pointerGpu()  { return gpuVector_[0]; }
+       {% endif -%}
+
+       Vector3<double> getForce()
+       {
+          syncCPU();
+          Vector3<double> result(double_c(0.0));
+          for(std::vector<ForceStruct>::iterator it = cpuVector_.begin(); it != cpuVector_.end(); ++it)
+          {
+             result[0] += it->F_0;
+             result[1] += it->F_1;
+             result[2] += it->F_2;
+          }
+          return result;
+       }
+
+       void syncGPU()
+       {
+          {% if target == 'gpu' -%}
+          if(!gpuVector_.empty()){WALBERLA_GPU_CHECK(gpuFree( gpuVector_[0] ))}
+          if(!cpuVector_.empty())
+          {
+             gpuVector_.resize(cpuVector_.size());
+             WALBERLA_GPU_CHECK(gpuMalloc(&gpuVector_[0], sizeof(ForceStruct) * cpuVector_.size()))
+             WALBERLA_GPU_CHECK(gpuMemcpy(gpuVector_[0], &cpuVector_[0], sizeof(ForceStruct) * cpuVector_.size(), gpuMemcpyHostToDevice))
+          }
+          {%- endif %}
+       }
+
+       void syncCPU()
+       {
+          {% if target == 'gpu' -%}
+          WALBERLA_GPU_CHECK(gpuMemcpy( &cpuVector_[0], gpuVector_[0] , sizeof(ForceStruct) * cpuVector_.size(), gpuMemcpyDeviceToHost ))
+          {%- endif %}
+       }
+
+     private:
+       std::vector<ForceStruct> cpuVector_;
+       {% if target == 'gpu' -%}
+       std::vector<ForceStruct *> gpuVector_;
+       {%- endif %}
+    };
+
+    {%- endif %}
+
     {{class_name}}( const shared_ptr<StructuredBlockForest> & blocks,
-                   {{kernel|generate_constructor_parameters(['indexVector', 'indexVectorSize'])}}{{additional_data_handler.constructor_arguments}})
-        :{{additional_data_handler.initialiser_list}} {{ kernel|generate_constructor_initializer_list(['indexVector', 'indexVectorSize']) }}
+                   {{kernel|generate_constructor_parameters(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize'])}}{{additional_data_handler.constructor_arguments}})
+        :{{additional_data_handler.initialiser_list}} {{ kernel|generate_constructor_initializer_list(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize']) }}
     {
         auto createIdxVector = []( IBlock * const , StructuredBlockStorage * const ) { return new IndexVectors(); };
         indexVectorID = blocks->addStructuredBlockData< IndexVectors >( createIdxVector, "IndexField_{{class_name}}");
+        {% if calculate_force -%}
+        auto createForceVector = []( IBlock * const , StructuredBlockStorage * const ) { return new ForceVector(); };
+        forceVectorID = blocks->addStructuredBlockData< ForceVector >( createForceVector, "forceVector_{{class_name}}");
+        {%- endif %}
     };
 
     void run (
@@ -147,6 +226,19 @@ public:
     void outer (
         {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}}
     );
+
+    Vector3<double> getForce(IBlock * {% if calculate_force -%}block{%else%}/*block*/{%- endif %})
+    {
+       {% if calculate_force -%}
+       auto * forceVector = block->getData<ForceVector>(forceVectorID);
+       if(forceVector->empty())
+          return Vector3<double>(double_c(0.0));
+       return forceVector->getForce();
+       {% else %}
+       WALBERLA_ABORT("Boundary condition was not generated including force calculation.")
+       return Vector3<double>(double_c(0.0));
+       {%- endif %}
+    }
 
     std::function<void (IBlock *)> getSweep( {{- [interface_spec.high_level_args, ["gpuStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} )
     {
@@ -186,6 +278,9 @@ public:
         auto & indexVectorAll = indexVectors->indexVector(IndexVectors::ALL);
         auto & indexVectorInner = indexVectors->indexVector(IndexVectors::INNER);
         auto & indexVectorOuter = indexVectors->indexVector(IndexVectors::OUTER);
+        {% if calculate_force -%}
+        auto * forceVector = block->getData< ForceVector > ( forceVectorID );
+        {%- endif %}
 
         auto * flagField = block->getData< FlagField_T > ( flagFieldID );
         {{additional_data_handler.additional_field_data|indent(4)}}
@@ -300,6 +395,10 @@ public:
         {% endif %}
 
         indexVectors->syncGPU();
+        {% if calculate_force -%}
+        forceVector->forceVector().resize(indexVectorAll.size());
+        forceVector->syncGPU();
+        {%- endif %}
     }
 
 private:
@@ -310,9 +409,12 @@ private:
    );
 
     BlockDataID indexVectorID;
+    {% if calculate_force -%}
+    BlockDataID forceVectorID;
+    {%- endif %}
     {{additional_data_handler.additional_member_variable|indent(4)}}
 public:
-    {{kernel|generate_members(('indexVector', 'indexVectorSize'))|indent(4)}}
+    {{kernel|generate_members(('indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize'))|indent(4)}}
 };
 
 

@@ -23,17 +23,23 @@ const bool infoCsePdfs = {cse_pdfs};
 
 with CodeGeneration() as ctx:
     field_type = "float64" if ctx.double_accuracy else "float32"
+    cpu_vec = {"instruction_set": None}
 
-    streaming_pattern = 'aa'
+    streaming_pattern = 'esopull'
     timesteps = get_timesteps(streaming_pattern)
     stencil = LBStencil(Stencil.D3Q19)
+    method_enum = Method.CUMULANT
+
+    fourth_order_correction = 0.01 if method_enum == Method.CUMULANT and stencil.Q == 27 else False
+    collision_setup = "cumulant-K17" if fourth_order_correction else method_enum.name.lower()
 
     assert stencil.D == 3, "This application supports only three-dimensional stencils"
     pdfs, pdfs_tmp = ps.fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): {field_type}[3D]", layout='fzyx')
     density_field, velocity_field = ps.fields(f"density, velocity(3) : {field_type}[3D]", layout='fzyx')
     macroscopic_fields = {'density': density_field, 'velocity': velocity_field}
 
-    lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega, compressible=True,
+    lbm_config = LBMConfig(stencil=stencil, method=method_enum, relaxation_rate=omega, compressible=True,
+                           fourth_order_correction=fourth_order_correction,
                            streaming_pattern=streaming_pattern)
     lbm_opt = LBMOptimisation(cse_global=False, field_layout="fzyx")
 
@@ -50,12 +56,12 @@ with CodeGeneration() as ctx:
                          lbm_config=lbm_config, lbm_optimisation=lbm_opt,
                          nonuniform=True, boundaries=[no_slip, ubb],
                          macroscopic_fields=macroscopic_fields,
-                         target=ps.Target.CPU)
+                         target=ps.Target.CPU, cpu_vectorize_info=cpu_vec,)
 
     infoHeaderParams = {
         'stencil': stencil.name.lower(),
         'streaming_pattern': streaming_pattern,
-        'collision_setup': lbm_config.method.name.lower(),
+        'collision_setup': collision_setup,
         'cse_global': int(lbm_opt.cse_global),
         'cse_pdfs': int(lbm_opt.cse_pdfs),
     }

@@ -92,6 +92,16 @@ public:
       return c;
    }
 
+   uint64_t numberOfCells() const
+   {
+      return cells_.numberOfCells();
+   }
+
+   uint64_t numberOfFluidCells() const
+   {
+      return fluidCells_.numberOfCells();
+   }
+
    double mlups( const uint_t timeSteps, const double time ) const
    {
       double m( 0.0 );

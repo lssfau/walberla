@@ -64,6 +64,9 @@ using SweepCollection_T = lbm::UniformGridCPUSweepCollection;
 
 using blockforest::communication::UniformBufferedScheme;
 
+using macroFieldType = VelocityField_T::value_type;
+using pdfFieldType = PdfField_T::value_type;
+
 int main(int argc, char** argv)
 {
    const mpi::Environment env(argc, argv);
@@ -87,10 +90,10 @@ int main(int argc, char** argv)
 
       // Creating fields
       const StorageSpecification_T StorageSpec = StorageSpecification_T();
-      auto fieldAllocator = make_shared< field::AllocateAligned< real_t, 64 > >();
+      auto fieldAllocator = make_shared< field::AllocateAligned< pdfFieldType, 64 > >();
       const BlockDataID pdfFieldId  = lbm_generated::addPdfFieldToStorage(blocks, "pdfs", StorageSpec, field::fzyx, fieldAllocator);
-      const BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
-      const BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
+      const BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", macroFieldType(0.0), field::fzyx);
+      const BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", macroFieldType(1.0), field::fzyx);
       const BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
 
       // Initialize velocity on cpu
@@ -235,12 +238,16 @@ int main(int argc, char** argv)
                   pythonCallbackResults.data().exposeValue("numProcesses", performance.processes());
                   pythonCallbackResults.data().exposeValue("numThreads", performance.threads());
                   pythonCallbackResults.data().exposeValue("numCores", performance.cores());
+                  pythonCallbackResults.data().exposeValue("numberOfCells", performance.numberOfCells());
+                  pythonCallbackResults.data().exposeValue("numberOfFluidCells", performance.numberOfFluidCells());
                   pythonCallbackResults.data().exposeValue("mlups", performance.mlups(timesteps, time));
                   pythonCallbackResults.data().exposeValue("mlupsPerCore", performance.mlupsPerCore(timesteps, time));
                   pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
                   pythonCallbackResults.data().exposeValue("stencil", infoStencil);
                   pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);
                   pythonCallbackResults.data().exposeValue("collisionSetup", infoCollisionSetup);
+                  pythonCallbackResults.data().exposeValue("vectorised", vectorised);
+                  pythonCallbackResults.data().exposeValue("nontemporal", nontemporal);
                   pythonCallbackResults.data().exposeValue("cse_global", infoCseGlobal);
                   pythonCallbackResults.data().exposeValue("cse_pdfs", infoCsePdfs);
                   // Call Python function to report results

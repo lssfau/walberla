@@ -32,12 +32,19 @@ class KernelInfo:
         all_headers = [list(get_headers(self.ast))]
         return reduce(merge_sorted_lists, all_headers)
 
-    def generate_kernel_invocation_code(self, **kwargs):
+    def generate_kernel_invocation_code(self, plain_kernel_call=False, **kwargs):
         ast = self.ast
         ast_params = self.parameters
         fnc_name = ast.function_name
         is_cpu = self.ast.target == Target.CPU
         call_parameters = ", ".join([p.symbol.name for p in ast_params])
+
+        if plain_kernel_call:
+            if is_cpu:
+                return f"internal_{fnc_name}::{fnc_name}({call_parameters});"
+            else:
+                stream = kwargs.get('stream', '0')
+                return f"internal_{fnc_name}::{fnc_name}<<<_grid, _block, 0, {stream}>>>({call_parameters});"
 
         if not is_cpu:
             stream = kwargs.get('stream', '0')

@@ -28,7 +28,7 @@ using namespace walberla::gpu;
 namespace walberla::lbm_generated {
 
 template< typename LatticeStorageSpecification_T >
-class GPUPdfField : public GPUField< real_t >
+class GPUPdfField : public GPUField< typename LatticeStorageSpecification_T::value_type >
 {
  public:
 
@@ -38,7 +38,7 @@ class GPUPdfField : public GPUField< real_t >
    using LatticeStorageSpecification = LatticeStorageSpecification_T;
    using Stencil = typename LatticeStorageSpecification_T::Stencil;
 
-   using value_type = typename GPUField<real_t>::value_type;
+   using value_type = typename LatticeStorageSpecification_T::value_type;
    //@}
    //*******************************************************************************************************************
 
@@ -59,7 +59,7 @@ template< typename LatticeStorageSpecification_T >
 GPUPdfField< LatticeStorageSpecification_T >::GPUPdfField( uint_t _xSize, uint_t _ySize, uint_t _zSize,
                                                           const LatticeStorageSpecification_T & storageSpecification,
                                                           uint_t ghostLayers, const Layout & layout, bool usePitchedMem) :
-                    GPUField< real_t>( _xSize, _ySize, _zSize, LatticeStorageSpecification_T::Stencil::Size, ghostLayers, layout, usePitchedMem ), storageSpecification_( storageSpecification )
+                    GPUField<value_type>( _xSize, _ySize, _zSize, LatticeStorageSpecification_T::Stencil::Size, ghostLayers, layout, usePitchedMem ), storageSpecification_( storageSpecification )
 {
 }
 

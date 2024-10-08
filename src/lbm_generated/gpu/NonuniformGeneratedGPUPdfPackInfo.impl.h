@@ -55,7 +55,7 @@ std::shared_ptr< NonuniformGeneratedGPUPdfPackInfo< PdfField_T > >
    auto handling = std::make_shared<NonuniformGPUCommDataHandling< LatticeStorageSpecification_T > >(blocks);
    BlockDataID commDataID = sbf->addBlockData(handling, dataIdentifier);
 
-   return std::make_shared<NonuniformGeneratedGPUPdfPackInfo< PdfField_T > >(pdfFieldID, commDataID);
+   return std::make_shared<NonuniformGeneratedGPUPdfPackInfo< PdfField_T > >(sbf->getNumberOfLevels(), pdfFieldID, commDataID);
 }
 
 
@@ -81,6 +81,9 @@ template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalEqualLevel(
    const Block* sender, Block* receiver, stencil::Direction dir, gpuStream_t stream)
 {
+   if(kernels_.blockWise())
+      return;
+
    auto srcField = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
    auto dstField = receiver->getData< PdfField_T >(pdfFieldID_);
 
@@ -90,6 +93,57 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalEqualLevel
    srcField->getSliceBeforeGhostLayer(dir, srcRegion, gls, false);
    dstField->getGhostRegion(stencil::inverseDir[dir], dstRegion, gls, false);
    kernels_.localCopyDirection(srcField, srcRegion, dstField, dstRegion, dir, stream);
+}
+
+template< typename PdfField_T>
+void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::addForLocalEqualLevelComm(
+   const Block* sender, Block* receiver, stencil::Direction dir)
+{
+   if(!kernels_.blockWise())
+      return;
+   const uint_t level = sender->getLevel();
+   auto srcField = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
+   auto dstField = receiver->getData< PdfField_T >(pdfFieldID_);
+
+   CellInterval srcRegion;
+   CellInterval dstRegion;
+   cell_idx_t gls = skipsThroughCoarseBlock(sender, dir) ? 2 : 1;
+   srcField->getSliceBeforeGhostLayer(dir, srcRegion, gls, false);
+   dstField->getGhostRegion(stencil::inverseDir[dir], dstRegion, gls, false);
+
+   strides[0] = int64_t(srcField->xStride());
+   strides[1] = int64_t(srcField->yStride());
+   strides[2] = int64_t(srcField->zStride());
+   strides[3] = int64_t(1 * int64_t(srcField->fStride()));
+
+   value_type* data_pdfs_dst = dstField->dataAt(dstRegion.xMin(), dstRegion.yMin(), dstRegion.zMin(), 0);
+   value_type* data_pdfs_src = srcField->dataAt(srcRegion.xMin(), srcRegion.yMin(), srcRegion.zMin(), 0);
+
+   const uint_t index = level * Stencil::Q + dir;
+   Vector3<int64_t> size(int64_c(srcRegion.xSize()), int64_c(srcRegion.ySize()), int64_c(srcRegion.zSize()));
+
+   equalCommDST[index][size].emplace_back(data_pdfs_dst);
+   equalCommSRC[index][size].emplace_back(data_pdfs_src);
+}
+
+
+template< typename PdfField_T>
+void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalEqualLevel(uint64_t level, uint8_t timestep, gpuStream_t stream)
+{
+   if(!kernels_.blockWise())
+      return;
+
+   for (auto dir = CommunicationStencil::beginNoCenter(); dir != CommunicationStencil::end(); ++dir){
+      const uint_t index = level * Stencil::Q + *dir;
+      for (auto const& x : equalCommSRC[index]){
+         auto key = x.first;
+         value_type** data_pdfs_src_dp = equalCommSRCGPU[index][key];
+         value_type** data_pdfs_dst_dp = equalCommDSTGPU[index][key];
+         std::array< int64_t, 4 > size = { int64_c(equalCommSRC[index][key].size()), key[0], key[1], key[2] };
+
+         kernels_.blockLocalCopyDirection(data_pdfs_src_dp, data_pdfs_dst_dp, *dir, timestep, stream, size, strides);
+      }
+   }
 }
 
 
@@ -168,21 +222,13 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalCoarseToFi
       Direction const unpackDir      = dstIntervals[index].first;
       CellInterval dstInterval = dstIntervals[index].second;
 
-      uint_t packSize      = kernels_.size(srcInterval);
-
 #ifndef NDEBUG
       Direction const packDir        = srcIntervals[index].first;
       WALBERLA_ASSERT_EQUAL(packDir, stencil::inverseDir[unpackDir])
       uint_t unpackSize = kernels_.redistributeSize(dstInterval);
-      WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
+      WALBERLA_ASSERT_EQUAL(kernels_.size(srcInterval), unpackSize)
 #endif
-
-      // TODO: This is a dirty workaround. Code-generate direct redistribution!
-      unsigned char *buffer;
-      WALBERLA_GPU_CHECK( gpuMalloc( &buffer, packSize))
-      kernels_.packAll(srcField, srcInterval, buffer, stream);
-      kernels_.unpackRedistribute(dstField, dstInterval, buffer, unpackDir, stream);
-      WALBERLA_GPU_CHECK(gpuFree(buffer))
+      kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, unpackDir, stream);
    }
 }
 
@@ -190,6 +236,9 @@ template< typename PdfField_T>
 void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalCoarseToFine(
    const Block* coarseSender, Block* fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream)
 {
+   // WARNING: This function uses an inplace buffer array.
+   // If possible the direct communicateLocalCoarseToFine without buffer array should be used
+
    auto srcField = const_cast< Block* >(coarseSender)->getData< PdfField_T >(pdfFieldID_);
    auto dstField = fineReceiver->getData< PdfField_T >(pdfFieldID_);
 
@@ -269,22 +318,16 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalFineToCoar
 
    CellInterval srcInterval;
    srcField->getGhostRegion(dir, srcInterval, 2);
-   uint_t packSize = kernels_.partialCoalescenceSize(srcInterval, dir);
 
    CellInterval dstInterval = getCoarseBlockCoalescenceInterval(coarseReceiver, fineSender->getId(),
                                                                 invDir, dstField);
 
 #ifndef NDEBUG
    uint_t unpackSize = kernels_.size(dstInterval, invDir);
-   WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
+   WALBERLA_ASSERT_EQUAL(kernels_.partialCoalescenceSize(srcInterval, dir), unpackSize)
 #endif
 
-   // TODO: This is a dirty workaround. Code-generate direct redistribution!
-   unsigned char *buffer;
-   WALBERLA_GPU_CHECK( gpuMalloc( &buffer, packSize))
-   kernels_.packPartialCoalescence(srcField, maskField, srcInterval, buffer, dir, stream);
-   kernels_.unpackCoalescence(dstField, dstInterval, buffer, invDir, stream);
-   WALBERLA_GPU_CHECK(gpuFree(buffer))
+   kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir, stream);
 }
 
 
@@ -425,7 +468,7 @@ inline Vector3< cell_idx_t >
 }
 
 /**
- * Returns the part of a cell interval's hull of given \p width in direction \p dirVec.
+ * Returns the part of a cell interval's hull of given width in direction dirVec.
  * @param ci        The original cell interval
  * @param dirVec    Direction Vector
  * @param width     Width of the hull

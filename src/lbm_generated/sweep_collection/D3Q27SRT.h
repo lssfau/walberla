@@ -59,20 +59,20 @@ namespace lbm {
 
 class D3Q27SRT
 {
-public:
-  enum Type { ALL = 0, INNER = 1, OUTER = 2 };
+ public:
+   enum Type { ALL = 0, INNER = 1, OUTER = 2 };
 
    D3Q27SRT(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID pdfsID_, BlockDataID densityID_, BlockDataID velocityID_, double omega, const Cell & outerWidth=Cell(1, 1, 1))
-     : blocks_(blocks), pdfsID(pdfsID_), densityID(densityID_), velocityID(velocityID_), omega_(omega), outerWidth_(outerWidth)
+      : blocks_(blocks), pdfsID(pdfsID_), densityID(densityID_), velocityID(velocityID_), omega_(omega), outerWidth_(outerWidth)
    {
       
 
+      validInnerOuterSplit_= true;
+
       for (auto& iBlock : *blocks)
       {
-         if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 ||
-             int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 ||
-             int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
-          WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock")
+         if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 || int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 || int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
+            validInnerOuterSplit_ = false;
       }
    };
 
@@ -117,27 +117,33 @@ public:
 
    std::function<void (IBlock *)> streamCollide(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamCollideInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamCollideOuter(block); };
-         default:
-            return [this](IBlock* block) { streamCollide(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamCollideInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamCollideOuter(block); };
+      default:
+         return [this](IBlock* block) { streamCollide(block); };
       }
    }
 
    std::function<void (IBlock *)> streamCollide(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamCollideInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamCollideOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { streamCollide(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamCollideInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamCollideOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { streamCollide(block, ghost_layers); };
       }
    }
 
@@ -298,14 +304,14 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          streamCollideCellInterval(pdfs, pdfs_tmp, omega, ci);
       }
-    
+      
 
-    pdfs->swapDataPointers(pdfs_tmp);
+      pdfs->swapDataPointers(pdfs_tmp);
 
    }
    
@@ -317,27 +323,33 @@ public:
 
    std::function<void (IBlock *)> collide(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { collideInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { collideOuter(block); };
-         default:
-            return [this](IBlock* block) { collide(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { collideInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { collideOuter(block); };
+      default:
+         return [this](IBlock* block) { collide(block); };
       }
    }
 
    std::function<void (IBlock *)> collide(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { collideInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { collideOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { collide(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { collideInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { collideOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { collide(block, ghost_layers); };
       }
    }
 
@@ -425,14 +437,14 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          collideCellInterval(pdfs, omega, ci);
       }
-    
+      
 
-    
+      
    }
    
 
@@ -443,27 +455,33 @@ public:
 
    std::function<void (IBlock *)> stream(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamOuter(block); };
-         default:
-            return [this](IBlock* block) { stream(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamOuter(block); };
+      default:
+         return [this](IBlock* block) { stream(block); };
       }
    }
 
    std::function<void (IBlock *)> stream(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { stream(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { stream(block, ghost_layers); };
       }
    }
 
@@ -624,14 +642,14 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          streamCellInterval(pdfs, pdfs_tmp, ci);
       }
-    
+      
 
-    pdfs->swapDataPointers(pdfs_tmp);
+      pdfs->swapDataPointers(pdfs_tmp);
 
    }
    
@@ -643,27 +661,33 @@ public:
 
    std::function<void (IBlock *)> streamOnlyNoAdvancement(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamOnlyNoAdvancementInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamOnlyNoAdvancementOuter(block); };
-         default:
-            return [this](IBlock* block) { streamOnlyNoAdvancement(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamOnlyNoAdvancementInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamOnlyNoAdvancementOuter(block); };
+      default:
+         return [this](IBlock* block) { streamOnlyNoAdvancement(block); };
       }
    }
 
    std::function<void (IBlock *)> streamOnlyNoAdvancement(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { streamOnlyNoAdvancementInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { streamOnlyNoAdvancementOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { streamOnlyNoAdvancement(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { streamOnlyNoAdvancementInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { streamOnlyNoAdvancementOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { streamOnlyNoAdvancement(block, ghost_layers); };
       }
    }
 
@@ -821,14 +845,14 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          streamOnlyNoAdvancementCellInterval(pdfs, pdfs_tmp, ci);
       }
-    
+      
 
-    
+      
    }
    
 
@@ -839,27 +863,33 @@ public:
 
    std::function<void (IBlock *)> initialise(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { initialiseInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { initialiseOuter(block); };
-         default:
-            return [this](IBlock* block) { initialise(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { initialiseInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { initialiseOuter(block); };
+      default:
+         return [this](IBlock* block) { initialise(block); };
       }
    }
 
    std::function<void (IBlock *)> initialise(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { initialiseInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { initialiseOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { initialise(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { initialiseInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { initialiseOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { initialise(block, ghost_layers); };
       }
    }
 
@@ -870,9 +900,9 @@ public:
       const cell_idx_t ghost_layers = 0;
       
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -884,9 +914,9 @@ public:
    {
       
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -898,9 +928,9 @@ public:
 
    void initialiseCellInterval(IBlock * block, const CellInterval & ci)
    {
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -910,9 +940,9 @@ public:
 
    void initialiseInner(IBlock * block)
    {
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -926,9 +956,9 @@ public:
    void initialiseOuter(IBlock * block)
    {
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -957,14 +987,14 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          initialiseCellInterval(density, pdfs, velocity, ci);
       }
-    
+      
 
-    
+      
    }
    
 
@@ -975,27 +1005,33 @@ public:
 
    std::function<void (IBlock *)> calculateMacroscopicParameters(Type type)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { calculateMacroscopicParametersInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { calculateMacroscopicParametersOuter(block); };
-         default:
-            return [this](IBlock* block) { calculateMacroscopicParameters(block); };
+      case Type::INNER:
+         return [this](IBlock* block) { calculateMacroscopicParametersInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { calculateMacroscopicParametersOuter(block); };
+      default:
+         return [this](IBlock* block) { calculateMacroscopicParameters(block); };
       }
    }
 
    std::function<void (IBlock *)> calculateMacroscopicParameters(Type type, const cell_idx_t ghost_layers)
    {
+      if (!validInnerOuterSplit_ && type != Type::ALL)
+         WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller, increase cellsPerBlock or avoid communication hiding")
+
       switch (type)
       {
-         case Type::INNER:
-            return [this](IBlock* block) { calculateMacroscopicParametersInner(block); };
-         case Type::OUTER:
-            return [this](IBlock* block) { calculateMacroscopicParametersOuter(block); };
-         default:
-            return [this, ghost_layers](IBlock* block) { calculateMacroscopicParameters(block, ghost_layers); };
+      case Type::INNER:
+         return [this](IBlock* block) { calculateMacroscopicParametersInner(block); };
+      case Type::OUTER:
+         return [this](IBlock* block) { calculateMacroscopicParametersOuter(block); };
+      default:
+         return [this, ghost_layers](IBlock* block) { calculateMacroscopicParameters(block, ghost_layers); };
       }
    }
 
@@ -1006,9 +1042,9 @@ public:
       const cell_idx_t ghost_layers = 0;
       
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -1020,9 +1056,9 @@ public:
    {
       
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -1034,9 +1070,9 @@ public:
 
    void calculateMacroscopicParametersCellInterval(IBlock * block, const CellInterval & ci)
    {
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -1046,9 +1082,9 @@ public:
 
    void calculateMacroscopicParametersInner(IBlock * block)
    {
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -1062,9 +1098,9 @@ public:
    void calculateMacroscopicParametersOuter(IBlock * block)
    {
 
+      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 27> >(pdfsID);
-      auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
 
       
       
@@ -1093,32 +1129,33 @@ public:
          layers_.push_back(ci);
       }
 
-    
+      
       for( auto & ci: layers_ )
       {
          calculateMacroscopicParametersCellInterval(density, pdfs, velocity, ci);
       }
-    
+      
 
-    
+      
    }
    
 
    
 
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      BlockDataID pdfsID;
+ private:
+   shared_ptr< StructuredBlockStorage > blocks_;
+   BlockDataID pdfsID;
     BlockDataID densityID;
     BlockDataID velocityID;
     double omega_;
 
     private: std::set< field::GhostLayerField<double, 27> *, field::SwapableCompare< field::GhostLayerField<double, 27> * > > cache_pdfs_;
 
-      Cell outerWidth_;
-      std::vector<CellInterval> layers_;
+   Cell outerWidth_;
+   std::vector<CellInterval> layers_;
+   bool validInnerOuterSplit_;
 
-      
+   
 };
 
 

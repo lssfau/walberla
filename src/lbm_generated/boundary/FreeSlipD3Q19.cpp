@@ -45,9 +45,9 @@ namespace lbm {
 #pragma diag_suppress 177
 #endif
 #endif
-
+//NOLINTBEGIN(readability-non-const-parameter*)
 namespace internal_freeslipd3q19_even {
-static FUNC_PREFIX void freeslipd3q19_even(const uint8_t * RESTRICT const _data_indexVector, double * RESTRICT  _data_pdfs, int64_t const _stride_pdfs_0, int64_t const _stride_pdfs_1, int64_t const _stride_pdfs_2, int64_t const _stride_pdfs_3, int32_t indexVectorSize)
+static FUNC_PREFIX void freeslipd3q19_even(uint8_t * RESTRICT const _data_indexVector, double * RESTRICT  _data_pdfs, int64_t const _stride_pdfs_0, int64_t const _stride_pdfs_1, int64_t const _stride_pdfs_2, int64_t const _stride_pdfs_3, int32_t indexVectorSize)
 {
    
    const int32_t f_in_inv_dir_idx [] = { 0,2,1,4,3,6,5,10,9,8,7,16,15,18,17,12,11,14,13 }; 
@@ -63,16 +63,16 @@ static FUNC_PREFIX void freeslipd3q19_even(const uint8_t * RESTRICT const _data_
    
    for (int64_t ctr_0 = 0; ctr_0 < indexVectorSize; ctr_0 += 1)
    {
-      const int32_t x = *((int32_t * )(& _data_indexVector[32*ctr_0]));
-      const int32_t y = *((int32_t * )(& _data_indexVector[32*ctr_0 + 4]));
-      const int32_t z = *((int32_t * )(& _data_indexVector[32*ctr_0 + 8]));
-      const int32_t dir = *((int32_t * )(& _data_indexVector[32*ctr_0 + 12]));
-      _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*f_in_inv_offsets_x[dir] + _stride_pdfs_1*y + _stride_pdfs_1*f_in_inv_offsets_y[dir] + _stride_pdfs_2*z + _stride_pdfs_2*f_in_inv_offsets_z[dir] + _stride_pdfs_3*f_in_inv_dir_idx[dir]] = _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*(*((int32_t * )(& _data_indexVector[32*ctr_0 + 16])) + neighbour_offset_x[dir]) + _stride_pdfs_1*y + _stride_pdfs_1*(*((int32_t * )(& _data_indexVector[32*ctr_0 + 20])) + neighbour_offset_y[dir]) + _stride_pdfs_2*z + _stride_pdfs_2*(*((int32_t * )(& _data_indexVector[32*ctr_0 + 24])) + neighbour_offset_z[dir]) + _stride_pdfs_3**((int32_t * )(& _data_indexVector[32*ctr_0 + 28]))];
+      const int32_t x = *((int32_t *  )(& _data_indexVector[32*ctr_0]));
+      const int32_t y = *((int32_t *  )(& _data_indexVector[32*ctr_0 + 4]));
+      const int32_t z = *((int32_t *  )(& _data_indexVector[32*ctr_0 + 8]));
+      const int32_t dir = *((int32_t *  )(& _data_indexVector[32*ctr_0 + 12]));
+      _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*f_in_inv_offsets_x[dir] + _stride_pdfs_1*y + _stride_pdfs_1*f_in_inv_offsets_y[dir] + _stride_pdfs_2*z + _stride_pdfs_2*f_in_inv_offsets_z[dir] + _stride_pdfs_3*f_in_inv_dir_idx[dir]] = _data_pdfs[_stride_pdfs_0*x + _stride_pdfs_0*(*((int32_t *  )(& _data_indexVector[32*ctr_0 + 16])) + neighbour_offset_x[dir]) + _stride_pdfs_1*y + _stride_pdfs_1*(*((int32_t *  )(& _data_indexVector[32*ctr_0 + 20])) + neighbour_offset_y[dir]) + _stride_pdfs_2*z + _stride_pdfs_2*(*((int32_t *  )(& _data_indexVector[32*ctr_0 + 24])) + neighbour_offset_z[dir]) + _stride_pdfs_3**((int32_t *  )(& _data_indexVector[32*ctr_0 + 28]))];
    }
 }
 }
 
-
+//NOLINTEND(readability-non-const-parameter*)
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif

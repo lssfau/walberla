@@ -90,6 +90,8 @@ class NonUniformGPUScheme
    inline void waitCommunicateCoarseToFine(uint_t fineLevel);
    inline void waitCommunicateFineToCoarse(uint_t fineLevel);
 
+   inline void setTimestepForLevel(uint_t level, uint8_t timestep) {timestepPerLevel_[level] = timestep;}
+
  private:
    void setupCommunication();
 
@@ -128,6 +130,7 @@ class NonUniformGPUScheme
    Set< SUID > incompatibleBlockSelectors_;
 
    gpuStream_t streams_[Stencil::Q];
+   std::vector< uint8_t > timestepPerLevel_;
 };
 
 template< typename Stencil >
@@ -196,6 +199,7 @@ void NonUniformGPUScheme< Stencil >::refresh()
    WALBERLA_CHECK_NOT_NULLPTR(forest,
                               "Trying to access communication for a block storage object that doesn't exist anymore")
    const uint_t levels = forest->getNumberOfLevels();
+   timestepPerLevel_.resize(levels);
 
    for (uint_t i = 0; i != 3; ++i)
    {
@@ -313,6 +317,13 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
       for (auto it : headers_[EQUAL_LEVEL][index])
          bufferSystemGPU_[EQUAL_LEVEL][index].sendBuffer(it.first).clear();
 
+   // If localCommunication is generated blockwise it is executed here.
+   for (auto level : participatingLevels){
+      for (auto& pi : packInfos_){
+         pi->communicateLocalEqualLevel(level, timestepPerLevel_[level], streams_[0]);
+      }
+   }
+
    // Start filling send buffers
    for (auto& iBlock : *forest)
    {
@@ -369,12 +380,11 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
          }
       }
    }
+
    // wait for packing to finish
-   for (uint_t i = 0; i < Stencil::Q; ++i)
-   {
+   for (uint_t i = 0; i < Stencil::Q; ++i){
       WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
    }
-
 
    if (sendFromGPU_)
       bufferSystemGPU_[EQUAL_LEVEL][index].sendAll();
@@ -836,8 +846,14 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
             if (!selectable::isSetSelected(block->getNeighborState(neighborIdx, uint_t(0)), requiredBlockSelectors_,
                                            incompatibleBlockSelectors_))
                continue;
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+
+            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) ){
+               auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( block->getNeighborId( neighborIdx, uint_t(0) )) );
+               for (auto& pi : packInfos_){
+                  pi->addForLocalEqualLevelComm(block, receiverBlock, *dir);
+               }
                continue;
+            }
 
             const BlockID& receiverId = block->getNeighborId(neighborIdx, uint_t(0));
             auto nProcess             = mpi::MPIRank(block->getNeighborProcess(neighborIdx, uint_t(0)));
@@ -913,6 +929,10 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
             receiverInfo[COARSE_TO_FINE][level].insert( nProcess );
          }
       }
+   }
+
+   for (auto& pi : packInfos_){
+      pi->sync();
    }
 
    for (uint_t i = 0; i != 3; ++i)

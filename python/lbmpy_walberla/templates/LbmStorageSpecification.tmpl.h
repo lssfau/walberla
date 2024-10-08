@@ -30,21 +30,13 @@
 #include "stencil/{{stencil_name}}.h"
 #include "stencil/Directions.h"
 
-{% if target is equalto 'cpu' -%}
-#define FUNC_PREFIX
-{%- elif target is equalto 'gpu' -%}
-#define FUNC_PREFIX __global__
+{% if target is equalto 'gpu' -%}
 #include "gpu/GPUWrapper.h"
 #include "gpu/GPUField.h"
 {%- endif %}
 
-#ifdef __GNUC__
-#define RESTRICT __restrict__
-#elif _MSC_VER
-#define RESTRICT __restrict
-#else
-#define RESTRICT
-#endif
+#include <array>
+
 
 #if defined WALBERLA_CXX_COMPILER_IS_GNU || defined WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma GCC diagnostic push
@@ -120,6 +112,7 @@ class {{class_name}}
       {%- endif %}
 
       static const bool inplace = {% if inplace -%} true {%- else -%} false {%- endif -%};
+      static const bool blockWise = {% if block_wise -%} true {%- else -%} false {%- endif -%};
 
       /**
       * Packs all pdfs from the given cell interval to the send buffer.
@@ -179,12 +172,20 @@ class {{class_name}}
         * PDFs streaming aligned with the direction dir are copied from the sending interval onto the receiving interval.
         * */
       void localCopyDirection(
+         {{- [src_field.dtype.c_name + "** _data_" + src_field.name + "_dp", dst_field.dtype.c_name + "** _data_" + dst_field.name + "_dp",
+                kernels['localCopyDirection'].kernel_selection_parameters,
+                ["gpuStream_t stream"] if is_gpu else [], "std::array<int64_t, 4>& _sizes", "std::array<int64_t, 4>& _strides"]
+             | type_identifier_list -}}
+      ) const;
+
+      void localCopyDirection(
          {{- [ "PdfField_T * " + src_field.name, "CellInterval & srcInterval",
                 "PdfField_T * " + dst_field.name, "CellInterval & dstInterval",
                 kernels['localCopyDirection'].kernel_selection_parameters,
                 ["gpuStream_t stream = nullptr"] if is_gpu else []]
              | type_identifier_list -}}
       ) const;
+
 
       /**
        * Returns the number of bytes that will be packed from / unpacked to the cell interval
@@ -208,6 +209,26 @@ class {{class_name}}
       }
 
       {% if nonuniform -%}
+
+      /**
+       * Local uniform redistribute.
+       * */
+      void localCopyRedistribute(
+         {{- [  "PdfField_T * " + src_field.name, "CellInterval & srcInterval",
+                "PdfField_T * " + dst_field.name, "CellInterval & dstInterval", kernels['localCopyRedistribute'].kernel_selection_parameters,
+                ["gpuStream_t stream = nullptr"] if is_gpu else []]
+             | type_identifier_list -}}
+      ) const;
+
+      /**
+       * Local partial coalescence.
+       * */
+      void localPartialCoalescence(
+         {{- [  "PdfField_T * " + src_field.name, "MaskField_T * " + mask_field.name, "CellInterval & srcInterval",
+                "PdfField_T * " + dst_field.name, "CellInterval & dstInterval", kernels['localPartialCoalescence'].kernel_selection_parameters,
+                ["gpuStream_t stream = nullptr"] if is_gpu else []]
+             | type_identifier_list -}}
+      ) const;
 
       /**
        * Unpacks and uniformly redistributes populations coming from a coarse block onto the fine grid.

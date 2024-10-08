@@ -158,9 +158,9 @@ public:
    void startCommunication();
    void wait();
 
+   std::function<void()> getCommunicateFunctor();
    std::function<void()> getStartCommunicateFunctor();
    std::function<void()> getWaitFunctor();
-   std::function<void()> getCommunicateFunctor();
    //@}
    //*******************************************************************************************************************
 
@@ -535,6 +535,12 @@ void UniformBufferedScheme<Stencil>::localBufferUnpacking( const uint_t index, c
 }
 
 template< typename Stencil >
+std::function<void()> UniformBufferedScheme<Stencil>::getCommunicateFunctor()
+{
+   return std::bind( &UniformBufferedScheme::communicate, this );
+}
+
+template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getStartCommunicateFunctor()
 {
    return std::bind( &UniformBufferedScheme::startCommunication, this );
@@ -544,12 +550,6 @@ template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getWaitFunctor()
 {
    return std::bind( &UniformBufferedScheme::wait, this );
-}
-
-template< typename Stencil >
-std::function<void()> UniformBufferedScheme<Stencil>::getCommunicateFunctor()
-{
-   return std::bind( &UniformBufferedScheme::communicate, this );
 }
 
 } // namespace communication

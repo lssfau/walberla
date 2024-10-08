@@ -10,6 +10,7 @@ qrc_*
 
 # CLion indexing
 *.uuid
+.fleet
 
 
 # Generated files
@@ -32,10 +33,12 @@ qrc_*
 # Visual Studio Code
 /.vscode
 
+# Zed
+/.cache*
+
 # CLion
 *.idea
 *.clion*
-
 
 # QtCreator
 CMakeLists.txt.user.*
