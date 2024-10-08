@@ -97,7 +97,7 @@ with CodeGeneration() as ctx:
     mean_sgs_tke = ps.fields(f"mean_sgs_tke: {data_type}[{stencil.D}D]", layout=layout)
     velocity = ps.fields(f"velocity({stencil.D}): {data_type}[{stencil.D}D]", layout=layout)
     mean_velocity = ps.fields(f"mean_velocity({stencil.D}): {data_type}[{stencil.D}D]", layout=layout)
-    sum_of_products = ps.fields(f"sum_of_products({stencil.D**2}): {data_type}[{stencil.D}D]", layout=layout)
+    sum_of_squares_field = ps.fields(f"sum_of_squares_field({stencil.D**2}): {data_type}[{stencil.D}D]", layout=layout)
 
     # LBM Optimisation
     lbm_opt = LBMOptimisation(cse_global=True,
@@ -146,7 +146,7 @@ with CodeGeneration() as ctx:
     #   Welford update
     # welford_update = welford_assignments(vector_field=velocity, mean_vector_field=mean_velocity)
     welford_update = welford_assignments(field=velocity, mean_field=mean_velocity,
-                                         sum_of_products_field=sum_of_products)
+                                         sum_of_squares_field=sum_of_squares_field)
     generate_sweep(ctx, "TurbulentChannel_Welford", welford_update, target=target)
 
     tke_welford_update = welford_assignments(field=sgs_tke, mean_field=mean_sgs_tke)
