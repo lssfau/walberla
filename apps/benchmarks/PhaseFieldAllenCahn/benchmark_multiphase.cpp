@@ -29,6 +29,7 @@
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/InitBoundaryHandling.h"
+#include "lbm_generated/evaluation/PerformanceEvaluation.h"
 
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/DictWrapper.h"
@@ -78,14 +79,10 @@ int main(int argc, char** argv)
       logging::configureLogging(config);
       shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGridFromConfig(config);
 
-      Vector3< uint_t > cellsPerBlock =
-         config->getBlock("DomainSetup").getParameter< Vector3< uint_t > >("cellsPerBlock");
       // Reading parameters
       auto parameters                    = config->getOneBlock("Parameters");
       const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
       const uint_t timesteps             = parameters.getParameter< uint_t >("timesteps", uint_c(50));
-      const real_t remainingTimeLoggerFrequency =
-         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0));
       const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
       const uint_t warmupSteps  = parameters.getParameter< uint_t >("warmupSteps", uint_t(2));
 
@@ -102,6 +99,7 @@ int main(int argc, char** argv)
          gpu::addGPUFieldToStorage< VelocityField_T >(blocks, vel_field, "velocity field on GPU", true);
       BlockDataID phase_field_gpu =
          gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "phase field on GPU", true);
+      BlockDataID phase_field_tmp = gpu::addGPUFieldToStorage< PhaseField_T >(blocks, phase_field, "temporary phasefield", true);
 #else
       BlockDataID lb_phase_field =
          field::addToStorage< PdfField_phase_T >(blocks, "lb phase field", real_c(0.0), field::fzyx);
@@ -109,6 +107,7 @@ int main(int argc, char** argv)
          field::addToStorage< PdfField_hydro_T >(blocks, "lb velocity field", real_c(0.0), field::fzyx);
       BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
+      BlockDataID phase_field_tmp = field::addToStorage< PhaseField_T >(blocks, "phase tmp", real_c(0.0), field::fzyx);
 #endif
 
       if (timeStepStrategy != "phase_only" && timeStepStrategy != "hydro_only" && timeStepStrategy != "kernel_only")
@@ -139,47 +138,80 @@ int main(int argc, char** argv)
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field_gpu, vel_field_gpu);
 
       pystencils::phase_field_LB_step phase_field_LB_step(
-         lb_phase_field_gpu, phase_field_gpu, vel_field_gpu, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
+         lb_phase_field_gpu, phase_field_gpu, phase_field_tmp, vel_field_gpu, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
       pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu, gpuBlockSize[0],
                                               gpuBlockSize[1], gpuBlockSize[2]);
 #else
       pystencils::initialize_phase_field_distributions init_h(lb_phase_field, phase_field, vel_field);
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field, vel_field);
-      pystencils::phase_field_LB_step phase_field_LB_step(lb_phase_field, phase_field, vel_field);
+      pystencils::phase_field_LB_step phase_field_LB_step(lb_phase_field, phase_field, phase_field_tmp, vel_field);
       pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field, phase_field, vel_field);
 #endif
 
 // add communication
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      const bool cudaEnabledMpi = parameters.getParameter< bool >("cudaEnabledMpi", false);
-      auto Comm_velocity_based_distributions =
-         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
-      auto generatedPackInfo_velocity_based_distributions =
-         make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
-      Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
-      auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
-      Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_phase_field);
+      const bool gpuEnabledMpi = parameters.getParameter< bool >("cudaEnabledMpi", false);
+      const int streamLowPriority  = 0;
+      const int streamHighPriority = 0;
+      auto defaultStream     = gpu::StreamRAII::newPriorityStream(streamLowPriority);
+      auto innerOuterStreams = gpu::ParallelStreams(streamHighPriority);
 
-      auto Comm_phase_field_distributions =
-         make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
-      auto generatedPackInfo_phase_field_distributions =
-         make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
-      Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      auto generatedPackInfo_phase_field_distributions = make_shared< lbm::PackInfo_phase_field_distributions>(lb_phase_field_gpu);
+      auto generatedPackInfo_velocity_based_distributions = make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
+      auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
+
+      auto UniformGPUSchemeVelocityBasedDistributions = make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, gpuEnabledMpi, false);
+      auto UniformGPUSchemePhaseFieldDistributions = make_shared< gpu::communication::UniformGPUScheme< Full_Stencil_T > >(blocks, gpuEnabledMpi, false);
+      auto UniformGPUSchemePhaseField = make_shared< gpu::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, gpuEnabledMpi, false, 65432);
+
+      UniformGPUSchemeVelocityBasedDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
+      UniformGPUSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      UniformGPUSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
+
+      auto Comm_velocity_based_distributions_start = std::function< void() >([&]() { UniformGPUSchemeVelocityBasedDistributions->startCommunication(); });
+      auto Comm_velocity_based_distributions_wait = std::function< void() >([&]() { UniformGPUSchemeVelocityBasedDistributions->wait(); });
+
+      auto Comm_phase_field_distributions_start = std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->startCommunication(); });
+      auto Comm_phase_field_distributions_wait = std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->wait(); });
+
+      auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(); });
+
+      auto swapPhaseField = std::function< void(IBlock *) >([&](IBlock * b)
+        {
+           auto phaseField    = b->getData< gpu::GPUField<real_t> >(phase_field_gpu);
+           auto phaseFieldTMP = b->getData< gpu::GPUField<real_t> >(phase_field_tmp);
+           phaseField->swapDataPointers(phaseFieldTMP);
+        });
+
 #else
 
-      blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_velocity_based_distributions(blocks);
-
+      auto generatedPackInfo_phase_field_distributions = make_shared< lbm::PackInfo_phase_field_distributions>(lb_phase_field);
+      auto generatedPackInfo_velocity_based_distributions = make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field);
-      auto generatedPackInfo_velocity_based_distributions =
-         make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field);
 
-      Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_phase_field);
-      Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_velocity_based_distributions);
+      auto UniformGPUSchemeVelocityBasedDistributions = make_shared< blockforest::communication::UniformBufferedScheme< Full_Stencil_T > >(blocks);
+      auto UniformGPUSchemePhaseFieldDistributions = make_shared< blockforest::communication::UniformBufferedScheme< Full_Stencil_T > >(blocks);
+      auto UniformGPUSchemePhaseField = make_shared< blockforest::communication::UniformBufferedScheme< Full_Stencil_T > >(blocks, 65432);
 
-      blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field_distributions(blocks);
-      auto generatedPackInfo_phase_field_distributions =
-         make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field);
-      Comm_phase_field_distributions.addPackInfo(generatedPackInfo_phase_field_distributions);
+      UniformGPUSchemeVelocityBasedDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
+      UniformGPUSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      UniformGPUSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
+
+      auto Comm_velocity_based_distributions_start = std::function< void() >([&]() { UniformGPUSchemeVelocityBasedDistributions->startCommunication(); });
+      auto Comm_velocity_based_distributions_wait = std::function< void() >([&]() { UniformGPUSchemeVelocityBasedDistributions->wait(); });
+
+      auto Comm_phase_field_distributions = std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->communicate(); });
+      auto Comm_phase_field_distributions_start = std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->startCommunication(); });
+      auto Comm_phase_field_distributions_wait = std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->wait(); });
+
+      auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(); });
+
+      auto swapPhaseField = std::function< void(IBlock *) >([&](IBlock * b)
+        {
+           auto phaseField    = b->getData< PhaseField_T >(phase_field);
+           auto phaseFieldTMP = b->getData< PhaseField_T >(phase_field_tmp);
+           phaseField->swapDataPointers(phaseFieldTMP);
+        });
 #endif
 
       BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -201,99 +233,37 @@ int main(int argc, char** argv)
             init_h(&block);
             init_g(&block);
          }
+         WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+         WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+         WALBERLA_MPI_BARRIER()
          WALBERLA_LOG_INFO_ON_ROOT("initialization of the distributions done")
       }
 
+      SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      int const streamLowPriority  = 0;
-      int const streamHighPriority = 0;
-      auto defaultStream     = gpu::StreamRAII::newPriorityStream(streamLowPriority);
-      auto innerOuterStreams = gpu::ParallelStreams(streamHighPriority);
-#endif
+      timeloop.add() << BeforeFunction(Comm_velocity_based_distributions_start, "Start Hydro PDFs Communication")
+                     << Sweep(phase_field_LB_step.getSweep(defaultStream), "Phase LB Step")
+                     << AfterFunction(Comm_velocity_based_distributions_wait, "Wait Hydro PDFs Communication");
 
-      auto timeLoop = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
-#if defined(WALBERLA_BUILD_WITH_CUDA)
-      auto normalTimeStep = [&]() {
-         Comm_velocity_based_distributions->startCommunication();
-         for (auto& block : *blocks)
-            phase_field_LB_step(&block, defaultStream);
-         Comm_velocity_based_distributions->wait();
+      timeloop.add() << BeforeFunction(Comm_phase_field_distributions_start, "Start Phase PDFs Communication")
+                     << Sweep(hydro_LB_step.getSweep(defaultStream), "Hydro LB Step");
+      timeloop.add() << Sweep(swapPhaseField, "Swap PhaseField")
+                     << AfterFunction(Comm_phase_field_distributions_wait, "Wait Phase PDFs Communication");
 
-         Comm_phase_field_distributions->startCommunication();
-         for (auto& block : *blocks)
-            hydro_LB_step(&block, defaultStream);
-         Comm_phase_field_distributions->wait();
-      };
-      auto phase_only = [&]() {
-         for (auto& block : *blocks)
-            phase_field_LB_step(&block);
-      };
-      auto hydro_only = [&]() {
-         for (auto& block : *blocks)
-            hydro_LB_step(&block);
-      };
-      auto without_comm = [&]() {
-         for (auto& block : *blocks)
-            phase_field_LB_step(&block);
-         for (auto& block : *blocks)
-            hydro_LB_step(&block);
-      };
+      timeloop.addFuncAfterTimeStep(Comm_phase_field, "Communication Phase field");
+
 #else
-      auto normalTimeStep = [&]() {
-            Comm_velocity_based_distributions.startCommunication();
-            for (auto& block : *blocks)
-               phase_field_LB_step(&block);
-            Comm_velocity_based_distributions.wait();
+      timeloop.add() << BeforeFunction(Comm_velocity_based_distributions_start, "Start Hydro PDFs Communication")
+                     << Sweep(phase_field_LB_step.getSweep(), "Phase LB Step")
+                     << AfterFunction(Comm_velocity_based_distributions_wait, "Wait Hydro PDFs Communication");
 
-            Comm_phase_field_distributions.startCommunication();
-            for (auto& block : *blocks)
-               hydro_LB_step(&block);
-            Comm_phase_field_distributions.wait();
-      };
-      auto phase_only = [&]() {
-         for (auto& block : *blocks)
-            phase_field_LB_step(&block);
-      };
-      auto hydro_only = [&]() {
-         for (auto& block : *blocks)
-            hydro_LB_step(&block);
-      };
-      auto without_comm = [&]() {
-         for (auto& block : *blocks)
-            phase_field_LB_step(&block);
-         for (auto& block : *blocks)
-            hydro_LB_step(&block);
-      };
+      timeloop.add() << BeforeFunction(Comm_phase_field_distributions_start, "Start Phase PDFs Communication")
+                     << Sweep(hydro_LB_step.getSweep(), "Hydro LB Step");
+      timeloop.add() << Sweep(swapPhaseField, "Swap PhaseField")
+                     << AfterFunction(Comm_phase_field_distributions_wait, "Wait Phase PDFs Communication");
+
+      timeloop.addFuncAfterTimeStep(Comm_phase_field, "Communication Phase field");
 #endif
-      std::function< void() > timeStep;
-      if (timeStepStrategy == "phase_only")
-      {
-         timeStep = std::function< void() >(phase_only);
-         WALBERLA_LOG_INFO_ON_ROOT("started only phasefield step without communication for benchmarking")
-      }
-      else if (timeStepStrategy == "hydro_only")
-      {
-         timeStep = std::function< void() >(hydro_only);
-         WALBERLA_LOG_INFO_ON_ROOT("started only hydro step without communication for benchmarking")
-      }
-      else if (timeStepStrategy == "kernel_only")
-      {
-         timeStep = std::function< void() >(without_comm);
-         WALBERLA_LOG_INFO_ON_ROOT("started complete phasefield model without communication for benchmarking")
-      }
-      else
-      {
-         timeStep = std::function< void() >(normalTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("normal timestep with overlapping")
-      }
-
-      timeLoop->add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
-
-      // remaining time logger
-      if (remainingTimeLoggerFrequency > 0)
-         timeLoop->addFuncAfterTimeStep(
-            timing::RemainingTimeLogger(timeLoop->getNrOfTimeSteps(), remainingTimeLoggerFrequency),
-            "remaining time logger");
 
       uint_t const vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 1)
@@ -307,40 +277,60 @@ int main(int argc, char** argv)
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field, "phase");
          vtkOutput->addCellDataWriter(phaseWriter);
 
-         timeLoop->addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+         timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
 
-      for (uint_t i = 0; i < warmupSteps; ++i)
-         timeLoop->singleStep();
+      lbm_generated::PerformanceEvaluation< FlagField_T > const performance(blocks, flagFieldID, fluidFlagUID);
+      field::CellCounter< FlagField_T > fluidCells(blocks, flagFieldID, fluidFlagUID);
+      fluidCells();
 
-      timeLoop->setCurrentTimeStepToZero();
+      WALBERLA_LOG_INFO_ON_ROOT("Multiphase benchmark with " << fluidCells.numberOfCells() << " fluid cells")
+      WALBERLA_LOG_INFO_ON_ROOT("Running " << warmupSteps << " timesteps to warm up the system")
+
+      for (uint_t i = 0; i < warmupSteps; ++i)
+         timeloop.singleStep();
+
+      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+      WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+      WALBERLA_MPI_BARRIER()
+      WALBERLA_LOG_INFO_ON_ROOT("Warmup timesteps done")
+
+      timeloop.setCurrentTimeStepToZero();
+      WALBERLA_MPI_BARRIER()
       WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+      WcTimingPool timeloopTiming;
       WcTimer simTimer;
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      cudaDeviceSynchronize();
+      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
 #endif
       simTimer.start();
-      timeLoop->run();
+      timeloop.run(timeloopTiming);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-      cudaDeviceSynchronize();
+      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+      WALBERLA_GPU_CHECK(gpuPeekAtLastError())
 #endif
+      WALBERLA_MPI_BARRIER()
       simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = real_c(simTimer.last());
-      auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
-      auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
-      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << mlupsPerProcess)
+      double time = simTimer.max();
+      WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+      performance.logResultOnRoot(timesteps, time);
+
+      const auto reducedTimeloopTiming = timeloopTiming.getReduced();
+      WALBERLA_LOG_RESULT_ON_ROOT("Time loop timing:\n" << *reducedTimeloopTiming)
+
+      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << performance.mlupsPerProcess(timesteps, time))
       WALBERLA_LOG_RESULT_ON_ROOT("Time per time step: " << time / real_c(timesteps) << " s")
       WALBERLA_ROOT_SECTION()
       {
          python_coupling::PythonCallback pythonCallbackResults("results_callback");
          if (pythonCallbackResults.isCallable())
          {
-            pythonCallbackResults.data().exposeValue("mlupsPerProcess", mlupsPerProcess);
+            pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
             pythonCallbackResults.data().exposeValue("stencil_phase", StencilNamePhase);
             pythonCallbackResults.data().exposeValue("stencil_hydro", StencilNameHydro);
             #if defined(WALBERLA_BUILD_WITH_CUDA)
-               pythonCallbackResults.data().exposeValue("cuda_enabled_mpi", cudaEnabledMpi);
+               pythonCallbackResults.data().exposeValue("cuda_enabled_mpi", gpuEnabledMpi);
             #endif
             // Call Python function to report results
             pythonCallbackResults();

@@ -6,6 +6,11 @@ import waLBerla as wlb
 from waLBerla.tools.config import block_decomposition
 from waLBerla.tools.sqlitedb import sequenceValuesToScalars
 
+try:
+    import machinestate as ms
+except ImportError:
+    ms = None
+
 
 def num_time_steps(block_size, time_steps_for_256_block=50):
     # Number of time steps run for a workload of 256^3 cells per process
@@ -136,6 +141,14 @@ class Scenario:
         data['compile_flags'] = wlb.build_info.compiler_flags
         data['walberla_version'] = wlb.build_info.version
         data['build_machine'] = wlb.build_info.build_machine
+
+        if ms:
+            state = ms.MachineState(extended=False, anonymous=True)
+            state.generate()                        # generate subclasses
+            state.update()                          # read information
+            data["MachineState"] = str(state.get())
+        else:
+            print("MachineState module is not available. MachineState was not saved")
 
         sequenceValuesToScalars(data)
 

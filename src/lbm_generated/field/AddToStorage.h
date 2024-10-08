@@ -41,7 +41,7 @@ public:
    using Base_T = field::BlockDataHandling<PdfField_T, LatticeStorageSpecification_T::Stencil::D == 2>;
 
    PdfFieldHandling( const weak_ptr< StructuredBlockStorage > & blocks, const LatticeStorageSpecification_T & storageSpecification,
-                     const uint_t nrOfGhostLayers, const field::Layout & layout, const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr ) :
+                     const uint_t nrOfGhostLayers, const field::Layout & layout, const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr ) :
       blocks_( blocks ), storageSpecification_( storageSpecification ),
       nrOfGhostLayers_( nrOfGhostLayers ), layout_( layout ), alloc_( alloc ){}
 
@@ -106,7 +106,7 @@ private:
 
    uint_t            nrOfGhostLayers_;
    field::Layout     layout_;
-   shared_ptr< field::FieldAllocator<real_t> > alloc_;
+   shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc_;
 
 }; // class PdfFieldHandling
 
@@ -121,10 +121,10 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
                                   const field::Layout & layout = field::fzyx,
                                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
-                                  const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
+                                  const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr)
 {
    return blocks->addBlockData( make_shared< internal::PdfFieldHandling< LatticeStorageSpecification_T > >(
-                                   blocks, storageSpecification, ghostLayers, layout, alloc ),
+                                blocks, storageSpecification, ghostLayers, layout, alloc ),
                                 identifier, requiredSelectors, incompatibleSelectors );
 }
 
@@ -134,7 +134,7 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
                                  const field::Layout & layout = field::fzyx,
                                  const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                  const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
-                                 const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
+                                 const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr)
 {
    auto ghostLayers = uint_c(1);
 
@@ -148,7 +148,7 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
                                  const LatticeStorageSpecification_T & storageSpecification,
                                  const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                  const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
-                                 const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
+                                 const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr)
 {
    auto ghostLayers = uint_c(1);
    auto layout = field::fzyx;
@@ -161,7 +161,7 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
 template< typename LatticeStorageSpecification_T, typename BlockStorage_T >
 BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                                  const LatticeStorageSpecification_T & storageSpecification,
-                                 const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
+                                 const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr)
 {
    auto ghostLayers = uint_c(1);
    auto layout = field::fzyx;
@@ -177,7 +177,7 @@ template< typename LatticeStorageSpecification_T, typename BlockStorage_T >
 BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                                  const LatticeStorageSpecification_T & storageSpecification,
                                  const field::Layout & layout = field::fzyx,
-                                 const shared_ptr< field::FieldAllocator<real_t> > alloc = nullptr)
+                                 const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc = nullptr)
 {
    auto ghostLayers = uint_c(1);
    auto requiredSelectors = Set<SUID>::emptySet();
@@ -193,7 +193,7 @@ BlockDataID addPdfFieldToStorage( const shared_ptr< BlockStorage_T > & blocks, c
                                  const LatticeStorageSpecification_T & storageSpecification,
                                  const uint_t ghostLayers,
                                  const field::Layout & layout,
-                                 const shared_ptr< field::FieldAllocator<real_t> > alloc)
+                                 const shared_ptr< field::FieldAllocator<typename LatticeStorageSpecification_T::value_type> > alloc)
 {
    auto requiredSelectors = Set<SUID>::emptySet();
    auto incompatibleSelectors = Set<SUID>::emptySet();

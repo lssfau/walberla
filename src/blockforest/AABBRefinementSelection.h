@@ -46,7 +46,7 @@ public:
    {
       if( configBlock )
       {
-         auto refinementBlock = configBlock.getBlock( "AABBRefinementSelection" );
+         auto refinementBlock = configBlock.getKey() == "AABBRefinementSelection" ? configBlock : configBlock.getBlock( "AABBRefinementSelection" );
 
          if( refinementBlock )
          {

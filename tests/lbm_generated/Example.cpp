@@ -145,7 +145,7 @@ int main(int argc, char** argv)
    auto domainSetup = walberlaEnv.config()->getOneBlock("DomainSetup");
    auto parameters  = walberlaEnv.config()->getOneBlock("Parameters");
 
-   auto omega           = parameters.getParameter< real_t >("omega", real_c(1.4));
+   real_t omega           = parameters.getParameter< real_t >("omega", real_c(1.4));
    auto timesteps       = parameters.getParameter< uint_t >("timesteps", uint_c(10)) + uint_c(1);
    auto refinementDepth = parameters.getParameter< uint_t >("refinementDepth", uint_c(1));
 

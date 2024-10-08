@@ -3,7 +3,6 @@ from typing import Callable, List, Dict
 from pystencils import Target, Field
 
 from lbmpy.creationfunctions import LbmCollisionRule, LBMConfig, LBMOptimisation
-from lbmpy.relaxationrates import get_shear_relaxation_rate
 
 from pystencils_walberla.cmake_integration import CodeGenerationContext
 
@@ -35,7 +34,7 @@ def generate_lbm_package(ctx: CodeGenerationContext, name: str,
                                        cpu_openmp=cpu_openmp)
 
     if nonuniform:
-        omega = get_shear_relaxation_rate(method)
+        omega = lbm_config.relaxation_rate
         refinement_scaling = RefinementScaling()
         refinement_scaling.add_standard_relaxation_rate_scaling(omega)
     else:
@@ -47,15 +46,15 @@ def generate_lbm_package(ctx: CodeGenerationContext, name: str,
                                   macroscopic_fields=macroscopic_fields,
                                   target=target, data_type=data_type,
                                   cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info,
-                                  max_threads=max_threads,
-                                  set_pre_collision_pdfs=set_pre_collision_pdfs,
+                                  max_threads=max_threads, set_pre_collision_pdfs=set_pre_collision_pdfs,
                                   **kernel_parameters)
 
     spatial_shape = None
     if lbm_optimisation.symbolic_field and lbm_optimisation.symbolic_field.has_fixed_shape:
         spatial_shape = lbm_optimisation.symbolic_field.spatial_shape + (lbm_config.stencil.Q, )
 
-    generate_boundary_collection(ctx, f'{name}BoundaryCollection', boundary_generators=boundaries,
-                                 lb_method=method, field_name='pdfs', spatial_shape=spatial_shape,
-                                 streaming_pattern=lbm_config.streaming_pattern,
-                                 target=target, layout=lbm_optimisation.field_layout)
+    if boundaries is not None:
+        generate_boundary_collection(ctx, f'{name}BoundaryCollection', boundary_generators=boundaries,
+                                     lb_method=method, field_name='pdfs', spatial_shape=spatial_shape,
+                                     streaming_pattern=lbm_config.streaming_pattern,
+                                     target=target, layout=lbm_optimisation.field_layout)

@@ -19,7 +19,7 @@ with CodeGeneration() as ctx:
     field_type = "float64" if ctx.double_accuracy else "float32"
 
     stencil_phase = LBStencil(Stencil.D3Q15)
-    stencil_hydro = LBStencil(Stencil.D3Q27)
+    stencil_hydro = LBStencil(Stencil.D3Q19)
     assert (stencil_phase.D == stencil_hydro.D)
 
     ########################
@@ -76,13 +76,13 @@ with CodeGeneration() as ctx:
                                  delta_equilibrium=False,
                                  force=sp.symbols(f"F_:{stencil_phase.D}"), velocity_input=u,
                                  weighted=True, relaxation_rates=rates,
-                                 output={'density': C_tmp}, kernel_type='stream_pull_collide')
+                                 output={'density': C_tmp})
     method_phase = create_lb_method(lbm_config=lbm_config_phase)
 
     lbm_config_hydro = LBMConfig(stencil=stencil_hydro, method=Method.MRT, compressible=False,
                                  weighted=True, relaxation_rate=omega,
                                  force=sp.symbols(f"F_:{stencil_hydro.D}"),
-                                 output={'velocity': u}, kernel_type='collide_stream_push')
+                                 output={'velocity': u})
     method_hydro = create_lb_method(lbm_config=lbm_config_hydro)
 
     # create the kernels for the initialization of the g and h field
@@ -137,7 +137,8 @@ with CodeGeneration() as ctx:
     sweep_params = {'block_size': sweep_block_size}
 
     stencil_typedefs = {'Stencil_phase_T': stencil_phase,
-                        'Stencil_hydro_T': stencil_hydro}
+                        'Stencil_hydro_T': stencil_hydro,
+                        'Full_Stencil_T': LBStencil(Stencil.D3Q27)}
     field_typedefs = {'PdfField_phase_T': h,
                       'PdfField_hydro_T': g,
                       'VelocityField_T': u,
@@ -156,7 +157,7 @@ with CodeGeneration() as ctx:
         generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates, target=Target.CPU)
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
-                       field_swaps=[(h, h_tmp), (C, C_tmp)],
+                       field_swaps=[(h, h_tmp)],
                        inner_outer_split=True,
                        cpu_vectorize_info=cpu_vec,
                        target=Target.CPU)
@@ -172,7 +173,7 @@ with CodeGeneration() as ctx:
                               streaming_pattern='pull', target=Target.CPU)
 
         generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
-                              streaming_pattern='push', target=Target.CPU)
+                              streaming_pattern='pull', target=Target.CPU)
 
         generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target=Target.CPU)
 
@@ -183,7 +184,7 @@ with CodeGeneration() as ctx:
                        g_updates, target=Target.GPU)
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
-                       field_swaps=[(h, h_tmp), (C, C_tmp)],
+                       field_swaps=[(h, h_tmp)],
                        target=Target.GPU,
                        gpu_indexing_params=sweep_params,
                        varying_parameters=vp)
@@ -198,7 +199,7 @@ with CodeGeneration() as ctx:
                               streaming_pattern='pull', target=Target.GPU)
 
         generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
-                              streaming_pattern='push', target=Target.GPU)
+                              streaming_pattern='pull', target=Target.GPU)
 
         generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target=Target.GPU)
 

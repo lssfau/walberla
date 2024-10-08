@@ -82,10 +82,23 @@ void {{class_name}}::run_impl(
 
    uint8_t * _data_indexVector = reinterpret_cast<uint8_t*>(pointer);
 
-   {{kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
+   {% if calculate_force -%}
+   auto * forceVector = block->getData<ForceVector>(forceVectorID);
+   WALBERLA_ASSERT_EQUAL(indexVectorSize, int32_c( forceVector->forceVector().size() ))
+
+   {% if target == 'gpu' -%}
+   auto forcePointer = forceVector->pointerGpu();
+   int32_t forceVectorSize = int32_c( forceVector->forceVector().size() );
+   {% else %}
+   auto forcePointer = forceVector->pointerCpu();
+   {% endif %}
+   uint8_t * _data_forceVector = reinterpret_cast<uint8_t*>(forcePointer);
+   {%- endif %}
+
+   {{kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize'])|indent(4)}}
    {{kernel|generate_timestep_advancements|indent(4)}}
-   {{kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize'], ignore_fields=True)|indent(4) }}
-   {{kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
+   {{kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize', 'forceVectorSize'], ignore_fields=True)|indent(4) }}
+   {{kernel|generate_call(spatial_shape_symbols=['indexVectorSize', 'forceVectorSize'], stream='stream')|indent(4)}}
 }
 
 void {{class_name}}::run(

@@ -22,6 +22,8 @@
 #include "core/DataTypes.h"
 #include "domain_decomposition/IBlock.h"
 
+
+
 #include "OutflowD3Q27.h"
 #include "FixedDensityD3Q27.h"
 #include "FreeSlipD3Q27.h"
@@ -43,11 +45,11 @@ class D3Q27BoundaryCollection
    D3Q27BoundaryCollection(const shared_ptr<StructuredBlockForest> & blocks, BlockDataID flagID_, BlockDataID pdfsID_, FlagUID domainUID_, double density, double u_x, double u_y, double u_z)
       : blocks_(blocks), flagID(flagID_), pdfsID(pdfsID_), domainUID(domainUID_)
    {
-      OutflowD3Q27Object = std::make_shared< lbm::OutflowD3Q27 >(blocks, pdfsID);
-      FixedDensityD3Q27Object = std::make_shared< lbm::FixedDensityD3Q27 >(blocks, pdfsID, density);
-      FreeSlipD3Q27Object = std::make_shared< lbm::FreeSlipD3Q27 >(blocks, pdfsID);
-      NoSlipD3Q27Object = std::make_shared< lbm::NoSlipD3Q27 >(blocks, pdfsID);
-      UBBD3Q27Object = std::make_shared< lbm::UBBD3Q27 >(blocks, pdfsID, u_x, u_y, u_z);
+      OutflowD3Q27Object = std::make_shared< lbm::OutflowD3Q27 >(blocks, pdfsID_);
+      FixedDensityD3Q27Object = std::make_shared< lbm::FixedDensityD3Q27 >(blocks, pdfsID_, density);
+      FreeSlipD3Q27Object = std::make_shared< lbm::FreeSlipD3Q27 >(blocks, pdfsID_);
+      NoSlipD3Q27Object = std::make_shared< lbm::NoSlipD3Q27 >(blocks, pdfsID_);
+      UBBD3Q27Object = std::make_shared< lbm::UBBD3Q27 >(blocks, pdfsID_, u_x, u_y, u_z);
       
 
       OutflowD3Q27Object->fillFromFlagField<FlagField_T>(blocks, flagID, walberla::FlagUID("Outflow"), domainUID);

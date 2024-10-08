@@ -42,6 +42,7 @@ template< typename PdfField_T, bool inplace >
 class NonuniformGPUPackingKernelsWrapper
 {
  public:
+   using value_type = typename PdfField_T::value_type;
    void packAll(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, gpuStream_t stream ) const  = 0;
    void unpackAll(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, gpuStream_t stream ) const = 0;
    void localCopyAll(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
@@ -49,8 +50,15 @@ class NonuniformGPUPackingKernelsWrapper
 
    void packDirection(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, Direction dir, gpuStream_t stream ) const  = 0;
    void unpackDirection(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer, Direction dir, gpuStream_t stream ) const = 0;
-   void localCopyDirection(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
-                           CellInterval dstInterval, Direction dir, gpuStream_t stream) const               = 0;
+   void localCopyDirection(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField, CellInterval dstInterval, Direction dir, gpuStream_t stream) const = 0;
+   void blockLocalCopyDirection(value_type** data_pdfs_src_dp, value_type** data_pdfs_dst_dp, Direction dir, uint8_t timestep, gpuStream_t stream, std::array<int64_t, 4>& sizes, std::array<int64_t, 4>& strides) const = 0;
+
+
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir, gpuStream_t stream) const = 0;
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskFieldGPU* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir, gpuStream_t stream) const = 0;
 
    void unpackRedistribute(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer,
                            stencil::Direction dir, gpuStream_t stream ) const = 0;
@@ -64,6 +72,8 @@ class NonuniformGPUPackingKernelsWrapper
    uint_t size(CellInterval ci) const                                  = 0;
    uint_t redistributeSize(CellInterval ci) const                      = 0;
    uint_t partialCoalescenceSize(CellInterval ci, Direction dir) const = 0;
+
+   bool blockWise() const = 0;
 };
 
 /*
@@ -75,6 +85,7 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, false >
  public:
    using LatticeStorageSpecification_T = typename PdfField_T::LatticeStorageSpecification;
    using PackingKernels_T              = typename LatticeStorageSpecification_T::PackKernels;
+   using value_type                    = typename PdfField_T::value_type;
 
    void packAll(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, gpuStream_t stream = nullptr) const
    {
@@ -108,6 +119,23 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, false >
       kernels_.localCopyDirection(srcField, srcInterval, dstField, dstInterval, dir, stream);
    }
 
+   void blockLocalCopyDirection(value_type** data_pdfs_src_dp, value_type** data_pdfs_dst_dp, Direction dir, uint8_t /*timestep*/, gpuStream_t stream, std::array<int64_t, 4>& sizes, std::array<int64_t, 4>& strides) const
+   {
+      kernels_.localCopyDirection(data_pdfs_src_dp, data_pdfs_dst_dp, dir, stream, sizes, strides);
+   }
+
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir, gpuStream_t stream) const
+   {
+      kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, dir, stream);
+   }
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskFieldGPU* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir, gpuStream_t stream) const
+   {
+      kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir, stream);
+   }
+
    void unpackRedistribute(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer,
                            stencil::Direction dir, gpuStream_t stream = nullptr) const
    {
@@ -138,6 +166,8 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, false >
       return kernels_.partialCoalescenceSize(ci, dir);
    }
 
+   bool blockWise() const {return kernels_.blockWise;}
+
  private:
    PackingKernels_T kernels_;
 };
@@ -151,6 +181,7 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, true >
  public:
    using LatticeStorageSpecification_T = typename PdfField_T::LatticeStorageSpecification;
    using PackingKernels_T              = typename LatticeStorageSpecification_T::PackKernels;
+   using value_type                    = typename PdfField_T::value_type;
 
    void packAll(PdfField_T* srcField, CellInterval ci, unsigned char* outBuffer, gpuStream_t stream = nullptr) const
    {
@@ -192,10 +223,39 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, true >
       kernels_.localCopyDirection(srcField, srcInterval, dstField, dstInterval, dir, timestep, stream);
    }
 
+   void blockLocalCopyDirection(value_type** data_pdfs_src_dp, value_type** data_pdfs_dst_dp, Direction dir, uint8_t timestep, gpuStream_t stream, std::array<int64_t, 4>& sizes, std::array<int64_t, 4>& strides) const
+   {
+      kernels_.localCopyDirection(data_pdfs_src_dp, data_pdfs_dst_dp, dir, timestep, stream, sizes, strides);
+   }
+
+
+   void localCopyRedistribute(PdfField_T* srcField, CellInterval srcInterval, PdfField_T* dstField,
+                              CellInterval dstInterval, Direction dir, gpuStream_t stream) const
+   {
+      uint8_t timestep = srcField->getTimestep();
+      WALBERLA_ASSERT(!((dstField->getTimestep() & 1) ^ 1), "When the course to fine step is executed, the fine Field must "
+                                                            "be on an odd timestep, while the source field could either be "
+                                                            "on an even or an odd state.")
+      kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, dir, timestep, stream);
+   }
+
+   void localPartialCoalescence(PdfField_T* srcField, PartialCoalescenceMaskFieldGPU* maskField, CellInterval srcInterval,
+                                PdfField_T* dstField, CellInterval dstInterval, Direction dir, gpuStream_t stream) const
+   {
+      uint8_t timestep = dstField->getTimestep();
+      WALBERLA_ASSERT((srcField->getTimestep() & 1) ^ 1, "When the fine to coarse step is executed, the fine Field must "
+                                                          "be on an even timestep, while the source field could either be "
+                                                          "on an even or an odd state.")
+      kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir, timestep, stream);
+   }
+
    void unpackRedistribute(PdfField_T* dstField, CellInterval ci, unsigned char* inBuffer,
                            stencil::Direction dir, gpuStream_t stream = nullptr) const
    {
       uint8_t timestep = dstField->getTimestep();
+      WALBERLA_ASSERT(!((dstField->getTimestep() & 1) ^ 1), "When the course to fine step is executed, the fine Field must "
+                                                            "be on an odd timestep, while the source field could either be "
+                                                            "on an even or an odd state.")
       kernels_.unpackRedistribute(dstField, ci, inBuffer, dir, timestep, stream);
    }
 
@@ -203,6 +263,9 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, true >
                                unsigned char* outBuffer, Direction dir, gpuStream_t stream = nullptr) const
    {
       uint8_t timestep = srcField->getTimestep();
+      WALBERLA_ASSERT((srcField->getTimestep() & 1) ^ 1, "When the fine to coarse step is executed, the fine Field must "
+                                                         "be on an even timestep, while the source field could either be "
+                                                         "on an even or an odd state.")
       kernels_.packPartialCoalescence(srcField, maskField, ci, outBuffer, dir, timestep, stream);
    }
 
@@ -226,6 +289,8 @@ class NonuniformGPUPackingKernelsWrapper< PdfField_T, true >
       return kernels_.partialCoalescenceSize(ci, dir);
    }
 
+   bool blockWise() const {return kernels_.blockWise;}
+
  private:
    PackingKernels_T kernels_;
 };
@@ -243,17 +308,52 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
    using Stencil                       = typename LatticeStorageSpecification_T::Stencil;
    using CommunicationStencil          = typename LatticeStorageSpecification_T::CommunicationStencil;
    using CommData_T                    = NonuniformGPUCommData< LatticeStorageSpecification_T >;
+   using value_type                    = typename PdfField_T::value_type;
 
-   NonuniformGeneratedGPUPdfPackInfo(const BlockDataID pdfFieldID, const BlockDataID commDataID)
-      : pdfFieldID_(pdfFieldID), commDataID_(commDataID){};
+   NonuniformGeneratedGPUPdfPackInfo(const uint64_t meshLevels, const BlockDataID pdfFieldID, const BlockDataID commDataID)
+      : pdfFieldID_(pdfFieldID), commDataID_(commDataID){ init(meshLevels); };
+
+   void init(const uint64_t meshLevels){
+      auto size = meshLevels * Stencil::Q;
+      equalCommSRC.resize(size);
+      equalCommDST.resize(size);
+      equalCommSRCGPU.resize(size);
+      equalCommDSTGPU.resize(size);
+
+   }
+
+   void sync() override {
+      for (uint_t i = 0; i < equalCommSRC.size(); i++){
+         for (auto const& x : equalCommSRC[i]){
+            auto key = x.first;
+            WALBERLA_GPU_CHECK(gpuMalloc((void**) &equalCommSRCGPU[i][key], sizeof(value_type*) * equalCommSRC[i][key].size()));
+            WALBERLA_GPU_CHECK(gpuMemcpy(equalCommSRCGPU[i][key], &equalCommSRC[i][key][0],sizeof(value_type*) * equalCommSRC[i][key].size(), gpuMemcpyHostToDevice));
+
+            WALBERLA_GPU_CHECK(gpuMalloc((void**) &equalCommDSTGPU[i][key], sizeof(value_type*) * equalCommDST[i][key].size()));
+            WALBERLA_GPU_CHECK(gpuMemcpy(equalCommDSTGPU[i][key], &equalCommDST[i][key][0],sizeof(value_type*) * equalCommDST[i][key].size(), gpuMemcpyHostToDevice));
+
+         }
+      }
+   }
+
+   ~NonuniformGeneratedGPUPdfPackInfo() {
+      for (uint_t i = 0; i < equalCommSRC.size(); i++){
+         for (auto const& x : equalCommSRC[i]){
+            auto key = x.first;
+            WALBERLA_GPU_CHECK(gpuFree(equalCommSRCGPU[i][key]))
+            WALBERLA_GPU_CHECK(gpuFree(equalCommDSTGPU[i][key]))
+         }
+      }
+   }
 
    bool constantDataExchange() const override { return true; };
    bool threadsafeReceiving() const override { return false; };
 
    /// Equal Level
    void unpackDataEqualLevel(Block* receiver, Direction dir, GpuBuffer_T& buffer, gpuStream_t stream) override;
-   void communicateLocalEqualLevel(const Block* sender, Block* receiver, stencil::Direction dir,
-                                   gpuStream_t stream) override;
+   void addForLocalEqualLevelComm(const Block* sender, Block* receiver, stencil::Direction dir) override;
+   void communicateLocalEqualLevel(uint64_t level, uint8_t timestep, gpuStream_t stream) override;
+   void communicateLocalEqualLevel(const Block* sender, Block* receiver, stencil::Direction dir, gpuStream_t stream) override;
 
    /// Coarse to Fine
    void unpackDataCoarseToFine(Block* fineReceiver, const BlockID& coarseSender, stencil::Direction dir,
@@ -291,7 +391,7 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
    bool areNeighborsInDirection(const Block* block, const BlockID& neighborID,
                                 Vector3< cell_idx_t > dirVec) const;
 
-   CellInterval intervalHullInDirection(const CellInterval& ci, Vector3< cell_idx_t > dirVec,
+   CellInterval intervalHullInDirection(const CellInterval& ci, Vector3< cell_idx_t > tangentialDir,
                                         cell_idx_t width) const;
    bool skipsThroughCoarseBlock(const Block* block, Direction dir) const;
 
@@ -305,6 +405,14 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
 
    const BlockDataID pdfFieldID_;
    internal::NonuniformGPUPackingKernelsWrapper< PdfField_T, LatticeStorageSpecification_T::inplace > kernels_;
+
+   std::array<int64_t, 4> strides;
+
+   std::vector<std::unordered_map<Vector3<int64_t>,std::vector<value_type*>>> equalCommSRC;
+   std::vector<std::unordered_map<Vector3<int64_t>,std::vector<value_type*>>> equalCommDST;
+
+   std::vector<std::unordered_map<Vector3<int64_t>,value_type **>> equalCommSRCGPU;
+   std::vector<std::unordered_map<Vector3<int64_t>,value_type **>> equalCommDSTGPU;
 
  public:
    const BlockDataID commDataID_;

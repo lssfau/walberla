@@ -19,6 +19,7 @@
 
 #pragma once
 #include "core/DataTypes.h"
+#include "core/logging/Logging.h"
 
 #include "field/GhostLayerField.h"
 #include "domain_decomposition/BlockDataID.h"
@@ -38,6 +39,10 @@
 #define RESTRICT __restrict
 #else
 #define RESTRICT
+#endif
+
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+using walberla::half;
 #endif
 
 namespace walberla {
