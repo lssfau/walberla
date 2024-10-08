@@ -526,8 +526,8 @@ namespace walberla {
             const auto * const tkeSGS = block->template getData<ScalarField_T>(meanTkeSGSFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(tkeSGS)
 
-            const auto * const sop = block->template getData<TensorField_T>(velocityWelford_->sum_of_productsID);
-            WALBERLA_CHECK_NOT_NULLPTR(sop)
+            const auto * const sos = block->template getData<TensorField_T>(velocityWelford_->sum_of_squares_fieldID);
+            WALBERLA_CHECK_NOT_NULLPTR(sos)
 
             for(uint_t idx = 0; idx < parameters_->channelHalfWidth; ++idx) {
 
@@ -541,7 +541,7 @@ namespace walberla {
                   meanVelocityVector[idx] = meanVelocity->get(localCell, flowAxis);
                   tkeSGSVector[idx] = tkeSGS->get(localCell);
                   for(uint_t i = 0; i < TensorField_T::F_SIZE; ++i) {
-                     reynoldsStressVector[idx*TensorField_T::F_SIZE+i] = sop->get(localCell,i) / velocityWelford_->counter_;
+                     reynoldsStressVector[idx*TensorField_T::F_SIZE+i] = sos->get(localCell,i) / velocityWelford_->counter_;
                   }
                   tkeResolvedVector[idx] = real_c(0.5) * (
                      reynoldsStressVector[idx*TensorField_T::F_SIZE+0] +
@@ -706,7 +706,7 @@ namespace walberla {
       // Common Fields
       const BlockDataID velocityFieldId = field::addToStorage< VectorField_T >(blocks, "velocity", real_c(0.0), codegen::layout);
       const BlockDataID meanVelocityFieldId = field::addToStorage< VectorField_T >(blocks, "mean velocity", real_c(0.0), codegen::layout);
-      const BlockDataID sopFieldId = field::addToStorage< TensorField_T >(blocks, "sum of products", real_c(0.0), codegen::layout);
+      const BlockDataID sosFieldId = field::addToStorage< TensorField_T >(blocks, "sum of squares", real_c(0.0), codegen::layout);
 
       const BlockDataID tkeSgsFieldId = field::addToStorage< ScalarField_T >(blocks, "tke_SGS", real_c(0.0), codegen::layout);
       const BlockDataID meanTkeSgsFieldId = field::addToStorage< ScalarField_T >(blocks, "mean_tke_SGS", real_c(0.0), codegen::layout);
@@ -755,7 +755,7 @@ namespace walberla {
       const auto omega = lbm::collision_model::omegaFromViscosity(simulationParameters.viscosity);
       StreamCollideSweep_T streamCollideSweep(omegaFieldId, pdfFieldId, velocityFieldId, initialForce, omega);
 
-      WelfordSweep_T welfordSweep(meanVelocityFieldId, sopFieldId, velocityFieldId, 0_r);
+      WelfordSweep_T welfordSweep(meanVelocityFieldId, sosFieldId, velocityFieldId, 0_r);
       TKEWelfordSweep_T welfordTKESweep(meanTkeSgsFieldId, tkeSgsFieldId, 0_r);
 
       TkeSgsWriter_T tkeSgsWriter(omegaFieldId, pdfFieldId, tkeSgsFieldId, initialForce, omega);
@@ -876,7 +876,7 @@ namespace walberla {
                               welfordSweep.counter_ = real_t(0);
                               welfordTKESweep.counter_ = real_t(0);
                                for(auto & block : *blocks) {
-                                  auto * sopField = block.template getData<TensorField_T >(sopFieldId);
+                                  auto * sopField = block.template getData<TensorField_T >(sosFieldId);
                                   sopField->setWithGhostLayer(0.0);
 
                                   auto * tkeField = block.template getData<ScalarField_T>(tkeSgsFieldId);
