@@ -649,7 +649,7 @@ namespace walberla {
       WALBERLA_LOG_INFO_ON_ROOT("Creating block forest...")
 
       const auto channelParameter = walberlaEnv.config()->getOneBlock("TurbulentChannel");
-      const SimulationParameters simulationParameters(channelParameter);
+      SimulationParameters simulationParameters(channelParameter);
 
       // domain creation
       std::shared_ptr<StructuredBlockForest> blocks;
@@ -661,7 +661,13 @@ namespace walberla {
                                                 numBlocks, cellsPerBlock);
 
          const auto & periodicity = simulationParameters.periodicity;
-         const auto & domainSize = simulationParameters.domainSize;
+         auto & domainSize = simulationParameters.domainSize;
+         const Vector3<uint_t> newDomainSize(numBlocks[0] * cellsPerBlock[0], numBlocks[1] * cellsPerBlock[1], numBlocks[2] * cellsPerBlock[2]);
+
+         if(domainSize != newDomainSize) {
+            domainSize = newDomainSize;
+            WALBERLA_LOG_WARNING_ON_ROOT("\nWARNING: Domain size has changed due to the chosen domain decomposition.\n")
+         }
 
          SetupBlockForest sforest;
 
