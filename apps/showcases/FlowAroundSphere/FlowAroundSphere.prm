@@ -1,0 +1,86 @@
+Parameters
+{
+    reynoldsNumber 1000000;
+    diameterSphere 1.0;
+    sphereXPosition 12;
+
+    referenceVelocity 1.0;
+    latticeVelocity 0.05;
+    initialiseWithInletVelocity true;
+
+    coarseMeshSize 0.0625;
+    timesteps 60001;
+
+    processMemoryLimit 512; // MiB
+    innerOuterSplit <1, 1, 1>;
+
+    // GPU related Parameters, only used if GPU is enabled
+    gpuEnabledMPI true;
+}
+
+//! [domainSetup]
+DomainSetup
+{
+    cellsPerBlock < 64, 64, 64 >;
+    domainSize    < 40, 20, 20 >;
+    periodic    < false, false, false >;
+    refinementLevels 5;
+    numberProcesses 1; // This is for load balancing, overwritten if more than one proc is used
+    blockForestFilestem flowAroundSphereBlockForest;
+}
+//! [domainSetup]
+
+Boundaries
+{
+    sphere Obstacle;
+    inflow UBB;
+    outflow FixedDensity;
+    walls FreeSlip;
+}
+
+SpongeLayer
+{
+    deactivateSpongeLayer false;
+    targetOmega 1.9;
+    spongeStart 36;
+}
+
+StabilityChecker
+{
+    checkFrequency 0;
+    streamOutput   false;
+    vtkOutput      true;
+}
+
+VTKWriter
+{
+    vtkWriteFrequency 5000;
+    vtkGhostLayers 0;
+    velocity true;
+    density true;
+    flag false;
+    omega false;
+    writeOnlySlice true;
+    sliceThickness 1;
+    writeXZSlice false;
+    amrFileFormat true;
+    oneFilePerProcess false;
+    samplingResolution -1;
+    initialWriteCallsToSkip 0;
+}
+
+Logging
+{
+    logLevel info;  // info progress detail tracing
+    writeSetupForestAndReturn true; // When only one process is used the decomposition is writen and the program terminates
+    readSetupFromFile false;
+    remainingTimeLoggerFrequency 60; // in seconds
+}
+
+Evaluation
+{
+    evaluationCheckFrequency 500;
+    rampUpTime 0;
+    logToStream true;
+    logToFile true;
+}
