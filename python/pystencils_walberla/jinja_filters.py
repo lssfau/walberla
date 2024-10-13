@@ -106,6 +106,35 @@ def get_field_stride(param):
     return strides[param.symbol.coordinate]
 
 
+def normalise_cell_interval(cell_interval, field_object):
+    if isinstance(cell_interval, str):
+        return cell_interval
+    elif isinstance(cell_interval, dict):
+        return cell_interval[field_object.name]
+    else:
+        return None
+
+
+def get_start_coordinates(cell_interval, field_object, ghost_layers_to_include, required_ghost_layers):
+    ci = normalise_cell_interval(cell_interval, field_object)
+    if ci is None:
+        return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
+    else:
+        assert ghost_layers_to_include == 0
+        return [sp.Symbol(f"{ci}.{coord_name}Min()") - required_ghost_layers for coord_name in ('x', 'y', 'z')]
+
+def get_end_coordinates(cell_interval, field_object, ghost_layers_to_include, required_ghost_layers):
+    ci = normalise_cell_interval(cell_interval, field_object)
+    if ci is None:
+        shape_names = ['xSize()', 'ySize()', 'zSize()'][:field_object.spatial_dimensions]
+        offset = 2 * ghost_layers_to_include + 2 * required_ghost_layers
+        return [f"int64_c({field_object.name}->{e}) + {offset}" for e in shape_names]
+    else:
+        assert ghost_layers_to_include == 0
+        return [f"int64_c({ci}.{coord_name}Size()) + {2 * required_ghost_layers}"
+                for coord_name in ('x', 'y', 'z')]
+
+
 def generate_declaration(kernel_info, target=Target.CPU):
     """Generates the declaration of the kernel function"""
     target = translate_target(target)
@@ -308,34 +337,6 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             required_ghost_layers = max(max(kernel_ghost_layers))
 
     kernel_call_lines = []
-
-    def get_cell_interval(field_object):
-        if isinstance(cell_interval, str):
-            return cell_interval
-        elif isinstance(cell_interval, dict):
-            return cell_interval[field_object.name]
-        else:
-            return None
-
-    def get_start_coordinates(field_object):
-        ci = get_cell_interval(field_object)
-        if ci is None:
-            return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
-        else:
-            assert ghost_layers_to_include == 0
-            return [sp.Symbol(f"{ci}.{coord_name}Min()") - required_ghost_layers for coord_name in ('x', 'y', 'z')]
-
-    def get_end_coordinates(field_object):
-        ci = get_cell_interval(field_object)
-        if ci is None:
-            shape_names = ['xSize()', 'ySize()', 'zSize()'][:field_object.spatial_dimensions]
-            offset = 2 * ghost_layers_to_include + 2 * required_ghost_layers
-            return [f"int64_c({field_object.name}->{e}) + {offset}" for e in shape_names]
-        else:
-            assert ghost_layers_to_include == 0
-            return [f"int64_c({ci}.{coord_name}Size()) + {2 * required_ghost_layers}"
-                    for coord_name in ('x', 'y', 'z')]
-
     for param in ast_params:
         if param.is_field_parameter and FieldType.is_indexed(param.fields[0]):
             continue
@@ -345,7 +346,7 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             if field.field_type == FieldType.BUFFER:
                 kernel_call_lines.append(f"{param.symbol.dtype} {param.symbol.name} = {param.field_name};")
             else:
-                coordinates = get_start_coordinates(field)
+                coordinates = get_start_coordinates(cell_interval, field, ghost_layers_to_include, required_ghost_layers)
                 actual_gls = f"int_c({param.field_name}->nrOfGhostLayers())"
                 coord_set = set(coordinates)
                 coord_set = sorted(coord_set, key=lambda e: str(e))
@@ -373,7 +374,8 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             coord = param.symbol.coordinate
             field = param.fields[0]
             type_str = param.symbol.dtype.c_name
-            shape = f"{type_str}({get_end_coordinates(field)[coord]})"
+            end_coord = get_end_coordinates(cell_interval, field, ghost_layers_to_include, required_ghost_layers)[coord]
+            shape = f"{type_str}({end_coord})"
             assert coord < 3
             max_value = f"{field.name}->{('x', 'y', 'z')[coord]}SizeWithGhostLayer()"
             kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({max_value}, {shape})")
@@ -711,8 +713,47 @@ def nested_class_method_definition_prefix(ctx, nested_class_name):
         return f"{outer_class}::{nested_class_name}"
 
 
-@jinja2_context_decorator
-def generate_parameter_registration(ctx, kernel_infos, parameter_registration):
+def generate_getter(kernel_infos, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if parameter_registration and param.symbol.name in parameter_registration.scaling_info:
+                    continue
+                dtype = param.symbol.dtype
+                name = param.symbol.name
+                code_line = f"inline {dtype} get{name.capitalize()}() const {{ return {name}_; }}"
+                result.append(code_line)
+                params_to_skip.append(param.symbol.name)
+
+    return "\n".join(result)
+
+
+def generate_setter(kernel_infos, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if parameter_registration and param.symbol.name in parameter_registration.scaling_info:
+                    continue
+                dtype = param.symbol.dtype
+                name = param.symbol.name
+                code_line = f"inline void set{name.capitalize()}(const {dtype} value) {{ {name}_ = value; }}"
+                result.append(code_line)
+                params_to_skip.append(param.symbol.name)
+
+    return "\n".join(result)
+
+
+def generate_parameter_registration(kernel_infos, parameter_registration):
     if parameter_registration is None:
         return ""
     if not isinstance(kernel_infos, Iterable):
@@ -731,8 +772,7 @@ def generate_parameter_registration(ctx, kernel_infos, parameter_registration):
     return "\n".join(result)
 
 
-@jinja2_context_decorator
-def generate_constructor(ctx, kernel_infos, parameter_registration):
+def generate_constructor(kernel_infos, parameter_registration):
     if parameter_registration is None:
         return ""
     if not isinstance(kernel_infos, Iterable):
@@ -752,8 +792,7 @@ def generate_constructor(ctx, kernel_infos, parameter_registration):
     return "\n".join(result)
 
 
-@jinja2_context_decorator
-def generate_field_strides(ctx, kernel_info):
+def generate_field_strides(kernel_info):
     result = []
     for param in kernel_info.parameters:
         if param.is_field_stride:
@@ -835,3 +874,5 @@ def add_pystencils_filters_to_jinja_env(jinja_env):
     jinja_env.filters['list_of_expressions'] = generate_list_of_expressions
     jinja_env.filters['field_type'] = field_type
     jinja_env.filters['generate_field_strides'] = generate_field_strides
+    jinja_env.filters['generate_getter'] = generate_getter
+    jinja_env.filters['generate_setter'] = generate_setter
