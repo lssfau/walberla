@@ -287,6 +287,9 @@ class {{class_name}}
    }
    {%endif%}
 
+   {{kernel_list|generate_getter(parameter_registration=parameter_scaling)|indent(3)}}
+   {{kernel_list|generate_setter(parameter_registration=parameter_scaling)|indent(3)}}
+
  private:
    shared_ptr< StructuredBlockStorage > blocks_;
    {{kernel_list|generate_members(parameter_registration=parameter_scaling)|indent(4)}}

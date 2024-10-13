@@ -424,11 +424,11 @@ namespace walberla {
                               ForceCalculator<VectorField_T> const * const forceCalculator,
                               const std::weak_ptr<StructuredBlockStorage> & blocks,
                               const BlockDataID velocityFieldId, const BlockDataID meanVelocityFieldId,
-                              const BlockDataID meanTkeSGSFieldId, Welford_T * velocityWelford,
+                              const BlockDataID meanTkeSGSFieldId, const BlockDataID sosFieldId, Welford_T * velocityWelford,
                               const bool separateFile = false)
          : parameters_(parameters), forceCalculator_(forceCalculator), timeloop_(timeloop), blocks_(blocks),
            velocityWelford_(velocityWelford), velocityFieldId_(velocityFieldId), meanVelocityFieldId_(meanVelocityFieldId),
-           meanTkeSGSFieldId_(meanTkeSGSFieldId), plotFrequency_(parameters->plotFrequency), plotStart_(parameters->plotStart),
+           meanTkeSGSFieldId_(meanTkeSGSFieldId), sosFieldId_(sosFieldId), plotFrequency_(parameters->plotFrequency), plotStart_(parameters->plotStart),
            separateFiles_(separateFile)
       {
          if(!plotFrequency_)
@@ -526,7 +526,7 @@ namespace walberla {
             const auto * const tkeSGS = block->template getData<ScalarField_T>(meanTkeSGSFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(tkeSGS)
 
-            const auto * const sos = block->template getData<TensorField_T>(velocityWelford_->sum_of_squares_fieldID);
+            const auto * const sos = block->template getData<TensorField_T>(sosFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(sos)
 
             for(uint_t idx = 0; idx < parameters_->channelHalfWidth; ++idx) {
@@ -541,7 +541,7 @@ namespace walberla {
                   meanVelocityVector[idx] = meanVelocity->get(localCell, flowAxis);
                   tkeSGSVector[idx] = tkeSGS->get(localCell);
                   for(uint_t i = 0; i < TensorField_T::F_SIZE; ++i) {
-                     reynoldsStressVector[idx*TensorField_T::F_SIZE+i] = sos->get(localCell,i) / velocityWelford_->counter_;
+                     reynoldsStressVector[idx*TensorField_T::F_SIZE+i] = sos->get(localCell,i) / velocityWelford_->getCounter();
                   }
                   tkeResolvedVector[idx] = real_c(0.5) * (
                      reynoldsStressVector[idx*TensorField_T::F_SIZE+0] +
@@ -622,6 +622,7 @@ namespace walberla {
       const BlockDataID velocityFieldId_{};
       const BlockDataID meanVelocityFieldId_{};
       const BlockDataID meanTkeSGSFieldId_{};
+      const BlockDataID sosFieldId_{};
 
       const uint_t plotFrequency_{};
       const uint_t plotStart_{};
@@ -836,16 +837,15 @@ namespace walberla {
       communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
 
       auto setNewForce = [&](const real_t newForce) {
-         streamCollideSweep.F_x_ = newForce;
-         tkeSgsWriter.F_x_ = newForce;
-         tkeSgsWriter.F_x_ = newForce;
+         streamCollideSweep.setF_x(newForce);
+         tkeSgsWriter.setF_x(newForce);
       };
 
       // plotting
       const bool outputSeparateFiles = channelParameter.getParameter<bool>("separate_files", false);
       const TurbulentChannelPlotter<WelfordSweep_T > plotter(&simulationParameters, &timeloop, &forceCalculator, blocks,
                                                              velocityFieldId, meanVelocityFieldId,
-                                                             meanTkeSgsFieldId, &welfordSweep,
+                                                             meanTkeSgsFieldId, sosFieldId, &welfordSweep,
                                                              outputSeparateFiles);
 
       //NOTE must convert sweeps that are altered to lambdas, otherwise copy and counter will stay 0
@@ -876,11 +876,11 @@ namespace walberla {
       timeloop.add() << Sweep(wfbLambda, "wall function bounce");
       timeloop.add() << Sweep(streamCollideLambda, "stream and collide");
       timeloop.add() << BeforeFunction([&](){
-                           const uint_t velCtr = uint_c(welfordSweep.counter_);
+                           const uint_t velCtr = uint_c(welfordSweep.getCounter());
                            if((timeloop.getCurrentTimeStep() == simulationParameters.samplingStart) ||
                               (timeloop.getCurrentTimeStep() > simulationParameters.samplingStart && simulationParameters.samplingInterval && (velCtr % simulationParameters.samplingInterval == 0))) {
-                              welfordSweep.counter_ = real_t(0);
-                              welfordTKESweep.counter_ = real_t(0);
+                              welfordSweep.setCounter(real_c(0.0));
+                              welfordTKESweep.setCounter(real_c(0.0));
                                for(auto & block : *blocks) {
                                   auto * sopField = block.template getData<TensorField_T >(sosFieldId);
                                   sopField->setWithGhostLayer(0.0);
@@ -890,8 +890,8 @@ namespace walberla {
                                }
                            }
 
-                           welfordSweep.counter_ = welfordSweep.counter_ + real_c(1);
-                           welfordTKESweep.counter_ = welfordTKESweep.counter_ + real_c(1);
+                           welfordSweep.setCounter(welfordSweep.getCounter() + real_c(1.0));
+                           welfordTKESweep.setCounter(welfordTKESweep.getCounter() + real_c(1.0));
                         }, "welford sweep")
                      << Sweep(welfordLambda, "welford sweep");
       timeloop.add() << Sweep(tkeSgsWriter, "TKE_SGS writer");
