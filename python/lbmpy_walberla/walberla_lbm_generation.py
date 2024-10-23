@@ -1,18 +1,14 @@
-# import warnings
-from typing import Callable, List
-
-
 import numpy as np
 import sympy as sp
 from jinja2 import Environment, PackageLoader, StrictUndefined, Template
+from pystencils import Assignment
 from sympy.tensor import IndexedBase
 
-import pystencils as ps
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor, StreamPullTwoFieldsAccessor
 from lbmpy.relaxationrates import relaxation_rate_scaling
+from lbmpy.macroscopic_value_kernels import strain_rate_tensor_getter
 from lbmpy.updatekernels import create_lbm_kernel, create_stream_only_kernel
-from pystencils import AssignmentCollection, create_kernel, Target
-from pystencils.astnodes import SympyAssignment
+from pystencils import AssignmentCollection, create_kernel, Target, CreateKernelConfig
 from pystencils.backends.cbackend import CBackend, CustomSympyPrinter, get_headers
 from pystencils.typing import BasicType, CastFunc, TypedSymbol
 from pystencils.field import Field
@@ -40,6 +36,7 @@ def __type_equilibrium_assignments(assignments, config, subs_dict):
 def __lattice_model(generation_context, class_name, config, lb_method, stream_collide_ast, collide_ast, stream_ast,
                     refinement_scaling):
     stencil_name = lb_method.stencil.name
+    dim = lb_method.stencil.D
     if not stencil_name:
         raise ValueError("lb_method uses a stencil that is not supported in waLBerla")
 
@@ -53,10 +50,11 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
     reference_density = rho_sym if cqc.compressible else cqc.background_density
     pdfs_sym = sp.symbols(f'f_:{lb_method.stencil.Q}')
 
-    vel_arr_symbols = [IndexedBase(TypedSymbol('u', default_dtype), shape=(1,))[i] for i in range(len(vel_symbols))]
+    vel_arr_symbols = [IndexedBase(TypedSymbol('u', default_dtype), shape=(1,))[i] for i in range(dim)]
     subs_dict = {a: b for a, b in zip(vel_symbols, vel_arr_symbols)}
 
-    momentum_density_symbols = sp.symbols(f'md_:{len(vel_symbols)}')
+    momentum_density_symbols = sp.symbols(f'md_:{dim}')
+    strain_rate_tensor = sp.symbols(f"srt_:{dim * dim}")
 
     equilibrium = lb_method.get_equilibrium()
     lhs_list = [a.lhs for a in equilibrium.main_assignments]
@@ -65,11 +63,10 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
     symmetric_equilibrium_matrix = get_symmetric_part(equilibrium_matrix, vel_symbols)
     asymmetric_equilibrium_matrix = sp.expand(equilibrium_matrix - symmetric_equilibrium_matrix)
 
-    equilibrium = AssignmentCollection([ps.Assignment(lhs, rhs)
-                                        for lhs, rhs in zip(lhs_list, equilibrium_matrix)])
-    symmetric_equilibrium = AssignmentCollection([ps.Assignment(lhs, rhs)
+    equilibrium = AssignmentCollection([Assignment(lhs, rhs) for lhs, rhs in zip(lhs_list, equilibrium_matrix)])
+    symmetric_equilibrium = AssignmentCollection([Assignment(lhs, rhs)
                                                   for lhs, rhs in zip(lhs_list, symmetric_equilibrium_matrix)])
-    asymmetric_equilibrium = AssignmentCollection([ps.Assignment(lhs, rhs)
+    asymmetric_equilibrium = AssignmentCollection([Assignment(lhs, rhs)
                                                    for lhs, rhs in zip(lhs_list, asymmetric_equilibrium_matrix)])
 
     equilibrium = __type_equilibrium_assignments(equilibrium, config, subs_dict)
@@ -90,6 +87,10 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
                                                                    variables_without_prefix=['rho_in', 'u'])
     momentum_density_getter = cqc.output_equations_from_pdfs(pdfs_sym, {'density': rho_sym,
                                                                         'momentum_density': momentum_density_symbols})
+    mdg2 = cqc.output_equations_from_pdfs(pdfs_sym, {'density': rho_sym, 'velocity': vel_symbols})
+
+    strain_rate_tensor_assignments = strain_rate_tensor_getter(lb_method, strain_rate_tensor, pdfs_sym)
+    strain_rate_tensor_assignments = mdg2.all_assignments + strain_rate_tensor_assignments
 
     is_float = True if issubclass(default_dtype.numpy_dtype.type, np.float32) else False
     constant_suffix = "f" if is_float else ""
@@ -135,7 +136,8 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
         'momentum_density_getter': equations_to_code(momentum_density_getter, variables_without_prefix=pdfs_sym,
                                                      dtype=default_dtype),
         'density_velocity_setter_macroscopic_values': density_velocity_setter_macroscopic_values,
-
+        'strain_rate_tensor': equations_to_code(strain_rate_tensor_assignments, variables_without_prefix=pdfs_sym,
+                                                dtype=default_dtype),
         'refinement_scaling_info': refinement_scaling_info,
 
         'stream_collide_kernel': KernelInfo(stream_collide_ast, ['pdfs_tmp'], [('pdfs', 'pdfs_tmp')], []),
@@ -181,11 +183,10 @@ def generate_lattice_model(generation_context, class_name, collision_rule, field
     elif field_layout == 'zyxf':
         config.cpu_vectorize_info['assume_inner_stride_one'] = False
 
-    src_field = ps.Field.create_generic('pdfs', dim, config.data_type['pdfs'].numpy_dtype,
-                                        index_dimensions=1, layout=field_layout, index_shape=(q,))
-    dst_field = ps.Field.create_generic('pdfs_tmp', dim, config.data_type['pdfs_tmp'].numpy_dtype,
-                                        index_dimensions=1, layout=field_layout,
-                                        index_shape=(q,))
+    src_field = Field.create_generic('pdfs', dim, config.data_type['pdfs'].numpy_dtype,
+                                     index_dimensions=1, layout=field_layout, index_shape=(q,))
+    dst_field = Field.create_generic('pdfs_tmp', dim, config.data_type['pdfs_tmp'].numpy_dtype,
+                                     index_dimensions=1, layout=field_layout, index_shape=(q,))
 
     stream_collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, StreamPullTwoFieldsAccessor())
     stream_collide_ast = create_kernel(stream_collide_update_rule, config=config)
@@ -326,24 +327,32 @@ def type_expr(eq, dtype):
     return eq.subs({s: TypedSymbol(s.name, dtype) for s in eq.atoms(sp.Symbol)})
 
 
-def equations_to_code(equations, variable_prefix="lm.", variables_without_prefix=None, dtype=None):
+def equations_to_code(assignments, variable_prefix="lm.", variables_without_prefix=None, dtype=None):
     if dtype is None:
         dtype = BasicType("float64")
 
-    if variables_without_prefix is None:
-        variables_without_prefix = []
-    if isinstance(equations, AssignmentCollection):
-        equations = equations.all_assignments
+    config = CreateKernelConfig(data_type=dtype, default_number_float=dtype)
 
-    variables_without_prefix = list(variables_without_prefix)
+    if isinstance(assignments, AssignmentCollection):
+        assignments = assignments.all_assignments
+
+    left_hand_side_names = [e.lhs.name for e in assignments]
+    variables_without_prefix = list(variables_without_prefix) + left_hand_side_names
+
+    new_assignments = list()
+    for assignment in assignments:
+        new_rhs = field_and_symbol_substitute(assignment.rhs, variable_prefix, variables_without_prefix)
+        new_assignments.append(Assignment(assignment.lhs, new_rhs))
+
+    new_assignments = AssignmentCollection(new_assignments)
+    new_assignments = new_assignments.new_without_unused_subexpressions()
+
+    new_assignments = NodeCollection.from_assignment_collection(new_assignments)
+    new_assignments = add_types(new_assignments.all_assignments, config)
     c_backend = CBackend()
+
     result = []
-    left_hand_side_names = [e.lhs.name for e in equations]
-    for eq in equations:
-        assignment = SympyAssignment(type_expr(eq.lhs, dtype=dtype),
-                                     type_expr(field_and_symbol_substitute(eq.rhs, variable_prefix,
-                                                                           variables_without_prefix
-                                                                           + left_hand_side_names),
-                                               dtype=dtype))
+    for assignment in new_assignments:
         result.append(c_backend(assignment))
+
     return "\n".join(result)
