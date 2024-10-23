@@ -132,11 +132,12 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
                                 dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'field', neighbor_stencil, index_shape,
-                      FieldType.STAGGERED, target=target, **kwargs)
+                      spatial_shape=None, field_type=FieldType.STAGGERED, field_data_type=None, target=target, **kwargs)
 
 
 def generate_staggered_flux_boundary(generation_context, class_name, boundary_object,
                                      dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'flux', neighbor_stencil, index_shape,
-                      FieldType.STAGGERED_FLUX, target=target, **kwargs)
+                      spatial_shape=None, field_type=FieldType.STAGGERED_FLUX, field_data_type=None, target=target,
+                      **kwargs)
