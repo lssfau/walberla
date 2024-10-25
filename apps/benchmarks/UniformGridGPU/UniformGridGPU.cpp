@@ -73,6 +73,8 @@ using SweepCollection_T = lbm::UniformGridGPUSweepCollection;
 
 using gpu::communication::UniformGPUScheme;
 
+using macroFieldType = VelocityField_T::value_type;
+
 int main(int argc, char** argv)
 {
    mpi::Environment const env(argc, argv);
@@ -103,9 +105,9 @@ int main(int argc, char** argv)
       const StorageSpecification_T StorageSpec = StorageSpecification_T();
       const BlockDataID pdfFieldCpuID  = lbm_generated::addPdfFieldToStorage(blocks, "pdfs", StorageSpec, uint_c(1), field::fzyx);
 
-      auto allocator = make_shared< gpu::HostFieldAllocator<real_t> >(); // use pinned memory allocator for faster CPU-GPU memory transfers
-      const BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx, uint_c(1), allocator);
-      const BlockDataID densityFieldCpuID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx, uint_c(1), allocator);
+      auto allocator = make_shared< gpu::HostFieldAllocator<macroFieldType> >(); // use pinned memory allocator for faster CPU-GPU memory transfers
+      const BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", macroFieldType(0.0), field::fzyx, uint_c(1), allocator);
+      const BlockDataID densityFieldCpuID = field::addToStorage< ScalarField_T >(blocks, "density", macroFieldType(1.0), field::fzyx, uint_c(1), allocator);
       const BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "Boundary Flag Field");
 
       // Initialize velocity on cpu
@@ -136,7 +138,7 @@ int main(int argc, char** argv)
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ///                                      LB SWEEPS AND BOUNDARY HANDLING                                       ///
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      const pystencils::UniformGridGPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldGpuID, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
+      const pystencils::UniformGridGPU_StreamOnlyKernel StreamOnlyKernel(pdfFieldGpuID);
 
       // Boundaries
       const FlagUID fluidFlagUID("Fluid");
@@ -211,7 +213,7 @@ int main(int argc, char** argv)
          vtkOutput->addBeforeFunction([&]() {
             for (auto& block : *blocks)
                sweepCollection.calculateMacroscopicParameters(&block);
-            gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldCpuID, velFieldGpuID);
+            gpu::fieldCpy< VelocityField_T, gpu::GPUField< VelocityField_T::value_type > >(blocks, velFieldCpuID, velFieldGpuID);
          });
          timeLoop.addFuncAfterTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
@@ -264,6 +266,13 @@ int main(int argc, char** argv)
             python_coupling::PythonCallback pythonCallbackResults("results_callback");
             if (pythonCallbackResults.isCallable())
             {
+               pythonCallbackResults.data().exposeValue("numProcesses", performance.processes());
+               pythonCallbackResults.data().exposeValue("numThreads", performance.threads());
+               pythonCallbackResults.data().exposeValue("numCores", performance.cores());
+               pythonCallbackResults.data().exposeValue("numberOfCells", performance.numberOfCells());
+               pythonCallbackResults.data().exposeValue("numberOfFluidCells", performance.numberOfFluidCells());
+               pythonCallbackResults.data().exposeValue("mlups", performance.mlups(timesteps, time));
+               pythonCallbackResults.data().exposeValue("mlupsPerCore", performance.mlupsPerCore(timesteps, time));
                pythonCallbackResults.data().exposeValue("mlupsPerProcess", performance.mlupsPerProcess(timesteps, time));
                pythonCallbackResults.data().exposeValue("stencil", infoStencil);
                pythonCallbackResults.data().exposeValue("streamingPattern", infoStreamingPattern);

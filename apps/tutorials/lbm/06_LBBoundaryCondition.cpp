@@ -268,8 +268,9 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    else if (setup_.inflowType == "ParserUBB")
    {
       //! [forceBoundary_ParserUBB_eqs]
-      char x_eq[150];
-      sprintf(x_eq, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
+      const uint_t maxSize = 150;
+      char x_eq[maxSize];
+      snprintf(x_eq, maxSize, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
 
       std::array< std::string, 3 > eqs = { x_eq, "0", "0" };
       handling->forceBoundary(ParserUBBFlagUID, west, ParserUBB_T::Parser(eqs));

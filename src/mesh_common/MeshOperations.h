@@ -91,6 +91,19 @@ typename MeshType::Point principalComponent( const MeshType & mesh, InputIterato
 template< typename MeshType >
 typename MeshType::Point principalComponent( const MeshType & mesh, const uint_t iterations = uint_t( 10 ) );
 
+/**
+* \brief Color the faces of a mesh according to its vertices
+*
+* Iterate over all faces and colors them in their vertex color.
+* If no uniform coloring of the vertices is given, a default color is taken.
+*
+* \tparam MeshType The type of the Mesh
+*
+* \param mesh The Mesh source mesh
+* \param defaultColor Default color if no uniform coloring is given
+ */
+template< typename MeshType >
+void vertexToFaceColor( const MeshType & mesh, const typename MeshType::Color& defaultColor);
 
 template< typename MeshType >
 math::GenericAABB< typename MeshType::Scalar > computeAABB( const MeshType & mesh )
@@ -733,6 +746,34 @@ template< typename MeshType >
 typename MeshType::Point principalComponent( const MeshType & mesh, const uint_t iterations )
 {
    return principalComponent( mesh, mesh.faces_begin(), mesh.faces_end(), iterations );
+}
+
+template< typename MeshType >
+void vertexToFaceColor( const MeshType & mesh, const typename MeshType::Color& defaultColor)
+{
+   WALBERLA_CHECK(mesh.has_vertex_colors())
+   mesh.request_face_colors();
+
+   for (auto faceIt = mesh.faces_begin(); faceIt != mesh.faces_end(); ++faceIt)
+   {
+      typename MeshType::Color vertexColor;
+
+      bool useVertexColor = true;
+
+      auto vertexIt = mesh.fv_iter(*faceIt);
+      WALBERLA_ASSERT(vertexIt.is_valid())
+
+      vertexColor = mesh.color(*vertexIt);
+
+      ++vertexIt;
+      while (vertexIt.is_valid() && useVertexColor)
+      {
+         if (vertexColor != mesh.color(*vertexIt)) useVertexColor = false;
+         ++vertexIt;
+      }
+
+      mesh.set_color(*faceIt, useVertexColor ? vertexColor : defaultColor);
+   }
 }
 
 

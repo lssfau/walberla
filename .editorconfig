@@ -1,5 +1,6 @@
 # See https://editorconfig.org/
-root = true # top-most .editorconfig-file
+# top-most .editorconfig-file
+root = true
 
 [*]
 tab_width = 3

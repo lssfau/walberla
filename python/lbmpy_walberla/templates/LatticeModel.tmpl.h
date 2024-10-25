@@ -205,6 +205,7 @@ private:
     template<class LM, class Enable> friend struct DensityAndMomentumDensity;
     template<class LM, class Enable> friend struct MomentumDensity;
     template<class LM, class It, class Enable> friend struct DensityAndVelocityRange;
+    template<class LM>               friend struct PressureTensor;
 
     friend mpi::SendBuffer & ::walberla::mpi::operator<< (mpi::SendBuffer & , const {{class_name}} & );
     friend mpi::RecvBuffer & ::walberla::mpi::operator>> (mpi::RecvBuffer & ,       {{class_name}} & );
@@ -507,16 +508,35 @@ template<>
 struct PressureTensor<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
-   static void get( Matrix3< {{dtype}} > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const FieldPtrOrIterator & /* it */ )
+   static void get( Matrix3< {{dtype}} > & pressureTensor , const {{class_name}} & lm , const FieldPtrOrIterator & it  )
    {
-       WALBERLA_ABORT("Not implemented");
+      const auto x = it.x();
+      const auto y = it.y();
+      const auto z = it.z();
+
+      {% for i in range(Q) -%}
+      const {{dtype}} f_{{i}} = it[{{i}}];
+      {% endfor -%}
+
+      {{strain_rate_tensor | indent(6) }}
+      {% for i in range(D * D) -%}
+      pressureTensor[{{i}}] = srt_{{i}};
+      {% endfor %}
    }
 
    template< typename PdfField_T >
-   static void get( Matrix3< {{dtype}} > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const PdfField_T & /* pdf */,
-                    const cell_idx_t /* x */, const cell_idx_t /* y */, const cell_idx_t /* z */ )
+   static void get( Matrix3< {{dtype}} > & pressureTensor , const {{class_name}} & lm, const PdfField_T & pdf,
+                    const cell_idx_t x, const cell_idx_t y, const cell_idx_t z)
    {
-       WALBERLA_ABORT("Not implemented");
+      const {{dtype}} & xyz0 = pdf(x,y,z,0);
+      {% for i in range(Q) -%}
+      const {{dtype}} f_{{i}} = pdf.getF( &xyz0, {{i}});
+      {% endfor -%}
+
+      {{strain_rate_tensor | indent(6) }}
+      {% for i in range(D * D) -%}
+      pressureTensor[{{i}}] = srt_{{i}};
+      {% endfor %}
    }
 };
 

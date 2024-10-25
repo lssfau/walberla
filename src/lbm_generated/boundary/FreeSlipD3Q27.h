@@ -19,6 +19,7 @@
 
 #pragma once
 #include "core/DataTypes.h"
+#include "core/logging/Logging.h"
 
 #include "field/GhostLayerField.h"
 #include "domain_decomposition/BlockDataID.h"
@@ -38,6 +39,10 @@
 #define RESTRICT __restrict
 #else
 #define RESTRICT
+#endif
+
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+using walberla::half;
 #endif
 
 namespace walberla {
@@ -253,7 +258,7 @@ public:
                    element.wnx = 0;
                    element.wny = -1;
                    element.wnz = 0;
-                   ref_dir = 1;
+                   ref_dir = 2;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -301,7 +306,7 @@ public:
                    element.wnx = 0;
                    element.wny = 1;
                    element.wnz = 0;
-                   ref_dir = 2;
+                   ref_dir = 1;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -349,7 +354,7 @@ public:
                    element.wnx = 1;
                    element.wny = 0;
                    element.wnz = 0;
-                   ref_dir = 3;
+                   ref_dir = 4;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -397,7 +402,7 @@ public:
                    element.wnx = -1;
                    element.wny = 0;
                    element.wnz = 0;
-                   ref_dir = 4;
+                   ref_dir = 3;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -445,7 +450,7 @@ public:
                    element.wnx = 0;
                    element.wny = 0;
                    element.wnz = -1;
-                   ref_dir = 5;
+                   ref_dir = 6;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -493,7 +498,7 @@ public:
                    element.wnx = 0;
                    element.wny = 0;
                    element.wnz = 1;
-                   ref_dir = 6;
+                   ref_dir = 5;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -541,7 +546,7 @@ public:
                    element.wnx = 1;
                    element.wny = -1;
                    element.wnz = 0;
-                   ref_dir = 7;
+                   ref_dir = 10;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -589,7 +594,7 @@ public:
                    element.wnx = -1;
                    element.wny = -1;
                    element.wnz = 0;
-                   ref_dir = 8;
+                   ref_dir = 9;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -637,7 +642,7 @@ public:
                    element.wnx = 1;
                    element.wny = 1;
                    element.wnz = 0;
-                   ref_dir = 9;
+                   ref_dir = 8;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -685,7 +690,7 @@ public:
                    element.wnx = -1;
                    element.wny = 1;
                    element.wnz = 0;
-                   ref_dir = 10;
+                   ref_dir = 7;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -733,7 +738,7 @@ public:
                    element.wnx = 0;
                    element.wny = -1;
                    element.wnz = -1;
-                   ref_dir = 11;
+                   ref_dir = 16;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -781,7 +786,7 @@ public:
                    element.wnx = 0;
                    element.wny = 1;
                    element.wnz = -1;
-                   ref_dir = 12;
+                   ref_dir = 15;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -829,7 +834,7 @@ public:
                    element.wnx = 1;
                    element.wny = 0;
                    element.wnz = -1;
-                   ref_dir = 13;
+                   ref_dir = 18;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -877,7 +882,7 @@ public:
                    element.wnx = -1;
                    element.wny = 0;
                    element.wnz = -1;
-                   ref_dir = 14;
+                   ref_dir = 17;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -925,7 +930,7 @@ public:
                    element.wnx = 0;
                    element.wny = -1;
                    element.wnz = 1;
-                   ref_dir = 15;
+                   ref_dir = 12;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -973,7 +978,7 @@ public:
                    element.wnx = 0;
                    element.wny = 1;
                    element.wnz = 1;
-                   ref_dir = 16;
+                   ref_dir = 11;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1021,7 +1026,7 @@ public:
                    element.wnx = 1;
                    element.wny = 0;
                    element.wnz = 1;
-                   ref_dir = 17;
+                   ref_dir = 14;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1069,7 +1074,7 @@ public:
                    element.wnx = -1;
                    element.wny = 0;
                    element.wnz = 1;
-                   ref_dir = 18;
+                   ref_dir = 13;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1117,7 +1122,7 @@ public:
                    element.wnx = -1;
                    element.wny = -1;
                    element.wnz = -1;
-                   ref_dir = 19;
+                   ref_dir = 26;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1165,7 +1170,7 @@ public:
                    element.wnx = 1;
                    element.wny = -1;
                    element.wnz = -1;
-                   ref_dir = 20;
+                   ref_dir = 25;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1213,7 +1218,7 @@ public:
                    element.wnx = -1;
                    element.wny = 1;
                    element.wnz = -1;
-                   ref_dir = 21;
+                   ref_dir = 24;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1261,7 +1266,7 @@ public:
                    element.wnx = 1;
                    element.wny = 1;
                    element.wnz = -1;
-                   ref_dir = 22;
+                   ref_dir = 23;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1309,7 +1314,7 @@ public:
                    element.wnx = -1;
                    element.wny = -1;
                    element.wnz = 1;
-                   ref_dir = 23;
+                   ref_dir = 22;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1357,7 +1362,7 @@ public:
                    element.wnx = 1;
                    element.wny = -1;
                    element.wnz = 1;
-                   ref_dir = 24;
+                   ref_dir = 21;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1405,7 +1410,7 @@ public:
                    element.wnx = -1;
                    element.wny = 1;
                    element.wnz = 1;
-                   ref_dir = 25;
+                   ref_dir = 20;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );
@@ -1453,7 +1458,7 @@ public:
                    element.wnx = 1;
                    element.wny = 1;
                    element.wnz = 1;
-                   ref_dir = 26;
+                   ref_dir = 19;
                 }
                 element.ref_dir = ref_dir;
               indexVectorAll.push_back( element );

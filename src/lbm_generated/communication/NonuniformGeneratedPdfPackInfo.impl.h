@@ -167,19 +167,19 @@ void NonuniformGeneratedPdfPackInfo< PdfField_T >::communicateLocalCoarseToFine(
       Direction unpackDir      = dstIntervals[index].first;
       CellInterval dstInterval = dstIntervals[index].second;
 
-      uint_t packSize      = kernels_.size(srcInterval);
-
 #ifndef NDEBUG
       Direction const packDir        = srcIntervals[index].first;
       WALBERLA_ASSERT_EQUAL(packDir, stencil::inverseDir[unpackDir])
       uint_t unpackSize = kernels_.redistributeSize(dstInterval);
-      WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
+      WALBERLA_ASSERT_EQUAL(kernels_.size(srcInterval), unpackSize)
 #endif
 
       // TODO: This is a dirty workaround. Code-generate direct redistribution!
-      std::vector< unsigned char > buffer(packSize);
+      std::vector< unsigned char > buffer(kernels_.size(srcInterval));
       kernels_.packAll(srcField, srcInterval, &buffer[0]);
       kernels_.unpackRedistribute(dstField, dstInterval, &buffer[0], unpackDir);
+
+      // kernels_.localCopyRedistribute(srcField, srcInterval, dstField, dstInterval, unpackDir);
    }
 }
 
@@ -228,20 +228,20 @@ void walberla::lbm_generated::NonuniformGeneratedPdfPackInfo< PdfField_T >::comm
 
    CellInterval srcInterval;
    srcField->getGhostRegion(dir, srcInterval, 2);
-   uint_t packSize = kernels_.partialCoalescenceSize(srcInterval, dir);
 
    CellInterval dstInterval = getCoarseBlockCoalescenceInterval(coarseReceiver, fineSender->getId(),
                                                                 invDir, dstField);
 
 #ifndef NDEBUG
    uint_t unpackSize = kernels_.size(dstInterval, invDir);
-   WALBERLA_ASSERT_EQUAL(packSize, unpackSize)
+   WALBERLA_ASSERT_EQUAL(kernels_.partialCoalescenceSize(srcInterval, dir), unpackSize)
 #endif
 
    // TODO: This is a dirty workaround. Code-generate direct redistribution!
-   std::vector< unsigned char > buffer(packSize);
+   std::vector< unsigned char > buffer(kernels_.partialCoalescenceSize(srcInterval, dir));
    kernels_.packPartialCoalescence(srcField, maskField, srcInterval, &buffer[0], dir);
    kernels_.unpackCoalescence(dstField, dstInterval, &buffer[0], invDir);
+   // kernels_.localPartialCoalescence(srcField, maskField, srcInterval, dstField, dstInterval, dir);
 }
 
 template< typename PdfField_T>

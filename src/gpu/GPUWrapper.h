@@ -48,6 +48,13 @@
     #define gpuMemcpy3DAsync cudaMemcpy3DAsync
     #define gpuMemset cudaMemset
 
+    #define gpuMemset cudaMemset
+    #define gpuMemsetAsync cudaMemsetAsync
+    #define gpuMemset2D cudaMemset2D
+    #define gpuMemset2DAsync cudaMemset2DAsync
+    #define gpuMemset3D cudaMemset3D
+    #define gpuMemset3DAsync cudaMemset3DAsync
+
     #define make_gpuPos make_cudaPos
     #define make_gpuPitchedPtr make_cudaPitchedPtr
     #define gpuPitchedPtr cudaPitchedPtr
@@ -107,6 +114,13 @@
     #define gpuMemcpy3DParms hipMemcpy3DParms
     #define gpuMemcpy3DAsync hipMemcpy3DAsync
     #define gpuMemset hipMemset
+
+    #define gpuMemset hipMemset
+    #define gpuMemsetAsync hipMemsetAsync
+    #define gpuMemset2D hipMemset2D
+    #define gpuMemset2DAsync hipMemset2DAsync
+    #define gpuMemset3D hipMemset3D
+    #define gpuMemset3DAsync hipMemset3DAsync
 
     #define make_gpuPitchedPtr make_hipPitchedPtr
     #define make_gpuPos make_hipPos

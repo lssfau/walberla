@@ -31,6 +31,7 @@
 namespace walberla {
 
 using blockforest::communication::NonUniformBufferedScheme;
+using BlockFunction = std::function<void (const uint_t)>; // parameters: block, level
 
 namespace lbm_generated {
 
@@ -73,11 +74,14 @@ class BasicRecursiveTimeStep
    void operator() () { timestep(0); };
    void addRefinementToTimeLoop(SweepTimeloop & timeloop, uint_t level=0);
 
+   inline void addPostBoundaryHandlingBlockFunction( const BlockFunction & function );
+
  private:
    void timestep(uint_t level);
    void ghostLayerPropagation(Block * block);
-   std::function<void()> executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation=false);
-   std::function<void()> executeBoundaryHandlingOnLevel(uint_t level);
+   std::function< void() > executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation=false);
+   std::function< void() > executeBoundaryHandlingOnLevel(uint_t level);
+   std::function< void() > executePostBoundaryBlockFunctions(uint_t level);
 
    std::shared_ptr< StructuredBlockForest > sbfs_;
    uint_t maxLevel_;
@@ -89,6 +93,8 @@ class BasicRecursiveTimeStep
 
    SweepCollection_T & sweepCollection_;
    BoundaryCollection_T & boundaryCollection_;
+
+   std::vector< BlockFunction >  globalPostBoundaryHandlingBlockFunctions_;
 };
 
 } // namespace lbm_generated

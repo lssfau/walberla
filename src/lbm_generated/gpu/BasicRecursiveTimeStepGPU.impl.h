@@ -28,18 +28,13 @@ namespace lbm_generated {
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
 void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::timestep(uint_t level)
 {
-   std::vector<Block *> blocks;
-   sbfs_->getBlocks(blocks, level);
-
-   uint_t maxLevel = sbfs_->getDepth();
-
    // 1.1 Collision
-   for(auto b: blocks){
+   for(auto b: blocks_[level]){
       sweepCollection_.streamCollide(b);
    }
 
    // 1.2 Recursive Descent
-   if(level < maxLevel){
+   if(level < maxLevel_){
       timestep(level + 1);
    }
 
@@ -52,13 +47,13 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    commScheme_->communicateEqualLevel(level);
 
    // 1.5 Boundary Handling and Coalescence Preparation
-   for(auto b : blocks){
+   for(auto b : blocks_[level]){
       boundaryCollection_(b, nullptr);
-      if(level != maxLevel) pdfFieldPackInfo_->prepareCoalescence(b);
+      if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
 
    // 1.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel){
+   if(level < maxLevel_){
       commScheme_->communicateFineToCoarse(level + 1);
    }
 
@@ -67,13 +62,13 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    if(level == 0) return;
 
    // 2.1 Collision and Ghost-Layer Propagation
-   for(auto b: blocks){
+   for(auto b: blocks_[level]){
       ghostLayerPropagation(b);  // GL-Propagation first without swapping arrays...
       sweepCollection_.streamCollide(b);                // then Stream-Collide on interior, and swap arrays
    }
 
    // 2.2 Recursive Descent
-   if(level < maxLevel){
+   if(level < maxLevel_){
       timestep(level + 1);
    }
 
@@ -81,13 +76,13 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    commScheme_->communicateEqualLevel(level);
 
    // 2.5 Boundary Handling and Coalescence Preparation
-   for(auto b : blocks){
+   for(auto b : blocks_[level]){
       boundaryCollection_(b, nullptr);
-      if(level != maxLevel) pdfFieldPackInfo_->prepareCoalescence(b);
+      if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
 
    // 2.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel){
+   if(level < maxLevel_){
       commScheme_->communicateFineToCoarse(level + 1);
    }
 }
@@ -115,6 +110,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
    // 1.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
 
    // 1.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -138,6 +134,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
    // 2.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
 
    // 2.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_)
@@ -145,91 +142,65 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
 }
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::test(uint_t maxLevel, uint_t level)
-{
-   // 1.1 Collision
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: streamCollide on level " + std::to_string(level));
-
-   // 1.2 Recursive Descent
-   if(level < maxLevel){
-      test(maxLevel, level + 1);
-   }
-
-   // 1.3 Coarse to Fine Communication, receiving end
-   if(level != 0){
-      WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: communicate coarse to fine on level " + std::to_string(level));
-   }
-
-   // 1.4 Equal-Level Communication
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: communicate equal level on level " + std::to_string(level));
-
-
-   // 1.5 Boundary Handling and Coalescence Preparation
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: boundary handling on level " + std::to_string(level));
-
-   // 1.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel){
-      WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
-   }
-
-   // Stop here if on coarsest level.
-   // Otherwise, continue to second subcycle.
-   if(level == 0) return;
-
-   // 2.1 Collision and Ghost-Layer Propagation
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: streamCollide with ghost layer propagation on level " + std::to_string(level));
-
-   // 2.2 Recursive Descent
-   if(level < maxLevel)
-      test(maxLevel, level + 1);
-
-
-   // 2.4 Equal-Level Communication
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: communicate equal level on level " + std::to_string(level));
-
-   // 2.5 Boundary Handling and Coalescence Preparation
-   WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: boundary handling on level " + std::to_string(level));
-
-   // 2.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel)
-      WALBERLA_LOG_INFO_ON_ROOT("Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
-
-}
-
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
 std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation)
 {
-   return [level, withGhostLayerPropagation, this]()
-   {
-      if (withGhostLayerPropagation)
-      {
-         for(auto b: blocks_[level]){
-            ghostLayerPropagation(b, nullptr);
-            sweepCollection_.streamCollide(b, 0, nullptr);
+   if(sweepCollection_.blockWise()){
+      return [level, withGhostLayerPropagation, this](){
+         if (withGhostLayerPropagation){
+            const uint8_t timestepPlusOne = (timestepPerLevel_[level] + 1) & 1;
+            sweepCollection_.ghostLayerPropagation(level, timestepPlusOne);
+            WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+            WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+            timestepPerLevel_[level] = (timestepPerLevel_[level] + 1) & 1;
+            sweepCollection_.streamCollideOverBlocks(level, timestepPerLevel_[level]);
+            for (uint_t i = 0; i < blocks_[level].size(); i++){
+               auto pdfs = blocks_[level][i]->getData< PdfField_T >(pdfFieldId_);
+               pdfs->advanceTimestep();
+            }
+            commScheme_->setTimestepForLevel(level, timestepPerLevel_[level]);
+            WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+            WALBERLA_GPU_CHECK(gpuPeekAtLastError())
          }
-      }
-      else
-      {
-         for(auto b: blocks_[level]){
-            sweepCollection_.streamCollide(b, 0, nullptr);
+         else{
+            timestepPerLevel_[level] = (timestepPerLevel_[level] + 1) & 1;
+            sweepCollection_.streamCollideOverBlocks(level, timestepPerLevel_[level]);
+            for (uint_t i = 0; i < blocks_[level].size(); i++){
+               auto pdfs = blocks_[level][i]->getData< PdfField_T >(pdfFieldId_);
+               pdfs->advanceTimestep();
+            }
+            commScheme_->setTimestepForLevel(level, timestepPerLevel_[level]);
+            WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+            WALBERLA_GPU_CHECK(gpuPeekAtLastError())
          }
-      }
-      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
-   };
+      };
+   }
+   else{
+      return [level, withGhostLayerPropagation, this](){
+         if (withGhostLayerPropagation){
+            for (uint_t i = 0; i < blocks_[level].size(); i++){
+               ghostLayerPropagation(blocks_[level][i], streams_[level][i % nStreams_]);
+               sweepCollection_.streamCollide(blocks_[level][i], 0, streams_[level][i % nStreams_]);
+            }
+         }
+         else{
+            for (uint_t i = 0; i < blocks_[level].size(); i++){
+               sweepCollection_.streamCollide(blocks_[level][i], 0, streams_[level][i % nStreams_]);
+            }
+         }
+      };
+   }
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
 std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executeBoundaryHandlingOnLevel(uint_t level)
 {
    return [this, level]() {
-      for (auto b : blocks_[level])
-      {
-         boundaryCollection_(b, nullptr);
-         if (level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b, nullptr);
+      for (uint_t i = 0; i < blocks_[level].size(); i++){
+         boundaryCollection_(blocks_[level][i], streams_[level][i % nStreams_]);
+         if (level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(blocks_[level][i], streams_[level][i % nStreams_]);
       }
-      WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
    };
 }
 
@@ -250,6 +221,24 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
       }
    }
 }
+
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostBoundaryBlockFunctions(uint_t level)
+{
+   return [this, level]() {
+      for( const auto& func : globalPostBoundaryHandlingBlockFunctions_ ){
+         func(level);
+      }
+   };
+}
+
+
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
+inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function )
+{
+   globalPostBoundaryHandlingBlockFunctions_.emplace_back( function );
+}
+
 
 } // namespace lbm_generated
 } // namespace walberla

@@ -46,6 +46,8 @@ class GeneratedNonUniformGPUPackInfo
 
    inline void packDataEqualLevel( const Block * sender, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream = nullptr) const;
    virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
+   virtual void addForLocalEqualLevelComm(const Block* sender, Block* receiver, stencil::Direction dir) = 0;
+   virtual void communicateLocalEqualLevel(uint64_t level, uint8_t timestep, gpuStream_t stream) = 0;
    virtual void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir, gpuStream_t stream) = 0;
 
    inline  void packDataCoarseToFine        ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream = nullptr) const;
@@ -63,6 +65,7 @@ class GeneratedNonUniformGPUPackInfo
    virtual uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) = 0;
    virtual uint_t sizeFineToCoarseSend ( const Block * fineSender, stencil::Direction dir) = 0;
 
+   virtual void sync() = 0;
 
 #ifndef NDEBUG
    void clearBufferSizeCheckMap() { bufferSize_.clear(); }

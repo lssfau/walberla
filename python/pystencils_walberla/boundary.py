@@ -67,8 +67,16 @@ def generate_boundary(generation_context,
     if not kernel_creation_function:
         kernel_creation_function = create_boundary_kernel
 
-    kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object,
-                                      target=target, **create_kernel_params)
+    bc_force = hasattr(boundary_object, "calculate_force_on_boundary") and boundary_object.calculate_force_on_boundary
+    if bc_force:
+        force_vector_type = np.dtype([(f"F_{i}", np.float64) for i in range(dim)], align=True)
+        force_vector = Field('forceVector', FieldType.INDEXED, force_vector_type, layout=[0],
+                             shape=(TypedSymbol("forceVectorSize", create_type("int32")), 1), strides=(1, 1))
+        kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object,
+                                          target=target, force_vector=force_vector, **create_kernel_params)
+    else:
+        kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object,
+                                          target=target, **create_kernel_params)
 
     if isinstance(kernel, KernelFunction):
         kernel.function_name = f"boundary_{boundary_object.name}"
@@ -103,7 +111,8 @@ def generate_boundary(generation_context,
         'additional_data_handler': additional_data_handler,
         'dtype': "double" if is_float else "float",
         'layout': layout,
-        'index_shape': index_shape
+        'index_shape': index_shape,
+        'calculate_force': bc_force
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
@@ -123,11 +132,12 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
                                 dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'field', neighbor_stencil, index_shape,
-                      FieldType.STAGGERED, target=target, **kwargs)
+                      spatial_shape=None, field_type=FieldType.STAGGERED, field_data_type=None, target=target, **kwargs)
 
 
 def generate_staggered_flux_boundary(generation_context, class_name, boundary_object,
                                      dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'flux', neighbor_stencil, index_shape,
-                      FieldType.STAGGERED_FLUX, target=target, **kwargs)
+                      spatial_shape=None, field_type=FieldType.STAGGERED_FLUX, field_data_type=None, target=target,
+                      **kwargs)

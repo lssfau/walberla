@@ -19,6 +19,7 @@
 
 #pragma once
 #include "core/DataTypes.h"
+#include "core/logging/Logging.h"
 
 #include "field/GhostLayerField.h"
 #include "domain_decomposition/BlockDataID.h"
@@ -38,6 +39,10 @@
 #define RESTRICT __restrict
 #else
 #define RESTRICT
+#endif
+
+#ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+using walberla::half;
 #endif
 
 namespace walberla {
@@ -174,8 +179,8 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  4 );
-              element.pdf = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(0), 3);
-                element.pdf_nd = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(0), 3);
+              element.pdf = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(0), 3) );
+                element.pdf_nd = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(0), 3) );
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -192,8 +197,8 @@ public:
            if ( isFlagSet( it.neighbor(1, 1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  8 );
-              element.pdf = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(1), it.z() + cell_idx_c(0), 9);
-                element.pdf_nd = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(1), it.z() + cell_idx_c(0), 9);
+              element.pdf = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(1), it.z() + cell_idx_c(0), 9) );
+                element.pdf_nd = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(1), it.z() + cell_idx_c(0), 9) );
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -210,8 +215,8 @@ public:
            if ( isFlagSet( it.neighbor(1, -1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  10 );
-              element.pdf = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(-1), it.z() + cell_idx_c(0), 7);
-                element.pdf_nd = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(-1), it.z() + cell_idx_c(0), 7);
+              element.pdf = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(-1), it.z() + cell_idx_c(0), 7) );
+                element.pdf_nd = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(-1), it.z() + cell_idx_c(0), 7) );
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -228,8 +233,8 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  14 );
-              element.pdf = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(1), 17);
-                element.pdf_nd = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(1), 17);
+              element.pdf = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(1), 17) );
+                element.pdf_nd = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(1), 17) );
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -246,8 +251,8 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  18 );
-              element.pdf = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(-1), 13);
-                element.pdf_nd = pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(-1), 13);
+              element.pdf = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(-1), 13) );
+                element.pdf_nd = double( pdfs->get(it.x() + cell_idx_c(0), it.y() + cell_idx_c(0), it.z() + cell_idx_c(-1), 13) );
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );

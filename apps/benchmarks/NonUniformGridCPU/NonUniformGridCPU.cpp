@@ -38,6 +38,7 @@
 
 #include <cmath>
 
+#include "GridGeneration.h"
 #include "LdcSetup.h"
 #include "NonUniformGridCPUInfoHeader.h"
 #include "lbm_generated/communication/NonuniformGeneratedPdfPackInfo.h"
@@ -77,23 +78,25 @@ int main(int argc, char** argv)
 
       auto config = *cfg;
       logging::configureLogging(config);
-
+      auto domainSetup      = config->getOneBlock("DomainSetup");
       auto blockForestSetup = config->getOneBlock("SetupBlockForest");
+      const bool writeSetupForestAndReturn = blockForestSetup.getParameter< bool >("writeSetupForestAndReturn", true);
+
       const std::string blockForestFilestem =
          blockForestSetup.getParameter< std::string >("blockForestFilestem", "blockforest");
       const uint_t refinementDepth = blockForestSetup.getParameter< uint_t >("refinementDepth", uint_c(1));
 
-      auto domainSetup                = config->getOneBlock("DomainSetup");
       Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");
 
-      // Load structured block forest from file
-      std::ostringstream oss;
-      oss << blockForestFilestem << ".bfs";
-      const std::string setupBlockForestFilepath = oss.str();
+      shared_ptr< BlockForest > bfs;
+      createBlockForest(bfs, domainSetup, blockForestSetup);
 
-      WALBERLA_LOG_INFO_ON_ROOT("Creating structured block forest...")
-      auto bfs = std::make_shared< BlockForest >(uint_c(MPIManager::instance()->worldRank()),
-                                                 setupBlockForestFilepath.c_str(), false);
+      if (writeSetupForestAndReturn && mpi::MPIManager::instance()->numProcesses() == 1)
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("BlockForest has been created and writen to file. Returning program")
+         return EXIT_SUCCESS;
+      }
+
       auto blocks =
          std::make_shared< StructuredBlockForest >(bfs, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2]);
       blocks->createCellBoundingBoxes();
@@ -173,12 +176,20 @@ int main(int argc, char** argv)
       const uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       const bool useVTKAMRWriter = parameters.getParameter< bool >("useVTKAMRWriter", false);
       const bool oneFilePerProcess = parameters.getParameter< bool >("oneFilePerProcess", false);
+
+      auto finalDomain = blocks->getDomain();
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                          "simulation_step", false, true, true, false, 0, useVTKAMRWriter, oneFilePerProcess);
          auto velWriter = make_shared< field::VTKWriter< VelocityField_T, float32 > >(velFieldID, "vel");
          vtkOutput->addCellDataWriter(velWriter);
+
+         if (parameters.getParameter< bool >("writeOnlySlice", true)){
+            const AABB sliceXY(finalDomain.xMin(), finalDomain.yMin(), finalDomain.center()[2] - blocks->dz(refinementDepth),
+                               finalDomain.xMax(), finalDomain.yMax(), finalDomain.center()[2] + blocks->dz(refinementDepth));
+            vtkOutput->addCellInclusionFilter(vtk::AABBCellFilter(sliceXY));
+         }
 
          vtkOutput->addBeforeFunction([&]() {
             for (auto& block : *blocks)
@@ -236,6 +247,8 @@ int main(int argc, char** argv)
                pythonCallbackResults.data().exposeValue("numProcesses", performance.processes());
                pythonCallbackResults.data().exposeValue("numThreads", performance.threads());
                pythonCallbackResults.data().exposeValue("numCores", performance.cores());
+               pythonCallbackResults.data().exposeValue("numberOfCells", performance.numberOfCells());
+               pythonCallbackResults.data().exposeValue("numberOfFluidCells", performance.numberOfFluidCells());
                pythonCallbackResults.data().exposeValue("mlups", performance.mlups(timesteps, time));
                pythonCallbackResults.data().exposeValue("mlupsPerCore", performance.mlupsPerCore(timesteps, time));
                pythonCallbackResults.data().exposeValue("mlupsPerProcess",

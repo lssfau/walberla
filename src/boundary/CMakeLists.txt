@@ -14,4 +14,5 @@ target_sources( boundary
       BoundaryHandlingCollection.h
       Boundary.cpp
       BoundaryUID.h
+      ShiftedPeriodicity.h
       )

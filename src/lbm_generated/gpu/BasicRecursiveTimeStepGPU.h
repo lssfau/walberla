@@ -33,6 +33,7 @@ namespace walberla
 {
 
 using gpu::communication::NonUniformGPUScheme;
+using BlockFunction = std::function<void (const uint_t)>; // parameters: level
 
 namespace lbm_generated
 {
@@ -67,26 +68,53 @@ class BasicRecursiveTimeStepGPU
                          "Template parameter PdfField_T is of different type than BlockDataID pdfFieldId that is "
                          "provided as constructor argument")
 #endif
+      useStreams_ = false;
       maxLevel_ = sbfs->getDepth();
+      streams_.resize(maxLevel_ + 1);
+      timestepPerLevel_.resize(maxLevel_ + 1);
 
-      for (uint_t level = 0; level <= maxLevel_; level++)
-      {
+      for (uint_t level = 0; level <= maxLevel_; level++){
          std::vector< Block* > blocks;
          sbfs->getBlocks(blocks, level);
          blocks_.push_back(blocks);
+         streams_[level].resize(nStreams_);
+         timestepPerLevel_[level] = uint8_c(0);
+      }
+      for (uint_t level = 0; level <= maxLevel_; level++){
+         for (uint_t i = 0; i < nStreams_; i++){
+            streams_[level][i] = nullptr;
+         }
       }
    };
 
-   ~BasicRecursiveTimeStepGPU() = default;
+   ~BasicRecursiveTimeStepGPU(){
+      if(useStreams_){
+         for (uint_t level = 0; level <= maxLevel_; level++){
+            for (uint_t i = 0; i < nStreams_; i++)
+               WALBERLA_GPU_CHECK(gpuStreamDestroy(streams_[level][i]))
+         }
+      }
+   }
+
+   void activateStreams(){
+      WALBERLA_LOG_INFO_ON_ROOT("Updating blocks using " << nStreams_ << " GPU Streams")
+      for (uint_t level = 0; level <= maxLevel_; level++){
+         for (uint_t i = 0; i < nStreams_; i++)
+            WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[level][i]))
+      }
+      useStreams_ = true;
+   }
+
 
    void operator()() { timestep(0); };
    void addRefinementToTimeLoop(SweepTimeloop& timeloop, uint_t level = 0);
-   void test(uint_t maxLevel, uint_t level = 0);
+   void addPostBoundaryHandlingBlockFunction( const BlockFunction & function );
 
  private:
    void timestep(uint_t level);
    void ghostLayerPropagation(Block* block, gpuStream_t gpuStream);
    std::function< void() > executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation = false);
+   std::function< void() > executePostBoundaryBlockFunctions(uint_t level);
 
    std::function< void() > executeBoundaryHandlingOnLevel(uint_t level);
 
@@ -100,6 +128,12 @@ class BasicRecursiveTimeStepGPU
 
    SweepCollection_T& sweepCollection_;
    BoundaryCollection_T& boundaryCollection_;
+   std::vector< BlockFunction >  globalPostBoundaryHandlingBlockFunctions_;
+
+   std::vector< std::vector< gpuStream_t >> streams_;
+   uint_t nStreams_{uint_c(6)};
+   bool useStreams_;
+   std::vector< uint8_t > timestepPerLevel_;
 };
 
 } // namespace lbm_generated

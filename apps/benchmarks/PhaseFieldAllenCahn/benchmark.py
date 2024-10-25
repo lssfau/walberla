@@ -8,6 +8,11 @@ from waLBerla.tools.config import block_decomposition
 import sys
 from math import prod
 
+try:
+    import machinestate as ms
+except ImportError:
+    ms = None
+
 
 def domain_block_size_ok(block_size, total_mem, gls=1, q_phase=15, q_hydro=27, size_per_value=8):
     """Checks if a single block of given size fits into GPU memory"""
@@ -20,7 +25,9 @@ def domain_block_size_ok(block_size, total_mem, gls=1, q_phase=15, q_hydro=27, s
 
 
 class Scenario:
-    def __init__(self, time_step_strategy, cuda_block_size, cells_per_block=(256, 256, 256),
+    def __init__(self, time_step_strategy,
+                 cuda_block_size,
+                 cells_per_block=(256, 256, 256),
                  cuda_enabled_mpi=False):
         # output frequencies
         self.vtkWriteFrequency = 0
@@ -89,6 +96,14 @@ class Scenario:
         data['compile_flags'] = wlb.build_info.compiler_flags
         data['walberla_version'] = wlb.build_info.version
         data['build_machine'] = wlb.build_info.build_machine
+        if ms:
+            state = ms.MachineState(extended=False, anonymous=True)
+            state.generate()                        # generate subclasses
+            state.update()                          # read information
+            data["MachineState"] = str(state.get())
+        else:
+            print("MachineState module is not available. MachineState was not saved")
+
         sequenceValuesToScalars(data)
 
         df = pd.DataFrame.from_records([data])
@@ -101,43 +116,19 @@ class Scenario:
 def benchmark():
     scenarios = wlb.ScenarioManager()
 
-    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 8))
+    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 40))
     gpu_mem = gpu_mem_gb * (2 ** 30)
 
-    block_size = (256, 256, 256)
+    block_size = (320, 320, 320)
+    cuda_enabled_mpi = True
 
     if not domain_block_size_ok(block_size, gpu_mem):
         wlb.log_info_on_root(f"Block size {block_size} would exceed GPU memory. Skipping.")
     else:
-        scenarios.add(Scenario(time_step_strategy='normal', cuda_block_size=(256, 1, 1), cells_per_block=block_size))
+        scenarios.add(Scenario(time_step_strategy='normal',
+                               cuda_block_size=(128, 1, 1),
+                               cells_per_block=block_size,
+                               cuda_enabled_mpi=cuda_enabled_mpi))
 
 
-def kernel_benchmark():
-    scenarios = wlb.ScenarioManager()
-
-    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 8))
-    gpu_mem = gpu_mem_gb * (2 ** 30)
-
-    block_sizes = [(i, i, i) for i in (32, 64, 128, 256, 320, 384, 448, 512)]
-
-    cuda_blocks = [(32, 1, 1), (64, 1, 1), (128, 1, 1), (256, 1, 1),
-                   (32, 2, 1), (64, 2, 1), (128, 2, 1),
-                   (32, 4, 1), (64, 4, 1),
-                   (32, 4, 2),
-                   (32, 8, 1),
-                   (16, 16, 1)]
-
-    for time_step_strategy in ['phase_only', 'hydro_only', 'kernel_only', 'normal']:
-        for cuda_block in cuda_blocks:
-            for block_size in block_sizes:
-                if not domain_block_size_ok(block_size, gpu_mem):
-                    wlb.log_info_on_root(f"Block size {block_size} would exceed GPU memory. Skipping.")
-                    continue
-                scenario = Scenario(time_step_strategy=time_step_strategy,
-                                    cuda_block_size=cuda_block,
-                                    cells_per_block=block_size)
-                scenarios.add(scenario)
-
-
-# benchmark()
-kernel_benchmark()
+benchmark()

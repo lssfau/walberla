@@ -26,9 +26,7 @@
 {%- elif target is equalto 'gpu' -%}
 #include "gpu/GPUField.h"
 #include "gpu/GPUWrapper.h"
-{% if inner_outer_split -%}
-#include "gpu/ParallelStreams.h"
-{%- endif %}
+{%if inner_outer_split %} #include "gpu/ParallelStreams.h" {% endif %}
 {%- endif %}
 #include "field/SwapableCompare.h"
 #include "domain_decomposition/BlockDataID.h"
@@ -132,7 +130,7 @@ public:
    configured_ = true;
    }
    {% else %}
-   void configure( const shared_ptr<StructuredBlockStorage> & blocks, IBlock * block ){}
+   void configure( const shared_ptr<StructuredBlockStorage> & /*blocks*/, IBlock * /*block*/ ){}
    {% endif %}
 
    {% if inner_outer_split %}
@@ -161,23 +159,23 @@ public:
      {%endif%}
    }
 
-   {{kernel|generate_members|indent(3)}}
+   {% endif %}
+
+   {{kernel|generate_getter()|indent(3)}}
+   {{kernel|generate_setter()|indent(3)}}
 
 private:
+   {%if target is equalto 'gpu' and inner_outer_split %} gpu::ParallelStreams parallelStreams_; {% endif %}
+   {{kernel|generate_members|indent(3)}}
 
-   {%if target is equalto 'gpu' %} gpu::ParallelStreams parallelStreams_; {% endif %}
-
+   {% if inner_outer_split %}
    Cell outerWidth_;
    std::vector<CellInterval> layers_;
+   {% endif %}
+
    {% if block_offset -%}
    bool configured_;
    {% endif %}
-   {% else %}
-   {{ kernel|generate_members|indent(3) }}
-   {% if block_offset -%}
-   bool configured_;
-   {% endif %}
-{% endif %}
 };
 
 

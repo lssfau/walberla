@@ -25,7 +25,7 @@ with ManualCodeGenerationContext(openmp=False, optimize_for_localhost=False,
         relaxation_rate = sp.symbols("omega")
         streaming_pattern = 'pull'
 
-        pdfs = fields(f"pdfs({stencil.Q}): {data_type}[{stencil.D}D]", layout='fzyx')
+        pdfs, pdfs_tmp = fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): {data_type}[3D]", layout='fzyx')
         density_field, velocity_field = fields(f"density(1), velocity({stencil.D}): {data_type}[{stencil.D}D]",
                                                layout='fzyx')
 
@@ -33,13 +33,12 @@ with ManualCodeGenerationContext(openmp=False, optimize_for_localhost=False,
 
         lbm_config = LBMConfig(stencil=stencil, method=method, relaxation_rate=relaxation_rate,
                                streaming_pattern=streaming_pattern)
-        lbm_opt = LBMOptimisation(cse_global=False)
+        lbm_opt = LBMOptimisation(cse_global=False, symbolic_field=pdfs, symbolic_temporary_field=pdfs_tmp)
 
         collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
         generate_lbm_sweep_collection(ctx, f'{stencil.name}{method.name}', collision_rule,
-                                      streaming_pattern='pull',
-                                      field_layout='zyxf',
+                                      lbm_config=lbm_config, lbm_optimisation=lbm_opt,
                                       refinement_scaling=None,
                                       macroscopic_fields=macroscopic_fields,
                                       target=target, data_type=data_type,

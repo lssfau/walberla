@@ -20,44 +20,18 @@
 
 #pragma once
 
-#include "blockforest/BlockDataHandling.h"
+#include "core/DataTypes.h"
 
-#include "domain_decomposition/IBlock.h"
-#include "domain_decomposition/StructuredBlockStorage.h"
-
-namespace walberla
-{
-namespace lbm_generated
+namespace walberla::lbm_generated
 {
 
-class DefaultRefinementScaling : public blockforest::AlwaysInitializeBlockDataHandling< real_t >
+inline real_t relaxationRateScaling( real_t relaxationRate, uint_t refinementLevel )
 {
- public:
-   DefaultRefinementScaling(const weak_ptr< StructuredBlockStorage >& blocks, const real_t parameter)
-      : blocks_(blocks), parameter_(parameter){};
+   const real_t levelScaleFactor = real_c(uint_c(1) << refinementLevel);
+   const real_t one                = real_c(1.0);
+   const real_t half               = real_c(0.5);
 
-   real_t* initialize(IBlock* const block) override
-   {
-      WALBERLA_ASSERT_NOT_NULLPTR(block)
-      auto blocks = blocks_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR(blocks)
+   return real_c(relaxationRate / (levelScaleFactor * (-relaxationRate * half + one) + relaxationRate * half));
+}
 
-      level_ = block->getBlockStorage().getLevel(*block);
-
-      const real_t level_scale_factor = real_c(uint_t(1) << level_);
-      const real_t one                = real_c(1.0);
-      const real_t half               = real_c(0.5);
-
-      return new real_t(parameter_ / (level_scale_factor * (-parameter_ * half + one) + parameter_ * half));
-   }
-   bool operator==(const DefaultRefinementScaling& other) const { return level_ == other.level_; }
-
- private:
-   const weak_ptr< StructuredBlockStorage > blocks_;
-   const real_t parameter_;
-
-   uint_t level_;
-};
-
-} // namespace lbm_generated
-} // namespace walberla
+} // namespace walberla::lbm_generated

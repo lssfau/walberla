@@ -11,5 +11,5 @@ waLBerla_generate_target_from_python(NAME NonUniformGridGPUGenerated
         NonUniformGridGPUBoundaryCollection.h
         NonUniformGridGPUInfoHeader.h)
 waLBerla_add_executable( NAME NonUniformGridGPU
-                         FILES NonUniformGridGPU.cpp LdcSetup.h
+                         FILES NonUniformGridGPU.cpp LdcSetup.h GridGeneration.h
                          DEPENDS blockforest boundary core gpu domain_decomposition field geometry lbm_generated python_coupling timeloop vtk NonUniformGridGPUGenerated )

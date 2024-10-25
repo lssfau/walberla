@@ -9,27 +9,24 @@ import sympy as sp
 
 from pystencils import Target, Backend
 from pystencils.backends.cbackend import generate_c
-from pystencils.typing import TypedSymbol, get_base_type
+from pystencils.typing import TypedSymbol, get_base_type, PointerType
 from pystencils.field import FieldType
 from pystencils.sympyextensions import prod
 
 temporary_fieldPointerTemplate = """{type}"""
 
-temporary_fieldMemberTemplate = """
-private: std::set< {type} *, field::SwapableCompare< {type} * > > cache_{original_field_name}_;"""
+temporary_fieldMemberTemplate = "std::unordered_map<IBlock*, {type} *> cache_{original_field_name}_;"
 
 temporary_fieldTemplate = """
 {{
-    // Getting temporary field {tmp_field_name}
-    auto it = cache_{original_field_name}_.find( {original_field_name} );
-    if( it != cache_{original_field_name}_.end() )
+    if (cache_{original_field_name}_.find(block) == cache_{original_field_name}_.end())
     {{
-        {tmp_field_name} = *it;
+        {tmp_field_name} = {original_field_name}->cloneUninitialized();
+        cache_{original_field_name}_[block] = {tmp_field_name};
     }}
     else
     {{
-        {tmp_field_name} = {original_field_name}->cloneUninitialized();
-        cache_{original_field_name}_.insert({tmp_field_name});
+        {tmp_field_name} = cache_{original_field_name}_[block];
     }}
 }}
 """
@@ -40,7 +37,7 @@ temporary_constructor = """
 
 delete_loop = """
     for(auto p: cache_{original_field_name}_) {{
-        delete p;
+        delete p.second;
     }}
 """
 
@@ -107,6 +104,35 @@ def get_field_stride(param):
         f_stride_name = stride_names[-1]
         strides.extend([f"{type_str}({e} * {f_stride_name})" for e in reversed(additional_strides)])
     return strides[param.symbol.coordinate]
+
+
+def normalise_cell_interval(cell_interval, field_object):
+    if isinstance(cell_interval, str):
+        return cell_interval
+    elif isinstance(cell_interval, dict):
+        return cell_interval[field_object.name]
+    else:
+        return None
+
+
+def get_start_coordinates(cell_interval, field_object, ghost_layers_to_include, required_ghost_layers):
+    ci = normalise_cell_interval(cell_interval, field_object)
+    if ci is None:
+        return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
+    else:
+        assert ghost_layers_to_include == 0
+        return [sp.Symbol(f"{ci}.{coord_name}Min()") - required_ghost_layers for coord_name in ('x', 'y', 'z')]
+
+def get_end_coordinates(cell_interval, field_object, ghost_layers_to_include, required_ghost_layers):
+    ci = normalise_cell_interval(cell_interval, field_object)
+    if ci is None:
+        shape_names = ['xSize()', 'ySize()', 'zSize()'][:field_object.spatial_dimensions]
+        offset = 2 * ghost_layers_to_include + 2 * required_ghost_layers
+        return [f"int64_c({field_object.name}->{e}) + {offset}" for e in shape_names]
+    else:
+        assert ghost_layers_to_include == 0
+        return [f"int64_c({ci}.{coord_name}Size()) + {2 * required_ghost_layers}"
+                for coord_name in ('x', 'y', 'z')]
 
 
 def generate_declaration(kernel_info, target=Target.CPU):
@@ -226,17 +252,23 @@ def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_igno
 
 
 def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignore=(), ignore_fields=False,
-                                        parameter_registration=None):
+                                        parameter_registration=None, level_known=False):
+
+    pointer_symbols = {p.symbol.name for p in kernel_info.parameters
+                       if not p.is_field_parameter and isinstance(p.symbol.dtype, PointerType)}
     symbols = {p.field_name for p in kernel_info.parameters if p.is_field_pointer and not ignore_fields}
     symbols.update(p.symbol.name for p in kernel_info.parameters if not p.is_field_parameter)
     symbols.difference_update(parameters_to_ignore)
+    if ignore_fields:
+        symbols.difference_update(pointer_symbols)
     type_information = {p.symbol.name: p.symbol.dtype for p in kernel_info.parameters if not p.is_field_parameter}
     result = []
     registered_parameters = [] if not parameter_registration else parameter_registration.scaling_info
     for s in symbols:
         if s in registered_parameters:
             dtype = type_information[s].c_name
-            result.append("const uint_t level = block->getBlockStorage().getLevel(*block);")
+            if not level_known:
+                result.append("const uint_t level = block->getBlockStorage().getLevel(*block);")
             result.append(f"{dtype} & {s} = {s}Vector[level];")
         else:
             result.append(f"auto & {s} = {prefix}{s}_;")
@@ -245,7 +277,7 @@ def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignor
 
 @jinja2_context_decorator
 def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, stream='0',
-                  spatial_shape_symbols=()):
+                  spatial_shape_symbols=(), plain_kernel_call=False):
     """Generates the function call to a pystencils kernel
 
     Args:
@@ -265,6 +297,20 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
                                parameters - however in special cases like boundary conditions a manual specification
                                may be necessary.
     """
+    ast_params = kernel.parameters
+    if len(spatial_shape_symbols) == 0:
+        for param in ast_params:
+            if param.is_field_parameter and FieldType.is_indexed(param.fields[0]):
+                continue
+            if param.is_field_pointer:
+                field = param.fields[0]
+                if field.has_fixed_shape:
+                    spatial_shape_symbols = field.spatial_shape
+
+    if plain_kernel_call:
+        return kernel.generate_kernel_invocation_code(plain_kernel_call=True, stream=stream,
+                                                      spatial_shape_symbols=spatial_shape_symbols)
+
     assert isinstance(ghost_layers_to_include, str) or ghost_layers_to_include >= 0
     ast_params = kernel.parameters
     vec_info = ctx.get('cpu_vectorize_info', None)
@@ -291,34 +337,6 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             required_ghost_layers = max(max(kernel_ghost_layers))
 
     kernel_call_lines = []
-
-    def get_cell_interval(field_object):
-        if isinstance(cell_interval, str):
-            return cell_interval
-        elif isinstance(cell_interval, dict):
-            return cell_interval[field_object]
-        else:
-            return None
-
-    def get_start_coordinates(field_object):
-        ci = get_cell_interval(field_object)
-        if ci is None:
-            return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
-        else:
-            assert ghost_layers_to_include == 0
-            return [sp.Symbol(f"{ci}.{coord_name}Min()") - required_ghost_layers for coord_name in ('x', 'y', 'z')]
-
-    def get_end_coordinates(field_object):
-        ci = get_cell_interval(field_object)
-        if ci is None:
-            shape_names = ['xSize()', 'ySize()', 'zSize()'][:field_object.spatial_dimensions]
-            offset = 2 * ghost_layers_to_include + 2 * required_ghost_layers
-            return [f"int64_c({field_object.name}->{e}) + {offset}" for e in shape_names]
-        else:
-            assert ghost_layers_to_include == 0
-            return [f"int64_c({ci}.{coord_name}Size()) + {2 * required_ghost_layers}"
-                    for coord_name in ('x', 'y', 'z')]
-
     for param in ast_params:
         if param.is_field_parameter and FieldType.is_indexed(param.fields[0]):
             continue
@@ -328,7 +346,7 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             if field.field_type == FieldType.BUFFER:
                 kernel_call_lines.append(f"{param.symbol.dtype} {param.symbol.name} = {param.field_name};")
             else:
-                coordinates = get_start_coordinates(field)
+                coordinates = get_start_coordinates(cell_interval, field, ghost_layers_to_include, required_ghost_layers)
                 actual_gls = f"int_c({param.field_name}->nrOfGhostLayers())"
                 coord_set = set(coordinates)
                 coord_set = sorted(coord_set, key=lambda e: str(e))
@@ -356,7 +374,8 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             coord = param.symbol.coordinate
             field = param.fields[0]
             type_str = param.symbol.dtype.c_name
-            shape = f"{type_str}({get_end_coordinates(field)[coord]})"
+            end_coord = get_end_coordinates(cell_interval, field, ghost_layers_to_include, required_ghost_layers)[coord]
+            shape = f"{type_str}({end_coord})"
             assert coord < 3
             max_value = f"{field.name}->{('x', 'y', 'z')[coord]}SizeWithGhostLayer()"
             kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({max_value}, {shape})")
@@ -591,7 +610,8 @@ def generate_members(ctx, kernel_infos, parameters_to_ignore=None, only_fields=F
             original_field_name = field_name[:-len('_tmp')]
             f_size = get_field_fsize(f)
             field_type = make_field_type(get_base_type(f.dtype), f_size, is_gpu)
-            result.append(temporary_fieldMemberTemplate.format(type=field_type, original_field_name=original_field_name))
+            result.append(temporary_fieldMemberTemplate.format(type=field_type,
+                                                               original_field_name=original_field_name))
 
     for kernel_info in kernel_infos:
         if hasattr(kernel_info, 'varying_parameters'):
@@ -693,8 +713,47 @@ def nested_class_method_definition_prefix(ctx, nested_class_name):
         return f"{outer_class}::{nested_class_name}"
 
 
-@jinja2_context_decorator
-def generate_parameter_registration(ctx, kernel_infos, parameter_registration):
+def generate_getter(kernel_infos, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if parameter_registration and param.symbol.name in parameter_registration.scaling_info:
+                    continue
+                dtype = param.symbol.dtype
+                name = param.symbol.name
+                code_line = f"inline {dtype} get{name.capitalize()}() const {{ return {name}_; }}"
+                result.append(code_line)
+                params_to_skip.append(param.symbol.name)
+
+    return "\n".join(result)
+
+
+def generate_setter(kernel_infos, parameter_registration=None):
+    if not isinstance(kernel_infos, Iterable):
+        kernel_infos = [kernel_infos]
+
+    params_to_skip = []
+    result = []
+    for kernel_info in kernel_infos:
+        for param in kernel_info.parameters:
+            if not param.is_field_parameter and param.symbol.name not in params_to_skip:
+                if parameter_registration and param.symbol.name in parameter_registration.scaling_info:
+                    continue
+                dtype = param.symbol.dtype
+                name = param.symbol.name
+                code_line = f"inline void set{name.capitalize()}(const {dtype} value) {{ {name}_ = value; }}"
+                result.append(code_line)
+                params_to_skip.append(param.symbol.name)
+
+    return "\n".join(result)
+
+
+def generate_parameter_registration(kernel_infos, parameter_registration):
     if parameter_registration is None:
         return ""
     if not isinstance(kernel_infos, Iterable):
@@ -713,8 +772,7 @@ def generate_parameter_registration(ctx, kernel_infos, parameter_registration):
     return "\n".join(result)
 
 
-@jinja2_context_decorator
-def generate_constructor(ctx, kernel_infos, parameter_registration):
+def generate_constructor(kernel_infos, parameter_registration):
     if parameter_registration is None:
         return ""
     if not isinstance(kernel_infos, Iterable):
@@ -731,6 +789,15 @@ def generate_constructor(ctx, kernel_infos, parameter_registration):
                     result.append(standard_parameter_registration.format(dtype=dtype, name=name))
                     params_to_skip.append(name)
 
+    return "\n".join(result)
+
+
+def generate_field_strides(kernel_info):
+    result = []
+    for param in kernel_info.parameters:
+        if param.is_field_stride:
+            type_str = param.symbol.dtype.c_name
+            result.append(f"const {type_str} {param.symbol.name} = {param.symbol.name[1:]};")
     return "\n".join(result)
 
 
@@ -806,3 +873,6 @@ def add_pystencils_filters_to_jinja_env(jinja_env):
     jinja_env.filters['identifier_list'] = identifier_list
     jinja_env.filters['list_of_expressions'] = generate_list_of_expressions
     jinja_env.filters['field_type'] = field_type
+    jinja_env.filters['generate_field_strides'] = generate_field_strides
+    jinja_env.filters['generate_getter'] = generate_getter
+    jinja_env.filters['generate_setter'] = generate_setter

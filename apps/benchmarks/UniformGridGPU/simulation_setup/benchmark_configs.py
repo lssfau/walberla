@@ -6,11 +6,25 @@ import sys
 import sqlite3
 from math import prod
 
+try:
+    import machinestate as ms
+except ImportError:
+    ms = None
+
 # Number of time steps run for a workload of 128^3 per GPU
 # if double as many cells are on the GPU, half as many time steps are run etc.
 # increase this to get more reliable measurements
 TIME_STEPS_FOR_128_BLOCK = 1000
 DB_FILE = os.environ.get('DB_FILE', "gpu_benchmark.sqlite3")
+BENCHMARK = int(os.environ.get('BENCHMARK', 0))
+
+WeakX = int(os.environ.get('WeakX', 128))
+WeakY = int(os.environ.get('WeakY', 128))
+WeakZ = int(os.environ.get('WeakZ', 128))
+
+StrongX = int(os.environ.get('StrongX', 128))
+StrongY = int(os.environ.get('StrongY', 128))
+StrongZ = int(os.environ.get('StrongZ', 128))
 
 BASE_CONFIG = {
     'DomainSetup': {
@@ -39,6 +53,8 @@ ldc_setup = {'Border': [
 def num_time_steps(block_size, time_steps_for_128_block=200):
     cells = block_size[0] * block_size[1] * block_size[2]
     time_steps = (128 ** 3 / cells) * time_steps_for_128_block
+    if time_steps < 10:
+        time_steps = 10
     return int(time_steps)
 
 
@@ -61,13 +77,13 @@ class Scenario:
                  inner_outer_split=(1, 1, 1), warmup_steps=5, outer_iterations=3,
                  init_shear_flow=False, boundary_setup=False,
                  vtk_write_frequency=0, remaining_time_logger_frequency=-1,
-                 additional_info=None):
+                 additional_info=None, blocks=None, db_file_name=None):
 
         if boundary_setup:
             init_shear_flow = False
             periodic = (0, 0, 0)
 
-        self.blocks = block_decomposition(wlb.mpi.numProcesses())
+        self.blocks = blocks if blocks else block_decomposition(wlb.mpi.numProcesses())
 
         self.cells_per_block = cells_per_block
         self.periodic = periodic
@@ -85,6 +101,7 @@ class Scenario:
 
         self.vtk_write_frequency = vtk_write_frequency
         self.remaining_time_logger_frequency = remaining_time_logger_frequency
+        self.db_file_name = DB_FILE if db_file_name is None else db_file_name
 
         self.config_dict = self.config(print_dict=False)
         self.additional_info = additional_info
@@ -97,7 +114,6 @@ class Scenario:
                 'blocks': self.blocks,
                 'cellsPerBlock': self.cells_per_block,
                 'periodic': self.periodic,
-                'oneBlockPerProcess': True
             },
             'Parameters': {
                 'omega': self.omega,
@@ -115,7 +131,6 @@ class Scenario:
             'Logging': {
                 'logLevel': 'info',  # info progress detail tracing
             }
-
         }
         if self.boundary_setup:
             config_dict["Boundaries"] = ldc_setup
@@ -140,6 +155,15 @@ class Scenario:
         data['compile_flags'] = wlb.build_info.compiler_flags
         data['walberla_version'] = wlb.build_info.version
         data['build_machine'] = wlb.build_info.build_machine
+
+        if ms:
+            state = ms.MachineState(extended=False, anonymous=True)
+            state.generate()                        # generate subclasses
+            state.update()                          # read information
+            data["MachineState"] = str(state.get())
+        else:
+            print("MachineState module is not available. MachineState was not saved")
+
         sequenceValuesToScalars(data)
 
         result = data
@@ -150,8 +174,8 @@ class Scenario:
         table_name = table_name.replace("-", "_")  # - not allowed for table name would lead to syntax error
         for num_try in range(num_tries):
             try:
-                checkAndUpdateSchema(result, table_name, DB_FILE)
-                storeSingle(result, table_name, DB_FILE)
+                checkAndUpdateSchema(result, table_name, self.db_file_name)
+                storeSingle(result, table_name, self.db_file_name)
                 break
             except sqlite3.OperationalError as e:
                 wlb.log_warning(f"Sqlite DB writing failed: try {num_try + 1}/{num_tries}  {str(e)}")
@@ -200,12 +224,70 @@ def overlap_benchmark():
         scenarios.add(scenario)
 
 
+def no_overlap_scaling(cuda_enabled_mpi=False):
+    """Tests different communication overlapping strategies"""
+    wlb.log_info_on_root("Running scaling benchmark without communication hiding")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+    # no overlap
+    scenarios.add(Scenario(cells_per_block=(256, 256, 256),
+                           cuda_blocks=(128, 1, 1),
+                           time_step_strategy='noOverlap',
+                           inner_outer_split=(1, 1, 1),
+                           cuda_enabled_mpi=cuda_enabled_mpi,
+                           outer_iterations=1))
+
+
+def weak_scaling_overlap(cuda_enabled_mpi=False):
+    """Tests different communication overlapping strategies"""
+    wlb.log_info_on_root("Running scaling benchmark with communication hiding")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+
+    # overlap
+    for t in ["noOverlap", "simpleOverlap"]:
+        scenarios.add(Scenario(cells_per_block=(WeakX, WeakY, WeakZ),
+                               cuda_blocks=(128, 1, 1),
+                               time_step_strategy=t,
+                               inner_outer_split=(8, 8, 8),
+                               cuda_enabled_mpi=cuda_enabled_mpi,
+                               outer_iterations=1,
+                               boundary_setup=True,
+                               db_file_name="weakScalingUniformGrid.sqlite3"))
+
+
+def strong_scaling_overlap(cuda_enabled_mpi=False):
+    wlb.log_info_on_root("Running strong scaling benchmark with one block per proc with communication hiding")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+
+    domain_size = (StrongX, StrongY, StrongZ)
+    blocks = block_decomposition(wlb.mpi.numProcesses())
+    cells_per_block = tuple([d // b for d, b in zip(domain_size, reversed(blocks))])
+
+    # overlap
+    for t in ["noOverlap", "simpleOverlap"]:
+        scenarios.add(Scenario(cells_per_block=cells_per_block,
+                               cuda_blocks=(128, 1, 1),
+                               time_step_strategy=t,
+                               inner_outer_split=(1, 1, 1),
+                               cuda_enabled_mpi=cuda_enabled_mpi,
+                               outer_iterations=1,
+                               timesteps=50,
+                               blocks=blocks,
+                               boundary_setup=True,
+                               db_file_name="strongScalingUniformGridOneBlock.sqlite3"))
+
+
 def single_gpu_benchmark():
     """Benchmarks only the LBM compute kernel"""
     wlb.log_info_on_root("Running single GPU benchmarks")
     wlb.log_info_on_root("")
 
-    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 8))
+    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 40))
     gpu_mem = gpu_mem_gb * (2 ** 30)
     gpu_type = os.environ.get('GPU_TYPE')
 
@@ -214,12 +296,8 @@ def single_gpu_benchmark():
         additional_info['gpu_type'] = gpu_type
 
     scenarios = wlb.ScenarioManager()
-    block_sizes = [(i, i, i) for i in (32, 64, 128, 256)]
-    cuda_blocks = [(32, 1, 1), (64, 1, 1), (128, 1, 1), (256, 1, 1), (512, 1, 1),
-                   (32, 2, 1), (64, 2, 1), (128, 2, 1), (256, 2, 1),
-                   (32, 4, 1), (64, 4, 1), (128, 4, 1),
-                   (32, 8, 1), (64, 8, 1),
-                   (32, 16, 1)]
+    block_sizes = [(i, i, i) for i in (128, 256, 320)]
+    cuda_blocks = [(128, 1, 1), ]
     for block_size in block_sizes:
         for cuda_block_size in cuda_blocks:
             # cuda_block_size = (256, 1, 1) and block_size = (64, 64, 64) would be cut to cuda_block_size = (64, 1, 1)
@@ -266,4 +344,14 @@ wlb.log_info_on_root(f"Batch run of benchmark scenarios, saving result to {DB_FI
 # performance of compute kernel (no communication)
 # overlap_benchmark()  # benchmarks different communication overlap options
 # profiling()  # run only two timesteps on a smaller domain for profiling only
-validation_run()
+# validation_run()
+
+if BENCHMARK == 0:
+    single_gpu_benchmark()
+elif BENCHMARK == 1:
+    weak_scaling_overlap(True)
+elif BENCHMARK == 2:
+    strong_scaling_overlap(True)
+else:
+    validation_run()
+

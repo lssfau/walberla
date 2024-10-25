@@ -11,6 +11,7 @@ add_subdirectory( Piping )
 if ( WALBERLA_BUILD_WITH_CODEGEN)
 
    add_subdirectory( Antidunes )
+   add_subdirectory( FlowAroundSphere )
 
    if (WALBERLA_BUILD_WITH_PYTHON)
       add_subdirectory( PhaseFieldAllenCahn )

@@ -1,0 +1,35 @@
+
+TurbulentChannel {
+
+    channel_half_width           20;
+    full_channel                  0;
+
+    wall_boundary_condition     WFB;
+
+    target_friction_Reynolds    395;
+    target_bulk_velocity        0.1;
+
+    // turnover_periods              50;
+    timesteps                   100;
+
+    // sampling_start_timesteps      50;
+    // sampling_start_periods      1;
+    // sampling_interval_timesteps   20;
+    // sampling_interval_periods   1;
+
+    // vtk_start_timesteps        50;
+    // vtk_start_periods          1000;
+    // plot_start_timesteps       50;
+    // plot_start_periods         1000;
+    vtk_frequency              10;
+    plot_frequency             10;
+    separate_files                0;
+
+}
+
+StabilityChecker
+{
+   checkFrequency 10000;
+   streamOutput   false;
+   vtkOutput      true;
+}
