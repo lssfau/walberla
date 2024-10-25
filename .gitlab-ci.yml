@@ -98,7 +98,7 @@ stages:
 
 icc_2022_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -114,7 +114,7 @@ icc_2022_serial:
 
 icc_2022_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -128,7 +128,7 @@ icc_2022_mpionly:
 
 icc_2022_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WARNING_ERROR: "OFF"
@@ -138,7 +138,7 @@ icc_2022_hybrid:
 
 icc_2022_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -152,7 +152,7 @@ icc_2022_serial_dbg:
 
 icc_2022_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -164,7 +164,7 @@ icc_2022_mpionly_dbg:
 
 icc_2022_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -175,7 +175,7 @@ icc_2022_hybrid_dbg:
 
 icc_2022_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icc-2022:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -187,9 +187,9 @@ icc_2022_hybrid_dbg_sp:
       - cuda11
       - docker
 
-icx_2023_serial:
+icx_2024_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -202,9 +202,9 @@ icx_2023_serial:
       - cuda11
       - docker
 
-icx_2023_mpionly:
+icx_2024_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -215,18 +215,18 @@ icx_2023_mpionly:
       - cuda11
       - docker
 
-icx_2023_hybrid:
+icx_2024_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
    tags:
       - cuda11
       - docker
 
-icx_2023_serial_dbg:
+icx_2024_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -237,9 +237,9 @@ icx_2023_serial_dbg:
       - cuda11
       - docker
 
-icx_2023_mpionly_dbg:
+icx_2024_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -248,9 +248,9 @@ icx_2023_mpionly_dbg:
       - cuda11
       - docker
 
-icx_2023_hybrid_dbg:
+icx_2024_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -258,9 +258,9 @@ icx_2023_hybrid_dbg:
       - cuda11
       - docker
 
-icx_2023_hybrid_dbg_sp:
+icx_2024_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2023:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -273,7 +273,7 @@ icx_2023_hybrid_dbg_sp:
 
 gcc_10_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -302,7 +302,7 @@ gcc_10_serial:
 
 gcc_10_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -329,7 +329,7 @@ gcc_10_mpionly:
 
 gcc_10_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -355,7 +355,7 @@ gcc_10_hybrid:
 
 gcc_10_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -385,7 +385,7 @@ gcc_10_serial_dbg:
 
 gcc_10_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -413,7 +413,7 @@ gcc_10_mpionly_dbg:
 
 gcc_10_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -437,7 +437,7 @@ gcc_10_hybrid_dbg:
 
 gcc_10_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -467,7 +467,7 @@ gcc_10_hybrid_dbg_sp:
 
 gcc_11_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -496,7 +496,7 @@ gcc_11_serial:
 
 gcc_11_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -523,7 +523,7 @@ gcc_11_mpionly:
 
 gcc_11_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -549,7 +549,7 @@ gcc_11_hybrid:
 
 gcc_11_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -579,7 +579,7 @@ gcc_11_serial_dbg:
 
 gcc_11_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -607,7 +607,7 @@ gcc_11_mpionly_dbg:
 
 gcc_11_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -634,7 +634,7 @@ gcc_11_hybrid_dbg:
 
 gcc_11_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -664,7 +664,7 @@ gcc_11_hybrid_dbg_sp:
 
 gcc_12_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -693,7 +693,7 @@ gcc_12_serial:
 
 gcc_12_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -720,7 +720,7 @@ gcc_12_mpionly:
 
 gcc_12_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -746,7 +746,7 @@ gcc_12_hybrid:
 
 gcc_12_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -776,7 +776,7 @@ gcc_12_serial_dbg:
 
 gcc_12_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -804,7 +804,7 @@ gcc_12_mpionly_dbg:
 
 gcc_12_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -831,7 +831,7 @@ gcc_12_hybrid_dbg:
 
 gcc_12_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -861,7 +861,7 @@ gcc_12_hybrid_dbg_sp:
 
 gcc_13_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -891,7 +891,7 @@ gcc_13_serial:
 
 gcc_13_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -919,7 +919,7 @@ gcc_13_mpionly:
 
 gcc_13_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    stage: pretest
    before_script:
       - python3 -m venv ci-venv
@@ -944,7 +944,7 @@ gcc_13_hybrid:
 
 gcc_13_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -972,7 +972,7 @@ gcc_13_serial_dbg:
 
 gcc_13_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -998,7 +998,7 @@ gcc_13_mpionly_dbg:
 
 gcc_13_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1023,7 +1023,7 @@ gcc_13_hybrid_dbg:
 
 gcc_13_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1051,7 +1051,7 @@ gcc_13_hybrid_dbg_sp:
 
 clang_14_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1080,7 +1080,7 @@ clang_14_serial:
 
 clang_14_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1107,7 +1107,7 @@ clang_14_mpionly:
 
 clang_14_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1133,7 +1133,7 @@ clang_14_hybrid:
 
 clang_14_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1163,7 +1163,7 @@ clang_14_serial_dbg:
 
 clang_14_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1191,7 +1191,7 @@ clang_14_mpionly_dbg:
 
 clang_14_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1215,7 +1215,7 @@ clang_14_hybrid_dbg:
 
 clang_14_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1245,7 +1245,7 @@ clang_14_hybrid_dbg_sp:
 
 clang_15_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1274,7 +1274,7 @@ clang_15_serial:
 
 clang_15_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1301,7 +1301,7 @@ clang_15_mpionly:
 
 clang_15_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1327,7 +1327,7 @@ clang_15_hybrid:
 
 clang_15_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1357,7 +1357,7 @@ clang_15_serial_dbg:
 
 clang_15_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1385,7 +1385,7 @@ clang_15_mpionly_dbg:
 
 clang_15_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1412,7 +1412,7 @@ clang_15_hybrid_dbg:
 
 clang_15_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1442,7 +1442,7 @@ clang_15_hybrid_dbg_sp:
 
 clang_16_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1471,7 +1471,7 @@ clang_16_serial:
 
 clang_16_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1498,7 +1498,7 @@ clang_16_mpionly:
 
 clang_16_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1524,7 +1524,7 @@ clang_16_hybrid:
 
 clang_16_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1554,7 +1554,7 @@ clang_16_serial_dbg:
 
 clang_16_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1582,7 +1582,7 @@ clang_16_mpionly_dbg:
 
 clang_16_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1609,7 +1609,7 @@ clang_16_hybrid_dbg:
 
 clang_16_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1639,7 +1639,7 @@ clang_16_hybrid_dbg_sp:
 
 clang_17_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1668,7 +1668,7 @@ clang_17_serial:
 
 clang_17_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1695,7 +1695,7 @@ clang_17_mpionly:
 
 clang_17_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1718,7 +1718,7 @@ clang_17_hybrid:
 
 clang_17_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1745,7 +1745,7 @@ clang_17_serial_dbg:
 
 clang_17_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1770,7 +1770,7 @@ clang_17_mpionly_dbg:
 
 clang_17_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1794,7 +1794,7 @@ clang_17_hybrid_dbg:
 
 clang_17_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
    stage: pretest
    before_script:
       - python3 -m venv ci-venv
@@ -1822,7 +1822,7 @@ clang_17_hybrid_dbg_sp:
 
 aocc_4_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1851,7 +1851,7 @@ aocc_4_serial:
 
 aocc_4_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1878,7 +1878,7 @@ aocc_4_mpionly:
 
 aocc_4_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1901,7 +1901,7 @@ aocc_4_hybrid:
 
 aocc_4_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1928,7 +1928,7 @@ aocc_4_serial_dbg:
 
 aocc_4_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1953,7 +1953,7 @@ aocc_4_mpionly_dbg:
 
 aocc_4_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
@@ -1977,7 +1977,7 @@ aocc_4_hybrid_dbg:
 
 aocc_4_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:22
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
