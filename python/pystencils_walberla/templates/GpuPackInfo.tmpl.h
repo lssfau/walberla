@@ -59,7 +59,7 @@ public:
     void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
     void communicateLocal  ( stencil::Direction /*dir*/, const IBlock* /* sender */, IBlock* /* receiver */, gpuStream_t /* stream */ ) override
     {
-       WALBERLA_ABORT("Local Communication not implemented yet for standard PackInfos. To run your application turn of local communication in the Communication class")
+       WALBERLA_ABORT("Local Communication not implemented yet for standard PackInfos. To run your application, turn off local communication in the communication class, e.g. with useLocalCommunication=false")
     }
     void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
     uint_t size  (stencil::Direction dir, IBlock * block) override;
