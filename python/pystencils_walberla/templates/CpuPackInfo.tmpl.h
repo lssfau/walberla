@@ -47,7 +47,7 @@ public:
     {{class_name}}( {{fused_kernel|generate_constructor_parameters(parameters_to_ignore=['buffer'])}} )
         : {{ fused_kernel|generate_constructor_initializer_list(parameters_to_ignore=['buffer']) }}
     {};
-    ~{{class_name}}() override {}
+    ~{{class_name}}() override = default;
 
    bool constantDataExchange() const override { return true; }
    bool threadsafeReceiving()  const override { return true; }

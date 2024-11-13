@@ -44,7 +44,7 @@ public:
    /*! \name Construction & Destruction */
    //@{
    UniformToNonUniformPackInfoAdapter( const shared_ptr<walberla::communication::UniformPackInfo> & uniformPackInfo ) : uniformPackInfo_( uniformPackInfo ) { }
-   ~UniformToNonUniformPackInfoAdapter() override { }
+   ~UniformToNonUniformPackInfoAdapter() override = default;
    //@}
    //****************************************************************************************************************
 
