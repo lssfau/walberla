@@ -100,6 +100,10 @@ public:
     *
     * If NOT thread-safe, \ref threadsafeReceiving must return false!
     *
+    * Implementations must reserve extra space and advance the send buffer
+    * pointer according to the alignment of the ghost layer data type!
+    * The buffer is char-aligned.
+    *
     * @param receiver the block where the unpacked data should be stored into
     * @param dir      receive data from neighbor in this direction
     * @param buffer   buffer for reading the data from
@@ -144,6 +148,10 @@ protected:
     * \brief Pack data from a block into a send buffer.
     *
     * Must be thread-safe!
+    *
+    * Implementations must reserve extra space and advance the send buffer
+    * pointer according to the alignment of the ghost layer data type!
+    * The buffer is char-aligned.
     *
     * @param sender     the block whose data should be packed into a buffer
     * @param dir        pack data for neighbor in this direction

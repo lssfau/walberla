@@ -25,6 +25,8 @@
 #include "domain_decomposition/IBlock.h"
 #include "communication/UniformPackInfo.h"
 
+#include <memory>
+
 #define FUNC_PREFIX
 
 #ifdef __GNUC__
@@ -52,7 +54,10 @@ public:
 
    void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer) {
         const auto dataSize = size(dir, receiver);
-        unpack(dir, buffer.skip(dataSize), receiver);
+        auto bufferSize = dataSize + sizeof({{dtype}});
+        auto bufferPtr = reinterpret_cast<void*>(buffer.skip(bufferSize));
+        std::align(alignof({{dtype}}), dataSize, bufferPtr, bufferSize);
+        unpack(dir, reinterpret_cast<unsigned char*>(bufferPtr), receiver);
    }
 
    void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir) {
@@ -65,7 +70,10 @@ public:
 
    void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const {
         const auto dataSize = size(dir, sender);
-        pack(dir, outBuffer.forward(dataSize), const_cast<IBlock*>(sender));
+        auto bufferSize = dataSize + sizeof({{dtype}});
+        auto bufferPtr = reinterpret_cast<void*>(outBuffer.forward(bufferSize));
+        std::align(alignof({{dtype}}), dataSize, bufferPtr, bufferSize);
+        pack(dir, reinterpret_cast<unsigned char*>(bufferPtr), const_cast<IBlock *>(sender));
    }
 
    void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block) const;
