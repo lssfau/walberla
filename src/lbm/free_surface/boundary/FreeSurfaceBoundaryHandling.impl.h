@@ -60,7 +60,7 @@ class BoundaryBlockDataHandling
    {}
 
    // initialize standard waLBerla boundary handling
-   BoundaryHandling_T* initialize(IBlock* const block)
+   BoundaryHandling_T* initialize(IBlock* const block) override
    {
       using B      = FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >;
       using flag_t = typename B::flag_t;
@@ -91,16 +91,16 @@ class BoundaryBlockDataHandling
                                     pressureOutflow, outlet, freeSlip);
    }
 
-   void serialize(IBlock* const block, const BlockDataID& id, mpi::SendBuffer& buffer)
+   void serialize(IBlock* const block, const BlockDataID& id, mpi::SendBuffer& buffer) override
    {
       BoundaryHandling_T* const boundaryHandlingPtr = block->getData< BoundaryHandling_T >(id);
       CellInterval everyCell                        = boundaryHandlingPtr->getFlagField()->xyzSizeWithGhostLayer();
       boundaryHandlingPtr->pack(buffer, everyCell, true);
    }
 
-   BoundaryHandling_T* deserialize(IBlock* const block) { return initialize(block); }
+   BoundaryHandling_T* deserialize(IBlock* const block) override { return initialize(block); }
 
-   void deserialize(IBlock* const block, const BlockDataID& id, mpi::RecvBuffer& buffer)
+   void deserialize(IBlock* const block, const BlockDataID& id, mpi::RecvBuffer& buffer) override
    {
       BoundaryHandling_T* const boundaryHandlingPtr = block->getData< BoundaryHandling_T >(id);
       CellInterval everyCell                        = boundaryHandlingPtr->getFlagField()->xyzSizeWithGhostLayer();

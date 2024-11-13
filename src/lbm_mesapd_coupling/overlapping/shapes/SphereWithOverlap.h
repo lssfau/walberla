@@ -45,7 +45,7 @@ class SphereWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), sphere_(sphere)
    {}
 
-   bool contains(const Vector3< real_t >& point) const
+   bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideSphere(point, ac_->getPosition(idx_), sphere_.getRadius());
    }

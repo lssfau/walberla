@@ -2958,7 +2958,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~token_scanner()
+         ~token_scanner() override
          {}
 
          explicit token_scanner(const std::size_t& stride)
@@ -2970,7 +2970,7 @@ namespace exprtk
             }
          }
 
-         inline std::size_t process(generator& g)
+         inline std::size_t process(generator& g) override
          {
             if (g.token_list_.size() >= stride_)
             {
@@ -3065,7 +3065,7 @@ namespace exprtk
       {
       public:
 
-         inline std::size_t process(generator& g)
+         inline std::size_t process(generator& g) override
          {
             std::size_t changes = 0;
 
@@ -3093,7 +3093,7 @@ namespace exprtk
             }
          }
 
-         inline std::size_t process(generator& g)
+         inline std::size_t process(generator& g) override
          {
             if (g.token_list_.empty())
                return 0;
@@ -3197,7 +3197,7 @@ namespace exprtk
          : stride_(stride)
          {}
 
-         inline std::size_t process(generator& g)
+         inline std::size_t process(generator& g) override
          {
             if (g.token_list_.empty())
                return 0;
@@ -3330,7 +3330,7 @@ namespace exprtk
                ignore_set_.insert(symbol);
             }
 
-            inline int insert(const lexer::token& t0, const lexer::token& t1, lexer::token& new_token)
+            inline int insert(const lexer::token& t0, const lexer::token& t1, lexer::token& new_token) override
             {
                bool match         = false;
                new_token.type     = lexer::token::e_mul;
@@ -3385,7 +3385,7 @@ namespace exprtk
             : token_joiner(stride)
             {}
 
-            inline bool join(const lexer::token& t0, const lexer::token& t1, lexer::token& t)
+            inline bool join(const lexer::token& t0, const lexer::token& t1, lexer::token& t) override
             {
                // ': =' --> ':='
                if ((t0.type == lexer::token::e_colon) && (t1.type == lexer::token::e_eq))
@@ -3530,7 +3530,7 @@ namespace exprtk
                   return false;
             }
 
-            inline bool join(const lexer::token& t0, const lexer::token& t1, const lexer::token& t2, lexer::token& t)
+            inline bool join(const lexer::token& t0, const lexer::token& t1, const lexer::token& t2, lexer::token& t) override
             {
                // '[ * ]' --> '[*]'
                if (
@@ -3561,7 +3561,7 @@ namespace exprtk
               state_(true)
             {}
 
-            bool result()
+            bool result() override
             {
                if (!stack_.empty())
                {
@@ -3582,7 +3582,7 @@ namespace exprtk
                return error_token_;
             }
 
-            void reset()
+            void reset() override
             {
                // Why? because msvc doesn't support swap properly.
                stack_ = std::stack<std::pair<char,std::size_t> >();
@@ -3590,7 +3590,7 @@ namespace exprtk
                error_token_.clear();
             }
 
-            bool operator() (const lexer::token& t)
+            bool operator() (const lexer::token& t) override
             {
                if (
                     !t.value.empty()                       &&
@@ -3646,18 +3646,18 @@ namespace exprtk
               current_index_(0)
             {}
 
-            bool result()
+            bool result() override
             {
                return error_list_.empty();
             }
 
-            void reset()
+            void reset() override
             {
                error_list_.clear();
                current_index_ = 0;
             }
 
-            bool operator() (const lexer::token& t)
+            bool operator() (const lexer::token& t) override
             {
                if (token::e_number == t.type)
                {
@@ -3741,7 +3741,7 @@ namespace exprtk
 
          private:
 
-            bool modify(lexer::token& t)
+            bool modify(lexer::token& t) override
             {
                if (lexer::token::e_symbol == t.type)
                {
@@ -3804,12 +3804,12 @@ namespace exprtk
                add_invalid_set1(lexer::token::e_ternary);
             }
 
-            bool result()
+            bool result() override
             {
                return error_list_.empty();
             }
 
-            bool operator() (const lexer::token& t0, const lexer::token& t1)
+            bool operator() (const lexer::token& t0, const lexer::token& t1) override
             {
                const set_t::value_type p = std::make_pair(t0.type,t1.type);
 
@@ -3971,12 +3971,12 @@ namespace exprtk
                add_invalid(lexer::token::e_pow   , lexer::token::e_mod   , lexer::token::e_pow   );
             }
 
-            bool result()
+            bool result() override
             {
                return error_list_.empty();
             }
 
-            bool operator() (const lexer::token& t0, const lexer::token& t1, const lexer::token& t2)
+            bool operator() (const lexer::token& t0, const lexer::token& t1, const lexer::token& t2) override
             {
                const set_t::value_type p = std::make_pair(t0.type,std::make_pair(t1.type,t2.type));
 
@@ -5202,7 +5202,7 @@ namespace exprtk
          typedef typename nci_t::noderef_list_t noderef_list_t;
          typedef node_depth_base<expression_node<T> > ndb_t;
 
-         virtual ~expression_node()
+         ~expression_node() override
          {}
 
          inline virtual T value() const
@@ -5851,7 +5851,7 @@ namespace exprtk
 
          protected:
 
-            value_ptr value_at(const std::size_t& index) const
+            value_ptr value_at(const std::size_t& index) const override
             {
                if (index < size_)
                   return const_cast<const_value_ptr>(vec_ + index);
@@ -5859,7 +5859,7 @@ namespace exprtk
                   return const_value_ptr(0);
             }
 
-            std::size_t vector_size() const
+            std::size_t vector_size() const override
             {
                return size_;
             }
@@ -5886,12 +5886,12 @@ namespace exprtk
 
          protected:
 
-            value_ptr value_at(const std::size_t& index) const
+            value_ptr value_at(const std::size_t& index) const override
             {
                return (index < sequence_.size()) ? (&sequence_[index]) : const_value_ptr(0);
             }
 
-            std::size_t vector_size() const
+            std::size_t vector_size() const override
             {
                return sequence_.size();
             }
@@ -5913,24 +5913,24 @@ namespace exprtk
             : vec_view_(vec_view)
             {}
 
-            void set_ref(value_ptr* ref)
+            void set_ref(value_ptr* ref) override
             {
                vec_view_.set_ref(ref);
             }
 
-            virtual inline bool rebaseable() const
+            inline bool rebaseable() const override
             {
                return true;
             }
 
          protected:
 
-            value_ptr value_at(const std::size_t& index) const
+            value_ptr value_at(const std::size_t& index) const override
             {
                return (index < vec_view_.size()) ? (&vec_view_[index]) : const_value_ptr(0);
             }
 
-            std::size_t vector_size() const
+            std::size_t vector_size() const override
             {
                return vec_view_.size();
             }
@@ -5999,12 +5999,12 @@ namespace exprtk
       {
       public:
 
-         inline T value() const
+         inline T value() const override
          {
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_null;
          }
@@ -6069,7 +6069,7 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
 
@@ -6082,7 +6082,7 @@ namespace exprtk
                return (equality_) ? T(0) : T(1);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_nulleq;
          }
@@ -6092,17 +6092,17 @@ namespace exprtk
             return details::e_eq;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_,node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -6122,17 +6122,17 @@ namespace exprtk
          : value_(v)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return value_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_constant;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return reinterpret_cast<expression_node<T>*>(0);
          }
@@ -6202,42 +6202,42 @@ namespace exprtk
             rp_.cache.second = rp_.n1_c.second;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringconst;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return reinterpret_cast<expression_node<T>*>(0);
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return value_.data();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return rp_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return rp_;
          }
@@ -6266,7 +6266,7 @@ namespace exprtk
             construct_branch_pair(branch_,branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
 
@@ -6275,7 +6275,7 @@ namespace exprtk
             return numeric::process<T>(operation_,arg);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_unary;
          }
@@ -6285,7 +6285,7 @@ namespace exprtk
             return operation_;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
@@ -6295,12 +6295,12 @@ namespace exprtk
             branch_.second = false;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -6327,7 +6327,7 @@ namespace exprtk
             init_branches<2>(branch_, branch0, branch1);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_[0].first);
             assert(branch_[1].first);
@@ -6338,7 +6338,7 @@ namespace exprtk
             return numeric::process<T>(operation_,arg0,arg1);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_binary;
          }
@@ -6348,7 +6348,7 @@ namespace exprtk
             return operation_;
          }
 
-         inline expression_node<T>* branch(const std::size_t& index = 0) const
+         inline expression_node<T>* branch(const std::size_t& index = 0) const override
          {
             if (0 == index)
                return branch_[0].first;
@@ -6358,12 +6358,12 @@ namespace exprtk
                return reinterpret_cast<expression_ptr>(0);
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::template compute_node_depth<2>(branch_);
          }
@@ -6387,7 +6387,7 @@ namespace exprtk
             init_branches<2>(branch_, branch0, branch1);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_[0].first);
             assert(branch_[1].first);
@@ -6398,7 +6398,7 @@ namespace exprtk
             return Operation::process(arg0,arg1);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_binary_ext;
          }
@@ -6408,7 +6408,7 @@ namespace exprtk
             return Operation::operation();
          }
 
-         inline expression_node<T>* branch(const std::size_t& index = 0) const
+         inline expression_node<T>* branch(const std::size_t& index = 0) const override
          {
             if (0 == index)
                return branch_[0].first;
@@ -6418,12 +6418,12 @@ namespace exprtk
                return reinterpret_cast<expression_ptr>(0);
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::template compute_node_depth<2>(branch_);
          }
@@ -6450,7 +6450,7 @@ namespace exprtk
             init_branches<3>(branch_, branch0, branch1, branch2);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_[0].first);
             assert(branch_[1].first);
@@ -6476,17 +6476,17 @@ namespace exprtk
             }
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_trinary;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::template compute_node_depth<3>(branch_);
          }
@@ -6515,22 +6515,22 @@ namespace exprtk
             init_branches<4>(branch_, branch0, branch1, branch2, branch3);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_quaternary;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::template compute_node_depth<4>(branch_);
          }
@@ -6558,7 +6558,7 @@ namespace exprtk
             construct_branch_pair(alternative_, alternative);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_  .first);
             assert(consequent_ .first);
@@ -6570,19 +6570,19 @@ namespace exprtk
                return alternative_.first->value();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_conditional;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_  , node_delete_list);
             expression_node<T>::ndb_t::collect(consequent_ , node_delete_list);
             expression_node<T>::ndb_t::collect(alternative_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth
                (condition_, consequent_, alternative_);
@@ -6611,7 +6611,7 @@ namespace exprtk
             construct_branch_pair(consequent_, consequent);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_ .first);
             assert(consequent_.first);
@@ -6622,18 +6622,18 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_conditional;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_ , node_delete_list);
             expression_node<T>::ndb_t::collect(consequent_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::
                compute_node_depth(condition_, consequent_);
@@ -6674,7 +6674,7 @@ namespace exprtk
             construct_branch_pair(return_, ret);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             throw break_exception<T>(return_.first ? return_.first->value() : std::numeric_limits<T>::quiet_NaN());
             #ifndef _MSC_VER
@@ -6682,17 +6682,17 @@ namespace exprtk
             #endif
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_break;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(return_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(return_);
          }
@@ -6707,7 +6707,7 @@ namespace exprtk
       {
       public:
 
-         inline T value() const
+         inline T value() const override
          {
             throw continue_exception();
             #ifndef _MSC_VER
@@ -6715,7 +6715,7 @@ namespace exprtk
             #endif
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_break;
          }
@@ -6794,7 +6794,7 @@ namespace exprtk
             construct_branch_pair(loop_body_, loop_body);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -6811,18 +6811,18 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_while;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_, node_delete_list);
             expression_node<T>::ndb_t::collect(loop_body_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(condition_, loop_body_);
          }
@@ -6851,7 +6851,7 @@ namespace exprtk
             construct_branch_pair(loop_body_, loop_body);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -6869,18 +6869,18 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_repeat;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_, node_delete_list);
             expression_node<T>::ndb_t::collect(loop_body_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(condition_, loop_body_);
          }
@@ -6913,7 +6913,7 @@ namespace exprtk
             construct_branch_pair(loop_body_  , loop_body  );
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -6944,12 +6944,12 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_for;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(initialiser_, node_delete_list);
             expression_node<T>::ndb_t::collect(condition_  , node_delete_list);
@@ -6957,7 +6957,7 @@ namespace exprtk
             expression_node<T>::ndb_t::collect(loop_body_  , node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth
                (initialiser_, condition_, incrementor_, loop_body_);
@@ -6990,7 +6990,7 @@ namespace exprtk
             construct_branch_pair(loop_body_, loop_body);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -7016,18 +7016,18 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_while;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_, node_delete_list);
             expression_node<T>::ndb_t::collect(loop_body_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(condition_, loop_body_);
          }
@@ -7056,7 +7056,7 @@ namespace exprtk
             construct_branch_pair(loop_body_, loop_body);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -7083,18 +7083,18 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_repeat;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(condition_, node_delete_list);
             expression_node<T>::ndb_t::collect(loop_body_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(condition_, loop_body_);
          }
@@ -7127,7 +7127,7 @@ namespace exprtk
             construct_branch_pair(loop_body_  , loop_body  );
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(condition_.first);
             assert(loop_body_.first);
@@ -7177,12 +7177,12 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_for;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(initialiser_, node_delete_list);
             expression_node<T>::ndb_t::collect(condition_  , node_delete_list);
@@ -7190,7 +7190,7 @@ namespace exprtk
             expression_node<T>::ndb_t::collect(loop_body_  , node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth
                (initialiser_, condition_, incrementor_, loop_body_);
@@ -7236,7 +7236,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (!arg_list_.empty())
             {
@@ -7259,17 +7259,17 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_switch;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(arg_list_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(arg_list_);
          }
@@ -7292,7 +7292,7 @@ namespace exprtk
          : switch_node<T>(arg_list)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Switch_N::process(switch_node<T>::arg_list_);
          }
@@ -7329,7 +7329,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             T result = T(0);
 
@@ -7354,17 +7354,17 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_mswitch;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(arg_list_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(arg_list_);
          }
@@ -7407,22 +7407,22 @@ namespace exprtk
             return this < (&v);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return (*value_);
          }
 
-         inline T& ref()
+         inline T& ref() override
          {
             return (*value_);
          }
 
-         inline const T& ref() const
+         inline const T& ref() const override
          {
             return (*value_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_variable;
          }
@@ -7649,37 +7649,37 @@ namespace exprtk
            vds_(vds)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return vds().data()[0];
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return const_cast<vector_node_ptr>(this);
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return this;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vector;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -7713,22 +7713,22 @@ namespace exprtk
             construct_branch_pair(index_, index);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return *(vector_base_ + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline T& ref()
+         inline T& ref() override
          {
             return *(vector_base_ + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline const T& ref() const
+         inline const T& ref() const override
          {
             return *(vector_base_ + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecelem;
          }
@@ -7738,12 +7738,12 @@ namespace exprtk
             return (*vec_holder_);
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(index_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(index_);
          }
@@ -7775,22 +7775,22 @@ namespace exprtk
             construct_branch_pair(index_, index);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return *(vds_.data() + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline T& ref()
+         inline T& ref() override
          {
             return *(vds_.data() + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline const T& ref() const
+         inline const T& ref() const override
          {
             return *(vds_.data() + static_cast<std::size_t>(details::numeric::to_int64(index_.first->value())));
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_rbvecelem;
          }
@@ -7800,12 +7800,12 @@ namespace exprtk
             return (*vector_holder_);
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(index_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(index_);
          }
@@ -7836,22 +7836,22 @@ namespace exprtk
             vector_holder_->set_ref(&vds_.ref());
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return *(vds_.data() + index_);
          }
 
-         inline T& ref()
+         inline T& ref() override
          {
             return *(vds_.data() + index_);
          }
 
-         inline const T& ref() const
+         inline const T& ref() const override
          {
             return *(vds_.data() + index_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_rbveccelem;
          }
@@ -7885,7 +7885,7 @@ namespace exprtk
            single_value_initialse_(single_value_initialse)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             if (single_value_initialse_)
             {
@@ -7915,17 +7915,17 @@ namespace exprtk
             return *(vector_base_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecdefass;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(initialiser_list_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(initialiser_list_);
          }
@@ -7953,13 +7953,13 @@ namespace exprtk
            var1_(var1)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             std::swap(var0_->ref(),var1_->ref());
             return var1_->ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_swap;
          }
@@ -7984,13 +7984,13 @@ namespace exprtk
            var1_(dynamic_cast<ivariable_ptr>(var1))
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             std::swap(var0_->ref(),var1_->ref());
             return var1_->ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_swap;
          }
@@ -8049,7 +8049,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(binary_node<T>::branch_[0].first);
             assert(binary_node<T>::branch_[1].first);
@@ -8073,32 +8073,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return vec0_node_ptr_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return vec0_node_ptr_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvecswap;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vec_size_;
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -8142,7 +8142,7 @@ namespace exprtk
             return this < (&v);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             rp_.n1_c.second  = (*value_).size() - 1;
             rp_.cache.second = rp_.n1_c.second;
@@ -8150,17 +8150,17 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return ref();
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &(*value_)[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return ref().size();
          }
@@ -8175,17 +8175,17 @@ namespace exprtk
             return (*value_);
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return rp_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return rp_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringvar;
          }
@@ -8215,7 +8215,7 @@ namespace exprtk
            rp_(rp)
          {}
 
-         virtual ~string_range_node()
+         ~string_range_node() override
          {
             rp_.free();
          }
@@ -8225,22 +8225,22 @@ namespace exprtk
             return this < (&v);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline std::string str() const
+         inline std::string str() const override
          {
             return (*value_);
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &(*value_)[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return ref().size();
          }
@@ -8260,17 +8260,17 @@ namespace exprtk
             return (*value_);
          }
 
-         inline range_t& range_ref()
+         inline range_t& range_ref() override
          {
             return rp_;
          }
 
-         inline const range_t& range_ref() const
+         inline const range_t& range_ref() const override
          {
             return rp_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringvarrng;
          }
@@ -8298,27 +8298,27 @@ namespace exprtk
            rp_(rp)
          {}
 
-        ~const_string_range_node()
+        ~const_string_range_node() override
          {
             rp_.free();
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return value_.data();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
@@ -8328,17 +8328,17 @@ namespace exprtk
             return rp_;
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return rp_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return rp_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_cstringvarrng;
          }
@@ -8397,12 +8397,12 @@ namespace exprtk
             initialised_ = (str_base_ptr_ && str_range_ptr_);
          }
 
-        ~generic_string_range_node()
+        ~generic_string_range_node() override
          {
             base_range_.free();
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -8437,42 +8437,42 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &value_[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return range_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return range_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strgenrange;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -8550,7 +8550,7 @@ namespace exprtk
                            str1_range_ptr_ ;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -8588,32 +8588,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &value_[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return range_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return range_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strconcat;
          }
@@ -8663,7 +8663,7 @@ namespace exprtk
             initialised_ = (str0_node_ptr_ && str1_node_ptr_);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -8679,32 +8679,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return str0_node_ptr_->str();
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
            return str0_node_ptr_->base();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return str0_node_ptr_->size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return str0_node_ptr_->range_ref();
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return str0_node_ptr_->range_ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strswap;
          }
@@ -8773,7 +8773,7 @@ namespace exprtk
                            str1_range_ptr_ ;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -8856,7 +8856,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strswap;
          }
@@ -8888,12 +8888,12 @@ namespace exprtk
          : value_(&v)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return T((*value_).size());
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringvarsize;
          }
@@ -8930,7 +8930,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             T result = std::numeric_limits<T>::quiet_NaN();
 
@@ -8943,17 +8943,17 @@ namespace exprtk
             return result;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringsize;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -9029,7 +9029,7 @@ namespace exprtk
                            str1_range_ptr_ ;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -9056,32 +9056,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return str0_node_ptr_->str();
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
            return str0_node_ptr_->base();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return str0_node_ptr_->size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return str0_node_ptr_->range_ref();
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return str0_node_ptr_->range_ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strass;
          }
@@ -9158,7 +9158,7 @@ namespace exprtk
                            str1_range_ptr_    ;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -9193,32 +9193,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return str0_base_ptr_->str();
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return str0_base_ptr_->base();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return str0_base_ptr_->size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return str0_rng_node_ptr_->range_ref();
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return str0_rng_node_ptr_->range_ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strass;
          }
@@ -9299,7 +9299,7 @@ namespace exprtk
 
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -9351,32 +9351,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &value_[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return range_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return range_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strcondition;
          }
@@ -9441,7 +9441,7 @@ namespace exprtk
             initialised_ = str0_base_ptr_ && str0_range_ptr_ ;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -9474,32 +9474,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return value_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return &value_[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return value_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return range_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return range_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strccondition;
          }
@@ -9578,7 +9578,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (!arg_list_.empty())
             {
@@ -9590,43 +9590,43 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return str_base_ptr_->str();
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
             return str_base_ptr_->base();
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return str_base_ptr_->size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return str_range_ptr_->range_ref();
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return str_range_ptr_->range_ref();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_stringvararg;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(final_node_, node_delete_list);
             expression_node<T>::ndb_t::collect(arg_list_  , node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return std::max(
                expression_node<T>::ndb_t::compute_node_depth(final_node_),
@@ -9881,7 +9881,7 @@ namespace exprtk
          : trinary_node<T>(opr, branch0, branch1, branch2)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             assert(trinary_node<T>::branch_[0].first);
             assert(trinary_node<T>::branch_[1].first);
@@ -9910,7 +9910,7 @@ namespace exprtk
          : quaternary_node<T>(opr, branch0, branch1, branch2, branch3)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             assert(quaternary_node<T>::branch_[0].first);
             assert(quaternary_node<T>::branch_[1].first);
@@ -9939,12 +9939,12 @@ namespace exprtk
            v2_(v2)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return SpecialFunction::process(v0_, v1_, v2_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_trinary;
          }
@@ -9973,12 +9973,12 @@ namespace exprtk
            v3_(v3)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return SpecialFunction::process(v0_, v1_, v2_, v3_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_trinary;
          }
@@ -10022,22 +10022,22 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return VarArgFunction::process(arg_list_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vararg;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(arg_list_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(arg_list_);
          }
@@ -10075,7 +10075,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (!arg_list_.empty())
                return VarArgFunction::process(arg_list_);
@@ -10083,7 +10083,7 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vararg;
          }
@@ -10114,7 +10114,7 @@ namespace exprtk
                ivec_ptr_ = 0;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (ivec_ptr_)
             {
@@ -10128,17 +10128,17 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecfunc;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(v_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(v_);
          }
@@ -10168,7 +10168,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (var_node_ptr_)
             {
@@ -10208,7 +10208,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec_node_ptr_)
             {
@@ -10248,7 +10248,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (rbvec_node_ptr_)
             {
@@ -10288,7 +10288,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (rbvec_node_ptr_)
             {
@@ -10332,7 +10332,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec_node_ptr_)
             {
@@ -10392,32 +10392,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return vec_node_ptr_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return vec_node_ptr_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvalass;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -10479,7 +10479,7 @@ namespace exprtk
             initialised_ = (vec0_node_ptr_ && vec1_node_ptr_);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -10544,32 +10544,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return vec0_node_ptr_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return vec0_node_ptr_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvecass;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -10602,7 +10602,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (var_node_ptr_)
             {
@@ -10641,7 +10641,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec_node_ptr_)
             {
@@ -10680,7 +10680,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (rbvec_node_ptr_)
             {
@@ -10719,7 +10719,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (rbvec_node_ptr_)
             {
@@ -10762,7 +10762,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec_node_ptr_)
             {
@@ -10823,37 +10823,37 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return vec_node_ptr_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return vec_node_ptr_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecopvalass;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
 
-         bool side_effect() const
+         bool side_effect() const override
          {
             return true;
          }
@@ -10909,7 +10909,7 @@ namespace exprtk
             initialised_ = (vec0_node_ptr_ && vec1_node_ptr_);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -10975,37 +10975,37 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return vec0_node_ptr_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return vec0_node_ptr_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecopvecass;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
 
-         bool side_effect() const
+         bool side_effect() const override
          {
             return true;
          }
@@ -11091,13 +11091,13 @@ namespace exprtk
             }
          }
 
-        ~vec_binop_vecvec_node()
+        ~vec_binop_vecvec_node() override
          {
             delete temp_;
             delete temp_vec_node_;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (initialised_)
             {
@@ -11165,32 +11165,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return temp_vec_node_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return temp_vec_node_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvecarith;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds_.size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -11253,13 +11253,13 @@ namespace exprtk
             }
          }
 
-        ~vec_binop_vecval_node()
+        ~vec_binop_vecval_node() override
          {
             delete temp_;
             delete temp_vec_node_;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec0_node_ptr_)
             {
@@ -11325,32 +11325,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return temp_vec_node_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return temp_vec_node_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvalarith;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -11411,13 +11411,13 @@ namespace exprtk
             }
          }
 
-        ~vec_binop_valvec_node()
+        ~vec_binop_valvec_node() override
          {
             delete temp_;
             delete temp_vec_node_;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (vec1_node_ptr_)
             {
@@ -11483,32 +11483,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return temp_vec_node_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return temp_vec_node_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecvalarith;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -11567,13 +11567,13 @@ namespace exprtk
             }
          }
 
-        ~unary_vector_node()
+        ~unary_vector_node() override
          {
             delete temp_;
             delete temp_vec_node_;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(unary_node<T>::branch_.first);
 
@@ -11637,32 +11637,32 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         vector_node_ptr vec() const
+         vector_node_ptr vec() const override
          {
             return temp_vec_node_;
          }
 
-         vector_node_ptr vec()
+         vector_node_ptr vec() override
          {
             return temp_vec_node_;
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vecunaryop;
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return vds().size();
          }
 
-         vds_t& vds()
+         vds_t& vds() override
          {
             return vds_;
          }
 
-         const vds_t& vds() const
+         const vds_t& vds() const override
          {
             return vds_;
          }
@@ -11688,7 +11688,7 @@ namespace exprtk
          : binary_node<T>(opr, branch0, branch1)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             assert(binary_node<T>::branch_[0].first);
             assert(binary_node<T>::branch_[1].first);
@@ -11715,7 +11715,7 @@ namespace exprtk
          : binary_node<T>(opr, branch0, branch1)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             assert(binary_node<T>::branch_[0].first);
             assert(binary_node<T>::branch_[1].first);
@@ -11775,7 +11775,7 @@ namespace exprtk
             return this < (&fn);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             // Needed for incompetent and broken msvc compiler versions
             #ifdef _MSC_VER
@@ -12005,17 +12005,17 @@ namespace exprtk
             { return f(v[0]); }
          };
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_function;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::template compute_node_depth<N>(branch_);
          }
@@ -12044,7 +12044,7 @@ namespace exprtk
             return this < (&fn);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (function_)
                return (*function_)();
@@ -12052,7 +12052,7 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_function;
          }
@@ -12082,7 +12082,7 @@ namespace exprtk
             return this < (&fn);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (function_)
             {
@@ -12093,12 +12093,12 @@ namespace exprtk
                return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_vafunction;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             for (std::size_t i = 0; i < arg_list_.size(); ++i)
             {
@@ -12109,7 +12109,7 @@ namespace exprtk
             }
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(arg_list_);
          }
@@ -12155,15 +12155,15 @@ namespace exprtk
            arg_list_(arg_list)
          {}
 
-         virtual ~generic_function_node()
+         ~generic_function_node() override
          {}
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -12259,7 +12259,7 @@ namespace exprtk
             return this < (&fn);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (function_)
             {
@@ -12274,7 +12274,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_genfunction;
          }
@@ -12355,7 +12355,7 @@ namespace exprtk
             return this < (&fn);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (gen_function_t::function_)
             {
@@ -12379,32 +12379,32 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strfunction;
          }
 
-         std::string str() const
+         std::string str() const override
          {
             return ret_string_;
          }
 
-         char_cptr base() const
+         char_cptr base() const override
          {
            return &ret_string_[0];
          }
 
-         std::size_t size() const
+         std::size_t size() const override
          {
             return ret_string_.size();
          }
 
-         range_t& range_ref()
+         range_t& range_ref() override
          {
             return range_;
          }
 
-         const range_t& range_ref() const
+         const range_t& range_ref() const override
          {
             return range_;
          }
@@ -12431,7 +12431,7 @@ namespace exprtk
            param_seq_index_(param_seq_index)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             if (gen_function_t::function_)
             {
@@ -12450,7 +12450,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_genfunction;
          }
@@ -12476,7 +12476,7 @@ namespace exprtk
            param_seq_index_(param_seq_index)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             if (str_function_t::function_)
             {
@@ -12501,7 +12501,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_strfunction;
          }
@@ -12549,7 +12549,7 @@ namespace exprtk
            results_context_(&rc)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             if (
                  (0 != results_context_) &&
@@ -12567,7 +12567,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_return;
          }
@@ -12593,7 +12593,7 @@ namespace exprtk
             construct_branch_pair(body_, body);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(body_.first);
 
@@ -12611,7 +12611,7 @@ namespace exprtk
             }
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_retenv;
          }
@@ -12621,12 +12621,12 @@ namespace exprtk
             return &return_invoked_;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(body_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(body_);
          }
@@ -13869,7 +13869,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~vov_base_node()
+         ~vov_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -13887,7 +13887,7 @@ namespace exprtk
       {
       public:
 
-       virtual ~cov_base_node()
+         ~cov_base_node() override
           {}
 
          inline virtual operator_type operation() const
@@ -13905,7 +13905,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~voc_base_node()
+         ~voc_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -13923,7 +13923,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~vob_base_node()
+         ~vob_base_node() override
          {}
 
          virtual const T& v() const = 0;
@@ -13934,7 +13934,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~bov_base_node()
+         ~bov_base_node() override
          {}
 
          virtual const T& v() const = 0;
@@ -13945,7 +13945,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~cob_base_node()
+         ~cob_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -13965,7 +13965,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~boc_base_node()
+         ~boc_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -13985,7 +13985,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~uv_base_node()
+         ~uv_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -14001,7 +14001,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~sos_base_node()
+         ~sos_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -14015,7 +14015,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~sosos_base_node()
+         ~sosos_base_node() override
          {}
 
          inline virtual operator_type operation() const
@@ -14029,7 +14029,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~T0oT1oT2_base_node()
+         ~T0oT1oT2_base_node() override
          {}
 
          virtual std::string type_id() const = 0;
@@ -14040,7 +14040,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~T0oT1oT2oT3_base_node()
+         ~T0oT1oT2oT3_base_node() override
          {}
 
          virtual std::string type_id() const = 0;
@@ -14058,22 +14058,22 @@ namespace exprtk
          : v_(var)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(v_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T& v() const
+         inline const T& v() const override
          {
             return v_;
          }
@@ -14107,12 +14107,12 @@ namespace exprtk
            f_ (bf  )
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return f_(u0_(v0_),u1_(v1_));
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_uvouv;
          }
@@ -14173,12 +14173,12 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(branch_.first->value());
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
@@ -14188,7 +14188,7 @@ namespace exprtk
             return Operation::operation();
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
@@ -14198,12 +14198,12 @@ namespace exprtk
             branch_.second = false;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -14478,7 +14478,7 @@ namespace exprtk
            f_ (p2)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1<T,T0,T1>::result;
             return result;
@@ -14489,7 +14489,7 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return f_(t0_,t1_);
          }
@@ -14548,7 +14548,7 @@ namespace exprtk
            f1_(p4)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1oT2<T,T0,T1,T2>::result;
             return result;
@@ -14559,7 +14559,7 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return ProcessMode::process(t0_, t1_, t2_, f0_, f1_);
          }
@@ -14589,7 +14589,7 @@ namespace exprtk
             return f1_;
          }
 
-         std::string type_id() const
+         std::string type_id() const override
          {
             return id();
          }
@@ -14644,7 +14644,7 @@ namespace exprtk
            f2_(p6)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return ProcessMode::process(t0_, t1_, t2_, t3_, f0_, f1_, f2_);
          }
@@ -14684,7 +14684,7 @@ namespace exprtk
             return f2_;
          }
 
-         inline std::string type_id() const
+         inline std::string type_id() const override
          {
             return id();
          }
@@ -14735,7 +14735,7 @@ namespace exprtk
            f_ (p3)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1oT2<T,T0,T1,T2>::result;
             return result;
@@ -14746,7 +14746,7 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return f_(t0_, t1_, t2_);
          }
@@ -14771,7 +14771,7 @@ namespace exprtk
             return f_;
          }
 
-         std::string type_id() const
+         std::string type_id() const override
          {
             return id();
          }
@@ -14805,7 +14805,7 @@ namespace exprtk
       {
       public:
 
-         virtual ~sf3ext_type_node()
+         ~sf3ext_type_node() override
          {}
 
          virtual T0 t0() const = 0;
@@ -14831,7 +14831,7 @@ namespace exprtk
            t2_(p2)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1oT2<T,T0,T1,T2>::result;
             return result;
@@ -14842,27 +14842,27 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return SF3Operation::process(t0_, t1_, t2_);
          }
 
-         T0 t0() const
+         T0 t0() const override
          {
             return t0_;
          }
 
-         T1 t1() const
+         T1 t1() const override
          {
             return t1_;
          }
 
-         T2 t2() const
+         T2 t2() const override
          {
             return t2_;
          }
 
-         std::string type_id() const
+         std::string type_id() const override
          {
             return id();
          }
@@ -14922,7 +14922,7 @@ namespace exprtk
            f_ (p4)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1oT2oT3<T,T0,T1,T2,T3>::result;
             return result;
@@ -14933,7 +14933,7 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return f_(t0_, t1_, t2_, t3_);
          }
@@ -14963,7 +14963,7 @@ namespace exprtk
             return f_;
          }
 
-         std::string type_id() const
+         std::string type_id() const override
          {
             return id();
          }
@@ -15010,7 +15010,7 @@ namespace exprtk
            t3_(p3)
          {}
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             static const typename expression_node<T>::node_type result = nodetype_T0oT1oT2oT3<T,T0,T1,T2,T3>::result;
             return result;
@@ -15021,7 +15021,7 @@ namespace exprtk
             return e_default;
          }
 
-         inline T value() const
+         inline T value() const override
          {
             return SF4Operation::process(t0_, t1_, t2_, t3_);
          }
@@ -15046,7 +15046,7 @@ namespace exprtk
             return t3_;
          }
 
-         std::string type_id() const
+         std::string type_id() const override
          {
             return id();
          }
@@ -15133,27 +15133,27 @@ namespace exprtk
            v1_(var1)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(v0_,v1_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T& v0() const
+         inline const T& v0() const override
          {
             return v0_;
          }
 
-         inline const T& v1() const
+         inline const T& v1() const override
          {
             return v1_;
          }
@@ -15183,27 +15183,27 @@ namespace exprtk
            v_(var)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(c_,v_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T c() const
+         inline const T c() const override
          {
             return c_;
          }
 
-         inline const T& v() const
+         inline const T& v() const override
          {
             return v_;
          }
@@ -15233,22 +15233,22 @@ namespace exprtk
            c_(const_var)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(v_,c_);
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T c() const
+         inline const T c() const override
          {
             return c_;
          }
 
-         inline const T& v() const
+         inline const T& v() const override
          {
             return v_;
          }
@@ -15280,7 +15280,7 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return Operation::process(v_,branch_.first->value());
@@ -15291,22 +15291,22 @@ namespace exprtk
             return Operation::operation();
          }
 
-         inline const T& v() const
+         inline const T& v() const override
          {
             return v_;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -15336,7 +15336,7 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return Operation::process(branch_.first->value(),v_);
@@ -15347,22 +15347,22 @@ namespace exprtk
             return Operation::operation();
          }
 
-         inline const T& v() const
+         inline const T& v() const override
          {
             return v_;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -15392,44 +15392,44 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return Operation::process(c_,branch_.first->value());
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T c() const
+         inline const T c() const override
          {
             return c_;
          }
 
-         inline void set_c(const T new_c)
+         inline void set_c(const T new_c) override
          {
             (*const_cast<T*>(&c_)) = new_c;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
 
-         inline expression_node<T>* move_branch(const std::size_t&)
+         inline expression_node<T>* move_branch(const std::size_t&) override
          {
             branch_.second = false;
             return branch_.first;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -15459,44 +15459,44 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return Operation::process(branch_.first->value(),c_);
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
 
-         inline const T c() const
+         inline const T c() const override
          {
             return c_;
          }
 
-         inline void set_c(const T new_c)
+         inline void set_c(const T new_c) override
          {
             (*const_cast<T*>(&c_)) = new_c;
          }
 
-         inline expression_node<T>* branch(const std::size_t&) const
+         inline expression_node<T>* branch(const std::size_t&) const override
          {
             return branch_.first;
          }
 
-         inline expression_node<T>* move_branch(const std::size_t&)
+         inline expression_node<T>* move_branch(const std::size_t&) override
          {
             branch_.second = false;
             return branch_.first;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -15525,17 +15525,17 @@ namespace exprtk
            s1_(p1)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(s0_,s1_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
@@ -15576,12 +15576,12 @@ namespace exprtk
            rp0_(rp0)
          {}
 
-        ~str_xrox_node()
+        ~str_xrox_node() override
          {
             rp0_.free();
          }
 
-         inline T value() const
+         inline T value() const override
          {
             std::size_t r0 = 0;
             std::size_t r1 = 0;
@@ -15592,12 +15592,12 @@ namespace exprtk
                return T(0);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
@@ -15639,12 +15639,12 @@ namespace exprtk
            rp1_(rp1)
          {}
 
-        ~str_xoxr_node()
+        ~str_xoxr_node() override
          {
             rp1_.free();
          }
 
-         inline T value() const
+         inline T value() const override
          {
             std::size_t r0 = 0;
             std::size_t r1 = 0;
@@ -15655,12 +15655,12 @@ namespace exprtk
                return T(0);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
@@ -15703,13 +15703,13 @@ namespace exprtk
            rp1_(rp1)
          {}
 
-        ~str_xroxr_node()
+        ~str_xroxr_node() override
          {
             rp0_.free();
             rp1_.free();
          }
 
-         inline T value() const
+         inline T value() const override
          {
             std::size_t r0_0 = 0;
             std::size_t r0_1 = 0;
@@ -15730,12 +15730,12 @@ namespace exprtk
                return T(0);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
@@ -15815,7 +15815,7 @@ namespace exprtk
             }
          }
 
-         inline T value() const
+         inline T value() const override
          {
             if (
                  str0_base_ptr_  &&
@@ -15851,7 +15851,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
@@ -15887,17 +15887,17 @@ namespace exprtk
            s2_(p2)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return Operation::process(s0_,s1_,s2_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return Operation::type();
          }
 
-         inline operator_type operation() const
+         inline operator_type operation() const override
          {
             return Operation::operation();
          }
@@ -15942,12 +15942,12 @@ namespace exprtk
          : v_(v)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return PowOp::result(v_);
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_ipow;
          }
@@ -15974,23 +15974,23 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return PowOp::result(branch_.first->value());
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_ipow;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::collect(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -16015,12 +16015,12 @@ namespace exprtk
          : v_(v)
          {}
 
-         inline T value() const
+         inline T value() const override
          {
             return (T(1) / PowOp::result(v_));
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_ipowinv;
          }
@@ -16047,23 +16047,23 @@ namespace exprtk
             construct_branch_pair(branch_, branch);
          }
 
-         inline T value() const
+         inline T value() const override
          {
             assert(branch_.first);
             return (T(1) / PowOp::result(branch_.first->value()));
          }
 
-         inline typename expression_node<T>::node_type type() const
+         inline typename expression_node<T>::node_type type() const override
          {
             return expression_node<T>::e_ipowinv;
          }
 
-         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list)
+         void collect_nodes(typename expression_node<T>::noderef_list_t& node_delete_list) override
          {
             expression_node<T>::ndb_t::template collect<>(branch_, node_delete_list);
          }
 
-         std::size_t node_depth() const
+         std::size_t node_depth() const override
          {
             return expression_node<T>::ndb_t::compute_node_depth(branch_);
          }
@@ -37080,7 +37080,7 @@ namespace exprtk
          disable_has_side_effects(*this);
       }
 
-      virtual ~polynomial()
+      ~polynomial() override
       {}
 
       #define poly_rtrn(NN) \
@@ -37286,7 +37286,7 @@ namespace exprtk
             v.resize(pc);
          }
 
-         virtual ~base_func()
+         ~base_func() override
          {}
 
          inline void update(const T& v0)

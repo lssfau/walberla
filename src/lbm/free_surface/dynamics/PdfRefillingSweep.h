@@ -121,9 +121,9 @@ class ExtrapolationRefillingSweepBase : public RefillingSweepBase< LatticeModel_
         extrapolationOrder_(extrapolationOrder)
    {}
 
-   virtual ~ExtrapolationRefillingSweepBase() = default;
+   ~ExtrapolationRefillingSweepBase() override = default;
 
-   virtual void operator()(IBlock* const block) = 0;
+   void operator()(IBlock* const block) override = 0;
 
    /********************************************************************************************************************
     * Find the lattice direction in the given stencil that corresponds best to the provided direction.

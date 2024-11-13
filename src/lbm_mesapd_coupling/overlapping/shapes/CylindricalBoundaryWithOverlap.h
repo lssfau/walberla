@@ -47,7 +47,7 @@ class CylindricalBoundaryWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), cylindricalBoundary_(cylindricalBoundary)
    {}
 
-   bool contains(const Vector3< real_t >& point) const
+   bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideCylindricalBoundary(point, ac_->getPosition(idx_), cylindricalBoundary_.getRadius(),
                                                        cylindricalBoundary_.getAxis());

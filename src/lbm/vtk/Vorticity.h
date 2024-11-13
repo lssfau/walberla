@@ -48,12 +48,12 @@ public:
 
 protected:
 
-   void configure() {
+   void configure() override {
       WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
       velocityField_ = this->block_->template getData< VelocityField_T >(velocityFieldId_ );
    }
 
-   OutputType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) {
+   OutputType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) override {
       WALBERLA_ASSERT_NOT_NULLPTR(velocityField_ );
 
       const real_t dx = blockStorage_->dx(blockStorage_->getLevel(*this->block_));
