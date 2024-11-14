@@ -287,7 +287,7 @@ public:
    static const bool constant = false;
 
    EDMField( const BlockDataID & forceDensityFieldId ) :
-      forceDensityFieldId_( forceDensityFieldId ), forceDensityField_( NULL ) {}
+      forceDensityFieldId_( forceDensityFieldId ), forceDensityField_( nullptr ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << forceDensityFieldId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> forceDensityFieldId_; }
@@ -414,7 +414,7 @@ public:
    static const bool constant = false;
 
    LuoField( const BlockDataID & forceDensityFieldId ) :
-      forceDensityFieldId_( forceDensityFieldId ), forceDensityField_( NULL ) {}
+      forceDensityFieldId_( forceDensityFieldId ), forceDensityField_( nullptr ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << forceDensityFieldId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> forceDensityFieldId_; }

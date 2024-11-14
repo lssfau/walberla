@@ -74,7 +74,7 @@ BranchNode<ContainmentOctreeT>::BranchNode( const shared_ptr<const DistanceObjec
                                             const uint_t maxDepth, const Scalar minAABBVolume ) : center_( this->toPoint( aabb.center() ) )
 {
    for( int i = 0; i < 8; ++i )
-      children_[i] = NULL;
+      children_[i] = nullptr;
 
    const auto & min = aabb.minCorner();
    const auto & max = aabb.maxCorner();

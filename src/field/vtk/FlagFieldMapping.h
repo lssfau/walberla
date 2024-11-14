@@ -38,7 +38,7 @@ private:
 public:
 
    FlagFieldMapping( const ConstBlockDataID flagId, const std::string& id ) :
-      vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( NULL ) {}
+      vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( nullptr ) {}
 
    FlagFieldMapping( const ConstBlockDataID flagId, const std::string& id, const std::map< FlagUID, T > mapping ) :
       vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( nullptr ), mapping_( mapping ) {}
@@ -90,7 +90,7 @@ class BinarizationFieldWriter : public vtk::BlockCellDataWriter<TargetType,1>
 
 public:
    BinarizationFieldWriter( const ConstBlockDataID fieldID, const std::string& id, SrcType mask) :
-           vtk::BlockCellDataWriter<TargetType,1>( id ), fieldID_( fieldID ), field_( NULL ), mask_( mask ) {}
+           vtk::BlockCellDataWriter<TargetType,1>( id ), fieldID_( fieldID ), field_( nullptr ), mask_( mask ) {}
 
 protected:
 

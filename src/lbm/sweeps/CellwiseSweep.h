@@ -139,8 +139,8 @@ class CellwiseSweep
    void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type \
       >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude ) \
    { \
-      PdfField_T * src( NULL ); \
-      PdfField_T * dst( NULL ); \
+      PdfField_T * src( nullptr ); \
+      PdfField_T * dst( nullptr ); \
       this->getFields( block, src, dst ); \
       StreamPull< LatticeModel_T >::execute( src, dst, block, this->filter_, numberOfGhostLayersToInclude ); \
    }
@@ -152,8 +152,8 @@ class CellwiseSweep
    void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type \
       >::streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude ) \
    { \
-      PdfField_T * src( NULL ); \
-      PdfField_T * dst( NULL ); \
+      PdfField_T * src( nullptr ); \
+      PdfField_T * dst( nullptr ); \
       \
       this->getFields( block, src, dst ); \
       \

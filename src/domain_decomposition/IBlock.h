@@ -359,7 +359,7 @@ inline T* IBlock::getData( const BlockDataID & index ) {
 //**********************************************************************************************************************
 /*!
 *   Function for removing all data that corresponds to block data ID 'index'.
-*   Further calls to "getData" with 'index' will return NULL.
+*   Further calls to "getData" with 'index' will return nullptr.
 */
 //**********************************************************************************************************************
 inline void IBlock::deleteData( const BlockDataID & index )

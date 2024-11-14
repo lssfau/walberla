@@ -1784,8 +1784,8 @@ void VTKOutput::writeCollectors( const bool barrier )
       }
       else
       {
-         writePVTU( *collector ); // also applies for outputDomainDecomposition_ == true and pointDataSource_ != NULL
-                                  // and polylineDataSource_ != NULL (uniformGrid_ will be false)
+         writePVTU( *collector ); // also applies for outputDomainDecomposition_ == true and pointDataSource_ != nullptr
+                                  // and polylineDataSource_ != nullptr (uniformGrid_ will be false)
       }
    }
 

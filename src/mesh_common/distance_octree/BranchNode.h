@@ -122,7 +122,7 @@ BranchNode<MeshType>::BranchNode( const shared_ptr< TriangleDistance<MeshType> >
    : Node<MeshType>( triDistance->getMesh(), beginFh, endFh )
 {
    for( int i = 0; i < 8; ++i )
-      children_[i] = NULL;
+      children_[i] = nullptr;
 
    const auto &    min = this->aabb_.minCorner();
    const auto &    max = this->aabb_.maxCorner();

@@ -497,7 +497,7 @@ inline uint_t GlobalLoadBalancing::minimizeProcesses( const std::vector< BLOCK* 
 
 #ifdef WALBERLA_BUILD_WITH_METIS
 
-   if( numberOfProcesses > 1 && metisConfig.includeMetis() && processesWork == NULL && processesMemory == NULL ) {
+   if( numberOfProcesses > 1 && metisConfig.includeMetis() && processesWork == nullptr && processesMemory == nullptr ) {
 
       uint_t max = numberOfProcesses;
       uint_t min = uint_c( real_c(0.5) + ( real_c( memorySum( blocks ) ) / memoryLimit ) );
@@ -819,8 +819,8 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
    // first call to METIS: always try to balance the workload as good as possible, but allow large imbalances concerning the memory (-> ubvec[1])
 
-   int ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                             &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   int ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                             &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
    // if METIS was successful AND the memory limit of each process is not violated (which is highly unlikely due to a large value for ubvec[1])
    // then the algorithm is finished
@@ -844,8 +844,8 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
    real_t minUbvec = real_t(1);
    ubvec[1] = minUbvec;
 
-   ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                         &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                         &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
    // ... if this doesn't work OR if the memory limit is still violated then METIS is unable to find a valid partitioning
 
@@ -881,8 +881,8 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
       ubvec[1] = ( maxUbvec + minUbvec ) / real_c(2);
 
-      ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                            &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+      ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                            &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
       if( ret == core::METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
 
@@ -998,8 +998,8 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    options[ core::METIS_OPTION_NSEPS ] = 100;
    options[ core::METIS_OPTION_NCUTS ] = 100;
    
-   int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), NULL, &( adjwgt[0] ), 
-                                  &nparts, NULL, NULL, options, &objval, &( part[ 0 ] ) );
+   int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), nullptr, &( adjwgt[0] ),
+                                  &nparts, nullptr, nullptr, options, &objval, &( part[ 0 ] ) );
 
    if( ret != core::METIS_OK ) 
    {

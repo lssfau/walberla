@@ -60,7 +60,7 @@ class FieldClone
 {
 
 public:
-   FieldClone( ConstBlockDataID fieldID ) : fieldID_( fieldID ), dstField_( NULL ){}
+   FieldClone( ConstBlockDataID fieldID ) : fieldID_( fieldID ), dstField_( nullptr ){}
 
    ~FieldClone(){
       // Free allocated temporary fields
@@ -126,7 +126,7 @@ class FieldCreator
 {
 
 public:
-   FieldCreator() : dstField_( NULL ){}
+   FieldCreator() : dstField_( nullptr ){}
 
    ~FieldCreator(){
       // Free allocated temporary fields

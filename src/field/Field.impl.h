@@ -103,7 +103,7 @@ namespace field {
    Field<T,fSize_>::Field( uint_t _xSize, uint_t _ySize, uint_t _zSize,
                            const std::vector<T> & fValues, const Layout & l,
                            const shared_ptr<FieldAllocator<T> > &alloc)
-        : values_( NULL ), valuesWithOffset_( NULL )
+        : values_( nullptr ), valuesWithOffset_( nullptr )
    {
       init(_xSize,_ySize,_zSize,l,alloc);
       set(fValues);
@@ -301,7 +301,7 @@ namespace field {
     * \param _ySize  size of y dimension
     * \param _zSize  size of z dimension
     * \param l       memory layout of the field (see Field::Layout)
-    * \param alloc   the allocator to use. If a NULL shared pointer is given, a sensible default is selected,
+    * \param alloc   the allocator to use. If a nullptr is given, a sensible default is selected,
     *                depending on layout
     * \param innerGhostLayerSizeForAlignedAlloc
     *                This parameter should be set to zero for field that have no ghost layers.

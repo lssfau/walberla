@@ -56,6 +56,7 @@
 #include <utility>
 #include <vector>
 
+//NOLINTBEGIN(modernize-use-nullptr)
 
 namespace exprtk
 {
@@ -40041,5 +40042,7 @@ namespace exprtk
    #endif
 
 } // namespace exprtk
+
+//NOLINTEND(modernize-use-nullptr)
 
 #endif

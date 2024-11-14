@@ -297,7 +297,7 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForc
    origin_[1] = aabb.yMin() + real_c(0.5) * dx_[1];
    origin_[2] = aabb.zMin() + real_c(0.5) * dx_[2];
 
-   if(flagField != NULL)
+   if(flagField != nullptr)
    {
       parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
       velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
