@@ -187,7 +187,7 @@ SparseLinkedCells::SparseLinkedCells(const math::AABB& domain, const Vec3& cellD
    std::fill(cells_.begin(), cells_.end(), -1);
 }
 
-void SparseLinkedCells::clear()
+inline void SparseLinkedCells::clear()
 {
    for (const auto v : nonEmptyCells_)
    {

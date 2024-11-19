@@ -57,19 +57,19 @@ public:
 };
 
 template <>
-void reset<HydrodynamicForceTorqueNotification>(data::Particle& p)
+inline void reset<HydrodynamicForceTorqueNotification>(data::Particle& p)
 {
    p.setHydrodynamicForce( Vec3(real_t(0)) );
    p.setHydrodynamicTorque( Vec3(real_t(0)) );
 }
 
-void reduce(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
 {
    p.getHydrodynamicForceRef() += objparam.hydrodynamicForce_;
    p.getHydrodynamicTorqueRef() += objparam.hydrodynamicTorque_;
 }
 
-void update(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
+inline void update(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
 {
    p.setHydrodynamicForce( objparam.hydrodynamicForce_ );
    p.setHydrodynamicTorque( objparam.hydrodynamicTorque_ );

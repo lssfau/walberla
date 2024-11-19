@@ -38,12 +38,12 @@ namespace walberla
 namespace free_surface
 {
 // get index of largest entry in n_dot_ci with isInterfaceOrLiquid==true && isPdfAvailable==false
-uint_t getIndexOfMaximum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
-                         const std::vector< real_t >& n_dot_ci);
+inline uint_t getIndexOfMaximum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
+                                const std::vector< real_t >& n_dot_ci);
 
 // get index of smallest entry in n_dot_ci with isInterfaceOrLiquid==true && isPdfAvailable==false
-uint_t getIndexOfMinimum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
-                         const std::vector< real_t >& n_dot_ci);
+inline uint_t getIndexOfMinimum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
+                                const std::vector< real_t >& n_dot_ci);
 
 // reconstruct PDFs according to pressure anti bounce back boundary condition (page 31, equation 4.5 in dissertation of
 // N. Thuerey, 2007)
@@ -384,8 +384,8 @@ void reconstructInterfaceCellLegacy(const FlagField_T* flagField, const ConstPdf
    }
 }
 
-uint_t getIndexOfMaximum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
-                         const std::vector< real_t >& n_dot_ci)
+inline uint_t getIndexOfMaximum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
+                                const std::vector< real_t >& n_dot_ci)
 {
    real_t maximum = -std::numeric_limits< real_t >::max();
    uint_t index   = std::numeric_limits< uint_t >::max();
@@ -411,8 +411,8 @@ uint_t getIndexOfMaximum(const std::vector< bool >& isInterfaceOrLiquid, const s
    return index;
 }
 
-uint_t getIndexOfMinimum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
-                         const std::vector< real_t >& n_dot_ci)
+inline uint_t getIndexOfMinimum(const std::vector< bool >& isInterfaceOrLiquid, const std::vector< bool >& isPdfAvailable,
+                                const std::vector< real_t >& n_dot_ci)
 {
    real_t minimum = std::numeric_limits< real_t >::max();
    uint_t index   = std::numeric_limits< uint_t >::max();

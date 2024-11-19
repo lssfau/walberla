@@ -38,6 +38,7 @@ namespace mesa_pd {
  * or in body frame coordinates (BF) which requires the point to be first transformed
  */
 
+inline
 real_t raySphereIntersectionRatio( const Vec3& rayOrigin, const Vec3& rayDirection,
                                    const Vec3& spherePosition, const real_t sphereRadius )
 {
@@ -62,6 +63,7 @@ real_t raySphereIntersectionRatio( const Vec3& rayOrigin, const Vec3& rayDirecti
    return delta;
 }
 
+inline
 real_t rayHalfSpaceIntersectionRatio( const Vec3& rayOrigin, const Vec3& rayDirection,
                                       const Vec3& halfSpacePosition, const Vec3& halfSpaceNormal)
 {
@@ -82,6 +84,7 @@ real_t rayHalfSpaceIntersectionRatio( const Vec3& rayOrigin, const Vec3& rayDire
    return delta;
 }
 
+inline
 real_t rayEllipsoidIntersectionRatioBF( const Vec3& rayOriginBF, const Vec3& rayDirectionBF,
                                         const Vec3& ellipsoidSemiAxes)
 {

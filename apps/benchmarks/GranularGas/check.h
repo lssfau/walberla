@@ -27,7 +27,7 @@
 namespace walberla {
 namespace mesa_pd {
 
-void check( data::ParticleStorage& ps, blockforest::BlockForest& forest, real_t spacing, const Vec3& shift )
+inline void check( data::ParticleStorage& ps, blockforest::BlockForest& forest, real_t spacing, const Vec3& shift )
 {
    WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - START ***");
    auto pIt = ps.begin();

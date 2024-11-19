@@ -116,7 +116,7 @@ private:
    std::vector<real_t> coefficientOfFriction_ {};
 };
 
-SpringDashpotSpring::SpringDashpotSpring(const uint_t numParticleTypes)
+inline SpringDashpotSpring::SpringDashpotSpring(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    

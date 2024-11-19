@@ -25,7 +25,7 @@ namespace lbm {
 namespace initializer {
 
 template<>
-auto getCoordinates<false>(const Cell& globalCell, const real_t dx) {
+inline auto getCoordinates<false>(const Cell& globalCell, const real_t dx) {
 
    Cell coords;
    for(uint_t d = 0; d < 3; ++d) {
@@ -36,7 +36,7 @@ auto getCoordinates<false>(const Cell& globalCell, const real_t dx) {
 }
 
 template<>
-auto getCoordinates<true>(const Cell& globalCell, const real_t dx) {
+inline auto getCoordinates<true>(const Cell& globalCell, const real_t dx) {
 
    Vector3<real_t> coords;
    for(uint_t d = 0; d < 3; ++d) {

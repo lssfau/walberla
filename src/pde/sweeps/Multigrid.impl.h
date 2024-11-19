@@ -168,7 +168,7 @@ void CoarsenStencilFieldsDCA<Stencil_T >::operator()( const std::vector<BlockDat
 
 
 template< >
-void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
+inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
 {
 
    WALBERLA_ASSERT_EQUAL(numLvl_, stencilFieldId.size(), "This function can only be called when operating with stencil fields!");

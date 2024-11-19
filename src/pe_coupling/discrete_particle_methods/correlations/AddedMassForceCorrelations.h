@@ -36,6 +36,7 @@ namespace discrete_particle_methods {
  *                   const real_t & bodyVolume, const real_t & fluidDensity )
  */
 
+inline
 Vector3<real_t> addedMassForceFinn( const Vector3<real_t> & timeDerivativeFluidVel, const Vector3<real_t> & timeDerivativeBodyVel,
                                     const real_t & bodyVolume, const real_t & fluidDensity )
 {
@@ -44,6 +45,7 @@ Vector3<real_t> addedMassForceFinn( const Vector3<real_t> & timeDerivativeFluidV
    return bodyVolume * fluidDensity * Coeffam * ( timeDerivativeFluidVel - timeDerivativeBodyVel );
 }
 
+inline
 Vector3<real_t> noAddedMassForce( const Vector3<real_t> &, const Vector3<real_t> &, const real_t &, const real_t & )
 {
    return Vector3<real_t>(real_t(0));

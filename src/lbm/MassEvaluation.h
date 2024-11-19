@@ -33,7 +33,7 @@ namespace lbm {
 
 namespace internal {
 
-Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level )
+inline Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level )
 {
    return Vector3<real_t>( real_c( blocks->getNumberOfXCells(level) ),
                            real_c( blocks->getNumberOfYCells(level) ),
