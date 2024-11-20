@@ -1882,7 +1882,7 @@ void VTKOutput::writeVTHBSeries()
    {
       for( std::string line; std::getline(ofs, line); )
       {
-         if( line.find("]") != std::string::npos )
+         if( line.find(']') != std::string::npos )
          {
             WALBERLA_ASSERT_GREATER( ofs.tellg(), 0 );
             pvdEnd_ = ofs.tellg();

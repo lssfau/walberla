@@ -109,13 +109,13 @@ namespace initializer {
    }
 
    template<typename Flag_T>
-   void BoundarySetter<FlagField<Flag_T> >::setBoundaryConfigBlock( const BoundaryUID & boundaryUID, const Config::BlockHandle & blockHandle )
+   void BoundarySetter<FlagField<Flag_T> >::setBoundaryConfigBlock( [[maybe_unused]] const BoundaryUID & boundaryUID, [[maybe_unused]] const Config::BlockHandle & blockHandle )
    {
       WALBERLA_ABORT("Passed boundary information to an initializer that sets up a pure flag field only");
    }
 
    template<typename Flag_T>
-   void BoundarySetter<FlagField<Flag_T>>::setBoundaryConfig( const BoundaryUID & boundaryUID, const shared_ptr<BoundaryConfiguration> & conf )
+   void BoundarySetter<FlagField<Flag_T>>::setBoundaryConfig( [[maybe_unused]] const BoundaryUID & boundaryUID, [[maybe_unused]] const shared_ptr<BoundaryConfiguration> & conf )
    {
       WALBERLA_ABORT("Passed boundary information to an initializer that sets up a pure flag field only");
    }

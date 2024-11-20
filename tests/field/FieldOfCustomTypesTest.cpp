@@ -31,12 +31,6 @@
 using namespace walberla;
 
 
-using std::cout;
-using std::endl;
-
-
-
-
 struct MyClass
 {
    MyClass() {

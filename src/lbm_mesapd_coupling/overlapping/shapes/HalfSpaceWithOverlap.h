@@ -46,6 +46,8 @@ class HalfSpaceWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), halfSpace_(halfSpace)
    {}
 
+   ~HalfSpaceWithOverlap() override = default;
+
    bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideHalfSpace(point, ac_->getPosition(idx_), halfSpace_.getNormal());

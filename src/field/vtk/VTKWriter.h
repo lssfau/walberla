@@ -126,13 +126,10 @@ protected:
          // common case that can be handled faster
          return numeric_cast<OutputType>( OutputTrait::get( field_->get(x,y,z,0), uint_c(f) )  );
       }
-      else
-      {
-         const cell_idx_t fField = f / cell_idx_c( OutputTrait::F_SIZE );
-         const cell_idx_t fType  = f % cell_idx_c( OutputTrait::F_SIZE );
+      const cell_idx_t fField = f / cell_idx_c( OutputTrait::F_SIZE );
+      const cell_idx_t fType  = f % cell_idx_c( OutputTrait::F_SIZE );
 
-         return numeric_cast<OutputType>( OutputTrait::get( field_->get(x,y,z,fField), uint_c(fType) )  );
-      }
+      return numeric_cast<OutputType>( OutputTrait::get( field_->get(x,y,z,fField), uint_c(fType) )  );
    }
 
    const ConstBlockDataID bdid_;

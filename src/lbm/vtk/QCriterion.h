@@ -38,7 +38,7 @@ class QCriterionVTKWriter : public vtk::BlockCellDataWriter< OutputType, 1 >
 public:
    QCriterionVTKWriter(const shared_ptr<StructuredBlockStorage> blockStorage, Filter_T & filter,
                    const ConstBlockDataID & velocityFieldId, const std::string & id ) :
-         vtk::BlockCellDataWriter< OutputType, 1 >(id), blockStorage_(blockStorage), filter_(filter), velocityFieldId_(velocityFieldId), velocityField_(NULL) {}
+         vtk::BlockCellDataWriter< OutputType, 1 >(id), blockStorage_(blockStorage), filter_(filter), velocityFieldId_(velocityFieldId), velocityField_(nullptr) {}
 
 protected:
 

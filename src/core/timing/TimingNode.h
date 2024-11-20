@@ -97,8 +97,11 @@ TimingNode<TP>::TimingNode(const TimingNode<TP>& tn)
 template< typename TP >  // Timing policy
 TimingNode<TP>& TimingNode<TP>::operator=(const TimingNode<TP>& tn)
 {
-   TimingNode<TP> tmp (tn);
-   tmp.swap(*this);
+   if (&tn != this)
+   {
+      TimingNode<TP> tmp (tn);
+      tmp.swap(*this);
+   }
    return *this;
 }
 

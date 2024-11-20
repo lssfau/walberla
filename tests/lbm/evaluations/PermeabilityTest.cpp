@@ -284,8 +284,6 @@ int main( int argc, char ** argv )
    else
       WALBERLA_ABORT( "This app can only be executed with 1, 4, or 8 processes! Aborting ..." );
 
-   std::string collisionModel( "TRT" );
-
    try {
       if( std::strcmp( setup.collisionModel.c_str(), "SRT" ) == 0 )
          return setupAndExecute< lbm::D3Q19< lbm::collision_model::SRT          , false > >( setup );

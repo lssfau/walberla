@@ -129,6 +129,8 @@ class GhostLayerFieldDataHandling : public field::BlockDataHandling< GhostLayerF
         alignment_(alignment)
    {}
 
+   ~GhostLayerFieldDataHandling() override = default;
+
    GhostLayerField_T* allocate(IBlock* const block) override
    {
       auto blocks = blocks_.lock();

@@ -5209,7 +5209,7 @@ namespace exprtk
             return std::numeric_limits<T>::quiet_NaN();
          }
 
-         inline virtual expression_node<T>* branch(const std::size_t& index = 0) const
+         inline virtual expression_node<T>* branch([[maybe_unused]] const std::size_t& index = 0) const
          {
             return reinterpret_cast<expression_ptr>(index * 0);
          }
@@ -14889,6 +14889,8 @@ namespace exprtk
       {
       public:
 
+         ~T0oT1oT2oT3_sf4() override = default;
+
          typedef typename details::functor_t<T> functor_t;
          typedef typename functor_t::qfunc_t      qfunc_t;
          typedef T value_type;
@@ -18085,7 +18087,7 @@ namespace exprtk
             return false;
          else if (symbol_exists(vector_name))
             return false;
-         else if (0 == v.size())
+         else if (v.empty())
             return false;
          else
             return local_data().vector_store.add(vector_name,v);
@@ -18099,7 +18101,7 @@ namespace exprtk
             return false;
          else if (symbol_exists(vector_name))
             return false;
-         else if (0 == v.size())
+         else if (v.empty())
             return false;
          else
             return local_data().vector_store.add(vector_name,v);
@@ -18585,10 +18587,7 @@ namespace exprtk
                }
             }
 
-            if (results)
-            {
-               delete results;
-            }
+            delete results;
          }
 
          static inline control_block* create(expression_ptr e)
@@ -21419,7 +21418,9 @@ namespace exprtk
 
                end_token = current_token();
 
+               #ifdef exprtk_enable_debugging
                const std::string sub_expr = construct_subexpr(begin_token, end_token);
+               #endif
 
                exprtk_debug(("parse_corpus(%02d) Subexpr: %s\n",
                              static_cast<int>(arg_list.size() - 1),
@@ -24456,7 +24457,7 @@ namespace exprtk
 
             for (std::size_t i = 0; i < function_definition_list_.size(); ++i)
             {
-               if (std::string::npos != function_definition_list_[i].param_seq.find("Z"))
+               if (std::string::npos != function_definition_list_[i].param_seq.find('Z'))
                {
                   return true;
                }
@@ -38550,7 +38551,7 @@ namespace exprtk
 
          std::memcpy(reinterpret_cast<char*>(&fd),
                      reinterpret_cast<const char*>(&v),
-                     sizeof(fd));
+                     sizeof(void*));
          return fd;
       }
 
@@ -38611,7 +38612,7 @@ namespace exprtk
 
             std::memcpy(reinterpret_cast<char*>(&t ),
                         reinterpret_cast<char*>(&fd),
-                        sizeof(fd));
+                        sizeof(void*));
             return t;
          }
          else

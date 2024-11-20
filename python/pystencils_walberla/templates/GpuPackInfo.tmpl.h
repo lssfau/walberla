@@ -20,7 +20,6 @@
 #pragma once
 
 #include "core/DataTypes.h"
-#include "core/cell/CellInterval.h"
 
 #include "domain_decomposition/IBlock.h"
 

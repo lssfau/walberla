@@ -27,6 +27,7 @@ namespace vtk {
 std::vector< ParticleVtkOutput::Attributes > ParticleVtkOutput::getAttributes() const
 {
    std::vector< Attributes > attributes;
+   attributes.reserve(selectors_.size());
    for (const auto& s : selectors_)
    {
       attributes.emplace_back( s.second->type_string, s.first, s.second->components );

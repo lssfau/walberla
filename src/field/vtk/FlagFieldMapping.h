@@ -94,12 +94,12 @@ public:
 
 protected:
 
-   void configure()  {
+   void configure() override {
       WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
       field_ = this->block_->template getData< FieldType >( fieldID_ );
    }
 
-   TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ )
+   TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( field_ );
       if (field_->get(x,y,z) & mask_) {

@@ -109,14 +109,14 @@ int main( int argc, char ** argv )
    blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
             blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false ) );
 
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,1,1), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,1,3), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,3,1), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,3,3), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(3,1,1), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(3,1,3), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(3,3,1), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(3,3,3), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(1,1,1), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(1,1,3), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(1,3,1), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(1,3,3), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(3,1,1), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(3,1,3), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(3,3,1), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(3,3,3), 1);
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT( "Refinement 1" );
@@ -152,7 +152,7 @@ int main( int argc, char ** argv )
 
    for (unsigned int i = 0; i < 30; ++i)
    {
-      createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(real_t(2.1), real_t(2.1), real_t(2.1)), 1);
+      createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(real_t(2.1), real_t(2.1), real_t(2.1)), 1);
    }
 
    WALBERLA_MPI_BARRIER();

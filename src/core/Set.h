@@ -130,7 +130,7 @@ public:
 
    inline size_t size() const { return set_.size(); }
 
-   inline void swap( Set<T>& set ) { set_.swap( set.set_ ); }
+   inline void swap( Set<T>& set ) noexcept { set_.swap( set.set_ ); }
 
           void        toStream( std::ostream& os ) const;
    inline std::string toString() const;

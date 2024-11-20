@@ -327,8 +327,8 @@ void CurvatureSweepLocalTriangulation< Stencil_T, FlagField_T, ScalarField_T, Ve
                {
                   const real_t diff = nIt1->dist2 - nIt2->dist2;
 
-                  if (diff < real_c(1e-4)) { nIt1->valid = nIt1->wall ? true : false; }
-                  if (diff > real_c(-1e-4)) { nIt2->valid = nIt2->wall ? true : false; }
+                  if (diff < real_c(1e-4)) { nIt1->valid = nIt1->wall; }
+                  if (diff > real_c(-1e-4)) { nIt2->valid = nIt2->wall; }
                }
             }
          }

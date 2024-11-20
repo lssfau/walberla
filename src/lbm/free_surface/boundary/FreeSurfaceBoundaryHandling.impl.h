@@ -59,6 +59,8 @@ class BoundaryBlockDataHandling
       : boundary_(boundary)
    {}
 
+   ~BoundaryBlockDataHandling() override = default;
+
    // initialize standard waLBerla boundary handling
    BoundaryHandling_T* initialize(IBlock* const block) override
    {

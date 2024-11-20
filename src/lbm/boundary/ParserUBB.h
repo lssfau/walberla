@@ -220,19 +220,19 @@ template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternal
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::Parser::Parser( const std::array< std::string, 3 > & equations )
 : parsers_(), equations_( equations ), timeDependent_( false )
 {
-   if( equations_[0].length() > 0 )
+   if( not equations_[0].empty() )
    {
       parsers_[0].parse( equations_[0] );
       if( parsers_[0].symbolExists( "t" ) )
          timeDependent_ = true;
    }
-   if( equations_[1].length() > 0 )
+   if( not equations_[1].empty() )
    {
       parsers_[1].parse( equations_[1] );
       if( parsers_[1].symbolExists( "t" ) )
          timeDependent_ = true;
    }
-   if( equations_[2].length() > 0 )
+   if( not equations_[2].empty() )
    {
       parsers_[2].parse( equations_[2] );
       if( parsers_[2].symbolExists( "t" ) )

@@ -46,6 +46,8 @@ class EllipsoidWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), ellipsoid_(ellipsoid)
    {}
 
+   ~EllipsoidWithOverlap() override = default;
+
    bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideEllipsoidBF(mesa_pd::transformPositionFromWFtoBF(idx_, ac_, point),

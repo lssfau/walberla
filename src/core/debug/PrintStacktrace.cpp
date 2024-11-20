@@ -42,6 +42,7 @@ void printStacktrace()
 #include WALBERLA_BACKTRACE_HEADER
 #include <cstdlib>
 #include <string>
+#include <utility>
 
 namespace walberla {
 namespace debug {
@@ -92,12 +93,12 @@ namespace debug {
 
          string appName     = line.substr( 0, leftBracket );
          string bracketPart = line.substr( leftBracket+1, rightBracket - leftBracket -1 );
-         string rest        = line.substr( rightBracket +1 );
+         std::ignore        = line.substr( rightBracket +1 ); /*rest*/
 
          // split the bracketPart on plus sign
          size_t plusPos = bracketPart.find_first_of('+');
          string functionName = bracketPart.substr(0, plusPos );
-         string offset       = bracketPart.substr( plusPos+1 );
+         std::ignore = bracketPart.substr( plusPos+1 ); /*offset*/
 #endif
 
          // try to demangle -> no return code if successful
@@ -109,7 +110,7 @@ namespace debug {
 
          os << "\t" << appName << " \t " << demangled << endl;
       }
-      free (strings);
+      free (reinterpret_cast<void*>(strings));
    }
 
 
