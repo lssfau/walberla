@@ -28,9 +28,7 @@
 #include "core/math/Uint.h"
 
 #include <limits>
-#include <ostream>
 #include <string>
-#include <vector>
 
 
 namespace walberla {
@@ -108,28 +106,6 @@ memory_t memorySum( const T& array )
 inline memory_t bytesToMiB( memory_t bytes ) {
    return bytes / static_cast< memory_t >( 1024.0 * 1024.0 );
 }
-
-
-
-//**********************************************************************************************************************
-/*!
-*   \brief Returns the string representation of 'number', every three digits the character 'separator' is inserted
-*          (172408725 -> "172 408 725")
-*/
-//**********************************************************************************************************************
-std::string naturalNumberToGroupedThousandsString( const uint_t number, const char separator = ' ' );
-
-inline std::string naturalNumberToGroupedThousandsString( const real_t number, const char separator = ' ' ) {
-
-   return naturalNumberToGroupedThousandsString( static_cast< uint_t >( 0.5 + number ), separator );
-}
-
-
-
-inline void fillStream( std::ostream& ostream, const char fill, uint_t length ) {
-   while( length-- > 0 ) ostream << fill;
-}
-
 
 
 } // namespace blockforest

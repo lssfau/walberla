@@ -26,7 +26,6 @@
 #include "AllSet.h"
 #include "Array.h"
 #include "DataTypes.h"
-#include "EndianIndependentSerialization.h"
 #include "Environment.h"
 #include "FunctionTraits.h"
 #include "GetPID.h"
