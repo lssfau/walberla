@@ -351,6 +351,26 @@ namespace field {
    };
 
 
+constexpr uint_t SIMDAlignment() {
+#if defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE_BITS) && __ARM_FEATURE_SVE_BITS > 0
+   return uint_c(__ARM_FEATURE_SVE_BITS / 8);
+#elif defined(__ARM_FEATURE_SVE)
+   return 64u;
+#elif defined(__ARM_NEON)
+   return 16u;
+#elif defined(__AVX512F__)
+   return 64u;
+#elif defined(__AVX__)
+   return 32u;
+#elif defined(__SSE__) || defined(_MSC_VER)
+   return 16u;
+#elif defined(__BIGGEST_ALIGNMENT__)
+   return uint_c(__BIGGEST_ALIGNMENT__);
+#else
+   return 64u;
+#endif
+}
+
 } // namespace field
 } // namespace walberla
 
