@@ -32,7 +32,9 @@
 #include "domain_decomposition/BlockDataID.h"
 #include "domain_decomposition/IBlock.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
-#include <set>
+
+#include <functional>
+#include <unordered_map>
 
 {% for header in interface_spec.headers %}
 #include {{header}}
@@ -60,8 +62,8 @@ class {{class_name}}
 {
 public:
    {{class_name}}( {{kernel|generate_constructor_parameters(parameters_to_ignore=parameters_to_ignore)}} {%if inner_outer_split%}, const Cell & outerWidth=Cell(1, 1, 1){% endif %})
-     : {{ kernel|generate_constructor_initializer_list(parameters_to_ignore=parameters_to_ignore) }}{%if inner_outer_split%}{% if kernel|generate_constructor_initializer_list|length %},{% endif %} outerWidth_(outerWidth){% endif %}{%if block_offset%}, configured_(false){% endif %}
-   {};
+     : {{ kernel|generate_constructor_initializer_list(parameters_to_ignore=parameters_to_ignore) }}{%if inner_outer_split%}{% if kernel|generate_constructor_initializer_list|length %},{% endif %} outerWidth_(outerWidth){% endif %}{%if block_offset%}{% for offset in block_offset -%}, {{offset[0]}}_({{offset[1]}}(0)) {% endfor -%}, configured_(false){% endif %}
+   {}
 
    {{ kernel| generate_destructor(class_name) |indent(3) }}
 

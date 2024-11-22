@@ -204,7 +204,7 @@ public:
         auto createForceVector = []( IBlock * const , StructuredBlockStorage * const ) { return new ForceVector(); };
         forceVectorID = blocks->addStructuredBlockData< ForceVector >( createForceVector, "forceVector_{{class_name}}");
         {%- endif %}
-    };
+    }
 
     void run (
         {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}}

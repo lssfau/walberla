@@ -98,10 +98,10 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         ghost_layers_to_include: see documentation of `generate_sweep`
         cpu_vectorize_info: Dictionary containing information about CPU vectorization applied to the kernels
         cpu_openmp: Whether or not CPU kernels use OpenMP parallelization
-        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__
+        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`
         block_offset: A tuple of TypedSymbols that will function as internal variable to store
                       storage.getBlockCellBB(block).min())
-`
+
     """
     def to_name(f):
         return f.name if isinstance(f, Field) else f

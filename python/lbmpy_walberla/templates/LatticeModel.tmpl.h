@@ -109,7 +109,7 @@ public:
     class Sweep
     {
     public:
-        Sweep( BlockDataID _pdfsID ) : pdfsID(_pdfsID) {};
+        Sweep( BlockDataID _pdfsID ) : pdfsID(_pdfsID) {}
 
         //void stream       ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
         void collide      ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -134,7 +134,7 @@ public:
 
     {{class_name}}( {{stream_collide_kernel|generate_constructor_parameters(lmIgnores+lmOffsets) }} )
         : {{ stream_collide_kernel|generate_constructor_initializer_list(lmIgnores+lmOffsets) }}, currentLevel(0)
-    {};
+    {}
 
     void configure( IBlock & block, StructuredBlockStorage & storage )  { configureBlock( &block, &storage ); }
 
