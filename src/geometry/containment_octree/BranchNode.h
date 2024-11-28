@@ -46,7 +46,7 @@ public:
    inline BranchNode( const shared_ptr<const DistanceObject> & distanceObject, const AABB & aabb, const Scalar epsilon,
                       const uint_t maxDepth, const Scalar minAABBVolume );
 
-   virtual ~BranchNode() { for( int i = 0; i < 8; ++i ) delete children_[i]; }
+   ~BranchNode() override { for( int i = 0; i < 8; ++i ) delete children_[i]; }
 
    virtual inline bool contains( const Point & p ) const;
 

@@ -44,14 +44,14 @@ public:
 
    OutputSelectorFaceDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
-   virtual uint_t numComponents() {
+   uint_t numComponents() override {
       return uint_t(1);
    }
 
    using Base::getData;
-   virtual void getData( const MeshType &, const Faces & faces, std::vector<Type> & data,
-                         const ParticleIdxFacePropertyManager<MeshType> & faceToParticleIdxManager,
-                         shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) {
+   void getData( const MeshType &, const Faces & faces, std::vector<Type> & data,
+                 const ParticleIdxFacePropertyManager<MeshType> & faceToParticleIdxManager,
+                 shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) override {
       for (const auto & face: faces) {
          size_t particleIdx = faceToParticleIdxManager[face];
          auto p = (*ps)[particleIdx];
@@ -79,14 +79,14 @@ public:
 
    OutputSelectorFaceDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
-   virtual uint_t numComponents() {
+   uint_t numComponents() override {
       return uint_t(3);
    }
 
    using Base::getData;
-   virtual void getData( const MeshType &, const Faces & faces, std::vector<Type> & data,
-                         const ParticleIdxFacePropertyManager<MeshType> & faceToParticleIdxManager,
-                         shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) {
+   void getData( const MeshType &, const Faces & faces, std::vector<Type> & data,
+                 const ParticleIdxFacePropertyManager<MeshType> & faceToParticleIdxManager,
+                 shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) override {
       for (const auto & face: faces) {
          size_t particleIdx = faceToParticleIdxManager[face];
          auto p = (*ps)[particleIdx];

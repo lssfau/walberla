@@ -39,7 +39,7 @@ public:
          const ParticleIdxVertexPropertyManager<MeshType> & vertexToParticleIdxManager,
          shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) = 0;
 
-   virtual ~VertexDataSource() {}
+   virtual ~VertexDataSource() = default;
 
 protected:
    std::string name_;

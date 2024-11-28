@@ -42,13 +42,13 @@ public:
    
    using KahanAccumulator = typename Node<ContainmentOctreeT>::KahanAccumulator;
 
-   virtual ~LeafNode() = default;
+   ~LeafNode() override = default;
 
-   virtual uint_t height() const { return uint_t(0); }
-   virtual uint_t numNodes() const { return uint_t(0); }
-   virtual uint_t numChildren() const { return uint_t(0); }
+   uint_t height() const override { return uint_t(0); }
+   uint_t numNodes() const override { return uint_t(0); }
+   uint_t numChildren() const override { return uint_t(0); }
 
-   virtual const Node<ContainmentOctreeT> * getChild( const uint_t ) const { WALBERLA_ABORT("ContainmentOctree: You are requesting access to children of a Leaf Node!"); return 0; }
+   const Node<ContainmentOctreeT> * getChild( const uint_t ) const override { WALBERLA_ABORT("ContainmentOctree: You are requesting access to children of a Leaf Node!"); return 0; }
 };
 
 

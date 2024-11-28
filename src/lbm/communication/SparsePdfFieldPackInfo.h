@@ -68,7 +68,7 @@ public:
    SparsePdfFieldPackInfo( const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, FlagUID flag, bool flagFieldConstant )
       : pdfFieldId_( pdfFieldId ), flagFieldId_( flagFieldId ), flag_( flag ), flagFieldConstant_( flagFieldConstant ) {}
 
-   virtual ~SparsePdfFieldPackInfo() {}
+   ~SparsePdfFieldPackInfo() override = default;
 
    bool constantDataExchange() const { return flagFieldConstant_; }
    bool threadsafeReceiving()  const { return true; }
