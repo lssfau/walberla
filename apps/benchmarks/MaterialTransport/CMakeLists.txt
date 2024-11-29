@@ -1,2 +1,3 @@
 add_subdirectory(one_way_coupling)
 add_subdirectory(two_way_coupling)
+add_subdirectory(thermal_PSM)

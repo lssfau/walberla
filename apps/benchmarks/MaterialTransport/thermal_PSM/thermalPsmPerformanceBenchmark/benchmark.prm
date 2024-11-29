@@ -1,0 +1,41 @@
+
+NumericalSetup
+{
+    // product of number of blocks should be equal to number of used processes
+    xSizeSI  64;
+    ySizeSI  64;
+    zSizeSI  1;
+
+    numXBlocks 1;
+    numYBlocks 1;
+    numZBlocks 1;
+
+    cellsPerBlockPerDirection 64;
+
+    periodicInY false;
+    periodicInZ false;
+
+    tSI 15;
+    gravity 9.81;
+
+    sendDirectlyFromGPU false; // use GPU-GPU communication
+    useCommunicationHiding false;
+    frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
+
+    Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
+    Tcold 0;
+    PrandtlNumber 0.71;
+    RayleighNumber 1000000;
+    Mach 0.1;
+    relaxationRate 1.5;
+
+    timeSteps 1000000;
+}
+
+Output
+{
+    vtkSpacing 1000;
+    vtkFolder vtk_out_srt_srt;
+
+    performanceLogFrequency 10;
+}

@@ -228,11 +228,11 @@ void analyticalSolGaussian(const shared_ptr< StructuredBlockStorage >& blocks,
          }*/
 
 
-         AnalyticalConcentrationField->get(*cellIt) =
+         /*AnalyticalConcentrationField->get(*cellIt) =
             prefactor * std::exp(-(std::pow((x_eff + advection_period*domainSize[0]), 2) +
                                    std::pow((y_eff + advection_period*domainSize[1]),
                                             2)) /
-                                 (2 * (sigma_0 * sigma_0 + sigma_D2)));
+                                 (2 * (sigma_0 * sigma_0 + sigma_D2)));*/
 
       }
    } /*+ std::pow((pos[2] - x_0[2] - uInflow[2]*time),2)*/
