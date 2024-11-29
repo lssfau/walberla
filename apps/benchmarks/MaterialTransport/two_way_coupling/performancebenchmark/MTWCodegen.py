@@ -46,7 +46,6 @@ with CodeGeneration() as ctx:
     init_density_fluid = sp.Symbol("init_density_fluid")
     init_density_concentration = sp.Symbol("init_density_concentration")
     init_velocity_fluid = sp.symbols("init_velocity_fluid_:2")
-    #init_velocity_concentration = sp.symbols("init_velocity_concentration_:3")
     pdfs_inter_fluid = sp.symbols("pdfs_inter_fluid:" + str(stencil_fluid.Q))
     pdfs_inter_concentration = sp.symbols("pdfs_inter_concentration:" + str(stencil_concentration.Q))
     rho_0 = sp.Symbol("rho_0")
@@ -117,27 +116,19 @@ with CodeGeneration() as ctx:
     lbm_fluid_config = LBMConfig(
         stencil=stencil_fluid,
         method=Method.MRT,
-        #relaxation_rate=omega_f,
         relaxation_rates=[0,1,1,Sv,Sv,Sv,Sq,Sq,Sv],
         output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
     )
-    #sigma_k = 1/((np.sqrt(3))/6 + 0.5)
-    #sigma_e = 1/((1/np.sqrt(3)) + 0.5)
-    sigma_k = 1.9
-    sigma_e = 1.9
     # Concentration LBM config
     lbm_concentration_config = LBMConfig(
         stencil=stencil_concentration,
         method=Method.SRT,
-        #relaxation_rates=[0,omega,omega,omega,omega,omega,omega,omega,omega],
         relaxation_rate=omega,
         velocity_input=velocity_field,
         output={"density": concentration_field},
-        #force=sp.symbols("F_:3"),
-        #force_model=ForceModel.LUO,
         compressible=True,
         zero_centered=False
     )

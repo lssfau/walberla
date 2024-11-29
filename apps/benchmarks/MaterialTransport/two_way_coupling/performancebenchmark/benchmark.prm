@@ -6,11 +6,11 @@ NumericalSetup
     ySizeSI  64;
     zSizeSI  1;
 
-    numXBlocks 2;
-    numYBlocks 2;
+    numXBlocks 1;
+    numYBlocks 1;
     numZBlocks 1;
 
-    cellsPerBlockPerDirection 128;
+    cellsPerBlockPerDirection 64;
 
     periodicInY false;
     periodicInZ false;
@@ -28,6 +28,8 @@ NumericalSetup
     RayleighNumber 10000000;
     Mach 0.1;
     relaxationRate 1.5;
+
+    timeSteps 1000000;
 }
 
 Output

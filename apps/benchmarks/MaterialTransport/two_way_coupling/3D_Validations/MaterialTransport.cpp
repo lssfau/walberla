@@ -185,13 +185,18 @@ int main(int argc, char** argv) {
    const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
    const real_t omega_t = lbm::collision_model::omegaFromViscosity(thermalDiffusivityLB);
    const real_t tau_f = 1/omega_f;
+
+   // for MRT 1
+   /*const double Se = 1/tau_f;
+   const double Sq = 8*((2*tau_f - 1)/(8*tau_f - 1));
+   const double qk = 3 - std::pow(3,0.5);
+   const double qe = 4*std::pow(3,0.5) - 6.0;*/
+
+   // for MRT 2
    const double Se = 1/(3*kinematicViscosityLB + 0.5);
-   //const double Sq = 8*((2*tau_f - 1)/(8*tau_f - 1));
-   //const double qk = 3 - std::pow(3,0.5);
-   //const double qe = 4*std::pow(3,0.5) - 6.0;
    const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
    const real_t qe = 1.0;
-   //const real_t omega_t = 1/(0.5 + 4.5*thermalDiffusivityLB);
+
    // calculations for verification and correctness
 
    const real_t RayleighNumber = (Pr*alphaLB*gravityLB*delta_T*length_conversion*length_conversion*length_conversion)/(kinematicViscosityLB*kinematicViscosityLB);
@@ -328,7 +333,7 @@ int main(int argc, char** argv) {
       // map boundaries into the fluid field simulation
       geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfigFluid);
       geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
-      lbm::BC_Fluid_Density density_fluid_bc(blocks, densityConcentrationFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB, real_t(1.0),gravityLB,rho_0);
+      lbm::BC_Fluid_Density density_fluid_bc(blocks,densityConcentrationFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB,real_t(1.0),gravityLB,rho_0);
       density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
       lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
       noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
@@ -358,10 +363,10 @@ int main(int argc, char** argv) {
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       #else
       initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSizeLB);
-      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
-      pystencils::InitializeFluidDomain initializeFluidDomain(densityConcentrationFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
+      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSizeLB);
+      pystencils::InitializeFluidDomain initializeFluidDomain(densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID);
-
+      WALBERLA_LOG_INFO_ON_ROOT("code could execute till here ");
       #endif
 
       //pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
@@ -370,7 +375,6 @@ int main(int argc, char** argv) {
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
       {
          initializeFluidDomain(&(*blockIt));
-
          initializeConcentrationDomain(&(*blockIt));
 
       }
@@ -512,14 +516,16 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    }*/
 
 
-   //pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk);
-   //pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk,frameWidth);
+   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk);
+   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk,frameWidth);
 
-   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t);
-   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t,frameWidth);
+   //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,densityFluidFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Se,Sq,T0,alphaLB,gravityLB);
+   //pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,densityFluidFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Se,Sq,T0,alphaLB,gravityLB,frameWidth);
 
-   //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Se,T0,alphaLB,gravityLB,rho_0);
-   //pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Se,T0,alphaLB,gravityLB,rho_0,frameWidth);
+
+   //pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t);
+   //pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,omega_t,frameWidth);
+
 
    pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0);
    pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0,frameWidth);

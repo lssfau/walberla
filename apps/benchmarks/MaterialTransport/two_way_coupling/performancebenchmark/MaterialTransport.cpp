@@ -122,9 +122,6 @@ int main(int argc, char** argv) {
    // Read config file
    Config::BlockHandle numericalSetup = cfgFile->getBlock("NumericalSetup");
 
-   const real_t xSize_SI              = numericalSetup.getParameter< uint_t >("xSizeSI");
-   const real_t ySize_SI              = numericalSetup.getParameter< uint_t >("ySizeSI");
-   const real_t zSize_SI              = numericalSetup.getParameter< uint_t >("zSizeSI");
 
    const uint_t numXBlocks            = numericalSetup.getParameter< uint_t >("numXBlocks");
    const uint_t numYBlocks            = numericalSetup.getParameter< uint_t >("numYBlocks");
@@ -148,6 +145,7 @@ int main(int argc, char** argv) {
    const real_t Ra        = numericalSetup.getParameter< real_t >("RayleighNumber");
    const real_t Ma        = numericalSetup.getParameter< real_t >("Mach");
    const real_t relaxationRate = numericalSetup.getParameter< real_t >("relaxationRate");
+   const uint_t timeSteps = numericalSetup.getParameter< uint_t >("timeSteps");
 
 
    if ((periodicInY && numYBlocks == 1) || (periodicInZ && numZBlocks == 1))
@@ -163,7 +161,7 @@ int main(int argc, char** argv) {
    // Necessary Calculations
 
    const real_t length_conversion = (numXBlocks * real_c(cellsPerBlockPerDirection));
-   Vector3< uint_t > domainSizeLB(uint_c((xSize_SI / length_conversion)), uint_c((ySize_SI / length_conversion)), uint_c((zSize_SI /1.0)));
+   Vector3< uint_t > domainSizeLB(uint_c(length_conversion), uint_c(length_conversion), uint_c(length_conversion));
 
    const real_t uCharacteristicLB = Ma * (std::sqrt(real_c(1 / 3.0)));
    const Vector3< real_t > Uinitialize (uCharacteristicLB,0,0);
@@ -178,7 +176,6 @@ int main(int argc, char** argv) {
    const real_t gravityLB   = gravity * time_conversion * time_conversion / length_conversion;
    const real_t alphaLB     = (uCharacteristicLB * uCharacteristicLB) / (gravityLB * delta_T * length_conversion);
 
-   const uint_t timeSteps = 10000000;//uint_c(real_c(tSI)/time_conversion);
    const real_t rho_0 = 1.0;
 
    const real_t Sv = 2/(6*kinematicViscosityLB + 1);
@@ -192,7 +189,7 @@ int main(int argc, char** argv) {
    const real_t uchar = std::sqrt(Ra/Pr)*(kinematicViscosityLB/length_conversion);
    const real_t machnumber = uchar*std::sqrt(3);
    const real_t thermal_diffusivity_2 = (Ma/std::sqrt(3))/(std::sqrt(Ra*Pr))*length_conversion;
-
+   const real_t ratio = length_conversion/thermalDiffusivityLB;
    WALBERLA_LOG_INFO_ON_ROOT("length conversion is "<< length_conversion << " " << "time conversion is " << time_conversion);
    WALBERLA_LOG_INFO_ON_ROOT("kinematic viscosity is "<< kinematicViscosityLB);
    WALBERLA_LOG_INFO_ON_ROOT("Omega fluid is "<< omega_f << "omega temperature is " << omega_t);
@@ -351,7 +348,7 @@ int main(int argc, char** argv) {
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       #else
       initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSizeLB);
-      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSizeLB);
       pystencils::InitializeFluidDomain initializeFluidDomain(densityConcentrationFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID);
 
@@ -544,6 +541,12 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
    }
+
+   std::vector< real_t > nusseltNumbers = NusseltNumbers(blocks,
+                  densityConcentrationFieldID,velFieldFluidCPUGPUID,simulationDomain,
+                  domainSizeLB,delta_T,ratio);
+   WALBERLA_LOG_INFO_ON_ROOT("Nusselt at x=0 is " << nusseltNumbers[0] << " " << " Nusselt at x = 0.5 is " << nusseltNumbers[1] << " " << "Nusselt domain is " << nusseltNumbers[2]);
+
    timeloopTiming.logResultOnRoot();
    auto timeloopTimingReduced = timeloopTiming.getReduced();
 
