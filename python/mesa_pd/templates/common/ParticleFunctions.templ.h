@@ -93,19 +93,19 @@ inline void addForceAtomic(const size_t p_idx, Accessor& ac, const Vec3& f)
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[0]  += f[0];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[1]  += f[1];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[2]  += f[2];
 }
 
@@ -117,19 +117,19 @@ inline void addForceAtWFPosAtomic(const size_t p_idx, Accessor& ac, const Vec3& 
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[0]  += f[0];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[1]  += f[1];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getForceRef(p_idx)[2]  += f[2];
 
    const auto t = cross(( wf_pt - ac.getPosition(p_idx) ), f);
@@ -138,19 +138,19 @@ inline void addForceAtWFPosAtomic(const size_t p_idx, Accessor& ac, const Vec3& 
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[0] += t[0];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[1] += t[1];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[2] += t[2];
 }
 
@@ -165,19 +165,19 @@ inline void addTorqueAtomic(const size_t p_idx, Accessor& ac, const Vec3& t)
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[0]  += t[0];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[1]  += t[1];
    {%- if module.enableOpenMP %}
    #ifdef _OPENMP
    #pragma omp atomic
    #endif
-   {%- endif %};
+   {%- endif %}
    ac.getTorqueRef(p_idx)[2]  += t[2];
 }
 

@@ -88,23 +88,23 @@ inline Mat3 getInertia(const size_t p_idx, Accessor& ac)
 template <typename Accessor>
 inline void addForceAtomic(const size_t p_idx, Accessor& ac, const Vec3& f)
 {
-   // Increasing the force and torque on this particle;
-   ac.getForceRef(p_idx)[0]  += f[0];;
-   ac.getForceRef(p_idx)[1]  += f[1];;
+   // Increasing the force and torque on this particle
+   ac.getForceRef(p_idx)[0]  += f[0];
+   ac.getForceRef(p_idx)[1]  += f[1];
    ac.getForceRef(p_idx)[2]  += f[2];
 }
 
 template <typename Accessor>
 inline void addForceAtWFPosAtomic(const size_t p_idx, Accessor& ac, const Vec3& f, const Vec3& wf_pt)
 {
-   // Increasing the force and torque on this particle;
-   ac.getForceRef(p_idx)[0]  += f[0];;
-   ac.getForceRef(p_idx)[1]  += f[1];;
+   // Increasing the force and torque on this particle
+   ac.getForceRef(p_idx)[0]  += f[0];
+   ac.getForceRef(p_idx)[1]  += f[1];
    ac.getForceRef(p_idx)[2]  += f[2];
 
-   const auto t = cross(( wf_pt - ac.getPosition(p_idx) ), f);;
-   ac.getTorqueRef(p_idx)[0] += t[0];;
-   ac.getTorqueRef(p_idx)[1] += t[1];;
+   const auto t = cross(( wf_pt - ac.getPosition(p_idx) ), f);
+   ac.getTorqueRef(p_idx)[0] += t[0];
+   ac.getTorqueRef(p_idx)[1] += t[1];
    ac.getTorqueRef(p_idx)[2] += t[2];
 }
 
@@ -114,9 +114,9 @@ inline void addForceAtWFPosAtomic(const size_t p_idx, Accessor& ac, const Vec3& 
 template <typename Accessor>
 inline void addTorqueAtomic(const size_t p_idx, Accessor& ac, const Vec3& t)
 {
-   // Increasing the torque on this particle;
-   ac.getTorqueRef(p_idx)[0]  += t[0];;
-   ac.getTorqueRef(p_idx)[1]  += t[1];;
+   // Increasing the torque on this particle
+   ac.getTorqueRef(p_idx)[0]  += t[0];
+   ac.getTorqueRef(p_idx)[1]  += t[1];
    ac.getTorqueRef(p_idx)[2]  += t[2];
 }
 

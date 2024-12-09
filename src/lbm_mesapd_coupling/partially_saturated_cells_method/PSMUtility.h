@@ -51,10 +51,10 @@ namespace psm
  * Weighting_T is like in the PSMSweep.
  */
 template< typename LatticeModel_T, int Weighting_T, typename ParticleAccessor_T >
-Vector3< real_t > getPSMMacroscopicVelocity(
-   const IBlock& block, lbm::PdfField< LatticeModel_T >* pdfField,
-   GhostLayerField< std::vector< std::pair< walberla::size_t, real_t > >, 1 >* particleAndVolumeFractionField,
-   StructuredBlockStorage& blockStorage, const Cell& cell, const ParticleAccessor_T& ac)
+Vector3< real_t > getPSMMacroscopicVelocity(const IBlock& block, lbm::PdfField< LatticeModel_T >* pdfField,
+                                            ParticleAndVolumeFractionField_T* particleAndVolumeFractionField,
+                                            StructuredBlockStorage& blockStorage, const Cell& cell,
+                                            const ParticleAccessor_T& ac)
 {
    static_assert(LatticeModel_T::compressible == false, "Only works with incompressible models!");
    WALBERLA_ASSERT_NOT_NULLPTR(pdfField);
@@ -87,16 +87,16 @@ Vector3< real_t > getPSMMacroscopicVelocity(
    return velocity;
 }
 
-/*!\brief Initializes the PDF field inside the bodies according to the velocities of the bodies.
+/*!\brief Initializes the PDF field inside the particles according to the velocities of the particles.
  *
- * As the Partially Saturated Cells method relies on executing the LBM sweep also inside the bodies, it is good practice
- * (and for some PSM variants also required) to initialize the PDF field ( i.e. the velocity ) in agreement with
- * possible initial velocities of the bodies. This is also the case in the presence of external forces acting on the
- * fluid, as these will often shift the macroscopic velocities during the initialization of the PDF field.
+ * As the Partially Saturated Cells method relies on executing the LBM sweep also inside the particles, it is good
+ * practice (and for some PSM variants also required) to initialize the PDF field ( i.e. the velocity ) in agreement
+ * with possible initial velocities of the particles. This is also the case in the presence of external forces acting on
+ * the fluid, as these will often shift the macroscopic velocities during the initialization of the PDF field.
  *
  * Note, that the ParticleAndVolumeFractionMapping for PSM has to be called first to have a valid field.
  *
- * Only the velocity of cells intersecting with bodies is set, pure fluid cells remain unchanged.
+ * Only the velocity of cells intersecting with particles is set, pure fluid cells remain unchanged.
  */
 template< typename LatticeModel_T, int Weighting_T, typename ParticleAccessor_T >
 void initializeDomainForPSM(StructuredBlockStorage& blockStorage, const BlockDataID& pdfFieldID,
@@ -144,7 +144,7 @@ void initializeDomainForPSM(StructuredBlockStorage& blockStorage, const BlockDat
             Vector3< real_t > fluidVelocityInCell(real_t(0));
             const real_t rho = pdfField->getDensityAndVelocity(fluidVelocityInCell, cell);
 
-            // set the PDFs to equilibrium with the density rho and the average velocity of all intersecting bodies
+            // set the PDFs to equilibrium with the density rho and the average velocity of all intersecting particles
             pdfField->setToEquilibrium(cell,
                                        fluidVelocityInCell * (real_c(1) - totalSolidWeightingInCell) +
                                           weightedAverageParticleVelocityInCell,

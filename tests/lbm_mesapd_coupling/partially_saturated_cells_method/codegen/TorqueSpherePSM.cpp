@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file TorqueSphere.cpp
+//! \file TorqueSpherePSMGPU.cpp
 //! \ingroup lbm_mesapd_coupling
 //! \author Samuel Kemmler <samuel.kemmler@fau.de>
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
@@ -24,9 +24,6 @@
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 
-#include "boundary/all.h"
-
-#include "core/DataTypes.h"
 #include "core/Environment.h"
 #include "core/SharedFunctor.h"
 #include "core/debug/TestSubsystem.h"
@@ -35,20 +32,14 @@
 #include "core/mpi/Reduce.h"
 #include "core/timing/RemainingTimeLogger.h"
 
-#include "domain_decomposition/SharedSweep.h"
-
 #include "field/AddToStorage.h"
-#include "field/communication/PackInfo.h"
 
-#include "lbm/field/AddToStorage.h"
-#include "lbm/field/PdfField.h"
-#include "lbm/lattice_model/D3Q19.h"
-#include "lbm/lattice_model/ForceModel.h"
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/DeviceSelectMPI.h"
+#include "gpu/communication/UniformGPUScheme.h"
 
-#include "lbm_mesapd_coupling/DataTypes.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMSweep.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMUtility.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/ParticleAndVolumeFractionMapping.h"
+#include "lbm_mesapd_coupling/DataTypesCodegen.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 
 #include "mesa_pd/data/ParticleAccessorWithShape.h"
@@ -57,12 +48,12 @@
 #include "mesa_pd/domain/BlockForestDomain.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 
-#include "stencil/D3Q27.h"
-
-#include "timeloop/SweepTimeloop.h"
-
 #include <iostream>
-#include <vector>
+// codegen
+#include "InitializeDomainForPSM.h"
+#include "PSMPackInfo.h"
+#include "PSMSweep.h"
+#include "PSM_InfoHeader.h"
 
 namespace torque_sphere_psm
 {
@@ -73,15 +64,12 @@ namespace torque_sphere_psm
 
 using namespace walberla;
 using walberla::uint_t;
-
-// PDF field, flag field & particle field
-typedef lbm::D3Q19< lbm::collision_model::SRT, false > LatticeModel_T;
-
-using Stencil_T  = LatticeModel_T::Stencil;
-using PdfField_T = lbm::PdfField< LatticeModel_T >;
+using namespace lbm_mesapd_coupling::psm::gpu;
 
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
+
+typedef pystencils::PSMPackInfo PackInfo_T;
 
 ///////////
 // FLAGS //
@@ -129,7 +117,7 @@ class TorqueEval
       if (fileIO_)
       {
          std::ofstream file;
-         filename_ = "TorqueSpherePSM.txt";
+         filename_ = "TorqueSpherePSMGPU.txt";
          WALBERLA_ROOT_SECTION()
          {
             file.open(filename_.c_str());
@@ -240,6 +228,8 @@ int main(int argc, char** argv)
 
    mpi::Environment env(argc, argv);
 
+   logging::Logging::instance()->setLogLevel(logging::Logging::INFO);
+
    auto processes = MPIManager::instance()->numProcesses();
 
    if (processes != 1 && processes != 2 && processes != 4 && processes != 8)
@@ -255,12 +245,6 @@ int main(int argc, char** argv)
    bool shortrun = false;
    bool funcTest = false;
    bool fileIO   = false;
-   bool SC1W1    = false;
-   bool SC2W1    = false;
-   bool SC3W1    = false;
-   bool SC1W2    = false;
-   bool SC2W2    = false;
-   bool SC3W2    = false;
 
    for (int i = 1; i < argc; ++i)
    {
@@ -279,43 +263,7 @@ int main(int argc, char** argv)
          fileIO = true;
          continue;
       }
-      if (std::strcmp(argv[i], "--SC1W1") == 0)
-      {
-         SC1W1 = true;
-         continue;
-      }
-      if (std::strcmp(argv[i], "--SC2W1") == 0)
-      {
-         SC2W1 = true;
-         continue;
-      }
-      if (std::strcmp(argv[i], "--SC3W1") == 0)
-      {
-         SC3W1 = true;
-         continue;
-      }
-      if (std::strcmp(argv[i], "--SC1W2") == 0)
-      {
-         SC1W2 = true;
-         continue;
-      }
-      if (std::strcmp(argv[i], "--SC2W2") == 0)
-      {
-         SC2W2 = true;
-         continue;
-      }
-      if (std::strcmp(argv[i], "--SC3W2") == 0)
-      {
-         SC3W2 = true;
-         continue;
-      }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
-   }
-
-   if (!SC1W1 && !SC2W1 && !SC3W1 && !SC1W2 && !SC2W2 && !SC3W2)
-   {
-      std::cerr << "Specify the model (--SC_W_) you want to use for the partially saturated cells method!" << std::endl;
-      return EXIT_FAILURE;
    }
 
    ///////////////////////////
@@ -392,11 +340,10 @@ int main(int argc, char** argv)
       sphereParticle->setInteractionRadius(setup.radius);
    }
 
-   // synchronize often enough for large bodies
+   // synchronize often enough for large particles
    std::function< void(void) > syncCall = [&]() {
-      // const real_t overlap = real_t(1.5) * dx;
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
-      syncNextNeighborFunc(*ps, *mesapdDomain, overlap);
+      syncNextNeighborFunc(*ps, *mesapdDomain);
    };
 
    syncCall();
@@ -405,34 +352,36 @@ int main(int argc, char** argv)
    // ADD DATA TO BLOCKS //
    ////////////////////////
 
-   // create the lattice model
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
+   // add fields ( uInit = <0,0,0>, rhoInit = 1 )
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   BlockDataID pdfFieldID =
+      field::addToStorage< PdfField_T >(blocks, "pdf field (fzyx)", real_c(std::nan("")), field::fzyx);
+   BlockDataID pdfFieldCPUGPUID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "pdf field GPU", true);
+#else
+   BlockDataID pdfFieldCPUGPUID =
+      field::addToStorage< PdfField_T >(blocks, "pdf field CPU", real_c(std::nan("")), field::fzyx);
+#endif
 
-   // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(
-      blocks, "pdf field (fzyx)", latticeModel, Vector3< real_t >(real_c(0), real_c(0), real_c(0)), real_c(1),
-      uint_t(1), field::fzyx);
-
-   // add particle and volume fraction field
-   BlockDataID particleAndVolumeFractionFieldID =
-      field::addToStorage< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
-         blocks, "particle and volume fraction field",
-         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::fzyx, 0);
-   // map bodies and calculate solid volume fraction initially
-   lbm_mesapd_coupling::psm::ParticleAndVolumeFractionMapping particleMapping(
-      blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(), particleAndVolumeFractionFieldID, 4);
-   particleMapping();
-
-   // initialize the PDF field for PSM
-   if (SC1W1 || SC2W1 || SC3W1)
+   // add particle and volume fraction data structures
+   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omega);
+   // map particles and calculate solid volume fraction initially
+   PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
+                                         particleAndVolumeFractionSoA, Vector3(8));
+   for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
-      lbm_mesapd_coupling::psm::initializeDomainForPSM< LatticeModel_T, 1 >(
-         *blocks, pdfFieldID, particleAndVolumeFractionFieldID, *accessor);
+      psmSweepCollection.particleMappingSweep(&(*blockIt));
    }
-   else
+
+   pystencils::InitializeDomainForPSM pdfSetter(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0), real_t(0), real_t(0),
+      real_t(1.0), real_t(0), real_t(0), real_t(0));
+
+   for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
-      lbm_mesapd_coupling::psm::initializeDomainForPSM< LatticeModel_T, 2 >(
-         *blocks, pdfFieldID, particleAndVolumeFractionFieldID, *accessor);
+      // pdfSetter requires particle velocities at cell centers
+      psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
+      pdfSetter(&(*blockIt));
    }
 
    ///////////////
@@ -443,69 +392,39 @@ int main(int argc, char** argv)
    SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   std::function< void() > commFunction;
-
-   blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > scheme(blocks);
-   scheme.addPackInfo(make_shared< field::communication::PackInfo< PdfField_T > >(pdfFieldID));
-   commFunction = scheme;
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, 0, false);
+#else
+   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
+#endif
+   com.addPackInfo(make_shared< PackInfo_T >(pdfFieldCPUGPUID));
+   auto communication = std::function< void() >([&]() { com.communicate(); });
 
    using TorqueEval_T                    = TorqueEval< ParticleAccessor_T >;
    shared_ptr< TorqueEval_T > torqueEval = make_shared< TorqueEval_T >(&timeloop, &setup, blocks, accessor, fileIO);
 
-   if (SC1W1)
+   pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+                                 particleAndVolumeFractionSoA.particleForcesFieldID,
+                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0.0),
+                                 real_t(0.0), real_t(0.0), omega);
+
+   // communication, streaming and force evaluation
+   timeloop.add() << BeforeFunction(communication, "LBM Communication")
+                  << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                           "setParticleVelocitiesSweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep), "cell-wise LB sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep), "Reduce particle forces");
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   timeloop.add() << Sweep(gpu::fieldCpyFunctor< PdfField_T, gpu::GPUField< real_t > >(pdfFieldID, pdfFieldCPUGPUID),
+                           "copy pdf from GPU to CPU")
+#else
+   struct emptySweep
    {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 1, 1 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
-   else if (SC2W1)
-   {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 2, 1 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
-   else if (SC3W1)
-   {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 3, 1 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
-   else if (SC1W2)
-   {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 1, 2 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
-   else if (SC2W2)
-   {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 2, 2 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
-   else if (SC3W2)
-   {
-      auto sweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, 3, 2 >(
-         pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor);
-      // communication, streaming and force evaluation
-      timeloop.add() << BeforeFunction(commFunction, "LBM Communication")
-                     << Sweep(makeSharedSweep(sweep), "cell-wise LB sweep")
-                     << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
-   }
+      void operator()(IBlock*) {}
+   };
+   timeloop.add() << Sweep(emptySweep(), "emptySweep")
+#endif
+                  << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
 
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
 
@@ -550,7 +469,7 @@ int main(int argc, char** argv)
          }
       }
       // the relative error has to be below 10% (25% for SC2)
-      WALBERLA_CHECK_LESS(relErr, (SC2W1 || SC2W2) ? real_c(0.25) : real_c(0.1));
+      WALBERLA_CHECK_LESS(relErr, (SC == 2) ? real_c(0.25) : real_c(0.1));
    }
 
    return 0;

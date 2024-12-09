@@ -344,7 +344,8 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
       const real_t fTabs( std::min( fTLS.length(), fFrictionAbs) );
       const Vec3   fT   ( fTabs * t );
 
-      //TODO check if tangential spring displacement is same for symmetric case
+      // TODO check if tangential spring displacement is same for symmetric case
+      // TODO: check why exactly this critical section is needed
       auto& ch1 = ac.getNewContactHistoryRef(p_idx1)[ac.getUid(p_idx2)];
       ch1.setTangentialSpringDisplacement(newTangentialSpringDisplacement);
       ch1.setIsSticking(isSticking);
