@@ -16,7 +16,7 @@
 //! \file OverlapFraction.h
 //! \ingroup lbm_mesapd_coupling
 //! \author Samuel Kemmler <samuel.kemmler@fau.de>
-//! \brief Functor that provides overlap fraction computations for different MESA-PD shapes (used for SingleCast)
+//! \brief Functor that provides overlap fraction computations for different MESA-PD shapes (used by SingleCast)
 //
 //======================================================================================================================
 

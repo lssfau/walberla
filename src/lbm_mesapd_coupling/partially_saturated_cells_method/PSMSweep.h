@@ -221,7 +221,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   // total coverage ratio in the cell
                   real_t Bn = real_t(0);
 
-                  // averaged solid collision operator for all intersecting bodies s
+                  // averaged solid collision operator for all intersecting particles s
                   // = \sum_s B_s * \Omega_s_i
                   std::vector< real_t > omega_n(Stencil_T::Size, real_t(0));
 
@@ -398,7 +398,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   // total coverage ratio in the cell
                   real_t Bn = real_t(0);
 
-                  // averaged solid collision operator for all intersecting bodies s
+                  // averaged solid collision operator for all intersecting particles s
                   // = \sum_s B_s * \Omega_s_i
                   std::vector< real_t > omega_n(Stencil_T::Size, real_t(0));
 

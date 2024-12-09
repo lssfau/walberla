@@ -167,7 +167,9 @@ void PerformanceLogger<FlagField_T>::getBestResultsForSQLOnRoot( std::map< std::
                                                                  std::map< std::string, double > &      realProperties,
                                                                  std::map< std::string, std::string > & stringProperties )
 {
+   timer_.end();
    performanceEvaluation_.getResultsForSQLOnRoot( integerProperties, realProperties, stringProperties, interval_, getTiming( MAX ) );
+   timer_.start();
 }
 
 

@@ -17,5 +17,6 @@ target_sources( mesa_pd
     HydrodynamicForceTorqueNotification.h
     reset.h
     ForceTorqueNotification.h
-    NotificationType.h     
+    NotificationType.h
+    ElectrostaticForceNotification.h
     )

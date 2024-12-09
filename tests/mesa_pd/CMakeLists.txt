@@ -4,6 +4,8 @@
 #
 ###################################################################################################
 
+waLBerla_link_files_to_builddir(*.prm)
+
 waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions FILES collision_detection/AnalyticCollisionFunctions.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions )
 
@@ -223,6 +225,8 @@ waLBerla_execute_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification PROCESS
 
 waLBerla_compile_test( NAME   MESA_PD_Sorting FILES Sorting.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Sorting )
+
+waLBerla_compile_test( NAME   MESA_PD_Stiffness FILES Stiffness.cpp DEPENDS blockforest core mesa_pd )
 
 waLBerla_compile_test( NAME   MESA_PD_VTK_Outputs FILES vtk/VTKOutputs.cpp DEPENDS blockforest core vtk )
 waLBerla_execute_test( NAME   MESA_PD_VTK_Outputs PROCESSES 8 )

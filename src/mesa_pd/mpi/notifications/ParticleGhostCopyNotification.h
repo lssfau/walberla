@@ -55,6 +55,7 @@ public:
       int owner {-1};
       walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
       walberla::real_t invMass {real_t(1)};
+      walberla::real_t charge {real_t(0)};
       size_t shapeID {};
       std::shared_ptr<walberla::mesa_pd::data::BaseShape> baseShape {make_shared<walberla::mesa_pd::data::BaseShape>()};
       walberla::mesa_pd::Rot3 rotation {};
@@ -83,6 +84,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setOwner(data.owner);
    pIt->setLinearVelocity(data.linearVelocity);
    pIt->setInvMass(data.invMass);
+   pIt->setCharge(data.charge);
    pIt->setShapeID(data.shapeID);
    pIt->setBaseShape(data.baseShape);
    pIt->setRotation(data.rotation);
@@ -126,6 +128,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getOwner();
    buf << obj.particle_.getLinearVelocity();
    buf << obj.particle_.getInvMass();
+   buf << obj.particle_.getCharge();
    buf << obj.particle_.getShapeID();
    buf << obj.particle_.getBaseShape();
    buf << obj.particle_.getRotation();
@@ -150,6 +153,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.owner;
    buf >> objparam.linearVelocity;
    buf >> objparam.invMass;
+   buf >> objparam.charge;
    buf >> objparam.shapeID;
    buf >> objparam.baseShape;
    buf >> objparam.rotation;

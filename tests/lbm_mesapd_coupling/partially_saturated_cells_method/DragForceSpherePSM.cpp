@@ -36,6 +36,7 @@
 #include "core/timing/RemainingTimeLogger.h"
 
 #include "field/AddToStorage.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
@@ -43,10 +44,9 @@
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/lattice_model/ForceModel.h"
 #include "lbm/sweeps/SweepWrappers.h"
+#include "lbm/vtk/Velocity.h"
 
 #include "lbm_mesapd_coupling/DataTypes.h"
-#include "lbm_mesapd_coupling/momentum_exchange_method/MovingParticleMapping.h"
-#include "lbm_mesapd_coupling/momentum_exchange_method/boundary/SimpleBB.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMSweep.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMUtility.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/ParticleAndVolumeFractionMapping.h"
@@ -103,9 +103,10 @@ class DragForceEvaluator
 {
  public:
    DragForceEvaluator(SweepTimeloop* timeloop, Setup* setup, const shared_ptr< StructuredBlockStorage >& blocks,
-                      const BlockDataID& pdfFieldID, const shared_ptr< ParticleAccessor_T >& ac,
-                      walberla::id_t sphereID)
-      : timeloop_(timeloop), setup_(setup), blocks_(blocks), pdfFieldID_(pdfFieldID), ac_(ac), sphereID_(sphereID),
+                      const BlockDataID& pdfFieldID, const BlockDataID& particleAndVolumeFractionFieldID,
+                      const shared_ptr< ParticleAccessor_T >& ac, walberla::id_t sphereID)
+      : timeloop_(timeloop), setup_(setup), blocks_(blocks), pdfFieldID_(pdfFieldID),
+        particleAndVolumeFractionFieldID_(particleAndVolumeFractionFieldID), ac_(ac), sphereID_(sphereID),
         normalizedDragOld_(0.0), normalizedDragNew_(0.0)
    {
       // calculate the analytical drag force value based on the series expansion of chi
@@ -198,13 +199,18 @@ class DragForceEvaluator
       {
          // retrieve the pdf field and the flag field from the block
          PdfField_T* pdfField = blockIt->getData< PdfField_T >(pdfFieldID_);
+         lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T* particleAndVolumeFractionField =
+            blockIt->getData< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
+               particleAndVolumeFractionFieldID_);
 
          // get the flag that marks a cell as being fluid
 
          auto xyzField = pdfField->xyzSize();
          for (auto cell : xyzField)
          {
-            velocity_sum += pdfField->getVelocity(cell)[0];
+            // TODO: weighting is fixed to 1
+            velocity_sum += lbm_mesapd_coupling::psm::getPSMMacroscopicVelocity< LatticeModel_T, 1 >(
+               *blockIt, pdfField, particleAndVolumeFractionField, *blocks_, cell, *ac_)[0];
          }
       }
 
@@ -219,6 +225,7 @@ class DragForceEvaluator
 
    shared_ptr< StructuredBlockStorage > blocks_;
    const BlockDataID pdfFieldID_;
+   const BlockDataID particleAndVolumeFractionFieldID_;
 
    shared_ptr< ParticleAccessor_T > ac_;
    const walberla::id_t sphereID_;
@@ -278,11 +285,12 @@ int main(int argc, char** argv)
    // Customization //
    ///////////////////
 
-   bool shortrun = false;
-   bool funcTest = false;
-   bool logging  = false;
-   real_t tau    = real_c(1.5);
-   uint_t length = uint_c(32);
+   bool shortrun       = false;
+   bool funcTest       = false;
+   bool logging        = false;
+   uint_t vtkFrequency = uint_c(0);
+   real_t tau          = real_c(1.5);
+   uint_t length       = uint_c(32);
 
    for (int i = 1; i < argc; ++i)
    {
@@ -309,6 +317,11 @@ int main(int argc, char** argv)
       if (std::strcmp(argv[i], "--length") == 0)
       {
          length = uint_c(std::atof(argv[++i]));
+         continue;
+      }
+      if (std::strcmp(argv[i], "--vtkFrequency") == 0)
+      {
+         vtkFrequency = uint_c(std::atof(argv[++i]));
          continue;
       }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
@@ -440,7 +453,8 @@ int main(int argc, char** argv)
 
    // add LBM communication function and streaming & force evaluation
    using DragForceEval_T = DragForceEvaluator< ParticleAccessor_T >;
-   auto forceEval        = make_shared< DragForceEval_T >(&timeloop, &setup, blocks, pdfFieldID, accessor, sphereID);
+   auto forceEval        = make_shared< DragForceEval_T >(&timeloop, &setup, blocks, pdfFieldID,
+                                                   particleAndVolumeFractionFieldID, accessor, sphereID);
    timeloop.add() << BeforeFunction(optimizedPDFCommunicationScheme, "LBM Communication")
                   << Sweep(lbm::makeStreamSweep(sweep), "cell-wise LB sweep (stream)")
                   << AfterFunction(SharedFunctor< DragForceEval_T >(forceEval), "drag force evaluation");
@@ -454,7 +468,17 @@ int main(int argc, char** argv)
       "reset force on sphere");
 
    timeloop.addFuncAfterTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
+   if (vtkFrequency > 0)
+   {
+      const std::string path = "vtk_out/dragForceSphere";
+      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "psm_velocity_field", vtkFrequency, 0, false, path,
+                                                      "simulation_step", false, true, true, false, 0);
 
+      auto velWriter = make_shared< walberla::lbm::VelocityVTKWriter< LatticeModel_T > >(pdfFieldID, "Velocity");
+      vtkOutput->addCellDataWriter(velWriter);
+
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+   }
    ////////////////////////
    // EXECUTE SIMULATION //
    ////////////////////////

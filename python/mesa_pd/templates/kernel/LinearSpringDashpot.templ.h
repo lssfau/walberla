@@ -240,7 +240,14 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
       const real_t fTabs( std::min( fTLS.length(), fFrictionAbs) );
       const Vec3   fT   ( fTabs * t );
 
-      //TODO check if tangential spring displacement is same for symmetric case
+      // TODO check if tangential spring displacement is same for symmetric case
+      // TODO: check why exactly this critical section is needed
+      {%- if module.enableOpenMP %}
+      #ifdef _OPENMP
+      #pragma omp critical
+      {
+      #endif
+      {%- endif %}
       auto& ch1 = ac.getNewContactHistoryRef(p_idx1)[ac.getUid(p_idx2)];
       ch1.setTangentialSpringDisplacement(newTangentialSpringDisplacement);
       ch1.setIsSticking(isSticking);
@@ -250,6 +257,11 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
       ch2.setTangentialSpringDisplacement(newTangentialSpringDisplacement);
       ch2.setIsSticking(isSticking);
       ch2.setImpactVelocityMagnitude(impactVelocityMagnitude);
+      {%- if module.enableOpenMP %}
+      #ifdef _OPENMP
+      }
+      #endif
+      {%- endif %}
 
       // Add normal force at contact point
       addForceAtWFPosAtomic( p_idx1, ac,  fN, contactPoint );
