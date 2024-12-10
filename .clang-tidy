@@ -63,6 +63,7 @@ performance-*,
 -performance-move-const-arg,
 -performance-unnecessary-value-param,
 -performance-avoid-endl,
+-performance-no-int-to-ptr,
 
 portability-*,
 

@@ -131,7 +131,7 @@ inline int   omp_get_num_teams (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int   omp_get_team_num (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int   omp_get_cancellation (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
-#   include <stdlib.h>
+#   include <stdlib.h> // NOLINT(modernize-deprecated-headers)
 /* OpenMP 4.5 */
 inline int    omp_get_initial_device (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void*  omp_target_alloc(size_t, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
