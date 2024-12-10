@@ -145,6 +145,18 @@ namespace gpu
       CHECK_PARAMETER_FUNC(5)
       CHECK_PARAMETER_FUNC(6)
       CHECK_PARAMETER_FUNC(7)
+      CHECK_PARAMETER_FUNC(8)
+      CHECK_PARAMETER_FUNC(9)
+      CHECK_PARAMETER_FUNC(10)
+      CHECK_PARAMETER_FUNC(11)
+      CHECK_PARAMETER_FUNC(12)
+      CHECK_PARAMETER_FUNC(13)
+      CHECK_PARAMETER_FUNC(14)
+      CHECK_PARAMETER_FUNC(15)
+      CHECK_PARAMETER_FUNC(16)
+      CHECK_PARAMETER_FUNC(17)
+      CHECK_PARAMETER_FUNC(18)
+      CHECK_PARAMETER_FUNC(19)
 
       #undef CHECK_PARAMETER_FUNC
 
@@ -256,6 +268,18 @@ namespace gpu
          case 5: return checkParameter5<T>();
          case 6: return checkParameter6<T>();
          case 7: return checkParameter7<T>();
+         case 8: return checkParameter8<T>();
+         case 9: return checkParameter9<T>();
+         case 10: return checkParameter10<T>();
+         case 11: return checkParameter11<T>();
+         case 12: return checkParameter12<T>();
+         case 13: return checkParameter13<T>();
+         case 14: return checkParameter14<T>();
+         case 15: return checkParameter15<T>();
+         case 16: return checkParameter16<T>();
+         case 17: return checkParameter17<T>();
+         case 18: return checkParameter18<T>();
+         case 19: return checkParameter19<T>();
          default:
             WALBERLA_ABORT("Too many parameters passed to kernel")
       }

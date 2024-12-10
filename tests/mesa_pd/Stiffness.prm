@@ -1,0 +1,9 @@
+Stiffness{
+    domainSize_SI < 1, 1, 1 >;
+    diameter_SI 0.01;
+    densityParticle_SI 2500;
+    dt_SI 5e-5;
+    timeSteps 1000000;
+    force_SI 1;
+    normalSpringConstant_SI 1000;
+}

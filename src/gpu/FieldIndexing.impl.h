@@ -48,11 +48,11 @@ FieldIndexing<T>::FieldIndexing ( const GPUField<T> & field,
       {
          gpuDeviceProp prop;
          int count;
-         gpuGetDeviceCount(&count);
+         WALBERLA_GPU_CHECK(gpuGetDeviceCount(&count));
          int threadsPerBlock = std::numeric_limits< int >::max();
          for (int i = 0; i < count; i++)
          {
-            gpuGetDeviceProperties(&prop, i);
+            WALBERLA_GPU_CHECK(gpuGetDeviceProperties(&prop, i));
             threadsPerBlock = std::min(prop.maxThreadsPerBlock, threadsPerBlock);
          }
          WALBERLA_ASSERT_LESS(int_c(blockDim_.x), threadsPerBlock,

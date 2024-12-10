@@ -4,3 +4,5 @@ target_sources( lbm_mesapd_coupling
     ParticleAndVolumeFractionMapping.h
     PSMUtility.h
     )
+
+add_subdirectory(codegen)
