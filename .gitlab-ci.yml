@@ -2045,7 +2045,7 @@ clang-tidy:
       - cd $CI_PROJECT_DIR/build
       - cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWALBERLA_BUFFER_DEBUG=ON -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=ON -DCMAKE_BUILD_TYPE=Debug -DWALBERLA_BUILD_WITH_METIS=ON -DWALBERLA_BUILD_WITH_PARMETIS=ON -DWALBERLA_BUILD_WITH_OPENMESH=ON -DWALBERLA_DOUBLE_ACCURACY=ON -DWALBERLA_LOGLEVEL=DETAIL
       - cmake . -LA
-      - utilities/filterCompileCommands.py compile_commands.json
+      - utilities/filterCompileCommands.py --file compile_commands.json --exclude "*" --include src/core src/field src/stencil src/blockforest src/domain_decomposition src/communication src/gpu src/vtk src/fft --exclude extern tests
       - run-clang-tidy -quiet | tee clang-tidy-output.txt
    artifacts:
       paths:

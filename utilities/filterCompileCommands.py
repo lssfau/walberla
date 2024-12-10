@@ -1,11 +1,42 @@
 #!/usr/bin/env python3
 
+import argparse
+import pathlib
 import json
 import sys
 
 
-def compileCommandSelector(x):
-    return not (("extern" in x["file"]) or ("tests" in x["file"]))
+class QualifiedSequence(argparse.Action):
+    """Append qualified values from different arguments into the same destination."""
+    def __call__(self, parser, namespace, values, option_string=None):
+        accumulator = getattr(namespace, self.dest, None) or []
+        assert option_string is not None
+        mode = "include" if option_string in ("-i", "--include") else "exclude"
+        accumulator.append((mode, values))
+        setattr(namespace, self.dest, accumulator)
+
+
+parser = argparse.ArgumentParser(description="Filter out source files from CMake database.")
+parser.add_argument("-f", "--file", action="store", type=str, required=True,
+                    help="Database file to edit")
+parser.add_argument("-i", "--include", action=QualifiedSequence, dest="filters",
+                    nargs="+", help="Include paths containing these folder names")
+parser.add_argument("-e", "--exclude", action=QualifiedSequence, dest="filters",
+                    nargs="+", help="Exclude paths containing these folder names")
+
+
+def compileCommandSelector(x, filters=None):
+    if filters is None:
+        filters = [("exclude", ("extern", "tests"))]
+    path = "/".join(pathlib.Path(x["file"]).parts)[1:]
+    keep = True
+    for mode, components in filters:
+        for component in components:
+            subpath = "/".join(("", ) + pathlib.Path(component).parts + ("", ))
+            if subpath in path or component == "*":
+                keep = (mode == "include")
+                break
+    return keep
 
 
 def removePrecompiler(x):
@@ -17,25 +48,20 @@ def removePrecompiler(x):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("usage: ./filterCompileCommands.py compile_commands.json")
-        exit(-1)
+    args = parser.parse_args()
 
-    filename = sys.argv[1]
-    print("loading compile commands file: {}".format(filename))
+    print(f"loading compile commands file: {args.file}")
 
-    fin = open(filename, "r")
-    cc = json.load(fin)
-    fin.close()
+    with open(args.file, "r") as f:
+        cc = json.load(f)
 
-    print("compile commands read: {}".format(len(cc)))
+    print(f"compile commands read: {len(cc)}")
 
-    cc_filtered = list(filter(compileCommandSelector, cc))
+    cc_filtered = list(filter(lambda x: compileCommandSelector(x, args.filters), cc))
     for x in cc_filtered:
         x["command"] = removePrecompiler(x["command"])
 
-    print("compile commands filtered: {}".format(len(cc_filtered)))
+    print(f"compile commands filtered: {len(cc_filtered)}")
 
-    fout = open(filename, "w")
-    json.dump(cc_filtered, fout)
-    fout.close()
+    with open(args.file, "w") as f:
+        json.dump(cc_filtered, f, indent=2)
