@@ -61,14 +61,14 @@ public:
 
 
 // Reduce method for reduction (add up the velocity corrections)
-void reduce(data::Particle&& p, const VelocityCorrectionNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const VelocityCorrectionNotification::Parameters& objparam)
 {
    p.getDvRef() += objparam.dv_;
    p.getDwRef() += objparam.dw_;
 }
 
 template<>
-void reset<VelocityCorrectionNotification>(data::Particle& p )
+inline void reset<VelocityCorrectionNotification>(data::Particle& p )
 {
    p.setDv( Vec3(real_t(0)) );
    p.setDw( Vec3(real_t(0)) );

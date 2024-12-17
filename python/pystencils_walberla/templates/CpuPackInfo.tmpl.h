@@ -46,13 +46,13 @@ class {{class_name}} : public ::walberla::communication::UniformPackInfo
 public:
     {{class_name}}( {{fused_kernel|generate_constructor_parameters(parameters_to_ignore=['buffer'])}} )
         : {{ fused_kernel|generate_constructor_initializer_list(parameters_to_ignore=['buffer']) }}
-    {};
-    virtual ~{{class_name}}() {}
+    {}
+    ~{{class_name}}() override = default;
 
-   bool constantDataExchange() const { return true; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return true; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer) {
+   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer) override {
         const auto dataSize = size(dir, receiver);
         auto bufferSize = dataSize + sizeof({{dtype}});
         auto bufferPtr = reinterpret_cast<void*>(buffer.skip(bufferSize));
@@ -60,7 +60,7 @@ public:
         unpack(dir, reinterpret_cast<unsigned char*>(bufferPtr), receiver);
    }
 
-   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir) {
+   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir) override {
        //TODO: optimize by generating kernel for this case
        mpi::SendBuffer sBuffer;
        packData( sender, dir, sBuffer );
@@ -68,7 +68,7 @@ public:
        unpackData( receiver, stencil::inverseDir[dir], rBuffer );
    }
 
-   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const {
+   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const override {
         const auto dataSize = size(dir, sender);
         auto bufferSize = dataSize + sizeof({{dtype}});
         auto bufferPtr = reinterpret_cast<void*>(outBuffer.forward(bufferSize));

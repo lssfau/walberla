@@ -224,7 +224,7 @@ void Config::parseFromFile( const char* filename, Block& block, unsigned int lev
       }
 
       //Adding the line to the input string
-      lineNumbers.push_back( Pair( input.tellp(), lineCounter ) );
+      lineNumbers.emplace_back( input.tellp(), lineCounter );
       input << line << "\n";
    }
 
@@ -572,7 +572,7 @@ void Config::Block::getBlocks( const std::string& key, Blocks& blocks, size_t mi
    size_t c = 0;
    for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
       if( string_icompare( key, it->getKey() ) == 0 ) {
-         blocks.push_back( BlockHandle( &*it ) );
+         blocks.emplace_back( &*it );
          ++c;
       }
    }
@@ -595,7 +595,7 @@ void Config::Block::getBlocks( const std::string& key, Blocks& blocks, size_t mi
 void Config::Block::getBlocks( Blocks& blocks ) const
 {
    for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      blocks.push_back( BlockHandle( &*it ) );
+      blocks.emplace_back( &*it );
    }
 }
 //**********************************************************************************************************************
@@ -610,7 +610,7 @@ void Config::Block::getBlocks( Blocks& blocks ) const
 void Config::Block::getWritableBlocks( std::vector<Block*> & blocks )
 {
    for( List::iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      blocks.push_back( &*it );
+      blocks.emplace_back( &*it );
    }
 }
 //**********************************************************************************************************************
@@ -630,7 +630,7 @@ void Config::Block::getWritableBlocks( const std::string & key, std::vector<Bloc
    size_t c = 0;
    for( List::iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
       if( string_icompare( key, it->getKey() ) == 0 ) {
-         blocks.push_back(  &*it );
+         blocks.emplace_back( &*it );
          ++c;
       }
    }
@@ -676,7 +676,7 @@ bool Config::Block::addParameter( const std::string& key, const std::string& val
  */
 Config::Block& Config::Block::createBlock( const std::string& key )
 {
-   blocks_.push_back( Block( key ) );
+   blocks_.emplace_back( key );
    return *blocks_.rbegin();
 }
 //**********************************************************************************************************************

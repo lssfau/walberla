@@ -20,7 +20,6 @@
 #pragma once
 
 #include "core/DataTypes.h"
-#include "core/cell/CellInterval.h"
 
 #include "domain_decomposition/IBlock.h"
 
@@ -53,8 +52,8 @@ class {{class_name}} : public ::walberla::gpu::GeneratedGPUPackInfo
 public:
     {{class_name}}( {{fused_kernel|generate_constructor_parameters(parameters_to_ignore=['buffer'])}} )
         : {{ fused_kernel|generate_constructor_initializer_list(parameters_to_ignore=['buffer']) }}
-    {};
-    virtual ~{{class_name}}() {}
+    {}
+    ~{{class_name}}() override = default;
 
     void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
     void communicateLocal  ( stencil::Direction /*dir*/, const IBlock* /* sender */, IBlock* /* receiver */, gpuStream_t /* stream */ ) override

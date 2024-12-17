@@ -40,7 +40,7 @@ public:
                         const ParticleIdxFacePropertyManager<MeshType> & faceToParticleIdxManager,
                         shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps) = 0;
 
-   virtual ~FaceDataSource() {}
+   virtual ~FaceDataSource() = default;
 
 protected:
    std::string name_;

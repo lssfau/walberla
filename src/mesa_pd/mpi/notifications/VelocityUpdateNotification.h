@@ -66,7 +66,7 @@ public:
 real_t VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
 
 // Update method for broadcast
-void update(data::Particle&& p, const VelocityUpdateNotification::Parameters& objparam) {
+inline void update(data::Particle&& p, const VelocityUpdateNotification::Parameters& objparam) {
    // Reset the velocity corrections dv/dw of ghost particle
    p.getDvRef() = Vec3();
    p.getDwRef() = Vec3();
@@ -75,7 +75,7 @@ void update(data::Particle&& p, const VelocityUpdateNotification::Parameters& ob
 }
 
 template<>
-void reset<VelocityUpdateNotification>(data::Particle& p )
+inline void reset<VelocityUpdateNotification>(data::Particle& p )
 {
    p.setDv( Vec3(real_t(0)) );
    p.setDw( Vec3(real_t(0)) );

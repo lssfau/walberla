@@ -115,6 +115,7 @@ void updateAndSyncInfoCollection(BlockForest& bf, const BlockDataID boundaryHand
    }
 }
 
+inline
 void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_ptr<InfoCollection>& ic,
                                      BlockInfo & blockInfo )
 {

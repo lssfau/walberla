@@ -66,7 +66,7 @@ public:
    using PdfField_T = PdfField<LatticeModel_T>;
 
    DensitySIVTKWriter( const ConstBlockDataID & pdf, const real_t rho_SI, const std::string & id ) :
-      vtk::BlockCellDataWriter< OutputType >( id ), bdid_( pdf ), pdf_( NULL ), rho_SI_( rho_SI ) {}
+      vtk::BlockCellDataWriter< OutputType >( id ), bdid_( pdf ), pdf_( nullptr ), rho_SI_( rho_SI ) {}
 
 protected:
 

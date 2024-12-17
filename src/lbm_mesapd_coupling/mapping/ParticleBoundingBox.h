@@ -36,9 +36,9 @@ namespace lbm_mesapd_coupling {
  * Obtain a block-local cell bounding box from a given AABB (e.g. the particle's AABB)
  * If the given AABB is (partly) infinite, AABBIsInfinite should be set to true (e.g. for infinite particles)
  */
-CellInterval getCellBBFromAABB( const math::AABB & aabb, bool AABBIsInfinite,
-                                const IBlock & block, StructuredBlockStorage & blockStorage,
-                                const uint_t numberOfGhostLayersToInclude)
+inline CellInterval getCellBBFromAABB( const math::AABB & aabb, bool AABBIsInfinite,
+                                       const IBlock & block, StructuredBlockStorage & blockStorage,
+                                       const uint_t numberOfGhostLayersToInclude)
 {
 
    CellInterval cellBB;

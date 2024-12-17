@@ -132,7 +132,7 @@ private:
    std::vector<real_t> friction_ {};
 };
 
-SpringDashpot::SpringDashpot(const uint_t numParticleTypes)
+inline SpringDashpot::SpringDashpot(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    

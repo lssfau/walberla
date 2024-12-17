@@ -851,7 +851,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender : sendFunctions )
+      for( auto const &sender : sendFunctions )
          bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
 
       for(auto receiver : ranksToReceiveFrom)
@@ -996,7 +996,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender : sendFunctions )
+      for( auto const &sender : sendFunctions )
          bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
 
       for(auto receiver : ranksToReceiveFrom)

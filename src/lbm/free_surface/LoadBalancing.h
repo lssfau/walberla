@@ -50,10 +50,10 @@ class ProcessLoadEvaluator;
 /***********************************************************************************************************************
  * Create non-uniform block forest to be used for load balancing.
  **********************************************************************************************************************/
-std::shared_ptr< StructuredBlockForest > createNonUniformBlockForest(const Vector3< uint_t >& domainSize,
-                                                                     const Vector3< uint_t >& cellsPerBlock,
-                                                                     const Vector3< uint_t >& numBlocks,
-                                                                     const Vector3< bool >& periodicity)
+inline std::shared_ptr< StructuredBlockForest > createNonUniformBlockForest(const Vector3< uint_t >& domainSize,
+                                                                            const Vector3< uint_t >& cellsPerBlock,
+                                                                            const Vector3< uint_t >& numBlocks,
+                                                                            const Vector3< bool >& periodicity)
 {
    WALBERLA_CHECK_EQUAL(domainSize[0], cellsPerBlock[0] * numBlocks[0],
                         "The domain size is not divisible by the specified \"cellsPerBlock\" in x-direction.");

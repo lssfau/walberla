@@ -66,10 +66,12 @@ namespace gpustubs {
                   "available and shouldn't be called!");
 
 #ifndef __CUDACC__
+   //NOLINTBEGIN(bugprone-reserved-identifier)
    #define __device__
    #define __global__
    #define __host__
    #define __forceinline__
+   //NOLINTEND(bugprone-reserved-identifier)
 #endif
 
 using gpuError_t = int;

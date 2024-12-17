@@ -317,7 +317,7 @@ namespace stencil {
       else if ( axis==1 && !minOrMax ) return N;
       else if ( axis==2 &&  minOrMax ) return B;
       else if ( axis==2 && !minOrMax ) return T;
-      else                             return INVALID_DIR;
+      return INVALID_DIR;
    }
 
    /// Maps (direction,axis) pair to direction
@@ -333,7 +333,7 @@ namespace stencil {
       else if ( axis==1 && !minOrMax ) return N;
       else if ( axis==2 &&  minOrMax ) return B;
       else if ( axis==2 && !minOrMax ) return T;
-      else                             return INVALID_DIR;
+      return INVALID_DIR;
    }
 
 

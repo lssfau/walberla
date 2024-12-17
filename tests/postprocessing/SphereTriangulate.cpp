@@ -38,10 +38,6 @@ using namespace postprocessing;
 
 using geometry::TriangleMesh;
 
-using std::cout;
-using std::endl;
-using std::ofstream;
-
 typedef GhostLayerField<real_t,1> ScalarField;
 
 
@@ -106,7 +102,7 @@ void singleField()
 
    TriangleMesh m;
    generateIsoSurface(f,0.5,m);
-   //ofstream file ("out.obj");
+   //std::ofstream file ("out.obj");
    //writeMeshObj(file,m);
 }
 
@@ -143,11 +139,11 @@ void multipleFields()
       generateIsoSurface( **i, real_c(0.5), m, Vector3<real_t>(real_t(1)), uint_t(0), offset );
    }
 
-   //ofstream file1("meshWithDoubles.obj");
+   //std::ofstream file1("meshWithDoubles.obj");
    //writeMeshObj(file1,m);
    size_t verticesRemoved =  m.removeDuplicateVertices();
    WALBERLA_CHECK_EQUAL(verticesRemoved, expectedDoubles);
-   //ofstream file2("meshWithoutDoubles.obj");
+   //std::ofstream file2("meshWithoutDoubles.obj");
    //writeMeshObj(file2,m);
 }
 

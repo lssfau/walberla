@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include "core/StringUtility.h"
-
 #include <algorithm>
 #include <cctype>
 #include <string>

@@ -432,7 +432,7 @@ private:
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 
 #ifdef __IBMCPP__
-      return *(reinterpret_cast< Boundary_T * >( NULL )); // silencing incorrect IBM compiler warning
+      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
 #endif
    }
 
@@ -457,7 +457,7 @@ private:
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
    inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
-                                                              typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
+                                                              typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = nullptr ) const
    {
       if( uid == std::get<N>( boundaryConditions ).getUID() )
          return std::get<N>( boundaryConditions );
@@ -475,7 +475,7 @@ private:
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 
 #ifdef __IBMCPP__
-      return *(reinterpret_cast< Boundary_T * >( NULL )); // silencing incorrect IBM compiler warning
+      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
 #endif
    }
 
@@ -495,7 +495,7 @@ private:
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 
 #ifdef __IBMCPP__
-      return *(reinterpret_cast< Boundary_T * >( NULL )); // silencing incorrect IBM compiler warning
+      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
 #endif
    }
 
@@ -2501,7 +2501,7 @@ inline typename std::enable_if<(N==-1), BoundaryUID>::type BoundaryHandling< Fla
                    "boundary handling " << uid_.getIdentifier() << "!" );
 
 #ifdef __IBMCPP__
-   return *(reinterpret_cast< BoundaryUID * >( NULL )); // silencing incorrect IBM compiler warning
+   return *(static_cast< BoundaryUID * >( nullptr )); // silencing incorrect IBM compiler warning
 #endif
 }
 

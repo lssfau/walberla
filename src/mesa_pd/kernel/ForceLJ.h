@@ -80,7 +80,7 @@ private:
    std::vector<real_t> sigma {};
 };
 
-ForceLJ::ForceLJ(const uint_t numParticleTypes)
+inline ForceLJ::ForceLJ(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    

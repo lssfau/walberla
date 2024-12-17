@@ -95,7 +95,7 @@ void IsotropicVDWContact::operator()(const size_t p_idx1,
    addForceAtomic(p_idx2, ac, -force);
 }
 
-real_t IsotropicVDWContact::equilibriumDistance()
+inline real_t IsotropicVDWContact::equilibriumDistance()
 {
    return r * ( std::pow( (alpha*A)/(beta*B), 1_r/(alpha-beta)) + 2_r);
 }

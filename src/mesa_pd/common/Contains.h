@@ -42,18 +42,21 @@ namespace mesa_pd {
  * or in body frame coordinates (BF) which requires the point to be first transformed
  */
 
+inline
 bool isPointInsideSphere(const Vec3& point,
                          const Vec3& spherePosition, const real_t sphereRadius )
 {
    return !((point - spherePosition).sqrLength() > sphereRadius * sphereRadius);
 }
 
+inline
 bool isPointInsideHalfSpace(const Vec3& point,
                             const Vec3& halfSpacePosition, const Vec3& halfSpaceNormal )
 {
    return !((point - halfSpacePosition) * halfSpaceNormal > real_t(0));
 }
 
+inline
 bool isPointInsideBoxBF(const Vec3& pointBF,
                         const Vec3& edgeLengths )
 {
@@ -62,6 +65,7 @@ bool isPointInsideBoxBF(const Vec3& pointBF,
           std::fabs(pointBF[2]) <= real_t(0.5)*edgeLengths[2];
 }
 
+inline
 bool isPointInsideEllipsoidBF(const Vec3& pointBF,
                               const Vec3& semiAxes )
 {
@@ -69,6 +73,7 @@ bool isPointInsideEllipsoidBF(const Vec3& pointBF,
             + (pointBF[2] * pointBF[2])/(semiAxes[2] * semiAxes[2]) <= 1_r );
 }
 
+inline
 bool isPointInsideCylindricalBoundary(const Vec3& point,
                                       const Vec3& cylindricalBoundaryPosition, const real_t radius, const Vec3& axis  )
 {
@@ -77,6 +82,7 @@ bool isPointInsideCylindricalBoundary(const Vec3& point,
 }
 
 #ifdef WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE
+inline
 bool isPointInsideConvexPolyhedronBF(const Vec3& point, const mesh::TriangleMesh& mesh)
 {
    WALBERLA_ASSERT(mesh.has_face_normals(), "Provided mesh has no face normals! E.g., call `mesh.request_face_normals(); mesh.update_face_normals();` to add them.")

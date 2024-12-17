@@ -37,6 +37,7 @@ namespace discrete_particle_methods {
  */
 
 // Saffman lift force
+inline
 Vector3<real_t> liftForceSaffman ( const Vector3<real_t> & fluidVel, const Vector3<real_t> & curlFluidVel, const Vector3<real_t> & particleVel,
                                    real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
@@ -53,7 +54,7 @@ Vector3<real_t> liftForceSaffman ( const Vector3<real_t> & fluidVel, const Vecto
 
 }
 
-Vector3<real_t> noLiftForce ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )
+inline Vector3<real_t> noLiftForce ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )
 {
    return Vector3<real_t>(real_t(0));
 }

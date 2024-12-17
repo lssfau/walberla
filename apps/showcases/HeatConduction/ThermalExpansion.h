@@ -47,7 +47,7 @@ private:
    std::vector<real_t> linearExpansionCoefficient_ {};
 };
 
-ThermalExpansion::ThermalExpansion(const uint_t numParticleTypes)
+inline ThermalExpansion::ThermalExpansion(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
 

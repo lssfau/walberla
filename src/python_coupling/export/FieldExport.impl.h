@@ -129,7 +129,9 @@ class GhostLayerFieldDataHandling : public field::BlockDataHandling< GhostLayerF
         alignment_(alignment)
    {}
 
-   GhostLayerField_T* allocate(IBlock* const block)
+   ~GhostLayerFieldDataHandling() override = default;
+
+   GhostLayerField_T* allocate(IBlock* const block) override
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR(blocks, "Trying to access 'AlwaysInitializeBlockDataHandling' for a block "
@@ -140,7 +142,7 @@ class GhostLayerFieldDataHandling : public field::BlockDataHandling< GhostLayerF
       return field;
    }
 
-   GhostLayerField_T* reallocate(IBlock* const block) { return allocate(block); }
+   GhostLayerField_T* reallocate(IBlock* const block) override { return allocate(block); }
 
  private:
    weak_ptr< StructuredBlockStorage > blocks_;

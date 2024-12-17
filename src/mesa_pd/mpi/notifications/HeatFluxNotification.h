@@ -56,17 +56,17 @@ public:
 };
 
 template <>
-void reset<HeatFluxNotification>(data::Particle& p)
+inline void reset<HeatFluxNotification>(data::Particle& p)
 {
    p.setHeatFlux( real_t(0) );
 }
 
-void reduce(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
 {
    p.getHeatFluxRef() += objparam.heatFlux_;
 }
 
-void update(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
+inline void update(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
 {
    p.setHeatFlux( objparam.heatFlux_ );
 }

@@ -171,7 +171,7 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
    std::fill(cells_.begin(), cells_.end(), -1);
 }
 
-void LinkedCells::clear()
+inline void LinkedCells::clear()
 {
    const uint64_t cellsSize = cells_.size();
    //clear existing linked cells

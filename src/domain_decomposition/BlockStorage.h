@@ -273,7 +273,7 @@ public:
    *   \code
    *     for( const_iterator block = begin(); block != end(); ++block )
    *        if( block->getId() == id ) return *block;
-   *     return NULL;
+   *     return nullptr;
    *   \endcode
    */
    //*******************************************************************************************************************
@@ -294,7 +294,7 @@ public:
    *   \code
    *     for( iterator block = begin(); block != end(); ++block )
    *        if( block->getId() == id ) return *block;
-   *     return NULL;
+   *     return nullptr;
    *   \endcode
    */
    //*******************************************************************************************************************
@@ -315,7 +315,7 @@ public:
    *   \code
    *     for( const_iterator block = begin(); block != end(); ++block )
    *        if( block->getAABB().contains(x,y,z) ) return *block;
-   *     return NULL;
+   *     return nullptr;
    *   \endcode
    *
    *   Periodicity is not considered! For mapping points to the periodic simulation space see 'mapToPeriodicDomain'.
@@ -332,7 +332,7 @@ public:
    *   \code
    *     for( iterator block = begin(); block != end(); ++block )
    *        if( block->getAABB().contains(x,y,z) ) return *block;
-   *     return NULL;
+   *     return nullptr;
    *   \endcode
    *
    *   Periodicity is not considered! For mapping points to the periodic simulation space see 'mapToPeriodicDomain'.
@@ -716,7 +716,7 @@ inline BlockDataID BlockStorage::loadBlockData( const std::string & file, const 
 /*!
 *   This function can be used for removing all data that corresponds to block data ID 'id'.
 *   Please note: The block data ID 'id' will still be valid, but blocks won't return anything anymore,
-*                they will only return NULL for 'id'.
+*                they will only return nullptr for 'id'.
 */
 //**********************************************************************************************************************
 inline void BlockStorage::clearBlockData( const BlockDataID & id )

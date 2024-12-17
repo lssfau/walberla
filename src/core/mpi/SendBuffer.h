@@ -449,7 +449,7 @@ GenericSendBuffer<T,G>::put( V value )
    static_assert( sizeof(V) >= sizeof(T), "Type that is stored has to be bigger than T" );
    static_assert( sizeof(V)  % sizeof(T) == 0, "V has to be divisible by T ");
 
-   size_t count =  sizeof(V) / sizeof(T) ;
+   size_t count =  sizeof(V) / sizeof(T); // NOLINT(bugprone-sizeof-expression)
    const size_t rest = numeric_cast< size_t >( end_ - cur_ );
 
    // Checking the size of the remaining memory

@@ -117,7 +117,7 @@ uint_t {{class_name}}::size(stencil::Direction dir, const IBlock * block) const
     CellInterval ci;
     {{field_name}}->getGhostRegion(dir, ci, 1, false);
 
-    uint_t elementsPerCell = 0;
+    uint_t elementsPerCell = uint_t{ 0u };
 
     switch( dir )
     {
@@ -125,11 +125,11 @@ uint_t {{class_name}}::size(stencil::Direction dir, const IBlock * block) const
         {%- for dir in direction_set %}
         case stencil::{{dir}}:
         {%- endfor %}
-            elementsPerCell = {{elements}};
+            elementsPerCell = uint_t{ {{elements}}u };
             break;
         {% endfor %}
         default:
-            elementsPerCell = 0;
+            elementsPerCell = uint_t{ 0u };
     }
     return ci.numCells() * elementsPerCell * sizeof( {{dtype}} );
 }

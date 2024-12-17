@@ -45,7 +45,6 @@ target_sources( blockforest
       SetupBlock.cpp
       SetupBlockForest.cpp
       StructuredBlockForest.cpp
-      Utility.cpp
       )
 
 add_subdirectory( communication )

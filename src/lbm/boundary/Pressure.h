@@ -72,7 +72,7 @@ public:
    static shared_ptr<LatticeDensity> createConfiguration( const Config::BlockHandle & config ) { return make_shared<LatticeDensity>( config ); }
 
 
-   inline Pressure( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = NULL );
+   inline Pressure( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = nullptr );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -124,7 +124,7 @@ inline Pressure< LatticeModel_T, flag_t>::Pressure( const BoundaryUID & boundary
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
-   if (flagField != NULL)
+   if (flagField != nullptr)
       latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
    else
       latticeDensityField_ = make_shared<LatticeDensityField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::fzyx );

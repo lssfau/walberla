@@ -323,7 +323,7 @@ inline Matrix2<Type>& Matrix2<Type>::operator=( Type set )
 // Explicit definition of a copy assignment operator for performance reasons.
 */
 template< typename Type >
-inline Matrix2<Type>& Matrix2<Type>::operator=( const Matrix2& set )
+inline Matrix2<Type>& Matrix2<Type>::operator=( const Matrix2& set ) // NOLINT(bugprone-unhandled-self-assignment)
 {
    // This implementation is faster than the synthesized default copy assignment operator and
    // faster than an implementation with the C library function 'memcpy' in combination with a
@@ -347,7 +347,7 @@ inline Matrix2<Type>& Matrix2<Type>::operator=( const Matrix2& set )
 */
 template< typename Type >
 template< typename Other >
-inline Matrix2<Type>& Matrix2<Type>::operator=( const Matrix2<Other>& set )
+inline Matrix2<Type>& Matrix2<Type>::operator=( const Matrix2<Other>& set ) // NOLINT(bugprone-unhandled-self-assignment)
 {
    // This implementation is faster than the synthesized default copy assignment operator and
    // faster than an implementation with the C library function 'memcpy' in combination with a

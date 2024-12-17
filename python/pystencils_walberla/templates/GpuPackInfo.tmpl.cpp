@@ -17,6 +17,13 @@
 //! \\author pystencils
 //======================================================================================================================
 
+#include "core/DataTypes.h"
+#include "core/cell/CellInterval.h"
+
+#include "domain_decomposition/IBlock.h"
+
+#include "stencil/Directions.h"
+
 #include "{{class_name}}.h"
 
 {% if target is equalto 'cpu' -%}

@@ -191,7 +191,7 @@ bool GeneralContactDetection::operator()(const size_t idx1,
    return operator()(idx2, idx1, geo2, geo1, ac);
 }
 
-bool GeneralContactDetection::collideGJKEPA(Support& geom0, Support& geom1)
+inline bool GeneralContactDetection::collideGJKEPA(Support& geom0, Support& geom1)
 {
    real_t margin = real_t(1e-4);
    GJK gjk;

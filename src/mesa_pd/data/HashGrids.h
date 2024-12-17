@@ -351,7 +351,7 @@ private:
 
 // HashGrids::HashGrid member function implementations
 
-HashGrids::HashGrid::HashGrid( real_t cellSpan )
+inline HashGrids::HashGrid::HashGrid( real_t cellSpan )
 {
    // Initialization of all member variables and ...
    xCellCount_   = math::uintIsPowerOfTwo( xCellCount ) ? xCellCount : 16;
@@ -386,7 +386,7 @@ HashGrids::HashGrid::HashGrid( real_t cellSpan )
    particleCount_ = 0;
 }
 
-HashGrids::HashGrid::~HashGrid()
+inline HashGrids::HashGrid::~HashGrid()
 {
    clear();
 
@@ -396,7 +396,7 @@ HashGrids::HashGrid::~HashGrid()
    delete[] cell_;
 }
 
-void HashGrids::HashGrid::clear()
+inline void HashGrids::HashGrid::clear()
 {
    for( auto cellIt = occupiedCells_.begin(); cellIt < occupiedCells_.end(); ++cellIt ) {
       delete (*cellIt)->particles_;
@@ -412,7 +412,7 @@ void HashGrids::HashGrid::clear()
  * This function is used to initialize the offset arrays of all grid cells. The offsets are required
  * for ensuring fast direct access to all directly adjacent cells for each cell in the hash grid.
  */
-void HashGrids::HashGrid::initializeNeighborOffsets()
+inline void HashGrids::HashGrid::initializeNeighborOffsets()
 {
    offset_t xc   = static_cast<offset_t>( xCellCount_ );
    offset_t yc   = static_cast<offset_t>( yCellCount_ );
@@ -516,7 +516,7 @@ void HashGrids::HashGrid::addParticle( size_t p_idx, Accessor& ac )
 //*************************************************************************************************
 /*!\brief Adds a particle to a specific cell in this hash grid.
  */
-void HashGrids::HashGrid::addParticleToCell( size_t p_idx, Cell* cell )
+inline void HashGrids::HashGrid::addParticleToCell( size_t p_idx, Cell* cell )
 {
    // If this cell is already occupied by other particles, which means the pointer to the particle
    // container holds a valid address and thus the container itself is properly initialized, then
@@ -564,7 +564,7 @@ size_t HashGrids::HashGrid::hashOfParticle( size_t p_idx, Accessor& ac ) const
  * Note that the modulo calculations are replaced with fast bitwise AND operations - hence, the
  * spatial dimensions of the hash grid must be restricted to powers of two!
  */
-size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
+inline size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    size_t xHash;
    size_t yHash;
    size_t zHash;
@@ -773,7 +773,7 @@ void HashGrids::HashGrid::checkAgainstVectorEachParticlePairHalf( const Particle
 //*************************************************************************************************
 
 // clear all particles and grids
-void HashGrids::clearAll()
+inline void HashGrids::clearAll()
 {
    gridList_.clear();
    infiniteParticles_.clear();
@@ -781,7 +781,7 @@ void HashGrids::clearAll()
 
 // clear only all particles from the hash grids, but maintain the overall grid hierarchy
 // useful for "updating" the data structure in each time step, but also prevents clean-up of unnecessary grids
-void HashGrids::clear()
+inline void HashGrids::clear()
 {
    for( auto gridIt = gridList_.begin(); gridIt != gridList_.end(); ++gridIt ) {
       (*gridIt)->clear();
@@ -849,7 +849,7 @@ void HashGrids::operator()(const size_t p_idx, Accessor& ac)
    }
 }
 
-void HashGrids::addInfiniteParticle(size_t p_idx)
+inline void HashGrids::addInfiniteParticle(size_t p_idx)
 {
    infiniteParticles_.push_back(p_idx);
 }

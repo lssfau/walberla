@@ -120,7 +120,7 @@ private:
    std::vector<real_t> frictionCoefficientDynamic_ {};
 };
 
-NonLinearSpringDashpot::NonLinearSpringDashpot(const uint_t numParticleTypes, const real_t collisionTime)
+inline NonLinearSpringDashpot::NonLinearSpringDashpot(const uint_t numParticleTypes, const real_t collisionTime)
 {
    numParticleTypes_ = numParticleTypes;
    

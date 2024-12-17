@@ -400,11 +400,11 @@ GenericRecvBuffer<T>::get( V& value )
 
 
    // Checking the validity of the read operation
-   WALBERLA_ASSERT_LESS_EQUAL( cur_ + (sizeof(V) / sizeof(T)), end_ );
+   WALBERLA_ASSERT_LESS_EQUAL( cur_ + (sizeof(V) / sizeof(T)), end_ ); // NOLINT(bugprone-sizeof-expression)
 
    // Extracting the data value
    std::memcpy( &value, cur_, sizeof(V) );
-   cur_ += sizeof(V) / sizeof(T);
+   cur_ += sizeof(V) / sizeof(T); // NOLINT(bugprone-sizeof-expression)
 
    // Invariants check
    WALBERLA_ASSERT_LESS_EQUAL( cur_, end_);

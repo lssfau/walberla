@@ -32,20 +32,20 @@ namespace discrete_particle_methods {
 // correlations for the viscosity
 
 // no change in viscosity
-real_t calculateUnchangedEffectiveViscosity( real_t fluidViscosity, real_t /*porosity*/ )
+inline real_t calculateUnchangedEffectiveViscosity( real_t fluidViscosity, real_t /*porosity*/ )
 {
    return fluidViscosity;
 }
 
 // see: Fattahi, Waluga, Wohlmuth - "Large scale lattice Boltzmann simulation for the coupling of free and porous media flow"
-real_t calculateRescaledEffectiveViscosity( real_t fluidViscosity, real_t porosity )
+inline real_t calculateRescaledEffectiveViscosity( real_t fluidViscosity, real_t porosity )
 {
    return fluidViscosity / porosity;
 }
 
 // see: J. R. Finn, M. Li, S. V. Apte - "Particle based modelling and simulation of natural sand dynamics in the wave
 // bottom boundary layer", Journal of Fluid Mechanics 796 (2016) 340–385. doi:10.1017/jfm.2016.246.
-real_t calculateEilersEffectiveViscosity( real_t fluidViscosity, real_t porosity )
+inline real_t calculateEilersEffectiveViscosity( real_t fluidViscosity, real_t porosity )
 {
    const real_t closePackingFraction = real_t(0.64);
    const real_t intrinsicViscosity = real_t(2.5); //for monosized spheres

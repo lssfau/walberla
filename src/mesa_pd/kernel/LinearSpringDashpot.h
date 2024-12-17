@@ -133,7 +133,7 @@ private:
    std::vector<real_t> frictionCoefficientDynamic_ {};
 };
 
-LinearSpringDashpot::LinearSpringDashpot(const uint_t numParticleTypes)
+inline LinearSpringDashpot::LinearSpringDashpot(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    

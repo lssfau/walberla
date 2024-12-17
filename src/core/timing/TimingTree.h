@@ -128,8 +128,11 @@ TimingTree<TP>::TimingTree(const TimingTree<TP>& tt)
 template< typename TP >  // Timing policy
 TimingTree<TP>& TimingTree<TP>::operator=(const TimingTree<TP>& tt)
 {
-   TimingTree<TP> tmp (tt);
-   tmp.swap(*this);
+   if (&tt != this)
+   {
+      TimingTree<TP> tmp (tt);
+      tmp.swap(*this);
+   }
    return *this;
 }
 

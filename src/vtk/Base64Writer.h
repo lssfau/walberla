@@ -75,7 +75,7 @@ public:
 
 private:
 
-   void encodeblock( unsigned char in[3], unsigned char out[4], int len )
+   void encodeblock( unsigned char const in[3], unsigned char out[4], int len )
    {
       static const unsigned char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

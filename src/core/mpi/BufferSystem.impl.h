@@ -165,21 +165,24 @@ GenericBufferSystem<Rb, Sb> & GenericBufferSystem<Rb, Sb>::operator=( const Gene
 {
    WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" )
 
-   sizeChangesEverytime_ = other.sizeChangesEverytime_;
-   communicationRunning_ = other.communicationRunning_;
-   recvInfos_ = other.recvInfos_;
-   sendInfos_ = other.sendInfos_;
+   if (&other != this)
+   {
+      sizeChangesEverytime_ = other.sizeChangesEverytime_;
+      communicationRunning_ = other.communicationRunning_;
+      recvInfos_ = other.recvInfos_;
+      sendInfos_ = other.sendInfos_;
 
-   if( other.currentComm_ == &other.knownSizeComm_ )
-      currentComm_ = &knownSizeComm_;
-   else if ( other.currentComm_ == &other.unknownSizeComm_ )
-      currentComm_ = &unknownSizeComm_;
-   else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
-      currentComm_ = &unknownSizeCommIProbe_;
-   else if ( other.currentComm_ == &other.noMPIComm_ )
-      currentComm_ = &noMPIComm_;
-   else
-      currentComm_ = nullptr; // receiver information not yet set
+      if( other.currentComm_ == &other.knownSizeComm_ )
+         currentComm_ = &knownSizeComm_;
+      else if ( other.currentComm_ == &other.unknownSizeComm_ )
+         currentComm_ = &unknownSizeComm_;
+      else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
+         currentComm_ = &unknownSizeCommIProbe_;
+      else if ( other.currentComm_ == &other.noMPIComm_ )
+         currentComm_ = &noMPIComm_;
+      else
+         currentComm_ = nullptr; // receiver information not yet set
+   }
 
    return *this;
 }

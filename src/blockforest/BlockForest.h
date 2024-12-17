@@ -27,6 +27,7 @@
 #include "PhantomBlockForest.h"
 #include "Types.h"
 
+#include "core/EndianIndependentSerialization.h"
 #include "core/debug/Debug.h"
 #include "core/math/Uint.h"
 #include "core/timing/TimingPool.h"

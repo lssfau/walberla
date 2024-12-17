@@ -44,7 +44,7 @@ public:
    /*! \name Construction & Destruction */
    //@{
    UniformToNonUniformPackInfoAdapter( const shared_ptr<walberla::communication::UniformPackInfo> & uniformPackInfo ) : uniformPackInfo_( uniformPackInfo ) { }
-   virtual ~UniformToNonUniformPackInfoAdapter() { }
+   ~UniformToNonUniformPackInfoAdapter() override = default;
    //@}
    //****************************************************************************************************************
 
@@ -55,7 +55,7 @@ public:
    * Falsely return true will lead to errors! However, if the data can be guaranteed to remain
    * constant over time, returning true enables performance optimizations during the communication.
    */
-   virtual bool constantDataExchange() const { return uniformPackInfo_->constantDataExchange(); }
+   bool constantDataExchange() const override { return uniformPackInfo_->constantDataExchange(); }
 
    /**
    * Must return false if calling `unpackData*()` and/or `communicateLocal*()` methods is not thread-safe.
@@ -64,29 +64,29 @@ public:
    * Falsely return true will most likely lead to errors! However, if both `unpackData*()` AND
    * `communicateLocal*()` are thread-safe, returning true can lead to performance improvements.
    */
-   virtual bool threadsafeReceiving() const { return uniformPackInfo_->threadsafeReceiving(); }
+   bool threadsafeReceiving() const override { return uniformPackInfo_->threadsafeReceiving(); }
 
    /// If NOT thread-safe, \ref threadsafeReceiving must return false!
-   virtual void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) { uniformPackInfo_->unpackData( receiver, dir, buffer ); }
+   void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) override { uniformPackInfo_->unpackData( receiver, dir, buffer ); }
 
    /// If NOT thread-safe, \ref threadsafeReceiving must return false!
-   virtual void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir ) { uniformPackInfo_->communicateLocal( sender, receiver, dir ); }
+   void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir ) override { uniformPackInfo_->communicateLocal( sender, receiver, dir ); }
 
-   virtual void unpackDataCoarseToFine( Block * /*fineReceiver*/, const BlockID & /*coarseSender*/, stencil::Direction /*dir*/, mpi::RecvBuffer & /*buffer*/ ) { }
-   virtual void communicateLocalCoarseToFine( const Block * /*coarseSender*/, Block * /*fineReceiver*/, stencil::Direction /*dir*/ ) { }
+   void unpackDataCoarseToFine( Block * /*fineReceiver*/, const BlockID & /*coarseSender*/, stencil::Direction /*dir*/, mpi::RecvBuffer & /*buffer*/ ) override { }
+   void communicateLocalCoarseToFine( const Block * /*coarseSender*/, Block * /*fineReceiver*/, stencil::Direction /*dir*/ ) override { }
 
-   virtual void unpackDataFineToCoarse( Block * /*coarseReceiver*/, const BlockID & /*fineSender*/, stencil::Direction /*dir*/, mpi::RecvBuffer & /*buffer*/ ) { }
-   virtual void communicateLocalFineToCoarse( const Block * /*fineSender*/, Block * /*coarseReceiver*/, stencil::Direction /*dir*/ ) { }
+   void unpackDataFineToCoarse( Block * /*coarseReceiver*/, const BlockID & /*fineSender*/, stencil::Direction /*dir*/, mpi::RecvBuffer & /*buffer*/ ) override { }
+   void communicateLocalFineToCoarse( const Block * /*fineSender*/, Block * /*coarseReceiver*/, stencil::Direction /*dir*/ ) override { }
 
 protected:
 
    shared_ptr<walberla::communication::UniformPackInfo> uniformPackInfo_;
 
    /// Must be thread-safe!
-   virtual void packDataEqualLevelImpl( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const { uniformPackInfo_->packData( sender, dir, buffer ); }
+   void packDataEqualLevelImpl( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const override { uniformPackInfo_->packData( sender, dir, buffer ); }
 
-   virtual void packDataCoarseToFineImpl( const Block * /*coarseSender*/, const BlockID &   /*fineReceiver*/, stencil::Direction /*dir*/, mpi::SendBuffer & /*buffer*/ ) const { }
-   virtual void packDataFineToCoarseImpl( const Block *   /*fineSender*/, const BlockID & /*coarseReceiver*/, stencil::Direction /*dir*/, mpi::SendBuffer & /*buffer*/ ) const { }
+   void packDataCoarseToFineImpl( const Block * /*coarseSender*/, const BlockID &   /*fineReceiver*/, stencil::Direction /*dir*/, mpi::SendBuffer & /*buffer*/ ) const override { }
+   void packDataFineToCoarseImpl( const Block *   /*fineSender*/, const BlockID & /*coarseReceiver*/, stencil::Direction /*dir*/, mpi::SendBuffer & /*buffer*/ ) const override { }
 };
 
 

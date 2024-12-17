@@ -164,8 +164,8 @@ int main( int argc, char ** argv )
 
    blockforest.setRefreshPhantomBlockMigrationPreparationFunction( simpleLB );
 
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(5,5,5), 1);
-   createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(15,6,6), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5), 1);
+   createSphere(*globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(15,6,6), 1);
 
    SweepTimeloop timeloop( forest->getBlockStorage(), 1 );
    timeloop.addFuncBeforeTimeStep( simpleLB, "refreshFunctorName" );

@@ -82,7 +82,7 @@ public:
 
    static shared_ptr<SingleScalarConfiguration> createConfiguration( const Config::BlockHandle & config ) { return make_shared<SingleScalarConfiguration>( config ); }
 
-   inline DiffusionDirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = NULL );
+   inline DiffusionDirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = nullptr );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 

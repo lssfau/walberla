@@ -38,7 +38,7 @@ private:
 public:
 
    FlagFieldMapping( const ConstBlockDataID flagId, const std::string& id ) :
-      vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( NULL ) {}
+      vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( nullptr ) {}
 
    FlagFieldMapping( const ConstBlockDataID flagId, const std::string& id, const std::map< FlagUID, T > mapping ) :
       vtk::BlockCellDataWriter<T,1>( id ), flagId_( flagId ), flagField_( nullptr ), mapping_( mapping ) {}
@@ -90,16 +90,16 @@ class BinarizationFieldWriter : public vtk::BlockCellDataWriter<TargetType,1>
 
 public:
    BinarizationFieldWriter( const ConstBlockDataID fieldID, const std::string& id, SrcType mask) :
-           vtk::BlockCellDataWriter<TargetType,1>( id ), fieldID_( fieldID ), field_( NULL ), mask_( mask ) {}
+           vtk::BlockCellDataWriter<TargetType,1>( id ), fieldID_( fieldID ), field_( nullptr ), mask_( mask ) {}
 
 protected:
 
-   void configure()  {
+   void configure() override {
       WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
       field_ = this->block_->template getData< FieldType >( fieldID_ );
    }
 
-   TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ )
+   TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( field_ );
       if (field_->get(x,y,z) & mask_) {

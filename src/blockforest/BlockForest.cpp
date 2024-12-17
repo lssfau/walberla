@@ -74,7 +74,7 @@ void BlockForest::BlockInformation::getAllBlocks( std::vector< shared_ptr< IBloc
 
       std::stack< std::pair< const Node *, BlockID > > stack;
 
-      stack.push( std::make_pair( nodes_[i].get(), BlockID( i, treeIdMarker ) ) );
+      stack.emplace( nodes_[i].get(), BlockID( i, treeIdMarker ) );
 
       while( !stack.empty() ) {
 
@@ -85,7 +85,7 @@ void BlockForest::BlockInformation::getAllBlocks( std::vector< shared_ptr< IBloc
 
          if( !node.first->children_.empty() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( std::make_pair( node.first->children_[c].get(), BlockID( node.second, c ) ) );
+               stack.emplace( node.first->children_[c].get(), BlockID( node.second, c ) );
          }
          else {
             blocks.push_back( make_shared< BlockID >( node.second ) );
@@ -2540,7 +2540,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          if( phantom->sourceBlockHasTheSameSize() || phantom->sourceBlockIsLarger() )
          {
             WALBERLA_ASSERT( blocksToUnpack.find( block ) == blocksToUnpack.end() );
-            blocksToUnpack[ block ].push_back( std::make_pair( state, &(*buffer) ) );
+            blocksToUnpack[ block ].emplace_back( state, &(*buffer) );
          }
          else
          {

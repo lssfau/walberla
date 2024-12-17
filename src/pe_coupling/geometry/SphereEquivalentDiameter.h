@@ -31,7 +31,7 @@ namespace pe_coupling {
 
 
 // calculates sphere-equivalent diameter (diameter of a sphere with same volume as given body)
-real_t getSphereEquivalentDiameter( pe::RigidBody & body )
+inline real_t getSphereEquivalentDiameter( pe::RigidBody & body )
 {
    if( body.getTypeID() == pe::Sphere::getStaticTypeID() || body.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
