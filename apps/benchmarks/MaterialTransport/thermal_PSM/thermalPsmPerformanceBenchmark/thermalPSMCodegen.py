@@ -141,7 +141,7 @@ with CodeGeneration() as ctx:
         stencil=stencil_fluid,
         method=Method.SRT,
         relaxation_rate=omega,
-        force=sp.symbols("F_:3"),
+        force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
         psm_config=psm_config,
@@ -158,6 +158,9 @@ with CodeGeneration() as ctx:
         compressible=True,
         zero_centered=False
     )
+
+    if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
+        lbm_fluid_config.smagorinsky = True
 
     # =====================
     # Generate method
