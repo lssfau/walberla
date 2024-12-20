@@ -40,8 +40,8 @@ const bool infoCsePdfs = {cse_pdfs};
 
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil_fluid = LBStencil(Stencil.D3Q27)
-    stencil_concentration = LBStencil(Stencil.D3Q27)
+    stencil_fluid = LBStencil(Stencil.D3Q19)
+    stencil_concentration = LBStencil(Stencil.D3Q7)
     omega = sp.Symbol("omega")  # for now same for both the sweeps
     init_density_fluid = sp.Symbol("init_density_fluid")
     init_density_concentration = sp.Symbol("init_density_concentration")
@@ -73,6 +73,8 @@ with CodeGeneration() as ctx:
 
     # Solid collision variant
     SC = int(config_tokens[1])
+    qk = sp.Symbol("qk")
+    qe = sp.Symbol("qe")
 
 # Fluid PDFs and fields
     pdfs_fluid, pdfs_fluid_tmp, velocity_field, density_field = ps.fields(
@@ -140,7 +142,8 @@ with CodeGeneration() as ctx:
     psm_fluid_config = LBMConfig(
         stencil=stencil_fluid,
         method=Method.SRT,
-        relaxation_rate=omega,
+        relaxation_rate=omega_f,
+        output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
@@ -150,9 +153,9 @@ with CodeGeneration() as ctx:
     # Concentration LBM config
     lbm_concentration_config = LBMConfig(
         stencil=stencil_concentration,
-        method=Method.SRT,
-        #relaxation_rates=[0,omega,omega,omega,omega,omega,omega,omega,omega],
-        relaxation_rate=omega,
+        method=Method.MRT,
+        relaxation_rates=[1,qk,qk,qk,qe,qe,qe],  # MRT 2
+        #relaxation_rate=omega,
         velocity_input=velocity_field,
         output={"density": concentration_field},
         compressible=True,
@@ -195,6 +198,8 @@ with CodeGeneration() as ctx:
     else:
         target = ps.Target.CPU
 
+    node_collection = create_psm_update_rule(lbm_config=psm_fluid_config, lbm_optimisation=lbm_fluid_opt)
+    print(node_collection)
     # Generate files
 
     generate_sweep(
@@ -216,7 +221,7 @@ with CodeGeneration() as ctx:
     generate_sweep(
         ctx,
         "PSMFluidSweep",
-        create_lb_update_rule(lbm_config=psm_fluid_config, lbm_optimisation=lbm_fluid_opt),
+        node_collection,
         field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
         target=target,
     )

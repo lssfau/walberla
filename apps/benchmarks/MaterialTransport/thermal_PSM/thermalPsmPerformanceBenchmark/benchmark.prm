@@ -4,7 +4,7 @@ NumericalSetup
     // product of number of blocks should be equal to number of used processes
     xSizeSI  64;
     ySizeSI  64;
-    zSizeSI  1;
+    zSizeSI  64;
 
     numXBlocks 1;
     numYBlocks 1;
@@ -29,12 +29,26 @@ NumericalSetup
     Mach 0.1;
     relaxationRate 1.5;
 
-    timeSteps 1000000;
+    timeSteps 1000;
+
+
+    // particle distribution in LBM units
+
+    useParticles false; // if true, PSM/particle mapping/velocity computation/hydrodynamic force reduction is used, else LBM is used
+    particleDiameter 10.0;
+    particleGenerationSpacing 11.0;
+    generationDomainFraction <0.8, 1.0, 1.0>; // fraction of the domain where particles are generated
+    generationPointOfReferenceOffset <0, 0, 0>; // offset of point of reference from domain center, see SCIterator.h
+    useParticleOffset true; // offset every second particle layer in flow direction
+    particleSubBlockSize <8, 8, 8>;
+
+    // fluid quantities in LBM units
+    uInflow 0.00008;
 }
 
 Output
 {
-    vtkSpacing 1000;
+    vtkSpacing 100;
     vtkFolder vtk_out_srt_srt;
 
     performanceLogFrequency 10;

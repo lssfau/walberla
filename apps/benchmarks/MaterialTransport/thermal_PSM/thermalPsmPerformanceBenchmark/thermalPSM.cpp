@@ -230,7 +230,7 @@ int main(int argc, char** argv)
 
    const bool periodicInX                     = false;
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
-      numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection, cellsPerBlockPerDirection, 1, real_t(1), uint_t(0),
+      numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection, cellsPerBlockPerDirection, cellsPerBlockPerDirection, real_t(1), uint_t(0),
       false, false, periodicInX, periodicInY, periodicInZ, // periodicity
       false);
 
@@ -450,7 +450,7 @@ int main(int argc, char** argv)
 #endif
 
    // Map particles into the fluid domain
-   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, relaxationRate);
+   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omega_f);
    PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
                                          particleAndVolumeFractionSoA, particleSubBlockSize);
    if (useParticles)
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
    {
       //initializeFluidDomain(&(*blockIt));
       if (useParticles) { psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt)); }
-      pdfSetter(&(*blockIt));
+      //pdfSetter(&(*blockIt));
       initializeConcentrationDomain(&(*blockIt));
 
    }
@@ -636,26 +636,30 @@ int main(int argc, char** argv)
       //timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration
    NoSlip)");
    }*/
+   const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
+   const real_t qe = 1.0;
 
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID, pdfFieldConcentrationCPUGPUID,
-                                                           velFieldFluidCPUGPUID, omega_t);
+                                                           velFieldFluidCPUGPUID, qe,qk);
    pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(
-      densityConcentrationFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID, omega_t, frameWidth);
+      densityConcentrationFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID, qe,qk, frameWidth);
 
    pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID, pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,
                                            T0, alphaLB, gravityLB, omega_f, rho_0);
    pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldID, pdfFieldFluidCPUGPUID,
-                                                     velFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_t, rho_0,
+                                                     velFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_f, rho_0,
                                                      frameWidth);
 
    pystencils::PSMFluidSweep psmFluidSweep(
       particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldID,
       particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
-      pdfFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_f, rho_0);
+      pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_f, rho_0);
+
+   //addPSMSweepsToTimeloop(timeloop, psmSweepCollection, psmFluidSweep);
 
    if (useParticles)
    {
-      timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
+      addPSMSweepsToTimeloop(timeloop, psmSweepCollection, psmFluidSweep);
       timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
    }
    else
@@ -666,6 +670,8 @@ int main(int argc, char** argv)
 
    WcTimingPool timeloopTiming;
    // TODO: maybe add warmup phase
+
+
    for (uint_t timeStep = 0; timeStep < timeSteps; ++timeStep)
    {
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
