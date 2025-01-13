@@ -15,7 +15,7 @@ waLBerla_add_executable ( NAME 03_LBLidDrivenCavity
 
 if ( WALBERLA_BUILD_WITH_OPENMESH )
 
-waLBerla_link_files_to_builddir( *.obj )
+waLBerla_link_geometry_to_builddir(*.obj)
 
 waLBerla_add_executable ( NAME 04_LBComplexGeometry
                           FILES 04_LBComplexGeometry.cpp

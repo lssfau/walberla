@@ -28,9 +28,11 @@
 #include "mesh_common/DistanceComputations.h"
 #include "mesh_common/MatrixVectorOperations.h"
 #include "mesh_common/MeshOperations.h"
+# include "pe/raytracing/Intersects.h"
 
 #include <algorithm>
 #include <iterator>
+#include <optional>
 
 namespace walberla {
 namespace mesh {
@@ -63,6 +65,8 @@ public:
    virtual Scalar sqDistance( const Point & p, Point & closestPoint ) const;
    virtual Scalar sqDistance( const Point & p, Point & closestPoint, Normal & normal ) const;
 
+   virtual Scalar getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const override;
+
    inline uint_t numTriangles() const;
    void numTrianglesToStream( std::ostream & os, const uint_t level ) const;
    inline virtual uint_t height() const;
@@ -83,6 +87,55 @@ private:
 
       const Node<MeshType> * child;
       Scalar minSqBoxDist;
+   };
+/*
+   struct ChildInfoIntersects
+   {
+      ChildInfoIntersects(const Node<MeshType> * _child, const Point & ray_origin, const Point & ray_direction)
+         :child( _child ), intersectsAabb( pe::raytracing::intersects( child->getAABB(), 
+                                                                       pe::raytracing::Ray(toWalberla( ray_origin ), (toWalberla( ray_direction )).getNormalized()),
+                                                                       parametricDistance,
+                                                                       real_t(0.0), 
+                                                                       &normal
+                                                                     )) {}
+
+      bool operator<( const ChildInfoIntersects & other ) const 
+         { return parametricDistance < other.parametricDistance; }
+   const Node<MeshType> * child;
+      real_t parametricDistance;
+      pe::Vec3 normal;
+      bool intersectsAabb;
+   };
+*/
+   struct ChildInfoIntersects
+   {
+      ChildInfoIntersects(const Node<MeshType> * _child, const real_t & _parametricDistance, 
+                          const Vector3<real_t> & _normal, const bool & _intersects)
+         :child( _child ), parametricDistance(_parametricDistance), normal(_normal), intersectsAabb(_intersects){}
+
+      static ChildInfoIntersects fromRay(const Node<MeshType> * child, const Point & ray_origin, const Point & ray_direction) {
+         real_t distance;
+         Vector3<real_t> ray_normal;
+
+         bool intersects { pe::raytracing::intersects(   child->getAABB(), 
+                                                         pe::raytracing::Ray(
+                                                               toWalberla( ray_origin ), 
+                                                               (toWalberla( ray_direction )).getNormalized()),
+                                                         distance, real_t(0.0), &ray_normal
+                                                      )
+                        };
+                  
+         return ChildInfoIntersects(child, distance, ray_normal, intersects);
+      }
+
+      bool operator<(const ChildInfoIntersects & other) const {
+         return parametricDistance < other.parametricDistance;
+      }
+
+      const Node<MeshType> * child;
+      const real_t parametricDistance;
+      const Vector3<real_t> normal;
+      const bool intersectsAabb;
    };
 
 protected:
@@ -434,6 +487,37 @@ typename BranchNode<MeshType>::Scalar BranchNode<MeshType>::sqDistance( const Po
    return absMinSqDistance;
 }
 
+
+template <typename MeshType>
+typename BranchNode<MeshType>::Scalar BranchNode<MeshType>::getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const
+{
+   ChildInfoIntersects childinfos[8] = {
+      ChildInfoIntersects::fromRay( children_[0], ray_origin, normalised_ray_direction ), 
+      ChildInfoIntersects::fromRay( children_[1], ray_origin, normalised_ray_direction ),
+      ChildInfoIntersects::fromRay( children_[2], ray_origin, normalised_ray_direction ), 
+      ChildInfoIntersects::fromRay( children_[3], ray_origin, normalised_ray_direction ),
+      ChildInfoIntersects::fromRay( children_[4], ray_origin, normalised_ray_direction ), 
+      ChildInfoIntersects::fromRay( children_[5], ray_origin, normalised_ray_direction ),
+      ChildInfoIntersects::fromRay( children_[6], ray_origin, normalised_ray_direction ), 
+      ChildInfoIntersects::fromRay( children_[7], ray_origin, normalised_ray_direction )
+   };
+
+   Scalar distance( std::numeric_limits<Scalar>::max() );
+
+   for (const auto& childinfo : childinfos) {
+      if (childinfo.intersectsAabb) 
+      {
+         WALBERLA_ASSERT_NOT_NULLPTR(childinfo.child);
+
+         Scalar newDistance = childinfo.child->getRayDistanceToMeshObject(ray_origin, normalised_ray_direction);
+         
+         if (newDistance < distance)
+            distance = newDistance;
+      }
+   }
+
+   return distance;
+}
 
 template <typename MeshType>
 void BranchNode<MeshType>::numTrianglesToStream( std::ostream & os, const uint_t level ) const

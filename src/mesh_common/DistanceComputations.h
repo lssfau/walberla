@@ -74,13 +74,16 @@ struct DistanceProperties
 *
 * \image html mesh/triangle_topo.svg "A rotated triangle in the planar coordinate system. The vertex numbering is shown in red, the edge numbering in blue and the numbering of the voronoi regions in green."
 *
-* The class offers multiple methods to get the signed squared distance from a point to a single triangle or the whole mesh.
+* The class offers multiple methods to get the distance/signed squared distance from a point to a single triangle or the whole mesh.
 * Please note that the distance computation for whole meshes is rather inefficient. Instead you should an object of this
 * class into a \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" reduce the computational complexity
 * from \f$\mathcal O(n)\f$ to \f$\mathcal O(\log n)\f$, where \f$\mathcal O(n)\f$ where \f$n\f$ is the number triangles.
 *
 * Additionally to the signed squared distance you can also retrieve the closest point on the triangle or mesh to
 * your point of inquiry. You may also retrieve the corresponding normal and the closest voronoi region.
+*
+*  \tparam MeshType The type of the mesh, e.g., mesh::TriangleMesh.
+*  \param mesh A pointer to the mesh object being queried.
 */
 template< typename MeshType >
 class TriangleDistance
@@ -93,7 +96,9 @@ public:
    typedef math::Vector3<Scalar>         Vec3;
    typedef math::GenericAABB<Scalar>     BoundingBox;
 
-   TriangleDistance( const shared_ptr<MeshType> & mesh ) : mesh_(mesh), distanceProperties_( *mesh, "DistanceProperties" ) { computeNormals(); computeDistanceProperties(); }
+   TriangleDistance( const shared_ptr<MeshType> & mesh )
+      : mesh_(mesh), distanceProperties_( *mesh, "DistanceProperties" ) 
+      { computeNormals(); computeDistanceProperties(); }
 
    Scalar sqDistance      ( const FaceHandle fh, const Point & p ) const;
    Scalar sqSignedDistance( const FaceHandle fh, const Point & p ) const;
@@ -138,7 +143,10 @@ public:
    Scalar distance        ( InputIterator fhBegin, InputIterator fhEnd, const Point & p ) const;
    template< typename InputIterator >
    Scalar signedDistance  ( InputIterator fhBegin, InputIterator fhEnd, const Point & p ) const;
-
+   
+   // Ray and Triangle intersection
+   template< typename InputIterator >
+   Scalar getRayDistanceToMeshObject(InputIterator fhBegin, InputIterator fhEnd, const Point & ray_origin, const Point & normalised_ray_direction ) const;
    template< typename InputIterator >
    Scalar sqDistance      ( InputIterator fhBegin, InputIterator fhEnd, const Point & p, FaceHandle & closestTriangle ) const;
    template< typename InputIterator >
@@ -984,6 +992,88 @@ void TriangleDistance<MeshType>::filterTrianglesForAABB( const BoundingBox & aab
          break;
 
 }
+
+
+/*
+Möller-Trumbore Fast Minimum Storage Ray/Triangle Intersection Algorithm
+See:  Möller, T., & Trumbore, B. (1997). Fast, Minimum Storage Ray-Triangle Intersection.
+      Journal of Graphics Tools, 2(1), 21–28. https://doi.org/10.1080/10867651.1997.10487468
+*/
+template< typename MeshType >
+template< typename InputIterator >
+typename MeshType::Scalar TriangleDistance< MeshType >::getRayDistanceToMeshObject( InputIterator fhBegin, InputIterator fhEnd,
+                                                                                    const Point & ray_origin, const Point & normalised_ray_direction) const
+{
+   using DP = DistanceProperties<MeshType>;
+   using Vec3DP  = typename DP::Vec3;
+   
+   const Vec3DP ray_origin_vec {ray_origin[0], ray_origin[1], ray_origin[2]};
+   const Vec3DP ray_direction_vec(normalised_ray_direction[0],normalised_ray_direction[1],normalised_ray_direction[2]);
+
+   std::vector<Scalar> intersection_distance;
+
+   for( auto fIt = fhBegin; fIt != fhEnd; ++fIt )
+   {
+      Point v0, v1, v2;
+
+      getVertexPositions(*mesh_, *fIt, v0, v1, v2);
+
+      const Vec3DP edge1 = v1 - v0;
+      const Vec3DP edge2 = v2 - v0;
+
+      const Vec3DP pVec = ray_direction_vec.cross(edge2);   
+      const Scalar det  = pVec.dot(edge1);
+
+      if ( floatIsEqual(fabs(det), 0.0) )
+         continue ;                       // ray and triangle are parallel if det ~= 0. 
+                                          // uses default epsilon of walberla::real_comparison
+
+      const Scalar inv_det = Scalar(1.0) / det;
+
+      const Vec3DP tVec = ray_origin_vec - v0;
+
+      const Scalar u = inv_det * pVec.dot(tVec);
+
+      // Very small number... Scalar type can be a float and testing has shown there can be machine precsion issues
+      // causing errenuous outputs if one simply tries u > 1.0
+      const real_t epsilon = walberla::real_comparison::Epsilon<real_t>::value;
+
+      if (  u < - epsilon  ||  u > 1.0 + epsilon){ 
+         // WALBERLA_LOG_INFO("Barycentric 1 FAILED")
+         continue ;                                // Barycentric co-ordinate does not intersect triangle
+      }
+
+      const Vec3DP qVec = tVec.cross(edge1);
+      
+      const Scalar v = inv_det * ray_direction_vec.dot(qVec);
+
+      if ( v < - epsilon || u + v > 1.0 + epsilon){ 
+         // WALBERLA_LOG_INFO("Barycentric 2 FAILED")
+         continue ;                                // Barycentric co-ordinate does not intersect triangle
+      }
+
+      // Ray intersection distance
+      const Scalar t = inv_det * qVec.dot(edge2);
+      
+      // This should not be  if (t > epsilon_) as there might be cases where the mesh and cell center coincide
+      // In these cases, distance should be zero, not std::numeric_limits<Scalar>::max().
+      if (t >= 0.0)  
+         intersection_distance.push_back(t);
+
+   }
+
+   Scalar q { std::numeric_limits<Scalar>::max() }; 
+
+   if(!intersection_distance.empty())
+   {
+      q = *std::min_element(intersection_distance.begin(), intersection_distance.end());
+   }
+
+   // for (auto val: intersection_distance)
+   //    WALBERLA_LOG_INFO(val)
+   return q;
+}
+
 
 } // namespace mesh
 } // namespace walberla

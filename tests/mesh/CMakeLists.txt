@@ -5,7 +5,8 @@
 #############################################################################################################################
 
 if ( WALBERLA_BUILD_WITH_OPENMESH )
-   waLBerla_link_files_to_builddir( "*.obj" )   
+   waLBerla_link_files_to_builddir( "w.obj" )   
+   waLBerla_link_geometry_to_builddir( "*.obj" )   
 
    waLBerla_compile_test( FILES MatrixVectorOperationsTest.cpp DEPENDS mesh )
    waLBerla_execute_test( NAME  MatrixVectorOperationsTest COMMAND $<TARGET_FILE:MatrixVectorOperationsTest> )
@@ -28,6 +29,13 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_execute_test( NAME  MeshDistanceOctreeTestCube   COMMAND $<TARGET_FILE:MeshDistanceOctreeTest> cube.obj )
    waLBerla_execute_test( NAME  MeshDistanceOctreeTestSphere COMMAND $<TARGET_FILE:MeshDistanceOctreeTest> sphere.obj )
    
+   waLBerla_compile_test( FILES MeshDistanceMollerTrumboreTest.cpp DEPENDS mesh )
+   waLBerla_execute_test( NAME  MeshDistanceMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceMollerTrumboreTest>  cube.obj )
+
+   waLBerla_compile_test( FILES MeshDistanceCallbackMollerTrumboreTest.cpp DEPENDS mesh )
+   waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  cube.obj )
+   waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestSphere COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  sphere.obj )
+
    waLBerla_compile_test( FILES MeshDistancePlausibilityTest.cpp DEPENDS mesh )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunny     COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  1.25   CONFIGURATIONS Release RelWithDbgInfo )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunnyLong COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  0.6    CONFIGURATIONS Release RelWithDbgInfo LABELS longrun )

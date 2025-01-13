@@ -54,6 +54,8 @@ public:
    virtual Scalar sqDistance( const Point & p, FaceHandle & closestTriangle ) const = 0;
    virtual Scalar sqDistance( const Point & p, Point & closestPoint ) const = 0;
    virtual Scalar sqDistance( const Point & p, Point & closestPoint, Point & normal ) const = 0;
+   
+   virtual Scalar getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const = 0;
 
    virtual uint_t numTriangles() const = 0;
    virtual void numTrianglesToStream( std::ostream & os, const uint_t level ) const = 0;
