@@ -73,6 +73,13 @@ def generate_boundary_collection(generation_context,
 
     additional_constructor_arguments = [a.constructor_arguments[2:] for a in additional_data_handlers]
 
+    args_seen = set()
+    args_filtered = []
+    for arg in additional_constructor_arguments:
+        if arg not in args_seen:
+            args_seen.add(arg)
+            args_filtered.append(arg) 
+
     assert len(set(targets)) == 1
     target = targets[0]
 
@@ -84,7 +91,7 @@ def generate_boundary_collection(generation_context,
         'includes': includes,
         'boundary_classes': boundary_classes,
         'additional_data_handlers': additional_data_handlers,
-        'additional_constructor_arguments': additional_constructor_arguments,
+        'additional_constructor_arguments': args_filtered,
         'flag_uids': flag_uids,
         'object_names': object_names
     }

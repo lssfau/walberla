@@ -111,11 +111,14 @@ class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
 class UBBAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, UBB)
+
+        self.boundary_object = boundary_object
+
         super(UBBAdditionalDataHandler, self).__init__(stencil=stencil)
 
     @property
     def constructor_argument_name(self):
-        return "velocityCallback"
+        return "velocityCallback" + self.boundary_object.name
 
     @property
     def constructor_arguments(self):
@@ -124,7 +127,7 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
 
     @property
     def initialiser_list(self):
-        return "elementInitialiser(velocityCallback),"
+        return f"elementInitialiser({self.constructor_argument_name}),"
 
     @property
     def additional_arguments_for_fill_function(self):
@@ -153,13 +156,15 @@ class NoSlipLinearBouzidiAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, NoSlipLinearBouzidi)
 
+        self.boundary_object = boundary_object
+
         self._dtype = BasicType(boundary_object.data_type).c_name
         self._blocks = "const shared_ptr<StructuredBlockForest>&, IBlock&)>"
         super(NoSlipLinearBouzidiAdditionalDataHandler, self).__init__(stencil=stencil)
 
     @property
     def constructor_argument_name(self):
-        return "wallDistanceBouzidi"
+        return "wallDistanceBouzidi" + self.boundary_object.name
 
     @property
     def constructor_arguments(self):
@@ -200,14 +205,16 @@ class NoSlipLinearBouzidiAdditionalDataHandler(AdditionalDataHandler):
 class QuadraticBounceBackAdditionalDataHandler(AdditionalDataHandler):
     def __init__(self, stencil, boundary_object):
         assert isinstance(boundary_object, QuadraticBounceBack)
-
+        
+        self.boundary_object = boundary_object
+        
         self._dtype = BasicType(boundary_object.data_type).c_name
         self._blocks = "const shared_ptr<StructuredBlockForest>&, IBlock&)>"
         super(QuadraticBounceBackAdditionalDataHandler, self).__init__(stencil=stencil)
 
     @property
     def constructor_argument_name(self):
-        return "wallDistanceQuadraticBB"
+        return "wallDistance" + self.boundary_object.name
 
     @property
     def constructor_arguments(self):

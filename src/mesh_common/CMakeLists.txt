@@ -13,6 +13,7 @@ target_sources( mesh_common
       INTERFACE
       DistanceFunction.h
       QHull.h
+      MeshBodyWallDistanceCallback.h
       MeshOperations.h
       MeshIO.h
       DistanceComputations.h

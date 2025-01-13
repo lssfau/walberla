@@ -294,6 +294,46 @@ endfunction ( waLBerla_link_files_to_builddir )
 
 #######################################################################################################################
 #
+# Links all files in PROJECT_ROOT_DIR/geometry matching a globbing expression to the build directory
+#
+# first parameter is glob expression
+#
+# Typical usage: Assuming the parameter files end with obj, write this to your CMakeLists in the
+#                app or test folder:
+#                waLBerla_link_geometry_to_builddir( "*.obj" )
+#
+# Symlinking works only under linux, on windows the files are copied.
+#
+#######################################################################################################################
+
+function ( waLBerla_link_geometry_to_builddir globExpression )
+
+   set(GEOMETRY_DIR ${walberla_SOURCE_DIR}/geometry)
+   
+   file(GLOB filesToLink "${GEOMETRY_DIR}/${globExpression}")
+   
+   # Create symlink link to the build directory (directly in ${CMAKE_CURRENT_BINARY_DIR})
+   foreach(f ${filesToLink})
+      get_filename_component(OBJ_FILENAME ${f} NAME)
+
+      set(OBJ_BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}/${OBJ_FILENAME}")
+      
+      if( CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows" )
+         configure_file(${f} ${OBJ_BUILD_PATH} COPYONLY)
+      else()
+        execute_process(   COMMAND ${CMAKE_COMMAND} -E create_symlink
+                           ${f} ${OBJ_BUILD_PATH}
+                        )
+      endif()
+   endforeach()
+
+endfunction ( waLBerla_link_geometry_to_builddir )
+
+
+
+
+#######################################################################################################################
+#
 # Adds an executable to CTest.
 #
 # Wrapper around add_test, that handles test labels and parallel runs

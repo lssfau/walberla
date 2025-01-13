@@ -41,4 +41,45 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                 DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 03_AdvancedLBMCodegenPython )
     endif()
 
+    #   Tutorial 4: Advanced lbmpy Code Generation with Complex geometry
+    if ( WALBERLA_BUILD_WITH_OPENMESH )
+
+        # Links obj files in PROJECT_ROOT_DIR/geometry to build dir.
+        waLBerla_link_geometry_to_builddir(cube.obj)
+        waLBerla_link_geometry_to_builddir(bunny.obj)
+        
+        waLBerla_link_files_to_builddir( "04_LBComplexGeometryConfig.py" )
+
+        set(TUT4_OUT_FILES)
+        list(APPEND TUT4_OUT_FILES
+            FreeSlipBC.h FreeSlipBC.${CODEGEN_FILE_SUFFIX}
+            NoSlipBC.h NoSlipBC.${CODEGEN_FILE_SUFFIX}
+            NoSlipQBBBC.h NoSlipQBBBC.${CODEGEN_FILE_SUFFIX}
+            ObjNoSlipQBBBC.h ObjNoSlipQBBBC.${CODEGEN_FILE_SUFFIX}
+            UBBBC.h UBBBC.${CODEGEN_FILE_SUFFIX}
+            OutflowBC.h OutflowBC.${CODEGEN_FILE_SUFFIX}
+            LBComplexGeometryStorageSpecification.h LBComplexGeometryStorageSpecification.${CODEGEN_FILE_SUFFIX}
+            LBComplexGeometrySweepCollection.h LBComplexGeometrySweepCollection.${CODEGEN_FILE_SUFFIX}
+            LBComplexGeometryBoundaryCollection.h
+            InfoHeader.h
+        )
+        
+        set(TUT4_DEPENDENCIES blockforest boundary core field geometry lbm lbm_generated mesh python_coupling stencil timeloop vtk 04_LBComplexGeometryPython)
+        
+        if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
+            list(APPEND TUT4_DEPENDENCIES gpu)
+        endif()
+        
+        walberla_generate_target_from_python( 
+                NAME 04_LBComplexGeometryPython
+                FILE 04_LBComplexGeometry.py
+                CODEGEN_CFG 04_codegen
+                OUT_FILES  ${TUT4_OUT_FILES}
+            )
+
+        walberla_add_executable ( NAME 04_LBComplexGeometryCodeGen
+            FILES 04_LBComplexGeometry.cpp
+            DEPENDS ${TUT4_DEPENDENCIES} )
+    endif()
+
 endif()

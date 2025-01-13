@@ -86,7 +86,6 @@ public:
       return rootNode_->sqSignedDistance( p, closestPoint, normal );
    }
 
-
    Scalar sqDistance( const Point & p ) const
    {
       WALBERLA_ASSERT_NOT_NULLPTR( rootNode_ );
@@ -108,6 +107,39 @@ public:
       return rootNode_->sqDistance( p, closestPoint, normal );
    }
 
+   /**
+    * \brief This function calculates the distance from a point to the closest intersection point of a mesh object 
+    * along a specified ray (origin and direction). This is done via the  Möller-Trumbore Fast Minimum Storage 
+    * Ray/Triangle Intersection Algorithm.  For more information, see:
+    *    Möller, T., & Trumbore, B. (1997). Fast, Minimum Storage Ray-Triangle Intersection.
+    *    Journal of Graphics Tools, 2(1), 21–28. https://doi.org/10.1080/10867651.1997.10487468
+    * 
+    * \ingroup mesh_common
+    * 
+    * \param ray_origin    The origin of the ray as a MeshType::Point.
+    * \param normalised_ray_direction The direction of the ray as a MeshType::Point in its normalised state, i.e.
+    *                      if the direction vector is:
+    *                        ray_direction = [1,1,0]
+    *                        normalised_ray_direction = [1/sqrt(2), 1/sqrt(2), 0]
+    * 
+    * \return The distance to the closest intersection point, or `std::numeric_limits<Scalar>::max()` 
+    *         if no intersection occurs.
+    * 
+    * Usage:
+    * \code
+    *    const MeshType::Point ray_origin { ... };
+    *    MeshType::Point ray_direction { ... };
+    * 
+    *    auto q = distanceOctree_->getRayDistanceToMeshObject(ray_origin, ray_direction.normalize());
+    * \endcode
+    * 
+    * \warning If the ray and a triangle are parallel (within a small epsilon value), or do not intersect,
+    *          the function returns std::numeric_limits<Scalar>::max().
+    */
+   Scalar getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const
+   {
+      return rootNode_->getRayDistanceToMeshObject( ray_origin, normalised_ray_direction);
+   }
 
    uint_t numTriangles() const { return rootNode_->numTriangles(); }
 
