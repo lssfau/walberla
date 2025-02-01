@@ -96,10 +96,6 @@ class ShiftedPeriodicityBase {
 
       // sanity checks
       WALBERLA_CHECK_UNEQUAL( shiftDir_, normalDir_, "Direction of periodic shift and boundary normal must not coincide." )
-
-      WALBERLA_CHECK( sbf->isPeriodic(shiftDir_), "Blockforest must be periodic in direction " << shiftDir_ << "!" )
-      WALBERLA_CHECK( !sbf->isPeriodic(normalDir_), "Blockforest must NOT be periodic in direction " << normalDir_ << "!" )
-
    }
 
    Vector3<ShiftType> shift() const { return shift_; }
@@ -116,6 +112,11 @@ class ShiftedPeriodicityBase {
 
       // only setup send and receive information once at the beginning
       if(!setupPeriodicity_){
+
+         // check once during setup if the domain's  periodicity was well defined
+         WALBERLA_CHECK( sbf->isPeriodic(shiftDir_), "Blockforest must be periodic in direction " << shiftDir_ << "!" )
+         WALBERLA_CHECK( !sbf->isPeriodic(normalDir_), "Blockforest must NOT be periodic in direction " << normalDir_ << "!" )
+
          setupPeriodicity();
          setupPeriodicity_ = true;
       }
@@ -498,11 +499,14 @@ class ShiftedPeriodicityBase {
    }
 
    CellInterval globalAABBToLocalCI( const AABB & aabb, const std::shared_ptr<StructuredBlockForest> & sbf, IBlock * const block ) {
-      auto globalCI = CellInterval{toCellVector(aabb.min()), toCellVector(aabb.max()) - Vector3<cell_idx_t>(1, 1, 1)};
-      CellInterval localCI;
-      sbf->transformGlobalToBlockLocalCellInterval(localCI, *block, globalCI);
 
-      return localCI;
+      Vector3<real_t> local_min;
+      sbf->transformGlobalToBlockLocal(local_min , *block,   aabb.min());
+
+      Vector3<real_t> local_max;
+      sbf->transformGlobalToBlockLocal(local_max , *block,   aabb.max());
+
+      return CellInterval{toCellVector(local_min), toCellVector(local_max) - Vector3<cell_idx_t>(1, 1, 1)};
    }
 
    template< typename tPair >
