@@ -124,7 +124,29 @@ int main( int argc, char **argv ) {
       logging::configureLogging(config);
 
       // create the domain, flag field and vector field (non-uniform initialisation)
-      auto blocks = blockforest::createUniformBlockGridFromConfig(config->getBlock("DomainSetup"), nullptr, true);
+      auto configBlock = config->getBlock("DomainSetup");
+
+      const Vector3<bool> periodicity = configBlock.getParameter<Vector3<bool>  >( "periodic" );
+      const Vector3<uint_t> cellsPerBlock = configBlock.getParameter<Vector3<uint_t>  >( "cellsPerBlock" );
+      const Vector3<uint_t> nBlocks        = configBlock.getParameter<Vector3<uint_t>  >( "blocks" );
+      const bool zeroCenteredDomain = configBlock.getParameter<bool>( "zeroCenteredDomain" );
+
+      Vector3<real_t> domainSize{};
+      Vector3<real_t> domainCorner{};
+      for(uint_t d = 0; d < 3; ++d) {
+         domainSize[d] = real_c(nBlocks[d] * cellsPerBlock[d]);
+         domainCorner[d] = zeroCenteredDomain ? real_t(0) : - domainSize[d] / real_t(2);
+      }
+
+      auto blocks = blockforest::createUniformBlockGrid(
+         AABB(domainCorner, domainCorner + domainSize),         // AABB spanning the entire domain
+         nBlocks[0], nBlocks[1], nBlocks[2],                    // number of blocks in x/y/z direction
+         cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2],  // cells per block in x/y/z direction
+         uint_t(0),                                             // maximum number of blocks per process
+         true, false,                                           // include but don't force Metis
+         periodicity[0], periodicity[1], periodicity[2],        // periodicity
+         true                                                   // keep global block information
+      );
 
       const auto fieldID = field::addToStorage< Field_T >(blocks, "test field", real_t(0), field::Layout::fzyx, fieldGhostLayers);
       FieldInitialiser< Field_T > initialiser(blocks, fieldID);
