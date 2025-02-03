@@ -1,0 +1,318 @@
+import os
+import waLBerla as wlb
+from waLBerla.tools.config import block_decomposition
+from waLBerla.tools.sqlitedb import sequenceValuesToScalars, checkAndUpdateSchema, storeSingle
+import sys
+import sqlite3
+from math import prod
+
+try:
+    import machinestate as ms
+except ImportError:
+    ms = None
+
+# Number of time steps run for a workload of 128^3 per GPU
+# if double as many cells are on the GPU, half as many time steps are run etc.
+# increase this to get more reliable measurements
+TIME_STEPS_FOR_128_BLOCK = int(os.environ.get('TIME_STEPS_FOR_128_BLOCK', 1000))
+DB_FILE = os.environ.get('DB_FILE', "gpu_benchmark.sqlite3")
+BENCHMARK = int(os.environ.get('BENCHMARK', 0))
+
+WeakX = int(os.environ.get('WeakX', 128))
+WeakY = int(os.environ.get('WeakY', 128))
+WeakZ = int(os.environ.get('WeakZ', 128))
+
+StrongX = int(os.environ.get('StrongX', 128))
+StrongY = int(os.environ.get('StrongY', 128))
+StrongZ = int(os.environ.get('StrongZ', 128))
+
+BASE_CONFIG = {
+    'DomainSetup': {
+        'cellsPerBlock': (256, 128, 128),
+        'periodic': (1, 1, 1),
+    },
+    'Parameters': {
+        'omega': 1.8,
+        'cudaEnabledMPI': False,
+        'warmupSteps': 5,
+        'outerIterations': 3,
+    }
+}
+
+ldc_setup = {'Border': [
+    {'direction': 'N', 'walldistance': -1, 'flag': 'UBB'},
+    {'direction': 'W', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'E', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'S', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'B', 'walldistance': -1, 'flag': 'NoSlip'},
+    {'direction': 'T', 'walldistance': -1, 'flag': 'NoSlip'},
+]}
+
+
+def num_time_steps(block_size, time_steps_for_128_block=TIME_STEPS_FOR_128_BLOCK):
+    """
+    Calculate the number of time steps based on the block size.
+
+    This function computes the number of time steps required for a given block size
+    by scaling the time steps that could be executed on one process within one second 
+    for a 128x128x128 cells_per_block to the given cells_per_block size.
+
+    Parameters:
+    block_size (tuple): A tuple of three integers representing the dimensions of the cells_per_block (x, y, z).
+    time_steps_for_128_block (int, optional): The number of time steps for a 128x128x128 block. Default is 1000, 
+    which is approximately the number of timesteps that were executed within one second on one entire MareNostrum5-acc node.
+
+    Returns:
+    int: The calculated number of time steps, with a minimum value of 10.
+    """
+    cells = block_size[0] * block_size[1] * block_size[2]
+    time_steps = (128 ** 3 / cells) * time_steps_for_128_block
+    if time_steps < 10:
+        time_steps = 10
+    return int(time_steps)
+
+
+def cuda_block_size_ok(block_size, regs_per_threads=168):
+    """
+    Checks if a given CUDA block size does not exceed the SM register limit.
+    168 registers per thread was obtained using cuobjdump on both SRT and Cumulant
+    kernels. You might want to validate that for your own kernels.
+    """
+    return prod(block_size) * regs_per_threads < 64 * (2 ** 10)
+
+
+def domain_block_size_ok(block_size, total_mem, gls=1, q=27, size_per_value=8):
+    """
+    Checks if a single block of given size fits into GPU memory.
+    """
+    return prod(b + 2 * gls for b in block_size) * q * size_per_value < total_mem
+
+
+class Scenario:
+    def __init__(self, cells_per_block=(256, 128, 128), periodic=(1, 1, 1), cuda_blocks=(128, 1, 1),
+                 timesteps=None, time_step_strategy="normal", omega=1.8, cuda_enabled_mpi=False,
+                 inner_outer_split=(1, 1, 1), warmup_steps=5, outer_iterations=3,
+                 init_shear_flow=False, boundary_setup=False,
+                 vtk_write_frequency=0, remaining_time_logger_frequency=-1,
+                 additional_info=None, blocks=None, db_file_name=None):
+
+        if boundary_setup:
+            init_shear_flow = False
+            periodic = (0, 0, 0)
+
+        self.blocks = blocks if blocks else block_decomposition(wlb.mpi.numProcesses())
+
+        self.cells_per_block = cells_per_block
+        self.periodic = periodic
+
+        self.time_step_strategy = time_step_strategy
+        self.omega = omega
+        self.timesteps = timesteps if timesteps else num_time_steps(cells_per_block)
+        self.cuda_enabled_mpi = cuda_enabled_mpi
+        self.inner_outer_split = inner_outer_split
+        self.init_shear_flow = init_shear_flow
+        self.boundary_setup = boundary_setup
+        self.warmup_steps = warmup_steps
+        self.outer_iterations = outer_iterations
+        self.cuda_blocks = cuda_blocks
+
+        self.vtk_write_frequency = vtk_write_frequency
+        self.remaining_time_logger_frequency = remaining_time_logger_frequency
+        self.db_file_name = DB_FILE if db_file_name is None else db_file_name
+
+        self.config_dict = self.config(print_dict=False)
+        self.additional_info = additional_info
+
+    @wlb.member_callback
+    def config(self, print_dict=True):
+        from pprint import pformat
+        config_dict = {
+            'DomainSetup': {
+                'blocks': self.blocks,
+                'cellsPerBlock': self.cells_per_block,
+                'periodic': self.periodic,
+            },
+            'Parameters': {
+                'omega': self.omega,
+                'cudaEnabledMPI': self.cuda_enabled_mpi,
+                'warmupSteps': self.warmup_steps,
+                'outerIterations': self.outer_iterations,
+                'timeStepStrategy': self.time_step_strategy,
+                'timesteps': self.timesteps,
+                'initShearFlow': self.init_shear_flow,
+                'gpuBlockSize': self.cuda_blocks,
+                'innerOuterSplit': self.inner_outer_split,
+                'vtkWriteFrequency': self.vtk_write_frequency,
+                'remainingTimeLoggerFrequency': self.remaining_time_logger_frequency
+            },
+            'Logging': {
+                'logLevel': 'info',  # info progress detail tracing
+            }
+        }
+        if self.boundary_setup:
+            config_dict["Boundaries"] = ldc_setup
+
+        if print_dict:
+            wlb.log_info_on_root("Scenario:\n" + pformat(config_dict))
+            if self.additional_info:
+                wlb.log_info_on_root("Additional Info:\n" + pformat(self.additional_info))
+        return config_dict
+
+    @wlb.member_callback
+    def results_callback(self, **kwargs):
+        data = {}
+        data.update(self.config_dict['Parameters'])
+        data.update(self.config_dict['DomainSetup'])
+        data.update(kwargs)
+
+        if self.additional_info is not None:
+            data.update(self.additional_info)
+
+        data['executable'] = sys.argv[0]
+        data['compile_flags'] = wlb.build_info.compiler_flags
+        data['walberla_version'] = wlb.build_info.version
+        data['build_machine'] = wlb.build_info.build_machine
+
+        if ms:
+            state = ms.MachineState(extended=False, anonymous=True)
+            state.generate()  # generate subclasses
+            state.update()  # read information
+            data["MachineState"] = str(state.get())
+        else:
+            print("MachineState module is not available. MachineState was not saved")
+
+        sequenceValuesToScalars(data)
+
+        result = data
+        sequenceValuesToScalars(result)
+        num_tries = 4
+        # check multiple times e.g. may fail when multiple benchmark processes are running
+        table_name = f"runs_{data['stencil']}_{data['streamingPattern']}_{data['collisionSetup']}_{prod(self.blocks)}"
+        table_name = table_name.replace("-", "_")  # - not allowed for table name would lead to syntax error
+        for num_try in range(num_tries):
+            try:
+                checkAndUpdateSchema(result, table_name, self.db_file_name)
+                storeSingle(result, table_name, self.db_file_name)
+                break
+            except sqlite3.OperationalError as e:
+                wlb.log_warning(f"Sqlite DB writing failed: try {num_try + 1}/{num_tries}  {str(e)}")
+
+
+# -------------------------------------- Functions trying different parameter sets -----------------------------------
+
+
+def weak_scaling_overlap(cuda_enabled_mpi=False):
+    wlb.log_info_on_root("Running scaling benchmark with communication hiding")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+
+    # overlap
+    for t in ["simpleOverlap"]:
+        scenarios.add(Scenario(cells_per_block=(WeakX, WeakY, WeakZ),
+                               cuda_blocks=(128, 1, 1),
+                               time_step_strategy=t,
+                               inner_outer_split=(8, 8, 8),
+                               cuda_enabled_mpi=cuda_enabled_mpi,
+                               outer_iterations=1,
+                               boundary_setup=True,
+                               db_file_name="weakScalingUniformGrid.sqlite3"))
+
+
+def strong_scaling_overlap(cuda_enabled_mpi=False):
+    wlb.log_info_on_root("Running strong scaling benchmark with one block per proc with communication hiding")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+
+    domain_size = (StrongX, StrongY, StrongZ)
+    blocks = block_decomposition(wlb.mpi.numProcesses())
+    cells_per_block = tuple([d // b for d, b in zip(domain_size, reversed(blocks))])
+
+    # overlap
+    for t in ["simpleOverlap"]:
+        scenarios.add(Scenario(cells_per_block=cells_per_block,
+                               cuda_blocks=(128, 1, 1),
+                               time_step_strategy=t,
+                               inner_outer_split=(1, 1, 1),
+                               cuda_enabled_mpi=cuda_enabled_mpi,
+                               outer_iterations=1,
+                               timesteps=num_time_steps(cells_per_block),
+                               blocks=blocks,
+                               boundary_setup=True,
+                               db_file_name="strongScalingUniformGridOneBlock.sqlite3"))
+
+
+def single_gpu_benchmark():
+    """Benchmarks only the LBM compute kernel"""
+    wlb.log_info_on_root("Running single GPU benchmarks")
+    wlb.log_info_on_root("")
+
+    gpu_mem_gb = int(os.environ.get('GPU_MEMORY_GB', 40))
+    gpu_mem = gpu_mem_gb * (2 ** 30)
+    gpu_type = os.environ.get('GPU_TYPE')
+
+    additional_info = {}
+    if gpu_type is not None:
+        additional_info['gpu_type'] = gpu_type
+
+    scenarios = wlb.ScenarioManager()
+    block_sizes = [(i, i, i) for i in (128, 256, 320)]
+    cuda_blocks = [(128, 1, 1), ]
+    for block_size in block_sizes:
+        for cuda_block_size in cuda_blocks:
+            # cuda_block_size = (256, 1, 1) and block_size = (64, 64, 64) would be cut to cuda_block_size = (64, 1, 1)
+            if cuda_block_size > block_size:
+                continue
+            if not cuda_block_size_ok(cuda_block_size):
+                wlb.log_info_on_root(f"Cuda block size {cuda_block_size} would exceed register limit. Skipping.")
+                continue
+            if not domain_block_size_ok(block_size, gpu_mem):
+                wlb.log_info_on_root(f"Block size {block_size} would exceed GPU memory. Skipping.")
+                continue
+            scenario = Scenario(cells_per_block=block_size,
+                                cuda_blocks=cuda_block_size,
+                                time_step_strategy='kernelOnly',
+                                timesteps=num_time_steps(block_size, 2000),
+                                outer_iterations=1,
+                                additional_info=additional_info)
+            scenarios.add(scenario)
+
+
+def validation_run():
+    """Run with full periodic shear flow or boundary scenario (ldc) to check if the code works"""
+    wlb.log_info_on_root("Validation run")
+    wlb.log_info_on_root("")
+
+    time_step_strategy = "noOverlap"  # "simpleOverlap"
+
+    scenarios = wlb.ScenarioManager()
+    scenario = Scenario(cells_per_block=(128, 128, 128),
+                        time_step_strategy=time_step_strategy,
+                        timesteps=10001,
+                        outer_iterations=1,
+                        warmup_steps=0,
+                        init_shear_flow=False,
+                        boundary_setup=True,
+                        vtk_write_frequency=5000,
+                        remaining_time_logger_frequency=30)
+    scenarios.add(scenario)
+
+
+wlb.log_info_on_root(f"Batch run of benchmark scenarios, saving result to {DB_FILE}")
+# Select the benchmark you want to run
+# single_gpu_benchmark()  # benchmarks different CUDA block sizes and domain sizes and measures single GPU
+# performance of compute kernel (no communication)
+# overlap_benchmark()  # benchmarks different communication overlap options
+# profiling()  # run only two timesteps on a smaller domain for profiling only
+# validation_run()
+
+if BENCHMARK == 0:
+    single_gpu_benchmark()
+elif BENCHMARK == 1:
+    weak_scaling_overlap(True)
+elif BENCHMARK == 2:
+    strong_scaling_overlap(True)
+else:
+    validation_run()
+

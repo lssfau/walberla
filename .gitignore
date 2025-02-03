@@ -80,3 +80,10 @@ CMakeDefs.h
 /moduleStatistics.json
 /walberla-config.cmake
 cmake-build-*
+
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
