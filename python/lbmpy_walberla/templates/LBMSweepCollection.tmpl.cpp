@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \\file {{class_name}}.cpp
-//! \\author pystencils
+//! \\author lbmpy
 //======================================================================================================================
 #include "{{class_name}}.h"
 

@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \\file {{class_name}}.h
-//! \\author pystencils
+//! \\author lbmpy
 //======================================================================================================================
 
 #pragma once
@@ -86,8 +86,7 @@ class {{class_name}}
       {{kernel_list|generate_constructor(parameter_registration=parameter_scaling) |indent(6)}}
       validInnerOuterSplit_ = true;
 
-      for (auto& iBlock : *blocks)
-      {
+      for (auto& iBlock : *blocks){
          if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 ||
              int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 ||
              int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
@@ -95,8 +94,7 @@ class {{class_name}}
       }
    }
 
-   void initialiseBlockPointer()
-   {
+   void initialiseBlockPointer(){
       {%if block_stream_collide -%}
       blockWise_ = true;
 
@@ -115,8 +113,7 @@ class {{class_name}}
       {%if target is equalto 'gpu' -%} glPropagationBlock_.resize(blocks_->getNumberOfLevels()); {% endif %}
       {%if target is equalto 'gpu' -%} glPropagationGrid_.resize(blocks_->getNumberOfLevels()); {% endif %}
 
-      for( auto it = blocks_->begin(); it != blocks_->end(); ++it )
-      {
+      for( auto it = blocks_->begin(); it != blocks_->end(); ++it ){
          auto* local = dynamic_cast< Block* >(it.get());
          {%- for field in block_stream_collide['all_fields'] %}
          auto {{field.name}} = local->getData< {{field | field_type(is_gpu=is_gpu)}} >({{field.name}}ID);
@@ -137,8 +134,7 @@ class {{class_name}}
          break;
       }
 
-      for( auto it = blocks_->begin(); it != blocks_->end(); ++it )
-      {
+      for( auto it = blocks_->begin(); it != blocks_->end(); ++it ){
          auto* local = dynamic_cast< Block* >(it.get());
          const uint_t level = local->getLevel();
          {%- for field in block_stream_collide['all_fields'] %}
@@ -209,17 +205,18 @@ class {{class_name}}
    {%if block_stream_collide -%}
    ~{{class_name}}() {
       {%if target is equalto 'gpu' -%}
-      for (uint_t level = 0; level < blocks_->getNumberOfLevels(); level++)
-      {
-         {%- for field in block_stream_collide['all_fields'] %}
-         if(!{{field.name}}Pointers[level].empty()){
-            WALBERLA_GPU_CHECK(gpuFree({{field.name}}PointersGPU[level]))
-         }
-         {%- endfor %}
+      if(blockWise_){
+         for (uint_t level = 0; level < blocks_->getNumberOfLevels(); level++){
+            {%- for field in block_stream_collide['all_fields'] %}
+            if(!{{field.name}}Pointers[level].empty()){
+               WALBERLA_GPU_CHECK(gpuFree({{field.name}}PointersGPU[level]))
+            }
+            {%- endfor %}
 
-         for (auto it = glPropagationPDFs[level].begin(); it != glPropagationPDFs[level].end(); it++){
-            if(it->second.empty()){ continue;}
-            WALBERLA_GPU_CHECK(gpuFree(glPropagationPDFsGPU[level][it->first]))
+            for (auto it = glPropagationPDFs[level].begin(); it != glPropagationPDFs[level].end(); it++){
+               if(it->second.empty()){ continue;}
+               WALBERLA_GPU_CHECK(gpuFree(glPropagationPDFsGPU[level][it->first]))
+            }
          }
       }
       {%- endif %}
