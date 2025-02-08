@@ -32,7 +32,6 @@
 
 #include "stencil/D2Q5.h"
 
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 
 #include "vtk/VTKOutput.h"
@@ -245,9 +244,7 @@ int main( int argc, char ** argv )
    // This can not be done as a sweep since it includes an interior iteration, independent of the time loop.
    timeloop.addFuncAfterTimeStep( JacobiIteration( srcID, dstID, rhsID, weights, blocks, myCommScheme, uint_c(10000) ), "JacobiIteration");
 
-   // start the GUI and run the simulation
-   GUI gui ( timeloop, blocks, argc, argv );
-   gui.run();
+   timeloop.run();
 
    return 0;
 }

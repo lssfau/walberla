@@ -26,15 +26,16 @@
 
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "geometry/initializer/ScalarFieldFromGrayScaleImage.h"
 #include "geometry/structured/GrayScaleImage.h"
 
-#include "gui/Gui.h"
-
 #include "stencil/D2Q9.h"
 
 #include "timeloop/SweepTimeloop.h"
+
+#include "vtk/all.h"
 
 
 namespace walberla {
@@ -205,15 +206,21 @@ int main( int argc, char ** argv )
    fieldInitializer.init( image, uint_c(2), false );
 
    // create time loop
-   const uint_t numberOfTimesteps = uint_c(10); // number of timesteps for non-gui runs
+   const uint_t numberOfTimesteps = uint_c(10); // number of timesteps
    SweepTimeloop timeloop( blocks, numberOfTimesteps );
 
    // registering the sweep
    timeloop.add() << BeforeFunction( myCommScheme, "Communication" )
                   << Sweep( GameOfLifeSweep(fieldID), "GameOfLifeSweep" );
 
-   GUI gui ( timeloop, blocks, argc, argv );
-   gui.run();
+   // Create vtk output object, a dataWriter and write the output
+   vtk::writeDomainDecomposition(blocks);
+   auto vtkOutput  = vtk::createVTKOutput_BlockData(*blocks);
+   auto dataWriter = make_shared< field::VTKWriter< Field< real_t, 1 > > >(fieldID, "field");
+   vtkOutput->addCellDataWriter(dataWriter);
+   timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+
+   timeloop.run();
 
    return EXIT_SUCCESS;
 }

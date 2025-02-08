@@ -32,8 +32,6 @@
 
 #include "field/interpolators/TrilinearInterpolator.h"
 
-#include "gui/Gui.h"
-
 #include "timeloop/SweepTimeloop.h"
 
 
@@ -96,10 +94,6 @@ int main( int argc, char ** argv )
    MPIGatherScheme gatherScheme( blocks->getBlockStorage() );
    gatherScheme.addPackInfo( curvePackInfo );
    gatherScheme();
-
-   //SweepTimeloop timeloop( blocks, 10 );
-   //GUI gui ( timeloop, blocks, argc, argv );
-   //gui.run();
 
    return 0;
 }

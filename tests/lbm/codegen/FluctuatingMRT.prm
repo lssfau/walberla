@@ -4,7 +4,6 @@ Parameters
 	omega           0.5;
 	timesteps       2;
 
-	useGui 0;
 	remainingTimeLoggerFrequency 3; // in seconds
 }
 

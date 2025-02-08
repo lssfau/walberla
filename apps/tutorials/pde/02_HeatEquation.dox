@@ -176,7 +176,6 @@ This is similar to what was done in the previous tutorial for the right-hand sid
 
 With this, all parts are present and the simulation can be started.
 
-When inspecting the results in the GUI using the color representation of the `src` field, you will see.... no changes. 
 No worries, everything we did was correct but the color gets automatically scaled in each time step. 
 Since the initial profile just shrinks over time, the results will always look the same.
 When you use the numeric representation, you will actually see changes in the values, which get smaller from one time step to the next one.
@@ -206,7 +205,7 @@ As arguments, the field we want to output together with the block structure and 
 The fourth argument specifies the write frequency where the value 1 denotes that we want to have an output after every time step.
 The number of ghost layers that are written can be specified by the fifth argument, where in our case we only have one and output it.
 
-To start the simulation without the GUI, we simply write:
+To start the simulation, we simply write:
 \code
 // run the simulation for the specified number of time steps
 timeloop.run();

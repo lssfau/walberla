@@ -30,8 +30,6 @@
 
 #include "field/AddToStorage.h"
 
-#include "gui/Gui.h"
-
 #include "timeloop/SweepTimeloop.h"
 
 #include <fstream>
@@ -43,9 +41,6 @@ using namespace geometry;
 
 const uint_t confBlockCount []      = { 1, 1, 1 };
 const uint_t confCells []           = { 30, 30, 30 };
-
-const bool   useGui = false;
-
 
 int main( int argc, char ** argv )
 {
@@ -88,14 +83,6 @@ int main( int argc, char ** argv )
    Config cfg;
    cfg.readParameterFile( "sampleImage.dat" );
    geometryInitializationManager->init( cfg.getBlock("Geometry") );
-
-
-   if ( useGui )
-   {
-      SweepTimeloop timeloop ( blocks, 100 );
-      GUI gui ( timeloop, blocks, argc, argv );
-      gui.run();
-   }
 
    return EXIT_SUCCESS;
 }

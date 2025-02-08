@@ -53,7 +53,6 @@ stages:
         -DWALBERLA_BUILD_WITH_PARMETIS=$WALBERLA_BUILD_WITH_PARMETIS
         -DWALBERLA_BUILD_WITH_FFTW=$WALBERLA_BUILD_WITH_FFTW
         -DWALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT=$WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
-        -DWALBERLA_ENABLE_GUI=$WALBERLA_ENABLE_GUI
         -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN
         -DWALBERLA_STL_BOUNDS_CHECKS=$WALBERLA_STL_BOUNDS_CHECKS
         -DWALBERLA_LOGLEVEL=$WALBERLA_LOGLEVEL
@@ -78,7 +77,6 @@ stages:
       WALBERLA_BUILD_WITH_METIS: "ON"
       WALBERLA_BUILD_WITH_PARMETIS: "ON"
       WALBERLA_BUILD_WITH_FFTW: "ON"
-      WALBERLA_ENABLE_GUI: "OFF"
       WALBERLA_LOGLEVEL: "DETAIL"
       WARNING_ERROR: "ON"
    artifacts:
@@ -2058,7 +2056,7 @@ cppcheck:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/cppcheck
    script:
       - cppcheck --version
-      - cppcheck . --max-configs=10 --enable=warning --enable=style --enable=performance --enable=portability -i src/gui/extern -i src/geometry/structured/extern -i sqlite3.c -i StackWalker.cpp -I src/ -I tests/ -I apps/ -D WALBERLA_BUILD_WITH_MPI -D WALBERLA_BUILD_WITH_METIS -D WALBERLA_BUILD_WITH_PYTHON --xml 2> report.xml
+      - cppcheck . --max-configs=10 --enable=warning --enable=style --enable=performance --enable=portability -i src/geometry/structured/extern -i sqlite3.c -i StackWalker.cpp -I src/ -I tests/ -I apps/ -D WALBERLA_BUILD_WITH_MPI -D WALBERLA_BUILD_WITH_METIS -D WALBERLA_BUILD_WITH_PYTHON --xml 2> report.xml
       - cppcheck-htmlreport --file=report.xml --report-dir=html_report --source-dir=.
    artifacts:
       untracked: true

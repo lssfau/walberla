@@ -88,32 +88,24 @@ is a good idea.
 
 \section tut01_vis Visualizing the Setup
 
-In order to visualize the domain, we can use the graphical user interface (GUI) module of waLBerla. Since this module depends on the Qt Library, one has to
-explicitly enable the module before compiling waLBerla. This is done by setting the CMake Option WALBERLA_ENABLE_GUI.
+In order to visualize the domain, we will export it to a VTK file, which can then be inspected using tools
+like ParaView.
 
-We have to add two more includes to our file, one for the GUI module and one for the time loop, which is used by the GUI.
+We have to add one more include to our file for the time loop.
 A detailed description of the time loop follows in the next tutorial.
 
 \code
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 \endcode
 
-In the main function we first create a time loop object, which we pass to the GUI:
+In the main function we first create a time loop object, which we run:
 
 \code
 // blockforest::createUniformBlockGrid(...)
 
 SweepTimeloop timeloop( blocks, uint_c(1) );
-GUI gui( timeloop, blocks, argc, argv );
-gui.run();
+timeloop.run();
 \endcode
-
-When you run the program now, a window should open showing the domain consisting of blocks:
-
-\image html tutorial_basics01_blocks.jpeg
-
-If no window opens, the GUI was probably not compiled. Make sure that WALBERLA_ENABLE_GUI is enabled and Qt was found.
 
 \section tut01_fields  Storing Data on a Block
 
@@ -163,13 +155,8 @@ The callback function can now be registered at the block storage with the follow
 // add a field to all blocks
 blocks->addStructuredBlockData< Field<real_t,1> >( &createFields, "My Field" );
 
-// time loop and GUI...
+// time loop ...
 \endcode
-
-In order to view the field in the GUI, click on "New Grid View" and drag a block into the window. The "Grid View Properties"
-dock widget can then be used to display slices of the field.
-
-\image html tutorial_basics01_field.jpeg
 
 The next tutorial contains the writing of algorithms operating on block data: \ref tutorial_basics_02
 

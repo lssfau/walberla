@@ -18,7 +18,7 @@ waLBerla_execute_test( NAME  GPUBlockSelectorCommunicationTest )
 waLBerla_compile_test( FILES FieldTransferTest.cpp )
 waLBerla_execute_test( NAME  FieldTransferTest )
 
-waLBerla_compile_test( FILES SimpleKernelTest.cpp Kernels.cu DEPENDS blockforest timeloop gui )
+waLBerla_compile_test( FILES SimpleKernelTest.cpp Kernels.cu DEPENDS blockforest timeloop )
 waLBerla_execute_test( NAME  SimpleKernelTest )
 
 waLBerla_compile_test( FILES FieldIndexing3DTest.cpp FieldIndexing3DTest.cu )
@@ -29,19 +29,19 @@ waLBerla_generate_target_from_python(NAME CodegenJacobiGPUGeneratedCudaJacobiKer
       OUT_FILES CudaJacobiKernel2D.cu CudaJacobiKernel2D.h
       CudaJacobiKernel3D.cu CudaJacobiKernel3D.h)
 waLBerla_compile_test( FILES codegen/CodegenJacobiGPU.cpp
-                       DEPENDS blockforest timeloop gui CodegenJacobiGPUGeneratedCudaJacobiKernel )
+                       DEPENDS blockforest timeloop CodegenJacobiGPUGeneratedCudaJacobiKernel )
 waLBerla_execute_test( NAME CodegenJacobiGPU )
 
 waLBerla_generate_target_from_python(NAME CodegenPoissonGPUGeneratedKernel FILE codegen/CudaPoisson.py
         OUT_FILES PoissonGPU.cu PoissonGPU.h )
-waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS gui gpu timeloop CodegenPoissonGPUGeneratedKernel)
+waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS gpu timeloop CodegenPoissonGPUGeneratedKernel)
 waLBerla_execute_test( NAME CodegenPoissonGPU )
 
 # The following tests work only for CUDA enabled MPI
 waLBerla_compile_test( FILES communication/CommTest.cpp )
 #waLBerla_execute_test( NAME  CommTest PROCESSES 2)
 
-waLBerla_compile_test( FILES CudaMPI.cpp DEPENDS blockforest timeloop gui )
+waLBerla_compile_test( FILES CudaMPI.cpp DEPENDS blockforest timeloop )
 #waLBerla_execute_test( NAME  CudaMPI )
 
 waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS blockforest timeloop )

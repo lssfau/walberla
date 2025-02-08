@@ -291,9 +291,6 @@ shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid
 
 Putting everything together, setting up the communication scheme for the D2Q5 stencil and adding everything to the time loop, 
 as known from the basic tutorials, the simulation can be carried out.
-Using the GUI, the converged profile looks like:
-
-\image html tutorial_pde01_solution.png
 
 In the next tutorial of the PDE section, \ref tutorial_pde02, the Jacobi method is used to solve the linear system of equations arising from an implicit time-stepping method
 for the solution of the famous heat equation. 

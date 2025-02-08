@@ -33,9 +33,6 @@
 #include "core/math/Vector3.h"
 
 #include "field/AddToStorage.h"
-
-#include "gui/Gui.h"
-
 #include "timeloop/SweepTimeloop.h"
 
 #include <fstream>
@@ -47,9 +44,6 @@ using namespace geometry;
 
 const uint_t confBlockCount []      = { 1, 1, 1 };
 const uint_t confCells []           = { 30, 30, 30 };
-
-const bool   useGui = false;
-
 
 typedef GhostLayerField<real_t,1> ScalarField;
 
@@ -278,14 +272,6 @@ int main( int argc, char ** argv )
    sphereTest   ( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
    ellipsoidTest( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
    boxTest      ( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
-
-
-   if ( useGui )
-   {
-      SweepTimeloop timeloop ( blocks, 100 );
-      GUI gui ( timeloop, blocks, argc, argv );
-      gui.run();
-   }
 
   return EXIT_SUCCESS;
 }

@@ -30,8 +30,6 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Vector3.h"
 
-#include "gui/Gui.h"
-
 #include "lbm/field/Adaptors.h"
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/MacroscopicValueCalculation.h"
@@ -160,10 +158,6 @@ int main( int argc, char ** argv )
    auto writeVelocity = field::createVTKOutput<lbm::Adaptor<LatticeModel_T>::VelocityVector  >( velocityID, *blocks, "velocity" );
    writeDensity();
    writeVelocity();
-
-   //GUI gui ( timeloop, blocks, argc, argv );
-   //gui.run();
-
 
    return 0;
 }

@@ -14,7 +14,6 @@ target_link_libraries( lbm
       domain_decomposition
       field
       geometry
-      gui
       stencil
       timeloop
       vtk
@@ -35,7 +34,6 @@ add_subdirectory( communication )
 add_subdirectory( field )
 add_subdirectory( free_surface )
 add_subdirectory( refinement )
-add_subdirectory( gui )
 add_subdirectory( boundary )
 add_subdirectory( mrt )
 add_subdirectory( evaluations )

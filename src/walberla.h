@@ -29,7 +29,6 @@
 #include "field/all.h"
 #include "gather/all.h"
 #include "geometry/all.h"
-#include "gui/all.h"
 #include "lbm/all.h"
 #include "pde/all.h"
 #include "pe_coupling/all.h"

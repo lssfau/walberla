@@ -29,8 +29,6 @@
 
 #include "geometry/all.h"
 
-#include "gui/all.h"
-
 #include "lbm/all.h"
 
 #include "mesh_common/DistanceComputations.h"
@@ -307,24 +305,7 @@ int main(int argc, char** argv)
 
    timeloop.addFuncAfterTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
 
-   // create adaptors, so that the GUI also displays density and velocity
-   // adaptors are like fields with the difference that they do not store values
-   // but calculate the values based on other fields ( here the PdfField )
-   field::addFieldAdaptor< lbm::Adaptor< LatticeModel_T >::Density >(blocks, pdfFieldId, "DensityAdaptor");
-   field::addFieldAdaptor< lbm::Adaptor< LatticeModel_T >::VelocityVector >(blocks, pdfFieldId, "VelocityAdaptor");
-
-   //////////////////////
-   /// RUN SIMULATION ///
-   //////////////////////
-
-   if (parameters.getParameter< bool >("useGui", false))
-   {
-      GUI gui(timeloop, blocks, argc, argv);
-      lbm::connectToGui< LatticeModel_T >(gui);
-      gui.run();
-   }
-   else
-      timeloop.run();
+   timeloop.run();
 
    return EXIT_SUCCESS;
 }

@@ -33,7 +33,6 @@
 #include "stencil/D2Q5.h"
 #include "stencil/D2Q9.h"
 
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 
 #include "vtk/VTKOutput.h"

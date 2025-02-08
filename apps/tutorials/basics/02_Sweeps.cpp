@@ -21,8 +21,9 @@
 #include "blockforest/Initialization.h"
 #include "core/Environment.h"
 #include "field/Field.h"
-#include "gui/Gui.h"
+#include "field/vtk/VTKWriter.h"
 #include "timeloop/SweepTimeloop.h"
+#include "vtk/all.h"
 
 #include <functional>
 
@@ -120,7 +121,7 @@ int main( int argc, char ** argv )
    }
 
    // create time loop
-   const uint_t numberOfTimesteps = uint_c(10); // number of time steps for non-gui runs
+   const uint_t numberOfTimesteps = uint_c(10); // number of time steps
    SweepTimeloop timeloop( blocks, numberOfTimesteps );
 
    // registering the function sweep
@@ -131,10 +132,15 @@ int main( int argc, char ** argv )
    // registering the class sweep
    timeloop.add() << Sweep( SimpleSweep(fieldID), "BogusAlgorithmButNowAsFunctor" );
 
-   // two sweeps were registered, so both are executed in each time step
+   // Create vtk output object, a dataWriter and write the output
+   vtk::writeDomainDecomposition(blocks);
+   auto vtkOutput  = vtk::createVTKOutput_BlockData(*blocks);
+   auto dataWriter = make_shared< field::VTKWriter< Field< real_t, 1 > > >(fieldID, "field");
+   vtkOutput->addCellDataWriter(dataWriter);
+   timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
 
-   GUI gui( timeloop, blocks, argc, argv );
-   gui.run();
+   // two sweeps were registered, so both are executed in each time step
+   timeloop.run();
 
    return EXIT_SUCCESS;
 }

@@ -80,7 +80,7 @@ int main( int argc, char ** argv )
    commScheme.addPackInfo( make_shared<Packing>(gpuFieldSrcID) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(101); // number of timesteps for non-gui runs
+   const uint_t numberOfTimesteps = uint_t(101); // number of timesteps
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

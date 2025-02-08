@@ -30,9 +30,6 @@ You can disable MPI using the CMake switch `WALBERLA_BUILD_WITH_MPI`.
 
 \subsubsection libs_qt    Qt (optional)
 waLBerla can be build with a graphical user interface, which is disabled by default.
-The GUI is mainly useful for debugging and visualizing very small scale simulations.
-To enable the GUI, set the CMake switch `WALBERLA_ENABLE_GUI` to ON and install
-Qt4 on your system.
 
 \subsection setup_building_waLBerla_commands Compiling the code
 
@@ -61,7 +58,6 @@ Some commonly-used build variables:
 Build variable 				        | Default | Meaning
 -----------------------------------| -------- | -----------------------------------------------------------
 CMAKE_BUILD_TYPE                   | Release  | Either Debug (non optimized, for debugging with asserts), Release (production runs), DebugOptimized (optimized, but for debugging with asserts), or RelWithDebInfo (Release with debug infos)
-WALBERLA_ENABLE_GUI                |	OFF   | Builds the graphical user interface. Make sure you have QT development libraries installed.
 WALBERLA_BUILD_TUTORIALS           |	ON    | Builds all the tutorials located in "apps/tutorials" (= they are added to the 'all' target in the Makefile). If disabled, the tutorials can still be built by going to "apps/tutorials" in the build folder and running make.
 WALBERLA_BUILD_WITH_MPI            |    ON    | Since one main goal of waLBerla are massively parallel simulations, this is enabled by default. However, MPI can be disabled.
 WALBERLA_BUILD_WITH_OPENMP         |    OFF   | Enables/Disables OpenMP support for thread-parallel computation. Can also be combined with MPI for hybrid simulations!
