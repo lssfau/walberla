@@ -33,8 +33,6 @@
 #include "field/AddToStorage.h"
 #include "timeloop/SweepTimeloop.h"
 
-#include "gui/Gui.h"
-
 
 using namespace walberla;
 
@@ -81,7 +79,7 @@ void fullFieldTransfer()
 }
 
 
-void blockStorageAndGui( int argc, char ** argv )
+void withBlockStorage()
 {
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
             uint_c(1) , uint_c(1), uint_c(1), // number of blocks in x,y,z direction
@@ -125,9 +123,7 @@ void blockStorageAndGui( int argc, char ** argv )
    }
 
    SweepTimeloop timeloop( blocks, 4 );
-   GUI gui( timeloop, blocks, argc, argv );
-   gui.run();
-
+   timeloop.run();
 }
 
 
@@ -137,8 +133,7 @@ int main( int argc, char ** argv )
    walberla::Environment walberlaEnv( argc, argv );
 
    fullFieldTransfer();
-   //blockStorageAndGui(argc, argv);
-
+   withBlockStorage();
 
    return 0;
 }

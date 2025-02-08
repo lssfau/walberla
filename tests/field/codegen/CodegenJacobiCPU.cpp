@@ -121,7 +121,7 @@ void testJacobi3D()
    commScheme.addDataToCommunicate( make_shared<Packing>(fieldID) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(800); // number of timesteps for non-gui runs
+   const uint_t numberOfTimesteps = uint_t(800); // number of timesteps
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

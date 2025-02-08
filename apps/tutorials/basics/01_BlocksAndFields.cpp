@@ -21,8 +21,8 @@
 #include "blockforest/Initialization.h"
 #include "core/Environment.h"
 #include "field/Field.h"
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
+#include "vtk/all.h"
 
 namespace walberla {
 
@@ -43,13 +43,13 @@ int main( int argc, char ** argv )
                                                                                   real_c(0.5),
                                                                                   false,
                                                                                   false, false, false);
-   
+   vtk::writeDomainDecomposition(blocks);
+
    blocks->addStructuredBlockData< Field<real_t,1> >( &createFields, "My Field" );
 
    
    SweepTimeloop timeloop( blocks, uint_c(1) );
-   GUI gui( timeloop, blocks, argc, argv );
-   gui.run();
+   timeloop.run();
 
    return EXIT_SUCCESS;
 }

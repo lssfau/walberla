@@ -42,7 +42,6 @@
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/MacroscopicValueCalculation.h"
 #include "lbm/field/PdfField.h"
-#include "lbm/gui/Connection.h"
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "lbm/vtk/Density.h"
@@ -72,8 +71,6 @@
 #include "field/adaptors/AdaptorCreators.h"
 #include "field/communication/PackInfo.h"
 #include "field/iterators/FieldPointer.h"
-
-#include "gui/Gui.h"
 
 #include "timeloop/SweepTimeloop.h"
 
@@ -191,7 +188,6 @@ int run( int argc, char **argv )
    real_t u_in = real_t( 1     );
    uint_t dim  = uint_t( 2u    );
 
-   bool useGui = false;
    bool useVTK = false;
    bool quiet  = false;
 
@@ -207,7 +203,6 @@ int run( int argc, char **argv )
          else if( std::string(argv[i]) == "-v"      )   u_in   = stringToNum<real_t>( args[++i] );
          else if( std::string(argv[i]) == "-t"      )   time   = stringToNum<real_t>( args[++i] );
          else if( std::string(argv[i]) == "-err"    )   err    = stringToNum<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "--gui"   )   useGui = true;
          else if( std::string(argv[i]) == "--quiet" )   quiet  = true;
          else if( std::string(argv[i]) == "--vtk"   )   useVTK = true;
          else if( std::string(argv[i]) == "-c"      )   ++i;
@@ -296,17 +291,7 @@ int run( int argc, char **argv )
 
    // --- run timeloop --- //
 
-   if ( useGui )
-   {
-      field::addFieldAdaptor< typename lbm::Adaptor<AdvDiffLatticeModel>::Density>                    ( blockStorage, srcFieldID, "E" );
-      field::addFieldAdaptor< typename lbm::Adaptor<AdvDiffLatticeModel>::StreamMomentumDensityVector>( blockStorage, srcFieldID, "j" );
-
-      GUI gui ( timeloop, blockStorage, argc, argv );
-      lbm::connectToGui<AdvDiffLatticeModel>( gui );
-
-      gui.run();
-   }
-   else if( !quiet )
+   if( !quiet )
    {
       WcTimingPool timeloopTiming;
       timeloop.run( timeloopTiming );

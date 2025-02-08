@@ -57,7 +57,6 @@ include( CTest )
 
 # Build options
 option ( WALBERLA_DOUBLE_ACCURACY           "Floating point accuracy, defaults to double"     ON )
-option ( WALBERLA_ENABLE_GUI                "Compile with GUI"                                   )
 
 option ( WALBERLA_BUILD_TESTS               "Build Testcases"                                 ON )
 option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                                ON )
@@ -827,29 +826,6 @@ execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result 
 if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
     set ( MPIEXEC_PREFLAGS "${MPIEXEC_PREFLAGS}" "-oversubscribe" CACHE STRING "" FORCE)
 endif()
-############################################################################################################################
-
-
-
-############################################################################################################################
-##
-## Qt
-##
-############################################################################################################################
-option (WALBERLA_ENABLE_GUI "This flag builds the graphical user interface, depends on Qt Libraries")
-
-if ( WALBERLA_ENABLE_GUI )
-
-    message( WARNING "The GUI is deprecated and will probably not work correctly." )
-    find_package( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml REQUIRED )
-    set( OpenGL_GL_PREFERENCE LEGACY )
-    find_package( OpenGL REQUIRED )
-
-    INCLUDE( ${QT_USE_FILE} )
-    list ( APPEND SERVICE_LIBS ${OPENGL_LIBRARIES} ${QT_LIBRARIES} )
-
-endif(WALBERLA_ENABLE_GUI)
-
 ############################################################################################################################
 
 

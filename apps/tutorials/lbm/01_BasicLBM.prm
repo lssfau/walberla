@@ -5,7 +5,6 @@ Parameters
 	initialVelocity < 0.1, 0, 0 >;
 	timesteps       10000;
 
-	useGui 1;
 	remainingTimeLoggerFrequency 3; // in seconds
 }
 

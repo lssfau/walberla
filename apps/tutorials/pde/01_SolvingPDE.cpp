@@ -27,11 +27,13 @@
 #include "field/Field.h"
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "stencil/D2Q5.h"
 
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
+
+#include "vtk/all.h"
 
 #include <cmath>
 #include <vector>
@@ -291,9 +293,14 @@ int main( int argc, char ** argv )
    timeloop.add() << BeforeFunction( myCommScheme, "Communication" )
                   << Sweep( JacobiSweepStencil( srcID, dstID, rhsID, weights ), "JacobiSweepStencil" );
 
-   // start the GUI and run the simulation
-   GUI gui ( timeloop, blocks, argc, argv );
-   gui.run();
+   // Create vtk output object, a dataWriter and write the output
+   vtk::writeDomainDecomposition(blocks);
+   auto vtkOutput  = vtk::createVTKOutput_BlockData(*blocks);
+   auto dataWriter = make_shared< field::VTKWriter< Field< real_t, 1 > > >(srcID, "field");
+   vtkOutput->addCellDataWriter(dataWriter);
+   timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+
+   timeloop.run();
 
    return 0;
 }

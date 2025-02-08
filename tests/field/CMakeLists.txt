@@ -37,10 +37,10 @@ waLBerla_execute_test( NAME InterpolationTest )
 waLBerla_compile_test( FILES interpolators/FieldInterpolationTest.cpp)
 waLBerla_execute_test( NAME FieldInterpolationTest )
 
-waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest gui lbm )
+waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest lbm )
 waLBerla_execute_test( NAME AdaptorTest )
 
-waLBerla_compile_test( FILES FieldGatherTest.cpp DEPENDS blockforest gui )
+waLBerla_compile_test( FILES FieldGatherTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME FieldGatherTest3 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 3 DEPENDS_ON_TARGETS FieldGatherTest )
 waLBerla_execute_test( NAME FieldGatherTest1 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 1 DEPENDS_ON_TARGETS FieldGatherTest )
 
@@ -68,7 +68,7 @@ endif( WALBERLA_BUILD_WITH_MPI )
 if( WALBERLA_BUILD_WITH_CODEGEN )
 waLBerla_generate_target_from_python(NAME CodegenJacobiCPUGeneratedJacobiKernel FILE codegen/JacobiKernel.py
       OUT_FILES JacobiKernel2D.cpp JacobiKernel2D.h JacobiKernel3D.cpp JacobiKernel3D.h )
-waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp DEPENDS gui timeloop CodegenJacobiCPUGeneratedJacobiKernel)
+waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp DEPENDS timeloop CodegenJacobiCPUGeneratedJacobiKernel)
 waLBerla_execute_test( NAME CodegenJacobiCPU )
 
 waLBerla_generate_target_from_python(NAME SweepCollectionKernel FILE codegen/SweepCollection.py
@@ -78,12 +78,12 @@ waLBerla_execute_test( NAME SweepCollection )
 
 waLBerla_generate_target_from_python(NAME CodegenPoissonCPUGeneratedKernel FILE codegen/Poisson.py
       OUT_FILES Poisson.cpp Poisson.h )
-waLBerla_compile_test( FILES codegen/CodegenPoissonCPU.cpp DEPENDS gui timeloop CodegenPoissonCPUGeneratedKernel)
+waLBerla_compile_test( FILES codegen/CodegenPoissonCPU.cpp DEPENDS timeloop CodegenPoissonCPUGeneratedKernel)
 waLBerla_execute_test( NAME CodegenPoissonCPU )
 
 waLBerla_generate_target_from_python(NAME CodeGenMultipleFieldSwaps FILE codegen/MultipleFieldSwaps.py
         OUT_FILES MultipleFieldSwaps.cpp MultipleFieldSwaps.h )
-waLBerla_compile_test( FILES codegen/MultipleFieldSwaps.cpp DEPENDS gui timeloop CodeGenMultipleFieldSwaps)
+waLBerla_compile_test( FILES codegen/MultipleFieldSwaps.cpp DEPENDS timeloop CodeGenMultipleFieldSwaps)
 waLBerla_execute_test( NAME MultipleFieldSwaps )
 
 waLBerla_generate_target_from_python(NAME CodegenGeneratedCPUFieldPackInfo FILE codegen/GeneratedFieldPackInfoTest.py

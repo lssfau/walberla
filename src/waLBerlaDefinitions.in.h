@@ -17,7 +17,6 @@
 #cmakedefine WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
 
 // Debugging options
-#cmakedefine WALBERLA_ENABLE_GUI
 #cmakedefine WALBERLA_BUILD_WITH_FASTMATH
 
 

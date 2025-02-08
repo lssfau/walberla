@@ -292,7 +292,7 @@ lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop( timeloop, blocks, 
 In order to know how to use the `VTK` block in the configuration file for setting up VTK output, please have a look
 at: \ref docVTKConfigurationFile
 
-Finally, the simulation is run by either calling the "run" function of the time loop or using the GUI.
+Finally, the simulation is run by calling the "run" function of the time loop.
 
 Now you can build the tutorial application, play around with the configuration file, and try loading different obstacles.
 

@@ -9,7 +9,6 @@ target_link_libraries( lbm_generated
         domain_decomposition
         field
         geometry
-        gui
         stencil
         timeloop
         vtk

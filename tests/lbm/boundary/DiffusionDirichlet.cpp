@@ -40,7 +40,6 @@
 #include "lbm/field/Adaptors.h"
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/PdfField.h"
-#include "lbm/gui/Connection.h"
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "lbm/vtk/Density.h"
@@ -70,8 +69,6 @@
 #include "field/communication/PackInfo.h"
 #include "field/iterators/FieldPointer.h"
 #include "field/vtk/VTKWriter.h"
-
-#include "gui/Gui.h"
 
 #include "geometry/initializer/BoundaryFromDomainBorder.h"
 
@@ -216,7 +213,6 @@ int main( int argc, char **argv )
    uint_t time   = uint_t( 50u  );
    real_t error  = real_t(  0.1 );
 
-   bool useGui = false;
    bool useVTK = false;
 
    // --- read arguments --- //
@@ -229,7 +225,6 @@ int main( int argc, char **argv )
          else if( std::string(argv[i]) == "-v" ) velx   = stringToNum<real_t>( args[++i] );
          else if( std::string(argv[i]) == "-t" ) time   = stringToNum<uint_t>( args[++i] );
          else if( std::string(argv[i]) == "-e" ) error  = stringToNum<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "--gui" ) useGui = true;
          else if( std::string(argv[i]) == "--vtk" ) useVTK = true;
          else if( argv[i][0] != '-' ){
             WALBERLA_ABORT( "Usage: --option or -option value" );
@@ -270,24 +265,12 @@ int main( int argc, char **argv )
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseAdvectionDiffusionSweep< LM, VectorField, MyFlagField >(
                                                 srcFieldID, velFieldID, flagFieldID, getFluidFlag() ) ), "LBM_SRT" );
 
-   if( useGui )
-   {
-      field::addFieldAdaptor< lbm::Adaptor< LM >::Density                     >( blockStorage, srcFieldID, "E" );
-      field::addFieldAdaptor< lbm::Adaptor< LM >::StreamMomentumDensityVector >( blockStorage, srcFieldID, "j" );
+   timeloop.run();
 
-      GUI gui( timeloop, blockStorage, argc, argv );
-      lbm::connectToGui<LM>( gui );
-      gui.run();
-   }
-   else
-   {
-      timeloop.run();
+   TestSweep ts(srcFieldID, omega, velx, error);
+   for (auto block = blockStorage->begin(); block != blockStorage->end(); ++block)
+      ts(block.get());
 
-      TestSweep ts( srcFieldID, omega, velx, error );
-      for( auto block = blockStorage->begin(); block != blockStorage->end(); ++block )
-         ts( block.get() );
-   }
-   
    if( useVTK )
    {
       auto vtkOut = vtk::createVTKOutput_BlockData( *blockStorage, "fields", uint_t(1u), uint_t(0u), false, "vtk_out/DiffusionDirichlet" );

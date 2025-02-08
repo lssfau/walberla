@@ -13,7 +13,7 @@
 #   Insert the following into your .bashrc file and adapt your paths
 #   export WALBERLA_SOURCE_DIR=/path/to/walberla/sources
 #   export WALBERLA_BUILD_DIR=/path/to/build/directory
-#   export WALBERLA_CMAKE_DEFS="-DCMAKE_BUILD_TYPE=Debug -DWALBERLA_ENABLE_GUI=ON"
+#   export WALBERLA_CMAKE_DEFS="-DCMAKE_BUILD_TYPE=Debug"
 #   source $WALBERLA_SOURCE_DIR/utilities/bashhelper/source_me.sh
 #  
 # Shortcuts: ( all cd* commands take as argument a relative path )
