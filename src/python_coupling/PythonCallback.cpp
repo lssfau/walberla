@@ -87,10 +87,11 @@ namespace python_coupling {
 
 
    PythonCallback::PythonCallback( const std::string & fileOrModuleName, const std::string & functionName, const std::vector<std::string> & argv )
-      : functionName_( functionName ), exposedVars_( new DictWrapper() ), callbackDict_( new DictWrapper() )
+      : functionName_( functionName )
    {
       Manager::instance()->triggerInitialization();
-
+      exposedVars_ = make_shared<DictWrapper>();
+      callbackDict_ = make_shared<DictWrapper>();
       namespace py = pybind11;
 
       // Add empty callbacks module
@@ -102,10 +103,11 @@ namespace python_coupling {
 
 
    PythonCallback::PythonCallback( const std::string & functionName )
-      : functionName_( functionName ), exposedVars_( new DictWrapper() ), callbackDict_( new DictWrapper() )
+      : functionName_( functionName )
    {
       Manager::instance()->triggerInitialization();
-
+      exposedVars_ = make_shared<DictWrapper>();
+      callbackDict_ = make_shared<DictWrapper>();
       // Add empty callbacks module
       py::object callbackModule = py::module::import( "walberla_cpp.callbacks");
 
