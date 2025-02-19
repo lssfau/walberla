@@ -5,8 +5,9 @@
 #
 ###################################################################################################
 
-add_library( mesa_pd )
-target_link_libraries( mesa_pd PUBLIC blockforest core stencil vtk )
+add_library( walberla_mesa_pd )
+add_library( walberla::mesa_pd ALIAS walberla_mesa_pd )
+target_link_libraries( walberla_mesa_pd PUBLIC walberla::blockforest walberla::core walberla::stencil walberla::vtk )
 add_subdirectory( collision_detection )
 add_subdirectory( common )
 add_subdirectory( data )
@@ -17,7 +18,7 @@ add_subdirectory( sorting )
 add_subdirectory( vtk )
 if(OPENMESH_CORE_FOUND)
     set( WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE ON CACHE INTERNAL "")
-    target_link_libraries( mesa_pd PUBLIC mesh_common )
+    target_link_libraries( walberla_mesa_pd PUBLIC walberla::mesh_common )
     message( DEBUG "MESA-PD: ConvexPolyhedron shape is available (OpenMesh dependency satisfied)" )
 else()
     set( WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE OFF CACHE INTERNAL "")

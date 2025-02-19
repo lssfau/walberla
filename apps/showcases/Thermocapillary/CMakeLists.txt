@@ -35,9 +35,9 @@ waLBerla_generate_target_from_python(NAME ThermocapillaryGen
 if ( WALBERLA_BUILD_WITH_GPU_SUPPORT )
     waLBerla_add_executable(NAME thermocapillary
             FILES thermocapillary.cpp PythonExports.cpp InitializerFunctions.cpp thermocapillary_codegen.py
-            DEPENDS blockforest core gpu field postprocessing python_coupling lbm geometry timeloop ThermocapillaryGen)
+          DEPENDS walberla::blockforest walberla::core walberla::gpu walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop ThermocapillaryGen )
 else ()
     waLBerla_add_executable(NAME thermocapillary
             FILES thermocapillary.cpp PythonExports.cpp InitializerFunctions.cpp thermocapillary_codegen.py
-            DEPENDS blockforest core field postprocessing python_coupling lbm geometry timeloop ThermocapillaryGen)
+          DEPENDS walberla::blockforest walberla::core walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop ThermocapillaryGen )
 endif ( WALBERLA_BUILD_WITH_GPU_SUPPORT )

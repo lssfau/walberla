@@ -1,4 +1,4 @@
-target_sources( lbm
+target_sources( walberla_lbm
     PRIVATE
     QCriterion.h
     NonEquilibrium.h

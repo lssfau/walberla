@@ -1,4 +1,4 @@
-target_sources( mesa_pd
+target_sources( walberla_mesa_pd
     PRIVATE
     LinearizedCompareFunctor.h
     HilbertCompareFunctor.h

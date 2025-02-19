@@ -4,11 +4,12 @@
 #
 ###################################################################################################
 
-add_library( gpu )
-target_link_libraries( gpu PUBLIC blockforest core communication domain_decomposition executiontree field stencil lbm )
+add_library( walberla_gpu )
+add_library( walberla::gpu ALIAS walberla_gpu )
+target_link_libraries( walberla_gpu PUBLIC walberla::blockforest walberla::core walberla::communication walberla::domain_decomposition walberla::executiontree walberla::field walberla::stencil walberla::lbm )
 
 # sources for HIP and CUDA
-target_sources( gpu
+target_sources( walberla_gpu
       PRIVATE
       AlignedAllocation.h
       AddGPUFieldToStorage.h
@@ -44,7 +45,7 @@ target_sources( gpu
 
 # sources only for CUDA
 if (WALBERLA_BUILD_WITH_CUDA)
-target_sources( gpu
+   target_sources( walberla_gpu
         PRIVATE
         NVTX.h
         )

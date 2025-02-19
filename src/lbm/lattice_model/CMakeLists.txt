@@ -1,4 +1,4 @@
-target_sources( lbm
+target_sources( walberla_lbm
     PRIVATE
     CollisionModel.cpp
     D3Q27.h

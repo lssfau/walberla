@@ -7,4 +7,4 @@ waLBerla_add_executable( NAME 01_cnt_film
         InitializeCNTs.cpp
         SQLProperties.cpp
         Statistics.cpp
-   DEPENDS blockforest core mesa_pd sqlite vtk )
+      DEPENDS walberla::blockforest walberla::core walberla::mesa_pd walberla::sqlite walberla::vtk )

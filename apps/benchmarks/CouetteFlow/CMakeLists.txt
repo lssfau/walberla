@@ -1,7 +1,7 @@
 
 waLBerla_link_files_to_builddir( "*.dat" )                 
-                                  
-waLBerla_add_executable( NAME CouetteFlow DEPENDS blockforest boundary core field lbm postprocessing stencil timeloop vtk sqlite )
+
+waLBerla_add_executable( NAME CouetteFlow DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::postprocessing walberla::stencil walberla::timeloop walberla::vtk walberla::sqlite )
 
 ##############
 # Some tests #

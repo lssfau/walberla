@@ -1,17 +1,18 @@
-add_library( lbm_generated)
+add_library( walberla_lbm_generated )
+add_library( walberla::lbm_generated ALIAS walberla_lbm_generated )
 
-target_link_libraries( lbm_generated
+target_link_libraries( walberla_lbm_generated
         PUBLIC
-        blockforest
-        boundary
-        communication
-        core
-        domain_decomposition
-        field
-        geometry
-        stencil
-        timeloop
-        vtk
+      walberla::blockforest
+      walberla::boundary
+      walberla::communication
+      walberla::core
+      walberla::domain_decomposition
+      walberla::field
+      walberla::geometry
+      walberla::stencil
+      walberla::timeloop
+      walberla::vtk
         )
 
 add_subdirectory( boundary )

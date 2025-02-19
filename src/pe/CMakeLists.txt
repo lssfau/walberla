@@ -5,9 +5,10 @@
 #
 ###################################################################################################
 
-add_library( pe )
-target_link_libraries( pe PUBLIC core blockforest domain_decomposition geometry stencil vtk PRIVATE lodepng )
-target_sources( pe
+add_library( walberla_pe )
+add_library( walberla::pe ALIAS walberla_pe )
+target_link_libraries( walberla_pe PUBLIC walberla::core walberla::blockforest walberla::domain_decomposition walberla::geometry walberla::stencil walberla::vtk PRIVATE lodepng )
+target_sources( walberla_pe
       PRIVATE
       Config.h
       Thresholds.h

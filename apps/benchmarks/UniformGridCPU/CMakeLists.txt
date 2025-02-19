@@ -29,7 +29,7 @@ foreach(streaming_pattern pull push aa esotwist esopull esopush)
 
             waLBerla_add_executable(NAME UniformGridCPU_${config}
                     FILES UniformGridCPU.cpp
-                    DEPENDS blockforest boundary core domain_decomposition field geometry python_coupling timeloop vtk UniformGridCPUGenerated_${config})
+                  DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::geometry walberla::python_coupling walberla::timeloop walberla::vtk UniformGridCPUGenerated_${config} )
 
             # all configs are excluded from all except for pull d3q27.
             if (${streaming_pattern} STREQUAL "pull" AND ${stencil} STREQUAL "d3q27")

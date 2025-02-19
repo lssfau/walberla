@@ -1,4 +1,4 @@
-target_sources( lbm
+target_sources( walberla_lbm
     PRIVATE
     SplitPureSweep.impl.h
     SplitSweep.impl.h

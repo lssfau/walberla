@@ -1,4 +1,4 @@
-target_sources( mesh
+target_sources( walberla_mesh
     PRIVATE
     ConvexPolyhedronFactory.h
     ConvexPolyhedron.cpp

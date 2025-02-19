@@ -4,9 +4,10 @@
 #
 ###################################################################################################
 
-add_library( domain_decomposition )
-target_link_libraries( domain_decomposition PUBLIC core )
-target_sources( domain_decomposition
+add_library( walberla_domain_decomposition )
+add_library( walberla::domain_decomposition ALIAS walberla_domain_decomposition )
+target_link_libraries( walberla_domain_decomposition PUBLIC walberla::core )
+target_sources( walberla_domain_decomposition
       PRIVATE
       BlockCounter.h
       BlockDataHandling.h

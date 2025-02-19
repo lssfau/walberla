@@ -4,8 +4,9 @@
 #
 ###################################################################################################
 
-add_library( stencil INTERFACE )
-target_sources( stencil
+add_library( walberla_stencil INTERFACE )
+add_library( walberla::stencil ALIAS walberla_stencil )
+target_sources( walberla_stencil
       INTERFACE
       AABBQuadrant.h
       D2CornerStencil.h
@@ -24,6 +25,6 @@ target_sources( stencil
       Iterator.h
       Stencil.in.h
       )
-target_link_libraries( stencil INTERFACE core )
+target_link_libraries( walberla_stencil INTERFACE walberla::core )
 
 ###################################################################################################

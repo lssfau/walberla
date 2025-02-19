@@ -4,8 +4,9 @@
 #
 ###################################################################################################
 
-add_library( vtk )
-target_sources( vtk
+add_library( walberla_vtk )
+add_library( walberla::vtk ALIAS walberla_vtk )
+target_sources( walberla_vtk
       PRIVATE
       Base64Writer.cpp
       Base64Writer.h
@@ -24,6 +25,6 @@ target_sources( vtk
       UtilityFunctions.h
       ChainedFilter.h
       )
-target_link_libraries( vtk PUBLIC core blockforest domain_decomposition )
+target_link_libraries( walberla_vtk PUBLIC walberla::core walberla::blockforest walberla::domain_decomposition )
 
 ###################################################################################################

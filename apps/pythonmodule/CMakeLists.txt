@@ -1,12 +1,12 @@
 # waLBerla Python module
-if( NOT TARGET python_coupling )
-    message( WARNING "python module ist not build since the python_coupling target is non-existent" )
+if ( NOT TARGET walberla::python_coupling )
+    message( WARNING "python module ist not build since the walberla::python_coupling target is non-existent" )
 else()
 if ( WALBERLA_BUILD_WITH_PYTHON )
     if ( WALBERLA_BUILD_WITH_GPU_SUPPORT )
-        set(PYTHON_MODULE_DEPENDENCIES blockforest boundary domain_decomposition core field python_coupling timeloop vtk gpu)
+        set( PYTHON_MODULE_DEPENDENCIES walberla::blockforest walberla::boundary walberla::domain_decomposition walberla::core walberla::field walberla::python_coupling walberla::timeloop walberla::vtk walberla::gpu )
     else()
-        set(PYTHON_MODULE_DEPENDENCIES blockforest boundary domain_decomposition core field python_coupling timeloop vtk)
+        set( PYTHON_MODULE_DEPENDENCIES walberla::blockforest walberla::boundary walberla::domain_decomposition walberla::core walberla::field walberla::python_coupling walberla::timeloop walberla::vtk )
     endif()
 
     if( WALBERLA_CXX_COMPILER_IS_MSVC )

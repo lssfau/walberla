@@ -1,4 +1,4 @@
-target_sources( blockforest
+target_sources( walberla_blockforest
       PRIVATE
       BlockInfo.h
       Cartesian.h

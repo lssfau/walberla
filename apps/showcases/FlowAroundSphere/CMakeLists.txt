@@ -22,10 +22,10 @@ waLBerla_generate_target_from_python(NAME FlowAroundSphereCodeGen
 if (WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP)
     waLBerla_add_executable ( NAME FlowAroundSphere
             FILES FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h
-            DEPENDS blockforest boundary core field gpu lbm_generated stencil timeloop vtk FlowAroundSphereCodeGen )
+          DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::gpu walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk FlowAroundSphereCodeGen )
 else()
     waLBerla_add_executable ( NAME FlowAroundSphere
             FILES FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h
-            DEPENDS blockforest boundary core field lbm_generated stencil timeloop vtk FlowAroundSphereCodeGen )
+          DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk FlowAroundSphereCodeGen )
 
 endif(WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP)

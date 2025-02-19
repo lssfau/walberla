@@ -1,4 +1,4 @@
-target_sources( mesh_common
+target_sources( walberla_mesh_common
     INTERFACE
     CommonFilters.h
     VTKMeshWriter.h

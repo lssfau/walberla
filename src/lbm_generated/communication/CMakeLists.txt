@@ -1,4 +1,4 @@
-target_sources( lbm_generated
+target_sources( walberla_lbm_generated
     PRIVATE
     CombinedInPlacePackInfo.h
     NonuniformCommData.h
