@@ -1,4 +1,4 @@
-target_sources( lbm_generated
+target_sources( walberla_lbm_generated
         PRIVATE
         D3Q19SRT.h
         D3Q19SRT.cpp

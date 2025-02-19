@@ -5,9 +5,10 @@
 ###################################################################################################
 
 
-add_library( boundary )
-target_link_libraries( boundary PUBLIC core communication domain_decomposition field stencil )
-target_sources( boundary
+add_library( walberla_boundary )
+add_library( walberla::boundary ALIAS walberla_boundary )
+target_link_libraries( walberla_boundary PUBLIC walberla::core walberla::communication walberla::domain_decomposition walberla::field walberla::stencil )
+target_sources( walberla_boundary
       PRIVATE
       BoundaryHandling.h
       Boundary.h

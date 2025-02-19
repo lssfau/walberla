@@ -1,4 +1,4 @@
-target_sources( core
+target_sources( walberla_core
    PRIVATE
       Cell.h
       CellArray.h

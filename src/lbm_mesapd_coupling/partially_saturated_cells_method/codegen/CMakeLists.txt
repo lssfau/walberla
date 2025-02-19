@@ -1,4 +1,4 @@
-target_sources(lbm_mesapd_coupling
+target_sources( walberla_lbm_mesapd_coupling
         PRIVATE
         ParticleAndVolumeFractionMappingSweepsCPU.h
         PSMSweepCollection.h
@@ -22,7 +22,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
     endforeach ()
 endif ()
 if (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP))
-    target_sources(lbm_mesapd_coupling
+    target_sources( walberla_lbm_mesapd_coupling
             PRIVATE
             ParticleAndVolumeFractionMappingSweepsGPU.h
             ParticleAndVolumeFractionMappingKernels.${CODEGEN_FILE_SUFFIX}

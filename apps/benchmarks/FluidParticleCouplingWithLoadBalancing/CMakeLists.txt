@@ -1,3 +1,3 @@
-waLBerla_add_executable( NAME FluidParticleWorkloadEvaluation FILES FluidParticleWorkloadEvaluation.cpp DEPENDS blockforest boundary core field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+waLBerla_add_executable( NAME FluidParticleWorkloadEvaluation FILES FluidParticleWorkloadEvaluation.cpp DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
-waLBerla_add_executable( NAME FluidParticleWorkloadDistribution FILES FluidParticleWorkloadDistribution.cpp DEPENDS blockforest boundary core field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+waLBerla_add_executable( NAME FluidParticleWorkloadDistribution FILES FluidParticleWorkloadDistribution.cpp DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )

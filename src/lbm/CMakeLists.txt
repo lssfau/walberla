@@ -4,21 +4,22 @@
 #
 ###################################################################################################
 
-add_library( lbm )
-target_link_libraries( lbm
+add_library( walberla_lbm )
+add_library( walberla::lbm ALIAS walberla_lbm )
+target_link_libraries( walberla_lbm
       PUBLIC
-      blockforest
-      boundary
-      communication
-      core
-      domain_decomposition
-      field
-      geometry
-      stencil
-      timeloop
-      vtk
+      walberla::blockforest
+      walberla::boundary
+      walberla::communication
+      walberla::core
+      walberla::domain_decomposition
+      walberla::field
+      walberla::geometry
+      walberla::stencil
+      walberla::timeloop
+      walberla::vtk
       )
-target_sources( lbm
+target_sources( walberla_lbm
       PRIVATE
       PerformanceEvaluation.h
       BlockForestEvaluation.h

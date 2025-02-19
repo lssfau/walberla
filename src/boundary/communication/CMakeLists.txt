@@ -1,4 +1,4 @@
-target_sources( boundary
+target_sources( walberla_boundary
     PRIVATE
     HandlingPackInfo.h     
     )

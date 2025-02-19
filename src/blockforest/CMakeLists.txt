@@ -4,9 +4,10 @@ mark_as_advanced( WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID )
 
 configure_file( CMakeDefs.in.h CMakeDefs.h )
 
-add_library( blockforest )
-target_link_libraries( blockforest PUBLIC communication core domain_decomposition stencil )
-target_sources( blockforest
+add_library( walberla_blockforest )
+add_library( walberla::blockforest ALIAS walberla_blockforest )
+target_link_libraries( walberla_blockforest PUBLIC walberla::communication walberla::core walberla::domain_decomposition walberla::stencil )
+target_sources( walberla_blockforest
       PRIVATE
       AABBRefinementSelection.h
       all.h

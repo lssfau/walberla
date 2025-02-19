@@ -59,7 +59,7 @@ function ( get_current_module_name  )
         if ( NOT ${moduleFolder} MATCHES "\\.\\./.*" )
            #append / to make cmake_path also work with one directory only
            string(REGEX REPLACE "(.*)/.*" "\\1" moduleNameOut ${moduleFolder})
-           set(moduleName ${moduleNameOut} PARENT_SCOPE)
+           set( moduleName walberla::${moduleNameOut} PARENT_SCOPE )
            return() 
         endif()
     endforeach()
@@ -170,48 +170,6 @@ endfunction ( waLBerla_resolve_dependencies )
 # message ( STATUS "Resolve Dependencies testcase ${out}" ) # should print A;B;C;F;D
 
 #######################################################################################################################
-
-
-
-
-
-#######################################################################################################################
-#
-# Links a list of modules to a given target
-#
-# - Translates module names to library names
-# - links transitively all modules that depend on given modules
-# 
-#######################################################################################################################
-
-function ( target_link_modules target )
-
-    set ( libs  )
-    foreach ( module ${ARGN} )
-       get_module_library_name ( libraryName ${module} )
-       list( APPEND libs ${libraryName} )
-    endforeach()
-        
-    waLBerla_resolve_dependencies ( libs ${libs} )
-        
-    # The linker needs the modules in the correct order depending on their
-    # dependencies. We would have to do a topological sorting here, instead
-    # we specify all libs twice -> Could be improved -> faster linking times
-    set ( libs ${libs} ${libs} ${libs} )
-    
-    foreach ( libraryName ${libs} )
-        if( TARGET ${libraryName} ) 
-     	   get_target_property( target_type ${libraryName} TYPE ) 
-     	   if( ${target_type} MATCHES LIBRARY ) 
-     	      target_link_libraries( ${target} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${libraryName} )
-     	   endif( )                    
-     	endif( ) 
-    endforeach()
-        
-endfunction ( target_link_modules )
-#######################################################################################################################
-
-
 
 
 

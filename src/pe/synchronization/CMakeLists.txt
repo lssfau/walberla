@@ -1,4 +1,4 @@
-target_sources( pe
+target_sources( walberla_pe
     PRIVATE
     SyncNextNeighbors.h
     SyncShadowOwners.h

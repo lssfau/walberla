@@ -1,4 +1,4 @@
-target_sources( lbm_generated
+target_sources( walberla_lbm_generated
         PRIVATE
         D3Q19BoundaryCollection.h
         D3Q27BoundaryCollection.h

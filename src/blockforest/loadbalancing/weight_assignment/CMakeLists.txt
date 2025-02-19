@@ -1,4 +1,4 @@
-target_sources( blockforest
+target_sources( walberla_blockforest
     PRIVATE
     WeightAssignmentFunctor.h
     MetisAssignmentFunctor.h     

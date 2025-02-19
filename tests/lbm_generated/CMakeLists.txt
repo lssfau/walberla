@@ -1,6 +1,6 @@
 #############################################################################################################################
 #
-# Tests for generated lbm module
+# Tests for generated walberla::lbm module
 #
 #############################################################################################################################
 waLBerla_link_files_to_builddir( "*.prm" )
@@ -17,7 +17,7 @@ waLBerla_generate_target_from_python(NAME ExampleGenerated
         UBB.h UBB.cpp
         LBMBoundaryCollection.h
         Example_InfoHeader.h)
-waLBerla_compile_test( FILES Example.cpp DEPENDS ExampleGenerated blockforest field lbm_generated timeloop )
+waLBerla_compile_test( FILES Example.cpp DEPENDS ExampleGenerated walberla::blockforest walberla::field walberla::lbm_generated walberla::timeloop )
 
 waLBerla_generate_target_from_python(NAME InterpolationNoSlipGenerated
         FILE InterpolationNoSlip.py
@@ -31,7 +31,7 @@ waLBerla_generate_target_from_python(NAME InterpolationNoSlipGenerated
         InterpolationNoSlipBoundaryCollection.h
         InterpolationNoSlipHeader.h)
 
-waLBerla_compile_test( FILES InterpolationNoSlip.cpp DEPENDS InterpolationNoSlipGenerated blockforest core field geometry lbm_generated timeloop )
+waLBerla_compile_test( FILES InterpolationNoSlip.cpp DEPENDS InterpolationNoSlipGenerated walberla::blockforest walberla::core walberla::field walberla::geometry walberla::lbm_generated walberla::timeloop )
 # waLBerla_execute_test( NAME InterpolationNoSlip1 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm -Parameters.distanceWall=0.1 )
 # waLBerla_execute_test( NAME InterpolationNoSlip2 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm -Parameters.distanceWall=0.5 )
 waLBerla_execute_test( NAME InterpolationNoSlip3 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm )
@@ -47,8 +47,8 @@ waLBerla_generate_target_from_python(NAME FreeSlipRefinementGenerated
         Outflow.h Outflow.cpp
         FreeSlipRefinementBoundaryCollection.h
         FreeSlipRefinementInfoHeader.h)
-waLBerla_compile_test( FILES FreeSlipRefinement.cpp DEPENDS FreeSlipRefinementGenerated blockforest field lbm_generated timeloop )
+waLBerla_compile_test( FILES FreeSlipRefinement.cpp DEPENDS FreeSlipRefinementGenerated walberla::blockforest walberla::field walberla::lbm_generated walberla::timeloop )
 
 if( WALBERLA_DOUBLE_ACCURACY )
-waLBerla_compile_test( FILES LDC.cpp DEPENDS blockforest field lbm_generated timeloop )
+   waLBerla_compile_test( FILES LDC.cpp DEPENDS walberla::blockforest walberla::field walberla::lbm_generated walberla::timeloop )
 endif()

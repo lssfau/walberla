@@ -1,7 +1,7 @@
 if ( WALBERLA_BUILD_WITH_OPENMESH )
         
     waLBerla_link_geometry_to_builddir( "bunny.obj" )                                
-	waLBerla_add_executable( NAME MeshDistanceBenchmark DEPENDS core mesh )
+    waLBerla_add_executable( NAME MeshDistanceBenchmark DEPENDS walberla::core walberla::mesh )
 
 	##############
 	# Some tests #

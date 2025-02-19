@@ -1,7 +1,7 @@
 waLBerla_add_executable ( NAME PackPerformance 
                           FILES PackPerformance.cpp
-                          DEPENDS core )
+      DEPENDS walberla::core )
 
 waLBerla_add_executable ( NAME ProbeVsExtraMessage 
                           FILES ProbeVsExtraMessage.cpp
-                          DEPENDS core postprocessing stencil sqlite)
+      DEPENDS walberla::core walberla::postprocessing walberla::stencil walberla::sqlite )
