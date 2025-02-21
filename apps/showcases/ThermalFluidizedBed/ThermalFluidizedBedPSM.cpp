@@ -15,9 +15,10 @@
 //
 //! \file FluidizedBedPSM.cpp
 //! \ingroup lbm_mesapd_coupling
+//! \author Ravi Ayyala Somayajula <ravi.k.ayyala@fau.de>
 //! \author Samuel Kemmler <samuel.kemmler@fau.de>
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
-//! \brief Modification of showcases/FluidizedBed/FluidizedBedMEM.cpp
+//! \brief Modification of showcases/FluidizedBed/FluidizedBedPSM.cpp for incorporating temperature
 //
 //======================================================================================================================
 
@@ -41,6 +42,12 @@
 #include "field/AddToStorage.h"
 #include "field/vtk/all.h"
 
+#include "geometry/InitBoundaryHandling.h"
+
+#include "gpu/AddGPUFieldToStorage.h"
+#include "gpu/DeviceSelectMPI.h"
+#include "gpu/communication/UniformGPUScheme.h"
+
 #include "lbm/boundary/all.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
@@ -48,11 +55,6 @@
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/vtk/all.h"
 
-#include "lbm_mesapd_coupling/DataTypes.h"
-#include "lbm_mesapd_coupling/mapping/ParticleMapping.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMSweep.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMUtility.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/ParticleAndVolumeFractionMapping.h"
 #include "lbm_mesapd_coupling/utility/AddForceOnParticlesKernel.h"
 #include "lbm_mesapd_coupling/utility/AddHydrodynamicInteractionKernel.h"
 #include "lbm_mesapd_coupling/utility/AverageHydrodynamicForceTorqueKernel.h"
@@ -86,7 +88,28 @@
 
 #include "vtk/all.h"
 
-namespace fluidized_bed
+// non-codegen folder file includes (just for reference) //
+#include "lbm_mesapd_coupling/DataTypes.h"
+#include "lbm_mesapd_coupling/mapping/ParticleMapping.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMSweep.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/PSMUtility.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/ParticleAndVolumeFractionMapping.h"
+
+
+// codegen folder file includes
+#include "lbm_mesapd_coupling/DataTypesCodegen.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
+
+
+// code generated files
+#include "ConcentrationMacroGetter.h"
+#include "FluidMacroGetter.h"
+#include "GeneralInfoHeader.h"
+#include "PSMFluidSweep.h"
+#include "PackInfoConcentration.h"
+#include "PackInfoFluid.h"
+
+namespace thermalfluidized_bed
 {
 
 ///////////
@@ -94,8 +117,10 @@ namespace fluidized_bed
 ///////////
 
 using namespace walberla;
-using walberla::uint_t;
-
+//using walberla::uint_t;
+using namespace lbm_mesapd_coupling::psm::gpu;
+typedef pystencils::PackInfoFluid PackInfoFluid_T;
+typedef pystencils::PackInfoConcentration PackInfoConcentration_T;
 using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT >;
 
 using Stencil_T  = LatticeModel_T::Stencil;
@@ -108,6 +133,7 @@ using ScalarField_T = GhostLayerField< real_t, 1 >;
 
 const uint_t FieldGhostLayers = 1;
 
+
 ///////////
 // FLAGS //
 ///////////
@@ -117,113 +143,26 @@ const FlagUID NoSlip_Flag("no slip");
 const FlagUID Inflow_Flag("inflow");
 const FlagUID Outflow_Flag("outflow");
 
-/////////////////////////////////////
-// BOUNDARY HANDLING CUSTOMIZATION //
-/////////////////////////////////////
-template< typename ParticleAccessor_T >
-class MyBoundaryHandling
-{
- public:
-   using NoSlip_T  = lbm::NoSlip< LatticeModel_T, flag_t >;
-   using Inflow_T  = lbm::SimpleUBB< LatticeModel_T, flag_t >;
-   using Outflow_T = lbm::SimplePressure< LatticeModel_T, flag_t >;
-   using Type      = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, Inflow_T, Outflow_T >;
 
-   MyBoundaryHandling(const BlockDataID& flagFieldID, const BlockDataID& pdfFieldID,
-                      const shared_ptr< ParticleAccessor_T >& ac, Vector3< real_t > inflowVelocity, bool periodicInX,
-                      bool periodicInY)
-      : flagFieldID_(flagFieldID), pdfFieldID_(pdfFieldID), ac_(ac), inflowVelocity_(inflowVelocity),
-        periodicInX_(periodicInX), periodicInY_(periodicInY)
-   {}
+///////////////////
+// FLAGS Codegen //
+//////////////////
 
-   Type* operator()(IBlock* const block, const StructuredBlockStorage* const storage) const
-   {
-      WALBERLA_ASSERT_NOT_NULLPTR(block);
-      WALBERLA_ASSERT_NOT_NULLPTR(storage);
+// Fluid Flags
+const FlagUID Fluidd_Flag("Fluid");
+const FlagUID Density_Fluid_Flag("Density_Fluid");
+const FlagUID NoSlip_Fluid_Flag("NoSlip_Fluid");
+const FlagUID Inflow_Fluid_Flag("Inflow_Fluid");
 
-      auto* flagField = block->getData< FlagField_T >(flagFieldID_);
-      auto* pdfField  = block->getData< PdfField_T >(pdfFieldID_);
+// Concentration Flags
+const FlagUID Concentration_Flag("Concentration");
+const FlagUID Density_Concentration_Flag_west("Density_Concentration_west");
+const FlagUID Density_Concentration_Flag_east("Density_Concentration_east");
+const FlagUID NoSlip_Concentration_Flag("NoSlip_Concentration");
+const FlagUID Inflow_Concentration_Flag("Inflow_Concentration");
+const FlagUID Neumann_Concentration_Flag("Neumann_Concentration");
 
-      const auto fluid =
-         flagField->flagExists(Fluid_Flag) ? flagField->getFlag(Fluid_Flag) : flagField->registerFlag(Fluid_Flag);
 
-      Type* handling =
-         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag, pdfField),
-                  Inflow_T("Inflow", Inflow_Flag, pdfField, inflowVelocity_),
-                  Outflow_T("Outflow", Outflow_Flag, pdfField, real_t(1)));
-
-      const auto inflow  = flagField->getFlag(Inflow_Flag);
-      const auto outflow = flagField->getFlag(Outflow_Flag);
-      const auto noslip  = flagField->getFlag(NoSlip_Flag);
-
-      CellInterval domainBB = storage->getDomainCellBB();
-
-      domainBB.xMin() -= cell_idx_c(FieldGhostLayers);
-      domainBB.xMax() += cell_idx_c(FieldGhostLayers);
-
-      domainBB.zMin() -= cell_idx_c(FieldGhostLayers);
-      domainBB.zMax() += cell_idx_c(FieldGhostLayers);
-
-      domainBB.yMin() -= cell_idx_c(FieldGhostLayers);
-      domainBB.yMax() += cell_idx_c(FieldGhostLayers);
-
-      // inflow at bottom
-      CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(),
-                          domainBB.zMin());
-      storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
-      handling->forceBoundary(inflow, bottom);
-
-      // outflow at top
-      CellInterval top(domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(),
-                       domainBB.zMax());
-      storage->transformGlobalToBlockLocalCellInterval(top, *block);
-      handling->forceBoundary(outflow, top);
-
-      if (!periodicInX_)
-      {
-         // left
-         CellInterval left(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(),
-                           domainBB.zMax());
-         storage->transformGlobalToBlockLocalCellInterval(left, *block);
-         handling->forceBoundary(noslip, left);
-
-         // right
-         CellInterval right(domainBB.xMax(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(),
-                            domainBB.zMax());
-         storage->transformGlobalToBlockLocalCellInterval(right, *block);
-         handling->forceBoundary(noslip, right);
-      }
-
-      if (!periodicInY_)
-      {
-         // front
-         CellInterval front(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(),
-                            domainBB.zMax());
-         storage->transformGlobalToBlockLocalCellInterval(front, *block);
-         handling->forceBoundary(noslip, front);
-
-         // back
-         CellInterval back(domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(),
-                           domainBB.zMax());
-         storage->transformGlobalToBlockLocalCellInterval(back, *block);
-         handling->forceBoundary(noslip, back);
-      }
-
-      handling->fillWithDomain(FieldGhostLayers);
-
-      return handling;
-   }
-
- private:
-   const BlockDataID flagFieldID_;
-   const BlockDataID pdfFieldID_;
-
-   shared_ptr< ParticleAccessor_T > ac_;
-
-   Vector3< real_t > inflowVelocity_;
-   bool periodicInX_;
-   bool periodicInY_;
-};
 //*******************************************************************************************************************
 
 void createPlane(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
@@ -348,28 +287,43 @@ std::ostream& operator<<(std::ostream& os, FluidInfo const& m)
              << ", densityMax = " << m.maximumDensity;
 }
 
-template< typename BoundaryHandling_T >
-FluidInfo evaluateFluidInfo(const shared_ptr< StructuredBlockStorage >& blocks, const BlockDataID& pdfFieldID,
-                            const BlockDataID& boundaryHandlingID)
+
+//////////////////////////////////////////////////////
+// Functionality to evaluate fluid info for codegen //
+/////////////////////////////////////////////////////
+
+
+FluidInfo evaluateFluidInfoCodegen(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& velocityFluidFieldID,BlockDataID& densityFluidFieldID)
 {
    FluidInfo info;
-
-   for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
+   int i = 0;
+   for (auto& block : *blocks)
    {
-      auto pdfField         = blockIt->getData< PdfField_T >(pdfFieldID);
-      auto boundaryHandling = blockIt->getData< BoundaryHandling_T >(boundaryHandlingID);
 
+      auto FluidVelocityField = block.getData< VelocityField_fluid_T >(velocityFluidFieldID);
+      auto FluidDensityField = block.getData< DensityField_fluid_T >(densityFluidFieldID);
       WALBERLA_FOR_ALL_CELLS_XYZ(
-         pdfField, if (!boundaryHandling->isDomain(x, y, z)) continue; ++info.numFluidCells;
-         Vector3< real_t > velocity(0_r); real_t density = pdfField->getDensityAndVelocity(velocity, x, y, z);
-         real_t velMagnitude                             = velocity.length(); info.averageVelocity += velMagnitude;
-         info.maximumVelocity = std::max(info.maximumVelocity, velMagnitude); info.averageDensity += density;
+         FluidVelocityField, ++info.numFluidCells;
+         Vector3< real_t > velocity(0_r);
+         real_t density = FluidDensityField->get(x,y,z);
+         velocity[0] = FluidVelocityField->get(x, y, z, 0);
+         velocity[1] = FluidVelocityField->get(x, y, z, 1);
+         velocity[2] = FluidVelocityField->get(x, y, z, 0);
+         real_t velMagnitude  = velocity.length();
+         info.averageVelocity += velMagnitude;
+         info.maximumVelocity = std::max(info.maximumVelocity, velMagnitude);
+         info.averageDensity  += density;
          info.maximumDensity  = std::max(info.maximumDensity, density);)
+
    }
+   /*mpi::allReduceInplace(info.numFluidCells, mpi::SUM);
+   mpi::allReduceInplace(info.averageVelocity, mpi::SUM);
+   mpi::allReduceInplace(info.maximumVelocity, mpi::MAX);
+   mpi::allReduceInplace(info.averageDensity, mpi::SUM);
+   mpi::allReduceInplace(info.maximumDensity, mpi::MAX);*/
    info.allReduce();
    return info;
 }
-
 //////////
 // MAIN //
 //////////
@@ -399,10 +353,18 @@ int main(int argc, char** argv)
    auto cfgFile = env.config();
    if (!cfgFile) { WALBERLA_ABORT("Usage: " << argv[0] << " path-to-configuration-file \n"); }
 
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   gpu::selectDeviceBasedOnMpiRank();
+#endif
+
    WALBERLA_LOG_INFO_ON_ROOT("waLBerla revision: " << std::string(WALBERLA_GIT_SHA1).substr(0, 8));
    WALBERLA_LOG_INFO_ON_ROOT(*cfgFile);
 
    // read all parameters from the config file
+
+   ///////////////////////////////////////////////////////////////
+   // parameters reading and printing for thermal fluidized bed //
+   ///////////////////////////////////////////////////////////////
 
    Config::BlockHandle physicalSetup         = cfgFile->getBlock("PhysicalSetup");
    const real_t xSize_SI                     = physicalSetup.getParameter< real_t >("xSize");
@@ -429,6 +391,18 @@ int main(int argc, char** argv)
    const uint_t numZBlocks                = numericalSetup.getParameter< uint_t >("numZBlocks");
    const bool useLubricationForces        = numericalSetup.getParameter< bool >("useLubricationForces");
    const uint_t numberOfParticleSubCycles = numericalSetup.getParameter< uint_t >("numberOfParticleSubCycles");
+   const bool sendDirectlyFromGPU     = numericalSetup.getParameter< bool >("sendDirectlyFromGPU");
+   const bool useCommunicationHiding  = numericalSetup.getParameter< bool >("useCommunicationHiding");
+   const Vector3< uint_t > frameWidth = numericalSetup.getParameter< Vector3< uint_t > >("frameWidth");
+   const real_t Thot           = numericalSetup.getParameter< real_t >("Thot");
+   const real_t Tcold          = numericalSetup.getParameter< real_t >("Tcold");
+   const real_t Pr             = numericalSetup.getParameter< real_t >("PrandtlNumber");
+   const real_t Ra             = numericalSetup.getParameter< real_t >("RayleighNumber");
+   const real_t Ma             = numericalSetup.getParameter< real_t >("Mach");
+   const real_t relaxationRate = numericalSetup.getParameter< real_t >("relaxationRate");
+   const uint_t timeSteps      = numericalSetup.getParameter< uint_t >("timeSteps");
+   const Vector3< uint_t > particleSubBlockSize =
+      numericalSetup.getParameter< Vector3< uint_t > >("particleSubBlockSize");
 
    Config::BlockHandle outputSetup     = cfgFile->getBlock("Output");
    const real_t infoSpacing_SI         = outputSetup.getParameter< real_t >("infoSpacing");
@@ -438,8 +412,9 @@ int main(int argc, char** argv)
 
    // convert SI units to simulation (LBM) units and check setup
 
-   Vector3< uint_t > domainSize(uint_c(std::ceil(xSize_SI / dx_SI)), uint_c(std::ceil(ySize_SI / dx_SI)),
-                                uint_c(std::ceil(zSize_SI / dx_SI)));
+   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)),
+                                uint_c((zSize_SI / dx_SI)));
+   WALBERLA_LOG_INFO_ON_ROOT("domain size in x is " << domainSize[0]);
    WALBERLA_CHECK_FLOAT_EQUAL(real_t(domainSize[0]) * dx_SI, xSize_SI, "domain size in x is not divisible by given dx");
    WALBERLA_CHECK_FLOAT_EQUAL(real_t(domainSize[1]) * dx_SI, ySize_SI, "domain size in y is not divisible by given dx");
    WALBERLA_CHECK_FLOAT_EQUAL(real_t(domainSize[2]) * dx_SI, zSize_SI, "domain size in z is not divisible by given dx");
@@ -507,6 +482,70 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT(" - vtk spacing particles = " << vtkSpacingParticles
                                                            << ", fluid slice = " << vtkSpacingFluid);
 
+   WALBERLA_CHECK_EQUAL(numXBlocks * numYBlocks * numZBlocks, uint_t(MPIManager::instance()->numProcesses()),
+                        "When using GPUs, the number of blocks ("
+                           << numXBlocks * numYBlocks * numZBlocks << ") has to match the number of MPI processes ("
+                           << uint_t(MPIManager::instance()->numProcesses()) << ")");
+
+
+
+
+   //const uint_t performanceLogFrequency = outputSetup.getParameter< uint_t >("performanceLogFrequency");
+
+   // Necessary Calculations for temperature field
+
+   const real_t length_conversion = (numZBlocks * cellsPerBlockPerDirection[2]);
+   Vector3< uint_t > domainSizeLB(uint_c(length_conversion), uint_c(length_conversion), uint_c(length_conversion));
+
+   const real_t uCharacteristicLB = Ma * (std::sqrt(real_c(1 / 3.0)));
+   const Vector3< real_t > Uinitialize(uCharacteristicLB, 0, 0);
+
+   const real_t delta_T              = Thot - Tcold;
+   const real_t T0                   = (Thot + Tcold) / (2 * delta_T);
+   const real_t kinematicViscosityLB = (Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion;
+   // std::min((Ma / std::sqrt(3)) * std::sqrt(Pr / Ra) * length_conversion, std::sqrt(3.6 / Ra));
+   const real_t thermalDiffusivityLB = kinematicViscosityLB / Pr;
+
+   const real_t time_conversion = (length_conversion * length_conversion) / (thermalDiffusivityLB);
+   const real_t gravityLB       = gravitationalAcceleration_SI * time_conversion * time_conversion / length_conversion;
+   const real_t alphaLB         = (uCharacteristicLB * uCharacteristicLB) / (gravityLB * delta_T * length_conversion);
+
+
+   // const uint_t timeSteps = 10000000;//uint_c(real_c(tSI)/time_conversion);
+   const real_t rho_0 = 1.0;
+   const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
+   const real_t omega_t = lbm::collision_model::omegaFromViscosity(thermalDiffusivityLB);
+   const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
+   const real_t qe = 1.0;
+   //  calculations for verification and correctness
+
+   const real_t RayleighNumber =
+      (Pr * alphaLB * gravityLB * delta_T * length_conversion * length_conversion * length_conversion) /
+      (kinematicViscosityLB * kinematicViscosityLB);
+   const real_t uchar                 = std::sqrt(Ra / Pr) * (kinematicViscosityLB / length_conversion);
+   const real_t machnumber            = uchar * std::sqrt(3);
+   const real_t thermal_diffusivity_2 = (Ma / std::sqrt(3)) / (std::sqrt(Ra * Pr)) * length_conversion;
+   const real_t ratio                 = length_conversion / thermalDiffusivityLB;
+
+   // Print temperature field related quantities
+
+   WALBERLA_LOG_INFO_ON_ROOT("length conversion is " << length_conversion << " " << "time conversion is "
+                                                     << time_conversion);
+   WALBERLA_LOG_INFO_ON_ROOT("kinematic viscosity is " << kinematicViscosityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Omega fluid is " << omega_f << "omega temperature is " << omega_t);
+   WALBERLA_LOG_INFO_ON_ROOT("Thermal Diffusivity LB is " << thermalDiffusivityLB << " " << thermal_diffusivity_2);
+   WALBERLA_LOG_INFO_ON_ROOT("ratio is " << length_conversion / thermalDiffusivityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number is " << RayleighNumber);
+   WALBERLA_LOG_INFO_ON_ROOT("Characteristic velocity is " << uchar << " " << uCharacteristicLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Mach number is " << machnumber);
+   WALBERLA_LOG_INFO_ON_ROOT("Domain size in lattice is " << domainSizeLB[0]);
+   WALBERLA_LOG_INFO_ON_ROOT("alpha LB is " << alphaLB);
+   WALBERLA_LOG_INFO_ON_ROOT("gravity LB is " << gravityLB);
+   WALBERLA_LOG_INFO_ON_ROOT("Temperature difference delta_t is " << delta_T);
+   WALBERLA_LOG_INFO_ON_ROOT("dx_SI is  " << length_conversion << "  dt_SI is " << time_conversion);
+   WALBERLA_LOG_INFO_ON_ROOT("Number of time steps is " << timeSteps);
+
+
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
@@ -518,6 +557,8 @@ int main(int argc, char** argv)
       false);
 
    auto simulationDomain = blocks->getDomain();
+
+
 
    //////////////////
    // RPD COUPLING //
@@ -556,24 +597,144 @@ int main(int argc, char** argv)
       }
    }
 
-   ///////////////////////
-   // ADD DATA TO BLOCKS //
-   ////////////////////////
 
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
 
-   // add PDF field
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(blocks, "pdf field", latticeModel, inflowVec,
-                                                                        densityFluid, uint_t(1), field::fzyx);
+   //////////////////////////////////////////////////////////
+   // ADD DATA TO BLOCKS and Boundary Handling for Codegen //
+   /////////////////////////////////////////////////////////
 
-   // add flag field
-   BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+   // Setting initial PDFs to nan helps to detect bugs in the initialization/BC handling
+   // Depending on WALBERLA_BUILD_WITH_GPU_SUPPORT, pdfFieldCPUGPUID is either a CPU or a CPU field
+   BlockDataID velFieldFluidID;
+   BlockDataID densityConcentrationFieldID;
 
-   // add boundary handling
-   using BoundaryHandling_T       = MyBoundaryHandling< ParticleAccessor_T >::Type;
-   BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
-      MyBoundaryHandling< ParticleAccessor_T >(flagFieldID, pdfFieldID, accessor, inflowVec, periodicInX, periodicInY),
-      "boundary handling");
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   // Fluid PDFs on GPU
+   BlockDataID pdfFieldFluidID =
+      field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field (fzyx)", real_c(std::nan("")), field::fzyx);
+   BlockDataID pdfFieldFluidCPUGPUID =
+      gpu::addGPUFieldToStorage< PdfField_fluid_T >(blocks, pdfFieldFluidID, "pdf fluid field GPU");
+
+   // Concentration PDFs on GPU
+   BlockDataID pdfFieldConcentrationID = field::addToStorage< PdfField_concentration_T >(
+      blocks, "pdf concentration field (fzyx)", real_c(std::nan("")), field::fzyx);
+   BlockDataID pdfFieldConcentrationCPUGPUID = gpu::addGPUFieldToStorage< PdfField_concentration_T >(
+      blocks, pdfFieldConcentrationID, "pdf concentration field GPU");
+
+   // Fluid velocity field on GPU
+   velFieldFluidID =
+      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+   BlockDataID velFieldFluidCPUGPUID =
+      gpu::addGPUFieldToStorage< VelocityField_fluid_T >(blocks, velFieldFluidID, "velocity fluid field GPU");
+
+   // Concentration Density on GPU
+   densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(
+      blocks, "density concentration field", real_t(0), field::fzyx);
+   BlockDataID densityConcentrationFieldCPUGPUID = gpu::addGPUFieldToStorage< DensityField_concentration_T >(
+      blocks, densityConcentrationFieldID, "density concentration field GPU");
+
+   // fraction field on GPU
+   BlockDataID BFieldID = field::addToStorage< GhostLayerField< real_t, 1 > >(blocks, "B field", 0, field::fzyx, 1);
+#else
+
+   // Fluid PDFs on CPU
+
+   BlockDataID pdfFieldFluidCPUGPUID =
+      field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field CPU", real_c(std::nan("")), field::fzyx);
+
+   BlockDataID velFieldFluidCPUGPUID =
+      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
+   velFieldFluidID =
+      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+   // Concentration PDFs on CPU
+   BlockDataID pdfFieldConcentrationCPUGPUID = field::addToStorage< PdfField_concentration_T >(
+      blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
+
+   BlockDataID densityConcentrationFieldCPUGPUID = field::addToStorage< DensityField_concentration_T >(
+      blocks, "density concentration field", real_t(0), field::fzyx);
+
+#endif
+   BlockDataID densityFluidFieldID =
+      field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
+   densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(
+      blocks, "density concentration field", real_t(0), field::fzyx);
+   BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field");
+   BlockDataID flagFieldConcentrationID =
+      field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field");
+
+   // Assemble boundary block string
+   std::string boundariesBlockString = " BoundariesFluid"
+                                       "{"
+                                       "Border { direction W;    walldistance -1;  flag NoSlip_Fluid; }"
+                                       "Border { direction E;    walldistance -1;  flag NoSlip_Fluid; }";
+
+   if (!periodicInY)
+   {
+      boundariesBlockString += "Border { direction S;    walldistance -1;  flag NoSlip_Fluid; }"
+                               "Border { direction N;    walldistance -1;  flag NoSlip_Fluid; }";
+   }
+
+   if (!periodicInZ)
+   {
+      boundariesBlockString += "Border { direction T;    walldistance -1;  flag NoSlip_Fluid; }"
+                               "Border { direction B;    walldistance -1;  flag NoSlip_Fluid; }";
+   }
+
+   boundariesBlockString += "}";
+
+   boundariesBlockString += "\n BoundariesConcentration";
+
+   boundariesBlockString += "{"
+                            "Border { direction W;    walldistance -1;  flag Density_Concentration_west; }"
+                            "Border { direction E;    walldistance -1;  flag Density_Concentration_east; }";
+
+   if (!periodicInY)
+   {
+      boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Concentration; }"
+                               "Border { direction N;    walldistance -1;  flag Neumann_Concentration; }";
+   }
+
+   if (!periodicInZ)
+   {
+      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Concentration; }"
+                               "Border { direction B;    walldistance -1;  flag Neumann_Concentration; }";
+   }
+   boundariesBlockString += "}";
+   WALBERLA_ROOT_SECTION()
+   {
+      std::ofstream boundariesFile("boundaries.prm");
+      boundariesFile << boundariesBlockString;
+      boundariesFile.close();
+   }
+   WALBERLA_MPI_BARRIER()
+
+   auto boundariesCfgFile = Config();
+   boundariesCfgFile.readParameterFile("boundaries.prm");
+   auto boundariesConfigFluid         = boundariesCfgFile.getBlock("BoundariesFluid");
+   auto boundariesConfigConcentration = boundariesCfgFile.getBlock("BoundariesConcentration");
+
+   // map boundaries into the fluid field simulation
+   geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfigFluid);
+   geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
+   lbm::BC_Fluid_Density density_fluid_bc(blocks,pdfFieldFluidCPUGPUID,real_t(1));
+   density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
+   lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
+   noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
+   lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(0), real_t(0), real_t(0));
+   ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
+
+   // map boundaries into the concentration field simulation
+   geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldConcentrationID, boundariesConfigConcentration);
+   geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldConcentrationID, Concentration_Flag);
+   lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, Thot);
+   density_concentration_bc_west.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID,
+                                                                  Density_Concentration_Flag_west, Concentration_Flag);
+   lbm::BC_Concentration_Density density_concentration_bc_east(blocks, pdfFieldConcentrationCPUGPUID, Tcold);
+   density_concentration_bc_east.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID,
+                                                                  Density_Concentration_Flag_east, Concentration_Flag);
+   lbm::BC_Concentration_Neumann neumann_concentration_bc(blocks, pdfFieldConcentrationCPUGPUID);
+   neumann_concentration_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldConcentrationID,
+                                                             Neumann_Concentration_Flag, Concentration_Flag);   // Assemble boundary block string
 
    // set up RPD functionality
    std::function< void(void) > syncCall = [&ps, &rpdDomain]() {
@@ -584,7 +745,6 @@ int main(int argc, char** argv)
    };
 
    syncCall();
-
    real_t timeStepSizeRPD = real_t(1) / real_t(numberOfParticleSubCycles);
    mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(timeStepSizeRPD);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeRPD);
@@ -606,29 +766,77 @@ int main(int argc, char** argv)
    // TIME LOOP //
    ///////////////
 
-   // map particles into the LBM simulation
-   // note: planes are not mapped and are thus only visible to the particles, not to the fluid
-   // instead, the respective boundary conditions for the fluid are explicitly set, see the boundary handling
-   BlockDataID particleAndVolumeFractionFieldID =
-      field::addToStorage< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
-         blocks, "particle and volume fraction field",
-         std::vector< lbm_mesapd_coupling::psm::ParticleAndVolumeFraction_T >(), field::fzyx, 0);
-   lbm_mesapd_coupling::psm::ParticleAndVolumeFractionMapping particleMapping(
-      blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(), particleAndVolumeFractionFieldID, 2);
-   particleMapping();
+   /////////////////////////////////////////////////////////
+   // map particles and initialize PSM domain for codegen //
+   ////////////////////////////////////////////////////////
 
-   lbm_mesapd_coupling::psm::initializeDomainForPSM< LatticeModel_T, 1 >(*blocks, pdfFieldID,
-                                                                         particleAndVolumeFractionFieldID, *accessor);
+   // Map particles into the fluid domain
+   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omega_f);
+   PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
+                                         particleAndVolumeFractionSoA, particleSubBlockSize);
 
-   // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   blockforest::communication::UniformBufferedScheme< Stencil_T > optimizedPDFCommunicationScheme(blocks);
-   optimizedPDFCommunicationScheme.addPackInfo(
-      make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >(pdfFieldID)); // optimized sync
+   // Initialize PDFs
+
+   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
+   pystencils::InitializeConcentrationDomain pdfSetterConcentration(
+      densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+
+
+   for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
+   {
+      psmSweepCollection.particleMappingSweep(&(*blockIt));
+      psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
+      pdfSetterFluid(&(*blockIt));
+      pdfSetterConcentration(&(*blockIt));
+
+   }
+
+   ////////////////////////////////////////
+   // Communication setting for codegen //
+   ///////////////////////////////////////
+
+   // Setup of the fluid LBM communication for synchronizing the fluid pdf field between neighboring blocks
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+gpu::communication::UniformGPUScheme< Stencil_Fluid_T > com_fluid(blocks, sendDirectlyFromGPU, false);
+#else
+walberla::blockforest::communication::UniformBufferedScheme< Stencil_Fluid_T > com_fluid(blocks);
+#endif
+com_fluid.addPackInfo(make_shared< PackInfoFluid_T >(pdfFieldFluidCPUGPUID));
+auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate(); });
+
+// Setup of the concentration LBM communication for synchronizing the concentration pdf field between neighboring blocks
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+gpu::communication::UniformGPUScheme< Stencil_Concentration_T > com_concentration(blocks, sendDirectlyFromGPU,
+                                                                                  false);
+#else
+walberla::blockforest::communication::UniformBufferedScheme< Stencil_Concentration_T > com_concentration(blocks);
+#endif
+com_concentration.addPackInfo(make_shared< PackInfoConcentration_T >(pdfFieldConcentrationCPUGPUID));
+auto communication_concentration = std::function< void() >([&]() { com_concentration.communicate(); });
 
    // create the timeloop
    SweepTimeloop timeloop(blocks->getBlockStorage(), numTimeSteps);
-
    timeloop.addFuncBeforeTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
+
+   // objects to get the macroscopic quantities
+
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   pystencils::FluidMacroGetter getterSweep_fluid(BFieldID,densityConcentrationFieldID, densityFluidFieldID,
+                                                  pdfFieldFluidID, velFieldFluidID, T0, alphaLB, gravityLB,
+                                                  rho_0);
+#else
+   pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldID, densityFluidFieldID,
+                                                  pdfFieldFluidCPUGPUID, velFieldFluidID, T0, alphaLB, gravityLB,
+                                                  rho_0);
+
+#endif
+
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID, pdfFieldConcentrationID);
+#else
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,
+                                                                  pdfFieldConcentrationCPUGPUID);
+#endif
 
    // vtk output
    if (vtkSpacingParticles != uint_t(0))
@@ -650,58 +858,119 @@ int main(int argc, char** argv)
 
    if (vtkSpacingFluid != uint_t(0))
    {
-      // velocity field, only a slice
-      auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid", vtkSpacingFluid, 0, false, vtkFolder);
+      // vtk files for fluid field
+      auto vtkOutput_Fluid = vtk::createVTKOutput_BlockData(blocks, "fluid", vtkSpacingFluid, 0, false, vtkFolder);
 
-      pdfFieldVTK->addBeforeFunction(optimizedPDFCommunicationScheme);
+      vtkOutput_Fluid->addBeforeFunction(communication_fluid);
 
-      AABB sliceAABB(real_t(0), real_c(domainSize[1]) * real_t(0.5) - real_t(1), real_t(0), real_c(domainSize[0]),
+      AABB fluidSliceAABB(real_t(0), real_c(domainSize[1]) * real_t(0.5) - real_t(1), real_t(0), real_c(domainSize[0]),
                      real_c(domainSize[1]) * real_t(0.5) + real_t(1), real_c(domainSize[2]));
-      vtk::AABBCellFilter aabbSliceFilter(sliceAABB);
 
-      field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
+      vtkOutput_Fluid->addBeforeFunction([&]() {
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+         gpu::fieldCpy< PdfField_fluid_T, gpu::GPUField< real_t > >(blocks, pdfFieldFluidID, pdfFieldFluidCPUGPUID);
+         gpu::fieldCpy< PdfField_concentration_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID,
+                                                                            pdfFieldConcentrationCPUGPUID);
+         gpu::fieldCpy< VelocityField_fluid_T, gpu::GPUField< real_t > >(blocks, velFieldFluidID,
+                                                                         velFieldFluidCPUGPUID);
+         gpu::fieldCpy< DensityField_concentration_T, gpu::GPUField< real_t > >(blocks, densityConcentrationFieldID,
+                                                                                densityConcentrationFieldCPUGPUID);
+         gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BField,
+                                                                    particleAndVolumeFractionSoA.BFieldID);
+#endif
+         for (auto& block : *blocks)
+         {
+            getterSweep_fluid(&block);
+         }
+      });
+
+       //////////////////////////////
+      // Write a fluid field slice //
+      //////////////////////////////
+
+      vtk::AABBCellFilter aabbSliceFilterFluid(fluidSliceAABB);
+
+      field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldFluidID);
       fluidFilter.addFlag(Fluid_Flag);
 
       vtk::ChainedFilter combinedSliceFilter;
       combinedSliceFilter.addFilter(fluidFilter);
-      combinedSliceFilter.addFilter(aabbSliceFilter);
+      combinedSliceFilter.addFilter(aabbSliceFilterFluid);
+      vtkOutput_Fluid->addCellInclusionFilter(combinedSliceFilter);
 
-      pdfFieldVTK->addCellInclusionFilter(combinedSliceFilter);
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
+#else
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
+#endif
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
 
-      pdfFieldVTK->addCellDataWriter(
-         make_shared< lbm::VelocityVTKWriter< LatticeModel_T, float > >(pdfFieldID, "Velocity"));
-      pdfFieldVTK->addCellDataWriter(
-         make_shared< lbm::DensityVTKWriter< LatticeModel_T, float > >(pdfFieldID, "Density"));
 
-      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
+// VTK files for the temperature field
+
+      auto vtkOutput_Concentration =
+         vtk::createVTKOutput_BlockData(blocks, "vtk files concentration", vtkSpacingFluid, 0, false, vtkFolder);
+
+      vtkOutput_Concentration->addBeforeFunction(communication_concentration);
+
+      vtkOutput_Concentration->addBeforeFunction([&]() {
+         for (auto& block : *blocks)
+         {
+            getterSweep_concentration(&block);
+         }
+      });
+
+      ///////////////////////////////////////
+      // Write a concentration field slice //
+      //////////////////////////////////////
+
+      AABB concentrationSliceAABB(real_t(0), real_c(domainSize[1]) * real_t(0.5) - real_t(1), real_t(0), real_c(domainSize[0]),
+                     real_c(domainSize[1]) * real_t(0.5) + real_t(1), real_c(domainSize[2]));
+
+      vtk::AABBCellFilter aabbSliceFilterConcentration(concentrationSliceAABB);
+
+      field::FlagFieldCellFilter< FlagField_T > ConcentrationFilter(flagFieldConcentrationID);
+      ConcentrationFilter.addFlag(Concentration_Flag);
+
+
+      combinedSliceFilter.addFilter(ConcentrationFilter);
+      combinedSliceFilter.addFilter(aabbSliceFilterConcentration);
+      vtkOutput_Concentration->addCellInclusionFilter(combinedSliceFilter);
+
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+      vtkOutput_Concentration->addCellDataWriter(
+         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+#else
+      vtkOutput_Concentration->addCellDataWriter(
+         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldCPUGPUID, "Concentration"));
+#endif
+
+      vtkOutput_Concentration->addCellDataWriter(
+         make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
 
       // fraction mapping field, only a slice
       auto fractionFieldVTK =
          vtk::createVTKOutput_BlockData(blocks, "fraction_field", vtkSpacingFluid, 0, false, vtkFolder);
 
-      BlockDataID BFieldID = field::addToStorage< GhostLayerField< real_t, 1 > >(blocks, "B field", 0, field::fzyx, 1);
-
-      fractionFieldVTK->addBeforeFunction([&]() {
-         for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
-         {
-            lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T* particleAndVolumeFractionField =
-               blockIt->getData< lbm_mesapd_coupling::psm::ParticleAndVolumeFractionField_T >(
-                  particleAndVolumeFractionFieldID);
-            GhostLayerField< real_t, 1 >* BField = blockIt->getData< GhostLayerField< real_t, 1 > >(BFieldID);
-
-            WALBERLA_FOR_ALL_CELLS_XYZ(particleAndVolumeFractionField, BField->get(x, y, z) = 0.0;
-                                       for (auto& e
-                                            : particleAndVolumeFractionField->get(x, y, z)) BField->get(x, y, z) +=
-                                       e.second;)
-         }
-      });
-
       fractionFieldVTK->addCellInclusionFilter(combinedSliceFilter);
 
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       fractionFieldVTK->addCellDataWriter(
-         make_shared< field::VTKWriter< GhostLayerField< real_t, 1 > > >(BFieldID, "Fraction mapping field B"));
+         make_shared< field::VTKWriter< BField_T > >(BFieldID, "OverlapFraction"));
+#else
+      fractionFieldVTK->addCellDataWriter(
+         make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID, "OverlapFraction"));
+#endif
+
 
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(fractionFieldVTK), "VTK (fraction field data");
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Fluid), "VTK output Fluid");
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Concentration), "VTK output Concentration");
    }
 
    if (vtkSpacingFluid != uint_t(0) || vtkSpacingParticles != uint_t(0))
@@ -709,17 +978,37 @@ int main(int argc, char** argv)
       vtk::writeDomainDecomposition(blocks, "domain_decomposition", vtkFolder);
    }
 
-   // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip
-   // treatment)
-   timeloop.add() << BeforeFunction(optimizedPDFCommunicationScheme, "LBM Communication")
-                  << Sweep(BoundaryHandling_T::getBlockSweep(boundaryHandlingID), "Boundary Handling");
+   ////////////////////////////////////////////////////////////////////////////////////////////////
+   // add LBM communication, boundary handling and the LBM sweeps to the time loop  for codegen //
+   //////////////////////////////////////////////////////////////////////////////////////////////
 
-   // stream + collide LBM step
-   auto lbmSweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, FlagField_T, 1, 1 >(
-      pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor, flagFieldID, Fluid_Flag);
-   // update particle mapping before PSM sweep
-   timeloop.add() << BeforeFunction(particleMapping, "particle mapping")
-                  << Sweep(makeSharedSweep(lbmSweep), "LBM stream / collide");
+   timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
+                  << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (No slip fluid)");
+   timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
+                  << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()),
+                           "Boundary Handling (Concentration Neumann)");
+   timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()),
+                           "Boundary Handling (Concentration Density west)");
+   timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_east.getSweep()),
+                           "Boundary Handling (Concentration Density east)");
+
+   pystencils::PSMFluidSweep psmFluidSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
+      pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_f, rho_0);
+
+   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID,
+                                                           velFieldFluidCPUGPUID,qk);
+
+
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                           "Set particle velocities");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                           "Reduce particle forces");
+
 
    ////////////////////////
    // EXECUTE SIMULATION //
@@ -727,13 +1016,11 @@ int main(int argc, char** argv)
 
    WcTimingPool timeloopTiming;
    const bool useOpenMP = false;
-
    // time loop
    for (uint_t timeStep = 0; timeStep < numTimeSteps; ++timeStep)
    {
       // perform a single simulation step -> this contains LBM and setting of the hydrodynamic interactions
       timeloop.singleStep(timeloopTiming);
-
       reduceProperty.operator()< mesa_pd::HydrodynamicForceTorqueNotification >(*ps);
 
       if (timeStep == 0)
@@ -823,7 +1110,12 @@ int main(int argc, char** argv)
          auto particleInfo = evaluateParticleInfo(*accessor);
          WALBERLA_LOG_INFO_ON_ROOT(particleInfo);
 
-         auto fluidInfo = evaluateFluidInfo< BoundaryHandling_T >(blocks, pdfFieldID, boundaryHandlingID);
+
+         ////////////////////////////////////////////
+         // evaluation of fluid info using codegen //
+         ///////////////////////////////////////////
+         auto fluidInfo = evaluateFluidInfoCodegen(blocks,velFieldFluidCPUGPUID,densityFluidFieldID);
+
          WALBERLA_LOG_INFO_ON_ROOT(fluidInfo);
 
          timeloopTiming["Evaluate infos"].end();
@@ -835,6 +1127,6 @@ int main(int argc, char** argv)
    return EXIT_SUCCESS;
 }
 
-} // namespace fluidized_bed
+} // namespace thermalfluidized_bed
 
-int main(int argc, char** argv) { fluidized_bed::main(argc, argv); }
+int main(int argc, char** argv) { thermalfluidized_bed::main(argc, argv); }

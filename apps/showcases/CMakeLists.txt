@@ -8,6 +8,7 @@ add_subdirectory( Mixer )
 add_subdirectory( ParticlePacking )
 add_subdirectory( PegIntoSphereBed )
 add_subdirectory( Piping )
+add_subdirectory( ThermalFluidizedBed )
 if ( WALBERLA_BUILD_WITH_CODEGEN)
 
    add_subdirectory( Antidunes )

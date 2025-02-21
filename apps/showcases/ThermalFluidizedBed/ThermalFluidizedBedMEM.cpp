@@ -87,7 +87,7 @@
 
 #include "vtk/all.h"
 
-namespace fluidized_bed
+namespace thermalfluidized_bed
 {
 
 ///////////
@@ -843,6 +843,6 @@ int main(int argc, char** argv)
    return EXIT_SUCCESS;
 }
 
-} // namespace fluidized_bed
+} // namespace thermalfluidized_bed
 
-int main(int argc, char** argv) { fluidized_bed::main(argc, argv); }
+int main(int argc, char** argv) { thermalfluidized_bed::main(argc, argv); }

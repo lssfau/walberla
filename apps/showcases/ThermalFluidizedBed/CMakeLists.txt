@@ -4,4 +4,5 @@ waLBerla_add_executable ( NAME ThermalFluidizedBedMEM FILES ThermalFluidizedBedM
                           DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd timeloop vtk )
 
 waLBerla_add_executable ( NAME ThermalFluidizedBedPSM FILES ThermalFluidizedBedPSM.cpp
-        DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd timeloop vtk )
+        DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd timeloop vtk MTWCodegenThermalPSM_sc_1 )
+target_compile_definitions(ThermalFluidizedBedPSM PRIVATE Weighting=2)

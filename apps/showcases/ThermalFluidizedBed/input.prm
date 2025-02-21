@@ -1,7 +1,7 @@
 PhysicalSetup // all to be specified in SI units!
 {
-    xSize 0.00175; // = width
-    ySize 0.00175; // = depth
+    xSize 0.0035; // = width
+    ySize 0.0035; // = depth
     zSize 0.007; // = height
 
     periodicInX true;
@@ -15,33 +15,47 @@ PhysicalSetup // all to be specified in SI units!
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
 
-    particleDiameter 0.00007;
+    particleDiameter 0.0007;
     densityParticle 3300.;
     dynamicFrictionCoefficient 0.15;
     coefficientOfRestitution 0.6;
 
-    particleGenerationSpacing 0.0002005;
+    particleGenerationSpacing 0.002005;
 }
 
 NumericalSetup
 {
-    dx 0.000007; // in m
+    dx 0.00007; // in m
     uInflow 0.01; // in LBM units, should be smaller than 0.1, this then determines dt
 
     // product of number of blocks should be equal to number of used processes
     numXBlocks 2;
-    numYBlocks 2;
-    numZBlocks 1;
+    numYBlocks 1;
+    numZBlocks 2;
 
     useLubricationForces true;
     numberOfParticleSubCycles 10;
+
+    sendDirectlyFromGPU false; // use GPU-GPU communication
+    useCommunicationHiding false;
+    frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
+
+    Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
+    Tcold 0;
+    PrandtlNumber 0.71;
+    RayleighNumber 1000000;
+    Mach 0.01;
+    relaxationRate 1.5;
+
+    timeSteps 1000000;
+    particleSubBlockSize <5, 5, 5>;
 }
 
 Output
 {
     infoSpacing 0.01; // in s
 
-    vtkSpacingParticles 0.1; // in s
-    vtkSpacingFluid 0.1; // in s
-    vtkFolder vtk_out;
+    vtkSpacingParticles 0.01; // in s
+    vtkSpacingFluid 0.01; // in s
+    vtkFolder vtk_out_thermal_fluidizedbed;
 }
