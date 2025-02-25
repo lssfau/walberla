@@ -63,7 +63,7 @@
 #include "ConcentrationMacroGetter.h"
 #include "FluidMacroGetter.h"
 #include "GeneralInfoHeader.h"
-#include "./utilities/InitializerFunctions.h"
+#include "../../utilities/InitializerFunctions.h"
 #include "PackInfoConcentration.h"
 #include "PackInfoFluid.h"
 
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
       ///////////////
       #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
-      initFluidField(blocks, velFieldFluidID , Uinitialize);
+      initFluidField(blocks, velFieldFluidID , Uinitialize,domainSize);
       gpu::fieldCpy<gpu::GPUField< real_t >, DensityField_concentration_T>(blocks, densityConcentrationFieldCPUGPUID,densityConcentrationFieldID);
       WALBERLA_LOG_INFO_ON_ROOT("code reached here on gpu");
       gpu::fieldCpy< gpu::GPUField< real_t >, VelocityField_fluid_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
       #else
       initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
-      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+      initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSize);
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),real_t(1));
       pystencils::InitializeConcentrationDomain initializeConcentrationDomain(densityConcentrationFieldCPUGPUID ,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0));
 
