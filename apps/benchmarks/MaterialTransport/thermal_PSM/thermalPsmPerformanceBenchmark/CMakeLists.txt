@@ -2,7 +2,7 @@ waLBerla_link_files_to_builddir("*.prm")
 
 if (WALBERLA_BUILD_WITH_CODEGEN)
     if (NOT WALBERLA_BUILD_WITH_GPU_SUPPORT OR (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP)))
-        foreach(solid_collision 1 2 3)
+        foreach(solid_collision 1)
 
             set(config sc_${solid_collision})
             message(STATUS "Config value in thermal PSM is: ${config}" )
@@ -27,6 +27,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     BC_Concentration_Density.h BC_Concentration_Density.${CODEGEN_FILE_SUFFIX}
                     BC_Concentration_FreeSlip.h BC_Concentration_FreeSlip.${CODEGEN_FILE_SUFFIX}
                     BC_Concentration_Neumann.h BC_Concentration_Neumann.${CODEGEN_FILE_SUFFIX}
+                    BC_Fluid_Outflow.h BC_Fluid_Outflow.${CODEGEN_FILE_SUFFIX}
                     FluidMacroSetter.h FluidMacroSetter.cpp
                     FluidMacroGetter.h FluidMacroGetter.cpp
                     ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
