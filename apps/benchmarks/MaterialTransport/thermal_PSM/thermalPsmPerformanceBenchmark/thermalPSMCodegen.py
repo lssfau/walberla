@@ -9,11 +9,12 @@ import numpy as np
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
 
-from lbmpy.boundaries import NoSlip, UBB, FixedDensity, FreeSlip, DiffusionDirichlet, NeumannByCopy
+from lbmpy.boundaries import NoSlip, UBB, FixedDensity, FreeSlip, DiffusionDirichlet, NeumannByCopy, SimpleExtrapolationOutflow,ExtrapolationOutflow
 from lbmpy.creationfunctions import (
     create_lb_update_rule,
     create_lb_method,
     create_psm_update_rule,
+    create_lb_collision_rule,
 )
 
 from lbmpy.macroscopic_value_kernels import (
@@ -28,6 +29,10 @@ from pystencils_walberla import (
     generate_pack_info_from_kernel,
 )
 from lbmpy_walberla import generate_boundary
+from pystencils.cache import clear_cache
+clear_cache()
+
+
 
 info_header = """
 const char * infoStencil_fluid = "{stencil}";
@@ -71,6 +76,7 @@ with CodeGeneration() as ctx:
         "trt-smagorinsky": Method.TRT,
     }
 
+
     # Solid collision variant
     SC = int(config_tokens[1])
     qk = sp.Symbol("qk")
@@ -99,7 +105,8 @@ with CodeGeneration() as ctx:
     B = ps.fields(f"b({1}): {data_type}[3D]", layout=layout)
 
 
-    force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
+    #force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
+    force_concentration_on_fluid = sp.Matrix([0, 0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
 
     # Fluid LBM optimisation
     lbm_fluid_opt = LBMOptimisation(
@@ -124,8 +131,8 @@ with CodeGeneration() as ctx:
         relaxation_rate=omega_f,
         #relaxation_rates=[0,1,1,Sv,Sv,Sv,Sq,Sq,Sv],
         output={"velocity": velocity_field},
-        force= force_concentration_on_fluid,
-        force_model=ForceModel.LUO,
+        #force= force_concentration_on_fluid,
+        #force_model=ForceModel.GUO,
         compressible=True,
     )
 
@@ -145,6 +152,7 @@ with CodeGeneration() as ctx:
         relaxation_rate=omega_f,
         output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
+        #force=sp.symbols("F_:3"),
         force_model=ForceModel.LUO,
         compressible=True,
         psm_config=psm_config,
@@ -171,9 +179,9 @@ with CodeGeneration() as ctx:
 
     method_fluid = create_lb_method(lbm_config=psm_fluid_config)
     method_concentration = create_lb_method(lbm_config=lbm_concentration_config)
-
+    init_velocity = sp.symbols("init_velocity_:3")
     pdfs_fluid_setter = macroscopic_values_setter(
-        method_fluid, density=init_density_fluid, velocity=velocity_field.center_vector, pdfs=pdfs_fluid.center_vector
+        method_fluid, density=init_density_fluid, velocity=init_velocity, pdfs=pdfs_fluid.center_vector
     )
 
     pdfs_concentration_setter = macroscopic_values_setter(
@@ -199,7 +207,11 @@ with CodeGeneration() as ctx:
         target = ps.Target.CPU
 
     node_collection = create_psm_update_rule(lbm_config=psm_fluid_config, lbm_optimisation=lbm_fluid_opt)
-    print(node_collection)
+
+
+    #collision_rule = create_lb_collision_rule(lbm_config=lbm_fluid_config, lbm_optimisation=lbm_fluid_opt)
+    #print(collision_rule)
+
     # Generate files
 
     generate_sweep(
@@ -243,6 +255,14 @@ with CodeGeneration() as ctx:
         target=target,
         inner_outer_split=True,
     )
+    #generate_sweep(
+    #    ctx,
+    #    "PSMSweepSplit",
+    #    node_collection,
+    #    field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
+    #    target=target,
+    #    inner_outer_split=True,
+    #)
 
     generate_pack_info_from_kernel(
         ctx,
@@ -298,6 +318,16 @@ with CodeGeneration() as ctx:
         ctx,
         "BC_Fluid_FreeSlip",
         FreeSlip(stencil_fluid),
+        method_fluid,
+        field_name=pdfs_fluid.name,
+        streaming_pattern="pull",
+        target=target,
+    )
+
+    generate_boundary(
+        ctx,
+        "BC_Fluid_Outflow",
+        ExtrapolationOutflow((0,0,1),method_fluid),
         method_fluid,
         field_name=pdfs_fluid.name,
         streaming_pattern="pull",
