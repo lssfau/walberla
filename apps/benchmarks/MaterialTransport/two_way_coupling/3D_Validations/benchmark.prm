@@ -35,7 +35,7 @@ NumericalSetup
 Output
 {
     vtkSpacing 100;
-    vtkFolder vtk_out_srt_srt;
+    vtkFolder vtk_out;
 
     performanceLogFrequency 10;
 }

@@ -431,6 +431,7 @@ int main(int argc, char** argv)
       if (useCommunicationHiding)
       {
          addPSMSweepsToTimeloops(commTimeloop, timeloop, com, psmSweepCollection, PSMSplitSweep);
+
       }
       else { addPSMSweepsToTimeloop(timeloop, psmSweepCollection, PSMSweep); }
    }
@@ -442,6 +443,7 @@ int main(int argc, char** argv)
                             << Sweep(deviceSyncWrapper(LBMSplitSweep.getInnerSweep()), "LBM inner sweep")
                             << AfterFunction([&]() { com.wait(); }, "LBM Communication (wait)");
          timeloop.add() << Sweep(deviceSyncWrapper(LBMSplitSweep.getOuterSweep()), "LBM outer sweep");
+
       }
       else { timeloop.add() << Sweep(deviceSyncWrapper(LBMSweep), "LBM sweep"); }
    }

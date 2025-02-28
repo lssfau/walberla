@@ -190,6 +190,7 @@ int main(int argc, char** argv) {
    const real_t machnumber = uchar*std::sqrt(3);
    const real_t thermal_diffusivity_2 = (Ma/std::sqrt(3))/(std::sqrt(Ra*Pr))*length_conversion;
    const real_t ratio = length_conversion/thermalDiffusivityLB;
+
    WALBERLA_LOG_INFO_ON_ROOT("length conversion is "<< length_conversion << " " << "time conversion is " << time_conversion);
    WALBERLA_LOG_INFO_ON_ROOT("kinematic viscosity is "<< kinematicViscosityLB);
    WALBERLA_LOG_INFO_ON_ROOT("Omega fluid is "<< omega_f << "omega temperature is " << omega_t);

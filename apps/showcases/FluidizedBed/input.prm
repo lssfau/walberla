@@ -7,7 +7,7 @@ PhysicalSetup // all to be specified in SI units!
     periodicInX true;
     periodicInY true;
 
-    runtime 10.0;
+    runtime 1;
 
     uInflow 0.01;
     gravitationalAcceleration 9.81;
@@ -41,7 +41,7 @@ Output
 {
     infoSpacing 0.01; // in s
 
-    vtkSpacingParticles 0.1; // in s
-    vtkSpacingFluid 0.1; // in s
+    vtkSpacingParticles 0.001; // in s
+    vtkSpacingFluid 0.001; // in s
     vtkFolder vtk_out;
 }

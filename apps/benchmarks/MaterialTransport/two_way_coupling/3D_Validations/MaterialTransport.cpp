@@ -516,7 +516,7 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    }*/
 
 
-   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk);
+   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk);
    pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldID,pdfFieldConcentrationCPUGPUID,velFieldFluidCPUGPUID,qe,qk,frameWidth);
 
    //pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldID,densityFluidFieldID,pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID,Se,Sq,T0,alphaLB,gravityLB);

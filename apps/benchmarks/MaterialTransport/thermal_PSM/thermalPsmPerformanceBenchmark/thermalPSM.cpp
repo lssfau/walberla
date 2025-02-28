@@ -193,12 +193,10 @@ int main(int argc, char** argv)
 
    // const uint_t timeSteps = 10000000;//uint_c(real_c(tSI)/time_conversion);
    const real_t rho_0 = 1.0;
-
-   const real_t Sv      = 2 / (6 * kinematicViscosityLB + 1);
-   const real_t Sq      = 8 * ((2 - Sv) / (8 - Sv));
    const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
    const real_t omega_t = lbm::collision_model::omegaFromViscosity(thermalDiffusivityLB);
-   // const real_t omega_t = 1/(0.5 + 4.5*thermalDiffusivityLB);
+   const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
+   const real_t qe = 1.0;
    //  calculations for verification and correctness
 
    const real_t RayleighNumber =
@@ -405,7 +403,7 @@ int main(int argc, char** argv)
    // map boundaries into the fluid field simulation
    geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldFluidID, boundariesConfigFluid);
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldFluidID, Fluid_Flag);
-   lbm::BC_Fluid_Density density_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(1.0));
+   lbm::BC_Fluid_Density density_fluid_bc(blocks,pdfFieldFluidCPUGPUID,real_t(1));
    density_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Density_Fluid_Flag, Fluid_Flag);
    lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
    noSlip_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, NoSlip_Fluid_Flag, Fluid_Flag);
@@ -444,15 +442,21 @@ int main(int argc, char** argv)
    initConcentrationField(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSizeLB);
    initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize, domainSizeLB);
 
-   pystencils::InitializeConcentrationDomain initializeConcentrationDomain(
-      densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
-
-#endif
-
    // Map particles into the fluid domain
    ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omega_f);
    PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
                                          particleAndVolumeFractionSoA, particleSubBlockSize);
+   // Initialize PDFs
+   /*pystencils::InitializeFluidDomain pdfSetter(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1.0),rho_0);*/
+
+   pystencils::InitializeFluidDomain pdfSetter(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
+   pystencils::InitializeConcentrationDomain initializeConcentrationDomain(
+      densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+#endif
+
+
    if (useParticles)
    {
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
@@ -461,16 +465,14 @@ int main(int argc, char** argv)
       }
    }
 
-   // Initialize PDFs
-   pystencils::InitializeFluidDomain pdfSetter(
-      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,
-      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1.0),rho_0);
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       //initializeFluidDomain(&(*blockIt));
-      if (useParticles) { psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt)); }
-      //pdfSetter(&(*blockIt));
+      if (useParticles) {
+         psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
+      }
+      pdfSetter(&(*blockIt));
       initializeConcentrationDomain(&(*blockIt));
 
    }
@@ -513,6 +515,10 @@ int main(int argc, char** argv)
    pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldID, densityFluidFieldID,
                                                   pdfFieldFluidCPUGPUID, velFieldFluidID, T0, alphaLB, gravityLB,
                                                   rho_0);
+
+   /*pystencils::FluidMacroGetter getterSweep_fluid(densityConcentrationFieldID, densityFluidFieldID,
+                                                  pdfFieldFluidCPUGPUID, velFieldFluidID, T0, alphaLB, gravityLB,
+                                                  rho_0);*/
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
@@ -630,16 +636,7 @@ int main(int argc, char** argv)
                               "Boundary Handling (Concentration Density east)");
    }
 
-   /*if (!periodicInY || !periodicInZ)
-   {
-      timeloop.add() << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()), "Boundary Handling (Fluid NoSlip)");
-      //timeloop.add() << Sweep(deviceSyncWrapper(noSlip_concentration_bc.getSweep()), "Boundary Handling (Concentration
-   NoSlip)");
-   }*/
-   const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
-   const real_t qe = 1.0;
-
-   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldID, pdfFieldConcentrationCPUGPUID,
+   pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID,
                                                            velFieldFluidCPUGPUID, qe,qk);
    pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(
       densityConcentrationFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID, qe,qk, frameWidth);
@@ -654,8 +651,6 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldID,
       particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
       pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID, T0, alphaLB, gravityLB, omega_f, rho_0);
-
-   //addPSMSweepsToTimeloop(timeloop, psmSweepCollection, psmFluidSweep);
 
    if (useParticles)
    {

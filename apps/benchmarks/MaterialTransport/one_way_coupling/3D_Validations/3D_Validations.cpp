@@ -60,7 +60,7 @@
 
 #include "vtk/all.h"
 
-#include "../utilities/InitializerFunctions.h"
+#include "../../utilities/InitializerFunctions.h"
 #include "ConcentrationMacroGetter.h"
 #include "FluidMacroGetter.h"
 #include "GeneralInfoHeader.h"

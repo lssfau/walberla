@@ -25,7 +25,7 @@ NumericalSetup
     Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
     Tcold 0;
     PrandtlNumber 0.71;
-    RayleighNumber 10000000;
+    RayleighNumber 1000000;
     Mach 0.1;
     relaxationRate 1.5;
 
