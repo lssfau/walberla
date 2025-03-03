@@ -378,7 +378,7 @@ int main(int argc, char** argv)
    if (!cfgFile) { WALBERLA_ABORT("Usage: " << argv[0] << " path-to-configuration-file \n"); }
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::selectDeviceBasedOnMpiRank();
+   walberla::gpu::selectDeviceBasedOnMpiRank();
 #endif
 
    WALBERLA_LOG_INFO_ON_ROOT("waLBerla revision: " << std::string(WALBERLA_GIT_SHA1).substr(0, 8));
@@ -633,30 +633,30 @@ int main(int argc, char** argv)
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    // Fluid PDFs on GPU
    BlockDataID pdfFieldFluidID =
-      field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field (fzyx)", real_c(std::nan("")), field::fzyx);
+      field::addToStorage< PdfField_fluid_T >(blocks, "pdf fluid field (fzyx) GPU", real_c(std::nan("")), field::fzyx);
    BlockDataID pdfFieldFluidCPUGPUID =
       gpu::addGPUFieldToStorage< PdfField_fluid_T >(blocks, pdfFieldFluidID, "pdf fluid field GPU");
 
    // Concentration PDFs on GPU
    BlockDataID pdfFieldConcentrationID = field::addToStorage< PdfField_concentration_T >(
-      blocks, "pdf concentration field (fzyx)", real_c(std::nan("")), field::fzyx);
+      blocks, "pdf concentration field (fzyx) GPU", real_c(std::nan("")), field::fzyx);
    BlockDataID pdfFieldConcentrationCPUGPUID = gpu::addGPUFieldToStorage< PdfField_concentration_T >(
       blocks, pdfFieldConcentrationID, "pdf concentration field GPU");
 
    // Fluid velocity field on GPU
    velFieldFluidID =
-      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field GPU", real_t(0), field::fzyx);
    BlockDataID velFieldFluidCPUGPUID =
       gpu::addGPUFieldToStorage< VelocityField_fluid_T >(blocks, velFieldFluidID, "velocity fluid field GPU");
 
    // Concentration Density on GPU
    densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(
-      blocks, "density concentration field", real_t(0), field::fzyx);
+      blocks, "density concentration field GPU", real_t(0), field::fzyx);
    BlockDataID densityConcentrationFieldCPUGPUID = gpu::addGPUFieldToStorage< DensityField_concentration_T >(
       blocks, densityConcentrationFieldID, "density concentration field GPU");
 
    // fraction field on GPU
-   BlockDataID BFieldID = field::addToStorage< GhostLayerField< real_t, 1 > >(blocks, "B field", 0, field::fzyx, 1);
+   BlockDataID BFieldID = field::addToStorage< GhostLayerField< real_t, 1 > >(blocks, "B field GPU", 0, field::fzyx, 1);
 #else
 
    // Fluid PDFs on CPU
@@ -667,22 +667,22 @@ int main(int argc, char** argv)
    BlockDataID velFieldFluidCPUGPUID =
       field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
    velFieldFluidID =
-      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
+      field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field CPU", real_t(0), field::fzyx);
    // Concentration PDFs on CPU
    BlockDataID pdfFieldConcentrationCPUGPUID = field::addToStorage< PdfField_concentration_T >(
       blocks, "pdf concentration field CPU", real_c(std::nan("")), field::fzyx);
 
    BlockDataID densityConcentrationFieldCPUGPUID = field::addToStorage< DensityField_concentration_T >(
-      blocks, "density concentration field", real_t(0), field::fzyx);
+      blocks, "density concentration field CPU", real_t(0), field::fzyx);
 
 #endif
    BlockDataID densityFluidFieldID =
-      field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
+      field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field CPU", real_t(0), field::fzyx);
    densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(
-      blocks, "density concentration field", real_t(0), field::fzyx);
-   BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field");
+      blocks, "density concentration field CPU", real_t(0), field::fzyx);
+   BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field CPU");
    BlockDataID flagFieldConcentrationID =
-      field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field");
+      field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field CPU");
 
    // Assemble boundary block string
    std::string boundariesBlockString = " BoundariesFluid";
@@ -749,7 +749,7 @@ int main(int argc, char** argv)
    lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(0), real_t(0), uInflow);
    ubb_fluid_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldFluidID, Inflow_Fluid_Flag, Fluid_Flag);
 
-   lbm::BC_Fluid_Outflow outflow_fluid_bc(blocks,pdfFieldFluidCPUGPUID);
+   lbm::BC_Fluid_Outflow outflow_fluid_bc(blocks,pdfFieldFluidCPUGPUID,pdfFieldFluidID);
    outflow_fluid_bc.fillFromFlagField<FlagField_T>(blocks, flagFieldFluidID, OutFlow_Fluid_Flag, Fluid_Flag);
 
    // map boundaries into the concentration field simulation
@@ -908,7 +908,7 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
                                                                          velFieldFluidCPUGPUID);
          gpu::fieldCpy< DensityField_concentration_T, gpu::GPUField< real_t > >(blocks, densityConcentrationFieldID,
                                                                                 densityConcentrationFieldCPUGPUID);
-         gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BField,
+         gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BFieldID,
                                                                     particleAndVolumeFractionSoA.BFieldID);
 #endif
          for (auto& block : *blocks)
@@ -1155,11 +1155,20 @@ pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(0),real_t(0),real_t(0),omega)
          // evaluation of fluid info using codegen //
          ///////////////////////////////////////////
          //auto fluidInfo = evaluateFluidInfoCodegen(blocks,velFieldFluidCPUGPUID,densityFluidFieldID);
+         gpu::fieldCpy< PdfField_fluid_T, gpu::GPUField< real_t > >(blocks, pdfFieldFluidID, pdfFieldFluidCPUGPUID);
+         gpu::fieldCpy< PdfField_concentration_T, gpu::GPUField< real_t > >(blocks, pdfFieldConcentrationID,
+                                                                            pdfFieldConcentrationCPUGPUID);
+         gpu::fieldCpy< VelocityField_fluid_T, gpu::GPUField< real_t > >(blocks, velFieldFluidID,
+                                                                         velFieldFluidCPUGPUID);
+         gpu::fieldCpy< DensityField_concentration_T, gpu::GPUField< real_t > >(blocks, densityConcentrationFieldID,
+                                                                                densityConcentrationFieldCPUGPUID);
+         gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BFieldID,
+                                                                    particleAndVolumeFractionSoA.BFieldID);
          for (auto& block : *blocks)
          {
             getterSweep_fluid(&block);
          }
-         auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidCPUGPUID);
+         auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidID);
          WALBERLA_LOG_INFO_ON_ROOT(fluidInfo);
 
          timeloopTiming["Evaluate infos"].end();

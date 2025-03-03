@@ -7,7 +7,7 @@ PhysicalSetup // all to be specified in SI units!
     periodicInX true;
     periodicInY true;
 
-    runtime 1.0;
+    runtime 2.0;
 
     uInflow 0.01;
     gravitationalAcceleration 9.81;
@@ -15,7 +15,7 @@ PhysicalSetup // all to be specified in SI units!
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
 
-    particleDiameter 0.002; //0.0007;
+    particleDiameter 0.004; //0.0007;
     densityParticle 1100.;
     dynamicFrictionCoefficient 0.15;
     coefficientOfRestitution 0.6;
@@ -25,13 +25,13 @@ PhysicalSetup // all to be specified in SI units!
 
 NumericalSetup
 {
-    dx 0.0002; //0.00007; // in m
-    uInflow 0.01; // in LBM units, should be smaller than 0.1, this then determines dt
+    dx 0.0004; //0.00007; // in m
+    uInflow  0.0057735; // in LBM units, should be smaller than 0.1, this then determines dt
 
     // product of number of blocks should be equal to number of used processes
-    numXBlocks 2;
-    numYBlocks 2;
-    numZBlocks 2;
+    numXBlocks 1;
+    numYBlocks 1;
+    numZBlocks 1;
 
     useLubricationForces true;
     numberOfParticleSubCycles 10;
@@ -53,9 +53,9 @@ NumericalSetup
 
 Output
 {
-    infoSpacing 0.001; // in s
+    infoSpacing 0.01; // in s
 
-    vtkSpacingParticles 0; // in s
-    vtkSpacingFluid 0; // in s
+    vtkSpacingParticles 0.01; // in s
+    vtkSpacingFluid 0.01; // in s
     vtkFolder vtk_out_thermal_fluidizedbed;
 }
