@@ -19,7 +19,7 @@ waLBerla_link_geometry_to_builddir(*.obj)
 
 waLBerla_add_executable ( NAME 04_LBComplexGeometry
                           FILES 04_LBComplexGeometry.cpp
-      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm mesh walberla::stencil walberla::timeloop walberla::vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::mesh walberla::stencil walberla::timeloop walberla::vtk )
                           
 endif()
 

@@ -3,7 +3,7 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
 	waLBerla_link_geometry_to_builddir( "*.obj" )             
 	waLBerla_link_files_to_builddir( "*.conf" )  
 
-   waLBerla_add_executable( NAME ComplexGeometry FILES ComplexGeometry.cpp DEPENDS walberla::boundary walberla::core walberla::lbm mesh walberla::vtk )
+   waLBerla_add_executable( NAME ComplexGeometry FILES ComplexGeometry.cpp DEPENDS walberla::boundary walberla::core walberla::lbm walberla::mesh walberla::vtk )
 
 	##############
 	# Some tests #
