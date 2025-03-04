@@ -66,10 +66,10 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
             InfoHeader.h
         )
 
-        set( TUT4_DEPENDENCIES walberla::blockforest walberla::boundary walberla::core walberla::field walberla::geometry walberla::lbm lbm_generated walberla::mesh walberla::python_coupling walberla::stencil walberla::timeloop walberla::vtk 04_LBComplexGeometryPython )
+        set( TUT4_DEPENDENCIES walberla::blockforest walberla::boundary walberla::core walberla::field walberla::geometry walberla::lbm walberla::lbm_generated walberla::mesh walberla::python_coupling walberla::stencil walberla::timeloop walberla::vtk 04_LBComplexGeometryPython )
         
         if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
-            list(APPEND TUT4_DEPENDENCIES gpu)
+            list(APPEND TUT4_DEPENDENCIES walberla::gpu)
         endif()
         
         walberla_generate_target_from_python( 
