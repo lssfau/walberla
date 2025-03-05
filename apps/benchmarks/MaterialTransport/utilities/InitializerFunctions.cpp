@@ -42,7 +42,7 @@ void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, 
    for (auto& block : *blocks)
    {
       auto ConcentrationField = block.getData< DensityField_concentration_T >(ConcentrationFieldID);
-
+      WALBERLA_LOG_INFO_ON_ROOT("failed here")
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(ConcentrationField, {
          Cell globalCell;
          const auto cellAABB = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
@@ -151,7 +151,7 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
 {
    for (auto& block : *blocks)
    {
-      WALBERLA_LOG_INFO_ON_ROOT("Velocity init reached here");
+
       auto FluidVelocityField = block.getData< VelocityField_fluid_T >(FluidFieldID);
 
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {

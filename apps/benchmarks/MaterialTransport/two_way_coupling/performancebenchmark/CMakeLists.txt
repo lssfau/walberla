@@ -32,9 +32,9 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME MaterialTransport_2way FILES MaterialTransport.cpp ../../utilities/InitializerFunctions.cpp
+        waLBerla_add_executable(NAME MTW_2way_performancebenchmark FILES MaterialTransport.cpp ../../utilities/InitializerFunctions.cpp
                 DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegen_${config})
-        target_compile_definitions(MaterialTransport_2way PRIVATE Weighting=2)
+        target_compile_definitions(MTW_2way_performancebenchmark PRIVATE Weighting=2)
     endif ()
 endif ()
 

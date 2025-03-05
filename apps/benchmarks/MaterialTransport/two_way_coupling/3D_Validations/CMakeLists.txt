@@ -2,10 +2,10 @@ waLBerla_link_files_to_builddir("*.prm")
 
 if (WALBERLA_BUILD_WITH_CODEGEN)
     if (NOT WALBERLA_BUILD_WITH_GPU_SUPPORT OR (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP)))
-        set(coupling_method 2)
-        set(config "couplingMethod_${coupling_method}")
-        message(STATUS "Config value is: ${config}" )
-        waLBerla_generate_target_from_python(NAME MTWCodegen_Validation3D_${config}
+        #set(coupling_method 2)
+        #set(config "couplingMethod_${coupling_method}")
+        #message(STATUS "Config value is: ${config}" )
+        waLBerla_generate_target_from_python(NAME MTWCodegen_Validation3D
                 FILE MTWCodegen.py
                 CODEGEN_CFG ${config}
                 OUT_FILES LBMFluidSweep.h LBMFluidSweep.${CODEGEN_FILE_SUFFIX}
@@ -32,9 +32,9 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME MaterialTransport_2way_3DValidation FILES MaterialTransport.cpp ../../utilities/InitializerFunctions.cpp
-                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegen_Validation3D_${config})
-        target_compile_definitions(MaterialTransport_2way_3DValidation PRIVATE Weighting=2)
+        waLBerla_add_executable(NAME MTW_2way_3DValidations FILES MaterialTransport.cpp ../../utilities/InitializerFunctions.cpp
+                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegen_Validation3D)
+        target_compile_definitions(MTW_2way_3DValidations PRIVATE Weighting=2)
     endif ()
 endif ()
 

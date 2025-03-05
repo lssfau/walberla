@@ -29,13 +29,13 @@ NumericalSetup
     Mach 0.01;
     relaxationRate 1.5;
 
-    timeSteps 1000000;
+    timeSteps 500;
 }
 
 Output
 {
-    vtkSpacing 100;
+    vtkSpacing 0;
     vtkFolder vtk_out;
 
-    performanceLogFrequency 10;
+    performanceLogFrequency 50;
 }

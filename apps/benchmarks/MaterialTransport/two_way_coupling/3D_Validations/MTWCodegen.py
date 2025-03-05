@@ -59,8 +59,8 @@ with CodeGeneration() as ctx:
     omega_f = sp.Symbol("omega_f")
 
     layout = "fzyx"
-    config_tokens = ctx.config.split("_")
-    print(config_tokens[0]," ", config_tokens[1])
+    #config_tokens = ctx.config.split("_")
+    #print(config_tokens[0]," ", config_tokens[1])
     MaxParticlesPerCell = int(2)
     methods = {
         "srt": Method.SRT,
@@ -86,15 +86,15 @@ with CodeGeneration() as ctx:
     force_concentration_on_fluid = sp.Matrix([0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
     # Determine the output based on the coupling mode
 
-    if config_tokens[1]== "1":
-        concentration_output = None
-        force_on_fluid = sp.symbols("F_:3")
-        print("One-way fluid-concentration coupling set")
+    #if config_tokens[1]== "1":
+    #    concentration_output = None
+    #    force_on_fluid = sp.symbols("F_:3")
+    #    print("One-way fluid-concentration coupling set")
 
-    elif config_tokens[1] == "2":
-        concentration_output = {"density": concentration_field}
-        force_on_fluid = sp.Matrix([0, 0, 0])
-        print("Two-way fluid-concentration coupling set")
+    #elif config_tokens[1] == "2":
+    #    concentration_output = {"density": concentration_field}
+    #    force_on_fluid = sp.Matrix([0, 0, 0])
+    #    print("Two-way fluid-concentration coupling set")
 
     # Ensure force_on_fluid is defined in all paths before using it
 
