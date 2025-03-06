@@ -25,12 +25,12 @@
 ##
 ############################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.14)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.24)
 
 
 PROJECT ( walberla )
 
-set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${walberla_SOURCE_DIR}/cmake )
+set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${walberla_SOURCE_DIR}/cmake ${walberla_SOURCE_DIR}/cmake/compileroptions )
 
 include ( waLBerlaFunctions )
 
@@ -193,6 +193,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_INTEL )
 # Check for Gnu compiler
 if ( CMAKE_COMPILER_IS_GNUCXX  AND NOT WALBERLA_CXX_COMPILER_IS_INTEL )
      option ( WALBERLA_CXX_COMPILER_IS_GNU "Use gnu compiler" ON  )
+     include(GNU)
 else()
      option ( WALBERLA_CXX_COMPILER_IS_GNU "Use gnu compiler" OFF  )
 endif()
@@ -201,6 +202,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_GNU )
 # Check for Visual Studio
 if ( MSVC )
      option ( WALBERLA_CXX_COMPILER_IS_MSVC "Use Visual Studio compiler" ON  )
+     include( MSVC )
 else()
      option ( WALBERLA_CXX_COMPILER_IS_MSVC "Use Visual Studio compiler" OFF  )
 endif()
@@ -209,6 +211,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MSVC )
 # Check for IBM compiler
 if( CMAKE_CXX_COMPILER MATCHES "xlc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "xlc" )
     option ( WALBERLA_CXX_COMPILER_IS_IBM "Use IBM compiler" ON  )
+    include(IBM)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_IBM "Use IBM compiler" OFF  )
 endif()
@@ -217,6 +220,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_IBM )
 # Check for NEC SX compiler
 if( CMAKE_CXX_COMPILER MATCHES "/sxc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "/sxc" OR CMAKE_CXX_COMPILER MATCHES "/sxmpic" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "/sxmpic" )
     option ( WALBERLA_CXX_COMPILER_IS_NEC "Use NEC compiler" ON  )
+    include(NEC)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_NEC "Use NEC compiler" OFF  )
 endif()
@@ -224,6 +228,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_NEC )
 
 if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER MATCHES "hipcc" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" )
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" ON  )
+    include(Clang)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" OFF  )
 endif()
@@ -232,6 +237,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CLANG )
 # Check for Cray compiler
 if( CMAKE_CXX_COMPILER_ID MATCHES Cray )
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" ON   )
+    include(Cray)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" OFF  )
 endif()
@@ -239,6 +245,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CRAY )
 
 if( CMAKE_CXX_COMPILER MATCHES "pgc\\+\\+" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "pgc\\+\\+" )
     option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" ON  )
+    include(PGI)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" OFF  )
 endif()
@@ -247,6 +254,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_PGI )
 # Check for Fujitsu compiler
 if( CMAKE_CXX_COMPILER_ID MATCHES FujitsuClang )
     option ( WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG "Use FujitsuClang compiler" ON  )
+    include(FujitsuClang)
 else()
     option ( WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG "Use FujitsuClang compiler" OFF  )
 endif()
@@ -264,6 +272,7 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 # Check for intel llvm compiler
 if( CMAKE_CXX_COMPILER MATCHES "icpx" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpx" )
    option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" ON  )
+   include(IntelLLVM)
 else()
    option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" OFF  )
 endif()
@@ -279,212 +288,12 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
 ##
 ############################################################################################################################
 
-# Profile guided optimization
-if ( WALBERLA_PROFILE_GENERATE )
-    if( WALBERLA_CXX_COMPILER_IS_INTEL )
-        add_flag( CMAKE_CXX_FLAGS "-prof-gen" )
-        file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/profile" )
-        add_flag( CMAKE_CXX_FLAGS "-prof-dir${CMAKE_BINARY_DIR}/profile" )
-    elseif( WALBERLA_CXX_COMPILER_IS_GNU )
-        add_flag( CMAKE_CXX_FLAGS "-fprofile-generate" )
-    elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS           "/GL"                )
-      add_flag ( CMAKE_MODULE_LINKER_FLAGS "/LTCG:PGINSTRUMENT" )
-      add_flag ( CMAKE_SHARED_LINKER_FLAGS "/LTCG:PGINSTRUMENT" )
-      add_flag ( CMAKE_EXE_LINKER_FLAGS    "/LTCG:PGINSTRUMENT" )
-    endif()
-endif()
 
-if ( WALBERLA_PROFILE_USE )
-    if( WALBERLA_CXX_COMPILER_IS_INTEL )
-       add_flag( CMAKE_CXX_FLAGS "-prof-use" )
-       add_flag( CMAKE_CXX_FLAGS "-prof-dir${CMAKE_BINARY_DIR}/profile" )
-    elseif( WALBERLA_CXX_COMPILER_IS_GNU )
-       add_flag( CMAKE_CXX_FLAGS "-fprofile-use" )
-    elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS           "/GL"              )
-      add_flag ( CMAKE_MODULE_LINKER_FLAGS "/LTCG:PGOPTIMIZE" )
-      add_flag ( CMAKE_SHARED_LINKER_FLAGS "/LTCG:PGOPTIMIZE" )
-      add_flag ( CMAKE_EXE_LINKER_FLAGS    "/LTCG:PGOPTIMIZE" )
-    endif()
-endif()
-
-# common flags for intel and g++
-if ( NOT WARNING_DISABLE AND ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL ) )
-   add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow" )
-endif()
-
-# C++ language features for NEC compiler
-if( WALBERLA_CXX_COMPILER_IS_NEC )
-   set( CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION "-Kcpp${CMAKE_CXX_STANDARD}" )
-   set( CMAKE_TRY_COMPILE_PLATFORM_VARIABLES CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION )
-   add_flag ( CMAKE_CXX_FLAGS "${CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION} -Krtti -Kexceptions -size_t64 -Kgcc" )
-   add_flag ( CMAKE_CXX_FLAGS "-D__BIG_ENDIAN -D__BYTE_ORDER=__BIG_ENDIAN" )
-   add_flag ( CMAKE_CXX_FLAGS "-Tnoauto,used" )
-   add_flag ( CMAKE_EXE_LINKER_FLAGS "-Wl,-h,muldefs" )
-   add_flag ( CMAKE_C_FLAGS "-size_t64 -Kgcc" )
-   add_flag ( CMAKE_C_FLAGS "-D__BIG_ENDIAN -D__BYTE_ORDER=__BIG_ENDIAN" )
-   add_flag ( CMAKE_C_FLAGS "-DSQLITE_OMIT_WAL -DHAVE_UTIME -DTHREADSAFE=0" )
-   set( CMAKE_RANLIB /bin/true )
-   set( CMAKE_SKIP_BUILD_RPATH TRUE )
-   set( CMAKE_C_FLAGS_DEBUGOPTIMIZED    "-Chopt -g"                               )
-   set( CMAKE_C_FLAGS_DEBUG             "-Cdebug -g"                              )
-   set( CMAKE_CXX_FLAGS_DEBUGOPTIMIZED  "-Chopt -g"                               )
-   set( CMAKE_CXX_FLAGS_DEBUG           "-Cdebug -g"                              )
-endif()
-
-# Fixes linker errors with IBM compiler
-if( WALBERLA_CXX_COMPILER_IS_IBM )
-   add_flag ( CMAKE_CXX_FLAGS "-qpic=large" )
-endif()
-# Fixes linker errors with Cray compiler
-if( WALBERLA_CXX_COMPILER_IS_CRAY )
-   add_flag ( CMAKE_EXE_LINKER_FLAGS  "-dynamic -L/opt/gcc/4.9.3/snos/lib64" )
-endif()
-
-# Silences compiler and linker warnings and information with the IBM compiler
-if( WALBERLA_CXX_COMPILER_IS_IBM )
-   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-267" )  # 1586-267 (I) Inlining of specified subprogram failed due to the presence of a C++ exception handler
-   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-266" )  # 1586-266 (I) Inlining of specified subprogram failed due to the presence of a global label
-   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1500-030" )  # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
-   add_flag ( CMAKE_C_FLAGS "-qsuppress=1500-030" )    # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
-endif()
-
-# Silences compiler and linker warnings and information with the Cray compiler
-if( WALBERLA_CXX_COMPILER_IS_CRAY )
-   set( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem " )
-   add_flag ( CMAKE_CXX_FLAGS "-h nomessage=1" )      # CC-1    The source file does not end with a new-line character.
-   add_flag ( CMAKE_C_FLAGS   "-DSQLITE_HAVE_ISNAN" ) # SQLite will not work correctly with the -ffast-math option of GCC.
-   add_flag ( CMAKE_CXX_FLAGS "-DSQLITE_HAVE_ISNAN" ) # SQLite will not work correctly with the -ffast-math option of GCC.
-endif()
-
-# Silences compiler and linker warnings and information with the PGI compiler
-if( WALBERLA_CXX_COMPILER_IS_PGI )
-   add_flag ( CMAKE_CXX_FLAGS "--display_error_number" )
-   add_flag ( CMAKE_C_FLAGS "--display_error_number" )
-   if( CMAKE_VERSION VERSION_LESS "3.19" )
-      #  https://github.com/Kitware/CMake/commit/52eee1938919deb59cc2b51d44f365f0d9a418e5
-      set( CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION "--c++${CMAKE_CXX_STANDARD}" )
-   endif()
-   add_flag ( CMAKE_CXX_FLAGS "--diag_suppress=1" )   # last line of file ends without a newline
-   add_flag ( CMAKE_CXX_FLAGS "--diag_suppress=111" ) # statement is unreachable
-   add_flag ( CMAKE_C_FLAGS "--diag_suppress=111" )   # statement is unreachable
-   add_flag ( CMAKE_C_FLAGS "--diag_suppress=550" )   # variable [...] was set but never used
-   add_flag ( CMAKE_C_FLAGS "--diag_suppress=191" )   # type qualifier is meaningless on cast type
-endif()
-
-# architecture optimization
-if( WALBERLA_OPTIMIZE_FOR_LOCALHOST )
-   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-      if(( CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" ) AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" )
-        # no -march=native available on this compiler, but there is currently only one such processor
-      else()
-        add_flag ( CMAKE_CXX_FLAGS "-march=native" )
-        add_flag ( CMAKE_C_FLAGS   "-march=native" )
-      endif()
-
-      if( WALBERLA_CXX_COMPILER_IS_INTEL )
-        add_flag ( CMAKE_CXX_FLAGS "-xhost" )
-        add_flag ( CMAKE_C_FLAGS   "-xhost" )
-      endif()
-
-      if( EXISTS "/proc/sys/abi/sve_default_vector_length" )
-        file( READ "/proc/sys/abi/sve_default_vector_length" SVE_LENGTH_BYTES )
-        string(STRIP "${SVE_LENGTH_BYTES}" SVE_LENGTH_BYTES)
-        math(EXPR SVE_LENGTH "${SVE_LENGTH_BYTES} * 8")
-        add_flag ( CMAKE_CXX_FLAGS "-msve-vector-bits=${SVE_LENGTH}" )
-        add_flag ( CMAKE_C_FLAGS   "-msve-vector-bits=${SVE_LENGTH}" )
-      endif()
-   endif()
-endif()
-
-# warning flags
-if( WALBERLA_CXX_COMPILER_IS_INTEL )
-   # system headers are also supported by intel, but cmake does not recognize that
-   set( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem " )
-   add_flag ( CMAKE_CXX_FLAGS "-wd2928,2504,2259,1682,597" )
-   # disable icc/icpc deprecation warning
-   add_flag ( CMAKE_CXX_FLAGS "-diag-disable=10441" )
-elseif( WALBERLA_CXX_COMPILER_IS_GNU )
-   add_flag ( CMAKE_CXX_FLAGS "-Wfloat-equal -Wextra" )
-elseif( WALBERLA_CXX_COMPILER_IS_NEC )
-   add_flag ( CMAKE_CXX_FLAGS "-wall" )
-endif()
-
-if ( WARNING_PEDANTIC AND WALBERLA_CXX_COMPILER_IS_GNU )
-   add_flag ( CMAKE_CXX_FLAGS "-pedantic" )
-endif ( )
-
- # omit deprecated warnings
-if( NOT WARNING_DEPRECATED)
-   if( WALBERLA_CXX_COMPILER_IS_INTEL )
-       add_flag( CMAKE_CXX_FLAGS "-wd1478" )  # Disable compiler warning # 1478: "declared as deprecated"
-   elseif( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
-       add_flag ( CMAKE_CXX_FLAGS "-Wno-deprecated-declarations")
-   endif()
-endif()
-
-
-if ( WALBERLA_CXX_COMPILER_IS_CLANG OR WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG )
-    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments" )
-endif ( )
-
-
-if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-    if ( WALBERLA_STL_BOUNDS_CHECKS )
-        add_definitions ( "-D_GLIBCXX_DEBUG" )
-        add_definitions ( "-D_LIBCPP_DEBUG=1" )
-    endif()
-endif()
-
-# Omit maybe-uninitialized for gcc 12 for now. Check if it is a bug or a real problem:
-if( WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0" )
-   add_flag( CMAKE_CXX_FLAGS "-Wno-maybe-uninitialized" )
-endif()
-
-# GCC 12 reports a "array bounds" warning at UniformBufferedScheme.h:297 (error: array subscript 26 is above array bounds of)
-# when e.g. compiling the GhostLayerCommTest.
-# Since this is most probably a bug in GCC disable the warning for now
-if( WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0" )
-   add_flag( CMAKE_CXX_FLAGS "-Wno-array-bounds" )
-endif()
-
-#fastmath
-if ( WALBERLA_BUILD_WITH_FASTMATH )
-    if ( WALBERLA_CXX_COMPILER_IS_INTEL )
-        add_flag( CMAKE_CXX_FLAGS "-fp-model fast=2 -no-prec-sqrt -no-prec-div" )
-    endif()
-
-    if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
-        add_flag( CMAKE_CXX_FLAGS "-ffast-math")
-    endif()
-
-    if( WALBERLA_CXX_COMPILER_IS_MSVC )
-        add_flag( CMAKE_CXX_FLAGS "/fp:fast" )
-    endif()
-else()
-   if( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
-      add_flag( CMAKE_CXX_FLAGS "-fp-model=precise")
-   endif()
-endif()
 
 # Xcode generator disables -isystem flag, even though current versions of Xcode support it
 if(CMAKE_GENERATOR STREQUAL "Xcode")
     set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-isystem ")
     set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
-endif()
-
-
-#GCC 5+ ABI selection
-if( WALBERLA_CXX_COMPILER_IS_GNU )
-   if( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0.0 )
-      option ( WALBERLA_USE_CPP11_ABI "On GCC 5+ use the C++11 ABI" ON )
-      if( WALBERLA_USE_CPP11_ABI )
-         add_flag( CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=1" )
-      else()
-         add_flag( CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0" )
-      endif()
-   endif()
 endif()
 
 
@@ -551,51 +360,6 @@ else()
    endif()
 endif()
 
-############################################################################################################################
-##
-##  Visual Studio Setup
-##
-############################################################################################################################
-if ( WALBERLA_CXX_COMPILER_IS_MSVC )
-   string( REGEX REPLACE "[/-]W[0-4]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ) # remove default warning flags
-
-   option ( WALBERLA_GROUP_PROJECTS   "Flag if the projects are grouped or in a flat hierarchy"    ON )
-   option ( WALBERLA_GROUP_FILES      "Flag if the files are grouped or in a flat hierarchy"       ON )
-   set_property ( GLOBAL PROPERTY USE_FOLDERS ${WALBERLA_GROUP_PROJECTS} )
-
-   option ( WALBERLA_VS_MULTI_PROCESS_BUILD "Use the /mp option for VS builds" ON )
-   if( WALBERLA_VS_MULTI_PROCESS_BUILD )
-      add_flag ( CMAKE_CXX_FLAGS "-MP" ) # enable multi-threaded compiling
-   endif()
-
-   add_definitions ( "-DNOMINMAX" )                # Disable Min/Max-Macros
-   add_definitions ( "-D_WIN32_WINNT=0x501" )      # Minimum Windows versions is Windows XP
-   add_definitions ( "-DWINVER=0x501" )            # Minimum Windows versions is Windows XP
-   add_definitions ( "-D_CRT_SECURE_NO_WARNINGS" ) # disable warnings promoting Microsoft's security enhanced CRT
-   add_definitions ( "-D_SCL_SECURE_NO_WARNINGS" ) # disable warnings triggered by Microsoft's checked iterators
-   add_flag ( CMAKE_CXX_FLAGS "-W4" )              # set warning level to maximum
-   add_flag ( CMAKE_CXX_FLAGS "-bigobj" )          # enable big object files
-   add_flag ( CMAKE_CXX_FLAGS "-wd4127" )          # disable compiler warning C4127: "conditional expression is constant"
-   add_flag ( CMAKE_CXX_FLAGS "-wd4512" )          # disable compiler warning C4512: "assignment operator could not be generated"
-   add_flag ( CMAKE_CXX_FLAGS "-wd4913" )          # disable compiler warning C4512: "user defined binary operator ',' exists but
-                                                   # no overload could convert all operands, default built-in binary operator ','
-                                                   # used"
-   add_flag ( CMAKE_CXX_FLAGS "-wd4702" )          # disable compiler warning C4702: "unreachable code"
-   add_flag ( CMAKE_CXX_FLAGS "-wd4505" )          # disable compiler warning C4505: "unreferenced local function has been removed"
-   add_flag ( CMAKE_CXX_FLAGS "-wd4503" )          # disable compiler warning C4503: "'identifier' : decorated name length exceeded, name was truncated"
-
-   if ( WARNING_ERROR )
-      add_flag ( CMAKE_CXX_FLAGS "-WX" )           # Treat warnings as errors
-   endif ( )
-
-   if( NOT WARNING_DEPRECATED)
-      add_definitions( "-D_CRT_SECURE_NO_DEPRECATE" )
-      add_definitions( "-D_SCL_SECURE_NO_DEPRECATE" )
-      add_flag       ( CMAKE_CXX_FLAGS "-wd4996"    ) # Disable compiler warning C4996: "declared as deprecated"
-   endif()
-
-endif ( )
-############################################################################################################################
 
 ############################################################################################################################
 ##
@@ -728,24 +492,6 @@ if ( Threads_FOUND )
       add_flag( CMAKE_CXX_FLAGS "${CMAKE_THREAD_LIBS_INIT}" )
    endif()
 endif()
-
-
-
-############################################################################################################################
-##
-## backtrace may be in a separate library
-##
-############################################################################################################################
-
-if ( NOT WIN32 AND (WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG))
-   find_package ( Backtrace QUIET )
-   if ( Backtrace_FOUND )
-      list ( APPEND SERVICE_LIBS ${Backtrace_LIBRARIES} )
-      set ( WALBERLA_BUILD_WITH_BACKTRACE ON )
-      set ( WALBERLA_BACKTRACE_HEADER ${Backtrace_HEADER} )
-   endif ( Backtrace_FOUND )
-endif()
-
 
 
 ############################################################################################################################
@@ -920,22 +666,6 @@ set( CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED ${CMAKE_MODULE_LINKER_FLAGS_DEBUG}
 
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOptimized)
 
-if ( WALBERLA_CXX_COMPILER_IS_MSVC )
-    string(REPLACE "/Od" "/O2"   CMAKE_C_FLAGS_DEBUGOPTIMIZED   ${CMAKE_C_FLAGS_DEBUGOPTIMIZED})
-    string(REPLACE "/Ob0" "/Ob2" CMAKE_C_FLAGS_DEBUGOPTIMIZED   ${CMAKE_C_FLAGS_DEBUGOPTIMIZED})
-    string(REPLACE "/RTC1" ""    CMAKE_C_FLAGS_DEBUGOPTIMIZED   ${CMAKE_C_FLAGS_DEBUGOPTIMIZED})
-    string(REPLACE "/Od" "/O2"   CMAKE_CXX_FLAGS_DEBUGOPTIMIZED ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED})
-    string(REPLACE "/Ob0" "/Ob2" CMAKE_CXX_FLAGS_DEBUGOPTIMIZED ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED})
-    string(REPLACE "/RTC1" ""    CMAKE_CXX_FLAGS_DEBUGOPTIMIZED ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED})
-elseif(    WALBERLA_CXX_COMPILER_IS_GNU
-        OR WALBERLA_CXX_COMPILER_IS_INTEL
-        OR WALBERLA_CXX_COMPILER_IS_CLANG
-        OR WALBERLA_CXX_COMPILER_IS_INTELLLVM
-        OR WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG )
-   set( CMAKE_C_FLAGS_DEBUGOPTIMIZED   "${CMAKE_C_FLAGS_DEBUGOPTIMIZED} -O3" )
-   set( CMAKE_CXX_FLAGS_DEBUGOPTIMIZED "${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED} -O3" )
-endif()
-
 set(CMAKE_C_FLAGS_DEBUGOPTIMIZED ${CMAKE_C_FLAGS_DEBUGOPTIMIZED} CACHE STRING
     "Flags used by the compiler during DebugOptimized builds")
 set(CMAKE_CXX_FLAGS_DEBUGOPTIMIZED ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED}  CACHE STRING
@@ -1010,12 +740,6 @@ if ( WALBERLA_BUILD_WITH_OPENMP )
           add_flag( CMAKE_CXX_FLAGS "-Wno-sign-conversion" )
        endif()
     endif()
-
-else()
-    if ( WALBERLA_CXX_COMPILER_IS_CRAY )
-        add_flag ( CMAKE_C_FLAGS   "-h noomp" )
-        add_flag ( CMAKE_CXX_FLAGS "-h noomp" )
-    endif()
 endif()
 ############################################################################################################################
 
@@ -1058,11 +782,6 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
 endif ( )
-
-# old nvcc compilers and newer stdlibc++ are incompatible. This needs to be checked!
-if (WALBERLA_STL_BOUNDS_CHECKS AND WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_CUDA AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0" AND WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
-    message(FATAL_ERROR "WALBERLA_STL_BOUNDS_CHECKS is not compatible with your CUDA compiler")
-endif()
 
 if (WALBERLA_BUILD_WITH_CUDA AND (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0" OR CMAKE_VERSION VERSION_LESS 3.18.0))
     # CUDA < 11 does not support C++17. std::experimental::any works with C++14, unlike std::any.
@@ -1110,35 +829,6 @@ endif ( )
 
 ############################################################################################################################
 
-
-
-############################################################################################################################
-##
-##  Testing Coverage
-##
-############################################################################################################################
-if (WALBERLA_BUILD_WITH_GCOV AND CMAKE_COMPILER_IS_GNUCXX  )
-    add_flag ( CMAKE_CXX_FLAGS "--coverage" )
-endif()
-############################################################################################################################
-
-
-
-############################################################################################################################
-##
-##  Profiling with gprof
-##
-############################################################################################################################
-
-if ( WALBERLA_BUILD_WITH_GPROF )
-    if ( WALBERLA_CXX_COMPILER_IS_INTEL )
-        add_flag ( CMAKE_CXX_FLAGS        "-pg" )
-        add_flag ( CMAKE_EXE_LINKER_FLAGS "-pg" )
-    elseif ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
-        add_flag ( CMAKE_CXX_FLAGS        "-pg" )
-    endif()
-endif()
-############################################################################################################################
 
 
 ############################################################################################################################
@@ -1192,37 +882,14 @@ endif ( )
 
 ############################################################################################################################
 ##
-##  Some more compiler flags that need to happen after any try_compile (e.g. inside FindMPI)
+##  Some more compiler flags that need to happen after any try_compile (e.g. inside FindMPI) (not sure if still true)
 ##
 ############################################################################################################################
 
 # Treat warnings as errors
 if ( WARNING_ERROR )
-   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
-   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS "/WX" )
-   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
-      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
-   endif()
+   set (CMAKE_COMPILE_WARNING_AS_ERROR ON)
 endif ( )
-
-############################################################################################################################
-##
-##  Sanitizer
-##
-############################################################################################################################
-if ( WALBERLA_SANITIZE_ADDRESS )
-    if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
-        add_flag( CMAKE_CXX_FLAGS "-fsanitize=address")
-    endif()
-endif()
-
-if ( WALBERLA_SANITIZE_UNDEFINED )
-    if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
-        add_flag( CMAKE_CXX_FLAGS "-fsanitize=undefined")
-    endif()
-endif()
 
 ############################################################################################################################
 ##
@@ -1282,33 +949,6 @@ endif()
 
 ############################################################################################################################
 
-
-
-
-
-############################################################################################################################
-#
-# Fix compiler bugs
-#
-############################################################################################################################
-
-# The NEC SX has a few issues in its standard library headers
-if( WALBERLA_CXX_COMPILER_IS_NEC )
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/math.h         "#include_next <math.h>\n#undef fpclassify\n#undef signbit\n#undef isfinite\n#undef isinf\n#undef isnan\n#undef isnormal\n#undef isgreater\n#undef isgreaterequal\n#undef isless\n#undef islessequal\n#undef islessgreater\n#undef isunordered\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/types.h    "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/types.h\"   \n#undef uint_t\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/acl.h      "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/acl.h\"     \n#undef uint_t\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/if_ehcpl.h "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/if_ehcpl.h\"\n#undef uint_t\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/ptms.h     "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/ptms.h\"    \n#undef uint_t\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/stream.h   "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/stream.h\"  \n#undef uint_t\n")
-   file( WRITE ${walberla_BINARY_DIR}/CMakeFiles/src/sys/strsubr.h  "#define uint_t SX_UINT_T\n#include \"/SX/usr/include/sys/strsubr.h\" \n#undef uint_t\n")
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/math.h         ${walberla_BINARY_DIR}/src/math.h COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/types.h    ${walberla_BINARY_DIR}/src/sys/types.h    COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/acl.h      ${walberla_BINARY_DIR}/src/sys/acl.h      COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/if_ehcpl.h ${walberla_BINARY_DIR}/src/sys/if_ehcpl.h COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/ptms.h     ${walberla_BINARY_DIR}/src/sys/ptms.h     COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/stream.h   ${walberla_BINARY_DIR}/src/sys/stream.h   COPYONLY )
-   configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/strsubr.h  ${walberla_BINARY_DIR}/src/sys/strsubr.h  COPYONLY )
-endif()
 
 
 

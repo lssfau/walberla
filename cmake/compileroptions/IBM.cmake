@@ -1,0 +1,14 @@
+message(STATUS "Setting IBM specific compiler options")
+
+# Fixes linker errors with IBM compiler
+if( WALBERLA_CXX_COMPILER_IS_IBM )
+   add_flag ( CMAKE_CXX_FLAGS "-qpic=large" )
+endif()
+
+# Silences compiler and linker warnings and information with the IBM compiler
+if( WALBERLA_CXX_COMPILER_IS_IBM )
+   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-267" )  # 1586-267 (I) Inlining of specified subprogram failed due to the presence of a C++ exception handler
+   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-266" )  # 1586-266 (I) Inlining of specified subprogram failed due to the presence of a global label
+   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1500-030" )  # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
+   add_flag ( CMAKE_C_FLAGS "-qsuppress=1500-030" )    # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
+endif()
