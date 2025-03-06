@@ -1,5 +1,9 @@
 message(STATUS "Setting IBM specific compiler options")
 
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.1.1)
+   message(FATAL_ERROR "IBM compiler version must be at least 17.1.1!")
+endif()
+
 # Fixes linker errors with IBM compiler
 if( WALBERLA_CXX_COMPILER_IS_IBM )
    add_flag ( CMAKE_CXX_FLAGS "-qpic=large" )

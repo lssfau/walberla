@@ -1,5 +1,9 @@
 message(STATUS "Setting GNU specific compiler options")
 
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
+   message(FATAL_ERROR "GCC version must be at least 8!")
+endif()
+
 # Profile guided optimization
 if ( WALBERLA_PROFILE_GENERATE )
    add_flag( CMAKE_CXX_FLAGS "-fprofile-generate" )
