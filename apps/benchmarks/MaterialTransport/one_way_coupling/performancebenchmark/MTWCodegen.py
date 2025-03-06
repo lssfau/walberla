@@ -124,6 +124,7 @@ with CodeGeneration() as ctx:
         force=sp.symbols("F_:3"),
         force_model=ForceModel.LUO,
         compressible=True,
+        zero_centered=False
     )
 
     # =====================
@@ -272,7 +273,7 @@ with CodeGeneration() as ctx:
     generate_boundary(
         ctx,
         "BC_Concentration_Density",
-        FixedDensity(bc_density_concentration),
+        DiffusionDirichlet(bc_density_concentration),
         method_concentration,
         field_name=pdfs_concentration.name,
         streaming_pattern="pull",

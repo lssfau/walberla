@@ -10,24 +10,24 @@ NumericalSetup
     periodicInZ false;
 
     numXCellsPerBlock 128;
-    numYCellsPerBlock 64;
-    numZCellsPerBlock 64;
+    numYCellsPerBlock 128;
+    numZCellsPerBlock 256;
 
-    timeSteps 10;
+    timeSteps 1000;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
     useCommunicationHiding false;
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
     // fluid quantities in LBM units
-    uInflow 0.5;
+    uInflow 0.1;
     relaxationRate 0.9;
 }
 
 Output
 {
-    vtkSpacing 1;
+    vtkSpacing 0;
     vtkFolder vtk_out;
 
-    performanceLogFrequency 10;
+    performanceLogFrequency 500;
 }
