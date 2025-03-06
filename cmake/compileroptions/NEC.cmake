@@ -47,3 +47,10 @@ if( WALBERLA_CXX_COMPILER_IS_NEC )
    configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/stream.h   ${walberla_BINARY_DIR}/src/sys/stream.h   COPYONLY )
    configure_file ( ${walberla_BINARY_DIR}/CMakeFiles/src/sys/strsubr.h  ${walberla_BINARY_DIR}/src/sys/strsubr.h  COPYONLY )
 endif()
+
+
+if ( WALBERLA_BUILD_WITH_OPENMP )
+   message( STATUS "Enabling OpenMP workaround for NEC")
+   add_flag ( CMAKE_C_FLAGS   "-Popenmp" )
+   add_flag ( CMAKE_CXX_FLAGS "-Popenmp" )
+endif()

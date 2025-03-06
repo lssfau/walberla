@@ -707,7 +707,7 @@ endif()
 
 option ( WALBERLA_THREAD_SAFE_LOGGING "Enables/Disables thread-safe logging" ON )
 
-if ( WALBERLA_BUILD_WITH_OPENMP )
+if ( WALBERLA_BUILD_WITH_OPENMP AND NOT OpenMP_FOUND )
     if( APPLE AND EXISTS /opt/local/lib/libomp AND EXISTS /opt/local/include/libomp ) # find libomp from MacPorts
         set( CMAKE_FRAMEWORK_PATH /opt/local/lib/libomp )
         set( CMAKE_INCLUDE_PATH /opt/local/include/libomp )
@@ -721,24 +721,7 @@ if ( WALBERLA_BUILD_WITH_OPENMP )
             include_directories( ${OpenMP_CXX_INCLUDE_DIRS} )
         endif()
     else()
-        #workarounds
-        if ( WALBERLA_CXX_COMPILER_IS_NEC )
-            message( STATUS "Enabling OpenMP workaround for NEC")
-            add_flag ( CMAKE_C_FLAGS   "-Popenmp" )
-            add_flag ( CMAKE_CXX_FLAGS "-Popenmp" )
-        else()
-            message(FATAL_ERROR "Could NOT enable OpenMP")
-        endif()
-    endif()
-
-    if( WALBERLA_CXX_COMPILER_IS_CLANG OR WALBERLA_CXX_COMPILER_IS_INTELLLVM )
-       # check for bug in combination with OpenMP and sign conversion https://bugs.llvm.org/show_bug.cgi?id=48387
-       try_compile( WALBERLA_CLANG_OPENMP_BUG "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestClangOpenMPBug.cpp"
-             COMPILE_DEFINITIONS -Werror )
-       if( NOT ${WALBERLA_CLANG_OPENMP_BUG} )
-          message( WARNING "Setting -Wno-sign-conversion due to a compiler bug in LLVM (https://bugs.llvm.org/show_bug.cgi?id=48387)" )
-          add_flag( CMAKE_CXX_FLAGS "-Wno-sign-conversion" )
-       endif()
+         message(FATAL_ERROR "Could NOT enable OpenMP")
     endif()
 endif()
 ############################################################################################################################
@@ -838,24 +821,15 @@ endif ( )
 ############################################################################################################################
 
 
-if ( WALBERLA_BUILD_WITH_LIKWID_MARKERS )
+if ( WALBERLA_BUILD_WITH_LIKWID_MARKERS AND NOT LIKWID_FOUND )
     find_library( LIKWID_LIB likwid HINTS $ENV{LIKWID_LIBDIR} $ENV{LIKWID_ROOT}/lib )
     find_path( LIKWID_INCLUDE_DIR likwid.h HINTS $ENV{LIKWID_INCDIR} $ENV{LIKWID_ROOT}/include )
-
-    # For some reason, these turned out to be necessary when building with likwid on Fugaku
-    if ( WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG )
-        find_library( LIKWIDLUA_LIB NAMES likwid-lua HINTS $ENV{LIKWID_LIBDIR} $ENV{LIKWID_ROOT}/lib )
-        find_library( LIKWIDHWLOC_LIB NAMES likwid-hwloc HINTS $ENV{LIKWID_LIBDIR} $ENV{LIKWID_ROOT}/lib )
-    endif()
 
     if ( LIKWID_LIB AND LIKWID_INCLUDE_DIR)
         set( LIKWID_FOUND 1)
         include_directories( ${LIKWID_INCLUDE_DIR})
         add_definitions ( "-DLIKWID_PERFMON" )
         list ( APPEND SERVICE_LIBS ${LIKWID_LIB} )
-        if( WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG )
-            list ( APPEND SERVICE_LIBS ${LIKWIDLUA_LIB} ${LIKWIDHWLOC_LIB} )
-        endif()
     else()
         message(WARNING "likwid marker library not found. Set environment variable LIKWID_ROOT")
         set ( WALBERLA_BUILD_WITH_LIKWID_MARKERS OFF CACHE BOOL "Compile in markers for likwid-perfctr" FORCE )
