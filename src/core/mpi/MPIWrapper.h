@@ -196,14 +196,14 @@ const int MPI_MAX_ERROR_STRING = 255;
 #define WALBERLA_MPI_FUNCTION_ERROR WALBERLA_ABORT( "Invalid MPI function call! In case of compiling without MPI, MPI functions are not available and shouldn't be called!" );
 
 inline int MPI_Init( int*, char*** )  { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Initialized( int *)    { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Initialized( int* )    { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Finalize()             { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Abort( MPI_Comm, int ) { WALBERLA_MPI_FUNCTION_ERROR }
 
-inline int MPI_Group_incl( MPI_Group, int, int*, MPI_Group * ) { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Group_excl( MPI_Group, int, int*, MPI_Group * ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Group_incl( MPI_Group, int, const int*, MPI_Group * ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Group_excl( MPI_Group, int, const int*, MPI_Group * ) { WALBERLA_MPI_FUNCTION_ERROR }
 
-inline int MPI_Group_translate_ranks(MPI_Group, int, int*, MPI_Group, int*) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Group_translate_ranks(MPI_Group, int, const int*, MPI_Group, int*) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Group_free( MPI_Group *) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Comm_size( MPI_Comm, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
@@ -220,7 +220,7 @@ inline int MPI_Comm_split ( MPI_Comm, int, int, MPI_Comm *)                { WAL
 inline int MPI_Comm_split_type ( MPI_Comm, int, int, MPI_Info, MPI_Comm *) { WALBERLA_MPI_FUNCTION_ERROR }
 
 
-inline int MPI_Cart_create( MPI_Comm, int, int*, int*, int, MPI_Comm* ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Cart_create( MPI_Comm, int, const int*, const int*, int, MPI_Comm* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Dims_create( int, int, int* )                            { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Cart_coords( MPI_Comm, int, int, int* )                  { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Cart_rank  ( MPI_Comm, int*, int* )                      { WALBERLA_MPI_FUNCTION_ERROR }
@@ -253,8 +253,8 @@ inline int MPI_Exscan( void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm ) { WAL
 inline int MPI_Bcast     ( void*, int, MPI_Datatype, int, MPI_Comm )                      { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Allgather ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Gather    ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm )  { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Allgatherv( void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Gatherv   ( void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, int, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Allgatherv( void*, int, MPI_Datatype, void*, const int*, const int*, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Gatherv   ( const void*, int, MPI_Datatype, void*, const int*, const int*, MPI_Datatype, int, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Alltoall  ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Type_contiguous( int, MPI_Datatype, MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
@@ -263,7 +263,7 @@ inline int MPI_Type_create_indexed_block( int, int, const int*, MPI_Datatype, MP
 inline int MPI_Type_commit( MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_free( MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_create_resized( MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
-inline int MPI_Type_size( MPI_Datatype, int * ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Type_size( MPI_Datatype, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_create_struct(int, const int[], const MPI_Aint[], const MPI_Datatype[], MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR }
 
