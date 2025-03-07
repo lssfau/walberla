@@ -9,9 +9,9 @@ NumericalSetup
     periodicInY false;
     periodicInZ false;
 
-    numXCellsPerBlock 128;
+    numXCellsPerBlock 256;
     numYCellsPerBlock 128;
-    numZCellsPerBlock 256;
+    numZCellsPerBlock 128;
 
     timeSteps 1000;
 
@@ -26,7 +26,7 @@ NumericalSetup
 
 Output
 {
-    vtkSpacing 0;
+    vtkSpacing 100;
     vtkFolder vtk_out;
 
     performanceLogFrequency 500;

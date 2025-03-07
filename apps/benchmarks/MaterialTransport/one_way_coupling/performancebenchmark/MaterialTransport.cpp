@@ -290,13 +290,13 @@ int main(int argc, char** argv) {
 // TIME LOOP //
 ///////////////
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
+   initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize, true);
    initFluidField(blocks, velFieldFluidID , Uinitialize,domainSize);
    gpu::fieldCpy<gpu::GPUField< real_t >, DensityField_concentration_T>(blocks, densityConcentrationFieldCPUGPUID,densityConcentrationFieldID);
    gpu::fieldCpy< gpu::GPUField< real_t >, VelocityField_fluid_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
 
 #else
-   initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
+   initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize,true);
    initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSize);
 
 #endif
