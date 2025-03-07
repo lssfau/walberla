@@ -30,12 +30,12 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 FluidMacroGetter.h FluidMacroGetter.cpp
                 ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
                 ConcentrationMacroGetter.h ConcentrationMacroGetter.cpp
-                BC_PoisuelleUBB.h BC_PoisuelleUBB.cpp
+                BC_PoisuelleUBB.h BC_PoisuelleUBB.${CODEGEN_FILE_SUFFIX}
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME 2d_gaussian_plate FILES Validations_2D.cpp ../../utilities/InitializerFunctions.cpp
+        waLBerla_add_executable(NAME MTW_1way_2Dvalidations FILES Validations_2D.cpp ../../utilities/InitializerFunctions.cpp
                 DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_2D_${config})
-        target_compile_definitions(2d_gaussian_plate PRIVATE Weighting=2)
+        target_compile_definitions(MTW_1way_2Dvalidations PRIVATE Weighting=2)
     endif ()
 endif ()

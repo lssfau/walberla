@@ -9,7 +9,7 @@ script_dir = os.path.dirname(__file__)
 print(script_dir)
 walberla_dir = os.path.join(script_dir, '..', '..', 'python')
 sys.path.append(walberla_dir)
-from lbmpy.session import *
+#from lbmpy.session import *
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
@@ -129,7 +129,7 @@ with CodeGeneration() as ctx:
         kernel_type="stream_pull_collide",
     )
     lamda=sp.Rational(1,6)
-    omegacTRT = relaxation_rate_from_magic_number(omega_c, magic_number=lamda)
+    #omegacTRT = relaxation_rate_from_magic_number(omega_c, magic_number=lamda)
     # Concentration LBM config
     lbm_concentration_config = LBMConfig(
         stencil=stencil_concentration,

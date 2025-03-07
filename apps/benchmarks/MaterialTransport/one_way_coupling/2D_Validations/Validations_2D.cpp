@@ -43,18 +43,8 @@
 #include "lbm/PerformanceLogger.h"
 #include "lbm/vtk/all.h"
 
-#include "lbm_mesapd_coupling/DataTypesCodegen.h"
-#include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
-#include "lbm_mesapd_coupling/utility/ParticleSelector.h"
 
-#include "mesa_pd/data/DataTypes.h"
-#include "mesa_pd/data/ParticleAccessorWithShape.h"
-#include "mesa_pd/data/ParticleStorage.h"
-#include "mesa_pd/data/ShapeStorage.h"
-#include "mesa_pd/data/shape/Sphere.h"
-#include "mesa_pd/domain/BlockForestDomain.h"
-#include "mesa_pd/mpi/SyncNextNeighbors.h"
-#include "mesa_pd/vtk/ParticleVtkOutput.h"
+#include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
 
 #include "sqlite/SQLite.h"
 
@@ -241,7 +231,6 @@ int main(int argc, char** argv) {
 
    #endif
       BlockDataID densityFluidFieldID = field::addToStorage< DensityField_fluid_T >(blocks, "density fluid field", real_t(0), field::fzyx);
-      //BlockDataID densityConcentrationFieldID = field::addToStorage< DensityField_concentration_T >(blocks, "density concentration field", real_t(0), field::fzyx);
       BlockDataID flagFieldFluidID = field::addFlagFieldToStorage< FlagField_T >(blocks, "fluid flag field");
       BlockDataID flagFieldConcentrationID = field::addFlagFieldToStorage< FlagField_T >(blocks, "concentration flag field");
 
@@ -344,12 +333,8 @@ int main(int argc, char** argv) {
                               domainBB.zMin(), domainBB.xMin(),
                               domainBB.yMax(), domainBB.zMin());
 
-            //const auto cellAABB = SbF->getBlockLocalCellAABB(block, pos);
-            //auto cellCenter = cellAABB.center();
-
             auto h_y          = real_c(west.ySize());
             SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
-            //WALBERLA_LOG_INFO_ON_ROOT("h_y is " << h_y << " " << "y coord is " << globalCell[1]);
             auto y1 = real_c(globalCell[1]);
 
             real_t u = 0.05*(1- std::pow((y1/h_y),2));
@@ -430,9 +415,23 @@ int main(int argc, char** argv) {
       // TIME LOOP //
       ///////////////
       #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-      initConcentrationField(blocks,densityConcentrationFieldID,simulationDomain,domainSize);
-      initFluidField(blocks, velFieldFluidID , Uinitialize);
+   if (simulationName == "2d_gaussian")
+   {
+      initConcentrationFieldGaussian(blocks, densityConcentrationFieldID, simulationDomain, domainSize,
+                                     sigma_0, sigma_D, Uinitialize, x_0);
 
+   }
+   if(simulationName == "2d_poisuelle"){
+      WALBERLA_LOG_INFO_ON_ROOT("Initializing Poisuelle Fluid Domain");
+      initFluidFieldPoiseuille(blocks,velFieldFluidID,Uinitialize,domainSize);
+   }
+   if (simulationName == "2d_plate")
+   {
+      WALBERLA_LOG_INFO_ON_ROOT("Initializing 2d plate Fluid Domain");
+      initFluidField(blocks, velFieldFluidID, Uinitialize,domainSize);
+   }
+   gpu::fieldCpy<gpu::GPUField< real_t >, DensityField_concentration_T>(blocks, densityConcentrationFieldCPUGPUID,densityConcentrationFieldID);
+   gpu::fieldCpy< gpu::GPUField< real_t >, VelocityField_fluid_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
       #else
 
       if (simulationName == "2d_gaussian")
@@ -447,7 +446,7 @@ int main(int argc, char** argv) {
       if (simulationName == "2d_plate")
       {
          WALBERLA_LOG_INFO_ON_ROOT("Initializing 2d plate Fluid Domain");
-         initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+         initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSize);
       }
 #endif
       pystencils::InitializeFluidDomain initializeFluidDomain(pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, real_t(1));
@@ -493,13 +492,13 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
    // objects to get the macroscopic quantities
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils:: FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
+   pystencils:: FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidID,velFieldFluidID);
 #else
    pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID);
 #endif
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID,velFieldFluidID,real_t(0),real_t(0),real_t(0));
+   pystencils:: ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,pdfFieldConcentrationID);
 #else
    pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID);
 #endif
