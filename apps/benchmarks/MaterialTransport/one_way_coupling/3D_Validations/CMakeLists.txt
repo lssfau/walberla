@@ -33,8 +33,8 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                 GeneralInfoHeader.h
         )
 
-        waLBerla_add_executable(NAME 3d_gaussian_paper FILES 3D_Validations.cpp ../../utilities/InitializerFunctions.cpp
+        waLBerla_add_executable(NAME MTW_1way_3Dvalidations FILES 3D_Validations.cpp ../../utilities/InitializerFunctions.cpp
                 DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_3D_${config})
-        target_compile_definitions(3d_gaussian_paper PRIVATE Weighting=2)
+        target_compile_definitions(MTW_1way_3Dvalidations PRIVATE Weighting=2)
     endif ()
 endif ()

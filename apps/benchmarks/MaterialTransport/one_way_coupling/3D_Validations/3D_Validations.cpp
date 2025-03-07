@@ -161,7 +161,7 @@ int main(int argc, char** argv)
    const real_t dt_SI              = real_c((dx_SI * dx_SI * kappa_L) / (kappa_SI));
    const real_t omegaConcentration = lbm::collision_model::omegaFromViscosity(kappa_L);
 
-   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)), uint_c((zSize_SI/1)));
+   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)), uint_c((zSize_SI/dx_SI)));
    const uint_t timeSteps   = uint_c(std::ceil(tSI / dt_SI));
    const uint_t tinitial    = uint_c(0);
    const real_t sigma_0     = real_t(10);
@@ -322,7 +322,7 @@ int main(int argc, char** argv)
    // map boundaries into the fluid field simulation
    lbm::BC_Fluid_Density density_fluid_bc(blocks, pdfFieldFluidCPUGPUID, real_t(1.0));
    lbm::BC_Fluid_NoSlip noSlip_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
-   lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow_LBM, real_t(0));
+   lbm::BC_Fluid_UBB ubb_fluid_bc(blocks, pdfFieldFluidCPUGPUID, uInflow_LBM, real_t(0),real_t(0));
    lbm::BC_Fluid_Neumann neumann_fluid_bc(blocks, pdfFieldFluidCPUGPUID);
    lbm::BC_Concentration_Density density_concentration_bc_west(blocks, pdfFieldConcentrationCPUGPUID, real_t(0));
    lbm::BC_Concentration_Density density_concentration_bc_south(blocks, pdfFieldConcentrationCPUGPUID, real_t(1));
@@ -345,12 +345,15 @@ int main(int argc, char** argv)
 #else
 
 
-   initConcentrationFieldGaussian(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSize, sigma_0,
-                                  sigma_D, Uinitialize, x_0);
+   initConcentrationFieldSinusoidal(blocks,
+                                    densityConcentrationFieldCPUGPUID,simulationDomain,
+                                    domainSize,sigma_0,sigma_D,
+                                    Uinitialize,x_0,dx_SI,dt_SI);
    // initConcentrationField(blocks,densityConcentrationFieldCPUGPUID,simulationDomain,domainSize);
 
-
-   initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize);
+   WALBERLA_LOG_INFO_ON_ROOT("reached hereeee");
+   initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize,domainSize);
+   WALBERLA_LOG_INFO_ON_ROOT("reached hereeee 22");
 
 #endif
 
@@ -516,18 +519,19 @@ int main(int argc, char** argv)
 
    WcTimingPool timeloopTiming;
    // TODO: maybe add warmup phase
-   real_t advection_time = domainSize[0]/Uinitialize[0];
-   analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
-                         Uinitialize, x_0, 0,1);
+
+   analyticalSolSinusoidal(blocks,
+                           analyticalConcentrationFieldID,simulationDomain,
+                           domainSize, sigma_0,diffusivity,
+                           Uinitialize,x_0,0,dx_SI,dt_SI);
    for (uint_t timeStep = 1; timeStep <= timeSteps; ++timeStep)
    {
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
-
-      uint_t advection_period = uint_c(timeStep/advection_time);
-      WALBERLA_LOG_INFO("advection period is " << timeStep << " " << advection_period);
-      analyticalSolGaussian(blocks, analyticalConcentrationFieldID, simulationDomain, domainSize, sigma_0, diffusivity,
-                            Uinitialize, x_0, timeStep,advection_period);
+      analyticalSolSinusoidal(blocks,
+                              analyticalConcentrationFieldID,simulationDomain,
+                              domainSize, sigma_0,diffusivity,
+                              Uinitialize,x_0,timeStep,dx_SI,dt_SI);
       std::vector< real_t > norms = computeErrorL2(blocks, densityConcentrationFieldCPUGPUID,
                                                    analyticalConcentrationFieldID, ErrorFieldID, simulationDomain);
       WALBERLA_LOG_INFO_ON_ROOT("Infinity norm is " << norms[0] << "\n L1 norm is " << norms[1] << "\n L2 norm is "

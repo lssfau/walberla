@@ -1,13 +1,13 @@
 Simulation{
-    simName 3D_resolution;  // 3D_validation or 3D_resolution
+    simName 3D_validation;  // 3D_validation or 3D_resolution
 }
 
 NumericalSetup
 {
 
-    xSize   256;           // SI and LBM length are one and the same => dx_SI = dx_LB always
-    ySize   256;
-    zSize   1;
+    xSize   2;           // SI and LBM length are one and the same => dx_SI = dx_LB always
+    ySize   2;
+    zSize   2;
 
     numXBlocks 1;
     numYBlocks 1;
@@ -24,10 +24,10 @@ NumericalSetup
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
 
-    dx_SI 1;
+    dx_SI 0.02;
 
     // fluid quantities
-    uInflowL 0.8;  // LBM velocity of fluid
+    uInflowL 1e-8;  // LBM velocity of fluid
     kappa_SI 4; // diffusivity SI
     kappa_L  0.00000166; // diffusivity lbm
 }

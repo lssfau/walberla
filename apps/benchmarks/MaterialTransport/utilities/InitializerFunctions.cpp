@@ -108,7 +108,7 @@ void initConcentrationFieldSinusoidal(const shared_ptr< StructuredBlockStorage >
          blocks->transformBlockLocalToGlobalCell(globalCell, block, *cellIt);
 
          Vector3< real_t > pos = blocks->getCellCenter(globalCell, level);
-         ConcentrationField->get(*cellIt) = std::sin(pi*pos[0]*dx)*std::sin(pi*pos[1]*dx)*std::sin(pi*pos[2]*dx) +1;
+         ConcentrationField->get(*cellIt) = std::sin(pi*pos[0]*dx)*std::sin(pi*pos[1]*dx)*std::sin(pi*pos[2]*dx) +1 ;
          ConcentrationField->get(*cellIt) = std::max(ConcentrationField->get(*cellIt), 1e-15);
       }
    }
@@ -187,7 +187,7 @@ void initFluidFieldPoiseuille(const shared_ptr< StructuredBlockStorage >& blocks
 void analyticalSolGaussian(const shared_ptr< StructuredBlockStorage >& blocks,
                            BlockDataID& AnalyticalConcentrationFieldID, const math::AABB& domainAABB,
                            Vector3< uint_t > domainSize, const real_t sigma_0, const real_t diffusivity,
-                           const Vector3< real_t > uInflow, const Vector3< real_t > x_0, const real_t time)
+                           const Vector3< real_t > uInflow, const Vector3< real_t > x_0, const real_t time,uint_t advection_period)
 {
    real_t sigma_D2 = (2 * diffusivity * time);
 
