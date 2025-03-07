@@ -2,15 +2,13 @@
 NumericalSetup
 {
     // product of number of blocks should be equal to number of used processes
-    xSizeSI  64;
-    ySizeSI  64;
-    zSizeSI  1;
-
     numXBlocks 1;
     numYBlocks 1;
     numZBlocks 1;
 
-    cellsPerBlockPerDirection 64;
+    cellsPerBlockPerDirectionX 64;
+    cellsPerBlockPerDirectionY 64;
+    cellsPerBlockPerDirectionZ 1;
 
     periodicInY false;
     periodicInZ false;
@@ -29,13 +27,13 @@ NumericalSetup
     Mach 0.1;
     relaxationRate 1.5;
 
-    timeSteps 10000;
+    timeSteps 40000;
 }
 
 Output
 {
     vtkSpacing 1000;
-    vtkFolder vtk_out_srt_srt;
+    vtkFolder vtk_out_2D;
 
     performanceLogFrequency 0;
 }

@@ -36,13 +36,12 @@ namespace walberla
 {
 
 void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& ConcentrationFieldID,
-                            const math::AABB& domainAABB, Vector3< uint_t > domainSize)
+                            const math::AABB& domainAABB, Vector3< uint_t > domainSize, bool performanceBenchmark)
 {
-   const real_t radius = real_c(domainSize[1] / 10);
+   //const real_t radius = real_c(domainSize[1] / 10);
    for (auto& block : *blocks)
    {
       auto ConcentrationField = block.getData< DensityField_concentration_T >(ConcentrationFieldID);
-      WALBERLA_LOG_INFO_ON_ROOT("failed here")
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(ConcentrationField, {
          Cell globalCell;
          const auto cellAABB = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
@@ -51,13 +50,13 @@ void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, 
          const real_t posY   = y; // cellCenter[1];
          const real_t posZ   = z; // cellCenter[2];
 
-         real_t distance =
-            real_c(sqrt(pow((domainAABB.center()[0] - posX), 2) + pow((domainAABB.center()[1] - posY), 2) +
-                        pow((domainAABB.center()[2] - posZ), 2)));
+         if(performanceBenchmark){
+            ConcentrationField->get(x, y, z) = real_t(0.2);
+         }
+         else{
+            ConcentrationField->get(x, y, z) = real_t(0);
+         }
 
-         /*if (distance <= radius) { ConcentrationField->get(x, y, z) = real_t(0.0); }
-         else { ConcentrationField->get(x, y, z) = real_t(0.0); }*/
-         ConcentrationField->get(x, y, z) = real_t(0.0);
       }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
    }
 
@@ -81,7 +80,6 @@ void initConcentrationFieldGaussian(const shared_ptr< StructuredBlockStorage >& 
          blocks->transformBlockLocalToGlobalCell(globalCell, block, *cellIt);
 
          Vector3< real_t > pos = blocks->getCellCenter(globalCell, level);
-         // WALBERLA_LOG_INFO("posx " << pos[0]);
          ConcentrationField->get(*cellIt) = std::exp(
             -(std::pow((pos[0] - x_0[0]), 2) + std::pow((pos[1] - x_0[1]), 2) + std::pow((pos[2]-x_0[2]),2)) /
             (2 * sigma_0 * sigma_0));
@@ -157,8 +155,8 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {
          Cell globalCell;
          const auto cellAABB                 = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
-         FluidVelocityField->get(x, y, z, 0) = 0;//uInflow[0];
-         FluidVelocityField->get(x, y, z, 1) = 0;//uInflow[1];
+         FluidVelocityField->get(x, y, z, 0) = uInflow[0];
+         FluidVelocityField->get(x, y, z, 1) = uInflow[1];
          if(domainSize[2] != 1)
          {
             FluidVelocityField->get(x, y, z, 2) = 0;
@@ -172,8 +170,6 @@ void initFluidFieldPoiseuille(const shared_ptr< StructuredBlockStorage >& blocks
 {
    for (auto& block : *blocks)
    {
-      WALBERLA_LOG_INFO_ON_ROOT("Velocity init reached here");
-      //WALBERLA_LOG_INFO_ON_ROOT("y height is " << domainSize[1]);
       auto FluidVelocityField = block.getData< VelocityField_fluid_T >(FluidFieldID);
 
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {
