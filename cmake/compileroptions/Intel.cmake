@@ -70,3 +70,6 @@ if(WALBERLA_BUILD_WITH_GPROF)
   add_flag(CMAKE_CXX_FLAGS "-pg")
   add_flag(CMAKE_EXE_LINKER_FLAGS "-pg")
 endif()
+
+# Intel C++17 support introduced in 2.6.2 (https://github.com/pybind/pybind11/pull/2729)
+set(PYBIND11_MINIMUM_VERSION "2.6.2")

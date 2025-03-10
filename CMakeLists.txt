@@ -413,12 +413,9 @@ endif()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
-    if(WALBERLA_CXX_COMPILER_IS_INTEL)
-        # Intel C++17 support introduced in 2.6.2 (https://github.com/pybind/pybind11/pull/2729)
-        set(PYBIND11_MINIMUM_VERSION "2.6.2")
-    else()
-        set(PYBIND11_MINIMUM_VERSION "2.6.0")
-    endif()
+   if (NOT DEFINED PYBIND11_MINIMUM_VERSION)
+           set(PYBIND11_MINIMUM_VERSION "2.6.0")
+   endif()
 
     execute_process(COMMAND ${Python_EXECUTABLE} -c "import pybind11; print(pybind11._version.__version__)"
                     OUTPUT_VARIABLE pybind11_VERSION ERROR_QUIET RESULT_VARIABLE pybind11_VERSION_RESULT)
