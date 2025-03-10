@@ -61,16 +61,6 @@ if ( WALBERLA_BUILD_WITH_FASTMATH )
    add_flag( CMAKE_CXX_FLAGS "-ffast-math")
 endif()
 
-#GCC 5+ ABI selection
-if( NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0.0 )
-   option ( WALBERLA_USE_CPP11_ABI "On GCC 5+ use the C++11 ABI" ON )
-   if( WALBERLA_USE_CPP11_ABI )
-      add_flag( CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=1" )
-   else()
-      add_flag( CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0" )
-   endif()
-endif()
-
 if (NOT WIN32)
 find_package ( Backtrace QUIET )
 if ( Backtrace_FOUND )
