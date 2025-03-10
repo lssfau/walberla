@@ -1,4 +1,4 @@
-message(STATUS "Setting Cray specific compiler options")
+message(STATUS "Setting PGI specific compiler options")
 
 # Silences compiler and linker warnings and information with the PGI compiler
 add_flag(CMAKE_CXX_FLAGS "--display_error_number")

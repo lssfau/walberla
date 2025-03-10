@@ -9,12 +9,21 @@ add_flag(CMAKE_CXX_FLAGS "-qpic=large")
 
 # Silences compiler and linker warnings and information with the IBM compiler
 add_flag(CMAKE_CXX_FLAGS "-qsuppress=1586-267") # 1586-267 (I) Inlining of
-# specified subprogram failed due to the presence of a C++ exception handler
+                                                # specified subprogram failed
+                                                # due to the presence of a C++
+                                                # exception handler
 add_flag(CMAKE_CXX_FLAGS "-qsuppress=1586-266") # 1586-266 (I) Inlining of
-# specified subprogram failed due to the presence of a global label
+                                                # specified subprogram failed
+                                                # due to the presence of a
+                                                # global label
 add_flag(CMAKE_CXX_FLAGS "-qsuppress=1500-030") # 1500-030: (I) INFORMATION:
-# [...] Additional optimization may be attained by recompiling and specifying
-# MAXMEM option with a value greater than 8192.
-add_flag(CMAKE_C_FLAGS "-qsuppress=1500-030") # 1500-030: (I) INFORMATION:
-# [...] Additional optimization may be attained by recompiling and specifying
-# MAXMEM option with a value greater than 8192.
+                                                # [...] Additional optimization
+                                                # may be attained by recompiling
+                                                # and specifying MAXMEM option
+                                                # with a value greater than
+                                                # 8192.
+add_flag(CMAKE_C_FLAGS "-qsuppress=1500-030") # 1500-030: (I) INFORMATION: [...]
+                                              # Additional optimization may be
+                                              # attained by recompiling and
+                                              # specifying MAXMEM option with a
+                                              # value greater than 8192.
