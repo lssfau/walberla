@@ -255,14 +255,14 @@ with CodeGeneration() as ctx:
         target=target,
         inner_outer_split=True,
     )
-    #generate_sweep(
-    #    ctx,
-    #    "PSMSweepSplit",
-    #    node_collection,
-    #    field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
-    #    target=target,
-    #    inner_outer_split=True,
-    #)
+    generate_sweep(
+        ctx,
+        "PSMFluidSweepSplit",
+        node_collection,
+        field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
+       target=target,
+        inner_outer_split=True,
+    )
 
     generate_pack_info_from_kernel(
         ctx,

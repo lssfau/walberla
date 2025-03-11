@@ -14,6 +14,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     LBMConcentrationSweep.h LBMConcentrationSweep.${CODEGEN_FILE_SUFFIX}
                     LBMFluidSplitSweep.h LBMFluidSplitSweep.${CODEGEN_FILE_SUFFIX}
                     LBMConcentrationSplitSweep.h LBMConcentrationSplitSweep.${CODEGEN_FILE_SUFFIX}
+                    PSMFluidSweepSplit.h PSMFluidSweepSplit.${CODEGEN_FILE_SUFFIX}
                     PackInfoFluid.h PackInfoFluid.${CODEGEN_FILE_SUFFIX}
                     PackInfoConcentration.h PackInfoConcentration.${CODEGEN_FILE_SUFFIX}
                     InitializeFluidDomain.h InitializeFluidDomain.${CODEGEN_FILE_SUFFIX}
@@ -35,9 +36,9 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     GeneralInfoHeader.h
         )
             message(STATUS "generated in thermal PSM is: ${config}" )
-            waLBerla_add_executable(NAME thermalPSM_${config} FILES thermalPSM.cpp ../../utilities/InitializerFunctions.cpp
+            waLBerla_add_executable(NAME thermalPSMPerformanceBenchmark_${config} FILES thermalPSM.cpp ../../utilities/InitializerFunctions.cpp
                     DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegenThermalPSM_${config})
-            target_compile_definitions(thermalPSM_${config} PRIVATE Weighting=2)
+            target_compile_definitions(thermalPSMPerformanceBenchmark_${config} PRIVATE Weighting=2)
         endforeach ()
 
 

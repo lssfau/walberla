@@ -2,20 +2,14 @@
 NumericalSetup
 {
     // product of number of blocks should be equal to number of used processes
-    xSizeSI  64;
-    ySizeSI  64;
-    zSizeSI  64;
-
     numXBlocks 1;
     numYBlocks 1;
     numZBlocks 1;
 
-    cellsPerBlockPerDirection 32;
+    cellsPerBlockPerDirection 200;
 
     periodicInY false;
     periodicInZ false;
-
-    tSI 15;
     gravity 9.81;
 
     sendDirectlyFromGPU false; // use GPU-GPU communication
@@ -48,7 +42,7 @@ NumericalSetup
 
 Output
 {
-    vtkSpacing 100;
+    vtkSpacing 0;
     vtkFolder vtk_out;
 
     performanceLogFrequency 10;
