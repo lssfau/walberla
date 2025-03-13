@@ -1,5 +1,10 @@
 message(STATUS "Setting FujitsuClang specific compiler options")
 
+set(_clang_minimal_version 7)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_clang_minimal_version})
+ message(FATAL_ERROR "Clang version must be at least ${_clang_minimal_version}!")
+endif()
+
 add_flag(CMAKE_CXX_FLAGS
          "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments")
 

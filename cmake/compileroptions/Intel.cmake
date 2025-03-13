@@ -1,5 +1,10 @@
 message(STATUS "Setting Intel specific compiler options")
 
+set(_intel_minimal_version 19.0.0)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_intel_minimal_version})
+  message(FATAL_ERROR "IBM compiler version must be at least ${_intel_minimal_version}!")
+endif()
+
 if(WALBERLA_PROFILE_GENERATE)
   add_flag(CMAKE_CXX_FLAGS "-prof-gen")
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/profile")

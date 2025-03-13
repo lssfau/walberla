@@ -1,7 +1,8 @@
 message(STATUS "Setting MSVC specific compiler options")
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.11)
-  message(FATAL_ERROR "MSVC version must be at least 19.11!")
+set(_msvc_minimal_version 19.11)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_msvc_minimal_version})
+  message(FATAL_ERROR "MSVC version must be at least ${_msvc_minimal_version}!")
 endif()
 
 if(WALBERLA_PROFILE_GENERATE)

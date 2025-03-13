@@ -1,12 +1,14 @@
 message(STATUS "Setting Clang specific compiler options")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
-    message(FATAL_ERROR "Clang version must be at least 11!")
+   set(_apple_clang_minimal_version 11.0.0)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_apple_clang_minimal_version})
+    message(FATAL_ERROR "Clang version must be at least ${_apple_clang_minimal_version}!")
   endif()
 else()
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
-    message(FATAL_ERROR "Clang version must be at least 7!")
+  set(_clang_minimal_version 7)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_clang_minimal_version})
+    message(FATAL_ERROR "Clang version must be at least ${_clang_minimal_version}!")
   endif()
 endif()
 

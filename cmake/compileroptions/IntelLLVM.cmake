@@ -1,5 +1,10 @@
 message(STATUS "Setting IntelLLVM specific compiler options")
 
+set(_intel_llvm_minimal_version 2021.0)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_intel_llvm_minimal_version})
+  message(FATAL_ERROR "IBM compiler version must be at least ${_intel_llvm_minimal_version}!")
+endif()
+
 # fastmath
 if(NOT WALBERLA_BUILD_WITH_FASTMATH)
   add_flag(CMAKE_CXX_FLAGS "-fp-model=precise")

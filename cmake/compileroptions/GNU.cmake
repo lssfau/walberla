@@ -1,7 +1,8 @@
 message(STATUS "Setting GNU specific compiler options")
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
-  message(FATAL_ERROR "GCC version must be at least 8!")
+set(_gcc_minimal_version 8)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_gcc_minimal_version})
+  message(FATAL_ERROR "GCC version must be at least ${_gcc_minimal_version}!")
 endif()
 
 # Profile guided optimization

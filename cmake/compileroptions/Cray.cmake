@@ -1,5 +1,10 @@
 message(STATUS "Setting Cray specific compiler options")
 
+set(_cray_minimal_version 9)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_cray_minimal_version})
+   message(FATAL_ERROR "Cray version must be at least ${_cray_minimal_version}!")
+endif()
+
 # Fixes linker errors with Cray compiler
 add_flag(CMAKE_EXE_LINKER_FLAGS "-dynamic -L/opt/gcc/4.9.3/snos/lib64")
 

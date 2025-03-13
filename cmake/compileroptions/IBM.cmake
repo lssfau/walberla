@@ -1,7 +1,8 @@
 message(STATUS "Setting IBM specific compiler options")
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.1.1)
-  message(FATAL_ERROR "IBM compiler version must be at least 17.1.1!")
+set(_ibm_minimal_version 17.1.1)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_ibm_minimal_version})
+  message(FATAL_ERROR "IBM compiler version must be at least ${_ibm_minimal_version}!")
 endif()
 
 # Fixes linker errors with IBM compiler
