@@ -238,14 +238,6 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CRAY )
 
-if( CMAKE_CXX_COMPILER MATCHES "pgc\\+\\+" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "pgc\\+\\+" )
-    option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" ON  )
-    include(PGI)
-else()
-    option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" OFF  )
-endif()
-mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_PGI )
-
 # Check for Fujitsu compiler
 if( CMAKE_CXX_COMPILER_ID MATCHES FujitsuClang )
     option ( WALBERLA_CXX_COMPILER_IS_FUJITSUCLANG "Use FujitsuClang compiler" ON  )
