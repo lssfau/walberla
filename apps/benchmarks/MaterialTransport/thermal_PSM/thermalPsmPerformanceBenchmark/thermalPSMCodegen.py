@@ -260,7 +260,7 @@ with CodeGeneration() as ctx:
         "PSMFluidSweepSplit",
         node_collection,
         field_swaps=[(pdfs_fluid, pdfs_fluid_tmp)],
-       target=target,
+        target=target,
         inner_outer_split=True,
     )
 

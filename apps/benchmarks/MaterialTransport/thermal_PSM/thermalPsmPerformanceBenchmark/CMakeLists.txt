@@ -2,7 +2,7 @@ waLBerla_link_files_to_builddir("*.prm")
 
 if (WALBERLA_BUILD_WITH_CODEGEN)
     if (NOT WALBERLA_BUILD_WITH_GPU_SUPPORT OR (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP)))
-        foreach(solid_collision 1)
+        foreach(solid_collision 1 2)
 
             set(config sc_${solid_collision})
             message(STATUS "Config value in thermal PSM is: ${config}" )

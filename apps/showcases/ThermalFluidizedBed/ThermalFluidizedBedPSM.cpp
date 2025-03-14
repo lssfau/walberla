@@ -385,8 +385,8 @@ int main(int argc, char** argv)
 
    // convert SI units to simulation (LBM) units and check setup
 
-   Vector3< uint_t > domainSize(uint_c((xSize_SI / dx_SI)), uint_c((ySize_SI / dx_SI)),
-                                uint_c((zSize_SI / dx_SI)));
+   Vector3< uint_t > domainSize(((xSize_SI / dx_SI)), ((ySize_SI / dx_SI)),
+                                ((zSize_SI / dx_SI)));
    WALBERLA_LOG_INFO_ON_ROOT("domain size in x is " << domainSize[0]);
    WALBERLA_CHECK_FLOAT_EQUAL(real_t(domainSize[0]) * dx_SI, xSize_SI, "domain size in x is not divisible by given dx");
    WALBERLA_CHECK_FLOAT_EQUAL(real_t(domainSize[1]) * dx_SI, ySize_SI, "domain size in y is not divisible by given dx");
@@ -652,20 +652,24 @@ int main(int argc, char** argv)
 
    boundariesBlockString += "\n BoundariesConcentration";
 
-   boundariesBlockString += "{"
-                            "Border { direction W;    walldistance -1;  flag Neumann_Concentration; }"
-                            "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
+   boundariesBlockString += "{";
+
+   if (!periodicInX)
+   {
+      boundariesBlockString += "Border { direction W;    walldistance -1;  flag Density_Concentration_west; }"
+                               "Border { direction E;    walldistance -1;  flag Density_Concentration_west; }";
+   }
 
    if (!periodicInY)
    {
-      boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Concentration; }"
-                               "Border { direction N;    walldistance -1;  flag Neumann_Concentration; }";
+      boundariesBlockString += "Border { direction S;    walldistance -1;  flag Density_Concentration_west; }"
+                               "Border { direction N;    walldistance -1;  flag Density_Concentration_west; }";
    }
 
    if (!periodicInZ)
    {
-      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Density_Concentration_west; }"
-                               "Border { direction B;    walldistance -1;  flag Density_Concentration_west; }";
+      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Concentration; }"
+                               "Border { direction B;    walldistance -1;  flag Neumann_Concentration; }";
    }
    boundariesBlockString += "}";
    WALBERLA_ROOT_SECTION()
@@ -1006,7 +1010,8 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
 
    else{
       timeloop.add() << BeforeFunction(communication_fluid, "LBM fluid Communication")
-                     << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Outflow Fluid)");
+                     << Sweep(deviceSyncWrapper(noSlip_fluid_bc.getSweep()),"Boundary Handling (No slip)");
+      timeloop.add() << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()), "Boundary Handling (Outflow Fluid)");
       timeloop.add() << Sweep(deviceSyncWrapper(ubb_fluid_bc.getSweep()),"Boundary Handling (UBB inflow fluid)");
 
       timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
