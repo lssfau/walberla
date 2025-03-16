@@ -293,52 +293,6 @@ endif()
 ############################################################################################################################
 
 
-
-############################################################################################################################
-##
-##  Find newer C++ libraries, which may only be available in std::experimental on some compilers
-##
-############################################################################################################################
-
-try_compile( WALBERLA_USE_STD_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-      COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM COPY_FILE "${CMAKE_CURRENT_BINARY_DIR}/TestStdFilesystem" OUTPUT_VARIABLE TRY_COMPILE_OUTPUT)
-if( WALBERLA_USE_STD_FILESYSTEM )
-  # detect https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90050 by checking whether it segfaults
-  execute_process( COMMAND "${CMAKE_CURRENT_BINARY_DIR}/TestStdFilesystem" OUTPUT_QUIET RESULT_VARIABLE WALBERLA_STD_FILESYSTEM_WORKS )
-endif()
-if( WALBERLA_USE_STD_FILESYSTEM AND WALBERLA_STD_FILESYSTEM_WORKS EQUAL 0 )
-   message( STATUS "Found std::filesystem")
-else()
-   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-         COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM OUTPUT_VARIABLE TRY_COMPILE_OUTPUT)
-   if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-      message( STATUS "Found std::experimental::filesystem")
-   endif()
-   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
-      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-            COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM LINK_LIBRARIES stdc++fs OUTPUT_VARIABLE TRY_COMPILE_OUTPUT)
-      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-         message( STATUS "Found std::experimental::filesystem in libstdc++fs")
-      list ( APPEND SERVICE_LIBS -lstdc++fs )
-      endif()
-   endif()
-   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
-      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-            COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM LINK_LIBRARIES c++experimental OUTPUT_VARIABLE TRY_COMPILE_OUTPUT)
-      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-         message( STATUS "Found std::experimental::filesystem in libc++experimental")
-         list ( APPEND SERVICE_LIBS -lc++experimental )
-      endif()
-   endif()
-   if( NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM AND NOT WALBERLA_USE_STD_FILESYSTEM)
-      message( WARNING ${TRY_COMPILE_OUTPUT} )
-      message( FATAL_ERROR "Neither std::filesystem nor std::experimental::filesystem are available" )
-   endif()
-endif()
-
-
 ############################################################################################################################
 ##
 ## Python
