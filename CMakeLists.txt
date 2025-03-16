@@ -212,15 +212,6 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_IBM )
 
-# Check for NEC SX compiler
-if( CMAKE_CXX_COMPILER MATCHES "/sxc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "/sxc" OR CMAKE_CXX_COMPILER MATCHES "/sxmpic" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "/sxmpic" )
-    option ( WALBERLA_CXX_COMPILER_IS_NEC "Use NEC compiler" ON  )
-    include(NEC)
-else()
-    option ( WALBERLA_CXX_COMPILER_IS_NEC "Use NEC compiler" OFF  )
-endif()
-mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_NEC )
-
 if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER MATCHES "hipcc" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" )
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" ON  )
     include(Clang)
