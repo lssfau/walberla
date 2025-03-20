@@ -345,50 +345,16 @@ endif()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
-   if (NOT DEFINED PYBIND11_MINIMUM_VERSION)
-           set(PYBIND11_MINIMUM_VERSION "2.6.0")
-   endif()
 
-    execute_process(COMMAND ${Python_EXECUTABLE} -c "import pybind11; print(pybind11._version.__version__)"
-                    OUTPUT_VARIABLE pybind11_VERSION ERROR_QUIET RESULT_VARIABLE pybind11_VERSION_RESULT)
-    string(STRIP "${pybind11_VERSION}" pybind11_VERSION)
-    if(pybind11_VERSION_RESULT EQUAL "0" AND pybind11_VERSION VERSION_GREATER_EQUAL "${PYBIND11_MINIMUM_VERSION}")
-        execute_process(COMMAND ${Python_EXECUTABLE} -m pybind11 --cmakedir
-                        OUTPUT_VARIABLE PYBIND11_CMAKE_PATH)
-        string(STRIP "${PYBIND11_CMAKE_PATH}" PYBIND11_CMAKE_PATH)
-        find_package(pybind11 PATHS "${PYBIND11_CMAKE_PATH}" NO_DEFAULT_PATH REQUIRED)
-    else()
-        find_package(Git QUIET)
-        if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-           # Update submodules as needed
-           if(WALBERLA_GIT_SUBMODULE_AUTO)
-              message(STATUS "Submodule update")
-              execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
-              if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-                 message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-              endif()
-           endif()
-        endif()
+    include(FetchContent)
 
-        if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/pybind11/CMakeLists.txt")
-            if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-                message(FATAL_ERROR "Please update git submodules or install pybind11 via pip.")
-            else()
-                message(FATAL_ERROR "Please install pybind11 via pip or download it to ${PROJECT_SOURCE_DIR}/extern/pybind11.")
-            endif()
-        endif()
+    FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11.git
+            GIT_TAG        v2.13.6
+    )
 
-        add_subdirectory(extern/pybind11)
-
-        if(pybind11_VERSION VERSION_LESS "2.6.2")
-            # if pybind11 was installed into ${Python_INCLUDE_DIRS} (e.g. by pip), that will have a higher priority than the Git submodule unless we reorder the search path
-            # introduced in 2.6.0 (https://github.com/pybind/pybind11/issues/2709), fixed in 2.6.2 (https://github.com/pybind/pybind11/pull/2716)
-            set_property( TARGET pybind11::pybind11
-                          PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/extern/pybind11/include" "${Python_INCLUDE_DIRS}")
-        endif()
-    endif()
+    FetchContent_MakeAvailable(pybind11)
 
     # a python module is a shared library - so everything has to be compiled to position independent code
     # otherwise linking the static libs into the shared lib will result in errors
