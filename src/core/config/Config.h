@@ -395,7 +395,7 @@ private:
    //**Member variables*************************************************************************************************
    /*! \name Member variables */
    //@{
-   bool stateFlag_;             //!< Internal status of the config object.
+   bool stateFlag_ = true;      //!< Internal status of the config object.
                                 /*!< An error is indicated by \p false. */
    std::ostringstream error_;   //!< Container for all error messages.
    Block block_;                //!< The global parameter block.
@@ -623,7 +623,7 @@ inline void Config::getBlocks( Blocks& blocks ) const
  */
 inline Config::BlockHandle Config::getGlobalBlock() const
 {
-   return BlockHandle( &block_ );
+   return { &block_ };
 }
 //*******************************************************
 
@@ -667,8 +667,8 @@ void Config::listParameters() const
  */
 inline void Config::convertToLowerCase( std::string& s )
 {
-   for( std::string::size_type i=0; i<s.size(); ++i ) {
-      s[i] = (char)std::tolower( s[i] );
+   for(char & i : s) {
+      i = (char)std::tolower( i );
    }
 }
 //**********************************************************************************************************************

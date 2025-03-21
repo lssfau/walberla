@@ -45,15 +45,15 @@ public:
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
-      for( auto it = blockData.begin(); it != blockData.end(); ++it )
+      for(auto & it : blockData)
       {
-         const PhantomBlock * block = it->first;
+         const PhantomBlock * block = it.first;
          //only change of one level is supported!
          WALBERLA_CHECK_LESS( abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
          auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
          WALBERLA_CHECK_UNEQUAL( infoIt, ic_->end() );
-         it->second = PhantomBlockWeight( double_c(infoIt->second.computationalWeight) + baseWeight_ );
+         it.second = PhantomBlockWeight( double_c(infoIt->second.computationalWeight) + baseWeight_ );
       }
    }
 

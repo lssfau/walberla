@@ -135,7 +135,7 @@ namespace communication {
        Set<SUID> requiredBlockSelectors_;
        Set<SUID> incompatibleBlockSelectors_;
 
-       gpuStream_t streams_[Stencil::Q];
+       std::array<gpuStream_t, Stencil::Q> streams_;
    };
 
 

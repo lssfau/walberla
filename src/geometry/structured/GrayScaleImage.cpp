@@ -40,7 +40,7 @@ namespace geometry   {
    {
       unsigned int tmpWidth;
       unsigned int tmpHeight;
-      unsigned int error = lodepng::decode( image_, tmpWidth, tmpHeight, pngFilename, LCT_GREY, 8 );
+      unsigned int const error = lodepng::decode( image_, tmpWidth, tmpHeight, pngFilename, LCT_GREY, 8 );
       size_[0] = tmpWidth;
       size_[1] = tmpHeight;
 
@@ -50,7 +50,7 @@ namespace geometry   {
 
    void GrayScaleImage::save( const std::string & pngFilename )
    {
-      uint32_t error = lodepng::encode( pngFilename, image_,
+      uint32_t const error = lodepng::encode( pngFilename, image_,
                                         uint32_c( size_[0] ), uint32_c( size_[1] ),
                                         LCT_GREY, 8 );
 
@@ -87,18 +87,18 @@ namespace geometry   {
 
       if ( bilinear )
       {
-         real_t scaleX = real_c( size_[0]-1 ) / real_c( newWidth );
-         real_t scaleY = real_c( size_[1]-1 ) / real_c( newHeight);
+         real_t const scaleX = real_c( size_[0]-1 ) / real_c( newWidth );
+         real_t const scaleY = real_c( size_[1]-1 ) / real_c( newHeight);
 
          for( cell_idx_t y = 0; y < cell_idx_c( newHeight ); ++y )
             for( cell_idx_t x = 0; x < cell_idx_c( newWidth ); ++x )
             {
-               real_t oldX = real_c(x) * scaleX;
-               real_t oldY = real_c(y) * scaleY;
-               cell_idx_t oldXi = cell_idx_c( oldX );
-               cell_idx_t oldYi = cell_idx_c( oldY );
-               real_t xDiff = oldX - real_c(oldXi);
-               real_t yDiff = oldY - real_c(oldYi);
+               real_t const oldX = real_c(x) * scaleX;
+               real_t const oldY = real_c(y) * scaleY;
+               cell_idx_t const oldXi = cell_idx_c( oldX );
+               cell_idx_t const oldYi = cell_idx_c( oldY );
+               real_t const xDiff = oldX - real_c(oldXi);
+               real_t const yDiff = oldY - real_c(oldYi);
 
                // bilinear interpolation
 
@@ -112,16 +112,16 @@ namespace geometry   {
       }
       else
       {
-         real_t scaleX = real_c( size_[0] ) / real_c( newWidth );
-         real_t scaleY = real_c( size_[1] ) / real_c( newHeight);
+         real_t const scaleX = real_c( size_[0] ) / real_c( newWidth );
+         real_t const scaleY = real_c( size_[1] ) / real_c( newHeight);
 
          for( cell_idx_t y = 0; y < cell_idx_c( newHeight ); ++y )
             for( cell_idx_t x = 0; x < cell_idx_c( newWidth ); ++x )
             {
-               real_t oldX = real_c(x) * scaleX;
-               real_t oldY = real_c(y) * scaleY;
-               cell_idx_t oldXi = cell_idx_c( oldX );
-               cell_idx_t oldYi = cell_idx_c( oldY );
+               real_t const oldX = real_c(x) * scaleX;
+               real_t const oldY = real_c(y) * scaleY;
+               cell_idx_t const oldXi = cell_idx_c( oldX );
+               cell_idx_t const oldYi = cell_idx_c( oldY );
 
                resizedImage.getElement( x, y ) = getElement( oldXi, oldYi );
             }

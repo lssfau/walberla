@@ -98,8 +98,8 @@ private:
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
       flag_t domainMask(0u);
-      for( auto domainFlagUID = domainFlagUIDs.begin(); domainFlagUID != domainFlagUIDs.end(); ++domainFlagUID )
-         field::addMask( domainMask, flagField->getOrRegisterFlag( *domainFlagUID ) );
+      for(auto domainFlagUID : domainFlagUIDs)
+         field::addMask( domainMask, flagField->getOrRegisterFlag( domainFlagUID ) );
 
       BoundaryHandling_T * handling = new BoundaryHandling_T( "Diffusion Boundary Handling", flagField, domainMask,
          DiffusionDirichlet_T      ( getDiffusionDirichletBoundaryUID(),        getDiffusionDirichletFlagUID(),        pdfField, flagField ),
@@ -112,11 +112,11 @@ private:
       if( initFlagUIDs.size() > size_t(0u) )
       {
          flag_t initMask(0u);
-         for( auto initFlagUID = initFlagUIDs.begin(); initFlagUID != initFlagUIDs.end(); ++initFlagUID )
-            if( flagField->flagExists( *initFlagUID ) )
-               field::addMask( initMask, flagField->getFlag( *initFlagUID ) );
+         for(auto initFlagUID : initFlagUIDs)
+            if( flagField->flagExists( initFlagUID ) )
+               field::addMask( initMask, flagField->getFlag( initFlagUID ) );
             else
-               WALBERLA_ABORT( "Try to init flag field with a non registered flag: " << *initFlagUID );
+               WALBERLA_ABORT( "Try to init flag field with a non registered flag: " << initFlagUID );
          handling->fillWithDomain( initMask, uint_t(0u) );
       }
 

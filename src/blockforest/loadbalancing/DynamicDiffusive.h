@@ -58,10 +58,8 @@ public:
 
    DynamicDiffusionBalance( const uint_t maxIterations, const uint_t flowIterations, const bool levelwise = true ) :
       mode_( DIFFUSION_PUSHPULL ), maxIterations_( maxIterations ),
-      defineProcessWeightLimitByMultipleOfMaxBlockWeight_( true ), checkForEarlyAbort_( true ), abortThreshold_( 1.0 ),
-      adaptOutflowWithGlobalInformation_( true ), adaptInflowWithGlobalInformation_( true ),
-      flowIterations_( flowIterations ), flowIterationsIncreaseStart_( maxIterations ), flowIterationsIncrease_( 0.0 ),
-      regardConnectivity_( true ), disregardConnectivityStart_( maxIterations ), outflowExceedFactor_( 1.0 ), inflowExceedFactor_( 1.0 ),
+      flowIterations_( flowIterations ), flowIterationsIncreaseStart_( maxIterations ),
+      disregardConnectivityStart_( maxIterations ),
       levelwise_(levelwise)
    {}
    
@@ -116,7 +114,7 @@ private:
 
    double weight( const PhantomBlock * block ) const
    {
-      return std::is_same< PhantomData_T, NoPhantomData >::value ? 1.0 :
+      return std::is_same_v< PhantomData_T, NoPhantomData > ? 1.0 :
                numeric_cast< double >( block->template getData< PhantomData_T >().weight() );
    }
 
@@ -124,20 +122,20 @@ private:
    
    uint_t maxIterations_;
    
-   bool defineProcessWeightLimitByMultipleOfMaxBlockWeight_; // only evaluated when checkForEarlyAbort_ == true or adaptOutflowWithGlobalInformation_ == true
-   bool checkForEarlyAbort_;
-   double abortThreshold_; // only evaluated when checkForEarlyAbort_ == true
-   bool adaptOutflowWithGlobalInformation_;
-   bool adaptInflowWithGlobalInformation_;
+   bool defineProcessWeightLimitByMultipleOfMaxBlockWeight_ { true }; // only evaluated when checkForEarlyAbort_ == true or adaptOutflowWithGlobalInformation_ == true
+   bool checkForEarlyAbort_{ true };
+   double abortThreshold_{ 1.0 }; // only evaluated when checkForEarlyAbort_ == true
+   bool adaptOutflowWithGlobalInformation_{ true };
+   bool adaptInflowWithGlobalInformation_{ true };
    
    uint_t flowIterations_;
    uint_t flowIterationsIncreaseStart_;
-   double flowIterationsIncrease_;
+   double flowIterationsIncrease_{ 0.0 };
    
-   bool regardConnectivity_;
+   bool regardConnectivity_{ true };
    uint_t disregardConnectivityStart_;
-   double outflowExceedFactor_;
-   double inflowExceedFactor_;
+   double outflowExceedFactor_{ 1.0 };
+   double inflowExceedFactor_{ 1.0 };
    
    math::IntRandom< uint_t > random_;
 
@@ -172,10 +170,10 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    
    //fill processWeight with total weight per level
    //find maxBlockWeight per level
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
+   for(auto & targetProces : targetProcess)
    {
-      const uint_t level = levelwise_ ? it->first->getLevel() : uint_t(0);
-      const auto blockWeight = weight( it->first );
+      const uint_t level = levelwise_ ? targetProces.first->getLevel() : uint_t(0);
+      const auto blockWeight = weight( targetProces.first );
       WALBERLA_ASSERT_LESS( level, levels );
       WALBERLA_CHECK_GREATER_EQUAL( blockWeight, 0.0 );
       processWeight[ level ] += blockWeight;
@@ -190,8 +188,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       avgProcessWeight = processWeight;
       mpi::allReduceInplace( avgProcessWeight, mpi::SUM, MPIManager::instance()->comm() );
       const double numProcesses = double_c( MPIManager::instance()->numProcesses() );
-      for( auto it = avgProcessWeight.begin(); it != avgProcessWeight.end(); ++it )
-         *it /= numProcesses;
+      for(double & it : avgProcessWeight)
+         it /= numProcesses;
       mpi::allReduceInplace( maxBlockWeight, mpi::MAX, MPIManager::instance()->comm() );
    }
    
@@ -235,8 +233,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    // alpha exchange
 
    std::map< mpi::MPIRank, mpi::MPISize > alphaRanksToRecvFrom;
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      alphaRanksToRecvFrom[ static_cast< mpi::MPIRank >(*n) ] = mpi::BufferSizeTrait<double>::size;
+   for(uint_t n : neighborhood)
+      alphaRanksToRecvFrom[ static_cast< mpi::MPIRank >(n) ] = mpi::BufferSizeTrait<double>::size;
 
    mpi::BufferSystem alphaBufferSystem( MPIManager::instance()->comm(), 1708 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110
    alphaBufferSystem.setReceiverInfo( alphaRanksToRecvFrom );
@@ -270,15 +268,15 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    // calculate flow for every edge (process-process connection) for every level
    
    std::map< mpi::MPIRank, mpi::MPISize > ranksToRecvFrom;
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      ranksToRecvFrom[ static_cast< mpi::MPIRank >(*n) ] = numeric_cast< mpi::MPISize >( levelsToProcess * mpi::BufferSizeTrait<double>::size );
+   for(uint_t n : neighborhood)
+      ranksToRecvFrom[ static_cast< mpi::MPIRank >(n) ] = numeric_cast< mpi::MPISize >( levelsToProcess * mpi::BufferSizeTrait<double>::size );
 
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1709 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110 + 1
    bufferSystem.setReceiverInfo( ranksToRecvFrom );
 
    std::map< uint_t, std::vector< double > > flow; //process rank -> flow on every level
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      flow[*n].resize( levels, 0.0 );
+   for(uint_t n : neighborhood)
+      flow[n].resize( levels, 0.0 );
    
    std::vector< double > localWeight( processWeight ); //per level
    
@@ -291,10 +289,10 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    {
       WALBERLA_ASSERT_EQUAL( localWeight.size(), levels );
 
-      for( auto rank = ranksToRecvFrom.begin(); rank != ranksToRecvFrom.end(); ++rank )
+      for(auto & rank : ranksToRecvFrom)
          for( uint_t l = uint_t(0); l < levels; ++l )
             if( processLevel[l] )
-               bufferSystem.sendBuffer( rank->first ) << localWeight[l];
+               bufferSystem.sendBuffer( rank.first ) << localWeight[l];
       
       bufferSystem.sendAll();
       
@@ -323,26 +321,26 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       }
    }
    
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
-      it->second = blockforest.getProcess();
+   for(auto & targetProces : targetProcess)
+      targetProces.second = blockforest.getProcess();
    
    if( mode_ == DIFFUSION_PUSH || ( mode_ == DIFFUSION_PUSHPULL && (iteration & uint_t(1)) == uint_t(0) ) )  // sending processes decide which blocks are exchanged
    {      
       // calculate accumulated outflow for every level
       
       std::vector< double > outflow( levels, 0.0 );
-      for( auto it = flow.begin(); it != flow.end(); ++it )
+      for(auto & it : flow)
          for( uint_t l = uint_t(0); l < levels; ++l )
-            outflow[l] += std::max( it->second[l], 0.0 );
+            outflow[l] += std::max( it.second[l], 0.0 );
       
       // use global information to adapt outflow
       
       if( adaptOutflowWithGlobalInformation_ )
       {
          std::vector< double > inflow( levels, 0.0 );
-         for( auto it = flow.begin(); it != flow.end(); ++it )
+         for(auto & it : flow)
             for( uint_t l = uint_t(0); l < levels; ++l )
-               inflow[l] += std::min( it->second[l], 0.0 );
+               inflow[l] += std::min( it.second[l], 0.0 );
 
          std::vector< double > flowScaleFactor( levels, 1.0 );
          for( uint_t l = uint_t(0); l < levels; ++l )
@@ -369,10 +367,10 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
             }
          }
 
-         for( auto it = flow.begin(); it != flow.end(); ++it )
+         for(auto & it : flow)
             for( uint_t l = uint_t(0); l < levels; ++l )
-               if( it->second[l] > 0.0 )
-                  it->second[l] *= flowScaleFactor[l];
+               if( it.second[l] > 0.0 )
+                  it.second[l] *= flowScaleFactor[l];
       }
       
       // determine which blocks are send to which process
@@ -472,14 +470,14 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      }
                   }
                   std::set< uint_t > assigned;
-                  for( auto type = connectionType.begin(); type != connectionType.end(); ++type )
+                  for(auto & type : connectionType)
                   {
-                     for( auto index = type->begin(); index != type->end(); ++index )
+                     for(uint_t index : type)
                      {
-                        if( assigned.find(*index) == assigned.end() )
+                        if( assigned.find(index) == assigned.end() )
                         {
-                           candidates.push_back(*index); // -> this order leads to a prioritization of face over edge over corner connections (if everything else is equal)
-                           assigned.insert(*index);
+                           candidates.push_back(index); // -> this order leads to a prioritization of face over edge over corner connections (if everything else is equal)
+                           assigned.insert(index);
                         }
                      }
                   }
@@ -559,11 +557,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
 
                // only blocks that do not exceed the entire process outflow are viable candidates
                std::vector< uint_t > viableCandidates;
-               for( auto candidate = candidates.begin(); candidate != candidates.end(); ++candidate )
+               for(uint_t & candidate : candidates)
                {
-                  if( weight( targetProcess[ *candidate ].first ) <= ( outflowExcess + outflow[l] ) ) // ( outflowExceedFactor_ * outflow[l] ) )
+                  if( weight( targetProcess[ candidate ].first ) <= ( outflowExcess + outflow[l] ) ) // ( outflowExceedFactor_ * outflow[l] ) )
                   {
-                     viableCandidates.push_back( *candidate );
+                     viableCandidates.push_back( candidate );
                   }
                }
 
@@ -607,18 +605,18 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       // calculate accumulated inflow for every level
       
       std::vector< double > inflow( levels, 0.0 ); // inflow is saved as a positive number!
-      for( auto it = flow.begin(); it != flow.end(); ++it )
+      for(auto & it : flow)
          for( uint_t l = uint_t(0); l < levels; ++l )
-            inflow[l] -= std::min( it->second[l], 0.0 );
+            inflow[l] -= std::min( it.second[l], 0.0 );
       
       // use global information to adapt inflow
       
       if( adaptInflowWithGlobalInformation_ )
       {
          std::vector< double > outflow( levels, 0.0 );
-         for( auto it = flow.begin(); it != flow.end(); ++it )
+         for(auto & it : flow)
             for( uint_t l = uint_t(0); l < levels; ++l )
-               outflow[l] += std::max( it->second[l], 0.0 );
+               outflow[l] += std::max( it.second[l], 0.0 );
 
          std::vector< double > flowScaleFactor( levels, 1.0 );
          for( uint_t l = uint_t(0); l < levels; ++l )
@@ -636,10 +634,10 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
             }
          }
 
-         for( auto it = flow.begin(); it != flow.end(); ++it )
+         for(auto & it : flow)
             for( uint_t l = uint_t(0); l < levels; ++l )
-               if( it->second[l] < 0.0 )
-                  it->second[l] *= flowScaleFactor[l];
+               if( it.second[l] < 0.0 )
+                  it.second[l] *= flowScaleFactor[l];
       }
       
       // determine blocks with connections to neighbors processes, sort these blocks by their connection type, and
@@ -649,11 +647,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       std::vector< std::vector< uint_t > > blocksConnectedToOtherProcesses; // sorted by level
       std::vector< std::vector< uint_t > > allBlocks; // sorted by level
       
-      for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
+      for(uint_t n : neighborhood)
       {
-         blocksForNeighbors[*n].resize( levels );
+         blocksForNeighbors[n].resize( levels );
          for( uint_t l = uint_t(0); l < levels; ++l )
-            blocksForNeighbors[*n][l].resize( 8 ); // 0 = full face (same level), 1 = full face (different level), 2 = part face,
+            blocksForNeighbors[n][l].resize( 8 ); // 0 = full face (same level), 1 = full face (different level), 2 = part face,
                                                    // 3 = full edge (same level), 4 = full edge (different level), 5 = part edge,
                                                    // 6 = corner (same level), 7 = corner (different level)
       }
@@ -750,32 +748,32 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                if( regardConnectivity_ && iteration < disregardConnectivityStart_ )
                {
                   std::set< uint_t > assigned;
-                  for( auto type = it->second[l].begin(); type != it->second[l].end(); ++type )
+                  for(auto & type : it->second[l])
                   {
-                     for( auto index = type->begin(); index != type->end(); ++index )
+                     for(uint_t index : type)
                      {
-                        if( assigned.find(*index) == assigned.end() )
+                        if( assigned.find(index) == assigned.end() )
                         {
-                           const auto * block = targetProcess[*index].first;
+                           const auto * block = targetProcess[index].first;
                            blocksForNeighborsUnsorted[np].push_back( std::make_pair( block->getId(), weight(block) ) ); // -> this order leads to a prioritization of face over edge over corner connections
-                           assigned.insert(*index);
+                           assigned.insert(index);
                         }
                      }
                   }
-                  for( auto index = blocksConnectedToOtherProcesses[l].begin(); index != blocksConnectedToOtherProcesses[l].end(); ++index )
+                  for(uint_t & index : blocksConnectedToOtherProcesses[l])
                   {
-                     if( assigned.find(*index) == assigned.end() )
+                     if( assigned.find(index) == assigned.end() )
                      {
-                        const auto * block = targetProcess[*index].first;
+                        const auto * block = targetProcess[index].first;
                         blocksForNeighborsUnsorted[np].push_back( std::make_pair( block->getId(), weight(block) ) );
-                        assigned.insert(*index);
+                        assigned.insert(index);
                      }
                   }
-                  for( auto index = allBlocks[l].begin(); index != allBlocks[l].end(); ++index )
+                  for(uint_t & index : allBlocks[l])
                   {
-                     if( assigned.find(*index) == assigned.end() )
+                     if( assigned.find(index) == assigned.end() )
                      {
-                        const auto * block = targetProcess[*index].first;
+                        const auto * block = targetProcess[index].first;
                         blocksForNeighborsUnsorted[np].push_back( std::make_pair( block->getId(), weight(block) ) );
                      }
                   }
@@ -783,8 +781,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                else
                {
                   std::vector< uint_t > blocksToPick;
-                  for( auto index = allBlocks[l].begin(); index != allBlocks[l].end(); ++index )
-                     blocksToPick.push_back( *index );
+                  for(uint_t & index : allBlocks[l])
+                     blocksToPick.push_back( index );
                   while( ! blocksToPick.empty() )
                   {
                      const uint_t pickedBlock = random_( uint_t(0), uint_c( blocksToPick.size() ) - uint_t(1) );
@@ -807,14 +805,14 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       }
 
       std::set< mpi::MPIRank > neighborsToRecvFrom;
-      for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-         neighborsToRecvFrom.insert( static_cast< mpi::MPIRank >(*n) );
+      for(uint_t n : neighborhood)
+         neighborsToRecvFrom.insert( static_cast< mpi::MPIRank >(n) );
 
       mpi::BufferSystem neighborsBufferSystem( MPIManager::instance()->comm(), 1710 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110 + 2
       neighborsBufferSystem.setReceiverInfo( neighborsToRecvFrom, true );
       
-      for( auto rank = neighborsToRecvFrom.begin(); rank != neighborsToRecvFrom.end(); ++rank )
-         neighborsBufferSystem.sendBuffer( *rank ) << blocksForNeighborsUnsorted[ uint_c( *rank ) ];
+      for(mpi::MPIRank rank : neighborsToRecvFrom)
+         neighborsBufferSystem.sendBuffer( rank ) << blocksForNeighborsUnsorted[ uint_c( rank ) ];
       
       neighborsBufferSystem.sendAll();
       
@@ -877,11 +875,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
                // only blocks that do not exceed the entire process inflow are viable candidates
                std::vector< std::pair< BlockID, double > > viableCandidates;
-               for( auto candidate = candidates.begin(); candidate != candidates.end(); ++candidate )
+               for(const auto & candidate : candidates)
                {
-                  if( pickedBlocks.find( candidate->first ) == pickedBlocks.end() && candidate->second <= ( inflowExcess + inflow[l] ) )
+                  if( pickedBlocks.find( candidate.first ) == pickedBlocks.end() && candidate.second <= ( inflowExcess + inflow[l] ) )
                   {
-                     viableCandidates.push_back( *candidate );
+                     viableCandidates.push_back( candidate );
                   }
                }
 
@@ -922,8 +920,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       // tell neighbors about blocks we want to fetch
       
-      for( auto rank = neighborsToRecvFrom.begin(); rank != neighborsToRecvFrom.end(); ++rank )
-         neighborsBufferSystem.sendBuffer( *rank ) << blocksToFetch[ uint_c( *rank ) ];
+      for(mpi::MPIRank rank : neighborsToRecvFrom)
+         neighborsBufferSystem.sendBuffer( rank ) << blocksToFetch[ uint_c( rank ) ];
       
       neighborsBufferSystem.sendAll();
       
@@ -939,11 +937,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       std::map< BlockID, std::vector< uint_t > > processToSendTo;
       
-      for( auto it = blocksToSend.begin(); it != blocksToSend.end(); ++it )
+      for(auto & it : blocksToSend)
       {
-         const uint_t p = it->first;
-         for( auto id = it->second.begin(); id != it->second.end(); ++id )
-            processToSendTo[ *id ].push_back( p );
+         const uint_t p = it.first;
+         for(auto & id : it.second)
+            processToSendTo[ id ].push_back( p );
       }
       
       for( auto it = processToSendTo.begin(); it != processToSendTo.end(); ++it )
@@ -972,16 +970,16 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    // synchronize with neighbors if blocks are exchanged
 
    std::map< uint_t, uint8_t > sendBlocksToNeighbor;
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      sendBlocksToNeighbor[*n] = uint8_t(0);
+   for(uint_t n : neighborhood)
+      sendBlocksToNeighbor[n] = uint8_t(0);
 
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
-      if( it->second != blockforest.getProcess() )
-         sendBlocksToNeighbor[ it->second ] = uint8_t(1);
+   for(auto & targetProces : targetProcess)
+      if( targetProces.second != blockforest.getProcess() )
+         sendBlocksToNeighbor[ targetProces.second ] = uint8_t(1);
 
    std::map< mpi::MPIRank, mpi::MPISize > blocksRanksToRecvFrom;
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      blocksRanksToRecvFrom[ static_cast< mpi::MPIRank >(*n) ] = mpi::BufferSizeTrait<uint8_t>::size;
+   for(uint_t n : neighborhood)
+      blocksRanksToRecvFrom[ static_cast< mpi::MPIRank >(n) ] = mpi::BufferSizeTrait<uint8_t>::size;
 
    mpi::BufferSystem blocksBufferSystem( MPIManager::instance()->comm(), 1711 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110 + 3
    blocksBufferSystem.setReceiverInfo( blocksRanksToRecvFrom );

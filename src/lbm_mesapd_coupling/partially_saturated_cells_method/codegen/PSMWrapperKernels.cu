@@ -47,14 +47,14 @@ __global__ void SetParticleVelocities(walberla::gpu::FieldAccessor< uint_t > nOv
    particleVelocitiesField.set(blockIdx_uint3, threadIdx_uint3);
 
    // Cell center is needed in order to compute the particle velocity at this WF point
-   const real_t cellCenter[] = { real_t(blockStart.x + (threadIdx.x + real_t(0.5)) * dx),
+   const real_t cellCenter[] = { real_t(blockStart.x + (threadIdx.x + real_t(0.5)) * dx), // NOLINT(*-avoid-c-arrays)
                                  real_t(blockStart.y + (blockIdx.x + real_t(0.5)) * dx),
                                  real_t(blockStart.z + (blockIdx.y + real_t(0.5)) * dx) };
 
    // Compute the particle velocity at the cell center for all overlapping particles
    for (uint_t p = 0; p < nOverlappingParticlesField.get(); p++)
    {
-      real_t particleVelocityAtWFPoint[] = { real_t(0.0), real_t(0.0), real_t(0.0) };
+      real_t particleVelocityAtWFPoint[] = { real_t(0.0), real_t(0.0), real_t(0.0) }; // NOLINT(*-avoid-c-arrays)
       getVelocityAtWFPoint(particleVelocityAtWFPoint, &linearVelocities[idxField.get(p) * 3],
                            &angularVelocities[idxField.get(p) * 3], &positions[idxField.get(p) * 3], cellCenter);
       particleVelocitiesField.get(p * 3 + 0) = particleVelocityAtWFPoint[0];
@@ -79,15 +79,15 @@ __global__ void ReduceParticleForces(walberla::gpu::FieldAccessor< uint_t > nOve
    particleForcesField.set(blockIdx_uint3, threadIdx_uint3);
 
    // Cell center is needed in order to compute the particle velocity at this WF point
-   const real_t cellCenter[] = { real_t(blockStart.x + (threadIdx.x + real_t(0.5)) * dx),
+   const real_t cellCenter[] = { real_t(blockStart.x + (threadIdx.x + real_t(0.5)) * dx), // NOLINT(*-avoid-c-arrays)
                                  real_t(blockStart.y + (blockIdx.x + real_t(0.5)) * dx),
                                  real_t(blockStart.z + (blockIdx.y + real_t(0.5)) * dx) };
 
    // Reduce the forces for all overlapping particles
    for (uint_t p = 0; p < nOverlappingParticlesField.get(); p++)
    {
-      real_t forceOnParticle[] = { particleForcesField.get(p * 3 + 0), particleForcesField.get(p * 3 + 1),
-                                   particleForcesField.get(p * 3 + 2) };
+      real_t forceOnParticle[] = { particleForcesField.get(p * 3 + 0), // NOLINT(*-avoid-c-arrays)
+                                   particleForcesField.get(p * 3 + 1), particleForcesField.get(p * 3 + 2) };
       forceOnParticle[0] *= forceScalingFactor;
       forceOnParticle[1] *= forceScalingFactor;
       forceOnParticle[2] *= forceScalingFactor;

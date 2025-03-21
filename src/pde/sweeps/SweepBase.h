@@ -49,7 +49,7 @@ public:
    SweepBase( const BlockDataID & src, const BlockDataID & dst, const BlockDataID & fFieldId ) :
       src_( src ), f_( fFieldId ), dstFromBlockData_( true ), dst_( dst ) {}
 
-   virtual ~SweepBase() { for( auto field = dstFields_.begin(); field != dstFields_.end(); ++field ) delete *field; }
+   virtual ~SweepBase() { for(auto dstField : dstFields_) delete dstField; }
 
 protected:
 

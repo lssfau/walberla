@@ -53,7 +53,7 @@ struct FunctionTraits< R( Args... ) >
    struct argument
    {
       static_assert(N < arity, "Error: Parameter index is not valid!");
-      using type = typename std::tuple_element< N, std::tuple<Args...> >::type;
+      using type = typename std::tuple_element_t< N, std::tuple<Args...> >;
    };
 };
 

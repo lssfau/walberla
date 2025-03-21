@@ -184,8 +184,8 @@ inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vec
          StencilField_T * coarse = block->getData< StencilField_T >( stencilFieldId[lvl] );
 
 
-         typedef std::array<std::array<std::array<real_t,7>,7>,7> Array3D_7;
-         typedef std::array<std::array<std::array<real_t,2>,2>,2> Array3D_2;
+         using Array3D_7 = std::array<std::array<std::array<real_t, 7>, 7>, 7>;
+         using Array3D_2 = std::array<std::array<std::array<real_t, 2>, 2>, 2>;
 
          Array3D_2 r;
          Array3D_7 p;

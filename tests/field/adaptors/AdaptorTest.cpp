@@ -44,8 +44,8 @@ namespace walberla {
 using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
 using PdfField = lbm::PdfField<LatticeModel_T>;
-typedef GhostLayerField<real_t,1 >          ScalarField;
-typedef GhostLayerField<Vector3<real_t>,1 > VectorField;
+using ScalarField = GhostLayerField<real_t, 1>;
+using VectorField = GhostLayerField<Vector3<real_t>, 1>;
 
 
 template<typename Field_T>
@@ -105,7 +105,7 @@ void iteratorTest()
 
 void simpleTest()
 {
-   typedef GhostLayerField<real_t, 3> MyField;
+   using MyField = GhostLayerField<real_t, 3>;
 
    MyField field( 2, 2, 1, 2, 42 );
 

@@ -147,7 +147,7 @@ REAL_T byteArrayToReal( const std::vector< uint8_t >& array, const uint_t offset
 
 inline void boolVectorToByteArray( const std::vector< bool >& boolVec, std::vector< uint8_t >& array, const uint_t offset )
 {
-   static const uint_t bit[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+   static const std::array< uint_t, 8 > bit = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
    WALBERLA_ASSERT_EQUAL( boolVec.size() % 8, uint_t(0) );
    const uint_t bytes =  uint_c(boolVec.size() / 8);
@@ -163,7 +163,7 @@ inline void boolVectorToByteArray( const std::vector< bool >& boolVec, std::vect
 
 inline std::vector< bool > byteArrayToBoolVector( const std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes )
 {
-   static const uint8_t bit[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+   static const std::array< uint8_t, 8 > bit = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
 

@@ -148,8 +148,8 @@ public:
    template< typename Other > inline const Vector3<HIGH> operator* ( const Vector3<Other>& rhs ) const;
    template< typename Other > inline const Matrix3<HIGH> operator* ( const Matrix3<Other>& rhs ) const;
 
-   template< typename Other > inline typename std::enable_if< std::is_arithmetic<Other>::value, Matrix3&            >::type operator*=( Other rhs );
-   template< typename Other > inline typename std::enable_if< std::is_arithmetic<Other>::value, const Matrix3<HIGH> >::type operator* ( Other rhs ) const;
+   template< typename Other > inline std::enable_if_t< std::is_arithmetic_v<Other>, Matrix3&            >operator*=( Other rhs );
+   template< typename Other > inline std::enable_if_t< std::is_arithmetic_v<Other>, const Matrix3<HIGH> >operator* ( Other rhs ) const;
    //@}
    //*******************************************************************************************************************
 
@@ -254,7 +254,7 @@ private:
    //@}
    //*******************************************************************************************************************
 };
-static_assert( std::is_trivially_copyable<Matrix3<real_t>>::value, "Matrix3<real_t> has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<Matrix3<real_t>>, "Matrix3<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 
@@ -690,7 +690,7 @@ inline Matrix3<Type>& Matrix3<Type>::operator-=( const Matrix3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline typename std::enable_if< std::is_arithmetic<Other>::value, Matrix3<Type>& >::type Matrix3<Type>::operator*=( Other rhs )
+inline std::enable_if_t< std::is_arithmetic_v<Other>, Matrix3<Type>& >Matrix3<Type>::operator*=( Other rhs )
 {
    v_[0] *= rhs;
    v_[1] *= rhs;
@@ -814,7 +814,7 @@ inline const Matrix3<Type> operator-( const Matrix3<Type>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline typename std::enable_if< std::is_arithmetic<Other>::value ,const Matrix3<HIGH> >::type Matrix3<Type>::operator*( Other rhs ) const
+inline std::enable_if_t< std::is_arithmetic_v<Other> ,const Matrix3<HIGH> >Matrix3<Type>::operator*( Other rhs ) const
 {
    return Matrix3<HIGH>( v_[0]*rhs, v_[1]*rhs, v_[2]*rhs,
                          v_[3]*rhs, v_[4]*rhs, v_[5]*rhs,
@@ -1304,8 +1304,8 @@ const Vector3<Type> Matrix3<Type>::getEulerAngles( EulerRotation order ) const
 {
    WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
-   static const uint_t eulSafe[4] = { 0, 1, 2, 0 };
-   static const uint_t eulNext[4] = { 1, 2, 0, 1 };
+   static const std::array< uint_t, 4 > eulSafe = { 0, 1, 2, 0 };
+   static const std::array< uint_t, 4 > eulNext = { 1, 2, 0, 1 };
 
    Vector3<Type> ea;
 
@@ -1405,7 +1405,7 @@ inline const Matrix3<Type> fabs( const Matrix3<Type>& m );
 // \return The scaled result matrix.
 */
 template< typename Type, typename Other >
-inline typename std::enable_if< std::is_arithmetic< Other >::value, const Matrix3< HIGH > >::type
+inline std::enable_if_t< std::is_arithmetic_v< Other >, const Matrix3< HIGH > >
 operator*(Other scalar, const Matrix3< Type >& matrix)
 {
    return matrix * scalar;
@@ -1750,7 +1750,7 @@ namespace mpi {
       mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Matrix3<MT> & m )
       {
          buf.addDebugMarker( "m3" );
-         static_assert ( std::is_trivially_copyable< Matrix3<MT> >::value,
+         static_assert ( std::is_trivially_copyable_v< Matrix3<MT> >,
                          "type has to be trivially copyable for the memcpy to work correctly" );
          auto pos = buf.forward(sizeof(Matrix3<MT>));
          std::memcpy(pos, &m, sizeof(Matrix3<MT>));
@@ -1762,7 +1762,7 @@ namespace mpi {
       mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Matrix3<MT> & m )
       {
          buf.readDebugMarker( "m3" );
-         static_assert ( std::is_trivially_copyable< Matrix3<MT> >::value,
+         static_assert ( std::is_trivially_copyable_v< Matrix3<MT> >,
                          "type has to be trivially copyable for the memcpy to work correctly" );
          auto pos = buf.skip(sizeof(Matrix3<MT>));
          //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess

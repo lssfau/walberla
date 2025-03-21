@@ -376,9 +376,9 @@ void synchronizeEntries( TimingNode<TP>& tn )
    
    std::set_difference( globalChildNames.begin(), globalChildNames.end(), childNames.begin(), childNames.end(), missingChildNames.begin() );
 
-   for( auto it = missingChildNames.begin(); it != missingChildNames.end(); ++it )
+   for(auto & missingChildName : missingChildNames)
    {
-      tn.tree_[*it].last_ = &tn; // insert missing child and setup correct pointer to parent node
+      tn.tree_[missingChildName].last_ = &tn; // insert missing child and setup correct pointer to parent node
    }
 
    // recurse into children

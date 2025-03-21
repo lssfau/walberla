@@ -112,9 +112,8 @@ public:
    /*! \name Construction & Destruction */
    //@{
    Timeloop( uint_t nrOfTimeSteps )
-      : curTimeStep_(0), nrOfTimeSteps_(nrOfTimeSteps), stop_( false )
-   {
-   }
+      : nrOfTimeSteps_(nrOfTimeSteps)
+   {}
 
    ~Timeloop() override = default;
    //@}
@@ -163,7 +162,7 @@ public:
     FctHandle addFuncAfterTimeStep (const VoidFctNoArguments & f,
                                     const std::string & identifier     = std::string(),
                                     const Set<SUID> & require          = Set<SUID>::emptySet(),
-                                    const Set<SUID> & exludingSelector = Set<SUID>::emptySet() );
+                                    const Set<SUID> & excludingSelector = Set<SUID>::emptySet() );
 
     void      addFuncAfterTimeStep (const FctHandle & fctToBindTo,
                                     const VoidFctNoArguments & f,
@@ -200,14 +199,14 @@ protected:
                           timing::TimingPool<TP> & tp);
 
 
-   uint_t curTimeStep_;   ///< current time step
+   uint_t curTimeStep_{0};   ///< current time step
    uint_t nrOfTimeSteps_; ///< total number of time steps
 
    using SelectableFunc = selectable::SetSelectableObject<VoidFctNoArguments, SUID>;
    std::vector<SelectableFunc> beforeFunctions_;
    std::vector<SelectableFunc> afterFunctions_;
 
-   bool stop_;
+   bool stop_{ false };
 };
 
 

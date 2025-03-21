@@ -27,7 +27,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
-   
+
 class Ray {
 public:
    /*!\name Constructors */
@@ -37,7 +37,7 @@ public:
    Ray () {
       Ray (Vec3(0,0,0), Vec3(1,0,0));
    }
-   
+
    /*!\brief Instantiation constructor for the Raytracer class.
     * \param origin Origin of the ray. ()
     * \param direction Normalized direction of the ray.
@@ -68,38 +68,38 @@ public:
    inline const Vec3& getOrigin () const {
       return origin_;
    }
-   
+
    /*!\brief Returns the normalized direction vector of the ray.
     */
    inline const Vec3& getDirection () const {
       return direction_;
    }
-   
+
    /*!\brief Returns the normalized direction vector of the ray for a given axis.
     */
    inline real_t getDirection (size_t axis) const {
       WALBERLA_ASSERT(axis <= 2, "No valid axis index passed.");
       return direction_[axis];
    }
-   
+
    /*!\brief Returns the x component of the ray direction.
     */
    inline real_t xDir () const {
       return direction_[0];
    }
-   
+
    /*!\brief Returns the y component of the ray direction.
     */
    inline real_t yDir () const {
       return direction_[1];
    }
-   
+
    /*!\brief Returns the z component of the ray direction.
     */
    inline real_t zDir () const {
       return direction_[2];
    }
-   
+
    /*!\brief Returns the inverse of the direction vector of the ray.
     */
    inline const Vec3& getInvDirection () const {
@@ -112,25 +112,25 @@ public:
       WALBERLA_ASSERT(axis <= 2, "No valid axis index passed.");
       return inv_direction_[axis];
    }
-   
+
    /*!\brief Returns the x component of the inverse ray direction.
     */
    inline real_t xInvDir () const {
       return inv_direction_[0];
    }
-   
+
    /*!\brief Returns the y component of the inverse ray direction.
     */
    inline real_t yInvDir () const {
       return inv_direction_[1];
    }
-   
+
    /*!\brief Returns the z component of the inverse ray direction.
     */
    inline real_t zInvDir () const {
       return inv_direction_[2];
    }
-   
+
    /*!\brief Returns the signs of the inverted direction vector of the ray.
     *
     * Returns the signs of the inverted direction vector of the ray as required for the ray-box intersection algorithm.
@@ -138,7 +138,7 @@ public:
    inline const Vector3<int8_t>& getInvDirectionSigns () const {
       return sign_;
    }
-   
+
    /*!\brief Returns the X value of the pixel coordinate this ray intersects.
     *
     * \return X value of pixel coordinate.
@@ -146,7 +146,7 @@ public:
    inline size_t getImageX () const {
       return imageX_;
    }
-   
+
    /*!\brief Returns the Y value of the pixel coordinate this ray intersects.
     *
     * \return Y value of pixel coordinate.
@@ -164,7 +164,7 @@ public:
    inline void setOrigin (const Vec3& origin) {
       origin_ = origin;
    }
-   
+
    /*!\brief Set the _normalized_ direction vector of the ray.
     * \param direction Normalized direction vector
     */
@@ -174,7 +174,7 @@ public:
       direction_ = direction;
       calcInvDirection();
    }
-   
+
    /*!\brief Sets the X and Y values of the image pixel coordinate this ray intersects.
     * \param x X value of the pixel coordinate
     * \param y Y value of the pixel coordinate
@@ -183,14 +183,14 @@ public:
       imageX_ = x;
       imageY_ = y;
    }
-   
+
    /*!\brief Sets the X value of the image pixel coordinate this ray intersects.
     * \param x X value of the pixel coordinate
     */
    inline void setImageX (size_t x) {
       imageX_ = x;
    }
-   
+
    /*!\brief Sets the Y value of the image pixel coordinate this ray intersects.
     * \param y Y value of the pixel coordinate
     */
@@ -209,12 +209,12 @@ public:
       sign_[1] = (inv_direction_[1] < 0) ? int8_t(1) : int8_t(0);
       sign_[2] = (inv_direction_[2] < 0) ? int8_t(1) : int8_t(0);
    }
-   
+
    /*!\brief Transforms the ray to the body frame.
     *
     * \return Ray transformed to the body frame.
     */
-   inline Ray transformedToBF(const BodyID body) const {
+   inline Ray transformedToBF(ConstBodyID body) const {
       return Ray(body->pointFromWFtoBF(getOrigin()), body->vectorFromWFtoBF(getDirection()));
    }
    //@}

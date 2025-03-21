@@ -78,14 +78,14 @@ public:
 private:
    GenericBufferSystem<RecvBuffer_T, SendBuffer_T> bs_;
 
-   bool dirty_;
+   bool dirty_{ true };
 
    void setupBufferSystem();
 
    bool serialSends_;
    bool serialRecvs_;
 
-   bool sizeChangesEverytime_;
+   bool sizeChangesEverytime_{ true };
 
    std::map<MPIRank, std::function<void ( RecvBuffer_T & )> > recvFunctions_;
 

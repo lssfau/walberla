@@ -51,15 +51,15 @@ public:
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );
 
       std::vector< FlagUID > existingFlags;
-      for( auto flag = filteredFlags_.begin(); flag != filteredFlags_.end(); ++flag )
-         if( flagField->flagExists( *flag ) )
-            existingFlags.push_back( *flag );
+      for(auto filteredFlag : filteredFlags_)
+         if( flagField->flagExists( filteredFlag ) )
+            existingFlags.push_back( filteredFlag );
 
       if( !existingFlags.empty() )
       {
          flag_t filterMask( flag_t(0) );
-         for( auto flag = existingFlags.begin(); flag != existingFlags.end(); ++flag )
-            filterMask = static_cast< flag_t >( filterMask | flagField->getFlag( *flag ) );
+         for(const auto & existingFlag : existingFlags)
+            filterMask = static_cast< flag_t >( filterMask | flagField->getFlag( existingFlag ) );
 
          const cell_idx_t gl    = cell_idx_c( ghostLayers );
          const cell_idx_t begin = cell_idx_c( -1 ) * gl;

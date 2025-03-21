@@ -165,29 +165,29 @@ int main( int argc, char * argv[] )
    std::vector< double > tpwgts( static_cast<size_t>(nparts), 1.0 / static_cast<double>( nparts ) );
    std::vector< double > ubvec(  static_cast<size_t>(ncon), 1.05 );
    double  ipc2redist =  1.0;
-   int64_t options[] = {0,0,0};
+   std::array< int64_t, 3 > options = { 0, 0, 0 };
    int64_t edgecut;
    std::vector< int64_t > part( numVertices );
    MPI_Comm comm = MPI_COMM_WORLD;
 
    std::cout << "ParMETIS_V3_PartKway" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
-                                &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
+                                &(tpwgts.front()), &(ubvec.front()), options.data(), &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_PartGeomKway" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartGeomKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ndims, &(xyz.front()), &ncon, &nparts,
-                                &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
+                                &(tpwgts.front()), &(ubvec.front()), options.data(), &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_PartGeom" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartGeom( &(vtxdist.front()), &ndims, &(xyz.front()), &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_AdaptiveRepart" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_AdaptiveRepart( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
-                                &(tpwgts.front()), &(ubvec.front()), &ipc2redist, options, &edgecut, &(part.front()), &comm ),
+                                &(tpwgts.front()), &(ubvec.front()), &ipc2redist, options.data(), &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_RefineKway" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_RefineKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
-                                &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
+                                &(tpwgts.front()), &(ubvec.front()), options.data(), &edgecut, &(part.front()), &comm ),
                          METIS_OK );
 
    MPI_Finalize();

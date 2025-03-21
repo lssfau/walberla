@@ -87,7 +87,7 @@ public:
 
 
 
-   inline UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = nullptr );
+   inline UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, const FlagField<flag_t> * const flagField = nullptr );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -141,7 +141,7 @@ inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::
 
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
-inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField ) :
+inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, const FlagField<flag_t> * const flagField ) :
 
    Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
 {

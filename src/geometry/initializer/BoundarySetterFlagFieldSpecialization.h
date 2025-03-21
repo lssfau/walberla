@@ -90,7 +90,7 @@ namespace initializer {
 
       for( auto blockHandleIt = boundaryConfigBlocks.begin(); blockHandleIt != boundaryConfigBlocks.end(); )
       {
-         std::string key = blockHandleIt->getKey();
+         std::string const key = blockHandleIt->getKey();
          if ( subblocksToIgnore.find( key ) != subblocksToIgnore.end() )
             boundaryConfigBlocks.erase( blockHandleIt );
          else

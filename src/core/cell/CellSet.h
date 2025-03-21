@@ -46,8 +46,8 @@ public:
    CellSet( const Cell& element ) : Set<Cell>( element ) {}
 
    CellSet( const CellVector& cells ) {
-      for( CellVector::const_iterator cell = cells.begin(); cell != cells.end(); ++cell )
-         Set<Cell>::insert( *cell );
+      for(auto cell : cells)
+         Set<Cell>::insert( cell );
    }
 
    using Set<Cell>::insert;
@@ -62,7 +62,7 @@ public:
 
    CellInterval boundingBox() const;
 
-   void pushToCellVector( CellVector& cellVector ) const { for( auto cell = begin(); cell != end(); ++cell ) cellVector.push_back( *cell ); }
+   void pushToCellVector( CellVector& cellVector ) const { for(auto cell : *this) cellVector.push_back( cell ); }
 
 }; // class CellSet
 

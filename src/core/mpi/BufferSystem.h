@@ -176,7 +176,7 @@ public:
       GenericBufferSystem & bufferSystem_;
 
       RecvBuffer_T * currentRecvBuffer_;
-      MPIRank        currentSenderRank_;
+      MPIRank        currentSenderRank_{ -1 };
 
       friend class GenericBufferSystem;
    };
@@ -235,8 +235,8 @@ protected:
    internal::NoMPICommunication<RecvBuffer_T, SendBuffer_T>             noMPIComm_;
    internal::AbstractCommunication<RecvBuffer_T, SendBuffer_T> *        currentComm_;  //< after receiver setup, this points to unknown- or knownSizeComm_
 
-   bool sizeChangesEverytime_; //< if set to true, the receiveSizeUnknown_ is set to true before communicating
-   bool communicationRunning_; //< indicates if a communication step is currently running
+   bool sizeChangesEverytime_{ true }; //< if set to true, the receiveSizeUnknown_ is set to true before communicating
+   bool communicationRunning_{ false }; //< indicates if a communication step is currently running
 
 
    /// Info about the message to be received from a certain rank:

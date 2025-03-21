@@ -286,7 +286,7 @@ namespace field {
    {
       WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf)
       static_assert(fSize_ % fSize2 == 0, "number of field components do not match");
-      static_assert(std::is_same<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>::value, "field types are incompatible for flattening");
+      static_assert(std::is_same_v<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>, "field types are incompatible for flattening");
       allocator_->incrementReferenceCount ( values_ );
    }
 

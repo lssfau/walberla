@@ -48,7 +48,7 @@ namespace gpu
       ParallelStreams * parent_;
       gpuStream_t mainStream_;
       gpuEvent_t startEvent_;
-      uint_t counter_;
+      uint_t counter_ = 0;
    };
 
 

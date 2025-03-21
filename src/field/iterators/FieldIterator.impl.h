@@ -47,7 +47,7 @@ FieldIterator<T,fs>::FieldIterator( const typename FieldIterator<T,fs>::FieldTyp
       return;
    }
 
-   using NonConstT = typename std::remove_const<T>::type;
+   using NonConstT = std::remove_const_t<T>;
 
    cur_[0] = cur_[1] = cur_[2] = 0;
    if( f_->layout() == fzyx )
@@ -134,10 +134,10 @@ FieldIterator<T,fs>::FieldIterator( const FieldIterator<T,fs> & o )
      fBegin_        ( o.fBegin_       )
 {
    // no need to copy fastestCoord_, since it is updated before read
-   for(int i=0; i<3; ++i)
+   for(uint_t i=0; i<3; ++i)
       cur_[i] = o.cur_[i];
 
-   for( int i=0; i<4; ++i ) {
+   for(uint_t i=0; i<4; ++i ) {
       skips_[i] = o.skips_[i];
       sizes_[i] = o.sizes_[i];
    }
@@ -164,10 +164,10 @@ FieldIterator<T,fs> & FieldIterator<T,fs>::operator= ( const FieldIterator<T,fs>
    zBegin_    = o.zBegin_   ;
    fBegin_    = o.fBegin_   ;
 
-   for(int i=0; i<3; ++i)
+   for(uint_t i=0; i<3; ++i)
       cur_[i] = o.cur_[i];
 
-   for( int i=0; i<4; ++i ) {
+   for(uint_t i=0; i<4; ++i ) {
       skips_[i] = o.skips_[i];
       sizes_[i] = o.sizes_[i];
    }
@@ -459,9 +459,9 @@ template <typename T, uint_t fs>
 inline Cell FieldIterator<T,fs>::cell() const
 {
    fastestCoord_ = cell_idx_c( linePtr_ - lineBegin_ );
-   return Cell ( xBegin_ + *curX_,
+   return { xBegin_ + *curX_,
                  yBegin_ + *curY_,
-                 zBegin_ + *curZ_ );
+                 zBegin_ + *curZ_ };
 }
 
 

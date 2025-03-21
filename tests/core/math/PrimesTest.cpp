@@ -52,19 +52,19 @@ void runTests( const uint_t n )
       WALBERLA_CHECK_EQUAL( n % i == 0, devisors.find( i ) != devisors.end() );
    }
 
-   for( auto it = primes.begin(); it != primes.end(); ++it )
-      WALBERLA_CHECK( math::isPrime( *it ) );
+   for(unsigned long & prime : primes)
+      WALBERLA_CHECK( math::isPrime( prime ) );
 
-   for( auto it = devisors.begin(); it != devisors.end(); ++it )
-      WALBERLA_CHECK( n % *it == 0 );
+   for(unsigned long devisor : devisors)
+      WALBERLA_CHECK( n % devisor == 0 );
 
    if( n != 0 )
    {
       auto primeFactors = math::getPrimeFactors(n);
       WALBERLA_CHECK( ::is_sorted( primeFactors.begin(), primeFactors.end() ) );
       WALBERLA_CHECK_EQUAL( n, std::accumulate( primeFactors.begin(), primeFactors.end(), uint_c(1), std::multiplies<uint_t>() ) );
-      for( auto it = primeFactors.begin(); it != primeFactors.end(); ++it )
-         WALBERLA_CHECK( math::isPrime(*it) );
+      for(unsigned long & primeFactor : primeFactors)
+         WALBERLA_CHECK( math::isPrime(primeFactor) );
    }
 }
 
@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
       runTests( n );
    }
 
-   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   using mt11213b = std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 >;
    mt11213b rng;
    std::uniform_int_distribution<uint_t> dist( 100, 10000 );
    for(int i = 0; i < 100; ++i)

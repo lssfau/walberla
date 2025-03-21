@@ -57,7 +57,7 @@ namespace initializer {
       blockHandle.getBlocks( subBlocks );
 
       if ( blockHandle.isDefined("initialFill") ) {
-         std::string initialFill = blockHandle.getParameter<std::string>("initialFill");
+         std::string const initialFill = blockHandle.getParameter<std::string>("initialFill");
          if ( initialFill == addKeyword_ )
          {
             for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
@@ -72,13 +72,12 @@ namespace initializer {
          }
       }
 
-      for ( auto it = subBlocks.begin(); it != subBlocks.end(); ++it )
+      for (auto subBlock : subBlocks)
       {
-         Config::BlockHandle subBlock = *it;
          bool addOrSubtract = true;
 
-         bool addDefined      = subBlock.isDefined( addKeyword_ );
-         bool subtractDefined = subBlock.isDefined( subtractKeyword_ );
+         bool const addDefined      = subBlock.isDefined( addKeyword_ );
+         bool const subtractDefined = subBlock.isDefined( subtractKeyword_ );
 
          if ( addDefined && subtractDefined )
             WALBERLA_ABORT( "Specify only one of " << addKeyword_ << " and " << subtractKeyword_ << "!\n"
@@ -87,9 +86,9 @@ namespace initializer {
          if ( subtractDefined )
             addOrSubtract = false;
 
-         std::string shape = subBlock.getParameter<std::string>("shape");
+         std::string const shape = subBlock.getParameter<std::string>("shape");
 
-         uint_t superSamplingDepth = subBlock.getParameter<uint_t>("superSamplingDepth", uint_t(4) );
+         uint_t const superSamplingDepth = subBlock.getParameter<uint_t>("superSamplingDepth", uint_t(4) );
 
          if      ( string_icompare( shape, "Sphere"   ) == 0 )  init ( sphereFromConfig   ( subBlock ), addOrSubtract, superSamplingDepth );
          else if ( string_icompare( shape, "Cylinder" ) == 0 )  init ( cylinderFromConfig ( subBlock ), addOrSubtract, superSamplingDepth );

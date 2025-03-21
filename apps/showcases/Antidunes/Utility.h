@@ -41,13 +41,13 @@ struct SphereSelector
    template< typename ParticleAccessor_T >
    bool inline operator()(const size_t particleIdx, const ParticleAccessor_T& ac) const
    {
-      static_assert(std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value,
+      static_assert(std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >,
                     "Provide a valid accessor as template");
       return ac.getBaseShape(particleIdx)->getShapeType() == mesa_pd::data::Sphere::SHAPE_TYPE;
    }
 };
 
-void renameFile(const std::string& oldName, const std::string& newName)
+inline void renameFile(const std::string& oldName, const std::string& newName)
 {
    int result = std::rename(oldName.c_str(), newName.c_str());
    if (result != 0)
@@ -55,7 +55,7 @@ void renameFile(const std::string& oldName, const std::string& newName)
                                                             << result);
 }
 
-void write2DVectorToFile(const std::vector< real_t >& vec, uint_t len1, uint_t len2, std::string filename)
+inline void write2DVectorToFile(const std::vector< real_t >& vec, uint_t len1, uint_t len2, std::string filename)
 {
    std::ofstream file;
    file.open(filename.c_str());
@@ -184,22 +184,22 @@ class AverageDataSliceEvaluator
          maxFluidZPos_ = uint_t(0);
 
          // iterate all (inner) cells in the field
-         for (auto cell = xyz.begin(); cell != xyz.end(); ++cell)
+         for (auto cell : xyz)
          {
-            blocks_->transformBlockLocalToGlobalCell(globalCell, *block, *cell);
+            blocks_->transformBlockLocalToGlobalCell(globalCell, *block, cell);
             auto entryIdx = uint_c(globalCell.x()) + uint_c(globalCell.z()) * xlen_;
-            if (flagField->isFlagSet(*cell, solidMO) || flagField->isFlagSet(*cell, solidNoSlip))
+            if (flagField->isFlagSet(cell, solidMO) || flagField->isFlagSet(cell, solidNoSlip))
             {
                x_z_SolidVolumeFraction_[entryIdx] += real_t(1);
                x_z_FillLevel_[entryIdx] += real_t(1);
             }
             else
             {
-               auto fillLevel = fillField->get(*cell);
+               auto fillLevel = fillField->get(cell);
                x_z_FillLevel_[entryIdx] += fillLevel;
                if (fillLevel > 0_r)
                {
-                  x_z_VelocityX_[entryIdx] += pdfField->getVelocity(*cell)[0];
+                  x_z_VelocityX_[entryIdx] += pdfField->getVelocity(cell)[0];
                   ++x_z_FluidCellCount_[entryIdx];
 
                   maxFluidZPos_ = std::max(uint_t(globalCell.z()), maxFluidZPos_);
@@ -254,7 +254,7 @@ class AverageDataSliceEvaluator
    std::vector< uint_t > x_z_FluidCellCount_;
 };
 
-void writeSphereInformationToFile(const std::string& filename, walberla::mesa_pd::data::ParticleStorage& ps,
+inline void writeSphereInformationToFile(const std::string& filename, walberla::mesa_pd::data::ParticleStorage& ps,
                                   Vector3< real_t >& domainSize, int precision = 12)
 {
    std::ostringstream ossData;
@@ -279,7 +279,7 @@ void writeSphereInformationToFile(const std::string& filename, walberla::mesa_pd
    walberla::mpi::writeMPITextFile(filename, ossData.str());
 }
 
-void getAvgDiameterScalingFactor(const std::string& filename, const Vector3< uint_t >& domainSize,
+inline void getAvgDiameterScalingFactor(const std::string& filename, const Vector3< uint_t >& domainSize,
                                  const uint_t bedCopiesInX, const uint_t bedCopiesInY, real_t& avgDiameter,
                                  real_t& scalingFactor)
 {
@@ -333,7 +333,7 @@ void getAvgDiameterScalingFactor(const std::string& filename, const Vector3< uin
    walberla::mpi::broadcastObject(avgDiameter);
 }
 
-void initSpheresFromFile(const std::string& filename, walberla::mesa_pd::data::ParticleStorage& ps,
+inline void initSpheresFromFile(const std::string& filename, walberla::mesa_pd::data::ParticleStorage& ps,
                          const walberla::mesa_pd::domain::IDomain& domain, walberla::real_t density,
                          const Vector3< uint_t >& domainSize,
                          const std::function< bool(walberla::Vector3< real_t >) >& particleCreateFunction,
@@ -425,7 +425,7 @@ void initSpheresFromFile(const std::string& filename, walberla::mesa_pd::data::P
    walberla::mpi::allReduceInplace(numParticles, walberla::mpi::SUM);
 }
 
-void getAverageVelocity(const mesa_pd::data::ParticleAccessorWithBaseShape& ac, real_t& averageVelocity,
+inline void getAverageVelocity(const mesa_pd::data::ParticleAccessorWithBaseShape& ac, real_t& averageVelocity,
                         real_t& maxVelocity, uint_t& numParticles, real_t& maxHeight)
 {
    averageVelocity = real_t(0);
@@ -452,7 +452,7 @@ void getAverageVelocity(const mesa_pd::data::ParticleAccessorWithBaseShape& ac, 
    averageVelocity /= real_t(numParticles);
 }
 
-auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, const mesa_pd::Vec3& normal)
+inline auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, const mesa_pd::Vec3& normal)
 {
    auto p0 = ps.create(true);
    p0->setPosition(pos);

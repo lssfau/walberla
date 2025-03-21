@@ -177,7 +177,7 @@ private:
 
    bool weightedBlocks() const
    {
-      return ! std::is_same< PhantomData_T, NoPhantomData >::value;
+      return ! std::is_same_v< PhantomData_T, NoPhantomData >;
    }
    
    template< typename T >
@@ -239,10 +239,10 @@ void DynamicCurveBalance< PhantomData_T >::allGatherWeighted( std::vector< std::
 {  
    std::vector< std::pair< BlockID, weight_t > > localBlocks;
 
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
+   for(auto & processIt : targetProcess)
    {
-      weight_t weight = it->first->template getData< PhantomData_T >().weight();
-      localBlocks.push_back( std::make_pair( it->first->getId(), weight ) );
+      weight_t weight = processIt.first->template getData< PhantomData_T >().weight();
+      localBlocks.push_back( std::make_pair(processIt.first->getId(), weight ) );
    }
    
    mpi::SendBuffer sendBuffer;
@@ -285,8 +285,9 @@ void DynamicCurveBalance< PhantomData_T >::allGatherNoWeight( std::vector< std::
 {
    std::vector< BlockID > localBlocks;
 
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
-      localBlocks.push_back( it->first->getId() );
+   localBlocks.reserve(targetProcess.size());
+   for(auto & processIt : targetProcess)
+      localBlocks.push_back(processIt.first->getId() );
    
    mpi::SendBuffer sendBuffer;
    mpi::RecvBuffer recvBuffer;
@@ -328,10 +329,10 @@ void DynamicCurveBalance< PhantomData_T >::masterWeighted( std::vector< std::pai
 {
    std::vector< std::pair< BlockID, weight_t > > localBlocks;
 
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
+   for(auto & processIt : targetProcess)
    {
-      weight_t weight = it->first->template getData< PhantomData_T >().weight();
-      localBlocks.push_back( std::make_pair( it->first->getId(), weight ) );
+      weight_t weight = processIt.first->template getData< PhantomData_T >().weight();
+      localBlocks.push_back( std::make_pair(processIt.first->getId(), weight ) );
    } 
    
    std::set< mpi::MPIRank > ranksToRecvFrom;
@@ -405,8 +406,9 @@ void DynamicCurveBalance< PhantomData_T >::masterNoWeight( std::vector< std::pai
 {
    std::vector< BlockID > localBlocks;
 
-   for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
-      localBlocks.push_back( it->first->getId() );
+   localBlocks.reserve(targetProcess.size());
+   for(auto & processIt : targetProcess)
+      localBlocks.push_back(processIt.first->getId() );
    
    std::set< mpi::MPIRank > ranksToRecvFrom;
 
@@ -776,10 +778,8 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
    for( uint_t p = uint_t(0); p != processes; ++p )
       targets[p].resize( allBlocks[p].size() );
    
-   for( uint_t i = 0; i < blocksPerLevel.size(); ++i )
+   for(const auto & blocks : blocksPerLevel)
    {
-      const std::vector< std::pair< pid_t, idx_t > > & blocks = blocksPerLevel[i];
-      
       long double totalWeight( 0 );
       for( auto block = blocks.begin(); block != blocks.end(); ++block )
       {
@@ -831,10 +831,8 @@ void DynamicCurveBalance< PhantomData_T >::balanceNoWeight( const std::vector< s
    for( uint_t p = uint_t(0); p != processes; ++p )
       targets[p].resize( allBlocks[p].size() );
    
-   for( uint_t i = 0; i < blocksPerLevel.size(); ++i )
+   for(const auto & blocks : blocksPerLevel)
    {
-      const std::vector< std::pair< pid_t, idx_t > > & blocks = blocksPerLevel[i];
-
       const uint_t base = uint_c( blocks.size() ) / processes;
       const uint_t rest = uint_c( blocks.size() ) % processes;
 
@@ -934,8 +932,8 @@ void DynamicCurveBalance< PhantomData_T >::finalAssignment( const uint_t index, 
    for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
       targetProcess[i].second = uint_c( targets[index][i] );
 
-   for( auto s = sender[index].begin(); s != sender[index].end(); ++s )
-      processesToRecvFrom.insert( uint_c(*s) ) ;
+   for(pid_t s : sender[index])
+      processesToRecvFrom.insert( uint_c(s) ) ;
 }
 
 template< typename PhantomData_T >

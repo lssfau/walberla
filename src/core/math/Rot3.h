@@ -41,9 +41,9 @@ class Rot3
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(std::is_floating_point<Type>::value, "T has to be floating point!");
-   static_assert(!std::is_const<Type>::value, "T has to be non const!");
-   static_assert(!std::is_volatile<Type>::value, "T has to be non volatile!");
+   static_assert(std::is_floating_point_v<Type>, "T has to be floating point!");
+   static_assert(!std::is_const_v<Type>, "T has to be non const!");
+   static_assert(!std::is_volatile_v<Type>, "T has to be non volatile!");
    /*! \endcond */
    //**********************************************************************************************
 public:

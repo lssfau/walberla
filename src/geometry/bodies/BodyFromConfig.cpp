@@ -51,8 +51,8 @@ Cylinder cylinderFromConfig( const Config::BlockHandle & block )
    if ( ! block.isDefined( "radius" ) )
       WALBERLA_ABORT( "Missing parameter 'radius' for cylinder defined in block " << block.getKey() );
 
-   Vector3<real_t> min = block.getParameter<Vector3<real_t> > ( "min" );
-   Vector3<real_t> max = block.getParameter<Vector3<real_t> > ( "max" );
+   Vector3<real_t> const min = block.getParameter<Vector3<real_t> > ( "min" );
+   Vector3<real_t> const max = block.getParameter<Vector3<real_t> > ( "max" );
 
    return Cylinder( min, max, block.getParameter<real_t>( "radius" ) );
 }
@@ -69,8 +69,8 @@ Torus torusFromConfig( const Config::BlockHandle & block )
    if ( ! block.isDefined( "distance" ) )
       WALBERLA_ABORT( "Missing parameter 'distance' for torus defined in block " << block.getKey() );
 
-   Vector3<real_t> midpoint = block.getParameter<Vector3<real_t> > ( "midpoint" );
-   Vector3<real_t> normal   = block.getParameter<Vector3<real_t> > ( "normal"   );
+   Vector3<real_t> const midpoint = block.getParameter<Vector3<real_t> > ( "midpoint" );
+   Vector3<real_t> const normal   = block.getParameter<Vector3<real_t> > ( "normal"   );
 
    return Torus( midpoint, normal, block.getParameter<real_t>( "radius" ), block.getParameter<real_t>( "distance" ) );
 }
@@ -83,7 +83,7 @@ Ellipsoid ellipsoidFromConfig ( const Config::BlockHandle & block )
    if( ! block.isDefined( "radii" ) )
       WALBERLA_ABORT( "Missing parameter 'radii' for ellipsoid defined in block " << block.getKey() );
 
-   Vector3<real_t> radii = block.getParameter<Vector3<real_t> > ( "radii" );
+   Vector3<real_t> const radii = block.getParameter<Vector3<real_t> > ( "radii" );
 
    return Ellipsoid( block.getParameter<Vector3<real_t> >( "midpoint" ),
                      block.getParameter<Vector3<real_t> >( "axis1", Vector3<real_t>( real_t(1),real_t(0),real_t(0) ) ),
@@ -102,7 +102,7 @@ AABB AABBFromConfig( const Config::BlockHandle & block )
    Vector3<real_t> min = block.getParameter<Vector3<real_t> > ( "min" );
    Vector3<real_t> max = block.getParameter<Vector3<real_t> > ( "max" );
 
-   return AABB( min[0], min[1], min[2], max[0], max[1], max[2] );
+   return { min[0], min[1], min[2], max[0], max[1], max[2] };
 }
 
 
@@ -137,7 +137,7 @@ BodyLogicalAND<Sphere,BodyLogicalNOT<Sphere> > hollowSphereFromConfig ( const Co
 
 shared_ptr<AbstractBody> bodyFromConfig (const Config::BlockHandle & block )
 {
-   std::string shape = block.getParameter<std::string>("shape");
+   std::string const shape = block.getParameter<std::string>("shape");
    
    if      ( string_icompare( shape, "Sphere"   ) == 0 )
       return make_DynamicBody(sphereFromConfig   ( block ) );

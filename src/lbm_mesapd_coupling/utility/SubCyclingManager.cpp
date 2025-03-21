@@ -27,7 +27,7 @@ namespace walberla {
 namespace lbm_mesapd_coupling {
 
 SubCyclingManager::SubCyclingManager(size_t numberOfSubCycles, shared_ptr<WcTimingPool> timingPool)
-   : numberOfSubCycles_(numberOfSubCycles), timingPool_(std::move(timingPool)), currentTimeStep_(0) {}
+   : numberOfSubCycles_(numberOfSubCycles), timingPool_(std::move(timingPool)) {}
 
 void SubCyclingManager::operator()() {
    executeBeforeFunctions();

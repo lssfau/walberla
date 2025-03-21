@@ -123,8 +123,8 @@ void BlockForestEvaluation::toStream( std::ostream & os ) const
       if( !blockData.empty() )
       {
          os << "\n- block data:";
-         for( auto data = blockData.begin(); data != blockData.end(); ++data )
-            os << "\n   + " << *data;
+         for(auto & data : blockData)
+            os << "\n   + " << data;
       }
 
       os << "\n- number of already performed restructure cycles: " << forest_.getModificationStamp()

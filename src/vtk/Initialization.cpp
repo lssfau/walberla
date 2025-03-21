@@ -72,8 +72,8 @@ static void addStates( Set<SUID>& set, const std::string& string )
    states = string_split( string, ", \t" );
    states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
 
-   for( auto it = states.begin(); it != states.end(); ++it )
-      set += SUID( *it );
+   for(auto & state : states)
+      set += SUID( state );
 }
 
 
@@ -109,12 +109,12 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
    std::map< std::string, VTKOutput::CellFilter,                      CaseInsensitiveCompare > globalFilters;
    std::map< std::string, VTKOutput::BeforeFunction,                  CaseInsensitiveCompare > beforeFunctions;
 
-   for( auto writer = _writers.begin(); writer != _writers.end(); ++writer )
+   for(const auto & _writer : _writers)
    {
-      if( writers.find( (*writer)->identifier() ) != writers.end() )
-         WALBERLA_ABORT( "There are at least two block data writers with identifier \"" << (*writer)->identifier() <<
+      if( writers.find( _writer->identifier() ) != writers.end() )
+         WALBERLA_ABORT( "There are at least two block data writers with identifier \"" << _writer->identifier() <<
                          "\" (test is case insensitive!).\nEvery writer must have a unique identifier!" );
-      writers[ (*writer)->identifier() ] = *writer;
+      writers[ _writer->identifier() ] = _writer;
    }
 
    for( auto filter = _filters.begin(); filter != _filters.end(); ++filter )
@@ -141,29 +141,29 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
    Config::Blocks blocks;
    vtkBlock.getBlocks( blocks );
 
-   for( auto block = blocks.begin(); block != blocks.end(); ++block )
+   for(auto & block : blocks)
    {
       Config::Blocks subBlocks;
-      block->getBlocks( subBlocks );
+      block.getBlocks( subBlocks );
 
-      const std::string identifier( block->getKey() );
+      const std::string identifier( block.getKey() );
 
-      const int    simultaneousIOOperations = block->getParameter< int >( "simultaneousIOOperations", 0 );
-      const uint_t writeFrequency           = block->getParameter< uint_t >( "writeFrequency", uint_c(1) );
-      const uint_t initialExecutionCount    = block->getParameter< uint_t >( "initialExecutionCount", uint_c(0) );
-      const bool   forcePVTU                = block->getParameter< bool >( "forcePVTU", false );
-      const uint_t ghostLayers              = block->getParameter< uint_t >( "ghostLayers", uint_c(0) );
+      const int    simultaneousIOOperations = block.getParameter< int >( "simultaneousIOOperations", 0 );
+      const uint_t writeFrequency           = block.getParameter< uint_t >( "writeFrequency", uint_c(1) );
+      const uint_t initialExecutionCount    = block.getParameter< uint_t >( "initialExecutionCount", uint_c(0) );
+      const bool   forcePVTU                = block.getParameter< bool >( "forcePVTU", false );
+      const uint_t ghostLayers              = block.getParameter< uint_t >( "ghostLayers", uint_c(0) );
 
-      std::string baseFolder( block->getParameter< std::string >( "baseFolder", std::string( "vtk_out" ) ) );
-      std::string executionFolder( block->getParameter< std::string >( "executionFolder", std::string( "simulation_step" ) ) );
+      std::string baseFolder( block.getParameter< std::string >( "baseFolder", std::string( "vtk_out" ) ) );
+      std::string executionFolder( block.getParameter< std::string >( "executionFolder", std::string( "simulation_step" ) ) );
 
-      const bool outputDomainDecomposition = block->getParameter< bool >( "outputDomainDecomposition", false );
-      const bool continuousNumbering       = block->getParameter< bool >( "continuousNumbering", false );
-      const bool binary                    = block->getParameter< bool >( "binary", true );
-      const bool littleEndian              = block->getParameter< bool >( "littleEndian", true );
-      const bool useMPIIO                  = block->getParameter< bool >( "useMPIIO", true );
+      const bool outputDomainDecomposition = block.getParameter< bool >( "outputDomainDecomposition", false );
+      const bool continuousNumbering       = block.getParameter< bool >( "continuousNumbering", false );
+      const bool binary                    = block.getParameter< bool >( "binary", true );
+      const bool littleEndian              = block.getParameter< bool >( "littleEndian", true );
+      const bool useMPIIO                  = block.getParameter< bool >( "useMPIIO", true );
 
-      Config::BlockHandle writersBlock = block->getBlock( "writers" );
+      Config::BlockHandle writersBlock = block.getBlock( "writers" );
 
       if( !writersBlock && !outputDomainDecomposition )
          WALBERLA_ABORT( "You declared a VTK output instance [\"" << identifier << "\"] without a \"writers\" block. "
@@ -201,23 +201,23 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          vtkOutput = createVTKOutput_BlockData( *storage, identifier, writeFrequency, ghostLayers, forcePVTU,
                                                 baseFolder, executionFolder, continuousNumbering, binary, littleEndian, useMPIIO, initialExecutionCount );
 
-      const uint_t initialWriteCallsToSkip = block->getParameter< uint_t >( "initialWriteCallsToSkip", uint_t(0) );
+      const uint_t initialWriteCallsToSkip = block.getParameter< uint_t >( "initialWriteCallsToSkip", uint_t(0) );
       if( initialWriteCallsToSkip > uint_t(0) )
          vtkOutput->setInitialWriteCallsToSkip( initialWriteCallsToSkip );
 
-      const real_t samplingResolution = block->getParameter< real_t >( "samplingResolution", real_c(-1) );
+      const real_t samplingResolution = block.getParameter< real_t >( "samplingResolution", real_c(-1) );
       vtkOutput->setSamplingResolution( samplingResolution );
 
-      if( block->isDefined( "samplingDx" ) )
+      if( block.isDefined( "samplingDx" ) )
       {
-         const real_t samplingDx = block->getParameter< real_t >( "samplingDx", real_c(-1) );
-         const real_t samplingDy = block->getParameter< real_t >( "samplingDy", real_c(-1) );
-         const real_t samplingDz = block->getParameter< real_t >( "samplingDz", real_c(-1) );
+         const real_t samplingDx = block.getParameter< real_t >( "samplingDx", real_c(-1) );
+         const real_t samplingDy = block.getParameter< real_t >( "samplingDy", real_c(-1) );
+         const real_t samplingDz = block.getParameter< real_t >( "samplingDz", real_c(-1) );
 
          vtkOutput->setSamplingResolution( samplingDx, samplingDy, samplingDz );
       }
 
-      Config::BlockHandle beforeFunctionsBlock = block->getBlock( "before_functions" );
+      Config::BlockHandle beforeFunctionsBlock = block.getBlock( "before_functions" );
       if( beforeFunctionsBlock )
       {
          for( auto beforeFunctionId = beforeFunctionsBlock.begin(); beforeFunctionId != beforeFunctionsBlock.end(); ++beforeFunctionId )
@@ -234,13 +234,13 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       Config::Blocks aabbBlocks;
       Config::Blocks cellBBBlocks;
 
-      for( auto subBlock = subBlocks.begin(); subBlock != subBlocks.end(); ++subBlock )
+      for(auto & subBlock : subBlocks)
       {
-         if( string_icompare( std::string( subBlock->getKey(), 0, 11 ), std::string("AABB_filter") ) == 0 )
-            aabbBlocks.push_back( *subBlock );
+         if( string_icompare( std::string( subBlock.getKey(), 0, 11 ), std::string("AABB_filter") ) == 0 )
+            aabbBlocks.push_back( subBlock );
 
-         if( string_icompare( std::string( subBlock->getKey(), 0, 13 ), std::string("CellBB_filter") ) == 0 )
-            cellBBBlocks.push_back( *subBlock );
+         if( string_icompare( std::string( subBlock.getKey(), 0, 13 ), std::string("CellBB_filter") ) == 0 )
+            cellBBBlocks.push_back( subBlock );
       }
 
       for( auto aabb = aabbBlocks.begin(); aabb != aabbBlocks.end(); ++aabb )
@@ -293,10 +293,10 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          filters[ bb->getKey() ] = CellBBCellFilter( CellInterval( xmin, ymin, zmin, xmax, ymax, zmax ), level );
       }
 
-      for( auto selectedWriter = selectedWriters.begin(); selectedWriter != selectedWriters.end(); ++selectedWriter )
-         vtkOutput->addCellDataWriter( *selectedWriter );
+      for(auto & selectedWriter : selectedWriters)
+         vtkOutput->addCellDataWriter( selectedWriter );
 
-      Config::BlockHandle inclusionFiltersBlock = block->getBlock( "inclusion_filters" );
+      Config::BlockHandle inclusionFiltersBlock = block.getBlock( "inclusion_filters" );
       if( inclusionFiltersBlock )
       {
          for( auto inclusionFilterId = inclusionFiltersBlock.begin(); inclusionFilterId != inclusionFiltersBlock.end(); ++inclusionFilterId )
@@ -305,12 +305,12 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
             {
                std::vector< std::string > filterList = splitList( inclusionFilterId->second );
                ChainedFilter combine;
-               for( auto filter = filterList.begin(); filter != filterList.end(); ++filter )
+               for(auto & filter : filterList)
                {
-                  if( filters.find( *filter ) != filters.end() )
-                     combine.addFilter( filters[ *filter ] );
+                  if( filters.find( filter ) != filters.end() )
+                     combine.addFilter( filters[ filter ] );
                   else
-                     WALBERLA_ABORT( "You have requested an inclusion cell filter \"" << *filter << "\". This filter is not available!" );
+                     WALBERLA_ABORT( "You have requested an inclusion cell filter \"" << filter << "\". This filter is not available!" );
                }
                vtkOutput->addCellInclusionFilter( combine );
             }
@@ -324,7 +324,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          }
       }
 
-      Config::BlockHandle exclusionFiltersBlock = block->getBlock( "exclusion_filters" );
+      Config::BlockHandle exclusionFiltersBlock = block.getBlock( "exclusion_filters" );
       if( exclusionFiltersBlock )
       {
          for( auto exclusionFilterId = exclusionFiltersBlock.begin(); exclusionFilterId != exclusionFiltersBlock.end(); ++exclusionFilterId )
@@ -333,12 +333,12 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
             {
                std::vector< std::string > filterList = splitList( exclusionFilterId->second );
                ChainedFilter combine;
-               for( auto filter = filterList.begin(); filter != filterList.end(); ++filter )
+               for(auto & filter : filterList)
                {
-                  if( filters.find( *filter ) != filters.end() )
-                     combine.addFilter( filters[ *filter ] );
+                  if( filters.find( filter ) != filters.end() )
+                     combine.addFilter( filters[ filter ] );
                   else
-                     WALBERLA_ABORT( "You have requested an exclusion cell filter \"" << *filter << "\". This filter is not available!" );
+                     WALBERLA_ABORT( "You have requested an exclusion cell filter \"" << filter << "\". This filter is not available!" );
                }
                vtkOutput->addCellExclusionFilter( combine );
             }
@@ -353,30 +353,30 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       }
 
       Set<SUID> requiredGlobalStates;
-      if( block->isDefined( "requiredGlobalStates" ) )
+      if( block.isDefined( "requiredGlobalStates" ) )
       {
-         std::string states = block->getParameter< std::string >( "requiredGlobalStates" );
+         std::string states = block.getParameter< std::string >( "requiredGlobalStates" );
          addStates( requiredGlobalStates, states );
       }
 
       Set<SUID> incompatibleGlobalStates;
-      if( block->isDefined( "incompatibleGlobalStates" ) )
+      if( block.isDefined( "incompatibleGlobalStates" ) )
       {
-         std::string states = block->getParameter< std::string >( "incompatibleGlobalStates" );
+         std::string states = block.getParameter< std::string >( "incompatibleGlobalStates" );
          addStates( incompatibleGlobalStates, states );
       }
 
       Set<SUID> requiredBlockStates;
-      if( block->isDefined( "requiredBlockStates" ) )
+      if( block.isDefined( "requiredBlockStates" ) )
       {
-         std::string states = block->getParameter< std::string >( "requiredBlockStates" );
+         std::string states = block.getParameter< std::string >( "requiredBlockStates" );
          addStates( requiredBlockStates, states );
       }
 
       Set<SUID> incompatibleBlockStates;
-      if( block->isDefined( "incompatibleBlockStates" ) )
+      if( block.isDefined( "incompatibleBlockStates" ) )
       {
-         std::string states = block->getParameter< std::string >( "incompatibleBlockStates" );
+         std::string states = block.getParameter< std::string >( "incompatibleBlockStates" );
          addStates( incompatibleBlockStates, states );
       }
 

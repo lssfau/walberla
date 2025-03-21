@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -43,7 +43,7 @@
 namespace walberla {
 namespace mesh {
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );
@@ -72,16 +72,16 @@ int main( int argc, char * argv[] )
   //static const mesh::TriangleMesh::Point xAxis( 1, 0, 0 );
   //static const mesh::TriangleMesh::Point yAxis( 0, 1, 0 );
   //static const mesh::TriangleMesh::Point zAxis( 0, 0, 1 );
-  
+
   mesh::TriangleMesh::Point r = mesh::toOpenMesh( ( aabb.minCorner() - aabb.maxCorner() ).getNormalized() );
-  
+
   WALBERLA_LOG_DEVEL( "Start: r = " << r );
-  
+
   mesh::TriangleMesh::Scalar sLengthOld = std::numeric_limits< mesh::TriangleMesh::Scalar >::max();
   for(int i = 0; i < 100; ++i)
   {
      mesh::TriangleMesh::Point s(0,0,0);
-  
+
      for(auto vh : mesh->vertices())
      {
         const mesh::TriangleMesh::Point & x = mesh->point(vh);
@@ -89,23 +89,23 @@ int main( int argc, char * argv[] )
      }
      const mesh::TriangleMesh::Scalar sLength = s.length();
      r = s / sLength;
-  
+
      const mesh::TriangleMesh::Scalar eps = sLength - sLengthOld;
      WALBERLA_LOG_DEVEL( "Iteration:" << i << " r = " << r << " eps = " << eps );
      sLengthOld = sLength;
   }
 
   auto testVolume = aabb.getScaled( real_t(1.5) ); // AABB containing the test points
-  
+
   auto triDist = make_shared< mesh::TriangleDistance<mesh::TriangleMesh> >( mesh );
   auto distanceOctree = make_shared< DistanceOctree<mesh::TriangleMesh> >( triDist );
   geometry::ContainmentOctree< DistanceOctree<mesh::TriangleMesh> > containmentOctree( distanceOctree );
-  
+
   if( writeVtk )
      containmentOctree.writeVTKOutput( "containment_octree" );
-  
+
   std::mt19937 rng;
-  
+
   for( int i = 0; i < 10000; ++i )
   {
      const auto p = toOpenMesh( testVolume.randomPoint( rng ) );
@@ -113,7 +113,7 @@ int main( int argc, char * argv[] )
      const real_t distance = distanceOctree->sqSignedDistance( p );
      WALBERLA_CHECK_EQUAL( distance <= DistanceOctree<mesh::TriangleMesh>::Scalar(0), isContained, "Point " << std::setprecision(16) << p << " is " << ( isContained ? "inside" : "outside" ) << " but has distance " << distance );
   }
-  
+
   return EXIT_SUCCESS;
 }
 

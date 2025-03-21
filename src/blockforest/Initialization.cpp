@@ -63,7 +63,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
       }
    }
    WALBERLA_ABORT_NO_DEBUG_INFO( "No Configuration specified" );
-   return shared_ptr<StructuredBlockForest>();
+   return {};
 }
 
 
@@ -270,10 +270,10 @@ public:
    FixedRefinementLevelSelector( const uint_t level ) : level_(level) {}
    void operator()( SetupBlockForest& forest )
    {
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for(auto & block : forest)
       {
-         if( block->getLevel() < level_ )
-            block->setMarker( true );
+         if( block.getLevel() < level_ )
+            block.setMarker( true );
       }
    }
 private:
@@ -346,7 +346,7 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB& simulationDomain,
          WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest successfully saved to file!" );
       }
 
-      return shared_ptr<BlockForest>();
+      return {};
    }
 
    WALBERLA_MPI_SECTION()
@@ -631,11 +631,10 @@ createUniformBlockGrid( const AABB& domainAABB,
    const memory_t memoryLimit = ( maxBlocksPerProcess == 0 ) ? numeric_cast< memory_t >( sforest.getNumberOfBlocks() ) :
                                                                numeric_cast< memory_t >( maxBlocksPerProcess );
 
-   GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig( includeMetis, forceMetis,
-                                                                      std::bind( cellWeightedCommunicationCost, std::placeholders::_1, std::placeholders::_2,
-                                                                                   numberOfXCellsPerBlock,
-                                                                                   numberOfYCellsPerBlock,
-                                                                                   numberOfZCellsPerBlock ) );
+   auto commFunc = [=](const SetupBlock* const a, const SetupBlock* const b) {
+       return cellWeightedCommunicationCost(a, b, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock);
+   };
+   GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig( includeMetis, forceMetis, commFunc );
 
    sforest.calculateProcessDistribution_Default( uint_c( MPIManager::instance()->numProcesses() ), memoryLimit, "hilbert", 10, false, metisConfig );
 
@@ -796,9 +795,9 @@ void uniformWorkloadAndMemoryAssignment( SetupBlockForest& forest ) {
    std::vector< SetupBlock* > blocks;
    forest.getBlocks( blocks );
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      blocks[i]->setWorkload( numeric_cast< workload_t >(1) );
-      blocks[i]->setMemory( numeric_cast< memory_t >(1) );
+   for(auto & block : blocks) {
+      block->setWorkload( numeric_cast< workload_t >(1) );
+      block->setMemory( numeric_cast< memory_t >(1) );
    }
 }
 
@@ -850,11 +849,11 @@ memory_t cellWeightedCommunicationCost( const SetupBlock* const a, const SetupBl
 
 memory_t uniformFacesDominantCommunication( const SetupBlock* const a, const SetupBlock* const b ) {
 
-   uint_t faces[] = { 4, 10, 12, 13, 15, 21 };
+   std::array< uint_t, 6 > faces = { 4, 10, 12, 13, 15, 21 };
 
-   for( uint_t i = 0; i != 6; ++i ) {
-      for( uint_t j = 0; j != a->getNeighborhoodSectionSize(faces[i]); ++j )
-         if( a->getNeighbor(faces[i],j) == b )
+   for(uint_t face : faces) {
+      for( uint_t j = 0; j != a->getNeighborhoodSectionSize(face); ++j )
+         if( a->getNeighbor(face,j) == b )
             return numeric_cast< memory_t >(1000);
    }
 

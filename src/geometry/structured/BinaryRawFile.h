@@ -159,9 +159,9 @@ bool BinaryRawFileInterpolator::get( const real_t x, const real_t y, const real_
 
 bool BinaryRawFileInterpolator::getNearestNeighbor( const real_t x, const real_t y, const real_t z ) const
 {
-   uint_t xInt = uint_c( (x - aabb_.xMin()) / aabb_.xSize() * real_t( binaryRawFile_.size()[0] ) + real_t( 0.5 ) );
-   uint_t yInt = uint_c( (y - aabb_.yMin()) / aabb_.ySize() * real_t( binaryRawFile_.size()[1] ) + real_t( 0.5 ) );
-   uint_t zInt = uint_c( (z - aabb_.zMin()) / aabb_.zSize() * real_t( binaryRawFile_.size()[2] ) + real_t( 0.5 ) );
+   uint_t const xInt = uint_c( (x - aabb_.xMin()) / aabb_.xSize() * real_t( binaryRawFile_.size()[0] ) + real_t( 0.5 ) );
+   uint_t const yInt = uint_c( (y - aabb_.yMin()) / aabb_.ySize() * real_t( binaryRawFile_.size()[1] ) + real_t( 0.5 ) );
+   uint_t const zInt = uint_c( (z - aabb_.zMin()) / aabb_.zSize() * real_t( binaryRawFile_.size()[2] ) + real_t( 0.5 ) );
 
    return binaryRawFile_.get( xInt, yInt, zInt );
 }

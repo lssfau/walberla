@@ -67,7 +67,7 @@ namespace mpi {
 
    // Specialization for all enums
    template< typename T>
-   struct BufferSizeTrait< T, typename std::enable_if< std::is_enum< T >::value >::type >
+   struct BufferSizeTrait< T, std::enable_if_t< std::is_enum_v< T > > >
    {
       static const bool constantSize = true;
       static const size_t size = sizeof( T ) + BUFFER_DEBUG_OVERHEAD;

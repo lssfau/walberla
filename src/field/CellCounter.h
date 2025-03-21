@@ -70,7 +70,7 @@ public:
                 const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       totalNumberOfCells_( uint64_t(0) ), totalNumberOfBlocksContainingCell_( uint64_t(0) ),
-      blocks_( blocks ), allFlagsMustBeSet_( false ), cellsToCount_( cellsToCount ), flagFieldId_( flagFieldId ),
+      blocks_( blocks ), cellsToCount_( cellsToCount ), flagFieldId_( flagFieldId ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}
 
@@ -140,7 +140,7 @@ private:
 
    weak_ptr< StructuredBlockStorage > blocks_;
 
-   bool allFlagsMustBeSet_;
+   bool allFlagsMustBeSet_ = false;
    const Set< FlagUID >   cellsToCount_;
    const ConstBlockDataID flagFieldId_;
 
@@ -198,8 +198,8 @@ void CellCounter< FlagField_T >::operator()()
          else
          {
             typename FlagField_T::flag_t mask = 0;
-            for( auto flag = cellsToCount_.begin(); flag != cellsToCount_.end(); ++flag )
-               mask = static_cast< typename FlagField_T::flag_t >( mask | flagField->getFlag( *flag ) );
+            for(const auto & flag : cellsToCount_)
+               mask = static_cast< typename FlagField_T::flag_t >( mask | flagField->getFlag( flag ) );
 
             bool blockHasCell = false;
             if( allFlagsMustBeSet_ )

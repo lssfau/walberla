@@ -245,15 +245,15 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
       Cell offset(0, 0, 0);
       storage->transformBlockLocalToGlobalCell(offset, *block);
 
-      for (auto cellIt = west.begin(); cellIt != west.end(); ++cellIt)
+      for (auto cellIt : west)
       {
-         Cell globalCell = *cellIt + offset;
+         Cell globalCell = cellIt + offset;
          const real_t y = real_c(globalCell[1]);
 
          Vector3< real_t > ubbVel(0);
          ubbVel[0] = -real_t(4) * y * (y - H) / (H * H) * setup_.inflowVelocity[0];
 
-         handling->forceBoundary(UBBFlagUID, cellIt->x(), cellIt->y(), cellIt->z(), UBB_T::Velocity(ubbVel));
+         handling->forceBoundary(UBBFlagUID, cellIt.x(), cellIt.y(), cellIt.z(), UBB_T::Velocity(ubbVel));
       }
       //! [forceBoundary_UBB]
    }
@@ -267,10 +267,10 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    {
       //! [forceBoundary_ParserUBB_eqs]
       const uint_t maxSize = 150;
-      char x_eq[maxSize];
-      snprintf(x_eq, maxSize, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
+      std::array<char, maxSize> x_eq;
+      snprintf(x_eq.data(), maxSize, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
 
-      std::array< std::string, 3 > eqs = { x_eq, "0", "0" };
+      std::array< std::string, 3 > eqs = { x_eq.data(), "0", "0" };
       handling->forceBoundary(ParserUBBFlagUID, west, ParserUBB_T::Parser(eqs));
       //! [forceBoundary_ParserUBB_eqs]
 
@@ -299,15 +299,15 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
       Cell offset(0, 0, 0);
       storage->transformBlockLocalToGlobalCell(offset, *block);
 
-      for (auto cellIt = east.begin(); cellIt != east.end(); ++cellIt)
+      for (auto cellIt : east)
       {
-         Cell globalCell = *cellIt + offset;
+         Cell globalCell = cellIt + offset;
          const real_t y = real_c(globalCell[1]);
 
          real_t local_density =
             setup_.outflowPressure * (real_t(1.0) + real_t(0.01) * std::sin(real_t(2.0 * 3.1415926538) * y / H));
 
-         handling->forceBoundary(PressureFlagUID, cellIt->x(), cellIt->y(), cellIt->z(),
+         handling->forceBoundary(PressureFlagUID, cellIt.x(), cellIt.y(), cellIt.z(),
                                  Pressure_T::LatticeDensity(local_density));
       }
       //! [forceBoundary_Pressure]

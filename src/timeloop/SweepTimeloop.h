@@ -132,8 +132,8 @@ namespace timeloop {
 
       ~SweepTimeloop() override
       {
-         for ( auto i = sweeps_.begin(); i != sweeps_.end(); ++i )
-            delete i->second;
+         for (auto & sweep : sweeps_)
+            delete sweep.second;
       }
 
       //@}
@@ -163,8 +163,8 @@ namespace timeloop {
 
       void removeForDeletionMarkedSweeps()
       {
-         for( auto it = sweepsToDelete_.begin(); it != sweepsToDelete_.end(); ++it )
-            sweeps_.erase( *it );
+         for(unsigned long & it : sweepsToDelete_)
+            sweeps_.erase( it );
       }
 
       void doTimeStep(const Set<SUID> &selectors) override;

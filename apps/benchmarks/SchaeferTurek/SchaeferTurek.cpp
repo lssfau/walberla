@@ -204,25 +204,25 @@ template< typename LatticeModel_T, class Enable = void >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > > >
 {
    static const char * str() { return "D2Q9"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q15 > > >
 {
    static const char * str() { return "D3Q15"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > > >
 {
    static const char * str() { return "D3Q19"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > > >
 {
    static const char * str() { return "D3Q27"; }
 };
@@ -232,22 +232,22 @@ template< typename LatticeModel_T, class Enable = void >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::SRT_tag > > >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::TRT_tag > > >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::MRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::MRT_tag > > >
 {
    static const char * str() { return "MRT"; }
 };
@@ -355,7 +355,7 @@ bool Cylinder::contains( const AABB & aabb ) const
 {
    if( setup_.circularCrossSection )
    {
-      Vector3< real_t > p[8];
+      std::array< Vector3< real_t >, 8 > p;
       p[0].set( aabb.xMin(), aabb.yMin(), aabb.zMin() );
       p[1].set( aabb.xMax(), aabb.yMin(), aabb.zMin() );
       p[2].set( aabb.xMin(), aabb.yMax(), aabb.zMin() );
@@ -521,12 +521,12 @@ public:
 
    void operator()( SetupBlockForest & forest )
    {
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for(auto & block : forest)
       {
-         const AABB & aabb = block->getAABB();
+         const AABB & aabb = block.getAABB();
 
-         if( block->getLevel() < level_ && cylinder_.intersects( aabb, bufferDistance_ ) && !cylinder_.contains( aabb ) )
-            block->setMarker( true );
+         if( block.getLevel() < level_ && cylinder_.intersects( aabb, bufferDistance_ ) && !cylinder_.contains( aabb ) )
+            block.setMarker( true );
       }
    }
 
@@ -633,10 +633,10 @@ static void workloadMemoryAndSUIDAssignment( SetupBlockForest & forest, const me
    }
    else
    {
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for(auto & block : forest)
       {
-         block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-         block->setMemory( memoryPerBlock );
+         block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+         block.setMemory( memoryPerBlock );
       }
    }
 }
@@ -656,7 +656,8 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.xCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadMemoryAndSUIDAssignment, std::placeholders::_1, memoryPerBlock, std::cref( setup ) ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction([memoryPerBlock, setup_cref = std::cref(setup)](SetupBlockForest & sbf) {
+      return workloadMemoryAndSUIDAssignment(sbf, memoryPerBlock, setup_cref); } );
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0),
                        setup.H * ( real_c(setup.xBlocks) * real_c(setup.xCells) ) / ( real_c(setup.yzBlocks) * real_c(setup.yzCells) ), setup.H, setup.H ),
@@ -1034,11 +1035,11 @@ Set<SUID> Pseudo2DBlockStateDetermination::operator()( const std::vector< std::p
    auto aabb = forest_.getAABBFromBlockId( destintation );
    
    Set<SUID> state;
-   for( auto it = source.begin(); it != source.end(); ++it )
+   for(const auto & it : source)
    {
-      for( auto suid = it->second.begin(); suid != it->second.end(); ++suid )
-         if( *suid != state_ )
-            state += *suid;
+      for(auto suid : it.second)
+         if( suid != state_ )
+            state += suid;
    }
    
    if( markEmptyBlocks_ )
@@ -1067,13 +1068,13 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
    // In addition to keeping in- and outflow blocks at the same level, this callback also
    // prevents these blocks from coarsening.
 
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      const Block * const block = it->first;
+      const Block * const block = minTargetLevel.first;
       if( forest.atDomainXMinBorder(*block) )
       {
-         it->second = std::max( it->second, block->getLevel() );
-         maxInflowLevel = std::max( maxInflowLevel, it->second );
+         minTargetLevel.second = std::max( minTargetLevel.second, block->getLevel() );
+         maxInflowLevel = std::max( maxInflowLevel, minTargetLevel.second );
       }
       if( setup.strictlyObeyL )
       {
@@ -1083,19 +1084,18 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
          p[0] = setup.L;
          if( aabb.contains(p) )
          {
-            it->second = std::max( it->second, block->getLevel() );
-            maxOutflowLevel = std::max( maxOutflowLevel, it->second );
+            minTargetLevel.second = std::max( minTargetLevel.second, block->getLevel() );
+            maxOutflowLevel = std::max( maxOutflowLevel, minTargetLevel.second );
          }
       }
       else if( forest.atDomainXMaxBorder(*block) )
       {
-         it->second = std::max( it->second, block->getLevel() );
-         maxOutflowLevel = std::max( maxOutflowLevel, it->second );
+         minTargetLevel.second = std::max( minTargetLevel.second, block->getLevel() );
+         maxOutflowLevel = std::max( maxOutflowLevel, minTargetLevel.second );
       }
    }
-   for( auto it = blocksAlreadyMarkedForRefinement.begin(); it != blocksAlreadyMarkedForRefinement.end(); ++it )
+   for(auto block : blocksAlreadyMarkedForRefinement)
    {
-      const Block * const block = *it;
       if( forest.atDomainXMinBorder(*block) )
       {
          maxInflowLevel = std::max( maxInflowLevel, block->getTargetLevel() );
@@ -1116,12 +1116,12 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
    mpi::allReduceInplace( maxInflowLevel, mpi::MAX );
    mpi::allReduceInplace( maxOutflowLevel, mpi::MAX );
 
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      const Block * const block = it->first;
+      const Block * const block = minTargetLevel.first;
       if( forest.atDomainXMinBorder(*block) )
       {
-         it->second = maxInflowLevel;
+         minTargetLevel.second = maxInflowLevel;
       }
       if( setup.strictlyObeyL )
       {
@@ -1130,10 +1130,10 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
          auto p = aabb.center();
          p[0] = setup.L;
          if( aabb.contains(p) )
-            it->second = maxOutflowLevel;
+            minTargetLevel.second = maxOutflowLevel;
       }
       else if( forest.atDomainXMaxBorder(*block) )
-         it->second = maxOutflowLevel;
+         minTargetLevel.second = maxOutflowLevel;
    }
 }
 
@@ -1143,10 +1143,10 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
 void pseudo2DTargetLevelCorrection( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                     std::vector< const Block * > &, const blockforest::BlockForest & forest )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      if( ! forest.atDomainZMinBorder( *(it->first ) ) )
-         it->second = uint_t(0);
+      if( ! forest.atDomainZMinBorder( *(minTargetLevel.first ) ) )
+         minTargetLevel.second = uint_t(0);
    }
 }
 
@@ -1177,12 +1177,12 @@ public:
    
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
-      for( auto it = blockData.begin(); it != blockData.end(); ++it )
+      for(auto & it : blockData)
       {
-         if( it->first->getState().contains( state_ ) )
-            it->second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(0) : uint8_t(1) );
+         if( it.first->getState().contains( state_ ) )
+            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(0) : uint8_t(1) );
          else
-            it->second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(1) : uint8_t(0) );
+            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(1) : uint8_t(0) );
       }
    }
 
@@ -1297,10 +1297,9 @@ public:
                const bool logToStream = true, const bool logToFile = true, const std::string& filename = std::string("SchaeferTurek.txt"),
                const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
-      initialized_( false ), blocks_( blocks ),
-      executionCounter_( uint_t(0) ), checkFrequency_( checkFrequency ), pdfFieldId_( pdfFieldId ), flagFieldId_( flagFieldId ),
-      fluid_( fluid ), obstacle_( obstacle ), setup_( setup ), D_( uint_t(0) ), AD_( real_t(0) ), AL_( real_t(0) ), forceEvaluationExecutionCount_( uint_t(0) ),
-      strouhalRising_( false ), strouhalNumberRealD_( real_t(0) ), strouhalNumberDiscreteD_( real_t(0) ), strouhalEvaluationExecutionCount_( uint_t(0) ),
+      blocks_( blocks ),
+      checkFrequency_( checkFrequency ), pdfFieldId_( pdfFieldId ), flagFieldId_( flagFieldId ),
+      fluid_( fluid ), obstacle_( obstacle ), setup_( setup ),
       logToStream_( logToStream ), logToFile_( logToFile ), filename_( filename ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {
@@ -1345,13 +1344,13 @@ protected:
 
 
 
-   bool initialized_;
+   bool initialized_{ false };
 
    weak_ptr< StructuredBlockStorage > blocks_;
    std::map< IBlock *, std::vector< std::pair< Cell, stencil::Direction > > >  directions_;
 
-   uint_t executionCounter_;
-   uint_t checkFrequency_;
+   uint_t executionCounter_{ uint_c(0) };
+   uint_t checkFrequency_{ uint_c(0) };
    
    BlockDataID pdfFieldId_;
    BlockDataID flagFieldId_;
@@ -1361,23 +1360,23 @@ protected:
    
    Setup setup_;
 
-   uint_t D_;
-   real_t AD_;
-   real_t AL_;
+   uint_t D_{ uint_c(0) };
+   real_t AD_{ real_c(0) };
+   real_t AL_{ real_c(0) };
    
    Vector3< real_t > force_;
    std::vector< math::Sample > forceSample_;
-   uint_t forceEvaluationExecutionCount_;
+   uint_t forceEvaluationExecutionCount_{ uint_c(0) };
    
    std::vector< std::deque< real_t > > coefficients_;
    std::vector< std::pair< real_t, real_t > > coefficientExtremas_;
 
    std::vector< real_t > strouhalVelocities_;
    std::vector< uint_t > strouhalTimeStep_;
-   bool strouhalRising_;
-   real_t strouhalNumberRealD_;
-   real_t strouhalNumberDiscreteD_;
-   uint_t strouhalEvaluationExecutionCount_;
+   bool strouhalRising_{ false };
+   real_t strouhalNumberRealD_{ real_c(0) };
+   real_t strouhalNumberDiscreteD_{ real_c(0) };
+   uint_t strouhalEvaluationExecutionCount_{ uint_c(0) };
 
    bool logToStream_;
    bool logToFile_;
@@ -1604,10 +1603,10 @@ void Evaluation< LatticeModel_T >::operator()( IBlock * block, const uint_t leve
       const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
 
       const auto & directions = directions_[ block ];
-      for( auto pair = directions.begin(); pair != directions.end(); ++pair )
+      for(const auto & pair : directions)
       {
-         const Cell cell( pair->first );
-         const stencil::Direction direction( pair->second );
+         const Cell cell( pair.first );
+         const stencil::Direction direction( pair.second );
 
          const real_t scaleFactor = real_t(1) / real_c( uint_t(1) << ( (Is2D< LatticeModel_T >::value ? uint_t(1) : uint_t(2)) * level ) );
 
@@ -1712,8 +1711,8 @@ void Evaluation< LatticeModel_T >::getResultsForSQLOnRoot( std::map< std::string
 {
    WALBERLA_ROOT_SECTION()
    {
-      for( auto result = sqlResults_.begin(); result != sqlResults_.end(); ++result )
-         realProperties[ result->first ] = result->second;
+      for(const auto & sqlResult : sqlResults_)
+         realProperties[ sqlResult.first ] = sqlResult.second;
          
       integerProperties[ "forceEvaluationTimeStep" ] = int_c( forceEvaluationExecutionCount_ );
       integerProperties[ "strouhalEvaluationTimeStep" ] = int_c( strouhalEvaluationExecutionCount_ );
@@ -2155,7 +2154,7 @@ public:
 
    SnapshotSimulator( const weak_ptr<blockforest::StructuredBlockForest> & blocks,
                       const uint_t failAt, const uint_t failRangeBegin, const uint_t failRangeEnd, const bool failRebalance ) :
-      blocks_( blocks ), executionCounter_( 0 ),
+      blocks_( blocks ),
       failAt_( failAt ), failRangeBegin_( failRangeBegin ), failRangeEnd_( failRangeEnd ), failRebalance_( failRebalance )
    {}
 
@@ -2216,7 +2215,7 @@ private:
 
    weak_ptr<blockforest::StructuredBlockForest> blocks_;
 
-   uint_t executionCounter_;
+   uint_t executionCounter_{ uint_c(0) };
    uint_t failAt_;
 
    uint_t failRangeBegin_;
@@ -2302,11 +2301,11 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >::value ||
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value ||
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value ||
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value
-                                                                       >::type >
+struct AddRefinementTimeStep< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag > ||
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > ||
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q15 > ||
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 >
+                                                                       > >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,
@@ -2429,9 +2428,9 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    if( vtkBeforeTimeStep )
    {
-      for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-         timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                         output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+      for(auto & output : vtkOutputFunctions)
+         timeloop.addFuncBeforeTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
+                                        output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
    }
 
    // evaluation
@@ -2490,8 +2489,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          adaptiveRefinementLog = oss.str();
       }
 
-      minTargetLevelDeterminationFunctions.add( std::bind( keepInflowOutflowAtTheSameLevel, std::placeholders::_1, std::placeholders::_2, 
-                                                           std::placeholders::_3, std::cref(setup) ) );
+      minTargetLevelDeterminationFunctions.add([setup_cref = std::cref(setup)](auto & minTargetLevels, auto & blocksAlreadyMarkedForRefinement, auto & bf) {
+         return keepInflowOutflowAtTheSameLevel(minTargetLevels, blocksAlreadyMarkedForRefinement, bf, setup_cref); } );
 
       if( Is2D< LatticeModel_T >::value )
          minTargetLevelDeterminationFunctions.add( pseudo2DTargetLevelCorrection );
@@ -2610,9 +2609,9 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    if( !vtkBeforeTimeStep )
    {
-      for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-         timeloop.addFuncAfterTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                        output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+      for(auto & output : vtkOutputFunctions)
+         timeloop.addFuncAfterTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
+                                       output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
    }
 
    // stability check (non-finite values in the PDF field?)
@@ -3060,7 +3059,7 @@ int main( int argc, char **argv )
       refinementSelectionFunctions.add( cylinderRefinementSelection );
    }
 
-   refinementSelectionFunctions.add( std::bind( setInflowOutflowToSameLevel, std::placeholders::_1, setup ) );
+   refinementSelectionFunctions.add([&setup](auto & bf) { return setInflowOutflowToSameLevel(bf, setup); });
 
    if( setup.pseudo2D )
       refinementSelectionFunctions.add( Pseudo2DRefinementSelectionCorrection );

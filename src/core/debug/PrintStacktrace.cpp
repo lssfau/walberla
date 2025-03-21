@@ -23,6 +23,7 @@
 #include "demangle.h"
 #include "core/DataTypes.h"
 
+#include <array>
 #include <iostream>
 
 
@@ -54,12 +55,12 @@ namespace debug {
       using std::endl;
 
       const int BACKTRACE_LENGTH = 20;
-      void * array[BACKTRACE_LENGTH];
+      std::array< void*, BACKTRACE_LENGTH > array;
       size_t size;
       char **strings;
 
-      size = numeric_cast< size_t >( backtrace (array, BACKTRACE_LENGTH) );
-      strings = backtrace_symbols (array, int_c(size) );
+      size = numeric_cast< size_t >( backtrace (array.data(), BACKTRACE_LENGTH) );
+      strings = backtrace_symbols (array.data(), int_c(size) );
 
       os << "Backtrace: " << std::endl;
 

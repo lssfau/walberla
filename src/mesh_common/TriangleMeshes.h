@@ -42,13 +42,13 @@ namespace Python {
 
 struct MeshTraits : public OpenMesh::DefaultTraits {
    /** Use double precision points */
-   typedef OpenMesh::Vec3d Point;
+   using Point = OpenMesh::Vec3d;
 
    /** Use double precision normals */
-   typedef OpenMesh::Vec3d Normal;
+   using Normal = OpenMesh::Vec3d;
 
    /** Use RGBA colors */
-   typedef OpenMesh::Vec4f Color;
+   using Color = OpenMesh::Vec4f;
 };
 
 }
@@ -58,22 +58,22 @@ struct MeshTraits : public OpenMesh::DefaultTraits {
 namespace walberla {
 namespace mesh {
 
-typedef OpenMesh::TriMesh_ArrayKernelT<OpenMesh::Python::MeshTraits> PythonTriangleMesh;
+using PythonTriangleMesh = OpenMesh::TriMesh_ArrayKernelT<OpenMesh::Python::MeshTraits>;
 
 struct RealTraits : public OpenMesh::DefaultTraits
 {
-   typedef OpenMesh::VectorT<real_t, 3> Point;
-   typedef OpenMesh::VectorT<real_t, 3> Normal;
+   using Point = OpenMesh::VectorT<real_t, 3>;
+   using Normal = OpenMesh::VectorT<real_t, 3>;
 };
-typedef OpenMesh::TriMesh_ArrayKernelT<RealTraits> TriangleMesh;
+using TriangleMesh = OpenMesh::TriMesh_ArrayKernelT<RealTraits>;
 
 
 struct FloatTraits : public OpenMesh::DefaultTraits
 {
-   typedef OpenMesh::Vec3f Point;
-   typedef OpenMesh::Vec3f Normal;
+   using Point = OpenMesh::Vec3f;
+   using Normal = OpenMesh::Vec3f;
 };
-typedef OpenMesh::TriMesh_ArrayKernelT<FloatTraits> FloatTriangleMesh;
+using FloatTriangleMesh = OpenMesh::TriMesh_ArrayKernelT<FloatTraits>;
 
 
 template< typename MeshType >

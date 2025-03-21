@@ -27,9 +27,9 @@ namespace pe {
 
 class ConvexPolyhedron;
 
-typedef ConvexPolyhedron        ConvexPolyhedronType;    //!< Type of the convex polyhedron geometric primitive.
-typedef ConvexPolyhedron*       ConvexPolyhedronID;      //!< Handle for a convexpolyhedron primitive.
-typedef const ConvexPolyhedron* ConstConvexPolyhedronID; //!< Handle for a constant convex polyhedron primitive.
+using ConvexPolyhedronType = ConvexPolyhedron;    //!< Type of the convex polyhedron geometric primitive.
+using ConvexPolyhedronID = ConvexPolyhedron *;      //!< Handle for a convexpolyhedron primitive.
+using ConstConvexPolyhedronID = const ConvexPolyhedron *; //!< Handle for a constant convex polyhedron primitive.
 using   ConvexPolyhedronPtr   = std::unique_ptr<ConvexPolyhedron>;
 
 } // namespace pe

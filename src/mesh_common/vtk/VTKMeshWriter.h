@@ -42,10 +42,10 @@ namespace mesh {
 template< typename MeshType >
 class VTKMeshWriter {
 public:
-   typedef std::function<bool ( const MeshType &, const typename MeshType::FaceHandle & )> FaceFilterFunction;
+   using FaceFilterFunction = std::function<bool (const MeshType &, const typename MeshType::FaceHandle &)>;
 
-   typedef std::vector< typename MeshType::FaceHandle >   Faces;
-   typedef std::vector< typename MeshType::VertexHandle > Vertices;
+   using Faces = std::vector<typename MeshType::FaceHandle>;
+   using Vertices = std::vector<typename MeshType::VertexHandle>;
 
    template< typename T >
    class DataSource
@@ -53,7 +53,7 @@ public:
    public:
       DataSource( const std::string & _name ) : name_( _name ) { }
       virtual ~DataSource() = default;
-      typedef T value_type;
+      using value_type = T;
       virtual uint_t      numComponents() = 0;
       const std::string & name() { return name_; }
    protected:
@@ -64,11 +64,11 @@ public:
    class VertexDataSource : public DataSource<T>
    {
    public:
-      typedef typename DataSource<T>::value_type value_type;
-      typedef typename VTKMeshWriter::Vertices Vertices;
+      using value_type = typename DataSource<T>::value_type;
+      using Vertices = typename VTKMeshWriter::Vertices;
 
       VertexDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
-      virtual ~VertexDataSource() = default;
+      ~VertexDataSource() override = default;
       virtual void getData( const MeshType &, const Vertices & vertices, std::vector<T> & ) = 0;
    };
 
@@ -76,11 +76,11 @@ public:
    class FaceDataSource : public DataSource<T>
    {
    public:
-      typedef typename DataSource<T>::value_type value_type;
-      typedef typename VTKMeshWriter::Faces Faces;
+      using value_type = typename DataSource<T>::value_type;
+      using Faces = typename VTKMeshWriter::Faces;
 
       FaceDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
-      virtual ~FaceDataSource() = default;
+      ~FaceDataSource() override = default;
       virtual void getData( const MeshType &, const Faces & faces, std::vector<T> & ) = 0;
    };
 
@@ -128,7 +128,7 @@ protected:
    std::string identifier_;
    std::string baseFolder_;
 
-   uint_t      timestep_;
+   uint_t      timestep_{ 0 };
 
    FaceFilterFunction faceFilter_;
 
@@ -195,7 +195,7 @@ void VTKMeshWriter<MeshType>::writeFaceData( const T & faceDataSources, const Fa
 template< typename MeshType >
 VTKMeshWriter<MeshType>::VTKMeshWriter( const shared_ptr<const MeshType> & mesh, const std::string & identifier, const uint_t writeFrequency,
    const std::string & baseFolder )
-   : mesh_( mesh ), writeFrequency_( writeFrequency ), identifier_( identifier ), baseFolder_( baseFolder ), timestep_( 0 )
+   : mesh_( mesh ), writeFrequency_( writeFrequency ), identifier_( identifier ), baseFolder_( baseFolder )
 {
    WALBERLA_ROOT_SECTION()
    {
@@ -298,9 +298,9 @@ void VTKMeshWriter<MeshType>::writePiece( std::ostream & os ) const
 
    os << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"binary\">\n";
    os << "          ";
-   for( auto it = offsets.begin(); it != offsets.end(); ++it )
+   for(auto const& offset : offsets)
    {
-      b64 << *it;
+      b64 << offset;
    }
    b64.toStream( os );
 
@@ -367,10 +367,10 @@ void VTKMeshWriter<MeshType>::operator()()
       {
          std::ostringstream filePathVtp;
          filePathVtp << baseFolder_ << '/' << identifier_ << '/' << identifier_ << '_' << timestep_ << ".vtp";
-      
+
          std::ofstream ofsVtp;
          ofsVtp.open( filePathVtp.str().c_str() );
-  
+
          write( ofsVtp );
 
          std::ostringstream filePathPvd;

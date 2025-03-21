@@ -51,12 +51,12 @@ uint_t CartesianDistribution::operator()( SetupBlockForest & forest, const uint_
    if( !processIdMap_->empty() )
       WALBERLA_CHECK_EQUAL( processIdMap_->size(), numberOfProcesses );
 
-   uint_t partitions[3];
+   std::array< uint_t, 3 > partitions;
    partitions[0] = numberOfXProcesses_;
    partitions[1] = numberOfYProcesses_;
    partitions[2] = numberOfZProcesses_;
 
-   std::vector< uint_t > indices[3];
+   std::array< std::vector< uint_t >, 3 > indices;
 
    for( uint_t i = 0; i != 3; ++i )
    {
@@ -80,11 +80,11 @@ uint_t CartesianDistribution::operator()( SetupBlockForest & forest, const uint_
 
             forest.getBlocks( partitionBlocks, indices[0][x], indices[1][y], indices[2][z], indices[0][x+1], indices[1][y+1], indices[2][z+1] );
 
-            for( auto block = partitionBlocks.begin(); block != partitionBlocks.end(); ++block )
+            for(auto & partitionBlock : partitionBlocks)
             {
                const uint_t index = z * partitions[0] * partitions[1] + y * partitions[0] + x;
 
-               (*block)->assignTargetProcess( ( !processIdMap_->empty() ) ? (*processIdMap_)[ index ] : index );
+               partitionBlock->assignTargetProcess( ( !processIdMap_->empty() ) ? (*processIdMap_)[ index ] : index );
             }
          }
       }

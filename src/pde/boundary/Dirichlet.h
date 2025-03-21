@@ -62,8 +62,8 @@ template< typename Stencil_T, typename flag_t >
 class Dirichlet : public Boundary< flag_t >
 {
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using Field_T = GhostLayerField<real_t, 1>;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
 public:
 

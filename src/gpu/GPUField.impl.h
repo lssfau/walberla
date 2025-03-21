@@ -124,7 +124,7 @@ template<typename T>
 void GPUField<T>::getGhostRegion(stencil::Direction d, CellInterval & ci,
                                  cell_idx_t thickness, bool fullSlice ) const
 {
-   const cell_idx_t sizeArr [] = { cell_idx_c( xSize() ),
+   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( xSize() ),
                                    cell_idx_c( ySize() ),
                                    cell_idx_c( zSize() )};
 
@@ -170,7 +170,7 @@ void GPUField<T>::getSlice(stencil::Direction d, CellInterval & ci,
 {
    WALBERLA_ASSERT_GREATER( thickness, 0 )
 
-   const cell_idx_t sizeArr [] = { cell_idx_c( xSize() ),
+   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( xSize() ),
                                    cell_idx_c( ySize() ),
                                    cell_idx_c( zSize() ) };
 

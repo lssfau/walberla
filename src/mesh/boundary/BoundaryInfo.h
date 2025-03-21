@@ -30,8 +30,8 @@ namespace mesh {
 class BoundaryInfo
 {
 public:
-   typedef boundary::BoundaryUID UID;
-   typedef shared_ptr< boundary::BoundaryConfiguration > ConfigPtr;
+   using UID = boundary::BoundaryUID;
+   using ConfigPtr = shared_ptr<boundary::BoundaryConfiguration>;
 
    BoundaryInfo() : config_( boundary::BoundaryConfiguration::nullPtr() ) { }
    BoundaryInfo( const UID & uid ) : uid_( uid ), config_( boundary::BoundaryConfiguration::nullPtr() ) { }

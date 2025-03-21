@@ -89,7 +89,7 @@ std::vector<T> allReduceSet( std::vector<T> values, SetOperation op, MPI_Comm mp
       sendBuffer << values;
 
       int sendBufferSize = int_c( sendBuffer.size() );
-      MPI_Request sendRequests[] = { MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL };
+      std::array< MPI_Request, 4 > sendRequests = { MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL };
       MPI_Isend( &sendBufferSize, 1, MPI_INT, commPartner % numberOfRanks, mpiTag, mpiCommunicator, &sendRequests[0] );
       MPI_Isend( sendBuffer.ptr(), sendBufferSize, MPI_CHAR, commPartner % numberOfRanks, mpiTag, mpiCommunicator, &sendRequests[1] );
       if( hasVirtualRank )
@@ -136,7 +136,7 @@ std::vector<T> allReduceSet( std::vector<T> values, SetOperation op, MPI_Comm mp
          swap( values, tmp1 );
       }
 
-      MPI_Waitall( hasVirtualRank ? 4 : 2, sendRequests, MPI_STATUSES_IGNORE );
+      MPI_Waitall( hasVirtualRank ? 4 : 2, sendRequests.data(), MPI_STATUSES_IGNORE );
 
       ++lvl;
       lvlRank = rank >> lvl;

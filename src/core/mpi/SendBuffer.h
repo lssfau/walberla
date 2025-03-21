@@ -86,7 +86,7 @@ public:
    class Ptr
    {
    public:
-      static_assert( std::is_fundamental<VT>::value, "only fundamental data types are allowed");
+      static_assert( std::is_fundamental_v<VT>, "only fundamental data types are allowed");
       using value_type = VT;
 
       Ptr(GenericSendBuffer<T, G>& buffer, const std::ptrdiff_t offset, const size_t length)
@@ -141,8 +141,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-   GenericSendBuffer&  >::type
+   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+   GenericSendBuffer&  >
    operator<<( V value );
 
    //@}
@@ -189,8 +189,8 @@ private:
    void extendMemory( size_t newCapacity );
 
    template< typename V >
-   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-   GenericSendBuffer&  >::type
+   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+   GenericSendBuffer&  >
    put( V value );
 
    inline std::ptrdiff_t getOffset() const;
@@ -208,7 +208,7 @@ private:
    //*******************************************************************************************************************
 
    //**Compile time checks**********************************************************************************************
-   static_assert( std::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
+   static_assert( std::is_arithmetic_v<T>, "SendBuffer<T>: T has to be native datatype" ) ;
    //*******************************************************************************************************************
 
    template< typename U >
@@ -438,12 +438,12 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-GenericSendBuffer<T,G>& >::type
+std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+GenericSendBuffer<T,G>& >
 GenericSendBuffer<T,G>::put( V value )
 {
    // Compile time check that V is built-in data type
-   static_assert( std::is_arithmetic<V>::value || std::is_enum<V>::value,
+   static_assert( std::is_arithmetic_v<V> || std::is_enum_v<V>,
                   "SendBuffer accepts only built-in data types");
 
    static_assert( sizeof(V) >= sizeof(T), "Type that is stored has to be bigger than T" );
@@ -483,8 +483,8 @@ GenericSendBuffer<T,G>::put( V value )
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-GenericSendBuffer<T,G>& >::type
+std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+GenericSendBuffer<T,G>& >
 GenericSendBuffer<T,G>::operator<<( V value )
 {
    addDebugMarker( typeid(V).name() );
@@ -697,7 +697,7 @@ template< typename T    // Element type
 inline void GenericSendBuffer<T,G>::reset()
 {
    delete [] begin_;
-   begin_ = new T[0];
+   begin_ = nullptr;
    cur_ = begin_;
    end_ = begin_;
 }

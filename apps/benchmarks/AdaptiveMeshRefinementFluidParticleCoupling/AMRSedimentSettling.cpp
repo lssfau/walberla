@@ -165,9 +165,9 @@ template< typename LatticeModel_T, typename Filter_T >
 void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                                                        std::vector< const Block * > &, const BlockForest & )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      const Block * const block = it->first;
+      const Block * const block = minTargetLevel.first;
 
       const uint_t currentLevelOfBlock = block->getLevel();
 
@@ -175,7 +175,7 @@ void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vect
 
       if( uField == nullptr )
       {
-         it->second = uint_t(0);
+         minTargetLevel.second = uint_t(0);
          continue;
       }
 
@@ -253,12 +253,12 @@ void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vect
       if( refine && currentLevelOfBlock < maxLevel_ )
       {
          WALBERLA_ASSERT( !coarsen );
-         it->second = currentLevelOfBlock + uint_t(1);
+         minTargetLevel.second = currentLevelOfBlock + uint_t(1);
       }
       if( coarsen && currentLevelOfBlock > uint_t(0) )
       {
          WALBERLA_ASSERT( !refine );
-         it->second = currentLevelOfBlock - uint_t(1);
+         minTargetLevel.second = currentLevelOfBlock - uint_t(1);
       }
    }
 }
@@ -500,7 +500,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
 
    MPIManager::instance()->useWorldComm();
 
-   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( [numberOfLevels, refinementBox](auto && PH1) { refinementSelection(std::forward<decltype(PH1)>(PH1), numberOfLevels, refinementBox); } );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    Vector3<bool> periodicity( true, true, false);
@@ -1375,7 +1375,7 @@ int main( int argc, char **argv )
    cr.setRelaxationModel( pe::cr::HardContactSemiImplicitTimesteppingSolvers::ApproximateInelasticCoulombContactByDecoupling );
 
    // set up synchronization procedure
-   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, &(*timingTreePE), overlap, false );
+   std::function<void(void)> syncCall = [&capture0 = blocks->getBlockForest(), bodyStorageID, capture1 = &(*timingTreePE), overlap] { pe::syncNextNeighbors<BodyTypeTuple>(capture0, bodyStorageID, capture1, overlap, false); };
 
    // create pe bodies
 
@@ -1525,14 +1525,14 @@ int main( int argc, char **argv )
 
    // force averaging functionality
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = [bodiesFTContainer1] { bodiesFTContainer1->store(); };
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = [bodiesFTContainer2] { bodiesFTContainer2->setOnBodies(); };
 
    shared_ptr<pe_coupling::ForceTorqueOnBodiesScaler> forceScaler = make_shared<pe_coupling::ForceTorqueOnBodiesScaler>(blocks, bodyStorageID, real_t(0.5));
-   std::function<void(void)> setForceScalingFactorToOne = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(1));
-   std::function<void(void)> setForceScalingFactorToHalf = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
+   std::function<void(void)> setForceScalingFactorToOne = [forceScaler] { forceScaler->resetScalingFactor(real_t(1)); };
+   std::function<void(void)> setForceScalingFactorToHalf = [forceScaler] { forceScaler->resetScalingFactor(real_t(0.5)); };
 
    if( averageForceTorqueOverTwoTimSteps ) {
       bodiesFTContainer2->store();

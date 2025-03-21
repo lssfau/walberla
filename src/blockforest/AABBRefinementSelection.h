@@ -52,20 +52,20 @@ public:
          {
             Config::Blocks aabbBlocks;
             refinementBlock.getBlocks( "AABB", aabbBlocks );
-            for( auto block = aabbBlocks.begin(); block != aabbBlocks.end(); ++block )
+            for(auto & aabbBlock : aabbBlocks)
             {
-               const math::AABB aabb  = block->getParameter< math::AABB >( "AABB" );
-               const uint_t     level = block->getParameter< uint_t >( "level" );
+               const math::AABB aabb  = aabbBlock.getParameter< math::AABB >( "AABB" );
+               const uint_t     level = aabbBlock.getParameter< uint_t >( "level" );
                addAABB( aabb, level );
             }
 
             // For regions, the simulation space is assumed to be [ <0,0,0>, <1,1,1> ]
             Config::Blocks regionBlocks;
             refinementBlock.getBlocks( "Region", regionBlocks );
-            for( auto block = regionBlocks.begin(); block != regionBlocks.end(); ++block )
+            for(auto & regionBlock : regionBlocks)
             {
-               const math::AABB region = block->getParameter< math::AABB >( "region" );
-               const uint_t     level  = block->getParameter< uint_t >( "level" );
+               const math::AABB region = regionBlock.getParameter< math::AABB >( "region" );
+               const uint_t     level  = regionBlock.getParameter< uint_t >( "level" );
                addRegion( region, level );
             }
          }
@@ -91,12 +91,12 @@ public:
       if( aabbs.empty() )
          return;
 
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for(auto & block : forest)
       {
-         for( auto aabb = aabbs.begin(); aabb != aabbs.end(); ++aabb )
+         for(auto & aabb : aabbs)
          {
-            if( block->getAABB().intersects( aabb->first ) && block->getLevel() < aabb->second )
-               block->setMarker( true );
+            if( block.getAABB().intersects( aabb.first ) && block.getLevel() < aabb.second )
+               block.setMarker( true );
          }
       }
    }
@@ -108,16 +108,16 @@ public:
       std::vector< std::pair< math::AABB, uint_t > > aabbs = transformRegionsToAABBs( forest.getDomain() );
       aabbs.insert( aabbs.end(), aabbs_.begin(), aabbs_.end() );
 
-      for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+      for(auto & minTargetLevel : minTargetLevels)
       {
-         uint_t currentLevelOfBlock = it->first->getLevel();
+         const uint_t currentLevelOfBlock = minTargetLevel.first->getLevel();
          uint_t targetLevelOfBlock = currentLevelOfBlock;
 
-         for( auto aabb = aabbs.begin(); aabb != aabbs.end(); ++aabb )
+         for(auto & aabb : aabbs)
          {
-            if( it->first->getAABB().intersects( aabb->first ) )
+            if( minTargetLevel.first->getAABB().intersects( aabb.first ) )
             {
-               uint_t targetLevelOfAABB = aabb->second;
+               uint_t targetLevelOfAABB = aabb.second;
                if( currentLevelOfBlock > targetLevelOfAABB )
                {
                   targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
@@ -132,7 +132,7 @@ public:
          }
 
          WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
-         it->second = targetLevelOfBlock;
+         minTargetLevel.second = targetLevelOfBlock;
       }
    }
 
@@ -142,14 +142,15 @@ private:
    std::vector< std::pair< math::AABB, uint_t > > transformRegionsToAABBs( const math::AABB & simulationDomain ) const
    {
       std::vector< std::pair< math::AABB, uint_t > > aabbs;
-      for( auto region = regions_.begin(); region != regions_.end(); ++region )
+      aabbs.reserve(regions_.size());
+      for(const auto & region : regions_)
       {
-         aabbs.emplace_back( math::AABB( simulationDomain.xMin() + region->first.xMin() * simulationDomain.xSize(),
-                                         simulationDomain.yMin() + region->first.yMin() * simulationDomain.ySize(),
-                                         simulationDomain.zMin() + region->first.zMin() * simulationDomain.zSize(),
-                                         simulationDomain.xMin() + region->first.xMax() * simulationDomain.xSize(),
-                                         simulationDomain.yMin() + region->first.yMax() * simulationDomain.ySize(),
-                                         simulationDomain.zMin() + region->first.zMax() * simulationDomain.zSize() ), region->second );
+         aabbs.emplace_back( math::AABB( simulationDomain.xMin() + region.first.xMin() * simulationDomain.xSize(),
+                                         simulationDomain.yMin() + region.first.yMin() * simulationDomain.ySize(),
+                                         simulationDomain.zMin() + region.first.zMin() * simulationDomain.zSize(),
+                                         simulationDomain.xMin() + region.first.xMax() * simulationDomain.xSize(),
+                                         simulationDomain.yMin() + region.first.yMax() * simulationDomain.ySize(),
+                                         simulationDomain.zMin() + region.first.zMax() * simulationDomain.zSize() ), region.second );
       }
       return aabbs;
    }

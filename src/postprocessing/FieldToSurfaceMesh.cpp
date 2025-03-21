@@ -88,7 +88,7 @@ shared_ptr<TriangleMesh> gatherMesh( const shared_ptr<TriangleMesh> & mesh, bool
       return mesh;
    }
    else
-      return shared_ptr<geometry::TriangleMesh>();
+      return {};
 }
 
 

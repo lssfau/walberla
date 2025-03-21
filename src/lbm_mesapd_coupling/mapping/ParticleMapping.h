@@ -52,7 +52,7 @@ public:
    template<typename ParticleAccessor_T>
    void operator()(const size_t particleIdx, const ParticleAccessor_T& ac, const FlagUID & obstacle )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
       {
@@ -66,7 +66,7 @@ private:
    void mapParticleOnBlock( const size_t particleIdx, const ParticleAccessor_T& ac,
                            IBlock & block, const FlagUID & obstacle )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage_->getBlockStorage()) );
 

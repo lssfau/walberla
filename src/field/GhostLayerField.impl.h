@@ -129,7 +129,7 @@ namespace field {
     {
        gl_ = gl;
        timestepCounter_ = uint8_c(0);
-       uint_t innerGhostLayerSize = ( l == fzyx ) ? gl : uint_t(0);
+       uint_t const innerGhostLayerSize = ( l == fzyx ) ? gl : uint_t(0);
        Field<T,fSize_>::init( _xSize + 2*gl ,
                               _ySize + 2*gl,
                               _zSize + 2*gl, l, alloc,

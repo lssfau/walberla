@@ -83,8 +83,8 @@ private:
                           const std::string & sweep,
                           const double totalTime );
 
-   bool valid_;
-   sqlite3 * dbHandle_;
+   bool valid_{true};
+   sqlite3 * dbHandle_{nullptr};
    std::string file_;
 };
 

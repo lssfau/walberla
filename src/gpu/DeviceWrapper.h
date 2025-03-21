@@ -74,6 +74,8 @@ namespace gpustubs {
    //NOLINTEND(bugprone-reserved-identifier)
 #endif
 
+//NOLINTBEGIN
+
 using gpuError_t = int;
 const gpuError_t gpuSuccess = 0;
 
@@ -289,6 +291,8 @@ typedef void(GPURT_CB* gpuHostFn_t)(void* /*userData*/);
 inline gpuError_t gpuLaunchHostFunc(gpuStream_t /*stream*/, gpuHostFn_t /*fn*/, void* /*userData*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 
 #undef WALBERLA_DEVICE_FUNCTION_ERROR
+
+//NOLINTEND
 
 } // namespace gpustubs
 using namespace gpustubs;

@@ -53,9 +53,9 @@ public:
                   forest.getBlockForest().isPeriodic(2)}};
       const math::AABB domain     = forest.getBlockForest().getDomain();
 
-      for( auto it = blockData.begin(); it != blockData.end(); ++it )
+      for(auto & it : blockData)
       {
-         const PhantomBlock * block = it->first;
+         const PhantomBlock * block = it.first;
          //only change of one level is supported!
          WALBERLA_ASSERT_LESS( abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
@@ -66,19 +66,18 @@ public:
          blockforest::DynamicParMetisBlockInfo info( 0 );
          info.setVertexWeight( int64_c(weight) );
          info.setVertexSize( int64_c( weight ) );
-         info.setVertexCoords( it->first->getAABB().center() );
-         for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSize(); ++nb )
+         info.setVertexCoords( it.first->getAABB().center() );
+         for( uint_t nb = uint_t(0); nb < it.first->getNeighborhoodSize(); ++nb )
          {
             const real_t dx(1.0);
-            info.setEdgeWeight( it->first->getNeighborId(nb),
+            info.setEdgeWeight( it.first->getNeighborId(nb),
                                 static_cast<blockforest::DynamicParMetisBlockInfo::weight_t>(
                                 domain_decomposition::periodicIntersectionVolume( periodic,
                                                                                   domain,
-                                                                                  it->first->getAABB(),
-                                                                                  it->first->getNeighborAABB(nb).getExtended(dx))) );
+                                                                                  it.first->getAABB(),
+                                                                                  it.first->getNeighborAABB(nb).getExtended(dx))) );
          }
-         it->second = info;
-         continue;
+         it.second = info;
       }
    }
 

@@ -89,8 +89,8 @@ class MatrixMxN
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(!std::is_const<Type>::value, "only non const Types are allowed!");
-   static_assert(!std::is_volatile<Type>::value, "only non volatile types are allowed!");
+   static_assert(!std::is_const_v<Type>, "only non const Types are allowed!");
+   static_assert(!std::is_volatile_v<Type>, "only non volatile types are allowed!");
    /*! \endcond */
    //**********************************************************************************************
 
@@ -111,7 +111,7 @@ public:
                                     inline constexpr MatrixMxN( const MatrixMxN& m );
 
    template< typename Other, size_t M, size_t N >
-   inline constexpr MatrixMxN( const Other (&rhs)[M][N] );
+   inline constexpr MatrixMxN( const std::array<std::array<Other, N>, M>& rhs );
    //@}
    //**********************************************************************************************
 
@@ -126,7 +126,7 @@ public:
    /*!\name Operators */
    //@{
    template< typename Other, size_t M, size_t N >
-   inline MatrixMxN& operator=( const Other (&rhs)[M][N] );
+   inline MatrixMxN& operator=( const std::array<std::array<Other, N>, M>& rhs );
 
                            inline MatrixMxN&  operator= ( Type set );
                            inline MatrixMxN&  operator= ( const MatrixMxN& set );
@@ -292,7 +292,7 @@ template< typename Type >  // Data type of the matrix
 template< typename Other   // Data type of the initialization array
         , size_t M         // Number of rows of the initialization array
         , size_t N >       // Number of columns of the initialization array
-inline constexpr MatrixMxN<Type>::MatrixMxN( const Other (&rhs)[M][N] )
+inline constexpr MatrixMxN<Type>::MatrixMxN( const std::array<std::array<Other, N>, M>& rhs )
    : m_       ( M )              // The current number of rows of the matrix
    , n_       ( N )              // The current number of columns of the matrix
    , capacity_( M*N )            // The maximum capacity of the matrix
@@ -355,7 +355,7 @@ template< typename Type >  // Data type of the matrix
 template< typename Other   // Data type of the initialization array
         , size_t M         // Number of rows of the initialization array
         , size_t N >       // Number of columns of the initialization array
-inline MatrixMxN<Type>& MatrixMxN<Type>::operator=( const Other (&rhs)[M][N] )
+inline MatrixMxN<Type>& MatrixMxN<Type>::operator=( const std::array<std::array<Other, N>, M>& rhs )
 {
    resize( M, N, false );
 

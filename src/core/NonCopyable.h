@@ -39,10 +39,10 @@ protected:
     NonCopyable()= default; // no object of type 'NonCopyable' can be created!
    ~NonCopyable()= default;
 
-private:
+public:
 
-   NonCopyable( const NonCopyable& );
-   NonCopyable& operator=( const NonCopyable& );
+   NonCopyable( const NonCopyable& ) = delete;
+   NonCopyable& operator=( const NonCopyable& ) = delete;
 
 };
 

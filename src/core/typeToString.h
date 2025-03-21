@@ -27,7 +27,7 @@ namespace walberla {
 template< typename T > inline const char* typeToString();
 
 #define TypeToString(X) template<> inline const char* typeToString< X >() { \
-   static char string[] = #X; \
+   static char string[] = #X; /* NOLINT */ \
    return string; \
 }
 

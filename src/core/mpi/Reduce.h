@@ -56,7 +56,7 @@ namespace mpi
 template< typename T >
 void reduceInplace( T & value, Operation operation, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "reduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "reduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -135,7 +135,7 @@ inline void reduceInplace( bool & value, Operation operation, int recvRank = 0, 
 template< typename T >
 T reduce( const T value, Operation operation, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "reduce(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "reduce(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -217,7 +217,7 @@ inline bool reduce( const bool value, Operation operation, int recvRank = 0, MPI
 template< typename T >
 void reduceInplace( std::vector<T> & values, Operation operation, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "reduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "reduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -296,7 +296,7 @@ inline void reduceInplace( std::vector<bool> & values, Operation operation, int 
 template< typename T >
 void reduceInplace( math::Vector3<T> & values, Operation operation, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "reduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "reduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -374,7 +374,7 @@ inline void reduceInplace( math::Vector3<bool> & values, Operation operation, in
 template< typename T >
 math::Vector3<T> reduce( const math::Vector3<T> & values, Operation operation, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "reduce(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "reduce(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -460,7 +460,7 @@ inline math::Vector3<bool> reduce( const math::Vector3<bool> & values, Operation
 template< typename T >
 T allReduce( const T & value, Operation operation, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "allReduce(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "allReduce(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION() { return value; }
 
@@ -513,7 +513,7 @@ inline bool allReduce( const bool value, Operation operation, MPI_Comm comm = MP
 template< typename T >
 void allReduceInplace( T & value, Operation operation, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "allReduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "allReduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
@@ -561,7 +561,7 @@ inline void allReduceInplace( bool & value, Operation operation, MPI_Comm comm =
 template< typename T >
 void allReduceInplace( std::vector<T> & values, Operation operation, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "allReduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "allReduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
@@ -611,7 +611,7 @@ inline void allReduceInplace( std::vector<bool> & bools, Operation operation, MP
 template< typename T >
 void allReduceInplace( math::Vector3<T> & values, Operation operation, MPI_Comm comm = MPI_COMM_WORLD )
 {
-   static_assert( std::is_arithmetic<T>::value, "allReduceInplace(...) may only by called with integer or floating point types!" );
+   static_assert( std::is_arithmetic_v<T>, "allReduceInplace(...) may only by called with integer or floating point types!" );
 
    WALBERLA_NON_MPI_SECTION() { return; }
 

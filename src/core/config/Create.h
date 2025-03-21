@@ -68,7 +68,7 @@ namespace config {
    */
    //*******************************************************************************************************************
           Iterator begin( int argc, char ** argv);
-   inline Iterator end()                           { return config::Iterator(); }
+   inline Iterator end()                           { return {}; }
 
 
 

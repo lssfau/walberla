@@ -21,6 +21,8 @@
 
 #include "Ellipsoid.h"
 
+#include <algorithm>
+
 
 namespace walberla {
 namespace geometry {
@@ -53,8 +55,8 @@ namespace geometry {
 
       mat_ = rotationMatrix_ *  diagonalMatrix * rotationMatrix_.getTranspose() ;
 
-      minRadius_ = std::min( radii_[0], std::min( radii_[1], radii_[2] ) );
-      maxRadius_ = std::max( radii_[0], std::max( radii_[1], radii_[2] ) );
+      minRadius_ = std::min( {radii_[0], radii_[1], radii_[2] } );
+      maxRadius_ = std::max( {radii_[0], radii_[1], radii_[2] } );
 
       updateBoundingBox( );
    }
@@ -75,10 +77,10 @@ namespace geometry {
       diagonalMatrix(0,0) = radii_[0];
       diagonalMatrix(1,1) = radii_[1];
       diagonalMatrix(2,2) = radii_[2];
-      Matrix3<real_t> M = rotationMatrix_.rotate( diagonalMatrix );
-      real_t xMax = (M * ( M.multTranspose( Vector3<real_t>(1, 0, 0 ) ).getNormalized() ) )[0];
-      real_t yMax = (M * ( M.multTranspose( Vector3<real_t>(0, 1, 0 ) ).getNormalized() ) )[1];
-      real_t zMax = (M * ( M.multTranspose( Vector3<real_t>(0, 0, 1 ) ).getNormalized() ) )[2];
+      Matrix3<real_t> const M = rotationMatrix_.rotate( diagonalMatrix );
+      real_t const xMax = (M * ( M.multTranspose( Vector3<real_t>(1, 0, 0 ) ).getNormalized() ) )[0];
+      real_t const yMax = (M * ( M.multTranspose( Vector3<real_t>(0, 1, 0 ) ).getNormalized() ) )[1];
+      real_t const zMax = (M * ( M.multTranspose( Vector3<real_t>(0, 0, 1 ) ).getNormalized() ) )[2];
       boundingBox_ = AABB::createFromMinMaxCorner( midpoint_[0] - xMax, midpoint_[1] - yMax, midpoint_[2] - zMax,
                                                    midpoint_[0] + xMax, midpoint_[1] + yMax, midpoint_[2] + zMax  );
    }
@@ -101,7 +103,7 @@ namespace geometry {
    template<>
    FastOverlapResult fastOverlapCheck ( const Ellipsoid & ellipsoid, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
    {
-      AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
+      AABB const box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
                                                cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
 
       if ( ! ellipsoid.boundingBox().intersects( box ) )

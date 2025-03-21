@@ -69,14 +69,14 @@ namespace stencil {
          static const bool   containsCenter   = true;
          static const uint_t noCenterFirstIdx = 1;
 
-         static const Direction dir           [15];
-         static const Direction dir_pos       [POS_Q];
-         static const uint_t    idx           [NR_OF_DIRECTIONS];
-         static const Direction d_per_d       [NR_OF_DIRECTIONS][15/2];
-         static const uint_t    d_per_d_length[NR_OF_DIRECTIONS];
+         static const std::array< Direction, 15 > dir;
+         static const std::array< Direction, POS_Q > dir_pos;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > idx;
+         static const std::array< std::array<Direction, 15/2>, NR_OF_DIRECTIONS> d_per_d;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length;
 
-         static const Direction dir_neighbors        [NR_OF_DIRECTIONS][NR_OF_DIRECTIONS];
-         static const uint_t    dir_neighbors_length [NR_OF_DIRECTIONS];
+         static const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > dir_neighbors;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > dir_neighbors_length;
 
          static bool   containsDir(Direction d) { return idx[d] < NR_OF_DIRECTIONS; }
          static uint_t invDirIdx  (Direction d) { return idx[stencil::inverseDir[d]]; }
@@ -111,7 +111,7 @@ namespace stencil {
 
       /// Subset of directions. Defines the stencil
       template<typename Dummy>
-      const Direction D3Q15<Dummy>::dir[15] = { C,N,S,W,E,T,B,TNE,TNW,TSE,TSW,BNE,BNW,BSE,BSW };
+      const std::array< Direction, 15 > D3Q15<Dummy>::dir{ C,N,S,W,E,T,B,TNE,TNW,TSE,TSW,BNE,BNW,BSE,BSW };
 
 
       /**
@@ -121,7 +121,7 @@ namespace stencil {
        * the direction together with its inverse direction.
        */
       template<typename Dummy>
-      const Direction D3Q15<Dummy>::dir_pos[POS_Q] = { N,E,T,TNE,TSE,BNE,BSE };
+      const std::array< Direction, D3Q15<Dummy>::POS_Q > D3Q15<Dummy>::dir_pos{ N,E,T,TNE,TSE,BNE,BSE };
 
 
       /**
@@ -134,7 +134,7 @@ namespace stencil {
        *  So a stencil class is needed to map back from direction to field index
        */
       template<typename Dummy>
-      const uint_t D3Q15<Dummy>::idx[NR_OF_DIRECTIONS] = { 0,1,2,3,4,5,6,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,7,8,9,10,11,12,13,14 };
+      const std::array< uint_t, NR_OF_DIRECTIONS > D3Q15<Dummy>::idx{ 0,1,2,3,4,5,6,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,7,8,9,10,11,12,13,14 };
 
 
       /**
@@ -154,7 +154,7 @@ namespace stencil {
        *
        */
       template<typename Dummy>
-      const Direction D3Q15<Dummy>::d_per_d[NR_OF_DIRECTIONS][15/2] = { {C},
+      const std::array< std::array< Direction, 15/2 >, NR_OF_DIRECTIONS > D3Q15<Dummy>::d_per_d{ { {C},
 								{N,TNE,TNW,BNE,BNW},
 								{S,TSE,TSW,BSE,BSW},
 								{W,TNW,TSW,BNW,BSW},
@@ -180,7 +180,7 @@ namespace stencil {
 								{BNE},
 								{BNW},
 								{BSE},
-								{BSW} };
+								{BSW} } };
 
 
       /**
@@ -188,7 +188,7 @@ namespace stencil {
        * For usage see documentation of d_per_d
        */
       template<typename Dummy>
-      const uint_t D3Q15<Dummy>::d_per_d_length [NR_OF_DIRECTIONS] = { 1,5,5,5,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1 };
+      const std::array< uint_t, NR_OF_DIRECTIONS > D3Q15<Dummy>::d_per_d_length{ 1,5,5,5,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1 };
 
 
       /**
@@ -201,7 +201,7 @@ namespace stencil {
        * By definition, the neighbors of C are identical to the dir[] array without C itself.
        */
       template<typename Dummy>
-      const Direction D3Q15<Dummy>::dir_neighbors[NR_OF_DIRECTIONS][NR_OF_DIRECTIONS] = { {N,S,W,E,T,B,TNE,TNW,TSE,TSW,BNE,BNW,BSE,BSW},
+      const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > D3Q15<Dummy>::dir_neighbors{ { {N,S,W,E,T,B,TNE,TNW,TSE,TSW,BNE,BNW,BSE,BSW},
 								{C,NW,NE,TN,TW,TE,BN,BW,BE},
 								{C,SW,SE,TS,TW,TE,BS,BW,BE},
 								{C,NW,SW,TN,TS,TW,BN,BS,BW},
@@ -227,7 +227,7 @@ namespace stencil {
 								{C,NE,BN,BE},
 								{C,NW,BN,BW},
 								{C,SE,BS,BE},
-								{C,SW,BS,BW} };
+								{C,SW,BS,BW} } };
 
 
       /**
@@ -235,7 +235,7 @@ namespace stencil {
        * For usage see documentation of dir_neighbors
        */
       template<typename Dummy>
-      const uint_t D3Q15<Dummy>::dir_neighbors_length[NR_OF_DIRECTIONS] = { 14,9,9,9,9,9,9,6,6,6,6,6,6,6,6,6,6,6,6,4,4,4,4,4,4,4,4 };
+      const std::array<uint_t, NR_OF_DIRECTIONS> D3Q15<Dummy>::dir_neighbors_length{ 14,9,9,9,9,9,9,6,6,6,6,6,6,6,6,6,6,6,6,4,4,4,4,4,4,4,4 };
 
    } // namespace internal
 

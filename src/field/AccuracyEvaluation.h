@@ -161,7 +161,7 @@ public:
       L1_( real_t(0) ), L2_( real_t(0) ), Lmax_( real_t(0) ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
-      static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+      static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
                      "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
    }
 
@@ -257,8 +257,8 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
          )
       }
 
-      for( auto v = lmax.begin(); v != lmax.end(); ++v )
-         _Lmax = std::max( _Lmax, *v );
+      for(const real_t v : lmax)
+         _Lmax = std::max( _Lmax, v );
 
 #else
 
@@ -376,7 +376,7 @@ inline void accuracyEvaluationConfigParser( const Config::BlockHandle & parentBl
 {
    if( parentBlockHandle )
    {
-      Config::BlockHandle block = parentBlockHandle.getBlock( configBlockName );
+      Config::BlockHandle const block = parentBlockHandle.getBlock( configBlockName );
       if( block )
       {
          defaultPlotFrequency = block.getParameter< uint_t >( "plotFrequency", defaultPlotFrequency );

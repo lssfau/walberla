@@ -33,14 +33,14 @@ using namespace walberla;
 int main( int argc, char ** argv )
 {
    debug::enterTestMode();
-   walberla::Environment walberlaEnv( argc, argv );
+   walberla::Environment const walberlaEnv( argc, argv );
 
 
    using geometry::RGBAImage;
 
    RGBAImage::pixel_t pixelValue;
 
-   std::string colorStr ("ff1100");
+   std::string const colorStr ("ff1100");
    std::stringstream ss( colorStr );
    ss >> pixelValue;
 

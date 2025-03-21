@@ -39,7 +39,7 @@
 
 namespace walberla {
 
-typedef GhostLayerField<real_t,1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 
 template<bool init_>
 class SumSweep
@@ -88,7 +88,7 @@ class CompareSweep
          WALBERLA_ASSERT_NOT_NULLPTR( bf )
 
          const AABB & bb = block->getAABB();
-         const cell_idx_t offset [3] = { cell_idx_c(bb.min(uint_t(0u))),
+         const std::array< cell_idx_t, 3 > offset = { cell_idx_c(bb.min(uint_t(0u))),
                                          cell_idx_c(bb.min(uint_t(1u))),
                                          cell_idx_c(bb.min(uint_t(2u))) };
 
@@ -113,8 +113,8 @@ int main(int argc, char **argv)
    debug::enterTestMode();
    mpi::Environment env( argc, argv );
 
-   const uint_t cells [] = { uint_t(5u), uint_t(2u), uint_t(7u) };
-   const uint_t blockCount [] = { uint_t(1u), uint_t(1u), uint_c( MPIManager::instance()->numProcesses() ) };
+   const std::array< uint_t, 3 > cells = { uint_t(5u), uint_t(2u), uint_t(7u) };
+   const std::array< uint_t, 3 > blockCount = { uint_t(1u), uint_t(1u), uint_c( MPIManager::instance()->numProcesses() ) };
    const uint_t nrOfTimeSteps = uint_t(3u);
    bool periodic = false;
    const field::Layout layout = field::fzyx;

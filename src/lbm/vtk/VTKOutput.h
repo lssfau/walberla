@@ -206,9 +206,9 @@ void VTKOutput<LatticeModel, FlagFieldT>::addToTimeloop( Timeloop & timeloop, co
    std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, vtkOutput, blocks, config, configBlockName );
 
-   for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK (LBM): ") + output->first,
-                                      output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+   for(auto & vtkOutputFunction : vtkOutputFunctions)
+      timeloop.addFuncBeforeTimeStep( vtkOutputFunction.second.outputFunction, std::string("VTK (LBM): ") + vtkOutputFunction.first,
+                                      vtkOutputFunction.second.requiredGlobalStates, vtkOutputFunction.second.incompatibleGlobalStates );
 }
 
 

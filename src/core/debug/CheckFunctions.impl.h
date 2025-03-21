@@ -61,7 +61,7 @@ inline bool check_not_nullptr( const shared_ptr<T> & p )
 template< typename T, typename U >
 inline bool check_equal( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_equal( lhs, rhs, truth_type() );
 }
 
@@ -81,7 +81,7 @@ inline bool check_equal( const T & lhs, const U & rhs, const std::false_type & )
 template< typename T, typename U >
 inline bool check_unequal( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_unequal( lhs, rhs, truth_type() );
 }
 
@@ -101,8 +101,8 @@ inline bool check_unequal( const T & lhs, const U & rhs, const std::false_type &
 template< typename T, typename U >
 inline bool check_float_equal( const T & lhs, const U & rhs )
 {
-   static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
-   static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+   static_assert( std::is_floating_point_v<T>,  "First operand type T is not a floating point type!");
+   static_assert( std::is_floating_point_v<U>, "Second operand type U is not a floating point type!");
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
@@ -115,8 +115,8 @@ inline bool check_float_equal( const T & lhs, const U & rhs )
 template< typename T, typename U >
 inline bool check_float_unequal( const T & lhs, const U & rhs )
 {
-   static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
-   static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+   static_assert( std::is_floating_point_v<T>,  "First operand type T is not a floating point type!");
+   static_assert( std::is_floating_point_v<U>, "Second operand type U is not a floating point type!");
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
@@ -130,8 +130,8 @@ template< typename T, typename U >
 inline bool check_float_equal_eps( const T & lhs, const U & rhs,
                                    const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
 {
-   static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
-   static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+   static_assert( std::is_floating_point_v<T>,  "First operand type T is not a floating point type!");
+   static_assert( std::is_floating_point_v<U>, "Second operand type U is not a floating point type!");
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
@@ -145,8 +145,8 @@ template< typename T, typename U >
 inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
                                      const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
 {
-   static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
-   static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+   static_assert( std::is_floating_point_v<T>,  "First operand type T is not a floating point type!");
+   static_assert( std::is_floating_point_v<U>, "Second operand type U is not a floating point type!");
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
@@ -159,7 +159,7 @@ inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
 template< typename T, typename U >
 inline bool check_identical( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_identical( lhs, rhs, truth_type() );
 }
 
@@ -179,7 +179,7 @@ inline bool check_identical( const T & lhs, const U & rhs, const std::false_type
 template< typename T, typename U >
 inline bool check_not_identical( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_not_identical( lhs, rhs, truth_type() );
 }
 
@@ -199,7 +199,7 @@ inline bool check_not_identical( const T & lhs, const U & rhs, const std::false_
 template< typename T, typename U >
 inline bool check_less( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_less( lhs, rhs, truth_type() );
 }
 
@@ -219,7 +219,7 @@ inline bool check_less( const T & lhs, const U & rhs, const std::false_type & )
 template< typename T, typename U >
 inline bool check_greater( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_greater( lhs, rhs, truth_type() );
 }
 
@@ -239,7 +239,7 @@ inline bool check_greater( const T & lhs, const U & rhs, const std::false_type &
 template< typename T, typename U >
 inline bool check_less_equal( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_less_equal( lhs, rhs, truth_type() );
 }
 
@@ -259,7 +259,7 @@ inline bool check_less_equal( const T & lhs, const U & rhs, const std::false_typ
 template< typename T, typename U >
 inline bool check_greater_equal( const T & lhs, const U & rhs )
 {
-   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic_v<T> && std::is_arithmetic_v<U>>;
    return check_greater_equal( lhs, rhs, truth_type() );
 }
 

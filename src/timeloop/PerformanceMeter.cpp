@@ -39,7 +39,7 @@ namespace timeloop {
     * \param blockStorage block storage is needed to retrieve the FlagField for cell counting
     *******************************************************************************************************************/
    PerformanceMeter::PerformanceMeter( StructuredBlockStorage & blockStorage)
-      : blockStorage_ ( blockStorage ), firstTimingStartStopCall_( true )
+      : blockStorage_ ( blockStorage )
    {
    }
 
@@ -53,7 +53,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    std::function<void () > PerformanceMeter::getBeforeFunction()
    {
-      return std::bind ( &PerformanceMeter::timingStart, this );
+      return [this] { timingStart(); };
    }
 
 
@@ -66,7 +66,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    std::function<void () > PerformanceMeter::getAfterFunction()
    {
-      return std::bind ( &PerformanceMeter::timingEnd, this );
+      return [this] { timingEnd(); };
    }
 
 
@@ -266,19 +266,19 @@ namespace timeloop {
 
       uint_t ts = timer_.getCounter();
 
-      for( auto measureIt = measurements_.begin(); measureIt != measurements_.end(); ++measureIt )
+      for(auto & measurement : measurements_)
       {
-         if( measureIt->countingFreq > 0 &&  ts % measureIt->countingFreq == 0 )
+         if( measurement.countingFreq > 0 &&  ts % measurement.countingFreq == 0 )
          {
             uint_t cells = 0;
             for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )
-               cells += measureIt->countFunction( *block );
+               cells += measurement.countFunction( *block );
 
             real_t cellsLastTimeStep = real_c ( cells );
 
-            measureIt->counts += 1;
-            real_t rCounts = real_c( measureIt->counts );
-            measureIt->avgCellsPerTimeStep = (rCounts - real_t(1.0) ) / rCounts * measureIt->avgCellsPerTimeStep +
+            measurement.counts += 1;
+            real_t rCounts = real_c( measurement.counts );
+            measurement.avgCellsPerTimeStep = (rCounts - real_t(1.0) ) / rCounts * measurement.avgCellsPerTimeStep +
                                                         real_t(1.0)   / rCounts * cellsLastTimeStep;
          }
       }
@@ -298,8 +298,8 @@ namespace timeloop {
          return;
 
       reduced.clear();
-      for( auto cellType = measurements_.begin(); cellType != measurements_.end(); ++cellType )
-         reduced.push_back ( cellType->avgCellsPerTimeStep );
+      for(auto & measurement : measurements_)
+         reduced.push_back ( measurement.avgCellsPerTimeStep );
 
       WALBERLA_NON_MPI_SECTION() {
          return;

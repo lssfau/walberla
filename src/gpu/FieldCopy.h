@@ -52,7 +52,7 @@ namespace gpu
    std::function<void()> fieldCpyFunctor( const shared_ptr< StructuredBlockStorage > & blocks,
                                             BlockDataID dstID, ConstBlockDataID srcID )
    {
-      return std::bind( fieldCpy<DstType,SrcType>, blocks, dstID, srcID );
+      return [blocks, dstID, srcID] { fieldCpy<DstType,SrcType>(blocks, dstID, srcID); };
    }
 
 
@@ -105,7 +105,7 @@ namespace gpu
 
          if (dst.layout() != src.layout()) { WALBERLA_ABORT("Cannot copy fields with different layout") }
 
-         bool canCopy =
+         bool const canCopy =
             (src.layout() == fzyx && dst.fAllocSize() == src.fAllocSize() && dst.zAllocSize() == src.zAllocSize() &&
              dst.yAllocSize() == src.yAllocSize() && dst.xSize() == src.xSize()) ||
             (src.layout() == zyxf && dst.zAllocSize() == src.zAllocSize() && dst.yAllocSize() == src.yAllocSize() &&
@@ -154,7 +154,7 @@ namespace gpu
 
          if (dst.layout() != src.layout()) { WALBERLA_ABORT("Cannot copy fields with different layout") }
 
-         bool canCopy =
+         bool const canCopy =
             (src.layout() == fzyx && dst.fAllocSize() == src.fAllocSize() && dst.zAllocSize() == src.zAllocSize() &&
              dst.yAllocSize() == src.yAllocSize() && dst.xSize() == src.xSize()) ||
             (src.layout() == zyxf && dst.zAllocSize() == src.zAllocSize() && dst.yAllocSize() == src.yAllocSize() &&

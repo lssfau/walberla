@@ -36,8 +36,8 @@ class Jacobi : public StencilFieldSweepBase< Stencil_T >
 {
 public:
 
-   typedef typename StencilFieldSweepBase< Stencil_T >::Field_T         Field_T;
-   typedef typename StencilFieldSweepBase< Stencil_T >::StencilField_T  StencilField_T;
+   using Field_T = typename StencilFieldSweepBase<Stencil_T>::Field_T;
+   using StencilField_T = typename StencilFieldSweepBase<Stencil_T>::StencilField_T;
 
    // block has NO dst u field
    Jacobi( const BlockDataID & uFieldId, const BlockDataID & fFieldId, const BlockDataID & stencilFieldId ) :

@@ -191,7 +191,7 @@ CellInterval::const_iterator CellInterval::begin() const
    if( empty() )
       return end();
    else
-      return CellIntervalIterator(*this, min());
+      return { *this, min() };
 }
 
 CellInterval::const_iterator CellInterval::end()   const { return ++CellIntervalIterator(*this, max()); }

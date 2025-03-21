@@ -49,7 +49,7 @@ namespace walberla {
 
 
 
-typedef GhostLayerField< real_t, 1 > PdeField_T;
+using PdeField_T = GhostLayerField<real_t, 1>;
 using Stencil_T = stencil::D3Q7;
 using StencilField_T = pde::VCycles<Stencil_T>::StencilField_T;
 
@@ -63,12 +63,12 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
    {
       PdeField_T * u = block->getData< PdeField_T >( uId );
       CellInterval xyz = u->xyzSizeWithGhostLayer();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2] ) );
-         u->get( *cell ) = math::realRandom( real_t(-10), real_t(10) );
-         sum += u->get( *cell );
+         u->get( cell ) = math::realRandom( real_t(-10), real_t(10) );
+         sum += u->get( cell );
       }
    }
    WALBERLA_UNUSED(sum);
@@ -130,9 +130,9 @@ void checkProlongateRestrict( const shared_ptr< StructuredBlockStorage > & block
       f2c( &*block );
       
       CellInterval xyz = coarse->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         WALBERLA_CHECK_FLOAT_EQUAL(coarse->get(*cell), orig->get(*cell), "Restrict-after-Prolongate should be an identity operation");
+         WALBERLA_CHECK_FLOAT_EQUAL(coarse->get(cell), orig->get(cell), "Restrict-after-Prolongate should be an identity operation");
       }
    }
 

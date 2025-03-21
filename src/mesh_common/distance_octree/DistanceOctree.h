@@ -48,11 +48,11 @@ template <typename MeshType>
 class DistanceOctree
 {
 public:
-   typedef typename MeshType::Point                    Point;
-   typedef typename MeshType::Normal                   Normal;
-   typedef typename MeshType::Scalar                   Scalar;  
-   typedef typename MeshType::FaceHandle               FaceHandle; 
-   typedef typename math::GenericAABB<Scalar> AABB;
+   using Point = typename MeshType::Point;
+   using Normal = typename MeshType::Normal;
+   using Scalar = typename MeshType::Scalar;  
+   using FaceHandle = typename MeshType::FaceHandle; 
+   using AABB = typename math::GenericAABB<Scalar>;
 
    DistanceOctree( const shared_ptr< TriangleDistance<MeshType> > & triDist, uint_t maxDepth = 20u, uint_t minNumTriangles = 25u )
    {
@@ -304,7 +304,7 @@ void DistanceOctree<MeshType>::writeVTKOutput( const std::string & filestem ) co
    while( !nodeQueue.empty() )
    {
       const Node<MeshType> * frontNode = nodeQueue.front();
-      uint8_t depth = depthQueue.front();
+      uint8_t const depth = depthQueue.front();
       nodeQueue.pop();
       depthQueue.pop();
 

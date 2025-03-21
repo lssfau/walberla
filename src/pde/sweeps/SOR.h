@@ -39,14 +39,14 @@ class SOR : public StencilFieldSweepBase< Stencil_T >
 {
 public:
 
-   typedef typename StencilFieldSweepBase< Stencil_T >::Field_T         Field_T;
-   typedef typename StencilFieldSweepBase< Stencil_T >::StencilField_T  StencilField_T;
+   using Field_T = typename StencilFieldSweepBase<Stencil_T>::Field_T;
+   using StencilField_T = typename StencilFieldSweepBase<Stencil_T>::StencilField_T;
 
    SOR( const shared_ptr< domain_decomposition::StructuredBlockStorage > & blocks,
                     const BlockDataID & uFieldId, const BlockDataID & fFieldId, const BlockDataID & stencilFieldId, const real_t omega ) :
       StencilFieldSweepBase< Stencil_T >( uFieldId, fFieldId, stencilFieldId ), blocks_( blocks ), omega_( omega ) {}
 
-   void operator()( IBlock * const block ) const { WALBERLA_ABORT( "You are not allowed to use class 'SOR' as a standard sweep!\n"
+   void operator()( IBlock * const /*block*/ ) const { WALBERLA_ABORT( "You are not allowed to use class 'SOR' as a standard sweep!\n"
                                                                    "Use the member functions 'getRedSweep' and 'getBlackSweep' instead." ); }
 
    void update( IBlock * const block, const bool rb );

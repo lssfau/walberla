@@ -38,8 +38,8 @@ namespace vtk {
 //**********************************************************************************************************************
 void Base64Writer::toStream( std::ostream& os )
 {
-   unsigned char input[3];
-   unsigned char output[4];
+   std::array< unsigned char, 3 > input;
+   std::array< unsigned char, 4 > output;
 
    const uint32_t bytes = uint32_c( buffer_.size() );
 

@@ -84,7 +84,7 @@ void ConvexPolyhedron::init( const Vec3& gpos,  const Quat& q,
    real_t maxSqRadius(0);
    for(auto vh : mesh_.vertices())
    {
-      real_t sqRadius = mesh_.point( vh ).sqrnorm();
+      real_t const sqRadius = mesh_.point( vh ).sqrnorm();
       if( sqRadius > maxSqRadius )
          maxSqRadius = sqRadius;
    }
@@ -219,7 +219,7 @@ Vec3 ConvexPolyhedron::support( const Vec3& d ) const
       }
    }
 
-   TriangleMesh::VertexHandle vh = supportVertex( d_loc, startVertex );
+   TriangleMesh::VertexHandle const vh = supportVertex( d_loc, startVertex );
 
    return pointFromBFtoWF( toWalberla( mesh_.point( vh ) ) );
 

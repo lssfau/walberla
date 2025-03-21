@@ -1,1 +1,1 @@
-waLBerla_link_files_to_builddir( filterCompileCommands.py )
+waLBerla_link_files_to_builddir( clang-tidy )

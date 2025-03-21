@@ -44,10 +44,10 @@ namespace field {
       CellInterval size = field.xyzSize();
 
       Cell coord = size.min();
-      const char * coordNames [3] = { "x", "y", "z" };
+      std::array<const char *, 3> coordNames = { "x", "y", "z" };
 
-      int innerCoord = (sliceCoord + 1) % 3;
-      int outerCoord = (sliceCoord + 2) % 3;
+      uint_t const innerCoord = static_cast< uint_t >((sliceCoord + 1) % 3);
+      uint_t const outerCoord = static_cast< uint_t >((sliceCoord + 2) % 3);
 
       size.min()[uint_c(sliceCoord)] = sliceValue;
       size.max()[uint_c(sliceCoord)] = sliceValue;
@@ -99,10 +99,10 @@ namespace field {
       WALBERLA_ASSERT(sliceCoord >=0 && sliceCoord <3 );
       cell_idx_t glCellIdx = cell_idx_c ( field.nrOfGhostLayers() );
 
-      const char * coordNames [3] = { "x", "y", "z" };
+      std::array<const char *, 3> coordNames = { "x", "y", "z" };
 
-      int innerCoord = (sliceCoord + 1) % 3;
-      int outerCoord = (sliceCoord + 2) % 3;
+      uint_t const innerCoord = static_cast< uint_t >((sliceCoord + 1) % 3);
+      uint_t const outerCoord = static_cast< uint_t >((sliceCoord + 2) % 3);
 
       CellInterval sliceInterval = field.xyzSize();
 
@@ -171,10 +171,10 @@ namespace field {
       WALBERLA_ASSERT(sliceCoord >=0 && sliceCoord <3 );
       cell_idx_t glCellIdx = cell_idx_c ( field.nrOfGhostLayers() );
 
-      const char * coordNames [3] = { "x", "y", "z" };
+      std::array<const char *, 3> coordNames = { "x", "y", "z" };
 
-      int innerCoord = (sliceCoord + 1) % 3;
-      int outerCoord = (sliceCoord + 2) % 3;
+      uint_t const innerCoord = static_cast< uint_t >((sliceCoord + 1) % 3);
+      uint_t const outerCoord = static_cast< uint_t >((sliceCoord + 2) % 3);
 
       CellInterval sliceInterval = field.xyzSize();
 
@@ -190,9 +190,9 @@ namespace field {
       std::vector<field::FlagUID> allFlags;
       sliced->getAllRegisteredFlags( allFlags );
       os << endl << "Registered Flags: " << endl;
-      for(auto i = allFlags.begin(); i != allFlags.end(); ++i )
+      for(const auto & allFlag : allFlags)
       {
-         os << "\t" << i->getIdentifier()[0] << " = " << *i << endl;
+         os << "\t" << allFlag.getIdentifier()[0] << " = " << allFlag << endl;
       }
       os << endl;
 
@@ -231,9 +231,9 @@ namespace field {
                os << std::setw(3) << "|";
 
             std::string out;
-            for( auto curFlag = allFlags.begin(); curFlag != allFlags.end(); ++curFlag )
-               if ( sliced->isFlagSet(coord[0],coord[1],coord[2], sliced->getFlag(*curFlag) ) )
-                  out.append( 1, curFlag->getIdentifier()[0] );
+            for(const auto & allFlag : allFlags)
+               if ( sliced->isFlagSet(coord[0],coord[1],coord[2], sliced->getFlag(allFlag) ) )
+                  out.append( 1, allFlag.getIdentifier()[0] );
 
             os << std::setw(10) << out;
          }

@@ -49,7 +49,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
    if( pointCloud.size() < size_t(4) )
       WALBERLA_ABORT( "Polyhedron needs at least 4 points!" );
    
-   shared_ptr< TriangleMesh > mesh = make_shared<TriangleMesh>();
+   shared_ptr< TriangleMesh > const mesh = make_shared<TriangleMesh>();
    mesh::QHull<TriangleMesh> qhull( pointCloud, mesh );
    qhull.run();
 
@@ -67,7 +67,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
 
    ConvexPolyhedronID poly = nullptr;
 
-   Vec3 centroid = toWalberla( computeCentroid( mesh ) );
+   Vec3 const centroid = toWalberla( computeCentroid( mesh ) );
    translate( mesh, -centroid );
 
    gpos += centroid;

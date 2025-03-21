@@ -30,7 +30,7 @@ int main()
    using walberla::geometry::CellAABB;
 
    {
-      CellAABB ca;
+      CellAABB const ca;
 
       WALBERLA_CHECK_EQUAL( ca.xBegin, 0 );
       WALBERLA_CHECK_EQUAL( ca.yBegin, 0 );
@@ -46,7 +46,7 @@ int main()
       WALBERLA_CHECK_EQUAL( ca.numCells(), 1 );
    }
    {
-      CellAABB ca(1, 2, 3, 4, 5, 6);
+      CellAABB const ca(1, 2, 3, 4, 5, 6);
 
       WALBERLA_CHECK_EQUAL( ca.xBegin, 1 );
       WALBERLA_CHECK_EQUAL( ca.yBegin, 2 );
@@ -62,19 +62,19 @@ int main()
       WALBERLA_CHECK_EQUAL( ca.numCells(), 4*4*4 );
    }
    {
-      CellAABB ca(0, 0, 0, 0, 0, 0);
+      CellAABB const ca(0, 0, 0, 0, 0, 0);
       WALBERLA_CHECK_EQUAL( ca.numCells(), 1 );
    }
    {
-      CellAABB ca(0, 0, 0, 1, 1, 1);
+      CellAABB const ca(0, 0, 0, 1, 1, 1);
       WALBERLA_CHECK_EQUAL( ca.numCells(), 8 );
    }
    {
-      CellAABB ca(0, 0, 0, 9, 9, 9);
+      CellAABB const ca(0, 0, 0, 9, 9, 9);
       WALBERLA_CHECK_EQUAL( ca.numCells(), 1000 );
    }
    {
-      CellAABB ca(1, 1, 1, 10, 10, 10);
+      CellAABB const ca(1, 1, 1, 10, 10, 10);
       WALBERLA_CHECK_EQUAL( ca.numCells(), 1000 );
    }
 }

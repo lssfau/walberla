@@ -225,16 +225,16 @@ void DirectionBasedReduceScheme<dir_>::copyIntoMPIBuffers()
    {
       for( size_t nb = 0u; nb < localCopy_[b].size(); ++nb )
       {
-         for(size_t s = 0u; s < packInfos_.size(); ++s)
+         for(auto & packInfo : packInfos_)
          {
-            packInfos_[s]->communicateLocal( localBlocks_[b], localCopy_[b][nb], dir_ );
+            packInfo->communicateLocal( localBlocks_[b], localCopy_[b][nb], dir_ );
          }
       }
 
       for( size_t nb = 0u; nb < remoteSend_[b].size(); ++nb )
       {
          bool headerWritten = false;
-         for(size_t s = 0u; s < packInfos_.size(); ++s)
+         for(auto & packInfo : packInfos_)
          {
             //Packing of MPI Buffer
             uint_t rank,nx,ny,nz;
@@ -249,7 +249,7 @@ void DirectionBasedReduceScheme<dir_>::copyIntoMPIBuffers()
             }
 
             // Call Packer
-            packInfos_[s]->packData( localBlocks_[b], dir_, buffer );
+            packInfo->packData( localBlocks_[b], dir_, buffer );
          }
       }
    }
@@ -260,8 +260,8 @@ void DirectionBasedReduceScheme<dir_>::copyIntoMPIBuffers()
 template< stencil::Direction dir_ >
 void DirectionBasedReduceScheme<dir_>::copyFromMPIBuffers()
 {
-   for(size_t s = 0u; s < packInfos_.size(); ++s){
-      packInfos_[s]->reset();
+   for(auto & packInfo : packInfos_){
+      packInfo->reset();
    }
 
    //  --------  Loop over all incoming messages  -------------------------------------
@@ -277,10 +277,10 @@ void DirectionBasedReduceScheme<dir_>::copyFromMPIBuffers()
          // Get receiving block
          Block * rBlock = blockForest_->getBlockForest().getBlock(rBlockID);
 
-         for(size_t s = 0u; s < packInfos_.size(); ++s)
+         for(auto & packInfo : packInfos_)
          {
             // Call Unpacker
-            packInfos_[s]->unpackData( rBlock, stencil::inverseDir[dir_], buffer );
+            packInfo->unpackData( rBlock, stencil::inverseDir[dir_], buffer );
          }
       }
    }

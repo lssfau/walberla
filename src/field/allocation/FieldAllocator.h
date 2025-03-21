@@ -52,10 +52,10 @@ namespace field {
    */
    //*******************************************************************************************************************
    template<typename T>
-   class FieldAllocator : FieldAllocatorBase<typename std::conditional<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>::type>
+   class FieldAllocator : FieldAllocatorBase<std::conditional_t<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>>
    {
       public:
-         using BaseType = typename std::conditional<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>::type;
+         using BaseType = std::conditional_t<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>;
 
          virtual ~FieldAllocator() = default;
 

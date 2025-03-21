@@ -40,7 +40,7 @@ class ConditionalResidualNorm
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    ConditionalResidualNorm( const BlockStorage & blocks, const ConstBlockDataID & uId, const ConstBlockDataID & fId,
                             const ConstBlockDataID & flagFieldId, const Set< FlagUID > & domainMask,
@@ -69,7 +69,7 @@ protected:
    ConstBlockDataID flagFieldId_;
    Set< FlagUID > domainMask_;
 
-   real_t weights_[ Stencil_T::Size ];
+   std::array<real_t, Stencil_T::Size> weights_;
 
    Set<SUID> requiredSelectors_;
    Set<SUID> incompatibleSelectors_;

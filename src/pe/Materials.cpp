@@ -71,36 +71,51 @@ bool Material::activateMaterials()
    materials_.push_back( Fir()     );
 
    // Initializing the coefficients of restitution
-   //                       | Iron                   | Copper                 | Granite                | Oak                    | Fir                     |
-   const real_t cor[5][5] = {
-                            { static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25) },  // Iron
-                            { static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25) },  // Copper
-                            { static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25) },  // Granite
-                            { static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25) },  // Oak
-                            { static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25), static_cast<real_t>(0.25) }   // Fir
-                          };
+   //                                                    | Iron                   | Copper                 | Granite                | Oak                    | Fir                     |
+   const std::array< std::array< real_t, 5 >, 5 > cor = { {
+      { { static_cast< real_t >(0.25), static_cast< real_t >(0.25), static_cast< real_t >(0.25),
+          static_cast< real_t >(0.25), static_cast< real_t >(0.25) } }, // Iron
+      { { static_cast< real_t >(0.25), static_cast< real_t >(0.25), static_cast< real_t >(0.25),
+          static_cast< real_t >(0.25), static_cast< real_t >(0.25) } }, // Copper
+      { { static_cast< real_t >(0.25), static_cast< real_t >(0.25), static_cast< real_t >(0.25),
+          static_cast< real_t >(0.25), static_cast< real_t >(0.25) } }, // Granite
+      { { static_cast< real_t >(0.25), static_cast< real_t >(0.25), static_cast< real_t >(0.25),
+          static_cast< real_t >(0.25), static_cast< real_t >(0.25) } }, // Oak
+      { { static_cast< real_t >(0.25), static_cast< real_t >(0.25), static_cast< real_t >(0.25),
+          static_cast< real_t >(0.25), static_cast< real_t >(0.25) } } // Fir
+   } };
    corTable_ = cor;
 
    // Initializing the coefficients of static friction
    //                       | Iron                   | Copper                 | Granite                | Oak                    | Fir                     |
-   const real_t csf[5][5] = {
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Iron
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Copper
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Granite
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Oak
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) }   // Fir
-                          };
+   const std::array< std::array< real_t, 5 >, 5 > csf = { {
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Iron
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Copper
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Granite
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Oak
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } } // Fir
+   } };
    csfTable_ = csf;
 
    // Initializing the coefficients of dynamic friction
    //                       | Iron                   | Copper                 | Granite                | Oak                    | Fir                     |
-   const real_t cdf[5][5] = {
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Iron
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Copper
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Granite
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) },  // Oak
-                            { static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20), static_cast<real_t>(0.20) }   // Fir
-                          };
+   const std::array< std::array< real_t, 5 >, 5 > cdf = { {
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Iron
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Copper
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Granite
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } }, // Oak
+      { { static_cast< real_t >(0.20), static_cast< real_t >(0.20), static_cast< real_t >(0.20),
+          static_cast< real_t >(0.20), static_cast< real_t >(0.20) } } // Fir
+   } };
    cdfTable_ = cdf;
 
    return true;

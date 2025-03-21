@@ -73,10 +73,10 @@ protected:
    FunctionParser( const FunctionParser & other );
    FunctionParser & operator=( const FunctionParser & other );
 
-   exprtk::expression<double>   * expression_;
-   exprtk::symbol_table<double> * symbolTable_;
-   bool isConstant_;
-   bool isZero_;
+   exprtk::expression<double>   * expression_{ nullptr };
+   exprtk::symbol_table<double> * symbolTable_{ nullptr };
+   bool isConstant_{false};
+   bool isZero_{false};
 };
 
 #else // WALBERLA_DEACTIVATE_MATH_PARSER

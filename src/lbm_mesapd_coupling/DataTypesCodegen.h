@@ -40,7 +40,7 @@ namespace psm
 namespace gpu
 {
 
-const uint MaxParticlesPerCell = MAX_PARTICLES_PER_CELL; // MAX_PARTICLES_PER_CELL comes from CMake
+const uint_t MaxParticlesPerCell = MAX_PARTICLES_PER_CELL; // MAX_PARTICLES_PER_CELL comes from CMake
 
 // nOverlappingParticlesField is used to store the amount of overlapping particles per cell
 // B denotes the local weighting factor and is calculated by taking the sum of all local particle
@@ -96,9 +96,9 @@ struct ParticleAndVolumeFractionSoA_T
                                                                         field::fzyx, uint_t(1), true);
       BFieldID = walberla::gpu::addGPUFieldToStorage< BFieldGPU_T >(bs, "B field GPU", 1, field::fzyx, uint_t(1), true);
       particleVelocitiesFieldID = walberla::gpu::addGPUFieldToStorage< particleVelocitiesFieldGPU_T >(
-         bs, "particle velocities field GPU", uint_t(MaxParticlesPerCell * 3), field::fzyx, uint_t(1), true);
+         bs, "particle velocities field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
       particleForcesFieldID = walberla::gpu::addGPUFieldToStorage< particleForcesFieldGPU_T >(
-         bs, "particle forces field GPU", uint_t(MaxParticlesPerCell * 3), field::fzyx, uint_t(1), true);
+         bs, "particle forces field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
 #else
       nOverlappingParticlesFieldID = field::addToStorage< nOverlappingParticlesField_T >(
          bs, "number of overlapping particles field CPU", uint_t(0), field::fzyx, uint_t(1), true);

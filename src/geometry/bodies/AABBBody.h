@@ -32,7 +32,7 @@ namespace geometry {
 template<>
 inline real_t overlapFraction ( const AABB & body, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx, uint_t )
 {
-   AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
+   AABB const box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
                                             cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
 
    return body.intersectionVolume( box ) / ( dx[0] * dx[1] * dx[2] );

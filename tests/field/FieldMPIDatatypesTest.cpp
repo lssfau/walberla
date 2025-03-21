@@ -104,7 +104,7 @@ void testOctantCopy( const SourceField & src, TargetField & dst )
    cell_idx_t yMid = fullInterval.yMin() + cell_idx_t( fullInterval.ySize() ) / cell_idx_t( 2 );
    cell_idx_t zMid = fullInterval.zMin() + cell_idx_t( fullInterval.ySize() ) / cell_idx_t( 2 );
 
-   CellInterval octants[] = {
+   std::array<CellInterval, 8> octants = {
       CellInterval( fullInterval.xMin(),  fullInterval.yMin(),  fullInterval.zMin(),  xMid,                 yMid,                 zMid                ),
       CellInterval( fullInterval.xMin(),  fullInterval.yMin(),  zMid + cell_idx_t(1), xMid,                 yMid,                 fullInterval.zMax() ),
       CellInterval( fullInterval.xMin(),  yMid + cell_idx_t(1), fullInterval.zMin(),  xMid,                 fullInterval.yMax(),  zMid                ),
@@ -117,10 +117,10 @@ void testOctantCopy( const SourceField & src, TargetField & dst )
 
    WALBERLA_CHECK( src != dst );
 
-   for( auto it = octants; it != octants + 8; ++it )
+   for( const auto& it : octants )
    {
-      MPI_Datatype srcType = mpiDatatypeSliceXYZ( src, *it, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
-      MPI_Datatype dstType = mpiDatatypeSliceXYZ( dst, *it, cell_idx_t( 0 ), cell_idx_c( dst.fSize() ) - cell_idx_t( 1 ) );
+      MPI_Datatype srcType = mpiDatatypeSliceXYZ( src, it, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
+      MPI_Datatype dstType = mpiDatatypeSliceXYZ( dst, it, cell_idx_t( 0 ), cell_idx_c( dst.fSize() ) - cell_idx_t( 1 ) );
 
       MPI_Type_commit( &srcType );
       MPI_Type_commit( &dstType );
@@ -226,17 +226,17 @@ void testIntervalCopy( const SourceField & src, TargetField & dst, const CellInt
    MPI_Type_free( &dstType );
 
    CellInterval fieldInterval = src.xyzSize();
-   for( auto it = fieldInterval.begin(); it != fieldInterval.end(); ++it )
+   for(const auto& ival : fieldInterval)
    {
-      if( interval.contains( *it ) )
+      if( interval.contains( ival ) )
       {
          for( cell_idx_t f = fBeg; f <= fEnd; ++f )
-            WALBERLA_CHECK_IDENTICAL( src.get( *it, f ), dst.get( *it, f ) );
+            WALBERLA_CHECK_IDENTICAL( src.get( ival, f ), dst.get( ival, f ) );
       }
       else
       {
          for( cell_idx_t f = fBeg; f <= fEnd; ++f )
-            WALBERLA_CHECK_IDENTICAL( dst.get( *it, f ), numeric_cast< typename SourceField::value_type >( 0 ) );
+            WALBERLA_CHECK_IDENTICAL( dst.get( ival, f ), numeric_cast< typename SourceField::value_type >( 0 ) );
       }
    }
 }
@@ -523,7 +523,7 @@ void runTests( const Vector3<uint_t> & size )
    runTests< double >( size );
 }
 
-int main( int argc, char* argv[] )
+int main( int argc, char** argv )
 {
    debug::enterTestMode();
 

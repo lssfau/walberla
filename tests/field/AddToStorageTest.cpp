@@ -40,8 +40,8 @@ int main( int argc, char ** argv )
                                                        1.0,           // dx
                                                        false
                                                        );
-   typedef GhostLayerField<Vector3<uint_t>,1> VectorField;
-   typedef GhostLayerField<uint_t, 3> FlattenedField;
+   using VectorField = GhostLayerField<Vector3<uint_t>, 1>;
+   using FlattenedField = GhostLayerField<uint_t, 3>;
    BlockDataID fieldID = field::addToStorage<VectorField>( blocks, "Field", Vector3<uint_t>(uint_c(0)), field::zyxf );
    BlockDataID flattenedID = field::addFlattenedShallowCopyToStorage<VectorField>( blocks, fieldID, "flattened Field");
 

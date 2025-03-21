@@ -173,9 +173,9 @@ std::string Logging::getHeaderFooter( bool header )
    std::time_t t;
    std::time( &t );
 
-   char cTimeString[64];
-   std::strftime( cTimeString, 64, "%A, %d.%B %Y, %H:%M:%S", std::localtime( &t ) );
-   std::string timeString( cTimeString );
+   std::array< char, 64 > cTimeString;
+   std::strftime(cTimeString.data(), 64, "%A, %d.%B %Y, %H:%M:%S", std::localtime(&t));
+   std::string timeString(cTimeString.data());
 
    std::string beginEnd( header ? "BEGIN LOGGING" : "  END LOGGING" );
 
@@ -226,8 +226,8 @@ bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & rege
       std::stringstream callerPathAndLine;
       callerPathAndLine << callerPath << ":" << line;
 
-      for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
-         if( walberla::regex_search( callerPathAndLine.str(), *regex ) )
+      for(const auto & regexe : regexes)
+         if( walberla::regex_search( callerPathAndLine.str(), regexe ) )
             return true;
    }
 

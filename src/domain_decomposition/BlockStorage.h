@@ -90,7 +90,7 @@ public:
       iterator( const iterator & it )  = default;
 
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
-      iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
+      iterator   operator++(int) { const iterator it( *this ); operator++(); return it; }; // postfix X++
 
       bool operator==( const iterator & rhs ) const { return it_ == rhs.it_; }
       bool operator!=( const iterator & rhs ) const { return it_ != rhs.it_; }
@@ -135,7 +135,7 @@ public:
       const_iterator( const const_iterator & it )  = default;
 
       const_iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }            // prefix ++X
-      const_iterator   operator++(int) { const_iterator it( *this ); operator++(); return it; }; // postfix X++
+      const_iterator   operator++(int) { const const_iterator it( *this ); operator++(); return it; }; // postfix X++
 
       bool operator==( const const_iterator & rhs ) const { return it_ == rhs.it_; }
       bool operator!=( const const_iterator & rhs ) const { return it_ != rhs.it_; }
@@ -170,7 +170,8 @@ public:
       Set<SUID> incompatibleSelectors_;
    };
 
-
+   /// Deleted default constructor
+   BlockStorage() = delete;
 
    const AABB& getDomain() const { return domain_; } ///< returns an axis-aligned bounding box that covers the entire simulation space/domain
 
@@ -192,14 +193,14 @@ public:
    /// iterator for traversing all locally allocated blocks
    iterator begin( const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
-      { return iterator( iBlocks_.begin(), iBlocks_.end(), requiredSelectors, incompatibleSelectors ); }
-   iterator   end() { return iterator( iBlocks_.end(), iBlocks_.end() ); } ///< iterator for traversing all locally allocated blocks
+      { return { iBlocks_.begin(), iBlocks_.end(), requiredSelectors, incompatibleSelectors }; }
+   iterator   end() { return { iBlocks_.end(), iBlocks_.end() }; } ///< iterator for traversing all locally allocated blocks
 
    /// iterator for traversing all locally allocated blocks
    const_iterator begin( const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                          const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) const
-      { return const_iterator( iBlocks_.begin(), iBlocks_.end(), requiredSelectors, incompatibleSelectors ); }
-   const_iterator   end() const { return const_iterator( iBlocks_.end(), iBlocks_.end() ); } ///< iterator for traversing all locally allocated blocks
+      { return { iBlocks_.begin(), iBlocks_.end(), requiredSelectors, incompatibleSelectors }; }
+   const_iterator   end() const { return { iBlocks_.end(), iBlocks_.end() }; } ///< iterator for traversing all locally allocated blocks
 
    uint_t getNumberOfBlocks() const { return iBlocks_.size(); } ///< number of locally allocated blocks
    uint_t size()              const { return iBlocks_.size(); } ///< number of locally allocated blocks
@@ -207,11 +208,11 @@ public:
 
    /// inserts all locally allocated blocks into vector 'blocks'
    void getBlocks( std::vector< const IBlock* >& blocks ) const
-   { for (auto blkIt = iBlocks_.begin(); blkIt != iBlocks_.end(); ++blkIt ) { blocks.push_back(blkIt->second); } }
+   { for (auto iBlock : iBlocks_) { blocks.push_back(iBlock.second); } }
 
    /// inserts all locally allocated blocks into vector 'blocks'
    void getBlocks( std::vector<       IBlock* >& blocks )
-   { for (auto blkIt = iBlocks_.begin(); blkIt != iBlocks_.end(); ++blkIt ) { blocks.push_back(blkIt->second); } }
+   { for (auto & iBlock : iBlocks_) { blocks.push_back(iBlock.second); } }
 
    //*******************************************************************************************************************
    /*!
@@ -465,7 +466,7 @@ public:
    ///
    /// Usage: BlockDataID id = blockStorage.addBlockData( "[optional block data identifier]" ) << BlockDataCreator( ... )
    ///                                                                                         << BlockDataCreator( ... ) << ... ;
-   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return internal::BlockDataHandlingAdder( *this, identifier ); }
+   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; }
 
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,
@@ -520,13 +521,11 @@ protected:
 
 
    AABB domain_;      ///< axis-aligned bounding box for the entire simulation space/domain
-   bool periodic_[3]; ///< periodicity flags
+   std::array< bool, 3 > periodic_; ///< periodicity flags
    
    std::vector< internal::BlockDataItem > blockDataItem_;
 
 private:
-
-   BlockStorage(); ///< Must not be made public or protected! Derived classes must call one of the available public/protected constructors.
 
    inline void registerBlock( const std::pair<IBlockID::IDType, IBlock*>& block ); // All three functions must not be made public!
    inline void removeBlock  ( const IBlock* block );                               // All three functions are intended for internal use only.
@@ -736,9 +735,10 @@ inline void BlockStorage::clearBlockData( const BlockDataID & id )
 inline std::vector< std::string > BlockStorage::getBlockDataIdentifiers() const
 {
    std::vector< std::string > identifiers;
+   identifiers.reserve(blockDataItem_.size());
 
-   for( auto it = blockDataItem_.begin(); it != blockDataItem_.end(); ++it )
-      identifiers.push_back( it->getIdentifier() );
+   for(const auto & it : blockDataItem_)
+      identifiers.push_back( it.getIdentifier() );
 
    return identifiers;
 }
@@ -747,7 +747,7 @@ inline std::vector< std::string > BlockStorage::getBlockDataIdentifiers() const
 
 inline const std::string & BlockStorage::getBlockDataIdentifier( const ConstBlockDataID & id ) const
 {
-   static std::string noData( "[no block data]" );
+   static const std::string noData( "[no block data]" );
 
    if( !(id < blockDataItem_.size()) )
       return noData;

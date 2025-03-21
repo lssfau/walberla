@@ -73,7 +73,7 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & particle field
-typedef lbm::D3Q19< lbm::collision_model::SRT, false > LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT, false >;
 
 using Stencil_T  = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField< LatticeModel_T >;
@@ -113,7 +113,7 @@ class TorqueEval
  public:
    TorqueEval(SweepTimeloop* timeloop, Setup* setup, const shared_ptr< StructuredBlockStorage >& blocks,
               const shared_ptr< ParticleAccessor_T >& ac, bool fileIO)
-      : timeloop_(timeloop), setup_(setup), blocks_(blocks), ac_(ac), fileIO_(fileIO), torqueOld_(0.0), torqueNew_(0.0)
+      : timeloop_(timeloop), setup_(setup), blocks_(blocks), ac_(ac), fileIO_(fileIO)
    {
       // calculate the (semi)analytical torque value
       // see also Hofmann et al. - Hydrodynamic interactions in colloidal crystals:(II). Application to dense cubic and
@@ -196,8 +196,8 @@ class TorqueEval
    bool fileIO_;
    std::string filename_;
 
-   real_t torqueOld_;
-   real_t torqueNew_;
+   real_t torqueOld_{ 0.0 };
+   real_t torqueNew_{ 0.0 };
 };
 
 //////////

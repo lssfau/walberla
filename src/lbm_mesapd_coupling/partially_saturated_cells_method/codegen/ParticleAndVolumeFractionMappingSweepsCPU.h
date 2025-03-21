@@ -50,18 +50,18 @@ namespace gpu
 {
 
 template< int Weighting_T >
-void calculateWeighting(real_t* const weighting, const real_t& /*epsilon*/, const real_t& /*tau*/)
+inline void calculateWeighting(real_t* const  /*weighting*/, const real_t& /*epsilon*/, const real_t& /*tau*/)
 {
    WALBERLA_STATIC_ASSERT(Weighting_T == 1 || Weighting_T == 2);
 }
 
 template<>
-void calculateWeighting< 1 >(real_t* const weighting, const real_t& epsilon, const real_t& /*tau*/)
+inline void calculateWeighting< 1 >(real_t* const weighting, const real_t& epsilon, const real_t& /*tau*/)
 {
    *weighting = epsilon;
 }
 template<>
-void calculateWeighting< 2 >(real_t* const weighting, const real_t& epsilon, const real_t& tau)
+inline void calculateWeighting< 2 >(real_t* const weighting, const real_t& epsilon, const real_t& tau)
 {
    *weighting = epsilon * (tau - real_t(0.5)) / ((real_t(1) - epsilon) + (tau - real_t(0.5)));
 }

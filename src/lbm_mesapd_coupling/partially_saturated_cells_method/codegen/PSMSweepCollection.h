@@ -39,7 +39,7 @@ namespace gpu
 {
 
 // The deviceSyncWrapper can be used so that the timeloop measures the correct device runtime
-auto deviceSyncWrapper = [](std::function< void(IBlock*) > sweep) {
+inline auto deviceSyncWrapper = [](std::function< void(IBlock*) > sweep) {
    return [sweep](IBlock* b) {
       sweep(b);
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT

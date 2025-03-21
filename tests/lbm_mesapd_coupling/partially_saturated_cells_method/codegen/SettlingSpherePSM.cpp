@@ -97,7 +97,7 @@ using namespace lbm_mesapd_coupling::psm::gpu;
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
-typedef pystencils::PSMPackInfo PackInfo_T;
+using PackInfo_T = pystencils::PSMPackInfo;
 
 ///////////
 // FLAGS //
@@ -639,7 +639,7 @@ int main(int argc, char** argv)
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, 0, false);
+   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, false, false);
 #else
    walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
 #endif

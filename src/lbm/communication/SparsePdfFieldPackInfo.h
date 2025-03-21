@@ -61,25 +61,25 @@ class SparsePdfFieldPackInfo : public communication::UniformPackInfo
 {
 public:
 
-   typedef lbm::PdfField<LatticeModel_T>     PdfField_T;
-   typedef typename FlagField_T::flag_t      flag_t;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using flag_t = typename FlagField_T::flag_t;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    SparsePdfFieldPackInfo( const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, FlagUID flag, bool flagFieldConstant )
       : pdfFieldId_( pdfFieldId ), flagFieldId_( flagFieldId ), flag_( flag ), flagFieldConstant_( flagFieldConstant ) {}
 
    ~SparsePdfFieldPackInfo() override = default;
 
-   bool constantDataExchange() const { return flagFieldConstant_; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return flagFieldConstant_; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer );
+   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
 
-   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir );
+   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
 
 protected:
 
-   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const;
+   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const override;
 
 
    BlockDataID pdfFieldId_;

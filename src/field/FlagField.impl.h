@@ -78,7 +78,7 @@ namespace field {
    template<typename T>
    FlagField<T>::~FlagField()
    {
-      uint_t refs = Field<T,1>::referenceCount();
+      uint_t const refs = Field<T,1>::referenceCount();
       if( refs == 1 ) // last field that uses this data
          delete data_;
    }
@@ -490,12 +490,12 @@ namespace field {
     template<class Sten, typename FieldPtrOrIterator>
     inline bool isFlagInNeighborhood(const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_type mask)
     {
-       using T = typename std::remove_const<typename FieldPtrOrIterator::value_type>::type;
+       using T = std::remove_const_t<typename FieldPtrOrIterator::value_type>;
 
-       static_assert( (std::is_same< T,uint8_t >::value ||
-                       std::is_same< T,uint16_t>::value ||
-                       std::is_same< T,uint32_t>::value ||
-                       std::is_same< T,uint64_t>::value),
+       static_assert( (std::is_same_v< T,uint8_t > ||
+                       std::is_same_v< T,uint16_t> ||
+                       std::is_same_v< T,uint32_t> ||
+                       std::is_same_v< T,uint64_t>),
                       "Only unsigned types of various lengths are allowed as type of FlagFields");
 
        T flag = 0;
@@ -511,10 +511,10 @@ namespace field {
      * \param[in] i     field pointer.
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
-    inline typename std::remove_const<typename FieldPtrOrIterator::value_type>::type
+    inline std::remove_const_t<typename FieldPtrOrIterator::value_type>
        getOredNeighborhood(const FieldPtrOrIterator & i)
     {
-       using RetType = typename std::remove_const<typename FieldPtrOrIterator::value_type>::type;
+       using RetType = std::remove_const_t<typename FieldPtrOrIterator::value_type>;
 
        RetType flag = 0;
        for( auto d = Sten::beginNoCenter(); d != Sten::end(); ++d ) {

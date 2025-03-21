@@ -428,7 +428,7 @@ public:
                              const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize ), alloc_(alloc)
    {
-      static_assert( !std::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
+      static_assert( !std::is_same_v< GhostLayerField_T, FlagField< Value_T > >,
                      "When using class FlagField, only constructors without the explicit specification of an initial value and the field layout are available!" );
    }
 
@@ -495,7 +495,7 @@ public:
                                       const shared_ptr< field::FieldAllocator<Value_T> > alloc = nullptr) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize ), alloc_(alloc)
    {
-      static_assert( ! std::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
+      static_assert( ! std::is_same_v< GhostLayerField_T, FlagField< Value_T > >,
                      "When using class FlagField, only constructors without the explicit specification of an initial value and the field layout are available!" );
    }
 

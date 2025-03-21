@@ -38,7 +38,7 @@ using namespace postprocessing;
 
 using geometry::TriangleMesh;
 
-typedef GhostLayerField<real_t,1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 
 
 template< typename T, uint_t fs>
