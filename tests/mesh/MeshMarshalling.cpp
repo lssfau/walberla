@@ -45,7 +45,7 @@ using UnionT = Union<mesh::pe::ConvexPolyhedron>;
 using UnionID = UnionT *;
 using UnionPtr = std::unique_ptr<UnionT>;
 
-typedef std::tuple<mesh::pe::ConvexPolyhedron, UnionT> BodyTuple ;
+using BodyTuple = std::tuple<mesh::pe::ConvexPolyhedron, UnionT> ;
 
 std::vector<Vector3<real_t>> generateOctahedron( const real_t radius)
 {

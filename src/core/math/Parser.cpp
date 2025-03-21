@@ -61,16 +61,7 @@
 namespace walberla {
 namespace math {
 
-
-
-FunctionParser::FunctionParser() 
-   : expression_ ( nullptr ),
-     symbolTable_( nullptr ),
-     isConstant_(false),
-     isZero_(false)
-{
-
-}
+FunctionParser::FunctionParser() = default;
 
 FunctionParser::~FunctionParser() 
 {
@@ -132,14 +123,14 @@ double FunctionParser::evaluate( const std::map<std::string,double> & symbolTabl
    std::vector< std::string > variables;
    symbolTable_->get_variable_list( variables );
 
-   for( auto vIt = variables.begin(); vIt != variables.end(); ++vIt )
+   for(auto & variable : variables)
    {
-      auto symbolEntryIt = symbolTable.find( *vIt );
+      auto symbolEntryIt = symbolTable.find( variable );
 
       if( symbolEntryIt == symbolTable.end() )
-         WALBERLA_ABORT( "Error evaluating expression. Variable \"" << *vIt << "\" not specified in symbol table!" );
+         WALBERLA_ABORT( "Error evaluating expression. Variable \"" << variable << "\" not specified in symbol table!" );
 
-      symbolTable_->variable_ref( *vIt ) = symbolEntryIt->second;
+      symbolTable_->variable_ref( variable ) = symbolEntryIt->second;
    }
 
    return expression_->value();

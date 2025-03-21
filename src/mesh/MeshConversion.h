@@ -88,9 +88,9 @@ void convertWalberlaToOpenMesh( const geometry::TriangleMesh & wbMesh, OpenMeshT
    std::map< uint32_t, typename OpenMeshType::VertexHandle > indexToOmVertexHandles;
 
    uint32_t ctr = 0;
-   for( auto v_it = wbMesh.getVertices().begin(); v_it != wbMesh.getVertices().end(); ++v_it )
+   for(const auto & v_it : wbMesh.getVertices())
    {
-      indexToOmVertexHandles[ ctr++ ] = omMesh.add_vertex( typename OpenMeshType::Point( toOpenMesh( *v_it ) ) );
+      indexToOmVertexHandles[ ctr++ ] = omMesh.add_vertex( typename OpenMeshType::Point( toOpenMesh( v_it ) ) );
    }
 
    WALBERLA_ASSERT_EQUAL( wbMesh.getVertexIndices().size() % size_t(3), size_t(0) );

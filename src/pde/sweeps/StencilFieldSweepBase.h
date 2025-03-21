@@ -37,8 +37,8 @@ class StencilFieldSweepBase : public SweepBase
 {
 public:
 
-   typedef SweepBase::Field_T                                 Field_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using Field_T = SweepBase::Field_T;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    // block has NO dst u field
    StencilFieldSweepBase( const BlockDataID & uFieldId, const BlockDataID & fFieldId, const BlockDataID & stencilFieldId ) :

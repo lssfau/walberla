@@ -69,14 +69,14 @@ namespace stencil {
          static const bool   containsCenter   = false;
          static const uint_t noCenterFirstIdx = 0;
 
-         static const Direction dir           [4];
-         static const Direction dir_pos       [POS_Q];
-         static const uint_t    idx           [NR_OF_DIRECTIONS];
-         static const Direction d_per_d       [NR_OF_DIRECTIONS][4/2];
-         static const uint_t    d_per_d_length[NR_OF_DIRECTIONS];
+         static const std::array< Direction, 4 > dir;
+         static const std::array< Direction, POS_Q > dir_pos;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > idx;
+         static const std::array< std::array<Direction, 4/2>, NR_OF_DIRECTIONS> d_per_d;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length;
 
-         static const Direction dir_neighbors        [NR_OF_DIRECTIONS][NR_OF_DIRECTIONS];
-         static const uint_t    dir_neighbors_length [NR_OF_DIRECTIONS];
+         static const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > dir_neighbors;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > dir_neighbors_length;
 
          static bool   containsDir(Direction d) { return idx[d] < NR_OF_DIRECTIONS; }
          static uint_t invDirIdx  (Direction d) { return idx[stencil::inverseDir[d]]; }
@@ -111,7 +111,7 @@ namespace stencil {
 
       /// Subset of directions. Defines the stencil
       template<typename Dummy>
-      const Direction D2CornerStencil<Dummy>::dir[4] = { NW,NE,SW,SE };
+      const std::array< Direction, 4 > D2CornerStencil<Dummy>::dir{ NW,NE,SW,SE };
 
 
       /**
@@ -121,7 +121,7 @@ namespace stencil {
        * the direction together with its inverse direction.
        */
       template<typename Dummy>
-      const Direction D2CornerStencil<Dummy>::dir_pos[POS_Q] = { NE,SE };
+      const std::array< Direction, D2CornerStencil<Dummy>::POS_Q > D2CornerStencil<Dummy>::dir_pos{ NE,SE };
 
 
       /**
@@ -134,7 +134,7 @@ namespace stencil {
        *  So a stencil class is needed to map back from direction to field index
        */
       template<typename Dummy>
-      const uint_t D2CornerStencil<Dummy>::idx[NR_OF_DIRECTIONS] = { INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,0,1,2,3,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR };
+      const std::array< uint_t, NR_OF_DIRECTIONS > D2CornerStencil<Dummy>::idx{ INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,0,1,2,3,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR };
 
 
       /**
@@ -154,7 +154,7 @@ namespace stencil {
        *
        */
       template<typename Dummy>
-      const Direction D2CornerStencil<Dummy>::d_per_d[NR_OF_DIRECTIONS][4/2] = { {},
+      const std::array< std::array< Direction, 4/2 >, NR_OF_DIRECTIONS > D2CornerStencil<Dummy>::d_per_d{ { {},
 								{NW,NE},
 								{SW,SE},
 								{NW,SW},
@@ -180,7 +180,7 @@ namespace stencil {
 								{},
 								{},
 								{},
-								{} };
+								{} } };
 
 
       /**
@@ -188,7 +188,7 @@ namespace stencil {
        * For usage see documentation of d_per_d
        */
       template<typename Dummy>
-      const uint_t D2CornerStencil<Dummy>::d_per_d_length [NR_OF_DIRECTIONS] = { 0,2,2,2,2,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+      const std::array< uint_t, NR_OF_DIRECTIONS > D2CornerStencil<Dummy>::d_per_d_length{ 0,2,2,2,2,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 
       /**
@@ -201,7 +201,7 @@ namespace stencil {
        * By definition, the neighbors of C are identical to the dir[] array without C itself.
        */
       template<typename Dummy>
-      const Direction D2CornerStencil<Dummy>::dir_neighbors[NR_OF_DIRECTIONS][NR_OF_DIRECTIONS] = { {NW,NE,SW,SE},
+      const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > D2CornerStencil<Dummy>::dir_neighbors{ { {NW,NE,SW,SE},
 								{W,E},
 								{W,E},
 								{N,S},
@@ -227,7 +227,7 @@ namespace stencil {
 								{B},
 								{B},
 								{B},
-								{B} };
+								{B} } };
 
 
       /**
@@ -235,7 +235,7 @@ namespace stencil {
        * For usage see documentation of dir_neighbors
        */
       template<typename Dummy>
-      const uint_t D2CornerStencil<Dummy>::dir_neighbors_length[NR_OF_DIRECTIONS] = { 4,2,2,2,2,4,4,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1 };
+      const std::array<uint_t, NR_OF_DIRECTIONS> D2CornerStencil<Dummy>::dir_neighbors_length{ 4,2,2,2,2,4,4,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1 };
 
    } // namespace internal
 

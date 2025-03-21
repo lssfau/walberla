@@ -125,8 +125,8 @@ public:
       WALBERLA_ROOT_SECTION() {
          std::ofstream fileLocBottom(filename_.c_str(), std::ios_base::app);
          fileLocBottom << executionCounter_ << " ";
-         for (auto i = reattachmentLocations.begin(); i != reattachmentLocations.end(); i++) {
-            fileLocBottom << *i << " ";
+         for (auto i : reattachmentLocations) {
+            fileLocBottom << i << " ";
          }
          fileLocBottom << std::endl;
          fileLocBottom.close();

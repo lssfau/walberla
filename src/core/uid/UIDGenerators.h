@@ -153,7 +153,7 @@ public:
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-static const uint8_t logBase2LookupTable[256] =
+static const std::array< uint8_t, 256 > logBase2LookupTable =
 {
 #define logBase2LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
       0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,

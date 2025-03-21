@@ -66,7 +66,7 @@ template< typename Container >
 class ContainerStreamReader
 {
 public:
-   ContainerStreamReader( std::istream& is ) : is_( is ), success_(false)
+   ContainerStreamReader( std::istream& is ) : is_( is )
    {
    }
    
@@ -132,7 +132,7 @@ private:
    std::istream& is_;
    std::istream::pos_type oldPos_;
    std::istream::fmtflags oldFlags_;
-   bool success_;   
+   bool success_{false};
 };
 
 //**********************************************************************************************************************

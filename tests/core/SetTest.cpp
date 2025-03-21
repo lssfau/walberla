@@ -86,11 +86,11 @@ int main( int /*argc*/, char** /*argv*/ ) {
    result.insert( A.begin(), A.end() );
    WALBERLA_CHECK_EQUAL( result, expected );
 
-   result   = A & A;
+   result   = A & A; // NOLINT: represent zero difference
    expected = Set<int>(1) + Set<int>(2) + Set<int>(3) + Set<int>(4);
    WALBERLA_CHECK_EQUAL( result, expected );
 
-   result   = A - A;
+   result   = A - A; // NOLINT: represent zero difference
    expected = Set<int>::emptySet();
    WALBERLA_CHECK_EQUAL( result, expected );
 

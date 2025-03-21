@@ -101,6 +101,8 @@ class StructuredBlockStorage : private NonCopyable {
 
 public:
 
+   StructuredBlockStorage() = delete;
+
    /// helper class for adding multiple block data initialization functions
    class StructuredBlockDataAdder {
    public:
@@ -412,7 +414,7 @@ public:
    /// Usage: BlockDataID id = blockStorage.addBlockData( "[optional block data identifier]" ) << StructuredBlockDataCreator( ... )
    ///                                                                                         << BlockDataCreator( ... ) << ... ;
    StructuredBlockDataAdder addStructuredBlockData( const std::string& identifier = std::string() )
-                                                                               { return StructuredBlockDataAdder( *this, identifier ); }
+                                                                               { return { *this, identifier }; }
 
    template< typename T >
    inline BlockDataID addStructuredBlockData( std::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
@@ -447,11 +449,6 @@ protected:
    virtual inline BlockDataID addCellBoundingBoxesAsBlockData( const std::string & identifier );
 
 private:
-
-   StructuredBlockStorage(); ///< Must not be made public or protected! Derived classes must call one of the available public/protected constructors.
-
-
-
    shared_ptr<BlockStorage> blockStorage_; ///< reference to an encapsulated object of type class BlockStorage (the object itself must be stored as a member in the derived class)
 
    uint_t levels_; ///< number of different grid levels managed by this block storage (every grid level has its own cell size dx/dy/dz)

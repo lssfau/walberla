@@ -108,16 +108,16 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
          xadj.push_back( int64_c( adjncy.size() ) );
 
 
-         for( auto nit = block.getNeighborhood().begin(); nit != block.getNeighborhood().end(); ++nit )
+         for(auto nit : block.getNeighborhood())
          {
-            if( (*nit)->getLevel() != level )
+            if( nit->getLevel() != level )
                continue; // ignore neighbor blocks on other levels
 
-            adjncy.push_back( int64_c( (*nit)->getIndex() ) );
+            adjncy.push_back( int64_c( nit->getIndex() ) );
 
             if(weightsToUse_ == PARMETIS_EDGE_WEIGHTS || weightsToUse_ == PARMETIS_BOTH_WEIGHTS)
             {
-               blockPairs.emplace_back( blocks[i], *nit );
+               blockPairs.emplace_back( blocks[i], nit );
             }
          }
 
@@ -151,11 +151,11 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       int64_t numflag = 0; // C-style ordering
       int64_t ncon = 1; // Number of constraints
       int64_t ndims = 3; // Number of dimensions
-      double ubvec[] = { real_t( 1.05 ) }; // imbalance tolerance
+      std::array< double, 1 > ubvec = { real_t( 1.05 ) }; // imbalance tolerance
       int64_t nparts = int64_c( numberOfProcesses ); // number of subdomains
       MPI_Comm comm = MPIManager::instance()->comm();
       std::vector<double> tpwgts( uint_c(nparts * ncon), 1.0 / double_c( nparts ) ); // vertex weight fraction that is stored in a subdomain
-      int64_t options[] = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };
+      std::array< int64_t, 4 > options = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };
 
       // add dummy element to circumvent null pointer check if less blocks than processes
       adjncy.resize( std::max( adjncy.size(), size_t(1) ) );
@@ -169,12 +169,12 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       {
       case PARMETIS_PART_GEOM_KWAY:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_PartGeomKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ndims, ptr( xyz ), &ncon, &nparts, ptr( tpwgts ), ubvec, options, &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_PartGeomKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ndims, ptr( xyz ), &ncon, &nparts, ptr( tpwgts ), ubvec.data(), options.data(), &edgecut, ptr( part ), &comm );
          parmetisTimer.end();
          break;
       case PARMETIS_PART_KWAY:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_PartKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ncon, &nparts, ptr( tpwgts ), ubvec, options, &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_PartKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ncon, &nparts, ptr( tpwgts ), ubvec.data(), options.data(), &edgecut, ptr( part ), &comm );
          parmetisTimer.end();
          break;
       }
@@ -197,9 +197,9 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
 
    //count number of used processes
    std::vector<bool> processUsed( numberOfProcesses, false );
-   for(auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt)
+   for(auto & blockIt : forest)
    {
-      processUsed[ blockIt->getTargetProcess() ] = true;
+      processUsed[ blockIt.getTargetProcess() ] = true;
    }
 
    return uint_c(std::count( processUsed.begin(), processUsed.end(), true ));

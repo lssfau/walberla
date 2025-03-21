@@ -54,7 +54,7 @@ void FloodFillUsingFillLevel< Stencil_T >::run(IBlock& block, BlockDataID bubble
    std::vector< bool > addedLast;
 
    using namespace stencil;
-   const int dirs[4]    = { N, S, T, B };
+   const uint_t dirs[4]    = { N, S, T, B };
    const uint_t numDirs = uint_c(4);
 
    CellInterval fieldSizeInterval = fillField->xyzSize();
@@ -149,7 +149,7 @@ void FloodFillUsingFlagField< FlagField_T >::run(IBlock& block, BlockDataID bubb
    std::vector< bool > addedLast;
 
    using namespace stencil;
-   const int dirs[4]    = { N, S, T, B };
+   const uint_t dirs[4]    = { N, S, T, B };
    const uint_t numDirs = uint_c(4);
 
    CellInterval fieldSizeInterval = flagField->xyzSize();

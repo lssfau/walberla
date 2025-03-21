@@ -39,13 +39,13 @@ class SORFixedStencil : public StencilSweepBase< Stencil_T >
 {
 public:
 
-   typedef typename StencilSweepBase< Stencil_T >::Field_T Field_T;
+   using Field_T = typename StencilSweepBase<Stencil_T>::Field_T;
 
    SORFixedStencil( const shared_ptr< domain_decomposition::StructuredBlockStorage > & blocks,
                     const BlockDataID & uFieldId, const BlockDataID & fFieldId, const std::vector< real_t > & weights, const real_t omega ) :
       StencilSweepBase< Stencil_T >( uFieldId, fFieldId, weights ), blocks_( blocks ), omega_( omega ) {}
 
-   void operator()( IBlock * const block ) const { WALBERLA_ABORT( "You are not allowed to use class 'SORFixedStencil' as a standard sweep!\n"
+   void operator()( IBlock * const /*block*/ ) const { WALBERLA_ABORT( "You are not allowed to use class 'SORFixedStencil' as a standard sweep!\n"
                                                                    "Use the member functions 'getRedSweep' and 'getBlackSweep' instead." ); }
 
    void update( IBlock * const block, const bool rb );
@@ -83,7 +83,7 @@ void SORFixedStencil< Stencil_T >::update( IBlock * const block, const bool rb )
    WALBERLA_ASSERT_GREATER_EQUAL( uf->nrOfGhostLayers(), 1 );
 
    // stencil weights
-   real_t weights[ Stencil_T::Size ];
+   std::array<real_t, Stencil_T::Size> weights;
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
       weights[ dir.toIdx() ] = this->w( dir.toIdx() );
    weights[ Stencil_T::idx[ stencil::C ] ] = real_t(1) / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!

@@ -81,17 +81,17 @@ public:
    /*! \name Cartesian Communicator */
    //@{
 
-   void createCartesianComm( int numberOfProcessors[3], int periodicity[3] );
+   void createCartesianComm(const std::array< int, 3 >&, const std::array< int, 3 >&);
    void createCartesianComm( const uint_t xProcesses,        const uint_t  yProcesses,        const uint_t zProcesses,
                              const bool   xPeriodic = false, const bool    yPeriodic = false, const bool   zPeriodic = false );
 
    /// Cartesian coordinates of own rank
-   void cartesianCoord( int coordOut[3] ) const;
+   void cartesianCoord(std::array< int, 3 >& coordOut) const;
    /// Cartesian coordinates of given rank
-   void cartesianCoord( int rank, int coordOut[3] ) const;
+   void cartesianCoord(int rank, std::array< int, 3 >& coordOut) const;
 
    /// translates Cartesian coordinates to rank
-   int cartesianRank( int coords[3] ) const;
+   int cartesianRank(std::array< int, 3 >& coords) const;
    /// translates Cartesian coordinates to rank
    int cartesianRank( const uint_t x, const uint_t y, const uint_t z ) const;
 

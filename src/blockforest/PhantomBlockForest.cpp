@@ -134,13 +134,13 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
 
             std::vector< uint_t > sourceProcesses( uint_t(8), process );
             const auto & neighborhood = block->getNeighborhood();
-            for( auto neighbor = neighborhood.begin(); neighbor != neighborhood.end(); ++neighbor )
+            for(const auto & neighbor : neighborhood)
             {
-               auto & nid = neighbor->getId();
+               auto & nid = neighbor.getId();
                if( blockforest_.getLevelFromBlockId( nid ) == level && nid.getFatherId() == fid )
                {
-                  sourceProcesses[ neighbor->getId().getBranchId() ] = neighbor->getProcess();
-                  sourceStates[ neighbor->getId().getBranchId() ] = std::make_pair( nid, neighbor->getState() );
+                  sourceProcesses[ neighbor.getId().getBranchId() ] = neighbor.getProcess();
+                  sourceStates[ neighbor.getId().getBranchId() ] = std::make_pair( nid, neighbor.getState() );
                }
             }
 
@@ -158,13 +158,13 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
          else
          {
             const auto & neighborhood = block->getNeighborhood();
-            for( auto neighbor = neighborhood.begin(); neighbor != neighborhood.end(); ++neighbor )
+            for(const auto & neighbor : neighborhood)
             {
-               const auto & nid = neighbor->getId();
+               const auto & nid = neighbor.getId();
                if( blockforest_.getLevelFromBlockId( nid ) == level && nid.getFatherId() == fid && nid.getBranchId() == uint_t(0) )
                {
                   WALBERLA_ASSERT_EQUAL( block->getTargetProcess().size(), uint_t(0) );
-                  block->addTargetProcess( neighbor->getProcess() );
+                  block->addTargetProcess( neighbor.getProcess() );
 #ifdef NDEBUG
                   break;
 #endif
@@ -175,9 +175,9 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       }
 
       const auto & neighborhood = block->getNeighborhood();
-      for( auto neighbor = neighborhood.begin(); neighbor != neighborhood.end(); ++neighbor )
-         if( neighbor->getProcess() != process )
-            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( neighbor->getProcess() ) );
+      for(const auto & neighbor : neighborhood)
+         if( neighbor.getProcess() != process )
+            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( neighbor.getProcess() ) );
 
       if( recalculateDepth )
          depth_ = std::max( depth_, targetLevel );
@@ -198,12 +198,12 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1941 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116
    bufferSystem.setReceiverInfo( ranksToRecvFrom, true ); // ATTENTION: true = the size of a message from A to B varies
 
-   for( int i = 0; i != 2; ++i )
+   for( uint_t i = 0; i != 2; ++i )
    {
-      for( auto rank = ranksToRecvFrom.begin(); rank != ranksToRecvFrom.end(); ++rank )
+      for(mpi::MPIRank rank : ranksToRecvFrom)
       {
-         WALBERLA_ASSERT_UNEQUAL( uint_c(*rank), process );
-         bufferSystem.sendBuffer( *rank ) << blockNeighborhood[ process ];
+         WALBERLA_ASSERT_UNEQUAL( uint_c(rank), process );
+         bufferSystem.sendBuffer( rank ) << blockNeighborhood[ process ];
       }
 
       bufferSystem.sendAll();
@@ -217,12 +217,12 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       }
 
       std::map< BlockID, std::pair< uint_t, Set<SUID> > > & localMap = blockNeighborhood[ process ];
-      for( auto it = blockNeighborhood.begin(); it != blockNeighborhood.end(); ++it )
+      for(auto & it : blockNeighborhood)
       {
-         if( it->first != process )
+         if( it.first != process )
          {
             // localMap.insert( it->second.begin(), it->second.end() ); // using 'insert' doesn't allow to assert consistency ... -> manual for loop
-            for( auto blockProcessPair = it->second.begin(); blockProcessPair != it->second.end(); ++blockProcessPair )
+            for( auto blockProcessPair = it.second.begin(); blockProcessPair != it.second.end(); ++blockProcessPair )
             {
 #ifndef NDEBUG
                if( localMap.find( blockProcessPair->first ) != localMap.end() )
@@ -230,7 +230,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
 #endif
                localMap[ blockProcessPair->first ] = blockProcessPair->second;
             }
-            it->second.clear();
+            it.second.clear();
          }
       }
    }
@@ -238,16 +238,17 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
    std::vector< BlockReconstruction::NeighborhoodReconstructionBlock > neighbors;
 
    std::map< BlockID, std::pair< uint_t, Set<SUID> > > & localMap = blockNeighborhood[ process ];
-   for( auto it = localMap.begin(); it != localMap.end(); ++it )
-      neighbors.emplace_back( it->first, it->second.first, it->second.second, aabbReconstruction );
+   neighbors.reserve(localMap.size());
+   for(auto & it : localMap)
+      neighbors.emplace_back( it.first, it.second.first, it.second.second, aabbReconstruction );
 
    BlockReconstruction::NeighborhoodReconstruction< PhantomBlock > neighborhoodReconstruction( blockforest_.getDomain(),
                                                                                                blockforest_.isXPeriodic(),
                                                                                                blockforest_.isYPeriodic(),
                                                                                                blockforest_.isZPeriodic() );
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it ) // TODO: can be done in parallel with OpenMP
-      neighborhoodReconstruction( it->second.get(), neighbors );
+   for(auto & block : blocks_) // TODO: can be done in parallel with OpenMP
+      neighborhoodReconstruction( block.second.get(), neighbors );
 
    updateNeighborhood();
 }
@@ -260,9 +261,9 @@ void PhantomBlockForest::assignBlockData( const PhantomBlockDataAssignmentFuncti
    {
       std::vector< std::pair< const PhantomBlock *, walberla::any > > blockData;
    
-      for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+      for(auto & it : blocks_)
       {
-         auto & block = it->second;
+         auto & block = it.second;
          WALBERLA_ASSERT_NOT_NULLPTR( block.get() );
          blockData.emplace_back( block.get(), walberla::any() );
       }
@@ -294,9 +295,9 @@ bool PhantomBlockForest::calculateMigrationInformation( const MigrationPreparati
    {
       std::vector< std::pair< const PhantomBlock *, uint_t > > targetProcess;
    
-      for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+      for(auto & it : blocks_)
       {
-         auto & block = it->second;
+         auto & block = it.second;
          WALBERLA_ASSERT_NOT_NULLPTR( block.get() );
          targetProcess.emplace_back( block.get(), block->getTargetProcess() );
       }
@@ -304,8 +305,9 @@ bool PhantomBlockForest::calculateMigrationInformation( const MigrationPreparati
       bool runAgain = function( targetProcess, processesToRecvFrom_, *this, iteration );
 
       WALBERLA_CHECK_EQUAL( targetProcess.size(), blocks_.size() );
-      for( auto it = processesToRecvFrom_.begin(); it != processesToRecvFrom_.end(); ++it )
-         WALBERLA_CHECK_LESS( *it, uint_c( MPIManager::instance()->numProcesses() ) );
+
+      for( auto rank: processesToRecvFrom_ )
+         WALBERLA_CHECK_LESS( rank, uint_c( MPIManager::instance()->numProcesses() ) );
       
       auto bit = blocks_.begin();
       for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
@@ -344,18 +346,18 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
 
    std::map< uint_t, std::vector< PhantomBlock * > > blocksToSend;
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       WALBERLA_ASSERT_NOT_NULLPTR( block.get() );
       if( block->getTargetProcess() != process )
          blocksToSend[ block->getTargetProcess() ].push_back( block.get() );
    }
 
    std::set< mpi::MPIRank > ranksToRecvFrom;
-   for( auto p = processesToRecvFrom_.begin(); p != processesToRecvFrom_.end(); ++p )
-      if( *p != process )
-         ranksToRecvFrom.insert( static_cast< mpi::MPIRank >(*p) );
+   for(uint_t p : processesToRecvFrom_)
+      if( p != process )
+         ranksToRecvFrom.insert( static_cast< mpi::MPIRank >(p) );
 
    // TODO: use OpenMP buffer system?
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1944 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116 + 3
@@ -373,9 +375,8 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
       // TODO: Is the data amount reduction really necessary? Is it even a good idea?!
 
       buffer << uint_c( blocks.size() );
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for(auto pBlock : blocks)
       {
-         auto * pBlock = *block;
          WALBERLA_ASSERT_NOT_NULLPTR( pBlock );
 
          buffer << pBlock->getId() << pBlock->getState();
@@ -516,8 +517,8 @@ void PhantomBlockForest::updateNeighborhood()
    if( blockforest_.insertBuffersIntoProcessNetwork() )
    {
       std::map< mpi::MPIRank, mpi::MPISize > ranksToRecvFrom;
-      for( auto n = neighborhood_.begin(); n != neighborhood_.end(); ++n )
-         ranksToRecvFrom[ static_cast< mpi::MPIRank >(*n) ] = mpi::BufferSizeTrait<int>::size;
+      for(uint_t & n : neighborhood_)
+         ranksToRecvFrom[ static_cast< mpi::MPIRank >(n) ] = mpi::BufferSizeTrait<int>::size;
 
       mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1942 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116 + 1
       bufferSystem.setReceiverInfo( ranksToRecvFrom );
@@ -546,19 +547,19 @@ void PhantomBlockForest::updateNeighborhood()
    }
 
    const uint_t process = blockforest_.getProcess();
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       WALBERLA_ASSERT_NOT_NULLPTR( block.get() );
       const auto & neighborhood = block->getNeighborhood();
-      for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-         if( n->getProcess() != process )
-            neighbors.insert( n->getProcess() );
+      for(const auto & n : neighborhood)
+         if( n.getProcess() != process )
+            neighbors.insert( n.getProcess() );
    }
 
    neighborhood_.clear();
-   for( auto n = neighbors.begin(); n != neighbors.end(); ++n )
-      neighborhood_.push_back( *n );
+   for(uint_t neighbor : neighbors)
+      neighborhood_.push_back( neighbor );
 }
 
 
@@ -575,13 +576,13 @@ void PhantomBlockForest::prepareMigration()
 
    const uint_t process = blockforest_.getProcess();
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & block : blocks_)
    {
-      blockProcessMap[ process ][ it->first ] = it->second->getTargetProcess();
-      auto & neighbors = it->second->getNeighborhood();
-      for( auto n = neighbors.begin(); n != neighbors.end(); ++n )
-         if( n->getProcess() != process )
-            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( n->getProcess() ) );
+      blockProcessMap[ process ][ block.first ] = block.second->getTargetProcess();
+      auto & neighbors = block.second->getNeighborhood();
+      for(const auto & neighbor : neighbors)
+         if( neighbor.getProcess() != process )
+            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( neighbor.getProcess() ) );
    }
    WALBERLA_ASSERT( ( blocks_.empty() && blockProcessMap.empty() ) || ( blockProcessMap.size() == uint_t(1) ) );
 
@@ -589,10 +590,10 @@ void PhantomBlockForest::prepareMigration()
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1943 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116 + 2
    bufferSystem.setReceiverInfo( ranksToRecvFrom, true ); // true = the size of a message from A to B varies
 
-   for( auto rank = ranksToRecvFrom.begin(); rank != ranksToRecvFrom.end(); ++rank )
+   for(int rank : ranksToRecvFrom)
    {
-      WALBERLA_ASSERT_UNEQUAL( uint_c(*rank), process );
-      bufferSystem.sendBuffer( *rank ) << blockProcessMap[ process ];
+      WALBERLA_ASSERT_UNEQUAL( uint_c(rank), process );
+      bufferSystem.sendBuffer( rank ) << blockProcessMap[ process ];
    }
 
    bufferSystem.sendAll();
@@ -604,9 +605,9 @@ void PhantomBlockForest::prepareMigration()
       recvIt.buffer() >> blockProcessMap[ uint_c( recvIt.rank() ) ];
    }
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       for( uint_t n = uint_t(0); n != block->getNeighborhoodSize(); ++n )
       {
          const uint_t p = block->getNeighborProcess(n);
@@ -624,20 +625,20 @@ void PhantomBlockForest::prepareMigration()
    ranksToRecvFrom.clear();
 
    const auto & blocks = blockforest_.getBlockMap();
-   for( auto it = blocks.begin(); it != blocks.end(); ++it )
+   for(const auto & block : blocks)
    {
-      auto & targets = it->second->getTargetProcess();
-      for( auto tp = targets.begin(); tp != targets.end(); ++tp )
-         if( *tp != process )
-            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( *tp ) );
+      auto & targets = block.second->getTargetProcess();
+      for(uint_t target : targets)
+         if( target != process )
+            ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( target ) );
    }
    
    mpi::BufferSystem linkBufferSystem( MPIManager::instance()->comm(), 1945 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116 + 4
    linkBufferSystem.setReceiverInfo( ranksToRecvFrom, true ); // true = the size of a message from A to B varies
    
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       auto & id = block->getId();
       auto & sources = block->getSourceProcess();
       

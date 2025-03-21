@@ -48,23 +48,23 @@ void InitializationManager::init( const Config::BlockHandle & blockHandle )
    Config::Blocks blocks;
    blockHandle.getBlocks(blocks);
 
-   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt)
+   for(auto & block : blocks)
    {
-      auto foundGeometryIt = geometryRegistry_.find( blockIt->getKey() );
+      auto foundGeometryIt = geometryRegistry_.find( block.getKey() );
 
       if( foundGeometryIt == geometryRegistry_.end() )
       {
          std::ostringstream oss;
-         oss << "No Geometry for block " << blockIt->getKey() << " registered at GeometryMaster!\n"
+         oss << "No Geometry for block " << block.getKey() << " registered at GeometryMaster!\n"
              << geometryRegistry_.size() << " Geometry instances are registered" << ( geometryRegistry_.empty() ? "." : ":" );
 
-         for( auto geometryIt = geometryRegistry_.begin(); geometryIt != geometryRegistry_.end(); ++geometryIt )
-            oss <<  "\n   " << geometryIt->first.getIdentifier();
+         for(auto & geometryIt : geometryRegistry_)
+            oss <<  "\n   " << geometryIt.first.getIdentifier();
 
          WALBERLA_ABORT( oss.str() );
       }
 
-      foundGeometryIt->second->init( blockStorage_, *blockIt );
+      foundGeometryIt->second->init( blockStorage_, block );
    }
 }
 

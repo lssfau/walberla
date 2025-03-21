@@ -69,7 +69,7 @@ using namespace lbm_mesapd_coupling::psm::gpu;
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
-typedef pystencils::PSMPackInfo PackInfo_T;
+using PackInfo_T = pystencils::PSMPackInfo;
 
 ///////////
 // FLAGS //
@@ -103,7 +103,7 @@ class TorqueEval
  public:
    TorqueEval(SweepTimeloop* timeloop, Setup* setup, const shared_ptr< StructuredBlockStorage >& blocks,
               const shared_ptr< ParticleAccessor_T >& ac, bool fileIO)
-      : timeloop_(timeloop), setup_(setup), blocks_(blocks), ac_(ac), fileIO_(fileIO), torqueOld_(0.0), torqueNew_(0.0)
+      : timeloop_(timeloop), setup_(setup), blocks_(blocks), ac_(ac), fileIO_(fileIO)
    {
       // calculate the (semi)analytical torque value
       // see also Hofmann et al. - Hydrodynamic interactions in colloidal crystals:(II). Application to dense cubic and
@@ -186,8 +186,8 @@ class TorqueEval
    bool fileIO_;
    std::string filename_;
 
-   real_t torqueOld_;
-   real_t torqueNew_;
+   real_t torqueOld_{ 0.0 };
+   real_t torqueNew_{ 0.0 };
 };
 
 //////////
@@ -393,7 +393,7 @@ int main(int argc, char** argv)
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, 0, false);
+   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, false, false);
 #else
    walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
 #endif

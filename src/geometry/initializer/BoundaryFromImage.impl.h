@@ -22,6 +22,7 @@
 #include "core/math/Vector3.h"
 #include "field/GhostLayerField.h"
 
+#include <algorithm>
 #include <limits>
 #include "BoundaryFromImage.h"
 
@@ -89,9 +90,9 @@ namespace initializer {
       // the extrusion limit can not be left at numeric_limits::min/max since
       // the blockStorage.transformGlobalToLocal would overflow
       cell_idx_t maxNumberOfCells = cell_idx_c(
-                                    std::max( structuredBlockStorage_.getNumberOfXCells(),
-                                    std::max( structuredBlockStorage_.getNumberOfYCells(),
-                                              structuredBlockStorage_.getNumberOfZCells() ) ) );
+                                    std::max( {structuredBlockStorage_.getNumberOfXCells(),
+                                    structuredBlockStorage_.getNumberOfYCells(),
+                                              structuredBlockStorage_.getNumberOfZCells() } ) );
 
       if ( upperExtrusionLimit > maxNumberOfCells )
          upperExtrusionLimit = maxNumberOfCells;
@@ -167,16 +168,16 @@ namespace initializer {
 
       BoundarySetters mapping;
 
-      for( auto mappingBlock = mappingBlocks.begin(); mappingBlock != mappingBlocks.end(); ++mappingBlock )
+      for(auto & mappingBlock : mappingBlocks)
       {
-         const std::string pixelValueStr =  mappingBlock->template getParameter<std::string> ( "value" );
+         const std::string pixelValueStr =  mappingBlock.template getParameter<std::string> ( "value" );
          auto pixelValue = Image_T::pixelValueFromString( pixelValueStr );
 
          if( mapping.find( pixelValue )  != mapping.end() )
             WALBERLA_ABORT( "BoundaryFromImage: Duplicate BoundaryValueMapping for pixel value " << pixelValue );
 
          BoundarySetter<Handling> boundarySetter;
-         boundarySetter.setConfigBlock( *mappingBlock );
+         boundarySetter.setConfigBlock( mappingBlock );
 
          mapping[pixelValue] = boundarySetter;
       }

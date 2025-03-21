@@ -132,7 +132,7 @@ inline UINT uintPow16( UINT exp ) {
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-static const uint8_t msbLookupTable[256] =
+static const std::array< uint8_t, 256 > msbLookupTable =
 {
 #define msbLT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
       0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -150,7 +150,7 @@ static const uint8_t msbLookupTable[256] =
 //**********************************************************************************************************************
 template< typename UINT > uint_t uintMSBPosition( UINT value )
 {
-   static_assert( std::is_unsigned< UINT >::value, "uintMSBPosition can only be used with unsigned integer types!" );
+   static_assert( std::is_unsigned_v< UINT >, "uintMSBPosition can only be used with unsigned integer types!" );
 
    switch( std::numeric_limits<UINT>::digits )
    {

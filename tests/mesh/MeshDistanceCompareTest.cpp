@@ -64,7 +64,7 @@ void testAABBDistance( const Vector3<real_t> & translationVector = Vector3<real_
 
 }
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

@@ -62,7 +62,7 @@ void writeMPIIO(const std::string& file, SendBuffer& buffer)
       const uint_t offset = uint_c(mpi::MPIManager::instance()->numProcesses() * 2 * uintSize) + exscanResult;
 
       // header of the file contains each process' offset and buffer size
-      uint_t offsetData[2];
+      std::array< uint_t, 2 > offsetData;
       offsetData[0] = offset; // position at which a process writes its data
       offsetData[1] = uint_c(buffer.size());
 
@@ -84,7 +84,7 @@ void writeMPIIO(const std::string& file, SendBuffer& buffer)
                }
                if (ofile.fail()) { WALBERLA_ABORT("Error while opening file \"" << file << "\" for writing."); }
 
-               ofile.write(reinterpret_cast< const char* >(offsetData), numeric_cast< std::streamsize >(2 * uintSize));
+               ofile.write(reinterpret_cast< const char* >(offsetData.data()), numeric_cast< std::streamsize >(2 * uintSize));
                if (ofile.fail()) { WALBERLA_ABORT("Error while writing to file \"" << file << "\"."); }
 
                ofile.close();
@@ -138,7 +138,7 @@ void writeMPIIO(const std::string& file, SendBuffer& buffer)
             WALBERLA_ABORT("Internal MPI-IO error! MPI Error is \"" << MPIManager::instance()->getMPIErrorString(result)
                                                                     << "\"");
 
-         result = MPI_File_write_all(mpiFile, reinterpret_cast< char* >(offsetData), 2, MPITrait< uint_t >::type(),
+         result = MPI_File_write_all(mpiFile, reinterpret_cast< char* >(offsetData.data()), 2, MPITrait< uint_t >::type(),
                                      MPI_STATUS_IGNORE);
 
          if (result != MPI_SUCCESS)
@@ -202,7 +202,7 @@ void readMPIIO(const std::string& file, RecvBuffer& buffer)
       MPI_Type_size(MPITrait< uint_t >::type(), &uintSize);
 
       // header of the file contains each process' offset and buffer size
-      uint_t offsetData[2];
+      std::array< uint_t, 2 > offsetData;
 
       // use serial I/O for versions of OpenMPI that produce segmentation faults when using MPI-IO with a 3D
       // Cartesian MPI communicator (see waLBerla issue #73)
@@ -219,7 +219,7 @@ void readMPIIO(const std::string& file, RecvBuffer& buffer)
                if (ifile.fail()) { WALBERLA_ABORT("Error while opening file \"" << file << "\" for reading."); }
 
                ifile.seekg(numeric_cast< std::streamoff >(mpi::MPIManager::instance()->rank() * 2 * uintSize));
-               ifile.read(reinterpret_cast< char* >(offsetData), numeric_cast< std::streamsize >(2 * uintSize));
+               ifile.read(reinterpret_cast< char* >(offsetData.data()), numeric_cast< std::streamsize >(2 * uintSize));
                if (ifile.fail()) { WALBERLA_ABORT("Error while reading from file \"" << file << "\"."); }
 
                ifile.close();
@@ -272,7 +272,7 @@ void readMPIIO(const std::string& file, RecvBuffer& buffer)
             WALBERLA_ABORT("Internal MPI-IO error! MPI Error is \"" << MPIManager::instance()->getMPIErrorString(result)
                                                                     << "\"");
 
-         result = MPI_File_read_all(mpiFile, reinterpret_cast< char* >(offsetData), 2, MPITrait< uint_t >::type(),
+         result = MPI_File_read_all(mpiFile, reinterpret_cast< char* >(offsetData.data()), 2, MPITrait< uint_t >::type(),
                                     MPI_STATUS_IGNORE);
 
          if (result != MPI_SUCCESS)

@@ -44,9 +44,8 @@ namespace config {
 // \brief Default constructor for the Config class.
  */
 Config::Config()
-     : stateFlag_(true) // Internal status flag
-     , error_()         // Container for all error messages
-     , block_()         // Global parameter block
+   : error_(), // Container for all error messages
+     block_()  // Global parameter block
 {}
 //**********************************************************************************************************************
 
@@ -516,8 +515,8 @@ Config::Block::~Block()
 Config::size_type Config::Block::getNumBlocks( const std::string& key ) const
 {
    size_type c = 0;
-   for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if( string_icompare( key, it->getKey() ) == 0 ) {
+   for(const auto & block : blocks_) {
+      if( string_icompare( key, block.getKey() ) == 0 ) {
          ++c;
       }
    }
@@ -538,7 +537,7 @@ Config::BlockHandle Config::Block::getBlock( const std::string& key ) const {
    Blocks blocks;
    getBlocks( key, blocks, 0, 1 );
    if( blocks.empty() )
-      return BlockHandle();
+      return {};
    return blocks[0];
 }
 
@@ -570,9 +569,9 @@ Config::BlockHandle Config::Block::getOneBlock( const std::string& key ) const
 void Config::Block::getBlocks( const std::string& key, Blocks& blocks, size_t min, size_t max ) const
 {
    size_t c = 0;
-   for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if( string_icompare( key, it->getKey() ) == 0 ) {
-         blocks.emplace_back( &*it );
+   for(const auto & block : blocks_) {
+      if( string_icompare( key, block.getKey() ) == 0 ) {
+         blocks.emplace_back( &block );
          ++c;
       }
    }
@@ -594,8 +593,8 @@ void Config::Block::getBlocks( const std::string& key, Blocks& blocks, size_t mi
  */
 void Config::Block::getBlocks( Blocks& blocks ) const
 {
-   for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      blocks.emplace_back( &*it );
+   for(const auto & block : blocks_) {
+      blocks.emplace_back( &block );
    }
 }
 //**********************************************************************************************************************
@@ -609,8 +608,8 @@ void Config::Block::getBlocks( Blocks& blocks ) const
  */
 void Config::Block::getWritableBlocks( std::vector<Block*> & blocks )
 {
-   for( List::iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      blocks.emplace_back( &*it );
+   for(auto & block : blocks_) {
+      blocks.emplace_back( &block );
    }
 }
 //**********************************************************************************************************************
@@ -628,9 +627,9 @@ void Config::Block::getWritableBlocks( std::vector<Block*> & blocks )
 void Config::Block::getWritableBlocks( const std::string & key, std::vector<Block*> & blocks, size_t min, size_t max )
 {
    size_t c = 0;
-   for( List::iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if( string_icompare( key, it->getKey() ) == 0 ) {
-         blocks.emplace_back( &*it );
+   for(auto & block : blocks_) {
+      if( string_icompare( key, block.getKey() ) == 0 ) {
+         blocks.emplace_back( &block );
          ++c;
       }
    }
@@ -690,8 +689,8 @@ Config::Block& Config::Block::createBlock( const std::string& key )
  */
 void Config::Block::listParameters() const
 {
-   for( Map::const_iterator it=params_.begin(); it!=params_.end(); ++it ) {
-      std::cout << " Key = '" << it->first << "' , Value = '" << it->second << "'\n";
+   for(const auto & param : params_) {
+      std::cout << " Key = '" << param.first << "' , Value = '" << param.second << "'\n";
    }
 }
 //**********************************************************************************************************************
@@ -705,11 +704,11 @@ void Config::Block::listParameters() const
 std::string Config::Block::getString() const
 {
    std::string ret="";
-   for( Map::const_iterator it=params_.begin(); it!=params_.end(); ++it ) {
-      ret += it->first + " " + it->second + ";";
+   for(const auto & param : params_) {
+      ret += param.first + " " + param.second + ";";
    }
-   for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      ret += it->key_ + "{" + it->getString() + "}";
+   for(const auto & block : blocks_) {
+      ret += block.key_ + "{" + block.getString() + "}";
    }
    return ret;
 }
@@ -742,12 +741,12 @@ static void printConfig( std::ostream & os, const Config::BlockHandle & block, i
       os << prefix.str() << "{\n";
    }
 
-   for( auto subBlock = subBlocks.begin(); subBlock != subBlocks.end(); ++subBlock )
-      printConfig( os, *subBlock, depth+1);
+   for(auto & subBlock : subBlocks)
+      printConfig( os, subBlock, depth+1);
 
-   for( auto paramIt = block.begin(); paramIt != block.end(); ++paramIt ) {
-      std::string key = paramIt->first;
-      std::string value = paramIt->second;
+   for(const auto & paramIt : block) {
+      std::string key = paramIt.first;
+      std::string value = paramIt.second;
       string_trim( key );
       string_trim( value );
       os << prefix.str() << "   " << key << " " << value << ";\n";

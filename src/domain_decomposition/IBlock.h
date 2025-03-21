@@ -208,6 +208,7 @@ class StructuredBlockStorage; // forward declaration
 class IBlock : private NonCopyable
 {
 public:
+   IBlock() = delete;
 
    using BlockData = internal::BlockData;
 
@@ -273,8 +274,6 @@ protected:
    AABB aabb_; ///< an axis-aligned bounding box that defines the exact part of the simulation space that is assigned to this block
 
 private:
-
-   IBlock(); ///< Must not be made public or protected! Derived classes must call one of the available public/protected constructors.
 
    /// helper function for assigning data to this block (called by 'BlockStorage'), must not be made public or protected!
    inline void addData( const BlockDataID & index, BlockData* const data );

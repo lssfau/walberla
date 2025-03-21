@@ -194,7 +194,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
             {
                using namespace stencil;
 
-               real_t pdfs[Stencil_T::Size];
+               std::array<real_t, Stencil_T::Size> pdfs;
 
                // stream pull & temporal storage of PDFs
                for (auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d)
@@ -372,7 +372,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
             {
                using namespace stencil;
 
-               real_t pdfs[Stencil_T::Size];
+               std::array<real_t, Stencil_T::Size> pdfs;
 
                // temporal storage of PDFs
                for (auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d)

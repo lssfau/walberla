@@ -39,8 +39,8 @@
 namespace walberla {
 using namespace geometry;
 
-const uint_t confBlockCount []      = { 1, 1, 1 };
-const uint_t confCells []           = { 30, 30, 30 };
+const std::array<uint_t, 3> confBlockCount = { 1, 1, 1 };
+const std::array<uint_t, 3> confCells      = { 30, 30, 30 };
 
 int main( int argc, char ** argv )
 {

@@ -101,7 +101,7 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
    center_of_mass[1] += real_c(startCell.y() + boundingBox.yMin());
    center_of_mass[2] += real_c(startCell.z() + boundingBox.xMin());
 
-   const int DIRS[6] = { N, S, E, W, T, B };
+   const uint_t DIRS[6] = { N, S, E, W, T, B };
 
    CellInterval sizeInterval = phaseField.xyzSize();
    while (!cellQueue.empty())
@@ -109,7 +109,7 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
       Cell& cell = cellQueue.front();
       cellQueue.pop();
 
-      for (int i : DIRS)
+      for (uint_t i : DIRS)
       {
          Cell neighborCell(cell.x() + cx[i], cell.y() + cy[i], cell.z() + cz[i]);
 

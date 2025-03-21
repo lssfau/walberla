@@ -45,9 +45,9 @@ template< typename ContainmentT >
 real_t volumeNumeric( const ContainmentT & body, const AABB & aabb, const real_t spacing )
 {
    Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
-   
+
    uint_t volume = 0;
-   
+
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
    {
       if( body.contains( ContainmentT::toPoint( *it ) ) )
@@ -63,7 +63,7 @@ Vector3<real_t> centroidNumeric( const ContainmentT & body, const AABB & aabb, c
 {
    Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
 
-   math::KahanAccumulator<real_t> centroid[3];
+   std::array<math::KahanAccumulator<real_t>, 3> centroid;
    uint_t numPoints = 0;
 
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
@@ -86,7 +86,7 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
 {
    Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
 
-   math::KahanAccumulator<real_t> inertiaTensor[6];
+   std::array<math::KahanAccumulator<real_t>, 6> inertiaTensor;
 
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
    {
@@ -165,7 +165,7 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
 }
 
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

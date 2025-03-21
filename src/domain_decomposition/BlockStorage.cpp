@@ -99,7 +99,7 @@ BlockDataID BlockStorage::addBlockData( const internal::SelectableBlockDataHandl
 {
    WALBERLA_LOG_PROGRESS( "Adding block data (\"" << identifier << "\")" );
 
-   BlockDataID id( blockDataItem_.size() );
+   const BlockDataID id( blockDataItem_.size() );
    internal::BlockDataItem item( id, identifier, dataHandling );
    blockDataItem_.push_back( item );
 
@@ -135,7 +135,7 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
 {
    WALBERLA_LOG_PROGRESS( "Adding block data (\"" << identifier << "\"), loading data from file \"" << file << "\" ..." );
    
-   BlockDataID id( blockDataItem_.size() );
+   const BlockDataID id( blockDataItem_.size() );
    internal::BlockDataItem item( id, identifier, dataHandling );
    blockDataItem_.push_back( item );
    
@@ -147,9 +147,8 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
       blocks.push_back( block.get() );
    std::sort( blocks.begin(), blocks.end(), internal::sortBlocksByID );
    
-   for( auto it = blocks.begin(); it != blocks.end(); ++it )
+   for(auto block : blocks)
    {
-      IBlock * block = *it;
       auto dh = item.getDataHandling( block );
       if( dh )
       {
@@ -197,9 +196,8 @@ void BlockStorage::serializeBlockData( const BlockDataID & id, mpi::SendBuffer &
 
    auto & item = blockDataItem_[ uint_t(id) ];
 
-   for( auto it = blocks.begin(); it != blocks.end(); ++it )
+   for(auto block : blocks)
    {
-      IBlock * block = *it;
       auto dh = item.getDataHandling( block );
       if( dh )
          dh->serialize( block, id, buffer );
@@ -224,9 +222,8 @@ void BlockStorage::deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer
 
    auto & item = blockDataItem_[ uint_t(id) ];
 
-   for( auto it = blocks.begin(); it != blocks.end(); ++it )
+   for(auto block : blocks)
    {
-      IBlock * block = *it;
       auto dh = item.getDataHandling( block );
       if( dh )
          dh->deserialize( block, id, buffer );
@@ -252,7 +249,7 @@ MPI_Comm BlockStorage::processesWithBlocksCommunicator()
    {
       if( rebuildProcessesWithBlocksCommunicator_ )
       {
-         int8_t hasBlocks = ( getNumberOfBlocks() > uint_t(0) ) ? int8_t(1) : int8_t(0);
+         const int8_t hasBlocks = ( getNumberOfBlocks() > uint_t(0) ) ? int8_t(1) : int8_t(0);
 
          std::vector<int8_t> processHasBlocks = mpi::allGather( hasBlocks );
 

@@ -117,7 +117,7 @@ public:
 
 
    ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-              FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
+              const FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
               const uint_t level, const AABB & aabb );
    ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
               FlagField<flag_t> * const flagField,  const uint_t level, const AABB & aabb );
@@ -285,7 +285,7 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce>
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-                                                                                   FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
+                                                                                   const FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
                                                                                    const uint_t level, const AABB & aabb )
    : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), timeTracker_( timeTracker ), time_( real_t(0) ), level_( level )
 {

@@ -53,7 +53,7 @@ inline real_t omegaBulkFromOmega(real_t omega, real_t LambdaBulk = real_t(1))
 template< typename ParticleAccessor_T, typename ParticleSelector_T >
 class OmegaBulkAdapter
 {
-   static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+   static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
 public:
    OmegaBulkAdapter(const shared_ptr<StructuredBlockStorage> & blockStorage,

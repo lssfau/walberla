@@ -42,14 +42,14 @@ namespace geometry {
 void test( const std::string & filename, const Vector3<uint_t> & size, const std::string & datatype, const bool vtkOut )
 {
    WALBERLA_LOG_INFO( "Testing unscaled" );
-   BinaryRawFile brf( filename, size, datatype );
+   BinaryRawFile const brf( filename, size, datatype );
 
    auto blocks = blockforest::createUniformBlockGrid( uint_t(1), uint_t( 1 ), uint_t( 1 ), 
       size[0], size[1], size[2], 
       real_t( 1 ), 
       uint_t( 1 ), uint_t( 1 ), uint_t( 1 ) );
 
-   typedef GhostLayerField< uint8_t, uint_t( 1 ) > ScalarField;
+   using ScalarField = GhostLayerField<uint8_t, uint_t(1)>;
 
    BlockDataID scalarFieldID = field::addToStorage<ScalarField>( blocks, "BinaryRawFile" );
 
@@ -57,7 +57,7 @@ void test( const std::string & filename, const Vector3<uint_t> & size, const std
    {
       auto field = block.getData<ScalarField>( scalarFieldID );
       
-      CellInterval ci( 0, 0, 0, cell_idx_c( size[0] ) - 1, cell_idx_c( size[1] ) - 1, cell_idx_c( size[2] ) - 1 );
+      CellInterval const ci( 0, 0, 0, cell_idx_c( size[0] ) - 1, cell_idx_c( size[1] ) - 1, cell_idx_c( size[2] ) - 1 );
 
       for (const Cell c : ci)
       {
@@ -77,7 +77,7 @@ void test( const std::string & filename, const Vector3<uint_t> & size, const std
 void testScaled( const std::string & filename, const Vector3<uint_t> & size, const std::string & datatype, const bool vtkOut )
 {
    WALBERLA_LOG_INFO( "Testing scaled" );
-   BinaryRawFile brf( filename, size, datatype );
+   BinaryRawFile const brf( filename, size, datatype );
 
    Vector3<uint_t> scaledSize( std::max( uint_t( 1 ), size[0] / uint_t( 2 ) ),
                                std::max( uint_t( 1 ), size[1] / uint_t( 3 ) ),
@@ -88,9 +88,9 @@ void testScaled( const std::string & filename, const Vector3<uint_t> & size, con
       real_t( 1 ),
       uint_t( 1 ), uint_t( 1 ), uint_t( 1 ) );
 
-   BinaryRawFileInterpolator brfi( blocks->getDomain(), brf, BinaryRawFileInterpolator::NEAREST_NEIGHBOR );
+   BinaryRawFileInterpolator const brfi( blocks->getDomain(), brf, BinaryRawFileInterpolator::NEAREST_NEIGHBOR );
 
-   typedef GhostLayerField< uint8_t, uint_t( 1 ) > ScalarField;
+   using ScalarField = GhostLayerField<uint8_t, uint_t(1)>;
 
    BlockDataID scalarFieldID = field::addToStorage<ScalarField>( blocks, "BinaryRawFile" );
 
@@ -98,7 +98,7 @@ void testScaled( const std::string & filename, const Vector3<uint_t> & size, con
    {
       auto field = block.getData<ScalarField>( scalarFieldID );
 
-      CellInterval ci( 0, 0, 0, cell_idx_c( scaledSize[0] ) - 1, cell_idx_c( scaledSize[1] ) - 1, cell_idx_c( scaledSize[2] ) - 1 );
+      CellInterval const ci( 0, 0, 0, cell_idx_c( scaledSize[0] ) - 1, cell_idx_c( scaledSize[1] ) - 1, cell_idx_c( scaledSize[2] ) - 1 );
 
       for (const Cell c : ci)
       {
@@ -121,7 +121,7 @@ void testScaled( const std::string & filename, const Vector3<uint_t> & size, con
 
 int main( int argc, char * argv[] )
 {
-   walberla::mpi::Environment env( argc, argv );
+   walberla::mpi::Environment const env( argc, argv );
 
    std::vector< std::string > args( argv, argv + argc );
 

@@ -67,7 +67,7 @@ void testHelperFunctions( const std::string & meshFile, const uint_t numTotalBlo
 
    WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
    auto sbf0 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, numTotalBlocks );
-   
+
    WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
    Vector3<uint_t> blockSize( sbf0->getNumberOfXCells(), sbf0->getNumberOfYCells(), sbf0->getNumberOfZCells() );
    auto sbf1 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, blockSize );
@@ -82,7 +82,7 @@ void testHelperFunctions( const std::string & meshFile, const uint_t numTotalBlo
    auto sbf3 = mesh::createStructuredBlockStorageOutsideMesh( exteriorAabb, distanceOctree, dx, blockSize );
 }
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

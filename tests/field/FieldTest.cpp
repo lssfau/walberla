@@ -108,7 +108,7 @@ void alignmentTest()
    const uint_t fs = 2;
 
    const uint_t alignment =64;
-   typedef field::AllocateAligned<short,alignment> Allocator;
+   using Allocator = field::AllocateAligned<short, alignment>;
    shared_ptr<Allocator> alloc = make_shared<Allocator>();
    Field<short,fs > field (xs,ys,zs,field::fzyx,alloc);
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
@@ -130,7 +130,7 @@ void ghostLayerFieldAlignmentTest()
    const uint_t gl = 1;
 
    const uint_t alignment = 4 * sizeof( double );
-   typedef field::AllocateAligned<double,alignment> Allocator;
+   using Allocator = field::AllocateAligned<double, alignment>;
    shared_ptr<Allocator> alloc = make_shared<Allocator>();
    GhostLayerField<double,fs > field (xs,ys,zs,gl,field::fzyx,alloc);
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
@@ -494,7 +494,7 @@ void isIteratorConsecutiveTest ( field::Layout layout )
 
 void swapableCompareTest ( )
 {
-   typedef Field<unsigned char, 1> MyField;
+   using MyField = Field<unsigned char, 1>;
    std::set<MyField*, field::SwapableCompare<MyField*> >  fieldSet;
 
    fieldSet.insert( new MyField(2,4,1, field::zyxf) );
@@ -507,18 +507,18 @@ void swapableCompareTest ( )
    fieldSet.insert( new MyField(1,2,2, field::fzyx) );
    fieldSet.insert( new MyField(1,2,3, field::fzyx) );
 
-   for ( auto i = fieldSet.begin(); i != fieldSet.end(); ++i )
+   for (auto i : fieldSet)
    {
-      std::cout << "( " << (*i)->xSize()
-                << ","  << (*i)->ySize()
-                << ","  << (*i)->zSize()
-                << ","  << (*i)->layout() << ")" << std::endl;
+      std::cout << "( " << i->xSize()
+                << ","  << i->ySize()
+                << ","  << i->zSize()
+                << ","  << i->layout() << ")" << std::endl;
 
    }
 
-   for ( auto i = fieldSet.begin(); i != fieldSet.end(); ++i )
+   for (auto i : fieldSet)
    {
-      delete *i;
+      delete i;
    }
 }
 

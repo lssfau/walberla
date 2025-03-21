@@ -67,7 +67,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
                                   uint_t fCoord, const Vector3<real_t> & posOffset,
                                   const CellInterval & cellInterval )
 {
-   static_assert( (std::is_same<typename Field_T::value_type, real_t>::value ), "Currently only real valued fields are supported" );
+   static_assert( (std::is_same_v<typename Field_T::value_type, real_t> ), "Currently only real valued fields are supported" );
 
    CellInterval targetInterval = cellInterval;
    if ( targetInterval.empty() )
@@ -82,7 +82,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
     * which of the 8 vertices of the cube lies under the threshold.
     * The returned bitmask indicates which edges are intersected.
     */
-   static const short mcEdgeTable[256]={
+   static const std::array<short, 256> mcEdgeTable={
       0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
       0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
       0x190, 0x99 , 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
@@ -117,7 +117,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
 
 
-   static const short mcTriTable[256][16] = {
+   static const std::array< std::array< short, 16 >, 256 > mcTriTable = {{
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       {0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -374,7 +374,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       {0, 9, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
-   };
+   }};
 
 
 
@@ -389,22 +389,22 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
    RealVec3 ey (0,dx[1],0);
    RealVec3 ez (0,0,dx[2]);
 
-   int cubeIndex;      // index entry of the cube
+   uint_t cubeIndex;      // index entry of the cube
 
    // edges between which points?
-   const int mcEdges[24] = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0,
+   const std::array< int, 24 > mcEdges = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0,
                              4, 1, 5, 2, 6, 3, 7 };
 
-   const int cubieOffsetX[8] = { 0, 1, 1, 0, 0, 1, 1, 0 };
-   const int cubieOffsetY[8] = { 0, 0, 1, 1, 0, 0, 1, 1 };
-   const int cubieOffsetZ[8] = { 0, 0, 0, 0, 1, 1, 1, 1 };
+   const std::array< int, 8 > cubieOffsetX = { 0, 1, 1, 0, 0, 1, 1, 0 };
+   const std::array< int, 8 > cubieOffsetY = { 0, 0, 1, 1, 0, 0, 1, 1 };
+   const std::array< int, 8 > cubieOffsetZ = { 0, 0, 0, 0, 1, 1, 1, 1 };
 
    for( auto i = f.beginSliceXYZ(targetInterval); i != f.end(); ++i )
    {
       const RealVec3 offset (- real_t(0.5)*dx[0],-real_t(0.5)*dx[1],-real_t(0.5)*dx[2]);
       RealVec3 curPos = offset + i.x() * ex +  i.y() * ey + i.z() * ez;
 
-      real_t value [8];
+      std::array< real_t, 8 > value;
       value[0] = real_c( i.getF( fCoord )              );
       value[1] = real_c( i.neighbor( 1, 0, 0, fCoord ) );
       value[2] = real_c( i.neighbor( 1, 1, 0, fCoord ) );
@@ -415,7 +415,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       value[7] = real_c( i.neighbor( 0, 1, 1, fCoord ) );
 
       cubeIndex = 0;
-      for(int j=0; j< 8; ++j)
+      for(uint_t j=0; j< 8; ++j)
          if(value[j] < threshold)
             cubeIndex |= 1 << j;
 
@@ -425,7 +425,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       }
 
       // where to look up if this point already exists
-      int * eVert[12];
+      std::array < int*, 12 > eVert;
       eVert[0] = &edgeVerticesField.get(i.x()  ,i.y()  ,i.z()  ,0);
       eVert[1] = &edgeVerticesField.get(i.x()+1,i.y()  ,i.z()  ,1);
       eVert[2] = &edgeVerticesField.get(i.x()  ,i.y()+1,i.z()  ,0);
@@ -442,7 +442,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       eVert[11]= &edgeVerticesField.get(i.x()  , i.y()+1, i.z(), 2);
 
       // grid positions
-      RealVec3 pos[8];
+      std::array< RealVec3, 8 > pos;
       pos[0] = curPos;
       pos[1] = curPos + ex;
       pos[2] = curPos + ex + ey;
@@ -453,7 +453,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       pos[7] = curPos + ey + ez;
 
 
-      TriangleMesh::index_t triIndices[12]; // vertex indices (intersection point for each edge)
+      std::array< TriangleMesh::index_t, 12 > triIndices; // vertex indices (intersection point for each edge)
 
       // check all edges
       for ( uint_t e = 0; e < 12; e++ ) // for all edges
@@ -468,10 +468,10 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
             // not pre-computed, then interpolate edge
             const int e1 = mcEdges[e * 2];
             const int e2 = mcEdges[e * 2 + 1];
-            const RealVec3 p1 = pos[e1];    // scalar field pos 1
-            const RealVec3 p2 = pos[e2];    // scalar field pos 2
-            const real_t valp1 = value[e1]; // scalar field val 1
-            const real_t valp2 = value[e2]; // scalar field val 2
+            const RealVec3 p1 = pos[uint_t(e1)];    // scalar field pos 1
+            const RealVec3 p2 = pos[uint_t(e2)];    // scalar field pos 2
+            const real_t valp1 = value[uint_t(e1)]; // scalar field val 1
+            const real_t valp2 = value[uint_t(e2)]; // scalar field val 2
             const real_t mu = (threshold - valp1) / (valp2 - valp1);
             TriangleMesh::vertex_t position  = p1 + (p2 - p1) * mu + posOffset;
 
@@ -479,12 +479,12 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
 
             if ( calcNormals )
             {
-               TriangleMesh::normal_t normal    = calcNormal(f, i.x() + cubieOffsetX[e1],
-                                                                i.y() + cubieOffsetY[e1],
-                                                                i.z() + cubieOffsetZ[e1], fCoord ) * (real_t(1) - mu)
-                                                + calcNormal(f, i.x() + cubieOffsetX[e2],
-                                                                i.y() + cubieOffsetY[e2],
-                                                                i.z() + cubieOffsetZ[e2], fCoord) * (mu);
+               TriangleMesh::normal_t normal    = calcNormal(f, i.x() + cubieOffsetX[uint_c(e1)],
+                                                                i.y() + cubieOffsetY[uint_c(e1)],
+                                                                i.z() + cubieOffsetZ[uint_c(e1)], fCoord ) * (real_t(1) - mu)
+                                                + calcNormal(f, i.x() + cubieOffsetX[uint_c(e2)],
+                                                                i.y() + cubieOffsetY[uint_c(e2)],
+                                                                i.z() + cubieOffsetZ[uint_c(e2)], fCoord) * (mu);
 
                if (normal.sqrLength() > 1e-8 )
                   normalize(normal);
@@ -498,22 +498,22 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       }// for all edges
 
       // Create the triangles...
-      for (int e = 0; mcTriTable[cubeIndex][e] != -1; e += 3)
+      for (uint_t e = 0; mcTriTable[cubeIndex][e] != -1; e += 3)
       {
          if ( calcNormals )
          {
-            mesh.addTriangle(triIndices[mcTriTable[cubeIndex][e + 0]],
-                             triIndices[mcTriTable[cubeIndex][e + 1]],
-                             triIndices[mcTriTable[cubeIndex][e + 2]],
-                             triIndices[mcTriTable[cubeIndex][e + 0]],
-                             triIndices[mcTriTable[cubeIndex][e + 1]],
-                             triIndices[mcTriTable[cubeIndex][e + 2]]);
+            mesh.addTriangle(triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])]);
          }
          else
          {
-            mesh.addTriangle(triIndices[mcTriTable[cubeIndex][e + 0]],
-                             triIndices[mcTriTable[cubeIndex][e + 1]],
-                             triIndices[mcTriTable[cubeIndex][e + 2]] );
+            mesh.addTriangle(triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])] );
          }
       }
    }

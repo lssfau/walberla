@@ -44,14 +44,14 @@ class PeVTKMeshWriter
 public:
    static_assert( MeshType::IsPolyMesh == 1, "PeVTKMeshWriter only works with polygonal meshes!" );
 
-   typedef typename MeshType::VertexHandle VertexHandle;
-   typedef typename MeshType::FaceHandle   FaceHandle;
-   typedef typename VTKMeshWriter<MeshType>::Faces    Faces;
-   typedef typename VTKMeshWriter<MeshType>::Vertices Vertices;
-   typedef typename OpenMesh::FPropHandleT< const walberla::pe::RigidBody * > BodyPointerFPropHandle;
-   typedef typename OpenMesh::VPropHandleT< const walberla::pe::RigidBody * > BodyPointerVPropHandle;
-   typedef OpenMesh::PropertyManager< BodyPointerFPropHandle, MeshType > BodyPointerFPropManager;
-   typedef OpenMesh::PropertyManager< BodyPointerVPropHandle, MeshType > BodyPointerVPropManager;
+   using VertexHandle = typename MeshType::VertexHandle;
+   using FaceHandle = typename MeshType::FaceHandle;
+   using Faces = typename VTKMeshWriter<MeshType>::Faces;
+   using Vertices = typename VTKMeshWriter<MeshType>::Vertices;
+   using BodyPointerFPropHandle = typename OpenMesh::FPropHandleT<const walberla::pe::RigidBody *>;
+   using BodyPointerVPropHandle = typename OpenMesh::VPropHandleT<const walberla::pe::RigidBody *>;
+   using BodyPointerFPropManager = OpenMesh::PropertyManager<BodyPointerFPropHandle, MeshType>;
+   using BodyPointerVPropManager = OpenMesh::PropertyManager<BodyPointerVPropHandle, MeshType>;
 
    PeVTKMeshWriter( const shared_ptr<BlockStorage> & storage, const BlockDataID bodyStorageId, const Tesselation & tesselation,
                     const std::string & identifier, const uint_t writeFrequency, const std::string & baseFolder = "vtk_out" )
@@ -66,7 +66,7 @@ public:
    {
    public:
       DataSource( const std::string & _name ) : name_( _name ) { }
-      typedef T value_type;
+      using value_type = T;
       virtual uint_t      numComponents() = 0;
       const std::string & name() { return name_; }
    protected:
@@ -77,9 +77,9 @@ public:
    class VertexDataSource : public DataSource<T>
    {
    public:
-      typedef typename DataSource<T>::value_type value_type;
-      typedef typename PeVTKMeshWriter::Vertices Vertices;
-      typedef typename PeVTKMeshWriter::BodyPointerVPropManager BodyPointerVPropManager;
+      using value_type = typename DataSource<T>::value_type;
+      using Vertices = typename PeVTKMeshWriter::Vertices;
+      using BodyPointerVPropManager = typename PeVTKMeshWriter::BodyPointerVPropManager;
 
       VertexDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
       virtual void getData( const MeshType &, const Vertices &, std::vector<T> &, const BodyPointerVPropManager & ) = 0;
@@ -89,9 +89,9 @@ public:
    class FaceDataSource : public DataSource<T>
    {
    public:
-      typedef typename DataSource<T>::value_type value_type;
-      typedef typename PeVTKMeshWriter::Faces Faces;
-      typedef typename PeVTKMeshWriter::BodyPointerFPropManager BodyPointerFPropManager;
+      using value_type = typename DataSource<T>::value_type;
+      using Faces = typename PeVTKMeshWriter::Faces;
+      using BodyPointerFPropManager = typename PeVTKMeshWriter::BodyPointerFPropManager;
 
       FaceDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
       virtual void getData( const MeshType &, const Faces &, std::vector<T> &, const BodyPointerFPropManager & ) = 0;
@@ -133,19 +133,19 @@ protected:
    class VertexDataSourceWrapper : public DistributedVTKMeshWriter<MeshType>::template VertexDataSource<T>
    {
    public:
-      typedef typename PeVTKMeshWriter::BodyPointerVPropManager BodyPointerVPropManager;
+      using BodyPointerVPropManager = typename PeVTKMeshWriter::BodyPointerVPropManager;
    
       VertexDataSourceWrapper( const shared_ptr<PeVTKMeshWriter::VertexDataSource<T>> & vertexDataSource, const BodyPointerVPropManager & bodyPointerProp )
          : DistributedVTKMeshWriter<MeshType>::template VertexDataSource<T>( vertexDataSource->name() ),
            vertexDataSource_(vertexDataSource), bodyPointerProp_(bodyPointerProp)
       { }
    
-      virtual void getData( const MeshType & mesh, const Vertices & vertices, std::vector<T> & data )
+      void getData( const MeshType & mesh, const Vertices & vertices, std::vector<T> & data ) override
       {
          return vertexDataSource_->getData( mesh, vertices, data, bodyPointerProp_ );
       };
    
-      virtual uint_t numComponents() { return vertexDataSource_->numComponents(); }
+      uint_t numComponents() override { return vertexDataSource_->numComponents(); }
    
    protected:
       shared_ptr<PeVTKMeshWriter::VertexDataSource<T>> vertexDataSource_;
@@ -156,19 +156,19 @@ protected:
    class FaceDataSourceWrapper : public DistributedVTKMeshWriter<MeshType>::template FaceDataSource<T>
    {
    public:
-      typedef typename PeVTKMeshWriter::BodyPointerFPropManager BodyPointerFPropManager;
+      using BodyPointerFPropManager = typename PeVTKMeshWriter::BodyPointerFPropManager;
 
       FaceDataSourceWrapper( const shared_ptr<PeVTKMeshWriter::FaceDataSource<T>> & faceDataSource, const BodyPointerFPropManager & bodyPointerProp )
          : DistributedVTKMeshWriter<MeshType>::template FaceDataSource<T>( faceDataSource->name() ),
          faceDataSource_(faceDataSource), bodyPointerProp_(bodyPointerProp)
       { }
 
-      virtual void getData( const MeshType & mesh, const Faces & faces, std::vector<T> & data )
+      void getData( const MeshType & mesh, const Faces & faces, std::vector<T> & data ) override
       {
          return faceDataSource_->getData( mesh, faces, data, bodyPointerProp_ );
       };
 
-      virtual uint_t numComponents() { return faceDataSource_->numComponents(); }
+      uint_t numComponents() override { return faceDataSource_->numComponents(); }
 
    protected:
       shared_ptr<PeVTKMeshWriter::FaceDataSource<T>> faceDataSource_;

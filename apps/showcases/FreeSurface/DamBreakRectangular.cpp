@@ -56,7 +56,7 @@ using PdfCommunication_T    = blockforest::SimpleCommunication< LatticeModelSten
 // the geometry computations in SurfaceGeometryHandler require meaningful values in the ghost layers in corner
 // directions (flag field and fill level field); this holds, even if the lattice model uses a D3Q19 stencil
 using CommunicationStencil_T =
-   typename std::conditional< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+   std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
 using Communication_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
 using flag_t                        = uint32_t;
@@ -129,13 +129,13 @@ class ColumnHeightEvaluator
 
             const FlagField_T* const flagField = blockIt->template getData< const FlagField_T >(flagFieldID);
 
-            for (auto c = localSearchInterval.begin(); c != localSearchInterval.end(); ++c)
+            for (auto c : localSearchInterval)
             {
-               if (flagInfo.isInterface(flagField->get(*c)))
+               if (flagInfo.isInterface(flagField->get(c)))
                {
-                  if (c->y() >= maxColumnHeight)
+                  if (c.y() >= maxColumnHeight)
                   {
-                     maxColumnHeight  = c->y();
+                     maxColumnHeight  = c.y();
                      isInterfaceFound = true;
                   }
                }
@@ -214,13 +214,13 @@ class ColumnWidthEvaluator
 
             const FlagField_T* const flagField = blockIt->template getData< const FlagField_T >(flagFieldID);
 
-            for (auto c = localSearchInterval.begin(); c != localSearchInterval.end(); ++c)
+            for (auto c : localSearchInterval)
             {
-               if (flagInfo.isInterface(flagField->get(*c)))
+               if (flagInfo.isInterface(flagField->get(c)))
                {
-                  if (c->x() >= maxColumnWidth)
+                  if (c.x() >= maxColumnWidth)
                   {
-                     maxColumnWidth   = c->x();
+                     maxColumnWidth   = c.x();
                      isInterfaceFound = true;
                   }
                }

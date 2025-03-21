@@ -34,7 +34,7 @@ namespace sqlite {
 
 
 SQLiteDB::SQLiteDB( const string & dbFile, const int busyTimeout )
-   : valid_(true), dbHandle_(nullptr), file_( dbFile )
+   : file_( dbFile )
 {
    static const char * CREATE_RUN_TABLE =
          "CREATE TABLE IF NOT EXISTS runs ("
@@ -43,7 +43,7 @@ SQLiteDB::SQLiteDB( const string & dbFile, const int busyTimeout )
          " uuid      STRING );" ;
 
    // Create tables if it does not exist
-   int retVal = sqlite3_open( file_.c_str(), &dbHandle_ );
+   int const retVal = sqlite3_open( file_.c_str(), &dbHandle_ );
    if ( retVal != SQLITE_OK ) {
       WALBERLA_LOG_WARNING( "Failed to open sqlite3 file." << dbFile );
       valid_ = false;
@@ -101,16 +101,16 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
    {
       insertRunCommand += "," + i->first;
       values  << ", " << i->second;
-      string command = "ALTER TABLE runs ADD COLUMN " + i->first + " INTEGER ";
+      string const command = "ALTER TABLE runs ADD COLUMN " + i->first + " INTEGER ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    // Add columns for string properties
-   for ( auto i = stringProperties.begin(); i != stringProperties.end(); ++i )
+   for (const auto & stringPropertie : stringProperties)
    {
-      insertRunCommand += "," + i->first;
-      values << ", " << "\"" << i->second << "\"";
-      string command = "ALTER TABLE runs ADD COLUMN " + i->first + " TEXT ";
+      insertRunCommand += "," + stringPropertie.first;
+      values << ", " << "\"" << stringPropertie.second << "\"";
+      string const command = "ALTER TABLE runs ADD COLUMN " + stringPropertie.first + " TEXT ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
 
    }
@@ -122,7 +122,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
       {
          insertRunCommand += "," + i->first;
          values << ", " << i->second;
-         string command = "ALTER TABLE runs ADD COLUMN " + i->first + " DOUBLE ";
+         string const command = "ALTER TABLE runs ADD COLUMN " + i->first + " DOUBLE ";
          sqlite3_exec( dbHandle, command.c_str(), nullptr, nullptr, nullptr ); // ignore errors (column can exist already)
       }
       else
@@ -133,12 +133,12 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
    }
 
    // Add columns for global state selectors
-   for( auto i = uid::globalState().begin(); i != uid::globalState().end(); ++i )
+   for(auto i : uid::globalState())
    {
-      insertRunCommand += "," + i->getIdentifier();
+      insertRunCommand += "," + i.getIdentifier();
       values << " ,1";
       // no boolean in sqlite3, use integer instead
-      string command = "ALTER TABLE runs ADD COLUMN " + i->getIdentifier() + " INTEGER ";
+      string const command = "ALTER TABLE runs ADD COLUMN " + i.getIdentifier() + " INTEGER ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
@@ -146,11 +146,11 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
    values << "); ";
    insertRunCommand += values.str();
 
-   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
+   int const ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
    if ( ret != SQLITE_OK) {
       WALBERLA_LOG_WARNING( "Failed to insert a row into run table of sqlite3 database: " << sqlite3_errmsg(dbHandle) << "\n sql command: " << insertRunCommand.c_str() );
    }
-   uint_t generatedPrimaryKey = uint_c ( sqlite3_last_insert_rowid( dbHandle ) );
+   uint_t const generatedPrimaryKey = uint_c ( sqlite3_last_insert_rowid( dbHandle ) );
 
    sqlite3_exec( dbHandle, "END TRANSACTION;",nullptr,nullptr,nullptr );
 
@@ -175,7 +175,7 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
                                  const map<string, double > & realProperties )
 {
    sqlite3_exec( dbHandle, "BEGIN;",nullptr,nullptr,nullptr );
-   std::string CREATE_TABLE =
+   std::string const CREATE_TABLE =
          "CREATE TABLE IF NOT EXISTS " + tableName +
          " (runId     INTEGER, "
          " FOREIGN KEY (runId) REFERENCES runs(runId) "
@@ -191,26 +191,26 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
    {
       insertRunCommand += "," + i->first;
       values  << ", " << i->second;
-      string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " INTEGER ";
+      string const command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " INTEGER ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    // Add columns for string properties
-   for ( auto i = stringProperties.begin(); i != stringProperties.end(); ++i )
+   for (const auto & stringPropertie : stringProperties)
    {
-      insertRunCommand += "," + i->first;
-      values << ", " << "\"" << i->second << "\"";
-      string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " TEXT ";
+      insertRunCommand += "," + stringPropertie.first;
+      values << ", " << "\"" << stringPropertie.second << "\"";
+      string const command = "ALTER TABLE " + tableName + " ADD COLUMN " + stringPropertie.first + " TEXT ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
 
    }
 
    // Add columns for real_t properties
-   for ( auto i = realProperties.begin(); i != realProperties.end(); ++i )
+   for (const auto & realPropertie : realProperties)
    {
-      insertRunCommand += "," + i->first;
-      values << ", " << i->second ;
-      string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " DOUBLE ";
+      insertRunCommand += "," + realPropertie.first;
+      values << ", " << realPropertie.second ;
+      string const command = "ALTER TABLE " + tableName + " ADD COLUMN " + realPropertie.first + " DOUBLE ";
       sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
@@ -218,7 +218,7 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
    values << "); ";
    insertRunCommand += values.str();
 
-   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
+   int const ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
    if ( ret != SQLITE_OK) {
       WALBERLA_LOG_WARNING( "Failed to insert a row into run table of sqlite3 database: " << sqlite3_errmsg(dbHandle) << "\n sql command: " << insertRunCommand.c_str() );
    }
@@ -297,7 +297,7 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
 {
    sqlite3_exec( dbHandle_, "BEGIN;",nullptr,nullptr,nullptr );
 
-   assert ( timingPoolName.length() > 0 && timingPoolName.length() < 255 );
+   assert ( !timingPoolName.empty() && timingPoolName.length() < 255 );
 
    static const char * CREATE_TIMINGPOOL_TABLE =
          "CREATE TABLE IF NOT EXISTS timingPool ("
@@ -329,21 +329,21 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
 
 
    double totalTime = 0;
-   for ( auto i = tp.begin(); i != tp.end(); ++i )
-      totalTime += i->second.total();
+   for (const auto & i : tp)
+      totalTime += i.second.total();
 
 
-   for ( auto i = tp.begin(); i != tp.end(); ++i )
+   for (const auto & i : tp)
    {
       sqlite3_bind_int64 ( stmt, 1, int64_c(runId) );
       sqlite3_bind_text  ( stmt, 2, timingPoolName.c_str() , -1, SQLITE_STATIC );
-      sqlite3_bind_text  ( stmt, 3, i->first.c_str() , -1, SQLITE_STATIC );
-      sqlite3_bind_double( stmt, 4, ( ( i->second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i->second.average() ) ) );
-      sqlite3_bind_double( stmt, 5, ( ( i->second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i->second.min() ) ) );
-      sqlite3_bind_double( stmt, 6, ( ( i->second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i->second.max() ) ) );
-      sqlite3_bind_int64 ( stmt, 7, int64_c   ( i->second.getCounter() ));
-      sqlite3_bind_double( stmt, 8, ( ( i->second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i->second.variance() ) ) );
-      sqlite3_bind_double( stmt, 9, ( ( i->second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i->second.total() / totalTime ) ) );
+      sqlite3_bind_text  ( stmt, 3, i.first.c_str() , -1, SQLITE_STATIC );
+      sqlite3_bind_double( stmt, 4, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.average() ) ) );
+      sqlite3_bind_double( stmt, 5, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.min() ) ) );
+      sqlite3_bind_double( stmt, 6, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.max() ) ) );
+      sqlite3_bind_int64 ( stmt, 7, int64_c   ( i.second.getCounter() ));
+      sqlite3_bind_double( stmt, 8, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.variance() ) ) );
+      sqlite3_bind_double( stmt, 9, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.total() / totalTime ) ) );
 
       sqlite3_step ( stmt );  // execute statement
       sqlite3_reset ( stmt ); // undo binding
@@ -369,7 +369,7 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
 {
    sqlite3_exec( dbHandle_, "BEGIN;",nullptr,nullptr,nullptr );
 
-   assert ( timingTreeName.length() > 0 && timingTreeName.length() < 255 );
+   assert ( !timingTreeName.empty() && timingTreeName.length() < 255 );
 
    static const char * CREATE_TIMINGTREE_TABLE =
          "CREATE TABLE IF NOT EXISTS timingTree ("
@@ -390,9 +390,9 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
    sqlite3_exec( dbHandle_, CREATE_TIMINGTREE_TABLE, nullptr,nullptr,nullptr );
 
    double totalTime = 0.0;
-   for (auto it = tt.getRawData().tree_.begin(); it != tt.getRawData().tree_.end(); ++it)
+   for (const auto & it : tt.getRawData().tree_)
    {
-      totalTime += it->second.timer_.total();
+      totalTime += it.second.timer_.total();
    }
 
    storeTimingNode(runId, std::numeric_limits<int>::max(), tt.getRawData(), timingTreeName, "Total", totalTime);
@@ -442,11 +442,11 @@ void SQLiteDB::storeTimingNode ( const uint_t runId,
    sqlite3_reset ( stmt ); // undo binding
    sqlite3_finalize( stmt ); // free prepared statement
 
-   int currentId = int_c( sqlite3_last_insert_rowid( dbHandle_ ) );
+   int const currentId = int_c( sqlite3_last_insert_rowid( dbHandle_ ) );
 
-   for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i )
+   for (const auto & i : tn.tree_)
    {
-      storeTimingNode( runId, currentId, i->second, timingTreeName, i->first, totalTime);
+      storeTimingNode( runId, currentId, i.second, timingTreeName, i.first, totalTime);
    }
 }
 

@@ -60,7 +60,7 @@ class SimpleBB : public Boundary< typename FlagField_T::flag_t >
    using Stencil_T = typename LatticeModel_T::Stencil;
    using flag_t = typename FlagField_T::flag_t;
 
-   static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+   static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
 public:
 

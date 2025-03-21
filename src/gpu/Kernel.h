@@ -124,16 +124,16 @@ namespace gpu
       //** Type checking of parameters **********************************************************************************
       /*! \name Type checking of parameters  */
       //@{
-      typedef typename std::remove_pointer<FuncPtr>::type FuncType;
+      using FuncType = std::remove_pointer_t<FuncPtr>;
 
       #define CHECK_PARAMETER_FUNC( Number ) \
       template<typename T> \
-      bool checkParameter##Number( typename std::enable_if< (FunctionTraits<FuncType>::arity > Number ), T >::type *  = 0 ) { \
+      bool checkParameter##Number( typename std::enable_if_t< (FunctionTraits<FuncType>::arity > Number ), T > *  = 0 ) { \
          typedef typename FunctionTraits<FuncType>::template argument<Number>::type ArgType; \
-         return std::is_same< T, ArgType >::value; \
+         return std::is_same_v< T, ArgType >; \
       } \
       template<typename T> \
-      bool checkParameter##Number( typename std::enable_if< (FunctionTraits<FuncType>::arity <= Number ),T >::type *  = 0 ) { \
+      bool checkParameter##Number( typename std::enable_if_t< (FunctionTraits<FuncType>::arity <= Number ),T > *  = 0 ) { \
          return false; \
       }
 
@@ -241,8 +241,8 @@ namespace gpu
 
       // register all parameters
       std::vector<void*> args;
-      for( auto paramIt = params_.begin(); paramIt != params_.end(); ++paramIt )  {
-         args.push_back( const_cast<char*>(paramIt->data()) );
+      for(const auto & param : params_)  {
+         args.push_back( const_cast<char*>(param.data()) );
       }
 
       // .. and launch the kernel

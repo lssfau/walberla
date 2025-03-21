@@ -34,9 +34,9 @@ MPI_Datatype mpiDatatypeSlice( const Field_T & field,
                                const cell_idx_t xEnd, const cell_idx_t yEnd, const cell_idx_t zEnd, const cell_idx_t fEnd )
 {
    using T = typename Field_T::value_type;
-   int sizes[4];
-   int subsizes[4];
-   int starts[4];
+   std::array<int, 4> sizes;
+   std::array<int, 4> subsizes;
+   std::array<int, 4> starts;
 
    if( field.layout() == field::fzyx )
    {
@@ -85,7 +85,7 @@ MPI_Datatype mpiDatatypeSlice( const Field_T & field,
 
    WALBERLA_DEBUG_SECTION()
    {
-      for( int i = 0; i < 4; ++i )
+      for( uint_t i = 0; i < 4; ++i )
       {
          WALBERLA_ASSERT_GREATER_EQUAL( subsizes[i], 1 );
          WALBERLA_ASSERT_LESS_EQUAL( subsizes[i], sizes[i] );
@@ -95,7 +95,7 @@ MPI_Datatype mpiDatatypeSlice( const Field_T & field,
    }
 
    MPI_Datatype newType;
-   MPI_Type_create_subarray( 4, sizes, subsizes, starts, MPI_ORDER_C, MPITrait<T>::type(), &newType );
+   MPI_Type_create_subarray( 4, sizes.data(), subsizes.data(), starts.data(), MPI_ORDER_C, MPITrait<T>::type(), &newType );
 
    return newType;
 }
@@ -137,9 +137,9 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
 
    MPI_Datatype newType = MPI_DATATYPE_NULL;
 
-   int sizes[3];
-   int subsizes[3];
-   int starts[3];
+   std::array<int, 3> sizes;
+   std::array<int, 3> subsizes;
+   std::array<int, 3> starts;
 
    sizes[0] = int_c( field.zAllocSize() );
    sizes[1] = int_c( field.yAllocSize() );
@@ -163,7 +163,7 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
 
    WALBERLA_DEBUG_SECTION()
    {
-      for( int i = 0; i < 3; ++i )
+      for( uint_t i = 0; i < 3; ++i )
       {
          WALBERLA_ASSERT_GREATER_EQUAL( starts[i], 0 );
          WALBERLA_ASSERT_LESS_EQUAL( starts[i], sizes[i] - subsizes[i] );
@@ -175,9 +175,9 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
    if( field.layout() == field::fzyx )
    {
       MPI_Datatype tmpType = MPI_DATATYPE_NULL;
-      MPI_Type_create_subarray( 3, sizes, subsizes, starts, MPI_ORDER_C, MPITrait<T>::type(), &tmpType );
+      MPI_Type_create_subarray( 3, sizes.data(), subsizes.data(), starts.data(), MPI_ORDER_C, MPITrait<T>::type(), &tmpType );
 
-      int count = int_c( fs.size() );
+      int const count = int_c( fs.size() );
       std::vector<int> displacements( std::max( fs.size(), size_t( 1 ) ) ); // if "fs" is empty create a dummy vector from so that we can take an address to the first element
       std::transform( fs.begin(), fs.end(), displacements.begin(), int_c<cell_idx_t> );
       
@@ -199,7 +199,7 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
       MPI_Datatype resizedTmpType = MPI_DATATYPE_NULL;
       MPI_Type_create_resized( tmpType, 0, int_c( field.fAllocSize() * sizeof(T) ), &resizedTmpType );
 
-      MPI_Type_create_subarray( 3, sizes, subsizes, starts, MPI_ORDER_C, resizedTmpType, &newType );
+      MPI_Type_create_subarray( 3, sizes.data(), subsizes.data(), starts.data(), MPI_ORDER_C, resizedTmpType, &newType );
 
       MPI_Type_free( &tmpType );
       MPI_Type_free( &resizedTmpType );

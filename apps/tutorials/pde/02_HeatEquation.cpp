@@ -60,13 +60,13 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       CellInterval xyz = u->xyzSize();
 
       // iterate all (inner) cells in the field
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell ){
+      for(auto cell : xyz){
 
          // obtain the physical coordinate of the center of the current cell
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
 
          // set the initial condition, given by the function u(x,y,0) = sin(PI*x)*sin(PI*y)
-         u->get( *cell ) = std::sin( math::pi * p[0] ) * std::sin( math::pi * p[1] );
+         u->get( cell ) = std::sin( math::pi * p[0] ) * std::sin( math::pi * p[1] );
       }
    }
 }

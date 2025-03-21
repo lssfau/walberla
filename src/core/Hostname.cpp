@@ -21,6 +21,8 @@
 
 #include "Hostname.h"
 
+#include <array>
+
 #include "waLBerlaDefinitions.h"
 
 #ifdef WALBERLA_CXX_COMPILER_IS_MSVC
@@ -36,9 +38,9 @@ namespace walberla {
 
 std::string getHostName()
 {
-   char hostname[255];
-   gethostname( hostname, 255 );
-   return std::string( hostname );
+   std::array< char, 255 > hostname;
+   gethostname(hostname.data(), 255);
+   return { hostname.data() };
 }
 
 } // namespace walberla

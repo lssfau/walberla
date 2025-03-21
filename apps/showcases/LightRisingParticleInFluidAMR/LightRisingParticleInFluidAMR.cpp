@@ -155,23 +155,23 @@ const FlagUID FormerMO_Flag("former moving obstacle");
 static void refinementSelection(SetupBlockForest &forest, uint_t levels, AABB refinementBox) {
    real_t dx = real_t(1); // dx on finest level
    const uint_t finestLevel = levels - uint_t(1);
-   for (auto block = forest.begin(); block != forest.end(); ++block) {
-      uint_t blockLevel = block->getLevel();
+   for (auto & block : forest) {
+      uint_t blockLevel = block.getLevel();
       uint_t levelScalingFactor = (uint_t(1) << (finestLevel - blockLevel));
       real_t dxOnLevel = dx * real_c(levelScalingFactor);
-      AABB blockAABB = block->getAABB();
+      AABB blockAABB = block.getAABB();
       // extend block AABB by ghostlayers
       AABB extendedBlockAABB = blockAABB.getExtended(dxOnLevel * real_c(FieldGhostLayers));
       if (extendedBlockAABB.intersects(refinementBox))
          if (blockLevel < finestLevel) // only if the block is not on the finest level
-            block->setMarker(true);
+            block.setMarker(true);
    }
 }
 
 static void workloadAndMemoryAssignment(SetupBlockForest &forest) {
-   for (auto block = forest.begin(); block != forest.end(); ++block) {
-      block->setWorkload(numeric_cast<workload_t>(uint_t(1) << block->getLevel()));
-      block->setMemory(numeric_cast<memory_t>(1));
+   for (auto & block : forest) {
+      block.setWorkload(numeric_cast<workload_t>(uint_t(1) << block.getLevel()));
+      block.setMemory(numeric_cast<memory_t>(1));
    }
 }
 static shared_ptr<StructuredBlockForest>
@@ -212,7 +212,7 @@ createBlockStructure(const AABB &domainAABB, Vector3<uint_t> blockSizeInCells, u
       WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
       sforest.addRefinementSelectionFunction(
-              std::bind(refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox));
+              [numberOfLevels, refinementBox](SetupBlockForest& block) { refinementSelection(block, numberOfLevels, refinementBox); });
       sforest.addWorkloadMemorySUIDAssignmentFunction(workloadAndMemoryAssignment);
 
       sforest.init(domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1],
@@ -922,7 +922,7 @@ int main(int argc, char** argv) {
    // add velocity field and utility
    BlockDataID velocityFieldID = field::addToStorage<VelocityField_T>( blocks, "velocity field", Vector3<real_t>(real_t(0)), field::fzyx, uint_t(2) );
 
-   typedef lbm::VelocityFieldWriter< PdfField_T, VelocityField_T > VelocityFieldWriter_T;
+   using VelocityFieldWriter_T = lbm::VelocityFieldWriter<PdfField_T, VelocityField_T>;
    BlockSweepWrapper< VelocityFieldWriter_T > velocityFieldWriter( blocks, VelocityFieldWriter_T( pdfFieldID, velocityFieldID ) );
 
    shared_ptr<blockforest::communication::NonUniformBufferedScheme<stencil::D3Q27> > velocityCommunicationScheme = make_shared<blockforest::communication::NonUniformBufferedScheme<stencil::D3Q27> >( blocks );
@@ -931,7 +931,7 @@ int main(int argc, char** argv) {
    // add q criterion field (only needed for mesh output)
    BlockDataID qCriterionFieldID = field::addToStorage<QCriterionField_T>(blocks, "q criterion field", real_t(0), field::fzyx, uint_t(1));
 
-   typedef lbm::QCriterionFieldWriter<VelocityField_T, QCriterionField_T, FluidFilter_T> QCriterionFieldWriter_T;
+   using QCriterionFieldWriter_T = lbm::QCriterionFieldWriter<VelocityField_T, QCriterionField_T, FluidFilter_T>;
    BlockSweepWrapper<QCriterionFieldWriter_T> qCriterionFieldWriter(blocks, QCriterionFieldWriter_T(blocks, velocityFieldID,
            qCriterionFieldID, fluidFlagFieldEvaluationFilter));
 

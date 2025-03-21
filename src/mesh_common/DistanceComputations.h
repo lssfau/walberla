@@ -38,10 +38,10 @@ namespace mesh {
 template< typename MeshType >
 struct DistanceProperties
 {
-   typedef OpenMesh::VectorT< typename MeshType::Scalar, 2 > Vec2;
-   typedef OpenMesh::VectorT< typename MeshType::Scalar, 3 > Vec3;
-   typedef typename MeshType::Scalar Scalar;
-   typedef math::Matrix3<Scalar> Matrix;
+   using Vec2 = OpenMesh::VectorT<typename MeshType::Scalar, 2>;
+   using Vec3 = OpenMesh::VectorT<typename MeshType::Scalar, 3>;
+   using Scalar = typename MeshType::Scalar;
+   using Matrix = math::Matrix3<Scalar>;
 
    // Dummy constructor to suppress GCC 7 warnings
    DistanceProperties() : e0(real_t(0)), e1(real_t(0)), e2(real_t(0)),
@@ -89,12 +89,12 @@ template< typename MeshType >
 class TriangleDistance
 {
 public:
-   typedef typename MeshType::Scalar     Scalar;
-   typedef typename MeshType::Point      Point;
-   typedef typename MeshType::Normal     Normal;
-   typedef typename MeshType::FaceHandle FaceHandle;
-   typedef math::Vector3<Scalar>         Vec3;
-   typedef math::GenericAABB<Scalar>     BoundingBox;
+   using Scalar = typename MeshType::Scalar;
+   using Point = typename MeshType::Point;
+   using Normal = typename MeshType::Normal;
+   using FaceHandle = typename MeshType::FaceHandle;
+   using Vec3 = math::Vector3<Scalar>;
+   using BoundingBox = math::GenericAABB<Scalar>;
 
    TriangleDistance( const shared_ptr<MeshType> & mesh )
       : mesh_(mesh), distanceProperties_( *mesh, "DistanceProperties" ) 
@@ -185,7 +185,7 @@ public:
    void triangleToStream( const FaceHandle fh, std::ostream & os ) const;
 
 protected:
-   typedef typename OpenMesh::FPropHandleT< DistanceProperties<MeshType> > DistancePropertyHandle;
+   using DistancePropertyHandle = typename OpenMesh::FPropHandleT<DistanceProperties<MeshType>>;
 
    void computeNormals();
    void computeDistanceProperties();

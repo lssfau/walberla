@@ -30,7 +30,7 @@ namespace blockforest {
 
 
 // see: "Dynamic Octree Load Balancing Using Space-Filling Curves", Campbell, Devine, Gervasio, Teresco, 2003
-static const uint_t hilbertOrder[24][8] = { { 0, 1, 3, 2, 6, 7, 5, 4 },
+static const std::array< std::array< uint_t , 8 >, 24 > hilbertOrder { { { 0, 1, 3, 2, 6, 7, 5, 4 },
                                             { 0, 4, 6, 2, 3, 7, 5, 1 },
                                             { 0, 1, 5, 4, 6, 7, 3, 2 },
                                             { 5, 1, 0, 4, 6, 2, 3, 7 },
@@ -53,9 +53,9 @@ static const uint_t hilbertOrder[24][8] = { { 0, 1, 3, 2, 6, 7, 5, 4 },
                                             { 5, 7, 6, 4, 0, 2, 3, 1 },
                                             { 3, 2, 6, 7, 5, 4, 0, 1 },
                                             { 3, 1, 0, 2, 6, 4, 5, 7 },
-                                            { 3, 1, 5, 7, 6, 4, 0, 2 } };
+                                            { 3, 1, 5, 7, 6, 4, 0, 2 } } };
 
-static const uint_t hilbertOrientation[24][8] = { {  1,  2,  0,  3,  4,  0,  5,  6 },
+static const std::array< std::array< uint_t , 8 >, 24 > hilbertOrientation { { {  1,  2,  0,  3,  4,  0,  5,  6 },
                                                   {  0,  7,  1,  8,  5,  1,  4,  9 },
                                                   { 15,  0,  2, 22, 20,  2, 19, 23 },
                                                   { 20,  6,  3, 23, 15,  3, 16, 22 },
@@ -78,7 +78,7 @@ static const uint_t hilbertOrientation[24][8] = { {  1,  2,  0,  3,  4,  0,  5, 
                                                   {  3, 12, 20, 13, 16, 20, 15,  4 },
                                                   { 23, 18, 21, 10, 14, 21,  9, 15 },
                                                   {  4, 23, 22,  6,  1, 22, 11,  3 },
-                                                  { 21, 22, 23,  0,  9, 23, 14,  2 } };
+                                                  { 21, 22, 23,  0,  9, 23, 14,  2 } } };
 
 
 

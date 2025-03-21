@@ -530,7 +530,7 @@ void testConstructors( const T x0, const T y0, const T z0, const T x1, const T y
 template< typename T >
 void randomTest()
 {
-   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   using mt11213b = std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 >;
    mt11213b rng;
 
    std::uniform_real_distribution<T> dist( -T(10), T(10) );

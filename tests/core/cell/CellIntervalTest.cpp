@@ -30,7 +30,8 @@
 
 using namespace walberla;
 
-typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+using mt11213b = std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7,
+                                               0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 >;
 
 CellInterval makeRandomInterval(uint_t maxSize)
 {
@@ -46,7 +47,7 @@ CellInterval makeRandomInterval(uint_t maxSize)
    cell_idx_t yMax = yMin + cell_idx_c( dist2(rng) );
    cell_idx_t zMax = zMin + cell_idx_c( dist2(rng) );
 
-   return CellInterval(xMin, yMin, zMin, xMax, yMax, zMax);
+   return { xMin, yMin, zMin, xMax, yMax, zMax };
 }
 
 CellInterval makeRandomEmptyInterval(uint_t maxSize)
@@ -77,14 +78,14 @@ CellInterval makeRandomEmptyInterval(uint_t maxSize)
    cell_idx_t yMax = yMin + ( yNegative ? - cell_idx_c( dist2(rng) ) : cell_idx_c( dist2(rng) ) );
    cell_idx_t zMax = zMin + ( zNegative ? - cell_idx_c( dist2(rng) ) : cell_idx_c( dist2(rng) ) );
 
-   return CellInterval(xMin, yMin, zMin, xMax, yMax, zMax);
+   return { xMin, yMin, zMin, xMax, yMax, zMax };
 }
 
 Cell makeRandomCell()
 {
    static mt11213b rng;
    std::uniform_int_distribution<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min(), std::numeric_limits<cell_idx_t>::max() );
-   return Cell( dist(rng), dist(rng), dist(rng) );
+   return { dist(rng), dist(rng), dist(rng) };
 }
 
 inline void testCI( const CellInterval & ci )

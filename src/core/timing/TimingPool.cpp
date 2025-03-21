@@ -395,9 +395,9 @@ void TimingPool<TP>::unifyRegisteredTimersAcrossProcesses()
       names.push_back( timer->first );
 
    auto gatheredNames = mpi::allReduceSet( names, mpi::UNION );
-   for( auto name = gatheredNames.begin(); name != gatheredNames.end(); ++name )
-      if( !timerExists(*name) )
-         registerTimer( *name );
+   for(auto & gatheredName : gatheredNames)
+      if( !timerExists(gatheredName) )
+         registerTimer( gatheredName );
 }
 
 

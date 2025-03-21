@@ -276,7 +276,7 @@ public:
    uint_t getTreeId()    const { return id_; }
    uint_t getTreeIndex() const { return id_ - uintPow2( getUsedBits() - 1 ); }
 
-   BlockID getSuperId()  const { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); return BlockID( id_ >> 3 ); }
+   BlockID getSuperId()  const { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); return { id_ >> 3 }; }
    BlockID getFatherId() const { return getSuperId(); }
 
    void   appendBranchId( const uint_t branchId ) { WALBERLA_ASSERT_LESS_EQUAL( getUsedBits() + 3, math::UINT_BITS ); WALBERLA_ASSERT_LESS( branchId, 8 ); id_ = (id_ << 3) + branchId; }

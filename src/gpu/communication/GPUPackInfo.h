@@ -74,32 +74,32 @@ template<typename GPUField_T>
 class GPUPackInfo : public walberla::communication::UniformPackInfo
 {
 public:
-   typedef typename GPUField_T::value_type FieldType;
+   using FieldType = typename GPUField_T::value_type;
 
    GPUPackInfo( const BlockDataID & bdId )
    : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 ),
-     copyAsync_( false ), communicationStream_( 0 )
+     copyAsync_( false ), communicationStream_( nullptr )
    {
    }
 
    GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers )
    : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers ),
-     copyAsync_( false ), communicationStream_( 0 )
+     copyAsync_( false ), communicationStream_( nullptr )
    {
    }
 
-   virtual ~GPUPackInfo() {}
+   ~GPUPackInfo() override = default;
 
-   bool constantDataExchange() const { return mpi::BufferSizeTrait<FieldType>::constantSize; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return mpi::BufferSizeTrait<FieldType>::constantSize; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer);
+   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer) override;
 
-   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir);
+   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir) override;
 
    void setCommunicationStream( gpuStream_t stream )
    {
-      if ( stream != 0 )
+      if ( stream != nullptr )
       {
          copyAsync_ = true;
          communicationStream_ = stream;
@@ -107,7 +107,7 @@ public:
    }
 
 protected:
-   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const;
+   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const override;
 
    uint_t numberOfGhostLayersToCommunicate( const GPUField_T * const field ) const;
 

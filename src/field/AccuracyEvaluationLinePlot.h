@@ -93,19 +93,19 @@ inline void accuracyEvaluationLinePlotIO( std::ofstream & file, const std::vecto
 {
    file << "# position [1] [2] [3], simulation [4] [5] [6], exact solution [7] [8] [9], "
            "|| u - u_exact || / || u_exact || (rel. error) [10], || u - u_exact || (abs. error) [11]\n";
-   for( auto point = points.begin(); point != points.end(); ++point )
+   for(const auto & point : points)
    {
-      Vector3< real_t > diff = point->value - point->solution;
-      file << point->center[0] << " "
-           << point->center[1] << " "
-           << point->center[2] << " "
-           << point->value[0] << " "
-           << point->value[1] << " "
-           << point->value[2] << " "
-           << point->solution[0] << " "
-           << point->solution[1] << " "
-           << point->solution[2] << " "
-           << ( diff.length() / point->solution.length() ) << " "
+      Vector3< real_t > const diff = point.value - point.solution;
+      file << point.center[0] << " "
+           << point.center[1] << " "
+           << point.center[2] << " "
+           << point.value[0] << " "
+           << point.value[1] << " "
+           << point.value[2] << " "
+           << point.solution[0] << " "
+           << point.solution[1] << " "
+           << point.solution[2] << " "
+           << ( diff.length() / point.solution.length() ) << " "
            << diff.length() << "\n";
    }
 }
@@ -218,7 +218,7 @@ public:
       relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
-      static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+      static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
                      "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
 
       auto _blocks = blocks_.lock();
@@ -444,7 +444,7 @@ inline void accuracyEvaluationLinePlotConfigParser( const Config::BlockHandle & 
 {
    if( parentBlockHandle )
    {
-      Config::BlockHandle block = parentBlockHandle.getBlock( configBlockName );
+      Config::BlockHandle const block = parentBlockHandle.getBlock( configBlockName );
       if( block )
       {
          defaultYAxis = block.getParameter< bool >( "y", defaultYAxis );
@@ -657,7 +657,7 @@ inline void accuracyEvaluationLinePlotterConfigParser( const Config::BlockHandle
 {
    if( parentBlockHandle )
    {
-      Config::BlockHandle block = parentBlockHandle.getBlock( configBlockName );
+      Config::BlockHandle const block = parentBlockHandle.getBlock( configBlockName );
       if( block )
       {
          defaultEvaluationFrequency = block.getParameter< uint_t >( "frequency", defaultEvaluationFrequency );

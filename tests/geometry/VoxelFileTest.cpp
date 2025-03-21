@@ -31,7 +31,7 @@
 
 #include <random>
 
-typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+using mt11213b = std::mersenne_twister_engine<walberla::uint32_t, 32, 351, 175, 19, 3433795303U, 11, 4294967295U, 7, 834054912, 15, 4293197824U, 17, 2742893714U>;
 
 /// randomize the memory underlying the vector up the maximal size (== capacity)
 template<typename T>
@@ -42,7 +42,7 @@ void randomizeVector( std::vector<T> & v )
    mt11213b rng;
    std::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
 
-   size_t oldSize = v.size();
+   size_t const oldSize = v.size();
    v.resize( v.capacity() );
    for(typename std::vector<T>::iterator it = v.begin(); it != v.end(); ++it)
       *it = dist(rng);
@@ -55,10 +55,10 @@ void randomizeVector( std::vector<unsigned char> & v )
    mt11213b rng;
    std::uniform_int_distribution<walberla::int16_t> dist( std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max() );
 
-   size_t oldSize = v.size();
+   size_t const oldSize = v.size();
    v.resize( v.capacity() );
-   for(typename std::vector<unsigned char>::iterator it = v.begin(); it != v.end(); ++it)
-      *it = static_cast<unsigned char>( dist(rng) );
+   for(unsigned char & it : v)
+      it = static_cast<unsigned char>( dist(rng) );
    v.resize(oldSize);
 }
 
@@ -68,10 +68,10 @@ void randomizeVector( std::vector<char> & v )
    mt11213b rng;
    std::uniform_int_distribution<int16_t> dist( std::numeric_limits<char>::min(), std::numeric_limits<char>::max() );
 
-   size_t oldSize = v.size();
+   size_t const oldSize = v.size();
    v.resize( v.capacity() );
-   for(typename std::vector<char>::iterator it = v.begin(); it != v.end(); ++it)
-      *it = static_cast<char>( dist(rng) );
+   for(char & it : v)
+      it = static_cast<char>( dist(rng) );
    v.resize(oldSize);
 }
 
@@ -92,8 +92,8 @@ void makeRandomMultiArray( std::vector<unsigned char> & ma) {
    mt11213b rng;
    std::uniform_int_distribution<walberla::int16_t> dist(std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max());
 
-   for (auto it = ma.begin(); it != ma.end(); ++it)
-      *it = static_cast<unsigned char>( dist(rng));
+   for (unsigned char & it : ma)
+      it = static_cast<unsigned char>( dist(rng));
 }
 
 template<>
@@ -101,8 +101,8 @@ void makeRandomMultiArray( std::vector<char> & ma)
 {
    mt11213b rng;
    std::uniform_int_distribution<int16_t> dist( std::numeric_limits<char>::min(), std::numeric_limits<char>::max() );
-   for (auto it = ma.begin(); it != ma.end(); ++it)
-      *it = static_cast<char>( dist(rng) );
+   for (char & it : ma)
+      it = static_cast<char>( dist(rng) );
 }
 
 template<typename T>
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 
    WALBERLA_LOG_INFO("Starting test!");
 
-   bool longrun = std::find(argv, argv + argc, std::string("--longrun")) != argv + argc;
+   bool const longrun = std::find(argv, argv + argc, std::string("--longrun")) != argv + argc;
 
    std::vector<size_t> sizes;
    if(longrun)
@@ -133,27 +133,27 @@ int main(int argc, char** argv)
 
    for(std::vector<size_t>::const_iterator xSize = sizes.begin(); xSize != sizes.end(); ++xSize)
       for(std::vector<size_t>::const_iterator ySize = sizes.begin(); ySize != sizes.end(); ++ySize)
-         for(std::vector<size_t>::const_iterator zSize = sizes.begin(); zSize != sizes.end(); ++zSize)
+         for(unsigned long const size : sizes)
          {
             std::stringstream ss;
-            ss << "geometry_testfile_" << *xSize << "_" << *ySize << "_" << *zSize << ".dat";
+            ss << "geometry_testfile_" << *xSize << "_" << *ySize << "_" << size << ".dat";
 
-            std::string filename = ss.str();
+            std::string const filename = ss.str();
 
-            runTests<unsigned char>(filename, *xSize, *ySize, *zSize);
+            runTests<unsigned char>(filename, *xSize, *ySize, size);
 
             if(longrun)
             {
-               runTests<char>(filename, *xSize, *ySize, *zSize);
+               runTests<char>(filename, *xSize, *ySize, size);
 
-               runTests<short>(filename, *xSize, *ySize, *zSize);
-               runTests<unsigned short>(filename, *xSize, *ySize, *zSize);
+               runTests<short>(filename, *xSize, *ySize, size);
+               runTests<unsigned short>(filename, *xSize, *ySize, size);
 
-               runTests<int>(filename, *xSize, *ySize, *zSize);
-               runTests<unsigned int>(filename, *xSize, *ySize, *zSize);
+               runTests<int>(filename, *xSize, *ySize, size);
+               runTests<unsigned int>(filename, *xSize, *ySize, size);
 
-               runTests<long>(filename, *xSize, *ySize, *zSize);
-               runTests<unsigned long>(filename, *xSize, *ySize, *zSize);
+               runTests<long>(filename, *xSize, *ySize, size);
+               runTests<unsigned long>(filename, *xSize, *ySize, size);
             }
          }
 }
@@ -166,13 +166,13 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    WALBERLA_LOG_INFO( "Running Test with size " << xSize << "x" << ySize << "x" << zSize << " T = " << typeid(T).name() );
 
-   filesystem::path path(filename);
+   filesystem::path const path(filename);
 
    if( filesystem::exists( path ) )
       filesystem::remove( path );
 
-   CellInterval aabb(0, 0, 0, cell_idx_c(xSize - 1), cell_idx_c(ySize - 1), cell_idx_c(zSize - 1));
-   uint_t numCells = aabb.numCells();
+   CellInterval const aabb(0, 0, 0, cell_idx_c(xSize - 1), cell_idx_c(ySize - 1), cell_idx_c(zSize - 1));
+   uint_t const numCells = aabb.numCells();
 
    VoxelFileReader<T> geometryFile(filename, xSize, ySize, zSize);
 
@@ -301,10 +301,7 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    if( zSize > size_t( 1 ) )
       blockSizesZ.push_back(std::max(zSize / 2 - 1, size_t(1)));
 
-   for( auto xit = blockSizesX.begin(); xit != blockSizesX.end(); ++xit ) { size_t blockSizeX = *xit;
-      for( auto yit = blockSizesY.begin(); yit != blockSizesY.end(); ++yit ) { size_t blockSizeY = *yit;
-         for( auto zit = blockSizesZ.begin(); zit != blockSizesZ.end(); ++zit ) { size_t blockSizeZ = *zit;
-            for(size_t zz = 0; zz <= (zSize - 1) / blockSizeZ; ++zz) {
+   for(unsigned long const blockSizeX : blockSizesX) { for(unsigned long const blockSizeY : blockSizesY) { for(unsigned long const blockSizeZ : blockSizesZ) { for(size_t zz = 0; zz <= (zSize - 1) / blockSizeZ; ++zz) {
                for(size_t yy = 0; yy <= (ySize - 1) / blockSizeY; ++yy) {
                   for(size_t xx = 0; xx <= (xSize - 1) / blockSizeX; ++xx)
                   {
@@ -352,10 +349,7 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    geometryFile.create(filename, xSize, ySize, zSize);
 
-   for( auto xit = blockSizesX.begin(); xit != blockSizesX.end(); ++xit ) { size_t blockSizeX = *xit;
-      for( auto yit = blockSizesY.begin(); yit != blockSizesY.end(); ++yit ) { size_t blockSizeY = *yit;
-         for( auto zit = blockSizesZ.begin(); zit != blockSizesZ.end(); ++zit ) { size_t blockSizeZ = *zit;
-            for(size_t zz = 0; zz <= (zSize - 1) / blockSizeZ; ++zz) {
+   for(unsigned long const blockSizeX : blockSizesX) { for(unsigned long const blockSizeY : blockSizesY) { for(unsigned long const blockSizeZ : blockSizesZ) { for(size_t zz = 0; zz <= (zSize - 1) / blockSizeZ; ++zz) {
                for(size_t yy = 0; yy <= (ySize - 1) / blockSizeY; ++yy) {
                   for(size_t xx = 0; xx <= (xSize - 1) / blockSizeX; ++xx)
                   {
@@ -460,10 +454,10 @@ void modifyHeader(std::string inputFilename, std::string outputFilename,
 
    while(!is.eof())
    {
-      char buffer[1024];
-      is.read(buffer, 1024);
-      std::streamsize bytesRead = is.gcount();
-      os.write( buffer, bytesRead );
+      std::array<char, 1024> buffer;
+      is.read(buffer.data(), 1024);
+      std::streamsize const bytesRead = is.gcount();
+      os.write( buffer.data(), bytesRead );
       WALBERLA_CHECK( is.eof() || !is.fail() );
       WALBERLA_CHECK( !os.fail() );
    }

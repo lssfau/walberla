@@ -32,7 +32,7 @@ namespace psm
 namespace gpu
 {
 
-__device__ void cross(real_t* __restrict__ const crossResult, const real_t* __restrict__ const lhs,
+inline __device__ void cross(real_t* __restrict__ const crossResult, const real_t* __restrict__ const lhs,
                       const real_t* __restrict__ const rhs)
 {
    crossResult[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
@@ -40,20 +40,20 @@ __device__ void cross(real_t* __restrict__ const crossResult, const real_t* __re
    crossResult[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
 }
 
-__device__ void getVelocityAtWFPoint(real_t* __restrict__ const velocityAtWFPoint,
+inline __device__ void getVelocityAtWFPoint(real_t* __restrict__ const velocityAtWFPoint,
                                      const real_t* __restrict__ const linearVelocity,
                                      const real_t* __restrict__ const angularVelocity,
                                      const real_t* __restrict__ const position, const real_t* __restrict__ const wf_pt)
 {
-   real_t crossResult[3];
-   real_t rhs[] = { wf_pt[0] - position[0], wf_pt[1] - position[1], wf_pt[2] - position[2] };
+   real_t crossResult[3]; // NOLINT(*-avoid-c-arrays)
+   real_t rhs[] = { wf_pt[0] - position[0], wf_pt[1] - position[1], wf_pt[2] - position[2] }; // NOLINT(*-avoid-c-arrays)
    cross(crossResult, angularVelocity, rhs);
    velocityAtWFPoint[0] = linearVelocity[0] + crossResult[0];
    velocityAtWFPoint[1] = linearVelocity[1] + crossResult[1];
    velocityAtWFPoint[2] = linearVelocity[2] + crossResult[2];
 }
 
-__device__ void addHydrodynamicForceTorqueAtWFPosAtomic(real_t* __restrict__ const particleForce,
+inline __device__ void addHydrodynamicForceTorqueAtWFPosAtomic(real_t* __restrict__ const particleForce,
                                                         real_t* __restrict__ const particleTorque,
                                                         const real_t* __restrict__ const f,
                                                         const real_t* __restrict__ const pos,
@@ -73,8 +73,8 @@ __device__ void addHydrodynamicForceTorqueAtWFPosAtomic(real_t* __restrict__ con
    unsafeAtomicAdd(&(particleForce[2]), f[2]);
 #endif
 
-   real_t torque[] = { 0.0, 0.0, 0.0 };
-   real_t lhs[]    = { wf_pt[0] - pos[0], wf_pt[1] - pos[1], wf_pt[2] - pos[2] };
+   real_t torque[] = { 0.0, 0.0, 0.0 }; // NOLINT(*-avoid-c-arrays)
+   real_t lhs[]    = { wf_pt[0] - pos[0], wf_pt[1] - pos[1], wf_pt[2] - pos[2] }; // NOLINT(*-avoid-c-arrays)
    cross(torque, lhs, f);
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)

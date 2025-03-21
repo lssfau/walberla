@@ -315,7 +315,7 @@ void ContainmentOctree<DistanceObjectT>::writeVTKOutput( const std::string & fil
    while( !nodeQueue.empty() )
    {
       const Node * frontNode = nodeQueue.front();
-      uint8_t depth = depthQueue.front();
+      uint8_t const depth = depthQueue.front();
       nodeQueue.pop();
       depthQueue.pop();
 

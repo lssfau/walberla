@@ -257,9 +257,9 @@ public:
    shared_ptr< BlockDataHandlingWrapper > getDataHandling( IBlock const * const block, const Set<SUID> & state = Set<SUID>::emptySet() )
    {
       shared_ptr< BlockDataHandlingWrapper > dataHandling;
-      
-      Set<SUID> selection( uid::globalState() + block->getState() + state );
-      size_t numMatches = dataHandling_.get( dataHandling, selection );
+
+      const Set<SUID> selection( uid::globalState() + block->getState() + state );
+      const size_t  numMatches = dataHandling_.get( dataHandling, selection );
 
       if( numMatches > size_t(1) )
       {

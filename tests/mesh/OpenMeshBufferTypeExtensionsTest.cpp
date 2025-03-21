@@ -45,10 +45,10 @@ void test( const T & in )
    WALBERLA_CHECK_EQUAL( in, out );
 }
 
-int main( int /*argc*/, char * /*argv*/[] )
+int main( int /*argc*/, char ** /*argv*/ )
 {
    debug::enterTestMode();
-   
+
    test( OpenMesh::VertexHandle( 42 ) );
    test( OpenMesh::FaceHandle( 42 ) );
    test( OpenMesh::EdgeHandle( 42 ) );

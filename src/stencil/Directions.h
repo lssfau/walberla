@@ -105,25 +105,25 @@ namespace stencil {
    };
 
    /// The x component for each direction  \ingroup stencil
-   const int cx[NR_OF_DIRECTIONS] =  {
+   const std::array< int, NR_OF_DIRECTIONS > cx  {
    // C   N   S   W   E   T   B  NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE TNE TNW TSE TSW BNE BNW BSE BSW
       0,  0,  0, -1,  1,  0,  0, -1,  1, -1,  1,  0,  0, -1,  1,  0,  0, -1,  1,  1, -1,  1, -1,  1, -1,  1, -1
    };
 
    /// The y component for each direction \ingroup stencil
-   const int cy[NR_OF_DIRECTIONS] =  {
+   const std::array< int, NR_OF_DIRECTIONS > cy  {
    // C   N   S   W   E   T   B  NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE TNE TNW TSE TSW BNE BNW BSE BSW
       0,  1, -1,  0,  0,  0,  0,  1,  1, -1, -1,  1, -1,  0,  0,  1, -1,  0,  0,  1,  1, -1, -1,  1,  1, -1, -1
    };
 
    /// The z component for each direction \ingroup stencil
-   const int cz[NR_OF_DIRECTIONS] =  {
+   const std::array< int, NR_OF_DIRECTIONS > cz  {
    // C   N   S   W   E   T   B  NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE TNE TNW TSE TSW BNE BNW BSE BSW
       0,  0,  0,  0,  0,  1, -1,  0,  0,  0,  0,  1,  1,  1,  1, -1, -1, -1, -1,  1,  1,  1,  1, -1, -1, -1, -1
    };
 
    /// The x,y,z component for each direction \ingroup stencil
-   const int c[3][NR_OF_DIRECTIONS] = {
+   const std::array< std::array< int, NR_OF_DIRECTIONS >, 3 > c { {
       {
    // C   N   S   W   E   T   B  NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE TNE TNW TSE TSW BNE BNW BSE BSW
       0,  0,  0, -1,  1,  0,  0, -1,  1, -1,  1,  0,  0, -1,  1,  0,  0, -1,  1,  1, -1,  1, -1,  1, -1,  1, -1
@@ -134,30 +134,30 @@ namespace stencil {
    // C   N   S   W   E   T   B  NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE TNE TNW TSE TSW BNE BNW BSE BSW
       0,  0,  0,  0,  0,  1, -1,  0,  0,  0,  0,  1,  1,  1,  1, -1, -1, -1, -1,  1,  1,  1,  1, -1, -1, -1, -1
       }
-   };
+   } };
 
 
    /// Maps a (x,y,z) direction vector to its direction \ingroup stencil
    inline Direction vectorToDirection(cell_idx_t x, cell_idx_t y, cell_idx_t z){
-      static const Direction vecToDirArr[3][3][3] = {
-         {  // x = -1
+      static const std::array< std::array< std::array< Direction, 3 >, 3 >, 3 > vecToDirArr {{
+         {{  // x = -1
             {BSW, SW, TSW},   // y = -1
             {BW, W, TW},      // y = 0
             {BNW, NW, TNW}    // y = 1
-         },
-         {  // x = 0
+         }},
+         {{  // x = 0
             {BS, S, TS},      // y = -1
             {B, C, T},        // y = 0
             {BN, N, TN}       // y = 1
-         },
-         {  // x = 1
+         }},
+         {{  // x = 1
             {BSE, SE, TSE},   // y = -1
             {BE, E, TE},      // y = 0
             {BNE, NE, TNE}    // y = 1
-         }
-      };
+         }}
+      }};
 
-      return vecToDirArr[x + 1][y + 1][z + 1];
+      return vecToDirArr[uint32_c(x + 1)][uint32_c(y + 1)][uint32_c(z + 1)];
    }
 
    inline Direction vectorToDirection(Vector3< cell_idx_t > vec){
@@ -170,7 +170,7 @@ namespace stencil {
 
 
    /// The x,y,z component for each normalized direction \ingroup stencil
-   const real_t cNorm[3][NR_OF_DIRECTIONS] = {
+   const std::array< std::array< real_t, NR_OF_DIRECTIONS >, 3 > cNorm { {
       {
          real_t(0), real_t(0), real_t(0), real_t(-1), real_t(1), real_t(0), real_t(0), real_t(-1) / std::sqrt( real_t(2) ),
          real_t(1) / std::sqrt( real_t(2) ), real_t(-1) / std::sqrt( real_t(2) ), real_t(1) / std::sqrt( real_t(2) ), real_t(0), real_t(0),
@@ -194,31 +194,31 @@ namespace stencil {
          real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ), real_t(-1) / std::sqrt( real_t(3) ),
          real_t(-1) / std::sqrt( real_t(3) )
       }
-   };
+   } };
 
    /// String representation for each direction \ingroup stencil
-   const std::string dirToString[NR_OF_DIRECTIONS] =  {
+   const std::array< std::string, NR_OF_DIRECTIONS > dirToString {
       "C", "N", "S", "W", "E", "T", "B",
       "NW", "NE", "SW", "SE", "TN", "TS", "TW", "TE", "BN", "BS", "BW","BE",
       "TNE", "TNW", "TSE", "TSW", "BNE", "BNW", "BSE", "BSW",
    };
 
    /// Binary encoded direction for each direction \ingroup stencil
-   const BinaryDirection dirToBinary[27] = {
+   const std::array< BinaryDirection, NR_OF_DIRECTIONS > dirToBinary {
       Bin_C, Bin_N, Bin_S, Bin_W, Bin_E, Bin_T, Bin_B,
       Bin_NW, Bin_NE, Bin_SW, Bin_SE, Bin_TN, Bin_TS, Bin_TW, Bin_TE, Bin_BN, Bin_BS, Bin_BW, Bin_BE,
       Bin_TNE, Bin_TNW, Bin_TSE, Bin_TSW, Bin_BNE, Bin_BNW, Bin_BSE, Bin_BSW,
    };
 
    /// Inverse directions  \ingroup stencil
-   const Direction inverseDir[NR_OF_DIRECTIONS] = {
+   const std::array< Direction, NR_OF_DIRECTIONS > inverseDir {
       C, S, N, E, W, B, T,
       SE, SW, NE, NW, BS, BN, BE, BW, TS, TN, TE, TW,
       BSW, BSE, BNW, BNE, TSW, TSE, TNW, TNE
    };
 
    /// Length for each direction \ingroup stencil
-   const real_t dirLength [NR_OF_DIRECTIONS] = {
+   const std::array< real_t, NR_OF_DIRECTIONS > dirLength {
         real_t(0), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1),
         std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), 
         std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ), std::sqrt( real_t(2) ),
@@ -228,9 +228,7 @@ namespace stencil {
    };
 
 
-   const real_t gaussianWeights [NR_OF_DIRECTIONS] =
-   {
-      //C  N   S   W   E   T   B   NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE  TNE TNW TSE TSW BNE BNW BSE BSW
+   const std::array< real_t, NR_OF_DIRECTIONS > gaussianWeights {
       real_t(8) / real_t(64),
       real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64),
       real_t(4) / real_t(64), real_t(4) / real_t(64),
@@ -242,9 +240,7 @@ namespace stencil {
    };
 
 
-   const uint_t gaussianMultipliers [NR_OF_DIRECTIONS] =
-   {
-      //C  N   S   W   E   T   B   NW  NE  SW  SE  TN  TS  TW  TE  BN  BS  BW  BE  TNE TNW TSE TSW BNE BNW BSE BSW
+   const std::array< uint_t, NR_OF_DIRECTIONS > gaussianMultipliers {
       uint_t(8u),
       uint_t(4u), uint_t(4u), uint_t(4u), uint_t(4u) ,
       uint_t(4u), uint_t(4u),
@@ -257,21 +253,21 @@ namespace stencil {
 
 
    /// The mirrored directions (flip W-E)  \ingroup stencil
-   const Direction mirrorX[NR_OF_DIRECTIONS] = {
+   const std::array< Direction, NR_OF_DIRECTIONS > mirrorX {
       C, N, S, E, W, T, B,
       NE, NW, SE, SW, TN, TS, TE, TW, BN, BS, BE, BW,
       TNW, TNE, TSW, TSE, BNW, BNE, BSW, BSE
    };
 
    /// The mirrored directions (flip N-S) \ingroup stencil
-   const Direction mirrorY[NR_OF_DIRECTIONS] = {
+   const std::array< Direction, NR_OF_DIRECTIONS > mirrorY {
       C, S, N, W, E, T, B,
       SW, SE, NW, NE, TS, TN, TW, TE, BS, BN, BW, BE,
       TSE, TSW, TNE, TNW, BSE, BSW, BNE, BNW
    };
 
    /// The mirrored directions (flip T-B) \ingroup stencil
-   const Direction mirrorZ[NR_OF_DIRECTIONS] = {
+   const std::array< Direction, NR_OF_DIRECTIONS > mirrorZ {
       C, N, S, W, E, B, T,
       NW, NE, SW, SE, BN, BS, BW, BE, TN, TS, TW, TE,
       BNE, BNW, BSE, BSW, TNE, TNW, TSE, TSW
@@ -288,7 +284,7 @@ namespace stencil {
             cout << pdfField.get(x,y,z, D3Q19::idx[ map2Dto3D[0][*i] ] ) << endl;
        \endcode
    */
-   const Direction map2Dto3D[3][NR_OF_DIRECTIONS] =
+   const std::array< std::array< Direction, NR_OF_DIRECTIONS >, 3 > map2Dto3D {
    {
             { C, T, B, S, N, INVALID_DIR, INVALID_DIR, TS, TN, BS, BN,
               INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR,
@@ -301,7 +297,7 @@ namespace stencil {
             { C, N, S, W, E, INVALID_DIR, INVALID_DIR, NW, NE, SW, SE,
               INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR,
               INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR, INVALID_DIR }
-   };
+   } };
 
    /// Maps (direction,axis) pair to direction
    /// \param axis     0,1 or 2 standing for x,y,z
@@ -343,7 +339,7 @@ namespace stencil {
    /// \param d      direction pointing towards the computed neighbor
    inline Cell operator+( const Cell & cell, const Direction d )
    {
-      return Cell( cell.x() + cx[d], cell.y() + cy[d], cell.z() + cz[d] );
+      return { cell.x() + cx[d], cell.y() + cy[d], cell.z() + cz[d] };
    }
 
 
@@ -353,7 +349,7 @@ namespace stencil {
    /// \param d      direction pointing away from the computed neighbor
    inline Cell operator-( const Cell & cell, const Direction d )
    {
-      return Cell( cell.x() - cx[d], cell.y() - cy[d], cell.z() - cz[d] );
+      return { cell.x() - cx[d], cell.y() - cy[d], cell.z() - cz[d] };
    }
 
 

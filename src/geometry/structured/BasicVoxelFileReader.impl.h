@@ -185,13 +185,13 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
    if( filestream_.fail() || filestream_.bad() )
       throw std::runtime_error("I/O Error while reading file \"" + _filename + "\"!");
 
-   std::streampos dataEnd = filestream_.tellg();
+   std::streampos const dataEnd = filestream_.tellg();
    if( filestream_.fail() || filestream_.bad() || dataEnd == std::streampos(-1) )
       throw std::runtime_error("I/O Error while reading file \"" + _filename + "\"!");
 
 
    assert(dataBegin_ <= dataEnd);
-   std::size_t rawDataLengthBytes = static_cast<std::size_t>( dataEnd - dataBegin_ );
+   std::size_t const rawDataLengthBytes = static_cast<std::size_t>( dataEnd - dataBegin_ );
    if( rawDataLengthBytes % sizeof(T) != 0 )
    {
       std::stringstream ss;
@@ -200,7 +200,7 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
       throw std::runtime_error(ss.str());
    }
    assert(rawDataLengthBytes % sizeof(T) == 0);
-   std::size_t rawDataLength = rawDataLengthBytes / sizeof(T);
+   std::size_t const rawDataLength = rawDataLengthBytes / sizeof(T);
    if( rawDataLength != numCells() )
    {
       std::stringstream ss;

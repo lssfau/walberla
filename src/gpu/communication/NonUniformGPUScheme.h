@@ -129,7 +129,7 @@ class NonUniformGPUScheme
    Set< SUID > requiredBlockSelectors_;
    Set< SUID > incompatibleBlockSelectors_;
 
-   gpuStream_t streams_[Stencil::Q];
+   std::array<gpuStream_t, Stencil::Q> streams_;
    std::vector< uint8_t > timestepPerLevel_;
 };
 

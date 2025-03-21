@@ -124,9 +124,9 @@ real_t Sample::variance( real_t theMean ) const
    WALBERLA_ASSERT(!empty());
 
    KahanAccumulator< real_t > acc;
-   for(auto it = begin(); it != end(); ++it)
+   for(real_t it : *this)
    {
-      real_t val = *it - theMean;
+      real_t val = it - theMean;
       acc += val*val;
    }
       
@@ -208,10 +208,10 @@ real_t Sample::giniCoefficient() const
    real_t sum1 = 0;
    uint_t i    = 1;
 
-   for( auto it = begin(); it != end(); ++it )
+   for(real_t it : *this)
    {
-      sum0 += *it * real_t( i++ );
-      sum1 += *it;
+      sum0 += it * real_t( i++ );
+      sum1 += it;
    }
 
    const real_t theSize = real_c( size() );

@@ -293,23 +293,23 @@ BlockForest::BlockForest( const uint_t process, const SetupBlockForest& forest, 
 
       std::set< uint_t > neighbors;
 
-      for( uint_t i = 0; i != blocks.size(); ++i ) {
+      for(auto & block : blocks) {
 
-         WALBERLA_ASSERT( blocks_.find( blocks[i]->getId() ) == blocks_.end() );
+         WALBERLA_ASSERT( blocks_.find( block->getId() ) == blocks_.end() );
 
-         blocks_[ blocks[i]->getId() ] = std::make_shared< Block >( *this, blocks[i] );
+         blocks_[ block->getId() ] = std::make_shared< Block >( *this, block );
 
-         for( uint_t j = 0; j != blocks[i]->getNeighborhoodSize(); ++j )
-            if( blocks[i]->getNeighbor(j)->getProcess() != process )
-               neighbors.insert( blocks[i]->getNeighbor(j)->getProcess() );
+         for( uint_t j = 0; j != block->getNeighborhoodSize(); ++j )
+            if( block->getNeighbor(j)->getProcess() != process )
+               neighbors.insert( block->getNeighbor(j)->getProcess() );
       }
 
       if( insertBuffersIntoProcessNetwork_ && ( process + 1 ) < forest.getNumberOfProcesses() &&
           forest.isBufferProcess( process + 1 ) )
          neighbors.insert( process + 1 );
 
-      for( std::set< uint_t >::iterator it = neighbors.begin(); it != neighbors.end(); ++it )
-         neighborhood_.push_back( *it );
+      for(uint_t neighbor : neighbors)
+         neighborhood_.push_back( neighbor );
    }
    else if( insertBuffersIntoProcessNetwork_ )
    {
@@ -403,10 +403,10 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
 
    // domain AABB
 
-   real_t domain[6];
+   std::array< real_t, 6 > domain;
 
-   for( uint_t i = 0; i != 6; ++i ) {
-      domain[i] = byteArrayToReal< real_t >( buffer, offset );
+   for(real_t & dom : domain) {
+      dom = byteArrayToReal< real_t >( buffer, offset );
       offset += sizeof( real_t ) + 1 + 2;
    }
 
@@ -414,8 +414,8 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
 
    // number of coarse/root blocks in each direction
 
-   for( uint_t i = 0; i != 3; ++i ) {
-      size_[i] = byteArrayToUint( buffer, offset, 4 );
+   for(uint_t & s : size_) {
+      s = byteArrayToUint( buffer, offset, 4 );
       offset += 4;
    }
 
@@ -827,16 +827,16 @@ std::map< uint_t, std::vector< Vector3<real_t> > > BlockForest::getNeighboringPr
 {
    std::map< uint_t, std::vector< Vector3<real_t> > > offsets;
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(const auto & it : blocks_)
    {
-      const auto & block = it->second;
+      const auto & block = it.second;
       const AABB & blockAABB = block->getAABB();
 
-      const real_t eps[] = { real_c( 1.0E-6 ) * ( blockAABB.xMax() - blockAABB.xMin() ),
+      const std::array< real_t, 3 > eps = { real_c( 1.0E-6 ) * ( blockAABB.xMax() - blockAABB.xMin() ),
                              real_c( 1.0E-6 ) * ( blockAABB.yMax() - blockAABB.yMin() ),
                              real_c( 1.0E-6 ) * ( blockAABB.zMax() - blockAABB.zMin() ) };
 
-      uint_t i[] = { uint_c(0), uint_c(0), uint_c(0) };
+      std::array< uint_t, 3 > i = { uint_c(0), uint_c(0), uint_c(0) };
 
       for( i[2] = 0; i[2] != 3; ++i[2] ) {
          for( i[1] = 0; i[1] != 3; ++i[1] ) {
@@ -848,13 +848,13 @@ std::map< uint_t, std::vector< Vector3<real_t> > > BlockForest::getNeighboringPr
                const auto sectionIndex = getBlockNeighborhoodSectionIndex( i[0], i[1], i[2] );
                const auto neighbors = block->getNeighborhoodSection( sectionIndex );
 
-               for( auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor )
+               for(auto neighbor : neighbors)
                {
-                  if( (*neighbor)->getProcess() == getProcess() )
+                  if( neighbor->getProcess() == getProcess() )
                      continue;
 
                   AABB aabb;
-                  getAABBFromBlockId( aabb, (*neighbor)->getId() );
+                  getAABBFromBlockId( aabb, neighbor->getId() );
 
                   Vector3< real_t > offset;
 
@@ -871,7 +871,7 @@ std::map< uint_t, std::vector< Vector3<real_t> > > BlockForest::getNeighboringPr
                              ( isPeriodic(j) && realIsEqual( std::fabs( offset[j] ), getDomain().max(j) - getDomain().min(j), eps[j] ) ) );
                   }
 
-                  const auto process = (*neighbor)->getProcess();
+                  const auto process = neighbor->getProcess();
                   auto & processOffsets = offsets[ process ];
 
                   bool newOffset = true;
@@ -1071,11 +1071,11 @@ void BlockForest::createSnapshot( const std::vector<uint_t> & sendTo, const std:
       buffer << block->first;
       block->second->toBuffer( buffer );
 
-      for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
+      for(auto & dataItem : blockDataItem_)
       {
-         auto blockDataHandlingWrapper = dataItem->getDataHandling( block->second.get() );
+         auto blockDataHandlingWrapper = dataItem.getDataHandling( block->second.get() );
          if( blockDataHandlingWrapper )
-            blockDataHandlingWrapper->serialize( block->second.get(), dataItem->getId(), buffer );
+            blockDataHandlingWrapper->serialize( block->second.get(), dataItem.getId(), buffer );
       }
    }
 
@@ -1169,19 +1169,19 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
 
    std::set< uint_t > neighborhood;
 
-   for( auto it = snapshot_.begin(); it != snapshot_.end(); ++it )
+   for(auto & it : snapshot_)
    {
-      if( processMapping( it->first ) == process_ )
+      if( processMapping( it.first ) == process_ )
       {
-         mpi::RecvBuffer & buffer = it->second;
+         mpi::RecvBuffer & buffer = it.second;
 
          std::vector< uint_t > pNeighborhood;
          buffer >> pNeighborhood;
 
-         for( auto n = pNeighborhood.begin(); n != pNeighborhood.end(); ++n )
+         for(uint_t & n : pNeighborhood)
          {
-            WALBERLA_ASSERT_LESS( processMapping(*n), uint_c( mpi::MPIManager::instance()->numProcesses() ) );
-            neighborhood.insert( processMapping(*n) );
+            WALBERLA_ASSERT_LESS( processMapping(n), uint_c( mpi::MPIManager::instance()->numProcesses() ) );
+            neighborhood.insert( processMapping(n) );
          }
 
          uint_t blocks( uint_t(0) );
@@ -1199,17 +1199,17 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
             blocks_[ id ] = std::make_shared< Block >( *this, id, aabb, level, buffer, processMapping );
 
             Block * block = blocks_[ id ].get();
-            for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
+            for(auto & dataItem : blockDataItem_)
             {
-               auto blockDataHandlingWrapper = dataItem->getDataHandling( block );
+               auto blockDataHandlingWrapper = dataItem.getDataHandling( block );
                if( blockDataHandlingWrapper )
                {
-                  addBlockData( block, dataItem->getId(), blockDataHandlingWrapper->deserialize( block ) );
-                  blockDataHandlingWrapper->deserialize( block, dataItem->getId(), buffer );
+                  addBlockData( block, dataItem.getId(), blockDataHandlingWrapper->deserialize( block ) );
+                  blockDataHandlingWrapper->deserialize( block, dataItem.getId(), buffer );
                }
                else
                {
-                  addBlockData( block, dataItem->getId(), nullptr );
+                  addBlockData( block, dataItem.getId(), nullptr );
                }
             }
          }
@@ -1218,8 +1218,8 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
 
    WALBERLA_LOG_PROGRESS( "BlockForest restore snapshot: restoring process neighborhood" );
 
-   for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
-      neighborhood_.push_back( *n );
+   for(uint_t n : neighborhood)
+      neighborhood_.push_back( n );
 
    rebuildProcessesWithBlocksCommunicator();
 
@@ -1234,8 +1234,8 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
    if( ! callbackAfterBlockDataIsUnpacked_.empty() )
       WALBERLA_LOG_PROGRESS( "BlockForest restore snapshot: executing call back functions after data was restored" );
 
-   for( auto f = callbackAfterBlockDataIsRestored_.begin(); f != callbackAfterBlockDataIsRestored_.end(); ++f )
-      f->second();
+   for(auto & f : callbackAfterBlockDataIsRestored_)
+      f.second();
 
    WALBERLA_MPI_SECTION()
    {
@@ -1281,8 +1281,8 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
             for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end() && !performUpdate; ++phantom )
             {
                const auto & sourceProcess = phantom->second->getSourceProcess();
-               for( auto it = sourceProcess.begin(); it != sourceProcess.end(); ++it )
-                  performUpdate = ( *it != process_ );
+               for(uint_t sourceProces : sourceProcess)
+                  performUpdate = ( sourceProces != process_ );
             }
             mpi::allReduceInplace( performUpdate, mpi::LOGICAL_OR );
          }
@@ -1308,8 +1308,8 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
 void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMode ) const
 {
    Set<SUID> suids;
-   for( auto block = blocks_.begin(); block != blocks_.end(); ++block )
-      suids += block->second->getState();
+   for(const auto & block : blocks_)
+      suids += block.second->getState();
 
    std::vector<SUID> localSuids( suids.begin(), suids.end() );
    std::vector<SUID> allSuids = mpi::allReduceSet( localSuids, mpi::UNION );
@@ -1332,11 +1332,11 @@ void BlockForest::saveToFile( const std::string & filename, const Set<SUID> & bl
    std::map< SUID, std::vector< bool > > suidMap;
 
    uint_t i = 0;
-   for( Set<SUID>::const_iterator it = blockStates.begin(); it != blockStates.end(); ++it ) {
+   for(auto blockState : blockStates) {
 
       std::vector< bool > suidBoolVec( 8 * suidBytes );
       suidBoolVec[i] = true;
-      suidMap[ *it ] = suidBoolVec;
+      suidMap[ blockState ] = suidBoolVec;
       ++i;
    }
 
@@ -1388,9 +1388,8 @@ void BlockForest::constructBlockInformation( const SetupBlockForest & forest )
    blockInformation_->nodes_.resize( forest.getNumberOfTrees() );
    auto & nodeForest = blockInformation_->nodes_;
 
-   for( uint_t i = 0; i != blocks.size(); ++i )
+   for(auto block : blocks)
    {
-      const SetupBlock * const block = blocks[i];
       BlockID id( block->getId() );
 
       std::stack< uint_t > index;
@@ -1493,9 +1492,10 @@ void BlockForest::constructBlockInformation( const std::vector< BlockID > & ids,
 void BlockForest::constructBlockInformation()
 {
    std::vector< std::pair< BlockID, std::pair< uint_t, Set<SUID> > > > data;
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   data.reserve(blocks_.size());
+   for(auto & block : blocks_)
    {
-      data.emplace_back( it->first, std::make_pair( process_, it->second->getState() ) );
+      data.emplace_back( block.first, std::make_pair( process_, block.second->getState() ) );
    }
 
    mpi::SendBuffer sBuffer;
@@ -1513,10 +1513,10 @@ void BlockForest::constructBlockInformation()
    for( int r = 0; r != MPIManager::instance()->numProcesses(); ++r )
    {
       rBuffer >> data;
-      for( auto it = data.begin(); it != data.end(); ++it )
+      for(auto & it : data)
       {
-         ids.push_back( it->first );
-         nodes.push_back( make_shared< BlockInformation::Node >( it->second.first, it->second.second ) );
+         ids.push_back( it.first );
+         nodes.push_back( make_shared< BlockInformation::Node >( it.second.first, it.second.second ) );
       }
       data.clear();
    }
@@ -1586,9 +1586,9 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
    auto it0 = minTargetLevelsCallback.begin();
    auto it1 = blocksAlreadyMarkedForRefinement.begin();
-   for( auto it = mapping.begin(); it != mapping.end(); ++it )
+   for( int m : mapping )
    {
-      if( *it == 0 )
+      if( m == 0 )
       {
          WALBERLA_CHECK( it0 != minTargetLevelsCallback.end() );
          minTargetLevelsAllBlocks.push_back( *it0 );
@@ -1596,7 +1596,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       }
       else
       {
-         WALBERLA_ASSERT_EQUAL( *it, 1 );
+         WALBERLA_ASSERT_EQUAL( m, 1 );
          WALBERLA_CHECK( it1 != blocksAlreadyMarkedForRefinement.end() );
          WALBERLA_CHECK_NOT_NULLPTR( *it1 );
          WALBERLA_CHECK_EQUAL( (*it1)->getTargetLevel(), (*it1)->getLevel() + uint_t(1) );
@@ -1877,10 +1877,10 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
       WALBERLA_LOG_PROGRESS( "BlockForest refresh:   + tell neighbors about blocks that can get merged" );
 
-      for( auto rank = ranksToRecvFrom.begin(); rank != ranksToRecvFrom.end(); ++rank )
+      for( auto rank: ranksToRecvFrom )
       {
-         WALBERLA_ASSERT_UNEQUAL( *rank, process_ );
-         mergeBufferSystem.sendBuffer( *rank ) << intentToMerge[ process_ ];
+         WALBERLA_ASSERT_UNEQUAL( rank, process_ );
+         mergeBufferSystem.sendBuffer( rank ) << intentToMerge[ process_ ];
       }
 
       mergeBufferSystem.sendAll();
@@ -1900,9 +1900,8 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          WALBERLA_ASSERT( intentToMerge.find( process_ ) != intentToMerge.end() );
 
          const std::set< BlockID > & blocksToCheck = intentToMerge[ process_ ];
-         for( auto it = blocksToCheck.begin(); it != blocksToCheck.end(); ++it )
+         for(const auto & id : blocksToCheck)
          {
-            const BlockID & id = *it;
             WALBERLA_ASSERT( octetMember.find(id) != octetMember.end() );
             const std::map< BlockID, uint_t > & octetMembers = octetMember[id];
             WALBERLA_ASSERT( octetMembers.size() == uint_t(7) );
@@ -2029,8 +2028,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    if( ! callbackBeforeBlockDataIsPacked_.empty() )
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: - executing call back functions before block data is packed" );
 
-   for( auto f = callbackBeforeBlockDataIsPacked_.begin(); f != callbackBeforeBlockDataIsPacked_.end(); ++f )
-      f->second( *this, phantomForest );
+   for(auto & f : callbackBeforeBlockDataIsPacked_)
+      f.second( *this, phantomForest );
 
    //////////////////////////////////////
    // SCHEDULE RECV's FOR BUFFER SIZES //
@@ -2039,21 +2038,21 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    std::map< uint_t, uint_t > numberOfBlocksToRecv; // does not include local transfers
 
    const auto & phantomBlocks = phantomForest.getBlockMap();
-   for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end(); ++phantom )
+   for(const auto & phantomBlock : phantomBlocks)
    {
-      auto & pBlock = phantom->second;
+      auto & pBlock = phantomBlock.second;
       auto & sourceProcesses = pBlock->getSourceProcess();
       if( pBlock->getSourceLevel() != pBlock->getLevel() || sourceProcesses[0] != process_ )
       {
          WALBERLA_ASSERT( blocks_.find( pBlock->getId() ) == blocks_.end() );
-         for( auto p = sourceProcesses.begin(); p != sourceProcesses.end(); ++p )
+         for(uint_t sourceProcesse : sourceProcesses)
          {
-            if( *p != process_ )
+            if( sourceProcesse != process_ )
             {
-               if( numberOfBlocksToRecv.find( *p ) == numberOfBlocksToRecv.end() )
-                  numberOfBlocksToRecv[*p] = uint_t(1);
+               if( numberOfBlocksToRecv.find( sourceProcesse ) == numberOfBlocksToRecv.end() )
+                  numberOfBlocksToRecv[sourceProcesse] = uint_t(1);
                else
-                  ++(numberOfBlocksToRecv[*p]);
+                  ++(numberOfBlocksToRecv[sourceProcesse]);
             }
          }
       }
@@ -2075,10 +2074,10 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - schedule receives for buffer sizes" );
 
    uint_t i( uint_t(0) );
-   for( auto it = recvBufferSizes.begin(); it != recvBufferSizes.end(); ++it )
+   for(auto & recvBufferSize : recvBufferSizes)
    {
-      MPI_Irecv( static_cast< void * >( &(it->second[0]) ), int_c( it->second.size() ), MPITrait< uint_t >::type(),
-                 int_c( it->first ), 0, MPIManager::instance()->comm(), &(recvBufferSizesRequests[i]) );
+      MPI_Irecv( static_cast< void * >( &(recvBufferSize.second[0]) ), int_c( recvBufferSize.second.size() ), MPITrait< uint_t >::type(),
+                 int_c( recvBufferSize.first ), 0, MPIManager::instance()->comm(), &(recvBufferSizesRequests[i]) );
       ++i;
    }
 
@@ -2090,16 +2089,16 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    std::set< mpi::MPIRank > ranksToRecvFrom;
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       auto & targetProcesses = block->getTargetProcess();
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
          WALBERLA_ASSERT( targetProcesses.size() == uint_t(1) || targetProcesses.size() == uint_t(8) );
-         for( auto p = targetProcesses.begin(); p != targetProcesses.end(); ++p )
-            if( *p != process_ )
-               ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >(*p) );
+         for(uint_t targetProcesse : targetProcesses)
+            if( targetProcesse != process_ )
+               ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >(targetProcesse) );
       }
    }
 
@@ -2108,21 +2107,21 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    std::map< uint_t, std::map< BlockID, Set<SUID> > > blockStates;
 
-   for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end(); ++phantom )
+   for(const auto & phantomBlock : phantomBlocks)
    {
-      auto & pBlock = phantom->second;
+      auto & pBlock = phantomBlock.second;
       auto & sourceProcesses = pBlock->getSourceProcess();
       if( pBlock->getSourceLevel() != pBlock->getLevel() || sourceProcesses[0] != process_ )
       {
-         for( auto p = sourceProcesses.begin(); p != sourceProcesses.end(); ++p )
-            blockStates[ *p ][ pBlock->getId() ] = pBlock->getState();
+         for(const uint_t sourceProcesse : sourceProcesses)
+            blockStates[ sourceProcesse ][ pBlock->getId() ] = pBlock->getState();
       }
    }
 
-   for( auto it = blockStates.begin(); it != blockStates.end(); ++it )
+   for(auto & blockState : blockStates)
    {
-      if( it->first != process_ )
-         bufferSystem.sendBuffer( numeric_cast< mpi::MPIRank >( it->first ) ) << it->second;
+      if( blockState.first != process_ )
+         bufferSystem.sendBuffer( numeric_cast< mpi::MPIRank >( blockState.first ) ) << blockState.second;
    }
 
    bufferSystem.sendAll();
@@ -2158,9 +2157,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    std::vector< std::pair< Block *, std::vector< mpi::SendBuffer > > > blocksToPack; // includes data that is NOT transfered via MPI but copied locally
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
+   for(auto & it : blocks_)
    {
-      auto & block = it->second;
+      auto & block = it.second;
       auto & targetProcesses = block->getTargetProcess();
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
@@ -2249,8 +2248,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       // sender block "state"
 
-      for( auto buffer = buffers.begin(); buffer != buffers.end(); ++buffer )
-         *buffer << block->getState();
+      for(auto & buffer : buffers)
+         buffer << block->getState();
 
       // block data
 
@@ -2260,11 +2259,11 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(1) );
          WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t(1) );
 
-         for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
+         for(auto & dataItem : blockDataItem_)
          {
-            auto blockDataHandlingWrapper = dataItem->getDataHandling( block, targetState[0] );
+            auto blockDataHandlingWrapper = dataItem.getDataHandling( block, targetState[0] );
             if( blockDataHandlingWrapper )
-               blockDataHandlingWrapper->serialize( block, dataItem->getId(), buffers[0] );
+               blockDataHandlingWrapper->serialize( block, dataItem.getId(), buffers[0] );
          }
       }
       else if( block->targetBlockIsLarger() )
@@ -2329,8 +2328,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - deleting blocks that are split, merged, and/or transfered" );
 
-   for( auto block = blocksToPack.begin(); block != blocksToPack.end(); ++block )
-      blocks_.erase( block->first->getId() );
+   for(auto & block : blocksToPack)
+      blocks_.erase( block.first->getId() );
 
    ///////////////
    // SEND DATA //
@@ -2347,8 +2346,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       auto & sizes = sendBufferSizes[ it->first ];
       WALBERLA_ASSERT( sizes.empty() );
-      for( auto buffer = it->second.begin(); buffer != it->second.end(); ++buffer )
-         sizes.push_back( (*buffer)->size() );
+      for(auto & buffer : it->second)
+         sizes.push_back( buffer->size() );
 
       blockDataSendRequests[ it->first ].resize( it->second.size() ); // do not resize this vector after this point!
    }
@@ -2385,9 +2384,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - allocating new blocks" );
 
-   for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end(); ++phantom )
+   for(const auto & pbIt : phantomBlocks)
    {
-      auto & pBlock = phantom->second;
+      auto & pBlock = pbIt.second;
       if( pBlock->getSourceLevel() != pBlock->getLevel() || pBlock->getSourceProcess()[0] != process_ )
       {
          WALBERLA_ASSERT( blocks_.find( pBlock->getId() ) == blocks_.end() );
@@ -2469,8 +2468,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - perform local data transfer" );
 
-   for( auto buffer = localBlocks.begin(); buffer != localBlocks.end(); ++buffer )
-      recvLocalBlocks.emplace_back( **buffer );
+   for(auto & localBlock : localBlocks)
+      recvLocalBlocks.emplace_back( *localBlock );
 
    ////////////////////////////////////
    // WAIT FOR RECV's FOR BLOCK DATA //
@@ -2478,9 +2477,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - wait for block data to be received" );
 
-   for( auto it = blockDataRecvRequests.begin(); it != blockDataRecvRequests.end(); ++it )
+   for(auto & blockDataRecvRequest : blockDataRecvRequests)
    {
-      auto & requests = it->second;
+      auto & requests = blockDataRecvRequest.second;
       MPI_Waitall( int_c( requests.size() ), &(requests[0]), MPI_STATUSES_IGNORE );
    }
 
@@ -2493,9 +2492,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    if( ! sendBufferSizesRequests.empty() )
       MPI_Waitall( int_c( sendBufferSizesRequests.size() ), &(sendBufferSizesRequests[0]), MPI_STATUSES_IGNORE );
 
-   for( auto it = blockDataSendRequests.begin(); it != blockDataSendRequests.end(); ++it )
+   for(auto & blockDataSendRequest : blockDataSendRequests)
    {
-      auto & requests = it->second;
+      auto & requests = blockDataSendRequest.second;
       MPI_Waitall( int_c( requests.size() ), &(requests[0]), MPI_STATUSES_IGNORE );
    }
 
@@ -2505,11 +2504,11 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - clear send buffers (= free memory)" );
 
-   for( auto it = blocksToPack.begin(); it != blocksToPack.end(); ++it )
+   for(auto & it : blocksToPack)
    {
-      auto & buffers = it->second;
-      for( auto buffer = buffers.begin(); buffer != buffers.end(); ++buffer )
-         buffer->reset();
+      auto & buffers = it.second;
+      for(auto & buffer : buffers)
+         buffer.reset();
    }
 
    ////////////////////////////////
@@ -2520,17 +2519,17 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    std::map< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > blocksToUnpack; // includes data that is NOT transfered via MPI but copied locally
 
-   for( auto it = recvBlockData.begin(); it != recvBlockData.end(); ++it )
+   for(auto & it : recvBlockData)
    {
-      auto & buffers = it->second;
-      for( auto buffer = buffers.begin(); buffer != buffers.end(); ++buffer )
+      auto & buffers = it.second;
+      for(auto & buffer : buffers)
       {
          // header = sender block ID + receiver block ID & sender block "state"
 
          BlockID sId;
          BlockID rId;
          Set<SUID> state;
-         (*buffer) >> sId >> rId >> state;
+         buffer >> sId >> rId >> state;
 
          WALBERLA_ASSERT( blocks_.find( rId ) != blocks_.end() );
          WALBERLA_ASSERT( phantomBlocks.find( rId ) != phantomBlocks.end() );
@@ -2540,7 +2539,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          if( phantom->sourceBlockHasTheSameSize() || phantom->sourceBlockIsLarger() )
          {
             WALBERLA_ASSERT( blocksToUnpack.find( block ) == blocksToUnpack.end() );
-            blocksToUnpack[ block ].emplace_back( state, &(*buffer) );
+            blocksToUnpack[ block ].emplace_back( state, &buffer );
          }
          else
          {
@@ -2548,7 +2547,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
             if( bufferPtrs.empty() )
                bufferPtrs.resize( uint_t(8), std::make_pair( Set<SUID>::emptySet(), static_cast< mpi::RecvBuffer * >(nullptr) ) );
             WALBERLA_ASSERT_EQUAL( sId.getUsedBits(), rId.getUsedBits() + uint_t(3) );
-            bufferPtrs[ sId.getBranchId() ] = std::make_pair( state, &(*buffer) );
+            bufferPtrs[ sId.getBranchId() ] = std::make_pair( state, &buffer );
          }
       }
    }
@@ -2589,8 +2588,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    if( ! callbackBeforeBlockDataIsUnpacked_.empty() )
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: - executing call back functions before block data is unpacked" );
 
-   for( auto f = callbackBeforeBlockDataIsUnpacked_.begin(); f != callbackBeforeBlockDataIsUnpacked_.end(); ++f )
-      f->second( *this, phantomForest );
+   for(auto & f : callbackBeforeBlockDataIsUnpacked_)
+      f.second( *this, phantomForest );
 
    /////////////////
    // UNPACK DATA //
@@ -2599,9 +2598,10 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - unpacking block data from buffers" );
 
    std::vector< std::pair< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > > dataToUnpack;
+   dataToUnpack.reserve(blocksToUnpack.size());
 
-   for( auto it = blocksToUnpack.begin(); it != blocksToUnpack.end(); ++it )
-      dataToUnpack.emplace_back( it->first, it->second );
+   for(auto & it : blocksToUnpack)
+      dataToUnpack.emplace_back( it.first, it.second );
 
    //#ifdef _OPENMP
    //#pragma omp parallel for schedule(dynamic)
@@ -2620,23 +2620,23 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       {
          WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
 
-         for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
+         for(auto & dataItem : blockDataItem_)
          {
             // allocate
             {
-               auto blockDataHandlingWrapper = dataItem->getDataHandling( block );
+               auto blockDataHandlingWrapper = dataItem.getDataHandling( block );
                if( blockDataHandlingWrapper )
-                  addBlockData( block, dataItem->getId(), blockDataHandlingWrapper->deserialize( block ) );
+                  addBlockData( block, dataItem.getId(), blockDataHandlingWrapper->deserialize( block ) );
                else
-                  addBlockData( block, dataItem->getId(), nullptr );
+                  addBlockData( block, dataItem.getId(), nullptr );
             }
             // fill with sent data
             {
-               auto blockDataHandlingWrapper = dataItem->getDataHandling( block, buffers[0].first );
+               auto blockDataHandlingWrapper = dataItem.getDataHandling( block, buffers[0].first );
                if( blockDataHandlingWrapper )
                {
                   WALBERLA_ASSERT_NOT_NULLPTR( buffers[0].second );
-                  blockDataHandlingWrapper->deserialize( block, dataItem->getId(), *(buffers[0].second) );
+                  blockDataHandlingWrapper->deserialize( block, dataItem.getId(), *(buffers[0].second) );
                }
             }
          }
@@ -2738,8 +2738,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          }
       }
 
-      for( auto it = buffers.begin(); it != buffers.end(); ++it )
-         it->second->reset();
+      for(auto & buffer : buffers)
+         buffer.second->reset();
    }
 
    //////////////
@@ -2749,8 +2749,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    if( ! callbackAfterBlockDataIsUnpacked_.empty() )
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: - executing call back functions after block data was unpacked" );
 
-   for( auto f = callbackAfterBlockDataIsUnpacked_.begin(); f != callbackAfterBlockDataIsUnpacked_.end(); ++f )
-      f->second( *this, phantomForest );
+   for(auto & f : callbackAfterBlockDataIsUnpacked_)
+      f.second( *this, phantomForest );
 }
 
 
@@ -2769,8 +2769,8 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    {
       dataSize += internal::FILE_HEADER_SIZE; // header
       ++dataSize; // number of SUIDs
-      for( auto suid = suidMap.begin(); suid != suidMap.end(); ++suid )
-         dataSize += uint_t(1) + uint_c( suid->first.getIdentifier().length() );
+      for(const auto & suid : suidMap)
+         dataSize += uint_t(1) + uint_c( suid.first.getIdentifier().length() );
    }
 
    std::vector< uint8_t > processDataBuffer( dataSize );
@@ -2785,13 +2785,13 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
       std::vector< SUID > suids( suidMap.size() );
 
-      for( auto suid = suidMap.begin(); suid != suidMap.end(); ++suid )
+      for(const auto & suid : suidMap)
       {
          for( uint_t i = uint_t(0); i != suids.size(); ++i )
          {
-            if( suid->second[i] )
+            if( suid.second[i] )
             {
-               suids[i] = suid->first;
+               suids[i] = suid.first;
                break;
             }
          }
@@ -2802,11 +2802,11 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
       // for every SUID ...
 
-      for( auto it = suids.begin(); it != suids.end(); ++it )
+      for(auto & suid : suids)
       {
          // length of its identifier string
 
-         const uint_t length = it->getIdentifier().length();
+         const uint_t length = suid.getIdentifier().length();
          WALBERLA_CHECK_LESS( length, 256, "SUID identifiers are allowed to consist of 255 characters at most when saving the block structure to file!" );
 
          uintToByteArray( length, processDataBuffer, offset, 1 );
@@ -2814,7 +2814,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
          // the identifier string
 
-         const char * str = it->getIdentifier().c_str();
+         const char * str = suid.getIdentifier().c_str();
          for( uint_t j = 0; j != length; ++j )
             processDataBuffer[offset+j] = *reinterpret_cast< const uint8_t* >( str + j );
          offset += length;
@@ -2837,14 +2837,14 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
          std::vector< bool > suidBoolVec( 8 * suidBytes );
 
          const Set<SUID> & state = block->second->getState();
-         for( auto suid = state.begin(); suid != state.end(); ++suid )
+         for(auto suid : state)
          {
-            WALBERLA_CHECK( suidMap.find( *suid ) != suidMap.end(), "Block state SUID missing from SUID list saved to file."
-                                                                    "\n- SUID = " << *suid << "\n- block ID = " << block->first <<
+            WALBERLA_CHECK( suidMap.find( suid ) != suidMap.end(), "Block state SUID missing from SUID list saved to file."
+                                                                    "\n- SUID = " << suid << "\n- block ID = " << block->first <<
                                                                     "\n- block AABB = " << block->second->getAABB() );
             //Elementwise OR of all elements
             for (uint_t i = 0; i < suidBoolVec.size(); ++i) {
-               suidBoolVec[i] = suidBoolVec[i] || suidMap.find( *suid )->second[i];
+               suidBoolVec[i] = suidBoolVec[i] || suidMap.find( suid )->second[i];
             }
          }
 
@@ -2857,9 +2857,9 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    uintToByteArray( uint_c( neighborhood_.size() ), processDataBuffer, offset, uint_t(2) );
    offset += uint_t(2);
 
-   for( auto neighbor = neighborhood_.begin(); neighbor != neighborhood_.end(); ++neighbor )
+   for(uint_t neighbor : neighborhood_)
    {
-      uintToByteArray( *neighbor, processDataBuffer, offset, processIdBytes_ );
+      uintToByteArray( neighbor, processDataBuffer, offset, processIdBytes_ );
       offset += processIdBytes_;
    }
 
@@ -3005,8 +3005,8 @@ void BlockForest::storeFileHeader( std::vector< uint8_t > & data, uint_t & offse
 
    // number of coarse/root blocks in each direction
 
-   for( uint_t i = 0; i != 3; ++i ) {
-      uintToByteArray( size_[i], data, offset, 4 );
+   for(uint_t s : size_) {
+      uintToByteArray( s, data, offset, 4 );
       offset += 4;
    }
 
@@ -3054,9 +3054,7 @@ void BlockForest::checkBlockInformationConsistency( const SetupBlockForest& fore
    std::vector< const SetupBlock* > blocks;
    forest.getBlocks( blocks );
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      const SetupBlock* const block = blocks[i];
-
+   for(auto block : blocks) {
       uint_t process = 0;
       WALBERLA_ASSERT( getBlockInformation().getProcess( process, block->getId() ) );
       WALBERLA_ASSERT_EQUAL( process, block->getProcess() );

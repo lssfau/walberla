@@ -39,8 +39,8 @@ static void refinementSelectionFunctionAll( SetupBlockForest& forest ) {
    std::vector< SetupBlock* > blocks;
    forest.getBlocks( blocks );
 
-   for( uint_t i = 0; i != blocks.size(); ++i )
-      if( blocks[i]->getLevel() < 2 ) blocks[i]->setMarker( true );
+   for(auto & block : blocks)
+      if( block->getLevel() < 2 ) block->setMarker( true );
 }
 
 
@@ -83,8 +83,8 @@ static void checkCollectorConsistency( SetupBlockForest& forest ) {
       WALBERLA_CHECK( blocks[i] == itBlocks[i] )
 
    std::set< SetupBlock* > baseSet;
-   for( uint_t i = 0; i != blocks.size(); ++i )
-      baseSet.insert( blocks[i] );
+   for(auto block : blocks)
+      baseSet.insert( block );
    WALBERLA_CHECK_EQUAL( baseSet.size(), blocks.size() )
 
    std::vector< SetupBlock* > hilbertBlocks;
@@ -92,8 +92,8 @@ static void checkCollectorConsistency( SetupBlockForest& forest ) {
    WALBERLA_CHECK_EQUAL( hilbertBlocks.size(), blocks.size() )
 
    std::set< SetupBlock* > hilbertSet;
-   for( uint_t i = 0; i != hilbertBlocks.size(); ++i )
-      hilbertSet.insert( hilbertBlocks[i] );
+   for(auto hilbertBlock : hilbertBlocks)
+      hilbertSet.insert( hilbertBlock );
    WALBERLA_CHECK_EQUAL( hilbertSet.size(), hilbertBlocks.size() )
 
    std::set< SetupBlock* >::iterator baseIterator    = baseSet.begin();
@@ -110,8 +110,8 @@ static void checkCollectorConsistency( SetupBlockForest& forest ) {
    WALBERLA_CHECK_EQUAL( aabbBlocks.size(), blocks.size() )
 
    std::set< SetupBlock* > aabbSet;
-   for( uint_t i = 0; i != aabbBlocks.size(); ++i )
-      aabbSet.insert( aabbBlocks[i] );
+   for(auto aabbBlock : aabbBlocks)
+      aabbSet.insert( aabbBlock );
    WALBERLA_CHECK_EQUAL( aabbSet.size(), aabbBlocks.size() )
 
                                      baseIterator = baseSet.begin();

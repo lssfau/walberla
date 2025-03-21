@@ -124,7 +124,7 @@ public:
    void operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, PdfField_T * const pdfField,
                     const size_t particleIdx, const ParticleAccessor_T & ac)
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -209,7 +209,7 @@ public:
    void operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, PdfField_T * const pdfField,
                     const size_t particleIdx, const ParticleAccessor_T & ac)
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -224,7 +224,7 @@ public:
    void operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, PdfField_T * const pdfField,
                     const size_t particleIdx, const ParticleAccessor_T & ac, const Vector3<cell_idx_t> & extrapolationDirection )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -380,7 +380,7 @@ public:
    void operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, PdfField_T * const pdfField,
                     const size_t particleIdx, const ParticleAccessor_T & ac)
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_NOT_NULLPTR(block);
       WALBERLA_ASSERT_NOT_NULLPTR(pdfField);
@@ -449,7 +449,7 @@ private:
    {
       using LatticeModel_T = typename PdfField_T::LatticeModel;
 
-      static_assert(std::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value || !EnforceNoSlipConstraintAfterExtrapolation, "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!");
+      static_assert(std::is_same_v<typename LatticeModel_T::Stencil, stencil::D3Q19> || !EnforceNoSlipConstraintAfterExtrapolation, "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!");
 
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
       WALBERLA_ASSERT( !math::isnan(localParticleVelocity) );
@@ -596,7 +596,7 @@ public:
    void operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, PdfField_T * const pdfField,
                     const size_t particleIdx, const ParticleAccessor_T & ac)
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );

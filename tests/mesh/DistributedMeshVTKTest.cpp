@@ -163,7 +163,7 @@ void test( const std::string & meshFile )
 }
 
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

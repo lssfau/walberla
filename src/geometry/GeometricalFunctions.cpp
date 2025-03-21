@@ -74,20 +74,20 @@ void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& 
    Vector3<real_t> tmp( R * l );
 
    // Saving the sign of the direction p1--p2
-   const real_t sign[] = { math::sign(tmp[0]), math::sign(tmp[1]), math::sign(tmp[2]) };
+   const std::array<real_t, 3> sign{ math::sign(tmp[0]), math::sign(tmp[1]), math::sign(tmp[2]) };
 
    // Calculating the absolute values of the direction direction
-   const real_t v [] = { sign[0]*tmp[0], sign[1]*tmp[1], sign[2]*tmp[2] };
-   const real_t v2[] = { sq( v[0] )   , sq( v[1] )   , sq( v[2] )    };
+   const std::array<real_t, 3> v { sign[0]*tmp[0], sign[1]*tmp[1], sign[2]*tmp[2] };
+   const std::array<real_t, 3> v2{ sq( v[0] )    , sq( v[1] )    , sq( v[2] )     };
 
    // Calculating the starting point of the line p1--p2 in box-relative coordinates
    tmp = p1 - c;
-   const real_t s[] = { sign[0]*( R[0]*tmp[0] + R[3]*tmp[1] + R[6]*tmp[2] ),
-                      sign[1]*( R[1]*tmp[0] + R[4]*tmp[1] + R[7]*tmp[2] ),
-                      sign[2]*( R[2]*tmp[0] + R[5]*tmp[1] + R[8]*tmp[2] ) };
+   const std::array<real_t, 3> s{ sign[0]*( R[0]*tmp[0] + R[3]*tmp[1] + R[6]*tmp[2] ),
+                                  sign[1]*( R[1]*tmp[0] + R[4]*tmp[1] + R[7]*tmp[2] ),
+                                  sign[2]*( R[2]*tmp[0] + R[5]*tmp[1] + R[8]*tmp[2] ) };
 
    // Calculating the half lengths of the box
-   const real_t h[] = { real_t(0.5)*side[0], real_t(0.5)*side[1], real_t(0.5)*side[2] };
+   const std::array<real_t, 3> h{ real_t(0.5)*side[0], real_t(0.5)*side[1], real_t(0.5)*side[2] };
 
 
    // Estimating the region of the starting point depending on which side of the
@@ -95,8 +95,8 @@ void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& 
    // causing a transition from one to another region, or the last one if there
    // are no more. Additionally, d|d|^2/dt is computed for t=0. If it is >= 0
    // then p1 is the closest point since the line points away from the box.
-   int  region [] = { 0, 0, 0 };
-   real_t tanchor[] = { 2, 2, 2 };  // Invalid t values; t cannot be greater than 1
+   std::array<int, 3>    region{ 0 };
+   std::array<real_t, 3> tanchor{ 2 };  // Invalid t values; t cannot be greater than 1
    real_t dd2dt( 0 );
 
    if( v[0] > Limits<real_t>::epsilon() )

@@ -51,7 +51,7 @@ namespace walberla {
 
 
 
-typedef GhostLayerField< real_t, 1 > PdeField_T;
+using PdeField_T = GhostLayerField<real_t, 1>;
 using Stencil_T = stencil::D2Q5;
 using StencilField_T = pde::SOR<Stencil_T>::StencilField_T;
 
@@ -66,10 +66,10 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          PdeField_T * u = block->getData< PdeField_T >( uId );
          CellInterval xyz = u->xyzSizeWithGhostLayer();
          xyz.yMin() = xyz.yMax();
-         for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+         for(auto cell : xyz)
          {
-            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-            u->get( *cell ) = std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
+            u->get( cell ) = std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
          }
       }
    }
@@ -83,10 +83,10 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
    {
       PdeField_T * f = block->getData< PdeField_T >( fId );
       CellInterval xyz = f->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         f->get( *cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
+         f->get( cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
       }
    }
 }

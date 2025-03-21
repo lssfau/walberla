@@ -103,7 +103,7 @@ using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
 using namespace lbm_mesapd_coupling::psm::gpu;
-typedef pystencils::PSMPackInfo PackInfo_T;
+using PackInfo_T = pystencils::PSMPackInfo;
 
 ///////////
 // FLAGS //
@@ -183,7 +183,7 @@ std::ostream& operator<<(std::ostream& os, ParticleInfo const& m)
 template< typename Accessor_T >
 ParticleInfo evaluateParticleInfo(const Accessor_T& ac)
 {
-   static_assert(std::is_base_of< mesa_pd::data::IAccessor, Accessor_T >::value, "Provide a valid accessor");
+   static_assert(std::is_base_of_v< mesa_pd::data::IAccessor, Accessor_T >, "Provide a valid accessor");
 
    ParticleInfo info;
    for (uint_t i = 0; i < ac.size(); ++i)

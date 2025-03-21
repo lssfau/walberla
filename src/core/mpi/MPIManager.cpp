@@ -150,7 +150,7 @@ void MPIManager::resetMPI()
    }
 }
 
-void MPIManager::createCartesianComm(int dims[3], int periodicity[3])
+void MPIManager::createCartesianComm(const std::array< int, 3 >& dims, const std::array< int, 3 >& periodicity)
 {
    WALBERLA_ASSERT(isMPIInitialized_);
    WALBERLA_ASSERT_EQUAL(rank_, -1);
@@ -159,7 +159,7 @@ void MPIManager::createCartesianComm(int dims[3], int periodicity[3])
    WALBERLA_ASSERT_GREATER(dims[1], 0);
    WALBERLA_ASSERT_GREATER(dims[2], 0);
 
-   MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periodicity, true, &comm_);
+   MPI_Cart_create(MPI_COMM_WORLD, 3, dims.data(), periodicity.data(), true, &comm_);
    MPI_Comm_rank(comm_, &rank_);
    cartesianSetup_ = true;
 
@@ -169,12 +169,12 @@ void MPIManager::createCartesianComm(int dims[3], int periodicity[3])
 void MPIManager::createCartesianComm(const uint_t xProcesses, const uint_t yProcesses, const uint_t zProcesses,
                                      const bool xPeriodic, const bool yPeriodic, const bool zPeriodic)
 {
-   int dims[3];
+   std::array< int, 3 > dims;
    dims[0] = numeric_cast< int >(xProcesses);
    dims[1] = numeric_cast< int >(yProcesses);
    dims[2] = numeric_cast< int >(zProcesses);
 
-   int periodicity[3];
+   std::array< int, 3 > periodicity;
    periodicity[0] = xPeriodic ? 1 : 0;
    periodicity[1] = yPeriodic ? 1 : 0;
    periodicity[2] = zPeriodic ? 1 : 0;
@@ -182,31 +182,31 @@ void MPIManager::createCartesianComm(const uint_t xProcesses, const uint_t yProc
    createCartesianComm(dims, periodicity);
 }
 
-void MPIManager::cartesianCoord(int coordOut[3]) const { cartesianCoord(rank_, coordOut); }
+void MPIManager::cartesianCoord(std::array< int, 3 >& coordOut) const { cartesianCoord(rank_, coordOut); }
 
-void MPIManager::cartesianCoord(int rankIn, int coordOut[3]) const
+void MPIManager::cartesianCoord(int rankIn, std::array< int, 3 >& coordOut) const
 {
    WALBERLA_ASSERT(isMPIInitialized_);
    WALBERLA_ASSERT(cartesianSetup_);
    WALBERLA_ASSERT_UNEQUAL(comm_, MPI_COMM_NULL);
 
-   MPI_Cart_coords(comm_, rankIn, 3, coordOut);
+   MPI_Cart_coords(comm_, rankIn, 3, coordOut.data());
 }
 
-int MPIManager::cartesianRank(int coords[3]) const
+int MPIManager::cartesianRank(std::array< int, 3 >& coords) const
 {
    WALBERLA_ASSERT(isMPIInitialized_);
    WALBERLA_ASSERT(cartesianSetup_);
    WALBERLA_ASSERT_UNEQUAL(comm_, MPI_COMM_NULL);
 
    int r;
-   MPI_Cart_rank(comm_, coords, &r);
+   MPI_Cart_rank(comm_, coords.data(), &r);
    return r;
 }
 
 int MPIManager::cartesianRank(const uint_t x, const uint_t y, const uint_t z) const
 {
-   int coords[3];
+   std::array< int, 3 > coords;
    coords[0] = numeric_cast< int >(x);
    coords[1] = numeric_cast< int >(y);
    coords[2] = numeric_cast< int >(z);
@@ -273,7 +273,7 @@ std::string MPIManager::getMPIErrorString(int errorCode)
 
    WALBERLA_ASSERT_GREATER_EQUAL(resultLen, 0);
    WALBERLA_ASSERT_LESS_EQUAL(resultLen, numeric_cast< int >(errorString.size()));
-   return std::string(errorString.begin(), errorString.begin() + resultLen);
+   return { errorString.begin(), errorString.begin() + resultLen };
 }
 
 std::string MPIManager::getMPICommName(MPI_Comm comm)
@@ -291,7 +291,7 @@ std::string MPIManager::getMPICommName(MPI_Comm comm)
 
    WALBERLA_ASSERT_GREATER_EQUAL(resultLen, 0);
    WALBERLA_ASSERT_LESS_EQUAL(resultLen, numeric_cast< int >(commName.size()));
-   return std::string(commName.begin(), commName.begin() + resultLen);
+   return { commName.begin(), commName.begin() + resultLen };
 }
 
 } // namespace mpi

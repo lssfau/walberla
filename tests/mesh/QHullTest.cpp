@@ -47,7 +47,7 @@ class PointCloudDataSource : public vtk::PointDataSource
 public:
    PointCloudDataSource( const std::vector<Vector3<real_t>> & pointCloud ) : pointCloud_( pointCloud ) {}
 
-   std::vector< Attributes > getAttributes() const override { return std::vector< Attributes >(); }
+   std::vector< Attributes > getAttributes() const override { return {}; }
    std::vector< Vector3< real_t > > getPoints() override { return pointCloud_; }
    void configure() override {};
 
@@ -71,23 +71,23 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
    //   ofs << std::setprecision(16) << p[0] << " " << p[1] << " " << p[2] << "\n";
 
    mesh::QHull<MeshType> qhull( pointCloud );
-   
+
    if( doVTKOutput )
    {
       auto pcds = walberla::make_shared<PointCloudDataSource>( pointCloud );
       vtk::createVTKOutput_PointData(pcds, testName + "PointCloud", 1)->write();
-      qhull.enableDebugVTKOutput( testName );   
+      qhull.enableDebugVTKOutput( testName );
    }
 
    WcTimer timer;
    uint_t iterations = qhull.run();
    timer.end();
-   WALBERLA_LOG_INFO( "QHull on \"" << testName << "\":\n" << 
-                      "   Point cloud size: " << pointCloud.size() << "\n" << 
-                      "   Iterations:       " << iterations << "\n" <<                
-                      "   Num hull points:  " << qhull.mesh().n_vertices() << "\n" << 
-                      "   Num hull faces:   " << qhull.mesh().n_faces() << "\n" << 
-                      "   Time:             " << timer.last() << "s\n" <<                   
+   WALBERLA_LOG_INFO( "QHull on \"" << testName << "\":\n" <<
+                      "   Point cloud size: " << pointCloud.size() << "\n" <<
+                      "   Iterations:       " << iterations << "\n" <<
+                      "   Num hull points:  " << qhull.mesh().n_vertices() << "\n" <<
+                      "   Num hull faces:   " << qhull.mesh().n_faces() << "\n" <<
+                      "   Time:             " << timer.last() << "s\n" <<
                       "   VTK output:       " << (doVTKOutput ? "enabled" : "disabled") );
 
    const MeshType & mesh = qhull.mesh();
@@ -158,7 +158,7 @@ std::vector<Vector3<real_t>> generatePointCloudOctahedron()
 std::vector<Vector3<real_t>> generatePointCloudIcosahedron()
 {
    std::vector<Vector3<real_t>> points;
-   
+
    static const real_t PHI = ( real_t(1) + std::sqrt( real_t(5) ) ) / real_t(2);
 
    for( auto one : {real_t(-1), real_t(1)} )
@@ -193,11 +193,11 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
 std::vector<Vector3<real_t>> generatePointCloudInAABB( const math::AABB & aabb, const uint_t numPoints )
 {
    std::mt19937 rng(42);
-   
+
    std::vector<Vector3<real_t>> pointCloud( numPoints );
    for( auto & p : pointCloud )
       p = aabb.randomPoint(rng);
-   
+
    return pointCloud;
 }
 
@@ -237,8 +237,7 @@ void runTests( const uint_t numPoints, const bool doVTKOutput )
 }
 
 
-int main( int argc, char * argv[] )
-{
+int main( int argc, char ** argv ) {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );
    mpi::MPIManager::instance()->useWorldComm();
@@ -265,7 +264,7 @@ int main( int argc, char * argv[] )
    {
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE:\n" << args[0] << " [--vtk] [--floatMesh] NUM_POINTS" );
    }
-   
+
    uint_t numPoints;
    try {
       numPoints = std::stoul( args[1] );

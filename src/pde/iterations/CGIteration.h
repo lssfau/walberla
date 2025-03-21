@@ -45,8 +45,8 @@ class CGIteration
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 >                Field_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using Field_T = GhostLayerField<real_t, 1>;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    CGIteration( BlockStorage & blocks,
                             const BlockDataID & uId, const BlockDataID & rId, const BlockDataID & dId, const BlockDataID & zId,

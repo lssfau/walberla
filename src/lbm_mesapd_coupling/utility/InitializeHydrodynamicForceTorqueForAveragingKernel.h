@@ -41,7 +41,7 @@ public:
    template< typename ParticleAccessor_T >
    void operator()(const size_t idx, ParticleAccessor_T& ac) const
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
       
       ac.setOldHydrodynamicForce( idx, ac.getHydrodynamicForce(idx) );
       ac.setOldHydrodynamicTorque( idx, ac.getHydrodynamicTorque(idx) );

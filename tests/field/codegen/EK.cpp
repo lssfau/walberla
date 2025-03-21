@@ -38,8 +38,8 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<real_t, 1> DensityField_T;
-typedef GhostLayerField<real_t, 2> FluxField_T;
+using DensityField_T = GhostLayerField<real_t, 1>;
+using FluxField_T = GhostLayerField<real_t, 2>;
 
 void initC(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID cID)
 {
@@ -117,8 +117,8 @@ void testEK()
    initC(blocks, c);
    BlockDataID j = field::addToStorage<FluxField_T>(blocks, "j", real_c(0.0), field::fzyx);
    
-   typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
-   typedef field::communication::PackInfo<DensityField_T> Packing;
+   using CommScheme = blockforest::communication::UniformBufferedScheme<stencil::D2Q9>;
+   using Packing = field::communication::PackInfo<DensityField_T>;
    CommScheme commScheme(blocks);
    commScheme.addDataToCommunicate( make_shared<Packing>(c) );
    

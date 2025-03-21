@@ -58,7 +58,7 @@ namespace postprocessing {
                                                               bool calcNormals = false,
                                                               int targetRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
    {
-      static_assert( std::is_unsigned<typename Field_T::value_type>::value, "Works only for FlagFields" );
+      static_assert( std::is_unsigned_v<typename Field_T::value_type>, "Works only for FlagFields" );
       static_assert( Field_T::F_SIZE == 1, "Works only for FlagFields" );
 
 
@@ -120,7 +120,7 @@ namespace postprocessing {
                                                               uint_t fCoord = 0, bool calcNormals = false,
                                                               int targetRank = 0, MPI_Comm comm = MPI_COMM_WORLD )
    {
-      static_assert( (std::is_same< typename Field_T::value_type, real_t >::value), "Function works only for fields of real" );
+      static_assert( (std::is_same_v< typename Field_T::value_type, real_t >), "Function works only for fields of real" );
 
       auto mesh = make_shared<geometry::TriangleMesh> ();
 

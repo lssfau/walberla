@@ -30,7 +30,7 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<real_t, 1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 using SweepCollection_T = pystencils::SweepCollection;
 
 void testSweepCollection()

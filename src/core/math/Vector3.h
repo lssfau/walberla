@@ -84,7 +84,7 @@ namespace math {
 template< typename Type >
 class Vector3
 {
-   static_assert( std::is_arithmetic<Type>::value, "Vector3 only accepts arithmetic data types" );
+   static_assert( std::is_arithmetic_v<Type>, "Vector3 only accepts arithmetic data types" );
 
 private:
    //**Friend declarations*************************************************************************
@@ -167,8 +167,8 @@ public:
    inline Vector3<Length> getNormalizedOrZero()          const;
    inline Vector3<Length> getNormalizedIfNotZero()       const;
    inline void            reset();
-   inline Type*           data()                         {return v_;}
-   inline Type const *    data()                         const {return v_;}
+   inline Type*           data()                         {return v_.data();}
+   inline Type const *    data()                         const {return v_.data();}
    //@}
    //*******************************************************************************************************************
 
@@ -185,11 +185,11 @@ public:
     * 0 & 1 & 2 \\
     * \end{array}\right)\f]
    **/
-   Type v_[3] = {Type(), Type(), Type()};
+   std::array< Type, 3 > v_ = { Type(), Type(), Type() };
    //@}
    //*******************************************************************************************************************
 };
-static_assert( std::is_trivially_copyable<Vector3<real_t>>::value, "Vector3<real_t> has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<Vector3<real_t>>, "Vector3<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 template<typename T>
@@ -227,7 +227,7 @@ template< typename Type >
 template< typename Other >
 inline constexpr Vector3<Type>::Vector3( Other init )
 {
-   static_assert( std::is_arithmetic<Other>::value, "Vector3 only accepts arithmetic data types in Vector3( Other init )");
+   static_assert( std::is_arithmetic_v<Other>, "Vector3 only accepts arithmetic data types in Vector3( Other init )");
 
    v_[0] = v_[1] = v_[2] = numeric_cast<Type>(init);
 }
@@ -1492,7 +1492,7 @@ inline bool operator!=( long double scalar, const Vector3<Type>& vec )
 // \return The scaled result vector.
 */
 template< typename Type, typename Other >
-inline typename std::enable_if< std::is_fundamental<Other>::value, Vector3<HIGH> >::type
+inline std::enable_if_t< std::is_fundamental_v<Other>, Vector3<HIGH> >
    operator*( Other scalar, const Vector3<Type>& vec )
 {
    return vec * scalar;
@@ -1759,9 +1759,9 @@ inline void normals(const Vector3<Type>& v, Vector3<Type>& defNor, Vector3<Type>
 template<typename T>
 Vector3<T> & normalize( Vector3<T> & v )
 {
-   static_assert( std::is_floating_point<T>::value,
+   static_assert( std::is_floating_point_v<T>,
       "You can only normalize floating point vectors in-place!");
-   static_assert( (std::is_same<T, typename Vector3<T>::Length>::value),
+   static_assert( (std::is_same_v<T, typename Vector3<T>::Length>),
       "The type of your Vector3's length does not match its element type!" );
 
    const T len( v.length() );
@@ -1847,7 +1847,7 @@ struct Vector3LexicographicalyLess
 // \param   v The vector the hash is computed for.
 // \returns   A hash for the entire Vector3.
 */
-template< typename T, typename Enable = std::enable_if_t<std::is_integral<T>::value> >
+template< typename T, typename Enable = std::enable_if_t<std::is_integral_v<T>> >
 std::size_t hash_value( const Vector3<T> & v )
 {
    std::size_t seed;
@@ -1891,7 +1891,7 @@ namespace mpi {
    mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Vector3<VT> & vec )
    {
       buf.addDebugMarker( "v3" );
-      static_assert ( std::is_trivially_copyable< Vector3<VT> >::value,
+      static_assert ( std::is_trivially_copyable_v< Vector3<VT> >,
                       "type has to be trivially copyable for the memcpy to work correctly" );
       auto pos = buf.forward(sizeof(Vector3<VT>));
       std::memcpy(pos, &vec, sizeof(Vector3<VT>));
@@ -1903,7 +1903,7 @@ namespace mpi {
    mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Vector3<VT> & vec )
    {
       buf.readDebugMarker( "v3" );
-      static_assert ( std::is_trivially_copyable< Vector3<VT> >::value,
+      static_assert ( std::is_trivially_copyable_v< Vector3<VT> >,
                       "type has to be trivially copyable for the memcpy to work correctly" );
       auto pos = buf.skip(sizeof(Vector3<VT>));
       //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess

@@ -53,7 +53,7 @@ void testCell( cell_idx_t x, cell_idx_t y, cell_idx_t z )
    tmp += c;
    WALBERLA_CHECK_EQUAL( tmp, sum );
 
-   Cell difference = c - c;
+   Cell difference = c - c; // NOLINT: represent zero difference
    WALBERLA_CHECK_EQUAL( difference.x(), cell_idx_t(0) );
    WALBERLA_CHECK_EQUAL( difference.y(), cell_idx_t(0) );
    WALBERLA_CHECK_EQUAL( difference.z(), cell_idx_t(0) );
@@ -194,7 +194,7 @@ int main( int /*argc*/, char** /*argv*/ ) {
 
    debug::enterTestMode();
 
-   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   using mt11213b = std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 >;
    mt11213b rng;
    std::uniform_int_distribution<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min(), std::numeric_limits<cell_idx_t>::max() );
 

@@ -585,11 +585,11 @@ int main( int argc, char **argv )
 
    // test setups -> tuple of (setupName, spherePosition, periodicityTested)
    std::vector<std::tuple<std::string, Vector3<real_t>, bool> > testSetups;
-   testSetups.push_back( std::make_tuple( "sphere inside block",          Vector3<real_t>(real_t(10), real_t(10), real_t(10)),        false) );
-   testSetups.push_back( std::make_tuple( "sphere on block boarder",      Vector3<real_t>(real_t(19.5), real_t(10), real_t(10)),      false) );
-   testSetups.push_back( std::make_tuple( "sphere on block boarder 2",    Vector3<real_t>(real_t(20)+radius, real_t(10), real_t(10)), false) );
-   testSetups.push_back( std::make_tuple( "sphere on periodic boarder",   Vector3<real_t>(real_t(59.5), real_t(10), real_t(10)),      true) );
-   testSetups.push_back( std::make_tuple( "sphere on periodic boarder 2", Vector3<real_t>(radius, real_t(10), real_t(10)),            true) );
+   testSetups.emplace_back( "sphere inside block",          Vector3<real_t>(real_t(10), real_t(10), real_t(10)),        false );
+   testSetups.emplace_back( "sphere on block boarder",      Vector3<real_t>(real_t(19.5), real_t(10), real_t(10)),      false );
+   testSetups.emplace_back( "sphere on block boarder 2",    Vector3<real_t>(real_t(20)+radius, real_t(10), real_t(10)), false );
+   testSetups.emplace_back( "sphere on periodic boarder",   Vector3<real_t>(real_t(59.5), real_t(10), real_t(10)),      true );
+   testSetups.emplace_back( "sphere on periodic boarder 2", Vector3<real_t>(radius, real_t(10), real_t(10)),            true );
 
 
    /////////////////////////////////////

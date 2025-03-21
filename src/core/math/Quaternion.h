@@ -100,9 +100,9 @@ class Quaternion
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(std::is_floating_point<Type>::value, "T has to be floating point!");
-   static_assert(!std::is_const<Type>::value, "T has to be non const!");
-   static_assert(!std::is_volatile<Type>::value, "T has to be non volatile!");
+   static_assert(std::is_floating_point_v<Type>, "T has to be floating point!");
+   static_assert(!std::is_const_v<Type>, "T has to be non const!");
+   static_assert(!std::is_volatile_v<Type>, "T has to be non volatile!");
    /*! \endcond */
    //**********************************************************************************************
 
@@ -161,8 +161,8 @@ public:
                               inline void                       rotateZ( Type angle );
                               inline void                       swap( Quaternion& q ) /* throw() */;
                               inline const Vector3<Type>        getEulerAnglesXYZ() const;
-                              inline Type*                      data()                         {return v_;}
-                              inline Type const *               data()                         const {return v_;}
+                              inline Type*                      data()                         {return v_.data();}
+                              inline Type const *               data()                         const {return v_.data();}
    //@}
    //**********************************************************************************************
 
@@ -205,11 +205,11 @@ private:
     * 0 & 1 & 2 & 3 \\
     * \end{array}\right)\f]
    **/
-   Type v_[4] = {Type(1), Type(0), Type(0), Type(0)};
-   //@}
+  std::array< Type, 4 > v_ = { Type(1), Type(0), Type(0), Type(0) };
+  //@}
    //**********************************************************************************************
 };
-static_assert( std::is_trivially_copyable<Quaternion<real_t>>::value, "Quaternion<real_t> has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<Quaternion<real_t>>, "Quaternion<real_t> has to be trivially copyable!");
 //*************************************************************************************************
 
 
@@ -264,7 +264,7 @@ template< typename Type >  // Data type of the quaternion
 template< typename Axis >  // Data type of the rotation axis
 inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
 {
-   static_assert(std::is_floating_point<Axis>::value, "Axis has to be floating point!" );
+   static_assert(std::is_floating_point_v<Axis>, "Axis has to be floating point!" );
 
    auto axisLength = axis.length();
    if( (floatIsEqual(axisLength, 0)) || (math::equal(std::fabs(angle), real_t(0)))  ) {
@@ -1095,7 +1095,7 @@ namespace mpi {
    mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const math::Quaternion<VT> & quat )
    {
       buf.addDebugMarker( "q4" );
-      static_assert ( std::is_trivially_copyable< math::Quaternion<VT> >::value,
+      static_assert ( std::is_trivially_copyable_v< math::Quaternion<VT> >,
                       "type has to be trivially copyable for the memcpy to work correctly" );
       auto pos = buf.forward(sizeof(math::Quaternion<VT>));
       std::memcpy(pos, &quat, sizeof(math::Quaternion<VT>));
@@ -1107,7 +1107,7 @@ namespace mpi {
    mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, math::Quaternion<VT> & quat )
    {
       buf.readDebugMarker( "q4" );
-      static_assert ( std::is_trivially_copyable< math::Quaternion<VT> >::value,
+      static_assert ( std::is_trivially_copyable_v< math::Quaternion<VT> >,
                       "type has to be trivially copyable for the memcpy to work correctly" );
       auto pos = buf.skip(sizeof(math::Quaternion<VT>));
       //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess

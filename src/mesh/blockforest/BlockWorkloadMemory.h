@@ -40,9 +40,9 @@ template< typename DistanceObject >
 class MeshWorkloadMemory
 {
 public:
-   typedef blockforest::memory_t           memory_t;
-   typedef blockforest::workload_t         workload_t;
-   typedef typename DistanceObject::Scalar Scalar;
+   using memory_t = blockforest::memory_t;
+   using workload_t = blockforest::workload_t;
+   using Scalar = typename DistanceObject::Scalar;
 
    MeshWorkloadMemory( const shared_ptr< DistanceObject > & distanceObject, const Vector3< Scalar > & cellSize ) : distanceObject_( distanceObject ), cellSize_( cellSize ) { defaultInit(); }
    MeshWorkloadMemory( const shared_ptr< DistanceObject > & distanceObject, const Scalar cellSize ) : distanceObject_( distanceObject ), cellSize_( cellSize, cellSize, cellSize ) { defaultInit(); }

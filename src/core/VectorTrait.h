@@ -44,7 +44,7 @@ struct VectorTrait
 };
 
 template< typename T >
-struct VectorTrait<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
+struct VectorTrait<T, std::enable_if_t<std::is_arithmetic_v<T>>>
 {
    using OutputType = T;
 

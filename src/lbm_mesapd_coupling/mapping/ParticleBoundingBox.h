@@ -59,7 +59,7 @@ inline CellInterval getCellBBFromAABB( const math::AABB & aabb, bool AABBIsInfin
       blockStorage.getCellBBFromAABB( cellBB, aabb.getIntersection( extendedBlockAABB ), level );
 
       // if (partly) infinite aabb does not intersect with the extended block AABB, return an empty interval
-      if( cellBB.empty() ) return CellInterval();
+      if( cellBB.empty() ) return {};
    }
    else
    {

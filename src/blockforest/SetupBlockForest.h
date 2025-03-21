@@ -183,10 +183,10 @@ public:
    uint_t getNumberOfBlocks( const uint_t level ) const;
 
    inline const_iterator begin() const;
-   inline const_iterator end()   const { return const_iterator( this, nullptr ); }
+   inline const_iterator end()   const { return { this, nullptr }; }
 
    inline iterator begin();
-   inline iterator end() { return iterator( this, nullptr ); }
+   inline iterator end() { return { this, nullptr }; }
 
    const SetupBlock* getFirstBlock() const;
          SetupBlock* getFirstBlock();
@@ -235,7 +235,7 @@ public:
 
    uint_t mapPointToTreeIndex( const real_t px, const real_t py, const real_t pz ) const;
 
-   void mapAABBToBoundingForestCoordinates( const AABB& aabb, uint_t (&min)[3], uint_t (&max)[3] ) const;
+   void mapAABBToBoundingForestCoordinates( const AABB& aabb, std::array< uint_t, 3 > & min, std::array< uint_t, 3 > & max ) const;
 
    static void getRootBlockAABB( AABB& aabb, const AABB& domain,
                                  const real_t rootBlockXSize, const real_t rootBlockYSize, const real_t rootBlockZSize,
@@ -380,9 +380,9 @@ private:
    uint_t numberOfBlocks_{ 0 };
 
    AABB   domain_;           // the simulation space/region
-   real_t rootBlockSize_[3]; // [(domain x width) / size_[0]], etc. [equivalent to the size of each root block's bounding box]
-   uint_t size_[3];          // number of coarse blocks on the initial grid (= number of octree root blocks) in each direction
-   bool   periodic_[3];
+   std::array< real_t, 3 > rootBlockSize_; // [(domain x width) / size_[0]], etc. [equivalent to the size of each root block's bounding box]
+   std::array< uint_t, 3 > size_;          // number of coarse blocks on the initial grid (= number of octree root blocks) in each direction
+   std::array< bool, 3 >   periodic_;
 
    uint_t  depth_{ 0 }; // depth := number of levels - 1
    uint_t  treeIdDigits_{ 0 };
@@ -420,9 +420,9 @@ inline SetupBlockForest::SetupBlockForest() {
 
 inline SetupBlockForest::~SetupBlockForest() {
 
-   for( uint_t i = 0; i != forest_.size(); ++i )
+   for(auto & coarseBlock : forest_)
    {
-      if( forest_[i] != nullptr ) delete forest_[i];
+      delete coarseBlock;
    }
 }
 
@@ -435,7 +435,7 @@ inline SetupBlockForest::const_iterator SetupBlockForest::begin() const {
    if( block == nullptr )
       return end();
 
-   return SetupBlockForest::const_iterator( this, block );
+   return { this, block };
 }
 
 
@@ -447,7 +447,7 @@ inline SetupBlockForest::iterator SetupBlockForest::begin() {
    if( block == nullptr )
       return end();
 
-   return SetupBlockForest::iterator( this, block );
+   return { this, block };
 }
 
 
@@ -623,8 +623,8 @@ inline void SetupBlockForest::initWorkloadMemorySUID( const Set<SUID>& selector 
       WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Assigning workload, memory requirements, and SUIDs to blocks ..." )
    }
 
-   for( uint_t i = 0; i != workloadMemorySUIDAssignmentFunctions.size(); ++i )
-      workloadMemorySUIDAssignmentFunctions[i]( *this );
+   for(const auto & workloadMemorySUIDAssignmentFunction : workloadMemorySUIDAssignmentFunctions)
+      workloadMemorySUIDAssignmentFunction( *this );
 }
 
 
@@ -633,8 +633,9 @@ inline void SetupBlockForest::updateNeighborhood( std::set< SetupBlock* >& block
 
    std::vector< SetupBlock* > blocks;
 
-   for( auto it = blocksToUpdate.begin(); it != blocksToUpdate.end(); ++it )
-      blocks.push_back( *it );
+   blocks.reserve(blocksToUpdate.size());
+   for(auto it : blocksToUpdate)
+      blocks.push_back( it );
 
    updateNeighborhood( blocks );
 }
@@ -737,8 +738,8 @@ public:
 
    void operator()( SetupBlockForest & forest )
    {
-      for( auto function = function_.begin(); function != function_.end(); ++function )
-         (*function)( forest );
+      for(auto & function : function_)
+         function( forest );
    }
 
 private:

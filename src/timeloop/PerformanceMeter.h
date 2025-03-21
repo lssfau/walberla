@@ -124,15 +124,15 @@ namespace timeloop {
       struct Measurement
       {
          Measurement ( CountFunction cf, const std::string & n, real_t sc, uint_t countFreq )
-            : countFunction ( cf), name(n), scaling(sc), countingFreq(countFreq), counts(0), avgCellsPerTimeStep(0)
+            : countFunction ( cf), name(n), scaling(sc), countingFreq(countFreq)
          {}
 
          CountFunction countFunction;
          std::string   name;                 //!< name of the measured performance number
          real_t        scaling;              //!< scaling factor, usually power of ten, for (M)FLUPS
          uint_t        countingFreq;         //!< every n'th timestep cells are counted, if 0 cells are counted only once
-         uint_t        counts;               //!< how often was the number of cells counted until now
-         real_t        avgCellsPerTimeStep;  //!< the average number of cells per timestep
+         uint_t        counts{0};               //!< how often was the number of cells counted until now
+         real_t        avgCellsPerTimeStep{0};  //!< the average number of cells per timestep
       };
 
       void   timingStartStop();
@@ -147,7 +147,7 @@ namespace timeloop {
       std::vector<Measurement> measurements_;
 
       /// Used for operator() to indicate if called the first time
-      bool firstTimingStartStopCall_;
+      bool firstTimingStartStopCall_{true};
    };
 
 

@@ -50,7 +50,7 @@ public:
 
    template <typename Accessor_T>
    void operator()(const size_t idx, Accessor_T& ac) {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, Accessor_T>::value, "please provide a valid accessor");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, Accessor_T>, "please provide a valid accessor");
 
       WALBERLA_CHECK_FLOAT_UNEQUAL(ac.getVirtualMass(idx), real_t(0.),
                                    "No virtual mass set on body. Was the virtualMass kernel not called before?");

@@ -62,14 +62,14 @@ namespace stencil {
          static const bool   containsCenter   = $containsCenter;
          static const uint_t noCenterFirstIdx = $noCenterFirstIndex;
 
-         static const Direction dir           [$Q];
-         static const Direction dir_pos       [POS_Q];
-         static const uint_t    idx           [NR_OF_DIRECTIONS];
-         static const Direction d_per_d       [NR_OF_DIRECTIONS][$Q/2];
-         static const uint_t    d_per_d_length[NR_OF_DIRECTIONS];
+         static const std::array< Direction, $Q > dir;
+         static const std::array< Direction, POS_Q > dir_pos;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > idx;
+         static const std::array< std::array<Direction, $Q/2>, NR_OF_DIRECTIONS> d_per_d;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length;
 
-         static const Direction dir_neighbors        [NR_OF_DIRECTIONS][NR_OF_DIRECTIONS];
-         static const uint_t    dir_neighbors_length [NR_OF_DIRECTIONS];
+         static const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > dir_neighbors;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > dir_neighbors_length;
 
          static bool   containsDir(Direction d) { return idx[d] < NR_OF_DIRECTIONS; }
          static uint_t invDirIdx  (Direction d) { return idx[stencil::inverseDir[d]]; }
@@ -104,7 +104,7 @@ namespace stencil {
 
       /// Subset of directions. Defines the stencil
       template<typename Dummy>
-      const Direction $name<Dummy>::dir[$Q] = { $dirs };
+      const std::array< Direction, $Q > $name<Dummy>::dir{ $dirs };
 
 
       /**
@@ -114,7 +114,7 @@ namespace stencil {
        * the direction together with its inverse direction.
        */
       template<typename Dummy>
-      const Direction $name<Dummy>::dir_pos[POS_Q] = { $dir_pos };
+      const std::array< Direction, $name<Dummy>::POS_Q > $name<Dummy>::dir_pos{ $dir_pos };
 
 
       /**
@@ -127,7 +127,7 @@ namespace stencil {
        *  So a stencil class is needed to map back from direction to field index
        */
       template<typename Dummy>
-      const uint_t $name<Dummy>::idx[NR_OF_DIRECTIONS] = { $indexFromDir };
+      const std::array< uint_t, NR_OF_DIRECTIONS > $name<Dummy>::idx{ $indexFromDir };
 
 
       /**
@@ -147,7 +147,7 @@ namespace stencil {
        *
        */
       template<typename Dummy>
-      const Direction $name<Dummy>::d_per_d[NR_OF_DIRECTIONS][$Q/2] = { $d_per_d };
+      const std::array< std::array< Direction, $Q/2 >, NR_OF_DIRECTIONS > $name<Dummy>::d_per_d{ { $d_per_d } };
 
 
       /**
@@ -155,7 +155,7 @@ namespace stencil {
        * For usage see documentation of d_per_d
        */
       template<typename Dummy>
-      const uint_t $name<Dummy>::d_per_d_length [NR_OF_DIRECTIONS] = { $d_per_d_length };
+      const std::array< uint_t, NR_OF_DIRECTIONS > $name<Dummy>::d_per_d_length{ $d_per_d_length };
 
 
       /**
@@ -168,7 +168,7 @@ namespace stencil {
        * By definition, the neighbors of C are identical to the dir[] array without C itself.
        */
       template<typename Dummy>
-      const Direction $name<Dummy>::dir_neighbors[NR_OF_DIRECTIONS][NR_OF_DIRECTIONS] = { $dir_neighbors };
+      const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > $name<Dummy>::dir_neighbors{ { $dir_neighbors } };
 
 
       /**
@@ -176,7 +176,7 @@ namespace stencil {
        * For usage see documentation of dir_neighbors
        */
       template<typename Dummy>
-      const uint_t $name<Dummy>::dir_neighbors_length[NR_OF_DIRECTIONS] = { $dir_neighbors_length };
+      const std::array<uint_t, NR_OF_DIRECTIONS> $name<Dummy>::dir_neighbors_length{ $dir_neighbors_length };
 
    } // namespace internal
 

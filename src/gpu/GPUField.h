@@ -65,7 +65,7 @@ namespace gpu
    class GPUField
    {
    public:
-      typedef T value_type;
+      using value_type = T;
 
       GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSize,
                 uint_t _nrOfGhostLayers, const Layout & _layout = fzyx, bool usePitchedMem = true );
@@ -170,7 +170,7 @@ namespace gpu
       uint_t         fAllocSize_;
       Layout         layout_;
       bool           usePitchedMem_;
-      uint8_t        timestepCounter_;
+      uint8_t        timestepCounter_ = uint8_c(0);
    };
 
 

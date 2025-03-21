@@ -129,8 +129,8 @@ int main( int /*argc*/, char** /*argv*/ ) {
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    functions.clear();
-   for( auto it = container.begin(); it != container.end(); ++it )
-      functions.push_back( *it );
+   for(auto & it : container)
+      functions.push_back( it );
 
    expected.clear();
    expected.emplace_back("function_1");

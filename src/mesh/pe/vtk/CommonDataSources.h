@@ -42,10 +42,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = uint64_
 class SIDVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
-   typedef typename Base::Vertices Vertices;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource<OutputType>;
+   using Vertices = typename Base::Vertices;
+   using value_type = typename Base::value_type;
+   using BodyPointerVPropManager = typename Base::BodyPointerVPropManager;
 
    SIDVertexDataSource( const std::string & _name = "sid" )
       : Base( _name ) { }
@@ -69,10 +69,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = uint64_
 class SIDFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
-   typedef typename Base::Faces Faces;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource<OutputType>;
+   using Faces = typename Base::Faces;
+   using value_type = typename Base::value_type;
+   using BodyPointerFPropManager = typename Base::BodyPointerFPropManager;
 
    SIDFaceDataSource( const std::string & _name = "sid" )
       : Base( _name ) { }
@@ -96,10 +96,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = uint64_
 class UIDVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
-   typedef typename Base::Vertices Vertices;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource<OutputType>;
+   using Vertices = typename Base::Vertices;
+   using value_type = typename Base::value_type;
+   using BodyPointerVPropManager = typename Base::BodyPointerVPropManager;
 
    UIDVertexDataSource( const std::string & _name = "uid" )
       : Base( _name ) { }
@@ -123,10 +123,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = uint64_
 class UIDFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
-   typedef typename Base::Faces Faces;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource<OutputType>;
+   using Faces = typename Base::Faces;
+   using value_type = typename Base::value_type;
+   using BodyPointerFPropManager = typename Base::BodyPointerFPropManager;
 
    UIDFaceDataSource( const std::string & _name = "uid" )
       : Base( _name ) { }
@@ -151,10 +151,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = real_t 
 class LinearVelocityVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
-   typedef typename Base::Vertices Vertices;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource<OutputType>;
+   using Vertices = typename Base::Vertices;
+   using value_type = typename Base::value_type;
+   using BodyPointerVPropManager = typename Base::BodyPointerVPropManager;
 
    LinearVelocityVertexDataSource( const std::string & _name = "linearVelocity" )
       : Base( _name ) { }
@@ -181,19 +181,19 @@ template< typename MeshType, typename Tesselation, typename OutputType = real_t 
 class LinearVelocityFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
-   typedef typename Base::Faces Faces;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource<OutputType>;
+   using Faces = typename Base::Faces;
+   using value_type = typename Base::value_type;
+   using BodyPointerFPropManager = typename Base::BodyPointerFPropManager;
 
    LinearVelocityFaceDataSource( const std::string & _name = "linearVelocity" )
       : Base( _name ) { }
 
    virtual ~LinearVelocityFaceDataSource() = default;
 
-   virtual uint_t numComponents() { return uint_t(3); }
+   uint_t numComponents() override { return uint_t(3); }
 
-   virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
+   void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer ) override
    {
       data.reserve( size_t(3) * faces.size() );
 
@@ -213,10 +213,10 @@ template< typename MeshType, typename Tesselation, typename OutputType = real_t 
 class AngularVelocityVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
-   typedef typename Base::Vertices Vertices;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource<OutputType>;
+   using Vertices = typename Base::Vertices;
+   using value_type = typename Base::value_type;
+   using BodyPointerVPropManager = typename Base::BodyPointerVPropManager;
 
    AngularVelocityVertexDataSource( const std::string & _name = "angularVelocity" )
       : Base( _name ) { }
@@ -243,19 +243,19 @@ template< typename MeshType, typename Tesselation, typename OutputType = real_t 
 class AngularVelocityFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
-   typedef typename Base::Faces Faces;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource<OutputType>;
+   using Faces = typename Base::Faces;
+   using value_type = typename Base::value_type;
+   using BodyPointerFPropManager = typename Base::BodyPointerFPropManager;
 
    AngularVelocityFaceDataSource( const std::string & _name = "angularVelocity" )
       : Base( _name ) { }
 
    virtual ~AngularVelocityFaceDataSource() = default;
 
-   virtual uint_t numComponents() { return uint_t(3); }
+   uint_t numComponents() override { return uint_t(3); }
 
-   virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
+   void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer ) override
    {
       data.reserve( size_t(3) * faces.size() );
 
@@ -275,19 +275,19 @@ template< typename MeshType, typename Tesselation, typename OutputType = real_t 
 class SurfaceVelocityVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {
 public:
-   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
-   typedef typename Base::Vertices Vertices;
-   typedef typename Base::value_type value_type;
-   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+   using Base = typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource<OutputType>;
+   using Vertices = typename Base::Vertices;
+   using value_type = typename Base::value_type;
+   using BodyPointerVPropManager = typename Base::BodyPointerVPropManager;
 
    SurfaceVelocityVertexDataSource( const std::string & _name = "surfaceVelocity" )
       : Base( _name ) { }
 
    virtual ~SurfaceVelocityVertexDataSource() = default;
 
-   virtual uint_t numComponents() { return uint_t(3); }
+   uint_t numComponents() override { return uint_t(3); }
 
-   virtual void getData( const MeshType & mesh, const Vertices & vertices, std::vector<value_type> & data, const BodyPointerVPropManager & bodyPointer )
+   void getData( const MeshType & mesh, const Vertices & vertices, std::vector<value_type> & data, const BodyPointerVPropManager & bodyPointer ) override
    {
       data.reserve( size_t(3) * vertices.size() );
 

@@ -33,15 +33,15 @@ template <typename MeshType>
 class Node
 {
 public:
-   typedef typename MeshType::Point                    Point;
-   typedef typename MeshType::Normal                   Normal;
-   typedef typename MeshType::Scalar                   Scalar;  
-   typedef typename MeshType::FaceHandle               FaceHandle; 
-   typedef typename math::GenericAABB<Scalar>          AABB;
+   using Point = typename MeshType::Point;
+   using Normal = typename MeshType::Normal;
+   using Scalar = typename MeshType::Scalar;  
+   using FaceHandle = typename MeshType::FaceHandle; 
+   using AABB = typename math::GenericAABB<Scalar>;
 
    template< typename InputIterator >
    Node( const MeshType & mesh, InputIterator beginFh, InputIterator endFh ) : aabb_( computeAABBForFaces( mesh, beginFh, endFh ) ) {}
-   virtual ~Node() { }
+   virtual ~Node() = default;
 
    const AABB & getAABB() const { return aabb_; }
 

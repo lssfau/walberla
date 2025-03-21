@@ -24,6 +24,7 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -72,7 +73,7 @@ namespace geometry   {
    protected:
       GrayScaleImage() = default;
 
-      uint_t size_[2];                   //< 0=width,  1=height
+      std::array<uint_t, 2> size_;                   //< 0=width,  1=height
       std::vector<unsigned char> image_; //< raw pixels
    };
 

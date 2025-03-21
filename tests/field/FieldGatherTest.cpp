@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
                                                        1.0,           // dx
                                                        oneBlockPerProcess
                                                        );
-   typedef GhostLayerField<cell_idx_t,3> MyField;
+   using MyField = GhostLayerField<cell_idx_t, 3>;
    BlockDataID fieldID = field::addToStorage<MyField>( blocks, "Field" );
 
 

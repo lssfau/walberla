@@ -48,7 +48,7 @@ public:
                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), iterations_( iterations ),
       residualNormThreshold_( residualNormThreshold ), residualCheckFrequency_( residualCheckFrequency ),
-      iterationsPerformed_( uint_t(0) ), thresholdReached_( false ),
+      iterationsPerformed_( uint_t(0) ),
       communication_( communication ), redUpdate_( redUpdate ), blackUpdate_( blackUpdate ), residualNorm_( residualNorm ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}
@@ -69,7 +69,7 @@ protected:
    uint_t residualCheckFrequency_;
    
    uint_t iterationsPerformed_;
-   bool thresholdReached_;
+   bool thresholdReached_{ false };
 
    std::function< void () >            boundary_;
    std::function< void () >            communication_;

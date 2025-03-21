@@ -45,7 +45,7 @@ class CGFixedStencilIteration
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    CGFixedStencilIteration( BlockStorage & blocks,
                             const BlockDataID & uId, const BlockDataID & rId, const BlockDataID & dId, const BlockDataID & zId,
@@ -83,7 +83,7 @@ protected:
    
    real_t cells_;
 
-   real_t w_[ Stencil_T::Size ];
+   std::array<real_t, Stencil_T::Size> w_;
 
    uint_t iterations_;
    real_t residualNormThreshold_;

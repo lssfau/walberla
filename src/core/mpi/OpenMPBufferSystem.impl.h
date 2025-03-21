@@ -35,10 +35,8 @@ template<typename Rb, typename Sb>
 GenericOpenMPBufferSystem<Rb, Sb>::GenericOpenMPBufferSystem( const MPI_Comm & communicator, int tag,
                                                               bool _serialSends, bool _serialRecvs  )
    : bs_( communicator, tag),
-     dirty_( true ),
      serialSends_( _serialSends ),
-     serialRecvs_( _serialRecvs ),
-     sizeChangesEverytime_( true )
+     serialRecvs_( _serialRecvs )
 {
 }
 

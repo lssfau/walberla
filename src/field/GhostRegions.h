@@ -46,7 +46,7 @@ template< typename GhostLayerField_T>
 CellInterval getGhostRegion( const GhostLayerField_T & f, stencil::Direction d,
                              cell_idx_t thickness, bool fullSlice )
 {
-   const cell_idx_t sizeArr [] = { cell_idx_c( f.xSize() ),
+   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( f.xSize() ),
                                    cell_idx_c( f.ySize() ),
                                    cell_idx_c( f.zSize() )};
 
@@ -89,7 +89,7 @@ CellInterval getSliceBeforeGhostLayer(const GhostLayerField_T & f, stencil::Dire
 {
    WALBERLA_ASSERT_GREATER( thickness, 0 );
 
-   const cell_idx_t sizeArr [] = { cell_idx_c( f.xSize() ),
+   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( f.xSize() ),
                                    cell_idx_c( f.ySize() ),
                                    cell_idx_c( f.zSize() )};
 
