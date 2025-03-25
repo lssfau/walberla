@@ -188,35 +188,56 @@ class ReduceParticleForcesSweep
 
       // For every cell, reduce the hydrodynamic forces and torques of the overlapping particles
       const real_t dx = block->getAABB().xSize() / real_t(nOverlappingParticlesField->xSize());
-      WALBERLA_FOR_ALL_CELLS_XYZ(
-         particleForcesField, const Vector3< real_t > cellCenter =
-                                 Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
-                                                   real_t(z) + real_t(0.5) * dx) +
-                                 block->getAABB().minCorner();
-         for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++) {
-            Vector3< real_t > forceOnParticle(particleForcesField->get(x, y, z, p * 3 + 0),
-                                              particleForcesField->get(x, y, z, p * 3 + 1),
-                                              particleForcesField->get(x, y, z, p * 3 + 2));
-            forceOnParticle[0] *= forceScalingFactor;
-            forceOnParticle[1] *= forceScalingFactor;
-            forceOnParticle[2] *= forceScalingFactor;
-
-            hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 0] += forceOnParticle[0];
-            hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 1] += forceOnParticle[1];
-            hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 2] += forceOnParticle[2];
-            Vector3< real_t > torqueOnParticle =
-               cross(Vector3< real_t >(
+      // Do not use WALBERLA_FOR_ALL_CELLS_XYZ to avoid race condition if waLBerla is built with OpenMP, i.e., this loop
+      // is not OpenMP parallel
+#ifdef WALBERLA_BUILD_WITH_OPENMP
+#   pragma omp parallel for schedule(static)
+#endif
+      for (cell_idx_t z = cell_idx_t(0); z < cell_idx_t(particleForcesField->zSize()); ++z)
+      {
+         for (cell_idx_t y = cell_idx_t(0); y < cell_idx_t(particleForcesField->ySize()); ++y)
+         {
+            for (cell_idx_t x = cell_idx_t(0); x < cell_idx_t(particleForcesField->xSize()); ++x)
+            {
+               const Vector3< real_t > cellCenter =
+                  Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
+                                    real_t(z) + real_t(0.5) * dx) +
+                  block->getAABB().minCorner();
+               for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++)
+               {
+                  Vector3< real_t > forceOnParticle(particleForcesField->get(x, y, z, p * 3 + 0),
+                                                    particleForcesField->get(x, y, z, p * 3 + 1),
+                                                    particleForcesField->get(x, y, z, p * 3 + 2));
+                  forceOnParticle[0] *= forceScalingFactor;
+                  forceOnParticle[1] *= forceScalingFactor;
+                  forceOnParticle[2] *= forceScalingFactor;
+#ifdef WALBERLA_BUILD_WITH_OPENMP
+#   pragma omp critical
+#endif
+                  {
+                     hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 0] += forceOnParticle[0];
+                     hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 1] += forceOnParticle[1];
+                     hydrodynamicForces[idxField->get(x, y, z, p) * 3 + 2] += forceOnParticle[2];
+                  }
+                  Vector3< real_t > torqueOnParticle = cross(
+                     Vector3< real_t >(
                         cellCenter[0] - particleAndVolumeFractionSoA_.positions[idxField->get(x, y, z, p) * 3 + 0],
                         cellCenter[1] - particleAndVolumeFractionSoA_.positions[idxField->get(x, y, z, p) * 3 + 1],
                         cellCenter[2] - particleAndVolumeFractionSoA_.positions[idxField->get(x, y, z, p) * 3 + 2]),
                      forceOnParticle);
 
-            hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 0] += torqueOnParticle[0];
-            hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 1] += torqueOnParticle[1];
-            hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 2] += torqueOnParticle[2];
+#ifdef WALBERLA_BUILD_WITH_OPENMP
+#   pragma omp critical
+#endif
+                  {
+                     hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 0] += torqueOnParticle[0];
+                     hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 1] += torqueOnParticle[1];
+                     hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 2] += torqueOnParticle[2];
+                  }
+               }
+            }
          }
-
-      )
+      }
 
       // Copy forces and torques of particles
       size_t idxMapped = 0;
