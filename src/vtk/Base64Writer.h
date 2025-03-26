@@ -75,7 +75,7 @@ public:
    void toStream( std::ostream& os );
 
 private:
-   void encodeblock( const std::array< unsigned char, 3 > in,  std::array< unsigned char, 4 > out, int len )
+   void encodeblock( const std::array< unsigned char, 3 > in,  std::array< unsigned char, 4 > & out, int len )
    {
       std::array< unsigned char, 65 > cb64 { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" };
 
