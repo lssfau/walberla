@@ -6,8 +6,8 @@ NumericalSetup
     numYBlocks 1;
     numZBlocks 1;
 
-    cellsPerBlockPerDirectionX 128;
-    cellsPerBlockPerDirectionY 128;
+    cellsPerBlockPerDirectionX 256;
+    cellsPerBlockPerDirectionY 512;
     cellsPerBlockPerDirectionZ 128;
 
     periodicInY false;
@@ -16,7 +16,7 @@ NumericalSetup
     tSI 15;
     gravity 9.81;
 
-    sendDirectlyFromGPU false; // use GPU-GPU communication
+    sendDirectlyFromGPU true; // use GPU-GPU communication
     useCommunicationHiding false;
     frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
 
@@ -27,7 +27,7 @@ NumericalSetup
     Mach 0.01;
     relaxationRate 1.5;
 
-    timeSteps 50000;
+    timeSteps 1000;
 }
 
 Output
@@ -35,5 +35,5 @@ Output
     vtkSpacing 0;
     vtkFolder vtk_out_3D;
 
-    performanceLogFrequency 5000;
+    performanceLogFrequency 1000;
 }

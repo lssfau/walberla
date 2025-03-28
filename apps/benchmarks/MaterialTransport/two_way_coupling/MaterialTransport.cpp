@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
    WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number is "<< RayleighNumber);
    WALBERLA_LOG_INFO_ON_ROOT("Characteristic velocity is "<< uchar << " " << uCharacteristicLB );
    WALBERLA_LOG_INFO_ON_ROOT("Mach number is "<< machnumber);
-   WALBERLA_LOG_INFO_ON_ROOT("Square domain size is "<< domainSizeLB[0]);
+   WALBERLA_LOG_INFO_ON_ROOT("Domain size is "<< domainSizeLB[0] << " " << domainSizeLB[1] << " " << domainSizeLB[2]);
    WALBERLA_LOG_INFO_ON_ROOT("alpha LB is "<< alphaLB);
    WALBERLA_LOG_INFO_ON_ROOT("gravity LB is "<< gravityLB);
    WALBERLA_LOG_INFO_ON_ROOT("Temperature difference delta_t is "<< delta_T);
@@ -537,12 +537,24 @@ auto communication_fluid = std::function< void() >([&]() { com_fluid.communicate
 
 
    WcTimingPool timeloopTiming;
+   WcTimer simTimer;
+
+   simTimer.start();
+
+
    // TODO: maybe add warmup phase
    for (uint_t timeStep = 0; timeStep < timeSteps; ++timeStep)
    {
       if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
    }
+   simTimer.end();
+   WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
+   double time = simTimer.max();
+   WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+   WALBERLA_LOG_INFO_ON_ROOT("Hidalgo total simulation time is " << time);
+
+
 
    /*std::vector< real_t > nusseltNumbers = NusseltNumbers(blocks,
                   densityConcentrationFieldID,velFieldFluidCPUGPUID,simulationDomain,
