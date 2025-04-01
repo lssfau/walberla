@@ -196,8 +196,6 @@ waLBerla_compile_test( FILES     free_surface/bubble_model/MovingSpheresTest.cpp
                                  free_surface/bubble_model/BubbleBodyMover.impl.h
                                  free_surface/bubble_model/BubbleModelTester.impl.h
       DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME      MovingSpheresTest
-                       PROCESSES 2 )
 
 waLBerla_compile_test( FILES    free_surface/bubble_model/RegionalFloodFillTest.cpp
       DEPENDS walberla::field walberla::lbm )
@@ -255,21 +253,18 @@ waLBerla_compile_test( FILES    free_surface/dynamics/PdfRefillingTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
 waLBerla_execute_test( NAME     PdfRefillingTest )
 
-waLBerla_compile_test( FILES    free_surface/dynamics/WettingConversionTest.cpp
-      DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME     WettingConversionTest )
-
 waLBerla_compile_test( FILES    free_surface/surface_geometry/CellFluidVolumeTest.cpp
       DEPENDS walberla::lbm )
 waLBerla_execute_test( NAME     CellFluidVolumeTest )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/CurvatureOfSineTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME     CurvatureOfSineTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/WettingConversionTest.cpp
+      DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::lbm walberla::timeloop )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/CurvatureOfSphereTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME     CurvatureOfSphereTest )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/DetectWettingTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
@@ -281,11 +276,9 @@ waLBerla_execute_test( NAME     GetInterfacePointTest )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsOfSineTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME     NormalsOfSineTest )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsOfSphereTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::lbm walberla::timeloop )
-waLBerla_execute_test( NAME     NormalsOfSphereTest )
 
 waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsEquivalenceTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
@@ -306,3 +299,14 @@ waLBerla_execute_test( NAME     ObstacleNormalsTest )
 waLBerla_compile_test( FILES    free_surface/surface_geometry/WettingCurvatureTest.cpp
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
 waLBerla_execute_test( NAME     WettingCurvatureTest )
+
+#     Slow-running tests that should only be active in Release mode
+
+if( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
+      waLBerla_execute_test( NAME     MovingSpheresTest PROCESSES 2 )
+      waLBerla_execute_test( NAME     WettingConversionTest )
+      waLBerla_execute_test( NAME     CurvatureOfSineTest )
+      waLBerla_execute_test( NAME     CurvatureOfSphereTest )
+      waLBerla_execute_test( NAME     NormalsOfSineTest )
+      waLBerla_execute_test( NAME     NormalsOfSphereTest )
+endif()
