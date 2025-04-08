@@ -34,7 +34,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
         )
 
         waLBerla_add_executable(NAME MTW_1way_3Dvalidations FILES 3D_Validations.cpp ../../utilities/InitializerFunctions.cpp
-                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk Validations_3D_${config})
+                DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk Validations_3D_${config})
         target_compile_definitions(MTW_1way_3Dvalidations PRIVATE Weighting=2)
     endif ()
 endif ()

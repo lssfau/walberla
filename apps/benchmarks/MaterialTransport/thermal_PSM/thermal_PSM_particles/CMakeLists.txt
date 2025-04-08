@@ -39,7 +39,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
         )
             message(STATUS "generated in thermal PSM is: ${config}" )
             waLBerla_add_executable(NAME thermalPSMPerformanceBenchmarkParticles_${config} FILES thermalPSMParticles.cpp ../../utilities/InitializerFunctions.cpp
-                    DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTWCodegenThermalPSMParticles_${config})
+                    DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk MTWCodegenThermalPSMParticles_${config})
             target_compile_definitions(thermalPSMPerformanceBenchmarkParticles_${config} PRIVATE Weighting=2)
         endforeach ()
 

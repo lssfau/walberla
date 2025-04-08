@@ -1,2 +1,3 @@
 add_subdirectory(thermalPsmPerformanceBenchmark)
+add_subdirectory(thermal_PSM_particles)
 

@@ -44,7 +44,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
         )
 
         waLBerla_add_executable(NAME MTW_2Way FILES MaterialTransport.cpp ../utilities/InitializerFunctions.cpp
-                DEPENDS blockforest core field geometry gpu lbm lbm_mesapd_coupling mesa_pd sqlite vtk MTW_2WayCodegen)
+                DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk MTW_2WayCodegen)
         target_compile_definitions(MTW_2Way PRIVATE Weighting=2)
     endif ()
 endif ()
