@@ -1,4 +1,4 @@
-target_sources( gpu
+target_sources( walberla_gpu
     PRIVATE
     MemcpyPackInfo.h
     UniformGPUScheme.impl.h

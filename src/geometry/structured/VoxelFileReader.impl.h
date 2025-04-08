@@ -329,12 +329,12 @@ CellAABB toCellAABB( const CellInterval & cellInterval )
     WALBERLA_ASSERT( !cellInterval.empty(), cellInterval );
     WALBERLA_ASSERT( cellInterval.positiveIndicesOnly(), cellInterval );
 
-    return CellAABB ( numeric_cast<size_t>( cellInterval.xMin() ),
+    return { numeric_cast<size_t>( cellInterval.xMin() ),
                       numeric_cast<size_t>( cellInterval.yMin() ),
                       numeric_cast<size_t>( cellInterval.zMin() ),
                       numeric_cast<size_t>( cellInterval.xMax() ),
                       numeric_cast<size_t>( cellInterval.yMax() ),
-                      numeric_cast<size_t>( cellInterval.zMax() ) );
+                      numeric_cast<size_t>( cellInterval.zMax() ) };
 }
 
 } // namespace geometry

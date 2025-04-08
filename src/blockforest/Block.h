@@ -144,7 +144,7 @@ private:
    BlockID id_;
    uint_t  level_; // 0=coarse (= block is located on the initial grid) -> 1 -> 2 -> finer
 
-   std::vector< NeighborBlock* >  neighborhoodSection_[26]; // the 26 neighborhood sections
+   std::array< std::vector< NeighborBlock* >, 26 >  neighborhoodSection_; // the 26 neighborhood sections
    std::vector< NeighborBlock  >  neighborhood_;            // all neighbor blocks
 
    uint_t targetLevel_; // | level_ - targetLevel_ | <= 1
@@ -292,8 +292,8 @@ inline bool Block::neighborhoodSectionHasLargerBlock( const uint_t sectionIndex 
 inline void Block::addNeighbor( const BlockID & id, const uint_t process, const Set<SUID> & state )
 {
 #ifndef NDEBUG
-   for( uint_t i = 0; i != neighborhood_.size(); ++i )
-      WALBERLA_ASSERT( neighborhood_[i].getId() < id || id < neighborhood_[i].getId() );
+   for(const auto & neighbor : neighborhood_)
+      WALBERLA_ASSERT( neighbor.getId() < id || id < neighbor.getId() );
 #endif
 
    neighborhood_.emplace_back( forest_, id, process, state );

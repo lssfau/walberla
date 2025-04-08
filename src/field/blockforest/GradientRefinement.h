@@ -76,14 +76,14 @@ template< typename VectorField_T, typename Filter_T, bool Pseudo2D >
 void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                                                           std::vector< const Block * > &, const BlockForest & )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      const Block * const block = it->first;
+      const Block * const block = minTargetLevel.first;
       const VectorField_T * u = block->template getData< VectorField_T >( fieldId_ );
 
       if( u == nullptr )
       {
-         it->second = uint_t(0);
+         minTargetLevel.second = uint_t(0);
          continue;
       }
 
@@ -107,7 +107,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
          {
             const Vector3< real_t > & v = u->get(x,y,z);
 
-            real_t gradient[gradients];
+            real_t gradient[gradients]; // NOLINT(*-avoid-c-arrays)
             for( int i = 0; i < gradients; ++i )
                gradient[i] = real_t(0);
 
@@ -200,12 +200,12 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
       if( refine && block->getLevel() < maxLevel_ )
       {
          WALBERLA_ASSERT( !coarsen );
-         it->second = block->getLevel() + uint_t(1);
+         minTargetLevel.second = block->getLevel() + uint_t(1);
       }
       if( coarsen && block->getLevel() > uint_t(0) )
       {
          WALBERLA_ASSERT( !refine );
-         it->second = block->getLevel() - uint_t(1);
+         minTargetLevel.second = block->getLevel() - uint_t(1);
       }
    }
 }

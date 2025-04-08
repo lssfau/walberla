@@ -33,9 +33,6 @@
 #include "core/math/Vector3.h"
 
 #include "field/AddToStorage.h"
-
-#include "gui/Gui.h"
-
 #include "timeloop/SweepTimeloop.h"
 
 #include <fstream>
@@ -45,13 +42,10 @@
 namespace walberla {
 using namespace geometry;
 
-const uint_t confBlockCount []      = { 1, 1, 1 };
-const uint_t confCells []           = { 30, 30, 30 };
+const std::array<uint_t, 3> confBlockCount = { 1, 1, 1 };
+const std::array<uint_t, 3> confCells      = { 30, 30, 30 };
 
-const bool   useGui = false;
-
-
-typedef GhostLayerField<real_t,1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 
 //======================================================================================================================
 //
@@ -127,13 +121,13 @@ void boxTest( StructuredBlockStorage & storage,
 
    manager.init( cfg.getBlock("Geometry") );
 
-   real_t volumeFromFileInit = getVolume( storage, fieldID );
+   real_t const volumeFromFileInit = getVolume( storage, fieldID );
 
    resetField( storage, fieldID );
 
    // Manual initialization
    initializer.init( AABB(min[0], min[1], min[2], max[0],max[1], max[2] ), false );
-   real_t volumeFromManualInit = getVolume( storage, fieldID );
+   real_t const volumeFromManualInit = getVolume( storage, fieldID );
 
 
    WALBERLA_LOG_RESULT("Box initialization test (Manual,File,Expected): ("
@@ -180,14 +174,14 @@ void ellipsoidTest( StructuredBlockStorage & storage,
 
    manager.init( cfg.getBlock("Geometry") );
 
-   real_t volumeFromFileInit = getVolume( storage, fieldID );
+   real_t const volumeFromFileInit = getVolume( storage, fieldID );
 
    resetField( storage, fieldID );
 
    // Manual initialization
 
    initializer.init( Ellipsoid( midpoint, axis1, axis2, radii ), false );
-   real_t volumeFromManualInit = getVolume( storage, fieldID );
+   real_t const volumeFromManualInit = getVolume( storage, fieldID );
 
 
    WALBERLA_LOG_RESULT("Ellipsoid initialization test (Manual,File,Expected): ("
@@ -225,7 +219,7 @@ void sphereTest( StructuredBlockStorage & storage,
 
    manager.init( cfg.getBlock("Geometry") );
 
-   real_t volumeFromFileInit = getVolume( storage, fieldID );
+   real_t const volumeFromFileInit = getVolume( storage, fieldID );
 
    resetField( storage, fieldID );
 
@@ -233,7 +227,7 @@ void sphereTest( StructuredBlockStorage & storage,
    // Manual initialization
 
    initializer.init( Sphere( midpoint, radius), false );
-   real_t volumeFromManualInit = getVolume( storage, fieldID );
+   real_t const volumeFromManualInit = getVolume( storage, fieldID );
 
 
    WALBERLA_LOG_RESULT("Sphere initialization test (Manual,File,Expected): ("
@@ -278,14 +272,6 @@ int main( int argc, char ** argv )
    sphereTest   ( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
    ellipsoidTest( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
    boxTest      ( *blocks, scalarFieldID, *geometryInitializationManager, *freeSurfaceInitializer );
-
-
-   if ( useGui )
-   {
-      SweepTimeloop timeloop ( blocks, 100 );
-      GUI gui ( timeloop, blocks, argc, argv );
-      gui.run();
-   }
 
   return EXIT_SUCCESS;
 }

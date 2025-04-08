@@ -33,10 +33,6 @@
 using namespace walberla;
 namespace wlb = walberla;
 
-using std::vector;
-using std::string;
-using std::cout;
-using std::endl;
 
 void registerTest()
 {
@@ -64,7 +60,7 @@ void registerTest()
    }
    WALBERLA_CHECK(overFlow);
 
-   vector<string> names;
+   std::vector<std::string> names;
    names.emplace_back("Flag1");
    names.emplace_back("Flag2");
    names.emplace_back("Flag3");
@@ -82,7 +78,7 @@ void registerTest()
       WALBERLA_CHECK_EQUAL( ff.getFlagUID( numeric_cast<FlagField<walberla::uint8_t>::flag_t>( 1 << i ) ), FlagUID(names[i]) );
    }
 
-   //ff.printRegistered(cout);
+   //ff.printRegistered(std::cout);
 }
 
 void accessTest()
@@ -167,7 +163,7 @@ void printingTest()
    ff.addFlag(0,1,0,ob);
    ff.addFlag(1,0,0,ob);
 
-   //printSlice( cout,ff, 2,0 );
+   //printSlice( std::cout,ff, 2,0 );
 }
 
 void neighborhoodTest()

@@ -37,7 +37,7 @@ class JacobiFixedStencil : public StencilSweepBase< Stencil_T >
 {
 public:
 
-   typedef typename StencilSweepBase< Stencil_T >::Field_T Field_T;
+   using Field_T = typename StencilSweepBase<Stencil_T>::Field_T;
 
    // block has NO dst u field
    JacobiFixedStencil( const BlockDataID & uFieldId, const BlockDataID & fFieldId, const std::vector< real_t > & weights ) :
@@ -63,7 +63,7 @@ void JacobiFixedStencil< Stencil_T >::operator()( IBlock * const block )
    WALBERLA_ASSERT_GREATER_EQUAL( sf->nrOfGhostLayers(), 1 );
 
    // stencil weights
-   real_t weights[ Stencil_T::Size ];
+   std::array<real_t, Stencil_T::Size> weights;
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
       weights[ dir.toIdx() ] = this->w( dir.toIdx() );
    weights[ Stencil_T::idx[ stencil::C ] ] = real_t(1) / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!

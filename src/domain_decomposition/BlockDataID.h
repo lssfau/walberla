@@ -64,7 +64,7 @@ private:
    uint_t id_ = 0;
 
 }; // class BlockDataID
-static_assert( std::is_trivially_copyable<BlockDataID>::value, "BlockDataID has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<BlockDataID>, "BlockDataID has to be trivially copyable!");
 
 
 class ConstBlockDataID
@@ -93,7 +93,7 @@ private:
    uint_t id_ = 0;
 
 }; // class ConstBlockDataID
-static_assert( std::is_trivially_copyable<ConstBlockDataID>::value, "ConstBlockDataID has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<ConstBlockDataID>, "ConstBlockDataID has to be trivially copyable!");
 
 
 } // namespace domain_decomposition

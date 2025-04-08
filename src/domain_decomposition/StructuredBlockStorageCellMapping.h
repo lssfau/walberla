@@ -56,8 +56,7 @@ inline void transformGlobalToBlockLocal( CellVector& local, const StructuredBloc
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellVector::const_iterator it = global.begin(); it != global.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : global) {
       blockStorage.transformGlobalToBlockLocalCell( cell, block );
       local.push_back( cell );
    }
@@ -71,8 +70,8 @@ inline void transformGlobalToBlockLocal( CellVector& cells, const StructuredBloc
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellVector::iterator cell = cells.begin(); cell != cells.end(); ++cell )
-      blockStorage.transformGlobalToBlockLocalCell( *cell, block );
+   for(auto & cell : cells)
+      blockStorage.transformGlobalToBlockLocalCell( cell, block );
 }
 
 
@@ -83,8 +82,7 @@ inline void transformBlockLocalToGlobal( CellVector& global, const StructuredBlo
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellVector::const_iterator it = local.begin(); it != local.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : local) {
       blockStorage.transformBlockLocalToGlobalCell( cell, block );
       global.push_back( cell );
    }
@@ -98,8 +96,8 @@ inline void transformBlockLocalToGlobal( CellVector& cells, const StructuredBloc
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellVector::iterator cell = cells.begin(); cell != cells.end(); ++cell )
-      blockStorage.transformBlockLocalToGlobalCell( *cell, block );
+   for(auto & cell : cells)
+      blockStorage.transformBlockLocalToGlobalCell( cell, block );
 }
 
 
@@ -110,8 +108,7 @@ inline void transformGlobalToBlockLocal( CellSet& local, const StructuredBlockSt
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellSet::const_iterator it = global.begin(); it != global.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : global) {
       blockStorage.transformGlobalToBlockLocalCell( cell, block );
       local.insert( cell );
    }
@@ -127,8 +124,7 @@ inline void transformGlobalToBlockLocal( CellSet& cells, const StructuredBlockSt
 
    CellSet localCells;
 
-   for( CellSet::const_iterator it = cells.begin(); it != cells.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : cells) {
       blockStorage.transformGlobalToBlockLocalCell( cell, block );
       localCells.insert( localCells.end(), cell );
    }
@@ -144,8 +140,7 @@ inline void transformBlockLocalToGlobal( CellSet& global, const StructuredBlockS
 
    WALBERLA_ASSERT_EQUAL( &( blockStorage.getBlockStorage() ), &( block.getBlockStorage() ) );
 
-   for( CellSet::const_iterator it = local.begin(); it != local.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : local) {
       blockStorage.transformBlockLocalToGlobalCell( cell, block );
       global.insert( cell );
    }
@@ -161,8 +156,7 @@ inline void transformBlockLocalToGlobal( CellSet& cells, const StructuredBlockSt
 
    CellSet globalCells;
 
-   for( CellSet::const_iterator it = cells.begin(); it != cells.end(); ++it ) {
-      Cell cell = *it;
+   for(auto cell : cells) {
       blockStorage.transformBlockLocalToGlobalCell( cell, block );
       globalCells.insert( globalCells.end(), cell );
    }

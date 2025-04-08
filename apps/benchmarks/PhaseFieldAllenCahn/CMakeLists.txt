@@ -15,10 +15,10 @@ waLBerla_generate_target_from_python(NAME BenchmarkPhaseFieldCodeGen
 if (WALBERLA_BUILD_WITH_GPU_SUPPORT )
     waLBerla_add_executable(NAME benchmark_multiphase
             FILES benchmark_multiphase.cpp InitializerFunctions.cpp multiphase_codegen.py
-            DEPENDS blockforest core gpu field postprocessing python_coupling lbm_generated geometry timeloop gui BenchmarkPhaseFieldCodeGen)
+          DEPENDS walberla::blockforest walberla::core walberla::gpu walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm_generated walberla::geometry walberla::timeloop BenchmarkPhaseFieldCodeGen )
 else ()
     waLBerla_add_executable(NAME benchmark_multiphase
             FILES benchmark_multiphase.cpp InitializerFunctions.cpp multiphase_codegen.py
-            DEPENDS blockforest core field postprocessing python_coupling lbm_generated geometry timeloop gui BenchmarkPhaseFieldCodeGen)
+          DEPENDS walberla::blockforest walberla::core walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm_generated walberla::geometry walberla::timeloop BenchmarkPhaseFieldCodeGen )
 endif (WALBERLA_BUILD_WITH_GPU_SUPPORT )
 

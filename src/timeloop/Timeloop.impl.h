@@ -99,13 +99,13 @@ void Timeloop<TP>::singleStep( const bool logTimeStep )
 
    WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
-   for(size_t i=0; i<beforeFunctions_.size(); ++i )
-      executeSelectable( beforeFunctions_[i], uid::globalState(), "Pre-Timestep Function" );
+   for(auto & beforeFunction : beforeFunctions_)
+      executeSelectable( beforeFunction, uid::globalState(), "Pre-Timestep Function" );
 
    doTimeStep(uid::globalState());
 
-   for(size_t i=0; i<afterFunctions_.size(); ++i )
-      executeSelectable( afterFunctions_[i], uid::globalState(),"Post-Timestep Function" );
+   for(auto & afterFunction : afterFunctions_)
+      executeSelectable( afterFunction, uid::globalState(),"Post-Timestep Function" );
 
    ++curTimeStep_;
 }
@@ -117,13 +117,13 @@ void Timeloop<TP>::singleStep( timing::TimingPool<TP> & tp, const bool logTimeSt
 
    WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
-   for(size_t i=0; i<beforeFunctions_.size(); ++i )
-      executeSelectable( beforeFunctions_[i], uid::globalState(), "Pre-Timestep Function", tp );
+   for(auto & beforeFunction : beforeFunctions_)
+      executeSelectable( beforeFunction, uid::globalState(), "Pre-Timestep Function", tp );
 
    doTimeStep(uid::globalState(), tp);
 
-   for(size_t i=0; i<afterFunctions_.size(); ++i )
-      executeSelectable( afterFunctions_[i], uid::globalState(),"Post-Timestep Function", tp );
+   for(auto & afterFunction : afterFunctions_)
+      executeSelectable( afterFunction, uid::globalState(),"Post-Timestep Function", tp );
 
    ++curTimeStep_;
 }

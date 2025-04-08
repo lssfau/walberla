@@ -1,4 +1,4 @@
-target_sources( mesa_pd
+target_sources( walberla_mesa_pd
     PRIVATE
     ParticleGhostCopyNotification.h
     ParticleRemovalNotification.h
@@ -17,5 +17,6 @@ target_sources( mesa_pd
     HydrodynamicForceTorqueNotification.h
     reset.h
     ForceTorqueNotification.h
-    NotificationType.h     
+    NotificationType.h
+    ElectrostaticForceNotification.h
     )

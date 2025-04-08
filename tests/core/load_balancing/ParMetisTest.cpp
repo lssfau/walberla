@@ -102,10 +102,10 @@ int main( int argc, char * argv[] )
    scheme.addPackInfo( make_shared< field::communication::PackInfo< FieldType > >( domainId ) );
    scheme();
 
-   std::vector< int64_t > vtxdist;
-   for( int i = 0; i < MPIManager::instance()->numProcesses() + 1; ++i )
+   std::vector< int64_t > vtxdist(uint_c(MPIManager::instance()->numProcesses()) + 1);
+   for (uint_t i = 0; i < uint_c(MPIManager::instance()->numProcesses()) + 1; ++i)
    {
-      vtxdist.push_back( int64_c(i) * int64_c( fieldSize[0] * fieldSize[1] ) );
+      vtxdist[i] = int64_c(i) * int64_c(fieldSize[0] * fieldSize[1]);
    }
 
    int64_t ncon  = int64_t(1);
@@ -130,13 +130,13 @@ int main( int argc, char * argv[] )
    int64_t nparts = int64_c( partitions );
    std::vector< double > tpwgts( partitions, 1.0 / numeric_cast<double>( partitions ) );
    std::vector< double > ubvec( numeric_cast<size_t>(ncon), 1.05 );
-   int64_t options[] = {0,0,0};
+   std::array< int64_t, 3 > options = { 0, 0, 0 };
    int64_t edgecut;
    std::vector< int64_t > part( fieldSize[0] * fieldSize[1] );
    MPI_Comm comm = MPIManager::instance()->comm();
 
    int result = core::ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
-                                            &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm );
+                                            &(tpwgts.front()), &(ubvec.front()), options.data(), &edgecut, &(part.front()), &comm );
 
 
    WALBERLA_CHECK_EQUAL( result, core::METIS_OK );  

@@ -34,7 +34,7 @@ namespace field {
    struct VectorFieldAccessor
    {
       static_assert( VectorField_T::F_SIZE == 3, "Only valid for Fields with 3 components (F_SIZE==3)" );
-      static_assert( std::is_same< typename VectorField_T::value_type, real_t >::value, "Only works for real valued fields" );
+      static_assert( std::is_same_v< typename VectorField_T::value_type, real_t >, "Only works for real valued fields" );
 
       using vector_or_constRefVector = Vector3<real_t>;
 
@@ -53,8 +53,8 @@ namespace field {
 
    template<typename VectorField_T>
    struct VectorFieldAccessor<VectorField_T,
-                              typename std::enable_if< std::is_same< typename VectorField_T::value_type,
-                                                                           Vector3<real_t> >::value >::type >
+                              std::enable_if_t< std::is_same_v< typename VectorField_T::value_type,
+                                                                           Vector3<real_t> > > >
    {
        using vector_or_constRefVector = const Vector3<real_t> &;
 

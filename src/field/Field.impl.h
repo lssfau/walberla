@@ -103,7 +103,7 @@ namespace field {
    Field<T,fSize_>::Field( uint_t _xSize, uint_t _ySize, uint_t _zSize,
                            const std::vector<T> & fValues, const Layout & l,
                            const shared_ptr<FieldAllocator<T> > &alloc)
-        : values_( NULL ), valuesWithOffset_( NULL )
+        : values_( nullptr ), valuesWithOffset_( nullptr )
    {
       init(_xSize,_ySize,_zSize,l,alloc);
       set(fValues);
@@ -286,7 +286,7 @@ namespace field {
    {
       WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf)
       static_assert(fSize_ % fSize2 == 0, "number of field components do not match");
-      static_assert(std::is_same<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>::value, "field types are incompatible for flattening");
+      static_assert(std::is_same_v<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>, "field types are incompatible for flattening");
       allocator_->incrementReferenceCount ( values_ );
    }
 
@@ -301,7 +301,7 @@ namespace field {
     * \param _ySize  size of y dimension
     * \param _zSize  size of z dimension
     * \param l       memory layout of the field (see Field::Layout)
-    * \param alloc   the allocator to use. If a NULL shared pointer is given, a sensible default is selected,
+    * \param alloc   the allocator to use. If a nullptr is given, a sensible default is selected,
     *                depending on layout
     * \param innerGhostLayerSizeForAlignedAlloc
     *                This parameter should be set to zero for field that have no ghost layers.
@@ -319,23 +319,7 @@ namespace field {
       // Automatically select allocator if none was given
       if ( alloc == nullptr )
       {
-#if defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE_BITS) && __ARM_FEATURE_SVE_BITS > 0
-         const uint_t alignment = __ARM_FEATURE_SVE_BITS/8;
-#elif defined(__ARM_FEATURE_SVE)
-         const uint_t alignment = 64;
-#elif defined(__ARM_NEON)
-         const uint_t alignment = 16;
-#elif defined(__AVX512F__)
-         const uint_t alignment = 64;
-#elif defined(__AVX__)
-         const uint_t alignment = 32;
-#elif defined(__SSE__) || defined(_MSC_VER)
-         const uint_t alignment = 16;
-#elif defined(__BIGGEST_ALIGNMENT__)
-         const uint_t alignment = __BIGGEST_ALIGNMENT__;
-#else
-         const uint_t alignment = 64;
-#endif
+         constexpr uint_t alignment = SIMDAlignment();
 
          // aligned allocator only used (by default) if ...
          if ( l == fzyx                      && // ... we use a structure of arrays layout

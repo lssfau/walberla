@@ -189,7 +189,7 @@ private:
 
    shared_ptr< BlockForest > blockForest_;
 
-   uint_t blockCells_[3];
+   std::array< uint_t, 3 > blockCells_;
 
 }; // class StructuredBlockForest
 
@@ -205,8 +205,12 @@ inline StructuredBlockForest::StructuredBlockForest( const shared_ptr< BlockFore
 
    blockForest_( blockForest ) {
 
+    auto resetCallback = [this]() {
+        StructuredBlockForest::resetCellDecompositionInStorage(*this);
+    };
+
    blockForest_->addRefreshCallbackFunctionBeforeBlockDataIsUnpacked(
-            BlockForest::RefreshCallbackWrappper( std::bind( resetCellDecompositionInStorage, std::ref(*this) ) ) );
+            BlockForest::RefreshCallbackWrappper( resetCallback ) );
 
    blockCells_[0] = blockXCells;
    blockCells_[1] = blockYCells;

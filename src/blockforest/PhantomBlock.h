@@ -150,7 +150,7 @@ private:
    // set by the user/application via callback
    walberla::any data_;
 
-   std::vector< NeighborBlock* > neighborhoodSection_[26]; // the 26 neighborhood sections (can be restored from 'neighborhood_')
+   std::array< std::vector< NeighborBlock* >, 26 > neighborhoodSection_; // the 26 neighborhood sections (can be restored from 'neighborhood_')
    std::vector< NeighborBlock  > neighborhood_;            // all neighbor blocks
 
    uint_t sourceLevel_; // | sourceLevel_ - level_ | == 1
@@ -300,8 +300,8 @@ inline bool PhantomBlock::neighborhoodSectionHasLargerBlock( const uint_t sectio
 inline void PhantomBlock::addNeighbor( const BlockID & id, const uint_t process, const Set<SUID> & state )
 {
 #ifndef NDEBUG
-   for( uint_t i = 0; i != neighborhood_.size(); ++i )
-      WALBERLA_ASSERT( neighborhood_[i].getId() < id || id < neighborhood_[i].getId() );
+   for(const auto & i : neighborhood_)
+      WALBERLA_ASSERT( i.getId() < id || id < i.getId() );
 #endif
 
    neighborhood_.emplace_back( phantomForest_, id, process, state );

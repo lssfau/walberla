@@ -168,7 +168,7 @@ void CoarsenStencilFieldsDCA<Stencil_T >::operator()( const std::vector<BlockDat
 
 
 template< >
-void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
+inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
 {
 
    WALBERLA_ASSERT_EQUAL(numLvl_, stencilFieldId.size(), "This function can only be called when operating with stencil fields!");
@@ -184,8 +184,8 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
          StencilField_T * coarse = block->getData< StencilField_T >( stencilFieldId[lvl] );
 
 
-         typedef std::array<std::array<std::array<real_t,7>,7>,7> Array3D_7;
-         typedef std::array<std::array<std::array<real_t,2>,2>,2> Array3D_2;
+         using Array3D_7 = std::array<std::array<std::array<real_t, 7>, 7>, 7>;
+         using Array3D_2 = std::array<std::array<std::array<real_t, 2>, 2>, 2>;
 
          Array3D_2 r;
          Array3D_7 p;

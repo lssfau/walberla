@@ -92,7 +92,7 @@ namespace field {
       inline cell_idx_t & f()       { return f_; }
       inline cell_idx_t   f() const { return f_; }
 
-      inline Cell cell() const { return Cell( x_, y_, z_ ); }
+      inline Cell cell() const { return { x_, y_, z_ }; }
 
       const FieldMember * getField() const { return &field_; }
 

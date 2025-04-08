@@ -1,7 +1,6 @@
-target_sources(lbm_mesapd_coupling
+target_sources( walberla_lbm_mesapd_coupling
         PRIVATE
-        ParticleAndVolumeFractionMappingCPU.h
-        ParticleAndVolumeFractionMappingGPU.h
+        ParticleAndVolumeFractionMappingSweepsCPU.h
         PSMSweepCollection.h
         PSMWrapperSweepsCPU.h
 )
@@ -21,13 +20,16 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
             add_dependencies(PSMCodegenPython_${config} MAX_PARTICLES_PER_CELL)
         endforeach ()
     endforeach ()
-    if (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP))
-        target_sources(lbm_mesapd_coupling
-                PRIVATE
-                PSMWrapperKernels.${CODEGEN_FILE_SUFFIX}
-                PSMWrapperKernels.h
-                PSMUtilityGPU.h
-                PSMWrapperSweepsGPU.h
-        )
-    endif ()
+endif ()
+if (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP))
+    target_sources( walberla_lbm_mesapd_coupling
+            PRIVATE
+            ParticleAndVolumeFractionMappingSweepsGPU.h
+            ParticleAndVolumeFractionMappingKernels.${CODEGEN_FILE_SUFFIX}
+            ParticleAndVolumeFractionMappingKernels.h
+            PSMUtilityGPU.h
+            PSMWrapperKernels.${CODEGEN_FILE_SUFFIX}
+            PSMWrapperKernels.h
+            PSMWrapperSweepsGPU.h
+    )
 endif ()

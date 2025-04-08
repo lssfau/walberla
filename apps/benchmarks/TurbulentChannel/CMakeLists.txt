@@ -18,9 +18,9 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
             TurbulentChannel_TKE_SGS_Writer.cpp TurbulentChannel_TKE_SGS_Writer.h
     )
 
-    walberla_add_executable ( NAME TurbulentChannel_Application
-            FILES TurbulentChannel.cpp
-            DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk
-                    TurbulentChannel_CodeGeneration )
+    walberla_add_executable( NAME TurbulentChannel_Application
+          FILES TurbulentChannel.cpp
+          DEPENDS walberla::blockforest walberla::core walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop
+          walberla::lbm walberla::stencil walberla::vtk TurbulentChannel_CodeGeneration )
 
 endif()

@@ -24,6 +24,7 @@
 #include "core/math/Vector3.h"
 #include "field/GhostLayerField.h"
 
+#include <algorithm>
 #include <limits>
 
 
@@ -84,19 +85,19 @@ namespace initializer {
 
       const std::string & file = block.getParameter< std::string > ( "file" );
 
-      uint_t extrusionCoordinate = block.getParameter<uint_t>( "extrusionCoordinate", 2 );
+      uint_t const extrusionCoordinate = block.getParameter<uint_t>( "extrusionCoordinate", 2 );
 
       const cell_idx_t minCellIdx = std::numeric_limits<cell_idx_t>::min();
       const cell_idx_t maxCellIdx = std::numeric_limits<cell_idx_t>::max();
 
-      cell_idx_t lowerExtrusionLimit = block.getParameter<cell_idx_t>( "lowerExtrusionLimit", minCellIdx );
-      cell_idx_t upperExtrusionLimit = block.getParameter<cell_idx_t>( "upperExtrusionLimit", maxCellIdx );
+      cell_idx_t const lowerExtrusionLimit = block.getParameter<cell_idx_t>( "lowerExtrusionLimit", minCellIdx );
+      cell_idx_t const upperExtrusionLimit = block.getParameter<cell_idx_t>( "upperExtrusionLimit", maxCellIdx );
 
-      cell_idx_t xOffset = block.getParameter<cell_idx_t>( "xOffset", 0 );
-      cell_idx_t yOffset = block.getParameter<cell_idx_t>( "yOffset", 0 );
+      cell_idx_t const xOffset = block.getParameter<cell_idx_t>( "xOffset", 0 );
+      cell_idx_t const yOffset = block.getParameter<cell_idx_t>( "yOffset", 0 );
 
 
-      GrayScaleImage img ( file );
+      GrayScaleImage const img ( file );
       if ( block.isDefined( "scaleToDomain") )
       {
          if ( xOffset != 0 || yOffset != 0 )
@@ -121,10 +122,10 @@ namespace initializer {
       // the extrusion limit can not be left at numeric_limits::min/max since
       // the blockStorage.transformGlobalToLocal would overflow
 
-      cell_idx_t maxNumberOfCells = cell_idx_c(
-                                    std::max( structuredBlockStorage_.getNumberOfXCells(),
-                                    std::max( structuredBlockStorage_.getNumberOfYCells(),
-                                              structuredBlockStorage_.getNumberOfZCells() ) ) );
+      cell_idx_t const maxNumberOfCells = cell_idx_c(
+                                    std::max( {structuredBlockStorage_.getNumberOfXCells(),
+                                    structuredBlockStorage_.getNumberOfYCells(),
+                                              structuredBlockStorage_.getNumberOfZCells() } ) );
 
       if ( upperExtrusionLimit > maxNumberOfCells )
          upperExtrusionLimit = maxNumberOfCells;
@@ -140,7 +141,7 @@ namespace initializer {
                                    xOffset+ width-1, yOffset + height-1, upperExtrusionLimit-1 );
 
 
-         cell_idx_t lowestGlobalCoord = - cell_idx_c( f->nrOfGhostLayers() );
+         cell_idx_t const lowestGlobalCoord = - cell_idx_c( f->nrOfGhostLayers() );
          if ( lowerExtrusionLimit < lowestGlobalCoord )
             lowerExtrusionLimit = lowestGlobalCoord;
 

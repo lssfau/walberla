@@ -53,16 +53,16 @@ namespace walberla {
 
 
 
-typedef GhostLayerField< real_t, 1 > Field_T;
-typedef stencil::D2Q5                Stencil_T;
-typedef pde::CGIteration<Stencil_T>::StencilField_T  StencilField_T;
+using Field_T = GhostLayerField<real_t, 1>;
+using Stencil_T = stencil::D2Q5;
+using StencilField_T = pde::CGIteration<Stencil_T>::StencilField_T;
 
-typedef walberla::uint8_t      flag_t;
-typedef FlagField < flag_t >   FlagField_T;
-typedef pde::Dirichlet< Stencil_T, flag_t >  Dirichlet_T;
-typedef pde::Neumann< Stencil_T, flag_t >  Neumann_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
+using Dirichlet_T = pde::Dirichlet<Stencil_T, flag_t>;
+using Neumann_T = pde::Neumann<Stencil_T, flag_t>;
 
-typedef BoundaryHandling< FlagField_T, Stencil_T, Dirichlet_T, Neumann_T > BoundaryHandling_T;
+using BoundaryHandling_T = BoundaryHandling<FlagField_T, Stencil_T, Dirichlet_T, Neumann_T>;
 
 
 const FlagUID  Domain_Flag( "domain" );
@@ -129,10 +129,10 @@ void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDa
    {
       Field_T * rhs = block->getData< Field_T >( rhsId );
       CellInterval xyz = rhs->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         rhs->get( *cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
+         rhs->get( cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
       }
    }
 }
@@ -145,9 +145,9 @@ void setRHSConstValue( const shared_ptr< StructuredBlockStorage > & blocks, cons
    {
       Field_T * rhs = block->getData< Field_T >( rhsId );
       CellInterval xyz = rhs->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         rhs->get( *cell ) = value;
+         rhs->get( cell ) = value;
       }
    }
 }
@@ -174,13 +174,13 @@ void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks,
       CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
 
       // Set north boundary to defined function
-      for( auto cell = north.begin(); cell != north.end(); ++cell )
+      for(auto cell : north)
       {
 
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
          real_t val = std::sin( real_t( 2 ) * math::pi * p[0] ) * std::sinh( real_t( 2 ) * math::pi * p[1] );
 
-         boundaryHandling->forceBoundary( Dirichlet_Flag, cell->x(), cell->y(), cell->z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
+         boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
       }
 
@@ -217,20 +217,20 @@ void setBoundaryConditionsMixed( shared_ptr< StructuredBlockForest > & blocks, c
       CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
 
       // Set north boundary to large value
-      for( auto cell = north.begin(); cell != north.end(); ++cell )
+      for(auto cell : north)
       {
 
          const real_t val = real_t(2);
-         boundaryHandling->forceBoundary( Dirichlet_Flag, cell->x(), cell->y(), cell->z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
+         boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
       }
 
       // Set south boundary to large value
-      for( auto cell = south.begin(); cell != south.end(); ++cell )
+      for(auto cell : south)
       {
 
          const real_t val = real_t(-2);
-         boundaryHandling->forceBoundary( Dirichlet_Flag, cell->x(), cell->y(), cell->z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
+         boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
       }
 

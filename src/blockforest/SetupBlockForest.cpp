@@ -72,14 +72,14 @@ uint_t SetupBlockForest::getNumberOfBlocks( const uint_t level ) const
 
    uint_t count( uint_t(0) );
 
-   for( uint_t i = 0; i != forest_.size(); ++i ) {
+   for(auto coarseBlock : forest_) {
 
-      if( forest_[i] == nullptr )
+      if(coarseBlock == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
 
-      stack.push( forest_[i] );
+      stack.push(coarseBlock );
 
       while( !stack.empty() ) {
 
@@ -293,16 +293,16 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks ) con
 
    // ATTENTION: the vector 'blocks' is not emptied
 
-   for( uint_t i = 0; i != forest_.size(); ++i ) {
+   for(auto coarseBlock : forest_) {
 
-      if( forest_[i] == nullptr )
+      if(coarseBlock == nullptr )
          continue;
 
       // depth-first search
 
       std::stack< SetupBlock* > stack;
 
-      stack.push( forest_[i] );
+      stack.push(coarseBlock );
 
       while( !stack.empty() ) {
 
@@ -326,16 +326,16 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks ) {
 
    // ATTENTION: the vector 'blocks' is not emptied
 
-   for( uint_t i = 0; i != forest_.size(); ++i ) {
+   for(auto & coarseBlock : forest_) {
 
-      if( forest_[i] == nullptr )
+      if(coarseBlock == nullptr )
          continue;
 
       // depth-first search
 
       std::stack< SetupBlock* > stack;
 
-      stack.push( forest_[i] );
+      stack.push(coarseBlock );
 
       while( !stack.empty() ) {
 
@@ -359,14 +359,14 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks, cons
 
    // ATTENTION: the vector 'blocks' is not emptied
 
-   for( uint_t i = 0; i != forest_.size(); ++i ) {
+   for(auto coarseBlock : forest_) {
 
-      if( forest_[i] == nullptr )
+      if(coarseBlock == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
 
-      stack.push( forest_[i] );
+      stack.push(coarseBlock );
 
       while( !stack.empty() ) {
 
@@ -390,14 +390,14 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint
 
    // ATTENTION: the vector 'blocks' is not emptied
 
-   for( uint_t i = 0; i != forest_.size(); ++i ) {
+   for(auto & coarseBlock : forest_) {
 
-      if( forest_[i] == nullptr )
+      if(coarseBlock == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
 
-      stack.push( forest_[i] );
+      stack.push(coarseBlock );
 
       while( !stack.empty() ) {
 
@@ -486,8 +486,8 @@ void SetupBlockForest::getProcessSpecificBlocks( std::vector< const SetupBlock* 
 
    const std::vector< SetupBlock* >& processBlocks = blockDistribution_[ process ];
 
-   for( uint_t i = 0; i < processBlocks.size(); ++i )
-      blocks.push_back( processBlocks[i] );
+   for(auto processBlock : processBlocks)
+      blocks.push_back( processBlock );
 }
 
 
@@ -501,8 +501,8 @@ void SetupBlockForest::getBlocksOverlappedByAABB( std::vector< SetupBlock* >& bl
        aabb.zMin() >= domain_.zMax() || aabb.zMax() <= domain_.zMin() )
       return;
 
-   uint_t min[3];
-   uint_t max[3];
+   std::array< uint_t, 3 > min;
+   std::array< uint_t, 3 > max;
 
    mapAABBToBoundingForestCoordinates( aabb, min, max );
 
@@ -599,7 +599,7 @@ uint_t SetupBlockForest::mapPointToTreeIndex( const real_t px, const real_t py, 
 
 
 
-void SetupBlockForest::mapAABBToBoundingForestCoordinates( const AABB& aabb, uint_t (&min)[3], uint_t (&max)[3] ) const {
+void SetupBlockForest::mapAABBToBoundingForestCoordinates( const AABB& aabb, std::array< uint_t, 3 > & min, std::array< uint_t, 3 > & max ) const {
 
    // ATTENTION: min[3] incl., max[3] excl.
 
@@ -698,8 +698,8 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
                       "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" )
 
    if( !forest_.empty() ) {
-      for( uint_t i = 0; i != forest_.size(); ++i ) {
-         if( forest_[i] != nullptr ) delete forest_[i];
+      for(auto & coarseBlock : forest_) {
+         delete coarseBlock;
       }
       forest_.clear();
    }
@@ -744,8 +744,8 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
    if( !rootBlockExclusionFunctions.empty() )
       WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling root block exclusion callback functions ..." )
 
-   for( uint_t i = 0; i != rootBlockExclusionFunctions.size(); ++i )
-      rootBlockExclusionFunctions[i]( excludeBlock, rootBlockAABB );
+   for(const auto & rootBlockExclusionFunction : rootBlockExclusionFunctions)
+      rootBlockExclusionFunction( excludeBlock, rootBlockAABB );
 
    // creation of all root blocks
 
@@ -865,8 +865,8 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
 
       // MARK ALL BLOCKS THAT NEED TO BE SPLIT
 
-      for( uint_t i = 0; i < refinementSelectionFunctions.size(); ++i )
-         refinementSelectionFunctions[i]( *this );
+      for(const auto & refinementSelectionFunction : refinementSelectionFunctions)
+         refinementSelectionFunction( *this );
 
       // GET ALL BLOCKS (= ALL LEAVES)
 
@@ -901,8 +901,8 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
       // IDENTIFY ALL BLOCKS THAT ARE MARKED TO BE SPLIT
 
       std::vector< SetupBlock* > blocksToSplit;
-      for( uint_t i = 0; i < blocks.size(); ++i )
-         if( blocks[i]->isMarked() ) blocksToSplit.push_back( blocks[i] );
+      for(auto & block : blocks)
+         if( block->isMarked() ) blocksToSplit.push_back( block );
 
       numberOfBlocks_ += blocksToSplit.size() * 7;
 
@@ -938,9 +938,9 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
          WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling block exclusion callback functions on child blocks ..." )
          for( uint_t c = 0; c != 8; ++c )
          {
-            for( uint_t j = 0; j != blockExclusionFunctions.size(); ++j )
+            for(const auto & blockExclusionFunction : blockExclusionFunctions)
             {
-               if(blockExclusionFunctions[j]( *blocksToSplit[ uint_c(i) ]->getChild(c)))
+               if(blockExclusionFunction( *blocksToSplit[ uint_c(i) ]->getChild(c)))
                {
                   WALBERLA_LOG_DETAIL( "Initializing SetupBlockForest: Excluding child block with ID " << blocksToSplit[ uint_c(i) ]->getChild(c)->getId() <<
                                       "\n                               - AABB: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getAABB() <<
@@ -956,9 +956,7 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
 
       std::set< SetupBlock* > blocksToUpdate;
 
-      for( uint_t i = 0; i < blocksToSplit.size(); ++i ) {
-
-         SetupBlock* const block = blocksToSplit[i];
+      for(auto block : blocksToSplit) {
 
          for( uint_t c = 0; c != 8; ++c )
          {
@@ -1071,9 +1069,9 @@ void SetupBlockForest::updateNeighborhood( std::vector< SetupBlock* >& blocks ) 
                WALBERLA_ASSERT_LESS_EQUAL( neighborhoodSectionBlocks.size(), 1 )
             }
 #endif
-            for( uint_t j = 0; j != neighborhoodSectionBlocks.size(); ++j )
-               if(neighborhoodSectionBlocks[j] != nullptr)
-                  block->addNeighbor( n, neighborhoodSectionBlocks[j] );
+            for(auto & neighborhoodSectionBlock : neighborhoodSectionBlocks)
+               if(neighborhoodSectionBlock != nullptr)
+                  block->addNeighbor( n, neighborhoodSectionBlock );
          }
 
          neighborhoodSectionBlocks.clear();
@@ -1146,8 +1144,8 @@ void SetupBlockForest::createNeighborhood() {
                WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), 1 )
             }
 #endif
-            for( uint_t j = 0; j != neighborhoodSectionBlocks.size(); ++j )
-               block->addNeighbor( n, neighborhoodSectionBlocks[j] );
+            for(auto & neighborhoodSectionBlock : neighborhoodSectionBlocks)
+               block->addNeighbor( n, neighborhoodSectionBlock );
          }
 
          neighborhoodSectionBlocks.clear();
@@ -1192,8 +1190,8 @@ void SetupBlockForest::assignAllBlocksToRootProcess()
    std::vector< SetupBlock* > blocks;
    getBlocks( blocks );
 
-   for( uint_t i = 0; i != blocks.size(); ++i )
-      blocks[i]->assignTargetProcess( uint_c(0) );
+   for(auto & block : blocks)
+      block->assignTargetProcess( uint_c(0) );
 
    calculateProcessDistributionFinalization();
 }
@@ -1395,9 +1393,9 @@ void SetupBlockForest::calculateProcessDistribution_LevelwiseMetis( const uint_t
       else
       {
          uint_t targetProcess = 0;
-         for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+         for(auto & block : blocks)
          {
-            (*blockIt)->assignTargetProcess( targetProcess++ );
+            block->assignTargetProcess( targetProcess++ );
          }
 
       }
@@ -1484,16 +1482,16 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
       distributition.insert( distributition.end(), i );
 
    numberOfWorkerProcesses = 0;
-   for( auto block = blocks.begin(); block != blocks.end(); ++block )
+   for(auto & block : blocks)
    {
       auto process = distributition.begin();
       while( process != distributition.end() )
       {
-         if( memory[ *process ] + (*block)->getMemory() <= memoryLimit )
+         if( memory[ *process ] + block->getMemory() <= memoryLimit )
          {
-            workload[ *process ] += (*block)->getWorkload();
-            memory[ *process ]   += (*block)->getMemory();
-            (*block)->assignTargetProcess( *process );
+            workload[ *process ] += block->getWorkload();
+            memory[ *process ]   += block->getMemory();
+            block->assignTargetProcess( *process );
             WALBERLA_ASSERT_LESS_EQUAL( *process, numberOfWorkerProcesses )
             numberOfWorkerProcesses = std::max( numberOfWorkerProcesses, *process + uint_c(1) );
             break;
@@ -1551,28 +1549,28 @@ void SetupBlockForest::balanceLoadHelper( const TargetProcessAssignmentFunction 
 
    std::vector< bool > processHasBlocks( numberOfWorkerProcesses, false );
 
-   for( auto block = blocks.begin(); block != blocks.end(); ++block )
+   for(auto & block : blocks)
    {
-      WALBERLA_CHECK_LESS( (*block)->getTargetProcess(), numberOfWorkerProcesses )
-      processHasBlocks[ (*block)->getTargetProcess() ] = true;
+      WALBERLA_CHECK_LESS( block->getTargetProcess(), numberOfWorkerProcesses )
+      processHasBlocks[ block->getTargetProcess() ] = true;
    }
 
-   for( auto it = processHasBlocks.begin(); it != processHasBlocks.end(); ++it )
-      WALBERLA_CHECK( *it )
+   for( bool has: processHasBlocks )
+      WALBERLA_CHECK( has )
 
    // make sure that the per process memory limit is satisfied
 
    if( perProcessMemoryLimit > memory_t(0) )
    {
       std::vector< memory_t > memory( numberOfWorkerProcesses, memory_c(0) );
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for(auto & block : blocks)
       {
-         const uint_t targetProcess = (*block)->getTargetProcess();
-         if( memory[ targetProcess ] + (*block)->getMemory() > perProcessMemoryLimit )
+         const uint_t targetProcess = block->getTargetProcess();
+         if( memory[ targetProcess ] + block->getMemory() > perProcessMemoryLimit )
             WALBERLA_ABORT( "Load balancing failed: A distribution to " << numberOfProcesses << " processes given a memory limit of \"" << perProcessMemoryLimit <<
                             "\" is impossible.\n                       (Are the memory coefficients correctly assigned to all blocks via "
                             "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" )
-         memory[ targetProcess ] += (*block)->getMemory();
+         memory[ targetProcess ] += block->getMemory();
       }
    }
 
@@ -1646,15 +1644,15 @@ void SetupBlockForest::calculateProcessDistributionFinalization( const bool reor
 
    blockDistribution_.clear();
    blockDistribution_.resize( numberOfProcesses_ );
-   for( uint_t i = 0; i != blocks.size(); ++i )
-      blockDistribution_[ blocks[i]->getProcess() ].push_back( blocks[i] );
+   for(auto & block : blocks)
+      blockDistribution_[ block->getProcess() ].push_back( block );
 
 #ifndef NDEBUG
    std::vector< bool > processHasBlocks( numberOfProcesses_, false );
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      WALBERLA_ASSERT_LESS( blocks[i]->getProcess(), numberOfProcesses_ )
-      processHasBlocks[ blocks[i]->getProcess() ] = true;
+   for(auto & block : blocks) {
+      WALBERLA_ASSERT_LESS( block->getProcess(), numberOfProcesses_ )
+      processHasBlocks[ block->getProcess() ] = true;
    }
 
    for( uint_t i = 0; i != numberOfProcesses_; ++i )
@@ -1695,15 +1693,15 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
 
    // number of coarse/root blocks in each direction
 
-   for( uint_t i = 0; i != 3; ++i ) {
-      uintToByteArray( size_[i], buffer, offset, 4 );
+   for(uint_t i : size_) {
+      uintToByteArray( i, buffer, offset, 4 );
       offset += 4;
    }
 
    // domain periodicity
 
-   for( uint_t i = 0; i != 3; ++i ) {
-      uintToByteArray( periodic_[i] ? uint_c(1) : uint_c(0), buffer, offset, 1 );
+   for(bool i : periodic_) {
+      uintToByteArray( i ? uint_c(1) : uint_c(0), buffer, offset, 1 );
       ++offset;
    }
 
@@ -1741,8 +1739,8 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
    Set<SUID> suids;
 
    for( uint_t i = 0; i != numberOfProcesses_; ++i ) {
-      for( uint_t j = 0; j != blockDistribution_[i].size(); ++j )
-         suids += blockDistribution_[i][j]->getState();
+      for(auto j : blockDistribution_[i])
+         suids += j->getState();
    }
 
    // number of SUIDs
@@ -1762,15 +1760,15 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
    // for every SUID ...
 
    uint_t i = 0;
-   for( Set<SUID>::const_iterator it = suids.begin(); it != suids.end(); ++it ) {
+   for(auto suid : suids) {
 
       std::vector< bool > suidBoolVec( 8 * suidBytes );
       suidBoolVec[i] =  true;
-      suidMap[ *it ] = suidBoolVec;
+      suidMap[ suid ] = suidBoolVec;
 
       // length of its identifier string
 
-      const uint_t length = it->getIdentifier().length();
+      const uint_t length = suid.getIdentifier().length();
       WALBERLA_CHECK_LESS( length, 256, "SUID identifiers are allowed to consist of 255 characters at most when saving the block structure to file!" )
 
       buffer.resize( 1 + length );
@@ -1778,7 +1776,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
 
       // the identifier string
 
-      const char* str = it->getIdentifier().c_str();
+      const char* str = suid.getIdentifier().c_str();
       for( uint_t j = 0; j != length; ++j )
          buffer[1+j] = *reinterpret_cast< const uint8_t* >( str + j );
 
@@ -1832,11 +1830,11 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
                std::vector< bool > suidBoolVec( 8 * suidBytes );
 
                const Set<SUID>& state = block->getState();
-               for( Set<SUID>::const_iterator suid = state.begin(); suid != state.end(); ++suid ) {
-                  WALBERLA_ASSERT( suidMap.find( *suid ) != suidMap.end() );
+               for(auto suid : state) {
+                  WALBERLA_ASSERT( suidMap.find( suid ) != suidMap.end() );
                   //Elementwise OR of all elements
                   for (uint_t k = 0;k  < suidBoolVec.size(); ++k) {
-                     suidBoolVec[k] = suidBoolVec[k] || suidMap.find( *suid )->second[k];
+                     suidBoolVec[k] = suidBoolVec[k] || suidMap.find( suid )->second[k];
                   }
                }
 
@@ -1874,8 +1872,8 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
       uintToByteArray( uint_c( neighbors.size() ), buffer, offset, 2 );
       offset += 2;
 
-      for( std::set< uint_t >::iterator it = neighbors.begin(); it != neighbors.end(); ++it ) {
-         uintToByteArray( *it, buffer, offset, processIdBytes );
+      for(uint_t neighbor : neighbors) {
+         uintToByteArray( neighbor, buffer, offset, processIdBytes );
          offset += processIdBytes;
       }
 
@@ -1905,13 +1903,12 @@ void SetupBlockForest::writeVTKOutput( const std::string & filestem ) const
    std::vector< const SetupBlock* > blocks;
    getBlocks( blocks );
 
-   for( uint_t i = 0; i != blocks.size(); ++i )
-      if( blocks[i]->getMemory() > 0 ) ++allocatedBlocks;
+   for(auto & block : blocks)
+      if( block->getMemory() > 0 ) ++allocatedBlocks;
 
    outfile << "POINTS " << ( 8 * allocatedBlocks ) << " " << typeToString<real_t>() << "\n\n";
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      const SetupBlock* const block = blocks[i];
+   for(auto block : blocks) {
       if( block->getMemory() > 0 ) {
          for( uint_t z = 0; z != 2; ++z ) {
             for( uint_t y = 0; y != 2; ++y ) {
@@ -1948,17 +1945,17 @@ void SetupBlockForest::writeVTKOutput( const std::string & filestem ) const
    outfile << "\n\nSCALARS workload double 1"
            <<   "\nLOOKUP_TABLE default\n";
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      if( blocks[i]->getMemory() > 0 )
-         outfile << blocks[i]->getWorkload() << "\n";
+   for(auto & block : blocks) {
+      if( block->getMemory() > 0 )
+         outfile << block->getWorkload() << "\n";
    }
 
    outfile << "\n\nSCALARS process int 1"
            <<   "\nLOOKUP_TABLE default\n";
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      if( blocks[i]->getMemory() > 0 )
-         outfile << blocks[i]->getProcess() << "\n";
+   for(auto & block : blocks) {
+      if( block->getMemory() > 0 )
+         outfile << block->getProcess() << "\n";
    }
 
 #ifdef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
@@ -1966,9 +1963,9 @@ void SetupBlockForest::writeVTKOutput( const std::string & filestem ) const
    outfile << "\n\nSCALARS blockId unsigned_long 1"
            <<   "\nLOOKUP_TABLE default\n";
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      if( blocks[i]->getMemory() > 0 )
-         outfile << blocks[i]->getId().getTreeId() << "\n";
+   for(auto & block : blocks) {
+      if( block->getMemory() > 0 )
+         outfile << block->getId().getTreeId() << "\n";
    }
 
 #endif // WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
@@ -1976,9 +1973,9 @@ void SetupBlockForest::writeVTKOutput( const std::string & filestem ) const
    outfile << "\n\nSCALARS level double 1"
            <<   "\nLOOKUP_TABLE colors\n";
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      if( blocks[i]->getMemory() > 0 )
-         outfile << (( depth_ == 0 ) ? 0 : ( static_cast< double >( blocks[i]->getLevel() ) / static_cast< double >( depth_ ) )) << "\n";
+   for(auto & block : blocks) {
+      if( block->getMemory() > 0 )
+         outfile << (( depth_ == 0 ) ? 0 : ( static_cast< double >( block->getLevel() ) / static_cast< double >( depth_ ) )) << "\n";
    }
 
    outfile << "\n\nLOOKUP_TABLE colors " << ( depth_ + 1 );
@@ -2012,8 +2009,8 @@ void SetupBlockForest::writeCSV( const std::string & filestem ) const
       for( uint_t i = 0; i <= depth_; ++i )
       {
          uint_t n = uint_t(0);
-         for( auto block = blocks->begin(); block != blocks->end(); ++block )
-            if( (*block)->getLevel() == i ) ++n;
+         for(auto block : *blocks)
+            if( block->getLevel() == i ) ++n;
          outfile << "," << n;
       }
       outfile << "\n";
@@ -2028,8 +2025,8 @@ void SetupBlockForest::writeCSV( const std::string & filestem ) const
 void SetupBlockForest::toStream( std::ostream & os ) const
 {
    uint_t discardedRootBlocks = uint_t(0);
-   for( auto block = forest_.begin(); block != forest_.end(); ++block )
-      if( *block == nullptr ) ++discardedRootBlocks;
+   for(auto block : forest_)
+      if( block == nullptr ) ++discardedRootBlocks;
 
    os << "- AABB: " << domain_ << "\n"
       << "- initial decomposition: " << size_[0] << " x " << size_[1] << " x " << size_[2] << " (= forest size)\n"
@@ -2053,18 +2050,18 @@ void SetupBlockForest::toStream( std::ostream & os ) const
          std::vector< real_t > workload      ( depth_ + 2, real_t(0) );
          std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t(0) );
 
-         for( auto block = begin(); block != end(); ++block )
+         for(const auto & block : *this)
          {
-            const auto level = block->getLevel();
+            const auto level = block.getLevel();
 
-            space[ level ]          += block->getAABB().volume();
-            memory[ level ]         += real_c( block->getMemory() );
-            workload[ level ]       += real_c( block->getWorkload() );
+            space[ level ]          += block.getAABB().volume();
+            memory[ level ]         += real_c( block.getMemory() );
+            workload[ level ]       += real_c( block.getWorkload() );
             numberOfBlocks[ level ] += uint_t(1);
 
-            space.back()          += block->getAABB().volume();
-            memory.back()         += real_c( block->getMemory() );
-            workload.back()       += real_c( block->getWorkload() );
+            space.back()          += block.getAABB().volume();
+            memory.back()         += real_c( block.getMemory() );
+            workload.back()       += real_c( block.getWorkload() );
             numberOfBlocks.back() += uint_t(1);
          }
 
@@ -2089,23 +2086,23 @@ void SetupBlockForest::toStream( std::ostream & os ) const
 
       WALBERLA_ASSERT_EQUAL( numberOfProcesses_, blockDistribution_.size() )
 
-      for( auto process = blockDistribution_.begin(); process != blockDistribution_.end(); ++process )
+      for( auto & process: blockDistribution_ )
       {
          std::vector< uint_t >     processBlocks  ( depth_ + 2, uint_t(0) );
          std::vector< memory_t >   processMemory  ( depth_ + 2, memory_t(0) );
          std::vector< workload_t > processWorkload( depth_ + 2, workload_t(0) );
 
-         for( auto block = process->begin(); block != process->end(); ++block )
+         for(auto block : process)
          {
-            const auto level = (*block)->getLevel();
+            const auto level = block->getLevel();
 
             processBlocks[level]   += uint_t(1);
-            processMemory[level]   += (*block)->getMemory();
-            processWorkload[level] += (*block)->getWorkload();
+            processMemory[level]   += block->getMemory();
+            processWorkload[level] += block->getWorkload();
 
             processBlocks.back()   += uint_t(1);
-            processMemory.back()   += (*block)->getMemory();
-            processWorkload.back() += (*block)->getWorkload();
+            processMemory.back()   += block->getMemory();
+            processWorkload.back() += block->getWorkload();
          }
 
          for( uint_t i = 0; i < depth_ + 2; ++i )
@@ -2147,14 +2144,14 @@ void SetupBlockForest::toStream( std::ostream & os ) const
          std::vector< real_t > space( depth_ + 2, real_t(0) );
          std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t(0) );
 
-         for( auto block = begin(); block != end(); ++block )
+         for(const auto & block : *this)
          {
-            const auto level = block->getLevel();
+            const auto level = block.getLevel();
 
-            space[ level ] += block->getAABB().volume();
+            space[ level ] += block.getAABB().volume();
             numberOfBlocks[ level ] += uint_t(1);
 
-            space.back() += block->getAABB().volume();
+            space.back() += block.getAABB().volume();
             numberOfBlocks.back() += uint_t(1);
          }
 

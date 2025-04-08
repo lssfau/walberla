@@ -31,6 +31,7 @@
 #include "core/Regex.h"
 #include "core/StringUtility.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <map>
@@ -345,13 +346,13 @@ namespace geometry {
       using std::string;
       using std::stringstream;
 
-      std::string source( (std::istreambuf_iterator<char>( is ) ), std::istreambuf_iterator<char>( ) );
+      std::string const source( (std::istreambuf_iterator<char>( is ) ), std::istreambuf_iterator<char>( ) );
 
       // replace multiline comments: /\\*.*?\\*/
       // replace single line comments //.*?\n
       // replace chars: < > , \ n \t
-      walberla::regex r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
-      std::string stripped = walberla::regex_replace( source , r , " " ) ;
+      walberla::regex const r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
+      std::string const stripped = walberla::regex_replace( source , r , " " ) ;
 
       TriangleMesh::index_t faceOffset = 0u;
       if( clear )
@@ -504,7 +505,7 @@ namespace geometry {
       }
 
       std::vector<TriangleMesh> meshVec( 1u + mesh.getNumVertices() / itemsPerMesh );
-      bool hasVertexNormals = mesh.hasVertexNormals();
+      bool const hasVertexNormals = mesh.hasVertexNormals();
 
       size_t j;
 
@@ -516,20 +517,20 @@ namespace geometry {
       }
 
       for( size_t i = 0; i < mesh.getNumTriangles(); ++i ){
-         TriangleMesh::index_t ix = mesh.getVertexIndex( i, 0 );
-         TriangleMesh::index_t iy = mesh.getVertexIndex( i, 1 );
-         TriangleMesh::index_t iz = mesh.getVertexIndex( i, 2 );
+         TriangleMesh::index_t const ix = mesh.getVertexIndex( i, 0 );
+         TriangleMesh::index_t const iy = mesh.getVertexIndex( i, 1 );
+         TriangleMesh::index_t const iz = mesh.getVertexIndex( i, 2 );
 
-         size_t jx = ix / itemsPerMesh;
-         size_t jy = iy / itemsPerMesh;
-         size_t jz = iz / itemsPerMesh;
+         size_t const jx = ix / itemsPerMesh;
+         size_t const jy = iy / itemsPerMesh;
+         size_t const jz = iz / itemsPerMesh;
 
          TriangleMesh::index_t nix = uint32_c( ix % itemsPerMesh );
          TriangleMesh::index_t niy = uint32_c( iy % itemsPerMesh );
          TriangleMesh::index_t niz = uint32_c( iz % itemsPerMesh );
 
          if ( jx != jy || jy != jz ){
-            j = std::max( std::max(jx, jy), jz );
+            j = std::max( {jx, jy, jz} );
             if( jx < j ){
                nix = meshVec[j].addVertex( mesh.getVertex(ix) );
                if( hasVertexNormals )
@@ -618,8 +619,8 @@ namespace geometry {
 
    void writeMeshOff( std::ostream & os, const TriangleMesh & mesh )
    {
-      TriangleMesh::index_t numVertices = mesh.getNumVertices();
-      size_t                numFaces    = mesh.getNumTriangles();
+      TriangleMesh::index_t const numVertices = mesh.getNumVertices();
+      size_t                const numFaces    = mesh.getNumTriangles();
 
       os << "OFF\n";
       os << numVertices << ' ' << mesh.getNumTriangles() << " 0\n"; // Number of edges is unknown, we put 0
@@ -651,9 +652,9 @@ namespace geometry {
          << "        <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">\n";
 
       os << "          ";
-      for( auto it = mesh.getVertices().begin(); it != mesh.getVertices().end(); ++it )
+      for(const auto & it : mesh.getVertices())
       {
-         os << (*it)[0] << ' ' << (*it)[1] << ' ' << (*it)[2] << ' ';
+         os << it[0] << ' ' << it[1] << ' ' << it[2] << ' ';
       }
       os  << '\n';
 
@@ -664,9 +665,9 @@ namespace geometry {
 
       os << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
       os << "          ";
-      for( auto it = mesh.getVertexIndices().begin(); it != mesh.getVertexIndices().end(); ++it )
+      for(unsigned int const it : mesh.getVertexIndices())
       {
-         os << *it << ' ';
+         os << it << ' ';
       }
       os << '\n';
       os << "        </DataArray>\n";
@@ -692,11 +693,11 @@ namespace geometry {
       {
          os << "        <DataArray type=\"UInt8\" Name=\"vertexColors\" NumberOfComponents=\"3\" format=\"ascii\">\n";
          os << "          ";
-         for( auto it = mesh.getVertexColors().begin(); it != mesh.getVertexColors().end(); ++it )
+         for(auto it : mesh.getVertexColors())
          {
-            os << std::lround( (*it)[0] * 255.0f ) << ' '
-               << std::lround( (*it)[1] * 255.0f ) << ' '
-               << std::lround( (*it)[2] * 255.0f ) << ' ';
+            os << std::lround( it[0] * 255.0f ) << ' '
+               << std::lround( it[1] * 255.0f ) << ' '
+               << std::lround( it[2] * 255.0f ) << ' ';
          }
          os << "        </DataArray>\n";
       }
@@ -705,9 +706,9 @@ namespace geometry {
       {
          os << "        <DataArray type=\"Float32\" Name=\"vertexNormals\" NumberOfComponents=\"3\" format=\"ascii\">\n";
          os << "          ";
-         for( auto it = mesh.getVertexNormals().begin(); it != mesh.getVertexNormals().end(); ++it )
+         for(const auto & it : mesh.getVertexNormals())
          {
-            os << (*it)[0] << ' ' << (*it)[1] << ' ' << (*it)[2] << ' ';
+            os << it[0] << ' ' << it[1] << ' ' << it[2] << ' ';
          }
          os << "        </DataArray>\n";
       }

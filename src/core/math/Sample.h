@@ -92,7 +92,7 @@ std::ostream & operator<<( std::ostream & os, const Sample & statReal );
 template< typename T >
 Sample::iterator Sample::castToRealAndInsert(const T& val)
 {
-   static_assert( std::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
+   static_assert( std::is_arithmetic_v<T>, "You can only use Sample::castToRealAndInsert with " \
                   "arithmetic types!" );
 
    return insert( numeric_cast<value_type>( val ) );
@@ -101,7 +101,7 @@ Sample::iterator Sample::castToRealAndInsert(const T& val)
 template< typename T >
 Sample::iterator Sample::castToRealAndInsert(const_iterator position, const T& val)
 {
-   static_assert( std::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
+   static_assert( std::is_arithmetic_v<T>, "You can only use Sample::castToRealAndInsert with " \
                   "arithmetic types!" );
 
    return insert( position, numeric_cast<value_type>( val ) );
@@ -110,7 +110,7 @@ Sample::iterator Sample::castToRealAndInsert(const_iterator position, const T& v
 template <class InputIterator>
 void Sample::castToRealAndInsert(InputIterator first, InputIterator last)
 {
-   static_assert( std::is_arithmetic< typename std::iterator_traits<InputIterator>::value_type >::value,
+   static_assert( std::is_arithmetic_v< typename std::iterator_traits<InputIterator>::value_type >,
                   "You can only use Sample::castToRealAndInsert with sequences of arithmetic types!" );
 
    while( first != last )

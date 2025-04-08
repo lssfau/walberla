@@ -39,7 +39,7 @@ namespace geometry {
       boundingBox_ = AABB::createFromMinMaxCorner( midpoint_[0] - radius_, midpoint_[1] - radius_, midpoint_[2] - radius_,
                                                    midpoint_[0] + radius_, midpoint_[1] + radius_, midpoint_[2] + radius_ );
 
-      real_t halfBoxEdge = radius_ * oneOverSqrt3;
+      real_t const halfBoxEdge = radius_ * oneOverSqrt3;
       innerBox_ = AABB::createFromMinMaxCorner( midpoint_[0] - halfBoxEdge, midpoint_[1] - halfBoxEdge, midpoint_[2] - halfBoxEdge,
                                                 midpoint_[0] + halfBoxEdge, midpoint_[1] + halfBoxEdge, midpoint_[2] + halfBoxEdge );
    }

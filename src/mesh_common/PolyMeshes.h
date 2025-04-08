@@ -28,9 +28,9 @@
 namespace walberla {
 namespace mesh {
 
-typedef OpenMesh::PolyMesh_ArrayKernelT<OpenMesh::Python::MeshTraits> PythonPolyMesh;
-typedef OpenMesh::PolyMesh_ArrayKernelT<RealTraits>                   PolyMesh;
-typedef OpenMesh::PolyMesh_ArrayKernelT<FloatTraits>                  FloatPolyMesh;
+using PythonPolyMesh = OpenMesh::PolyMesh_ArrayKernelT<OpenMesh::Python::MeshTraits>;
+using PolyMesh = OpenMesh::PolyMesh_ArrayKernelT<RealTraits>;
+using FloatPolyMesh = OpenMesh::PolyMesh_ArrayKernelT<FloatTraits>;
 
 } // namespace mesh
 } // namespace walberla

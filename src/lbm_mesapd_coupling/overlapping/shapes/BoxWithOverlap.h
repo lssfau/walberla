@@ -46,7 +46,9 @@ class BoxWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), box_(box)
    {}
 
-   bool contains(const Vector3< real_t >& point) const
+   ~BoxWithOverlap() override = default;
+
+   bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideBoxBF(mesa_pd::transformPositionFromWFtoBF(idx_, ac_, point), box_.getEdgeLength());
    }

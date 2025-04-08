@@ -42,8 +42,8 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors)
       SweepAdder & s = * ( sweepIt->second );
 
       //select and execute before functions
-      for( size_t j=0; j < s.beforeFuncs.size(); ++j )
-         this->executeSelectable(s.beforeFuncs[j].selectableFunc_, selectors, "Pre-Sweep Function");
+      for(auto & beforeFunc : s.beforeFuncs)
+         this->executeSelectable(beforeFunc.selectableFunc_, selectors, "Pre-Sweep Function");
 
       // Loop over all blocks
       for( BlockStorage::iterator bi = blockStorage_.begin(); bi != blockStorage_.end(); ++bi )
@@ -80,8 +80,8 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors)
       }
 
       // select and execute after functions
-      for( size_t j=0; j < s.afterFuncs.size(); ++j )
-         this->executeSelectable(s.afterFuncs[j].selectableFunc_, selectors, "Post-Sweep Function");
+      for(auto & afterFunc : s.afterFuncs)
+         this->executeSelectable(afterFunc.selectableFunc_, selectors, "Post-Sweep Function");
    }
 }
 
@@ -96,9 +96,9 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors, timing::TimingPoo
    if ( firstRun_ || timing.empty() )
    {
 
-      for( auto sweepIt = sweeps_.begin(); sweepIt != sweeps_.end(); ++sweepIt )
+      for(auto & sweep : sweeps_)
       {
-         SweepAdder & s = * ( sweepIt->second );
+         SweepAdder & s = * ( sweep.second );
          // loop over all possibilities in selectable object
          for( auto it = s.sweep.begin(); it != s.sweep.end(); ++it )
             timing.registerTimer( it.identifier() );
@@ -113,8 +113,8 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors, timing::TimingPoo
       SweepAdder & s = * ( sweepIt->second );
 
       //select and execute before functions
-      for( size_t j=0; j < s.beforeFuncs.size(); ++j )
-         this->executeSelectable( s.beforeFuncs[j].selectableFunc_, selectors, "Pre-Sweep Function", timing );
+      for(auto & beforeFunc : s.beforeFuncs)
+         this->executeSelectable( beforeFunc.selectableFunc_, selectors, "Pre-Sweep Function", timing );
 
       for( BlockStorage::iterator bi = blockStorage_.begin(); bi != blockStorage_.end(); ++bi )
       {
@@ -149,8 +149,8 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors, timing::TimingPoo
       }
 
       // select and execute after functions
-      for( size_t j=0; j < s.afterFuncs.size(); ++j )
-         this->executeSelectable(s.afterFuncs[j].selectableFunc_,selectors,"Post-Sweep Function", timing );
+      for(auto & afterFunc : s.afterFuncs)
+         this->executeSelectable(afterFunc.selectableFunc_,selectors,"Post-Sweep Function", timing );
    }
 }
 

@@ -386,8 +386,8 @@ uint_t GlobalLoadBalancing::balanceSorted( const std::vector< BLOCK* >& blocks, 
          minWorkload = std::max( minWorkload, sortedBlocks[l][i]->getWorkload() );
          WALBERLA_ASSERT_LESS_EQUAL( sortedBlocks[l][i]->getMemory(), memoryLimit );
       }
-      for( uint_t i = 0; i != processesWork.size(); ++i )
-         minWorkload = std::max( minWorkload, processesWork[i] );
+      for(workload_t i : processesWork)
+         minWorkload = std::max( minWorkload, i );
 
       // check min - potentially nothing more to do
 
@@ -497,7 +497,7 @@ inline uint_t GlobalLoadBalancing::minimizeProcesses( const std::vector< BLOCK* 
 
 #ifdef WALBERLA_BUILD_WITH_METIS
 
-   if( numberOfProcesses > 1 && metisConfig.includeMetis() && processesWork == NULL && processesMemory == NULL ) {
+   if( numberOfProcesses > 1 && metisConfig.includeMetis() && processesWork == nullptr && processesMemory == nullptr ) {
 
       uint_t max = numberOfProcesses;
       uint_t min = uint_c( real_c(0.5) + ( real_c( memorySum( blocks ) ) / memoryLimit ) );
@@ -696,9 +696,7 @@ void GlobalLoadBalancing::reorderProcessesByBFS( std::vector< BLOCK* > & blocks,
 
          reorderMap[p] = process++;
 
-         for( uint_t i = 0; i != processNeighbors[p].size(); ++i ) {
-            const uint_t neighbor = processNeighbors[p][i];
-
+         for(uint_t neighbor : processNeighbors[p]) {
             if( !processed[neighbor] ) {
                processList.push_back( neighbor );
                processed[neighbor] = true;
@@ -723,12 +721,12 @@ void GlobalLoadBalancing::reorderProcessesByBFS( std::vector< BLOCK* > & blocks,
    }
 #endif
 
-   const int blockssize = int_c( blocks.size() );
+   const uint_t blockssize = blocks.size();
 #ifdef _OPENMP
    #pragma omp parallel for schedule(static)
 #endif
-   for( int i = 0; i < blockssize; ++i )
-      blocks[ uint_c(i) ]->assignTargetProcess( reorderMap[ blocks[ uint_c(i) ]->getTargetProcess() ] );
+   for( uint_t i = 0; i < blockssize; ++i )
+      blocks[ i ]->assignTargetProcess( reorderMap[ blocks[ i ]->getTargetProcess() ] );
 }
 
 
@@ -815,12 +813,12 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
    std::vector< int64_t > part( uint_c(nvtxs) );
 
    real_t maxUbvec = metisConfig.maxUbvec();
-   real_t ubvec[]  = { real_c(1.01), maxUbvec };
+   std::array< real_t, 2 > ubvec  = { real_c(1.01), maxUbvec };
 
    // first call to METIS: always try to balance the workload as good as possible, but allow large imbalances concerning the memory (-> ubvec[1])
 
-   int ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                             &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   int ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                             &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
    // if METIS was successful AND the memory limit of each process is not violated (which is highly unlikely due to a large value for ubvec[1])
    // then the algorithm is finished
@@ -844,8 +842,8 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
    real_t minUbvec = real_t(1);
    ubvec[1] = minUbvec;
 
-   ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                         &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                         &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
    // ... if this doesn't work OR if the memory limit is still violated then METIS is unable to find a valid partitioning
 
@@ -881,8 +879,8 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
       ubvec[1] = ( maxUbvec + minUbvec ) / real_c(2);
 
-      ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                            &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+      ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
+                                            &(ubvec[0]), nullptr /*idx t *options*/, &objval, &(part[0]) );
 
       if( ret == core::METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
 
@@ -992,14 +990,14 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    
    std::vector< int64_t > part( uint_c(nvtxs) );
    
-   int64_t options[ METIS_NOPTIONS ];
-   core::METIS_SetDefaultOptions( options );
-   options[ core::METIS_OPTION_NITER ] = 1000;
-   options[ core::METIS_OPTION_NSEPS ] = 100;
-   options[ core::METIS_OPTION_NCUTS ] = 100;
-   
-   int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), NULL, &( adjwgt[0] ), 
-                                  &nparts, NULL, NULL, options, &objval, &( part[ 0 ] ) );
+   std::array< int64_t, METIS_NOPTIONS > options;
+   core::METIS_SetDefaultOptions( options.data() );
+   options[ size_t(core::METIS_OPTION_NITER) ] = 1000;
+   options[ size_t(core::METIS_OPTION_NSEPS) ] = 100;
+   options[ size_t(core::METIS_OPTION_NCUTS) ] = 100;
+
+   int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), nullptr, &( adjwgt[0] ),
+                                  &nparts, nullptr, nullptr, options.data(), &objval, &( part[ 0 ] ) );
 
    if( ret != core::METIS_OK ) 
    {
@@ -1055,10 +1053,10 @@ std::string GlobalLoadBalancing::metisErrorCodeToString( int errorCode )
 uint_t GlobalLoadBalancing::metisAdaptPartVector( std::vector< int64_t >& part, const uint_t numberOfProcesses )
 {
    std::vector<bool> hasBlock( numberOfProcesses, false );
-   for( uint_t i = 0; i != part.size(); ++i )
+   for( auto proc: part )
    {
-      WALBERLA_ASSERT_LESS( part[i], int_c( numberOfProcesses ) );
-      hasBlock[ uint_c(part[i]) ] = true;
+      WALBERLA_ASSERT_LESS( proc, int_c( numberOfProcesses ) );
+      hasBlock[ uint_c(proc) ] = true;
    }
 
    uint_t nProcesses = 0;
@@ -1066,8 +1064,8 @@ uint_t GlobalLoadBalancing::metisAdaptPartVector( std::vector< int64_t >& part, 
    {
       if( !hasBlock[ uint_c(i) ] )
       {
-         for( uint_t j = 0; j != part.size(); ++j )
-            if( part[j] > i ) --part[j];
+         for(int64_t & j : part)
+            if( j > i ) --j;
       }
       else
          ++nProcesses;

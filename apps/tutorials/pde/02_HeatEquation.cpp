@@ -32,7 +32,6 @@
 
 #include "stencil/D2Q5.h"
 
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 
 #include "vtk/VTKOutput.h"
@@ -61,13 +60,13 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       CellInterval xyz = u->xyzSize();
 
       // iterate all (inner) cells in the field
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell ){
+      for(auto cell : xyz){
 
          // obtain the physical coordinate of the center of the current cell
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
 
          // set the initial condition, given by the function u(x,y,0) = sin(PI*x)*sin(PI*y)
-         u->get( *cell ) = std::sin( math::pi * p[0] ) * std::sin( math::pi * p[1] );
+         u->get( cell ) = std::sin( math::pi * p[0] ) * std::sin( math::pi * p[1] );
       }
    }
 }
@@ -245,9 +244,7 @@ int main( int argc, char ** argv )
    // This can not be done as a sweep since it includes an interior iteration, independent of the time loop.
    timeloop.addFuncAfterTimeStep( JacobiIteration( srcID, dstID, rhsID, weights, blocks, myCommScheme, uint_c(10000) ), "JacobiIteration");
 
-   // start the GUI and run the simulation
-   GUI gui ( timeloop, blocks, argc, argv );
-   gui.run();
+   timeloop.run();
 
    return 0;
 }

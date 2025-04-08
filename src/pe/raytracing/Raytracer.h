@@ -614,7 +614,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
          
          std::stringstream ss;
-         for (auto it: correctToIncorrectBodyIDsMap) {
+         for (auto const &it: correctToIncorrectBodyIDsMap) {
             const BodyID correctBody = it.first;
             if (it.first != nullptr) {
                ss << " correct body: " << correctBody->getID() << "(" << correctBody->getHash() << ")";

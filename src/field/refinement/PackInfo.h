@@ -513,7 +513,7 @@ inline Vector3< cell_idx_t > PackInfo< Field_T, Stencil >::getNeighborShift( con
 {
    Vector3< cell_idx_t > shift;
 
-   uint_t branchId = smallBlock.getBranchId();
+   uint_t const branchId = smallBlock.getBranchId();
 
    shift[0] = ( stencil::cx[dir] == 0 ) ? ( ( ( branchId & uint_t(1) ) == uint_t(0) ) ? cell_idx_t(-1) : cell_idx_t(1) ) : cell_idx_t(0);
    shift[1] = ( stencil::cy[dir] == 0 ) ? ( ( ( branchId & uint_t(2) ) == uint_t(0) ) ? cell_idx_t(-1) : cell_idx_t(1) ) : cell_idx_t(0);
@@ -646,11 +646,11 @@ inline bool PackInfo< Field_T, Stencil >::isCornerDirection( stencil::Direction 
 template< typename Field_T, typename Stencil >
 inline bool PackInfo< Field_T, Stencil >::blocksConnectedByFaces( const Block * block, const BlockID & neighbor )
 {
-   const uint_t face[] = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
-   for( int i = 0; i != 6; ++i )
+   const std::array<uint_t, 6> face = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
+   for(const auto & i : face)
    {
-      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face[i] ); ++n )
-         if( block->getNeighborId( face[i], n ) == neighbor )
+      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( i ); ++n )
+         if( block->getNeighborId( i, n ) == neighbor )
             return true;
    }
    return false;
@@ -661,13 +661,13 @@ inline bool PackInfo< Field_T, Stencil >::blocksConnectedByFaces( const Block * 
 template< typename Field_T, typename Stencil >
 inline bool PackInfo< Field_T, Stencil >::blocksConnectedByEdges( const Block * block, const BlockID & neighbor )
 {
-   const uint_t face[] = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
+   const std::array<uint_t, 12> edges = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
                            uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
 
-   for( int i = 0; i != 12; ++i )
+   for(const auto & i : edges)
    {
-      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face[i] ); ++n )
-         if( block->getNeighborId( face[i], n ) == neighbor )
+      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( i ); ++n )
+         if( block->getNeighborId( i, n ) == neighbor )
             return true;
    }
    return false;

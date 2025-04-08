@@ -41,9 +41,9 @@ const uint_t FieldGhostLayers( 1 );
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
 
-typedef GhostLayerField< real_t, 1>          ScalarField_T;
-typedef GhostLayerField< Vector3<real_t>, 1> Vec3Field_T;
-typedef GhostLayerField< real_t, 3>          MultiComponentField_T;
+using ScalarField_T = GhostLayerField<real_t, 1>;
+using Vec3Field_T = GhostLayerField<Vector3<real_t>, 1>;
+using MultiComponentField_T = GhostLayerField<real_t, 3>;
 
 
 const FlagUID Domain_Flag ( "domain" );
@@ -118,9 +118,9 @@ void testNearestNeighborFieldInterpolator( const shared_ptr<StructuredBlockStora
                                            const BlockDataID & scalarFieldID, const BlockDataID & vectorFieldID, const BlockDataID & multiComponentFieldID )
 {
    // field interpolators
-   typedef field::NearestNeighborFieldInterpolator<ScalarField_T, FlagField_T>         ScalarFieldInterpolator_T;
-   typedef field::NearestNeighborFieldInterpolator<Vec3Field_T, FlagField_T>           Vec3FieldInterpolator_T;
-   typedef field::NearestNeighborFieldInterpolator<MultiComponentField_T, FlagField_T> MultiComponentFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::NearestNeighborFieldInterpolator<ScalarField_T, FlagField_T>;
+   using Vec3FieldInterpolator_T = field::NearestNeighborFieldInterpolator<Vec3Field_T, FlagField_T>;
+   using MultiComponentFieldInterpolator_T = field::NearestNeighborFieldInterpolator<MultiComponentField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID         = field::addFieldInterpolator< ScalarFieldInterpolator_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag );
    BlockDataID vectorFieldInterpolatorID         = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag );
    BlockDataID multiComponentFieldInterpolatorID = field::addFieldInterpolator< MultiComponentFieldInterpolator_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag );
@@ -171,9 +171,9 @@ void testTrilinearFieldInterpolator( const shared_ptr<StructuredBlockStorage> & 
                                      const BlockDataID & scalarFieldID, const BlockDataID & vectorFieldID, const BlockDataID & multiComponentFieldID )
 {
    // field interpolators
-   typedef field::TrilinearFieldInterpolator<ScalarField_T, FlagField_T>         ScalarFieldInterpolator_T;
-   typedef field::TrilinearFieldInterpolator<Vec3Field_T, FlagField_T>           Vec3FieldInterpolator_T;
-   typedef field::TrilinearFieldInterpolator<MultiComponentField_T, FlagField_T> MultiComponentFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::TrilinearFieldInterpolator<ScalarField_T, FlagField_T>;
+   using Vec3FieldInterpolator_T = field::TrilinearFieldInterpolator<Vec3Field_T, FlagField_T>;
+   using MultiComponentFieldInterpolator_T = field::TrilinearFieldInterpolator<MultiComponentField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID         = field::addFieldInterpolator< ScalarFieldInterpolator_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag );
    BlockDataID vectorFieldInterpolatorID         = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag );
    BlockDataID multiComponentFieldInterpolatorID = field::addFieldInterpolator< MultiComponentFieldInterpolator_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag );
@@ -224,9 +224,9 @@ void testKernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blo
                                   const BlockDataID & scalarFieldID, const BlockDataID & vectorFieldID, const BlockDataID & multiComponentFieldID )
 {
    // field interpolators
-   typedef field::KernelFieldInterpolator<ScalarField_T, FlagField_T>         ScalarFieldInterpolator_T;
-   typedef field::KernelFieldInterpolator<Vec3Field_T, FlagField_T>           Vec3FieldInterpolator_T;
-   typedef field::KernelFieldInterpolator<MultiComponentField_T, FlagField_T> MultiComponentFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::KernelFieldInterpolator<ScalarField_T, FlagField_T>;
+   using Vec3FieldInterpolator_T = field::KernelFieldInterpolator<Vec3Field_T, FlagField_T>;
+   using MultiComponentFieldInterpolator_T = field::KernelFieldInterpolator<MultiComponentField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID         = field::addFieldInterpolator< ScalarFieldInterpolator_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag );
    BlockDataID vectorFieldInterpolatorID         = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag );
    BlockDataID multiComponentFieldInterpolatorID = field::addFieldInterpolator< MultiComponentFieldInterpolator_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag );
@@ -277,7 +277,7 @@ void testKernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blo
 void testNearestNeighborFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockStorage> & blocks,
                                                      const BlockDataID & flagFieldID, const BlockDataID & scalarFieldID ) {
    // field interpolators
-   typedef field::NearestNeighborFieldInterpolator<ScalarField_T, FlagField_T> ScalarFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::NearestNeighborFieldInterpolator<ScalarField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID = field::addFieldInterpolator<ScalarFieldInterpolator_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag);
 
    // check scalar interpolation close to boundary
@@ -310,7 +310,7 @@ void testNearestNeighborFieldInterpolatorAtBoundary( const shared_ptr<Structured
 void testTrilinearFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockStorage> & blocks,
                                                const BlockDataID & flagFieldID, const BlockDataID & scalarFieldID ) {
    // field interpolators
-   typedef field::TrilinearFieldInterpolator<ScalarField_T, FlagField_T> ScalarFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::TrilinearFieldInterpolator<ScalarField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID = field::addFieldInterpolator<ScalarFieldInterpolator_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag);
 
    // check scalar interpolation close to boundary
@@ -343,7 +343,7 @@ void testTrilinearFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockS
 void testKernelFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockStorage> & blocks,
                                             const BlockDataID & flagFieldID, const BlockDataID & scalarFieldID ) {
    // field interpolators
-   typedef field::KernelFieldInterpolator<ScalarField_T, FlagField_T> ScalarFieldInterpolator_T;
+   using ScalarFieldInterpolator_T = field::KernelFieldInterpolator<ScalarField_T, FlagField_T>;
    BlockDataID scalarFieldInterpolatorID = field::addFieldInterpolator<ScalarFieldInterpolator_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag);
 
    // check scalar interpolation close to boundary

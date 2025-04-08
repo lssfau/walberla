@@ -34,10 +34,10 @@ namespace gpu
 
    //*******************************************************************************************************************
    /*!
-   * Allocator that allocates a CPU! field using gpuHostAlloc without padding
+   * Allocator that allocates a CPU! field using gpuHostAlloc without padding.
    *
-   * Uses gpuHostAlloc for the allocation - which allocates page-locked memory that is faster to transfer to the GPU
-   * This allocator should be used for CPU fields that are often transferred to GPU and back
+   * Uses gpuHostAlloc for the allocation - which allocates page-locked memory that is faster to transfer to the GPU.
+   * This allocator should be used for CPU fields that are often transferred to GPU and back.
    *
    * \ingroup gpu
    *
@@ -47,10 +47,10 @@ namespace gpu
    class HostFieldAllocator : public field::FieldAllocator<T>
    {
    public:
-      virtual ~HostFieldAllocator() = default;
+      ~HostFieldAllocator() override = default;
 
-      virtual T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
-                                    uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3 )
+      T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
+                            uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3 ) override
       {
          WALBERLA_NON_DEVICE_SECTION()
          {
@@ -65,7 +65,7 @@ namespace gpu
          return (T*)(result);
       }
 
-      virtual T * allocateMemory ( uint_t size )
+      T * allocateMemory ( uint_t size ) override
       {
          WALBERLA_NON_DEVICE_SECTION()
          {
@@ -77,7 +77,7 @@ namespace gpu
          return (T*)(result);
       }
 
-      virtual void deallocate(T *& values) {
+      void deallocate(T *& values) override {
          WALBERLA_NON_DEVICE_SECTION() {
             WALBERLA_ABORT(__FUNCTION__ << "Using GPU method without WALBERLA_BUILD_WITH_GPU_SUPPORT being enabled.")
          }

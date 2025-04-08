@@ -3,7 +3,8 @@ import sympy as sp
 import pystencils as ps
 from sympy.core.add import Add
 from sympy.codegen.ast import Assignment
-
+import sys
+sys.path.append("/local/dy94rovu/softwares/lbmpy")
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
 
@@ -27,6 +28,8 @@ from pystencils_walberla import (
 )
 
 from lbmpy_walberla import generate_boundary
+from pystencils.cache import clear_cache
+clear_cache()
 
 # Based on the following paper: https://doi.org/10.1016/j.compfluid.2017.05.033
 
@@ -38,9 +41,10 @@ const bool infoCseGlobal = {cse_global};
 const bool infoCsePdfs = {cse_pdfs};
 """
 
+
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil = LBStencil(Stencil.D3Q27)
+    stencil = LBStencil(Stencil.D3Q7)
     omega = sp.Symbol("omega")
     init_density = sp.Symbol("init_density")
     init_velocity = sp.symbols("init_velocity_:3")
@@ -63,6 +67,7 @@ with CodeGeneration() as ctx:
         f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}), velocity_field({stencil.D}), density_field({1}): {data_type}[3D]",
         layout=layout,
     )
+
 
     particle_velocities, particle_forces, Bs = ps.fields(
         f"particle_v({MaxParticlesPerCell * stencil.D}), particle_f({MaxParticlesPerCell * stencil.D}), Bs({MaxParticlesPerCell}): {data_type}[3D]",
@@ -92,11 +97,12 @@ with CodeGeneration() as ctx:
         stencil=stencil,
         method=methods[config_tokens[0]],
         relaxation_rate=omega,
-        force=sp.symbols("F_:3"),
-        force_model=ForceModel.LUO,
+        #force=sp.symbols("F_:3"),
+        #force_model=ForceModel.LUO,
         compressible=True,
         psm_config=psm_config,
     )
+
 
     if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
         lbm_config.smagorinsky = True

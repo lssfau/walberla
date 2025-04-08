@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-# Tests for core module
+# Tests for walberla::core module
 #
 ###################################################################################################
 
@@ -73,7 +73,7 @@ waLBerla_execute_test( NAME MatrixVector2Test )
 waLBerla_compile_test( FILES math/Matrix3Test.cpp )
 waLBerla_execute_test( NAME Matrix3Test )
 
-waLBerla_compile_test( FILES math/GenericAABBTest.cpp DEPENDS stencil domain_decomposition )
+waLBerla_compile_test( FILES math/GenericAABBTest.cpp DEPENDS walberla::stencil walberla::domain_decomposition )
 waLBerla_execute_test( NAME GenericAABBTest )
 
 
@@ -120,7 +120,7 @@ waLBerla_execute_test( NAME SetReductionTest5  COMMAND $<TARGET_FILE:SetReductio
 waLBerla_execute_test( NAME SetReductionTest27 COMMAND $<TARGET_FILE:SetReductionTest> PROCESSES 27 )
 
 if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
-   waLBerla_compile_test( Name MPIFloat16Test FILES mpi/MPIFloat16Test.cpp DEPENDS core )
+   waLBerla_compile_test( Name MPIFloat16Test FILES mpi/MPIFloat16Test.cpp DEPENDS walberla::core )
    target_compile_features( MPIFloat16Test PUBLIC cxx_std_23 )
    waLBerla_execute_test( NAME MPIFloat16Test4 COMMAND $<TARGET_FILE:MPIFloat16Test> PROCESSES 4)
 endif ()
@@ -149,18 +149,18 @@ waLBerla_execute_test( NAME TimingPoolTest PROCESSES 3  )
 waLBerla_compile_test( FILES timing/TimingTreeTest.cpp )
 waLBerla_execute_test( NAME TimingTreeTest PROCESSES 3)
 
-waLBerla_compile_test( FILES timing/SweepTimeloopTimerReduction.cpp DEPENDS blockforest domain_decomposition timeloop)
+waLBerla_compile_test( FILES timing/SweepTimeloopTimerReduction.cpp DEPENDS walberla::blockforest walberla::domain_decomposition walberla::timeloop )
 waLBerla_execute_test( NAME SweepTimeloopTimerReduction PROCESSES 9  )
 
 
 ########
-# core #
+# walberla::core #
 ########
 
 if ( WALBERLA_BUILD_WITH_PYTHON )
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS blockforest field geometry pe pe_coupling python_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling walberla::python_coupling )
 else()
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS blockforest field geometry pe pe_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling )
 endif()
 waLBerla_execute_test( NAME AllHeaderTest )
 
@@ -211,12 +211,13 @@ endif()
 ##################
 
 if( WALBERLA_BUILD_WITH_METIS )
-   waLBerla_compile_test( NAME MetisTest FILES load_balancing/MetisTest.cpp DEPENDS field )
+   waLBerla_compile_test( NAME MetisTest FILES load_balancing/MetisTest.cpp DEPENDS walberla::field )
    waLBerla_execute_test( NAME MetisTest COMMAND $<TARGET_FILE:MetisTest> 64 64  4 --no-vtk )
 endif()
 
 if( WALBERLA_BUILD_WITH_PARMETIS )
-   waLBerla_compile_test( NAME ParMetisTest FILES load_balancing/ParMetisTest.cpp DEPENDS blockforest field stencil vtk  )
+   waLBerla_compile_test( NAME ParMetisTest FILES load_balancing/ParMetisTest.cpp
+         DEPENDS walberla::blockforest walberla::field walberla::stencil walberla::vtk )
    waLBerla_execute_test( NAME ParMetisTest1 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  4 --no-vtk )
    waLBerla_execute_test( NAME ParMetisTest2 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  8 --no-vtk PROCESSES 2 )
    waLBerla_execute_test( NAME ParMetisTest4 COMMAND $<TARGET_FILE:ParMetisTest> 64 64 16 --no-vtk PROCESSES 4 )
@@ -230,7 +231,7 @@ endif()
 ###################
 
 if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
-   waLBerla_compile_test( Name Float16SupportTest FILES Float16SupportTest.cpp DEPENDS core)
+   waLBerla_compile_test( Name Float16SupportTest FILES Float16SupportTest.cpp DEPENDS walberla::core )
    # Actual support for float16 is available only since C++23
    #   before is_arithmetic and is_floating_point evaluated to false,
    #   also many STL functions are compatible with float16 only since C++23.

@@ -59,26 +59,26 @@ CellIntervalDataMap readCellIntervalsOnRoot( const std::string & geometryFile,
 
       sendBuffer << uint8_t(0); // dummy byte to make sure a message is sent even if cellIntervals is empty
 
-      for( auto ciIt = cellIntervals.begin(); ciIt != cellIntervals.end(); ++ciIt )
-         sendBuffer << ciIt->second;
+      for(const auto & cellInterval : cellIntervals)
+         sendBuffer << cellInterval.second;
 
    }
 
 
    allToRootBs.sendAll();
 
-   VoxelFileReader<uint8_t> reader( geometryFile );
+   VoxelFileReader<uint8_t> const reader( geometryFile );
    std::vector<uint8_t> data;
 
    WALBERLA_ROOT_SECTION()
    {
       // Read root cell intervals from geometry file
-      for( auto ciIt = cellIntervals.begin(); ciIt != cellIntervals.end(); ++ciIt )
+      for(const auto & cellInterval : cellIntervals)
       {
-         CellInterval shifted = ciIt->second;
+         CellInterval shifted = cellInterval.second;
          shifted.shift( -offset );
          reader.read(shifted, data);
-         result[ ciIt->first ] = std::make_pair( ciIt->second, data );
+         result[ cellInterval.first ] = std::make_pair( cellInterval.second, data );
       }
    }
 
@@ -89,7 +89,7 @@ CellIntervalDataMap readCellIntervalsOnRoot( const std::string & geometryFile,
       // only root should receive messages
       WALBERLA_ASSERT_EQUAL( MPIManager::instance()->worldRank(), 0 );
 
-      int rank = it.rank();
+      int const rank = it.rank();
       auto & recvBuffer = it.buffer();
       auto & sendBuffer = rootToAllBs.sendBuffer( rank );
 
@@ -121,11 +121,11 @@ CellIntervalDataMap readCellIntervalsOnRoot( const std::string & geometryFile,
       uint8_t dummy;
       recvBuffer >> dummy;
 
-      for( auto ciIt = cellIntervals.begin(); ciIt != cellIntervals.end(); ++ciIt )
+      for(const auto & cellInterval : cellIntervals)
       {
          WALBERLA_ASSERT( !recvBuffer.isEmpty() );
          recvBuffer >> data;
-         result[ ciIt->first ] = std::make_pair( ciIt->second, data );
+         result[ cellInterval.first ] = std::make_pair( cellInterval.second, data );
       }
 
       WALBERLA_ASSERT( recvBuffer.isEmpty() );

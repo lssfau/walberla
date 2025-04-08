@@ -29,26 +29,26 @@ void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *
                                            std::vector< const Block * > &,
                                            const BlockForest & /*forest*/ )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for(auto & minTargetLevel : minTargetLevels)
    {
-      const auto infoIt = ic_->find(it->first->getId());
+      const auto infoIt = ic_->find(minTargetLevel.first->getId());
       WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
 
-      it->second = it->first->getLevel(); //keep everything as it is
+      minTargetLevel.second = minTargetLevel.first->getLevel(); //keep everything as it is
 
       //check for refinement
       if (infoIt->second.computationalWeight > maxBodies_)
       {
-         it->second = it->first->getLevel() + uint_t(1);
+         minTargetLevel.second = minTargetLevel.first->getLevel() + uint_t(1);
          continue;
       }
 
       //check for coarsening
-      if ((it->first->getLevel() > 0) && (infoIt->second.computationalWeight < minBodies_))
+      if ((minTargetLevel.first->getLevel() > 0) && (infoIt->second.computationalWeight < minBodies_))
       {
-         if (getOrCreateCoarseInfo(it->first->getId())->second.computationalWeight < maxBodies_)
+         if (getOrCreateCoarseInfo(minTargetLevel.first->getId())->second.computationalWeight < maxBodies_)
          {
-            it->second = it->first->getLevel() - uint_t(1);
+            minTargetLevel.second = minTargetLevel.first->getLevel() - uint_t(1);
          }
          continue;
       }

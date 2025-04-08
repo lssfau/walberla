@@ -1,4 +1,4 @@
-target_sources( mesa_pd
+target_sources( walberla_mesa_pd
     PRIVATE
     BlockForestDomain.cpp
     IDomain.h
@@ -6,5 +6,5 @@ target_sources( mesa_pd
     BlockForestDataHandling.h
     InfoCollection.h
     BlockForestDataHandling.cpp
-    BlockForestDomain.h     
+      BlockForestDomain.h
     )

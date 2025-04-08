@@ -58,7 +58,7 @@ struct OverlapFractionFunctor
                      const shared_ptr< ParticleAccessor_T >& ac, const Vector3< real_t >& point,
                      const Vector3< real_t >& dxVec, uint_t superSamplingDepth)
    {
-      WALBERLA_STATIC_ASSERT((std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value));
+      WALBERLA_STATIC_ASSERT((std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >));
 
       SphereWithOverlap sphereWithOverlap(particleIdx, ac, sphere);
       return geometry::overlapFraction< geometry::AbstractBody >(sphereWithOverlap, point, dxVec, superSamplingDepth);
@@ -69,7 +69,7 @@ struct OverlapFractionFunctor
                      const shared_ptr< ParticleAccessor_T >& ac, const Vector3< real_t >& point, real_t dxVec,
                      uint_t superSamplingDepth)
    {
-      WALBERLA_STATIC_ASSERT((std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value));
+      WALBERLA_STATIC_ASSERT((std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >));
 
       HalfSpaceWithOverlap halfSpaceWithOverlap(particleIdx, ac, halfSphere);
       return geometry::overlapFraction< geometry::AbstractBody >(halfSpaceWithOverlap, point, dxVec,
@@ -81,7 +81,7 @@ struct OverlapFractionFunctor
                      const shared_ptr< ParticleAccessor_T >& ac, const Vector3< real_t >& point, real_t dxVec,
                      uint_t superSamplingDepth)
    {
-      WALBERLA_STATIC_ASSERT((std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value));
+      WALBERLA_STATIC_ASSERT((std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >));
 
       CylindricalBoundaryWithOverlap cylindricalBoundaryWithOverlap(particleIdx, ac, cylindricalBoundary);
       return geometry::overlapFraction< geometry::AbstractBody >(cylindricalBoundaryWithOverlap, point, dxVec,
@@ -93,7 +93,7 @@ struct OverlapFractionFunctor
                      const shared_ptr< ParticleAccessor_T >& ac, const Vector3< real_t >& point, real_t dxVec,
                      uint_t superSamplingDepth)
    {
-      WALBERLA_STATIC_ASSERT((std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value));
+      WALBERLA_STATIC_ASSERT((std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >));
 
       BoxWithOverlap boxWithOverlap(particleIdx, ac, box);
       return geometry::overlapFraction< geometry::AbstractBody >(boxWithOverlap, point, dxVec, superSamplingDepth);
@@ -104,7 +104,7 @@ struct OverlapFractionFunctor
                      const shared_ptr< ParticleAccessor_T >& ac, const Vector3< real_t >& point, real_t dxVec,
                      uint_t superSamplingDepth)
    {
-      WALBERLA_STATIC_ASSERT((std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value));
+      WALBERLA_STATIC_ASSERT((std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >));
 
       EllipsoidWithOverlap ellipsoidWithOverlap(particleIdx, ac, ellipsoid);
       return geometry::overlapFraction< geometry::AbstractBody >(ellipsoidWithOverlap, point, dxVec,

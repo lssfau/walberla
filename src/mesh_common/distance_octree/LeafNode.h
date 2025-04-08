@@ -33,30 +33,32 @@ template <typename MeshType>
 class LeafNode : public Node<MeshType>
 {
 public:
-   typedef typename Node<MeshType>::Point      Point;
-   typedef typename Node<MeshType>::Normal     Normal;
-   typedef typename Node<MeshType>::Scalar     Scalar;
-   typedef typename Node<MeshType>::FaceHandle FaceHandle; 
-   typedef typename Node<MeshType>::AABB       AABB;
+   using Point = typename Node<MeshType>::Point;
+   using Normal = typename Node<MeshType>::Normal;
+   using Scalar = typename Node<MeshType>::Scalar;
+   using FaceHandle = typename Node<MeshType>::FaceHandle; 
+   using AABB = typename Node<MeshType>::AABB;
    
    LeafNode( const shared_ptr< TriangleDistance<MeshType> > & triDistance, const std::vector<FaceHandle> & triangles )
       : Node<MeshType>( triDistance->getMesh(), triangles.begin(), triangles.end() ), triangles_( triangles ), triDistance_( triDistance ) { }
 
-   virtual Scalar sqSignedDistance( const Point & p ) const;
-   virtual Scalar sqSignedDistance( const Point & p, FaceHandle & closestTriangle ) const;
-   virtual Scalar sqSignedDistance( const Point & p, Point & closestPoint ) const;
-   virtual Scalar sqSignedDistance( const Point & p, Point & closestPoint, Normal & normal ) const;
+   Scalar sqSignedDistance( const Point & p ) const override;
+   Scalar sqSignedDistance( const Point & p, FaceHandle & closestTriangle ) const override;
+   Scalar sqSignedDistance( const Point & p, Point & closestPoint ) const override;
+   Scalar sqSignedDistance( const Point & p, Point & closestPoint, Normal & normal ) const override;
 
-   virtual Scalar sqDistance( const Point & p ) const;
-   virtual Scalar sqDistance( const Point & p, FaceHandle & closestTriangle ) const;
-   virtual Scalar sqDistance( const Point & p, Point & closestPoint ) const;
-   virtual Scalar sqDistance( const Point & p, Point & closestPoint, Normal & normal ) const;
+   Scalar sqDistance( const Point & p ) const override;
+   Scalar sqDistance( const Point & p, FaceHandle & closestTriangle ) const override;
+   Scalar sqDistance( const Point & p, Point & closestPoint ) const override;
+   Scalar sqDistance( const Point & p, Point & closestPoint, Normal & normal ) const override;
 
-   uint_t numTriangles() const { return uint_c( triangles_.size() ); }
-   void numTrianglesToStream( std::ostream & os, const uint_t level ) const;
-   virtual uint_t height() const { return 0; }
-   virtual uint_t numChildren() const { return 0; };
-   virtual const Node<MeshType> * getChild( const uint_t /*idx*/ ) const { WALBERLA_ABORT("DistanceOctree: You are requesting access to children of a Leaf Node!"); return 0; }
+   Scalar getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const override;
+   
+   uint_t numTriangles() const override { return uint_c( triangles_.size() ); }
+   void numTrianglesToStream( std::ostream & os, const uint_t level ) const override;
+   uint_t height() const override { return 0; }
+   uint_t numChildren() const override { return 0; };
+   const Node<MeshType> * getChild( const uint_t /*idx*/ ) const override { WALBERLA_ABORT("DistanceOctree: You are requesting access to children of a Leaf Node!"); return nullptr; }
    
 protected:
    std::vector<FaceHandle> triangles_;
@@ -116,8 +118,10 @@ typename LeafNode<MeshType>::Scalar LeafNode<MeshType>::sqSignedDistance( const 
 template <typename MeshType>
 typename LeafNode<MeshType>::Scalar LeafNode<MeshType>::sqDistance( const Point & p ) const
 {
-   if(triangles_.empty())
+   if(triangles_.empty()){
       return std::numeric_limits<Scalar>::max();
+   }
+
 
    return triDistance_->sqDistance( triangles_.begin(), triangles_.end(), p );
 }
@@ -152,6 +156,14 @@ typename LeafNode<MeshType>::Scalar LeafNode<MeshType>::sqDistance( const Point 
    return triDistance_->sqDistance( triangles_.begin(), triangles_.end(), p, closestPoint, normal );
 }
 
+template< typename MeshType >
+typename LeafNode<MeshType>::Scalar LeafNode< MeshType >::getRayDistanceToMeshObject(const Point& ray_origin, const Point& normalised_ray_direction) const
+{
+   if(triangles_.empty())
+      return std::numeric_limits<Scalar>::max();
+
+   return triDistance_->getRayDistanceToMeshObject( triangles_.begin(), triangles_.end(), ray_origin, normalised_ray_direction );
+}
 
 } // namespace distance_octree
 } // namespace mesh

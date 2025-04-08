@@ -320,7 +320,7 @@ class VelocityCallback
 {
 public:
 
-   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
+   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( nullptr ) {}
 
    void operator()( IBlock & block )
    {
@@ -349,7 +349,7 @@ template< typename VelocityField_T  >
 class VelocityCallback<VelocityField_T, typename std::enable_if< std::is_same< typename VelocityField_T::value_type, Vector3<real_t> >::value >::type >
 {
 public:
-   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
+   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( nullptr ) {}
 
    void operator()( IBlock & block )
    {
@@ -377,7 +377,7 @@ class DensityCallback
 {
 public:
 
-   DensityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
+   DensityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( nullptr ) {}
 
    void operator()( IBlock & block )
    {
@@ -407,7 +407,7 @@ class DensityVelocityCallback
 public:
 
    DensityVelocityCallback( const BlockDataID & velocityFieldId, const BlockDataID & densityFieldId ) :
-      vId_( velocityFieldId ), dId_( densityFieldId ), vfield_( NULL ), dfield_( NULL ) {}
+      vId_( velocityFieldId ), dId_( densityFieldId ), vfield_( nullptr ), dfield_( nullptr ) {}
 
    void operator()( IBlock & block )
    {
@@ -715,7 +715,7 @@ private:
 //{
 //public:
 //
-//   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
+//   VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( nullptr ) {}
 //
 //   void operator()( IBlock & block )
 //   {
@@ -744,7 +744,7 @@ private:
 //{
 //public:
 //
-//   DensityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
+//   DensityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( nullptr ) {}
 //
 //   void operator()( IBlock & block )
 //   {
@@ -774,7 +774,7 @@ private:
 //public:
 //
 //   DensityVelocityCallback( const BlockDataID & velocityFieldId, const BlockDataID & densityFieldId ) :
-//      vId_( velocityFieldId ), dId_( densityFieldId ), vfield_( NULL ), dfield_( NULL ) {}
+//      vId_( velocityFieldId ), dId_( densityFieldId ), vfield_( nullptr ), dfield_( nullptr ) {}
 //
 //   void operator()( IBlock & block )
 //   {

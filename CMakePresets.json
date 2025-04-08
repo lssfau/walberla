@@ -1,0 +1,32 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 23,
+      "patch": 0
+    },
+    "configurePresets": [
+      {
+        "name": "clang-tidy",
+        "generator": "Unix Makefiles",
+        "binaryDir": "${sourceDir}/build/clang-tidy",
+        "cacheVariables": {
+          "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+          "WALBERLA_BUFFER_DEBUG": true,
+          "WALBERLA_BUILD_TESTS": true,
+          "WALBERLA_BUILD_BENCHMARKS": true,
+          "WALBERLA_BUILD_TUTORIALS": true,
+          "WALBERLA_BUILD_TOOLS": true,
+          "WALBERLA_BUILD_WITH_MPI": true,
+          "WALBERLA_BUILD_WITH_OPENMP": true,
+          "CMAKE_BUILD_TYPE": "Debug",
+          "WALBERLA_BUILD_WITH_METIS": true,
+          "WALBERLA_BUILD_WITH_PARMETIS": true,
+          "WALBERLA_BUILD_WITH_OPENMESH": true,
+          "WALBERLA_DOUBLE_ACCURACY": true,
+          "WALBERLA_LOGLEVEL": "DETAIL"
+        }
+      }
+    ]
+  }
+  

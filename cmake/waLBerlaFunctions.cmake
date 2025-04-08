@@ -11,140 +11,6 @@ set ( WALBERLA_GLOB_FILES *.cpp
 
 #######################################################################################################################
 #
-# Creates a walberla module library
-#
-#
-# Keywords:
-#   DEPENDS [required]   list of modules, that this module depends on
-#   FILES   [optional]   list of all source and header files belonging to that module
-#                        if this is not given, all source and header files in the directory are added.
-#                        Careful: when file was added or deleted, cmake has to be run again
-#   EXCLUDE [optional]   Files that should not be included in the module (but are located in module directory).
-#                        This makes only sense if FILES was not specified, and all files have been added automatically.
-#   BUILD_ONLY_IF_FOUND  Before building the module test if all libraries specified here are availbable.
-#   [optional]           This is done using the ${arg}_FOUND variable.
-#                        Example: waLBerla_add_module( DEPENDS someModule BUILD_ONLY_IF_FOUND pe)
-#                                 This module is only built if PE_FOUND is true.
-#   OPTIONAL_DEPENDS     Lists modules, that this module might depend on. For example a module could depend on mesh_common if OpenMesh is
-#   [optional]           available.
-#
-#######################################################################################################################
-
-function ( waLBerla_add_module )
-    message(WARNING "This function is deprecated. Please use the default cmake mechanisms like add_library.")
-    set( options )
-    set( oneValueArgs )
-    set( multiValueArgs DEPENDS EXCLUDE FILES BUILD_ONLY_IF_FOUND OPTIONAL_DEPENDS )
-    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-
-    set( ALL_DEPENDENCIES ${ARG_DEPENDS} ${ARG_OPTIONAL_DEPENDS})
-    # Module name is the directory relative to WALBERLA_MODULE_DIRS
-    get_current_module_name ( )
-    get_module_library_name ( moduleLibraryName ${moduleName} )
-
-    # Test if all required libraries are available
-    # this is detected using the _FOUND variable
-    foreach ( externalName ${ARG_BUILD_ONLY_IF_FOUND} )
-        string( TOUPPER ${externalName} externalNameUpper )
-        if ( NOT ${externalNameUpper}_FOUND )
-            message ( STATUS "Module ${moduleName} is not built, because ${externalName} not available" )
-            return()
-        endif()
-    endforeach()
-
-    # Take source files either from parameter or search all source files
-    file ( GLOB_RECURSE allFiles "*" )  # Find all files
-    if ( ARG_FILES )
-        foreach( sourceFile ${ARG_FILES} )
-           get_filename_component( sourceFile ${sourceFile} ABSOLUTE )
-           list( APPEND sourceFiles ${sourceFile} )
-        endforeach()
-    else()
-        file ( GLOB_RECURSE sourceFiles ${WALBERLA_GLOB_FILES} )  # Find all source files
-    endif()
-
-    # Remove exclude files from the sources
-    if ( ARG_EXCLUDE )
-        foreach ( fileToExclude ${ARG_EXCLUDE} )
-            get_filename_component( fileToExclude ${fileToExclude} ABSOLUTE )
-            list (REMOVE_ITEM sourceFiles ${fileToExclude} )
-        endforeach()
-    endif()
-
-    list_minus ( otherFiles LIST1 ${allFiles} LIST2 ${sourceFiles} )
-    set_source_files_properties( ${otherFiles} PROPERTIES HEADER_FILE_ONLY ON )
-
-    if ( WALBERLA_GROUP_FILES )
-       group_files( "Other Files"  FILES ${otherFiles}  )
-       group_files( "Source Files" FILES ${sourceFiles} )
-    endif ( )
-
-    # Dependency Check
-    check_dependencies( missingDeps additionalDeps FILES ${sourceFiles} EXPECTED_DEPS ${ALL_DEPENDENCIES} ${moduleName} )
-    if ( missingDeps )
-        message ( WARNING "The module ${moduleName} depends on ${missingDeps} which are not listed as dependencies!" )
-    endif()
-
-    set( hasSourceFiles FALSE )
- 	foreach ( sourceFile ${sourceFiles} )
- 	   if ( ${sourceFile} MATCHES "\\.(c|cpp|cu)" )
- 	      set( hasSourceFiles TRUE )
- 	   endif( )
- 	endforeach( )
-
-    if ( hasSourceFiles )
-       add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
- 	else( )
-       add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${otherFiles} )  # dummy IDE target
- 	endif( )
-
-    waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
-
-    set_property( TARGET ${moduleLibraryName} PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD} )
-
-    # This property is needed for visual studio to group modules together
-    if( WALBERLA_GROUP_PROJECTS )
-       set_property( TARGET  ${moduleLibraryName}  PROPERTY  FOLDER  "SRC" )
-    endif()
-
-    # Install rule for library
-    get_target_property( module_type ${moduleLibraryName} TYPE )
-    if( ${module_type} MATCHES LIBRARY )
-       install ( TARGETS ${moduleLibraryName}  RUNTIME DESTINATION bin
-                                               LIBRARY DESTINATION lib
-                                               ARCHIVE DESTINATION lib )
-    endif( )
-
-    # Install rule for header
-    install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
-              DESTINATION "walberla/${moduleName}"
-              FILES_MATCHING PATTERN "*.h"
-              PATTERN "*.in.h"     EXCLUDE
-              PATTERN "CMakeFiles" EXCLUDE )
-
-    # Install generated headers if necessary
-    if ( NOT ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
-        install ( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-                  DESTINATION "walberla/${moduleName}"
-                  FILES_MATCHING PATTERN "*.h"
-                  PATTERN "*.in.h"     EXCLUDE
-                  PATTERN "CMakeFiles" EXCLUDE )
-    endif()
-
-
-    # Report module statistics - which is later on written out to a json file
-    # This file is used in the doxygen documentation to display a module graph
-    #waLBerla_module_statistics ( FILES ${sourceFiles} DEPENDS ${ARG_DEPENDS} )
-
-endfunction ( waLBerla_add_module )
-#######################################################################################################################
-
-
-
-
-
-#######################################################################################################################
-#
 # Compiles an application either from given source files, or otherwise globs all files in the current folder.
 # The application is linked against all waLBerla modules that are listed after DEPENDS
 #
@@ -205,8 +71,7 @@ function ( waLBerla_add_executable )
     endif()
 
     add_executable( ${ARG_NAME} ${sourceFiles} )
-
-    target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
+    target_link_libraries( ${ARG_NAME} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${ARG_DEPENDS} )
     target_link_libraries( ${ARG_NAME} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${SERVICE_LIBS} )
     set_property( TARGET ${ARG_NAME} PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD} )
 
@@ -288,6 +153,46 @@ function ( waLBerla_link_files_to_builddir globExpression )
     endforeach()
 
 endfunction ( waLBerla_link_files_to_builddir )
+
+
+
+
+#######################################################################################################################
+#
+# Links all files in PROJECT_ROOT_DIR/geometry matching a globbing expression to the build directory
+#
+# first parameter is glob expression
+#
+# Typical usage: Assuming the parameter files end with obj, write this to your CMakeLists in the
+#                app or test folder:
+#                waLBerla_link_geometry_to_builddir( "*.obj" )
+#
+# Symlinking works only under linux, on windows the files are copied.
+#
+#######################################################################################################################
+
+function ( waLBerla_link_geometry_to_builddir globExpression )
+
+   set(GEOMETRY_DIR ${walberla_SOURCE_DIR}/geometry)
+   
+   file(GLOB filesToLink "${GEOMETRY_DIR}/${globExpression}")
+   
+   # Create symlink link to the build directory (directly in ${CMAKE_CURRENT_BINARY_DIR})
+   foreach(f ${filesToLink})
+      get_filename_component(OBJ_FILENAME ${f} NAME)
+
+      set(OBJ_BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}/${OBJ_FILENAME}")
+      
+      if( CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows" )
+         configure_file(${f} ${OBJ_BUILD_PATH} COPYONLY)
+      else()
+        execute_process(   COMMAND ${CMAKE_COMMAND} -E create_symlink
+                           ${f} ${OBJ_BUILD_PATH}
+                        )
+      endif()
+   endforeach()
+
+endfunction ( waLBerla_link_geometry_to_builddir )
 
 
 

@@ -76,8 +76,8 @@ int METIS_PartGraphKway( ::walberla::int64_t *nvtxs, ::walberla::int64_t *ncon, 
                          ::walberla::int64_t *vwgt, ::walberla::int64_t *vsize, ::walberla::int64_t *adjwgt, ::walberla::int64_t *nparts,
                          double *tpwgts, double *ubvec, ::walberla::int64_t *options, ::walberla::int64_t *edgecut, ::walberla::int64_t *part)
 {
-   static_assert(std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!");
-   static_assert(std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!");
+   static_assert(std::is_same_v< ::walberla::int64_t, ::idx_t >, "You have to compile the metis library with 64-bit wide integer type support!");
+   static_assert(std::is_same_v< double, ::real_t >, "You have to compile the metis library with 64-bit wide floating-point type support!");
 
    return ::METIS_PartGraphKway( nvtxs, ncon, xadj, adjncy, vwgt, vsize, adjwgt, nparts, tpwgts, ubvec, options, edgecut, part );
 }
@@ -87,15 +87,15 @@ int METIS_PartGraphRecursive( ::walberla::int64_t *nvtxs, ::walberla::int64_t *n
                               ::walberla::int64_t *vwgt, ::walberla::int64_t *vsize, ::walberla::int64_t *adjwgt, ::walberla::int64_t *nparts,
                               double *tpwgts, double *ubvec, ::walberla::int64_t *options, ::walberla::int64_t *edgecut, ::walberla::int64_t *part)
 {
-   static_assert(std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!");
-   static_assert(std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!");
+   static_assert(std::is_same_v< ::walberla::int64_t, ::idx_t >, "You have to compile the metis library with 64-bit wide integer type support!");
+   static_assert(std::is_same_v< double, ::real_t >, "You have to compile the metis library with 64-bit wide floating-point type support!");
 
    return ::METIS_PartGraphRecursive( nvtxs, ncon, xadj, adjncy, vwgt, vsize, adjwgt, nparts, tpwgts, ubvec, options, edgecut, part );
 }
 
 int METIS_SetDefaultOptions( ::walberla::int64_t *options )
 {
-   static_assert(std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!");
+   static_assert(std::is_same_v< ::walberla::int64_t, ::idx_t >, "You have to compile the metis library with 64-bit wide integer type support!");
    
    return ::METIS_SetDefaultOptions( options );
 }

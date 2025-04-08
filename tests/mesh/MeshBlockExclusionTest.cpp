@@ -63,8 +63,8 @@ struct AnyPointInAABB
 
    inline bool operator()( const AABB & aabb )
    {
-     for( auto it = points_.begin(); it != points_.end(); ++it )
-        if( aabb.contains( *it ) )
+     for(auto & point : points_)
+        if( aabb.contains( point ) )
            return true;
      return false;
    }
@@ -104,9 +104,9 @@ void test(const shared_ptr< DistanceOctree< MeshType > > & distanceOctree, const
    // Check wether all vertices are located in allocated blocks
    std::vector< Vector3<real_t> > uncoveredVertices(vertexPositions);
 
-   for (auto bIt = setupBlocks.begin(); bIt != setupBlocks.end(); ++bIt)
+   for (auto & setupBlock : setupBlocks)
    {
-      const AABB & aabb = (*bIt)->getAABB();
+      const AABB & aabb = setupBlock->getAABB();
 
       uncoveredVertices.erase(std::remove_if(uncoveredVertices.begin(), uncoveredVertices.end(), PointInAABB(aabb)), uncoveredVertices.end());
    }
@@ -138,7 +138,7 @@ void run( const std::string & meshFile, const uint_t numTotalBlocks )
 }
 
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

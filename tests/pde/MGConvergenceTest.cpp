@@ -48,7 +48,7 @@ namespace walberla {
 
 
 
-typedef GhostLayerField< real_t, 1 > PdeField_T;
+using PdeField_T = GhostLayerField<real_t, 1>;
 using Stencil_T = stencil::D3Q7;
 using StencilField_T = pde::VCycles<Stencil_T>::StencilField_T;
 
@@ -71,11 +71,11 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
    {
       PdeField_T * u = block->getData< PdeField_T >( uId );
       CellInterval xyz = u->xyzSizeWithGhostLayer();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2]) );
-         u->get( *cell ) = math::realRandom( real_t(-10), real_t(10) );
+         u->get( cell ) = math::realRandom( real_t(-10), real_t(10) );
       }
    }
     
@@ -88,9 +88,9 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
     {
         PdeField_T * u = block->getData< PdeField_T >( uId );
         CellInterval xyz = u->xyzSize();
-        for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+        for(auto cell : xyz)
         {
-            sum += u->get( *cell );
+            sum += u->get( cell );
             ++numCells;
         }
     }
@@ -106,9 +106,9 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
     {
         PdeField_T * u = block->getData< PdeField_T >( uId );
         CellInterval xyz = u->xyzSizeWithGhostLayer();
-        for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+        for(auto cell : xyz)
         {
-            u->get( *cell ) -= domainMeanVal;
+            u->get( cell ) -= domainMeanVal;
         }
     }
 
@@ -148,23 +148,23 @@ void initURect( const shared_ptr< StructuredBlockStorage > & blocks, const Block
                     real_t(0.5)*(real_c(globalNumCells[0]) + cuboidSize[0]), real_t(0.5)*(real_c(globalNumCells[1]) + cuboidSize[1]), real_t(0.5)*(real_c(globalNumCells[2]) + cuboidSize[2])
    );
 
-   pde::Zeroize(blocks, uId);
+   pde::Zeroize zeroize_u(blocks, uId);
 
    // Initializing non-zero block with a given value in center of domain, relative to domain extension
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
       PdeField_T * u = block->getData< PdeField_T >( uId );
       CellInterval xyz = u->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
          // get global coordinate of current cell
          Cell globalCoordCell;
-         blocks->transformBlockLocalToGlobalCell( globalCoordCell, *block, *cell );
+         blocks->transformBlockLocalToGlobalCell( globalCoordCell, *block, cell );
 
          // set values in cuboid
          if(cuboidAABB.contains(real_c(globalCoordCell[0]),real_c(globalCoordCell[1]),real_c(globalCoordCell[2]))) {
-            u->get( *cell ) = cuboidValue;
-            sumCuboidValues += u->get( *cell );
+            u->get( cell ) = cuboidValue;
+            sumCuboidValues += u->get( cell );
          }
          ++numCells;
       }
@@ -185,9 +185,9 @@ void initURect( const shared_ptr< StructuredBlockStorage > & blocks, const Block
    {
       PdeField_T * u = block->getData< PdeField_T >( uId );
       CellInterval xyz = u->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(auto cell : xyz)
       {
-         u->get( *cell ) -= domainMeanVal;
+         u->get( cell ) -= domainMeanVal;
       }
    }
 

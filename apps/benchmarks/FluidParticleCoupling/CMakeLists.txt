@@ -11,61 +11,61 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
             )
 
    waLBerla_add_executable(NAME SphereWallCollision FILES SphereWallCollision.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling
-         mesa_pd postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling
+         walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME SettlingSphereInBox FILES SettlingSphereInBox.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling
-         mesa_pd postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling
+         walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME SphereMovingWithPrescribedVelocity FILES SphereMovingWithPrescribedVelocity.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm mesa_pd lbm_mesapd_coupling
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::mesa_pd walberla::lbm_mesapd_coupling
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME LubricationForceEvaluation FILES LubricationForceEvaluation.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME DragForceSphere FILES DragForceSphere.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBMWithForce)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBMWithForce )
 
    waLBerla_add_executable(NAME ForcesOnSphereNearPlane FILES ForcesOnSphereNearPlane.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME ObliqueWetCollision FILES ObliqueWetCollision.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
    waLBerla_add_executable(NAME MotionSettlingSphere FILES MotionSettlingSphere.cpp
-         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
-         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+         DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd
+         walberla::postprocessing walberla::timeloop walberla::vtk FluidParticleCouplingGeneratedLBM )
 
 else()
 
 waLBerla_add_executable ( NAME SphereWallCollision FILES SphereWallCollision.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME SettlingSphereInBox FILES SettlingSphereInBox.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME SphereMovingWithPrescribedVelocity FILES SphereMovingWithPrescribedVelocity.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm mesa_pd lbm_mesapd_coupling postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::mesa_pd walberla::lbm_mesapd_coupling walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME LubricationForceEvaluation FILES LubricationForceEvaluation.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME DragForceSphere FILES DragForceSphere.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME ForcesOnSphereNearPlane FILES ForcesOnSphereNearPlane.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 waLBerla_add_executable ( NAME ObliqueWetCollision FILES ObliqueWetCollision.cpp
-                          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::domain_decomposition walberla::field walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::postprocessing walberla::timeloop walberla::vtk )
 
 endif()
 
 waLBerla_add_executable ( NAME ObliqueDryCollision FILES ObliqueDryCollision.cpp
-      DEPENDS blockforest core mesa_pd postprocessing )
+      DEPENDS walberla::blockforest walberla::core walberla::mesa_pd walberla::postprocessing )

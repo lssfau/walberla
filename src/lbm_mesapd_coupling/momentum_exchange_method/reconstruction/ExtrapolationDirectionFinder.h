@@ -136,7 +136,7 @@ public:
    Vector3<cell_idx_t> operator()( IBlock * const block, const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z,
                                    const size_t particleIdx, const ParticleAccessor_T & ac) const
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       real_t cx, cy, cz;
       blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );

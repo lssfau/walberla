@@ -62,11 +62,11 @@ class QHull
 public:
    static_assert( MeshType::IsTriMesh == 1, "QHull only works on triangular meshes!" );
 
-   typedef typename MeshType::Point Point;
-   typedef typename MeshType::Scalar Scalar;
-   typedef typename MeshType::FaceHandle FaceHandle;
-   typedef typename MeshType::VertexHandle VertexHandle;
-   typedef typename MeshType::HalfedgeHandle HalfedgeHandle;
+   using Point = typename MeshType::Point;
+   using Scalar = typename MeshType::Scalar;
+   using FaceHandle = typename MeshType::FaceHandle;
+   using VertexHandle = typename MeshType::VertexHandle;
+   using HalfedgeHandle = typename MeshType::HalfedgeHandle;
 
    QHull( const std::vector< Vector3<real_t> > & pointCloud, const shared_ptr<MeshType> & mesh = make_shared< MeshType >());
    QHull( const std::vector< Point > & pointCloud, const shared_ptr<MeshType> & mesh = make_shared< MeshType >() );
@@ -108,7 +108,7 @@ private:
    
    std::vector< Point > pointCloud_; /// The initial point cloud
    shared_ptr< MeshType > mesh_; /// The generated convex mesh
-   typedef typename OpenMesh::FPropHandleT< std::vector<Point> > VisiblePointsPropertyHandle;
+   using VisiblePointsPropertyHandle = typename OpenMesh::FPropHandleT<std::vector<Point>>;
    OpenMesh::PropertyManager< VisiblePointsPropertyHandle, MeshType > visiblePoints_; /// Property storing the points of a certain face
    std::priority_queue<FaceHandle, std::vector<FaceHandle>, QHullFaceSorter<MeshType> > queue_; /// queue to prioritize faces
 
@@ -159,20 +159,20 @@ template< typename MeshType >
 class QHullPointDataSource : public vtk::PointDataSource
 {
 public:
-   typedef typename MeshType::Point Point;
-   typedef typename MeshType::Scalar Scalar;
+   using Point = typename MeshType::Point;
+   using Scalar = typename MeshType::Scalar;
 
    QHullPointDataSource( const QHull<MeshType> & qhull ) : qhull_( qhull ) {}
 
-   virtual std::vector< Attributes > getAttributes() const 
+   std::vector< Attributes > getAttributes() const override 
    {
       std::vector< Attributes > attributes; 
-      attributes.push_back( Attributes("Int32", "index", uint_t(1)) );
+      attributes.emplace_back("Int32", "index", uint_t(1) );
       return attributes;
    }
 
-   virtual std::vector< Vector3< real_t > > getPoints() { return points_; }
-   virtual void configure()
+   std::vector< Vector3< real_t > > getPoints() override { return points_; }
+   void configure() override
    {
       points_.clear();
       indices_.clear();
@@ -185,12 +185,12 @@ public:
       }
    };
 
-   virtual void push( std::ostream& os,  const uint_t /*data*/, const uint_t point, const uint_t /*component*/ )
+   void push( std::ostream& os,  const uint_t /*data*/, const uint_t point, const uint_t /*component*/ ) override
    {
       os << indices_[point];
    };
 
-   virtual void push( vtk::Base64Writer& b64, const uint_t /*data*/, const uint_t point, const uint_t /*component*/ )
+   void push( vtk::Base64Writer& b64, const uint_t /*data*/, const uint_t point, const uint_t /*component*/ ) override
    {
       b64 << indices_[point];
    };
@@ -253,7 +253,7 @@ void QHull<MeshType>::iteration()
    });
 
    // Remove the point from the remaining points
-   Point p = *it;
+   Point const p = *it;
    visiblePoints_[fh].erase(it);
 
    // Delete all faces visible by p
@@ -323,7 +323,7 @@ void QHull<MeshType>::createInitialSimplex()
       }
 
    // find the most distant point in ep to the previously found line
-   Point dir = base0 - base1;
+   Point const dir = base0 - base1;
    Scalar maxDist = Scalar(0);
    Point base2;
 
@@ -338,8 +338,8 @@ void QHull<MeshType>::createInitialSimplex()
    }
 
    // find the most distant point in the cloud to the previously found triangle
-   Point basePlaneNormal = (base0 - base2) % (base1 - base2);
-   Scalar basePlaneOffset = base0 | basePlaneNormal;
+   Point const basePlaneNormal = (base0 - base2) % (base1 - base2);
+   Scalar const basePlaneOffset = base0 | basePlaneNormal;
 
    Point tip;
    Scalar maxDistanceToBasePlane =  Scalar(0);
@@ -417,7 +417,7 @@ void QHull<MeshType>::deleteVisibleFaces( const FaceHandle startFaceHandle, cons
    // Move the horizon farther outwards
    while(!q.empty())
    {
-      HalfedgeHandle heh = q.front();
+      HalfedgeHandle const heh = q.front();
       q.pop();
 
       // If the face belonging to the half edge  has already been removed just go on with the next half edge
@@ -451,13 +451,13 @@ void QHull<MeshType>::addNewFaces( const Point & p )
 {
    newFaces_.clear();
 
-   VertexHandle v0h = mesh_->add_vertex(p);
+   VertexHandle const v0h = mesh_->add_vertex(p);
    for(const auto heh : horizon_)
    {
-      VertexHandle v1h = mesh_->to_vertex_handle(heh);
-      VertexHandle v2h = mesh_->from_vertex_handle(heh);
+      VertexHandle const v1h = mesh_->to_vertex_handle(heh);
+      VertexHandle const v2h = mesh_->from_vertex_handle(heh);
 
-      FaceHandle fh = mesh_->add_face( v0h, v1h, v2h );
+      FaceHandle const fh = mesh_->add_face( v0h, v1h, v2h );
       mesh_->update_normal(fh);
       newFaces_.push_back(fh);         
    }

@@ -162,19 +162,19 @@ template< typename LatticeModel_T, class Enable = void >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q15 > > >
 {
    static const char * str() { return "D3Q15"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > > >
 {
    static const char * str() { return "D3Q19"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value >::type >
+struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > > >
 {
    static const char * str() { return "D3Q27"; }
 };
@@ -184,22 +184,22 @@ template< typename LatticeModel_T, class Enable = void >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::SRT_tag > > >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::TRT_tag > > >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::MRT_tag >::value >::type >
+struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
+                                                                                          lbm::collision_model::MRT_tag > > >
 {
    static const char * str() { return "MRT"; }
 };
@@ -271,10 +271,10 @@ private:
 
 static void workloadAndMemoryAssignment( SetupBlockForest& forest, const memory_t memoryPerBlock )
 {
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for(auto & block : forest)
    {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( memoryPerBlock );
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( memoryPerBlock );
    }
 }
 
@@ -293,7 +293,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.zCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadAndMemoryAssignment, std::placeholders::_1, memoryPerBlock ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction([memoryPerBlock](auto & sbf) { workloadAndMemoryAssignment(sbf, memoryPerBlock); });
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0), real_c( setup.xBlocks * setup.xCells ),
                                                         real_c( setup.yBlocks * setup.yCells ),
@@ -634,10 +634,10 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >::value ||
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value ||
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value
-                                                                       >::type >
+struct AddRefinementTimeStep< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag > ||
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q15 > ||
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 >
+                                                                       > >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,
@@ -718,9 +718,9 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    if( vtkBeforeTimeStep )
    {
-      for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-         timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                         output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+      for(auto & output : vtkOutputFunctions)
+         timeloop.addFuncBeforeTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
+                                        output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
    }
 
    // add 'refinement' LB time step to time loop
@@ -733,11 +733,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // evaluation
 
-   const auto exactSolutionFunction = std::bind( exactVelocity, std::placeholders::_1, blocks->getDomain(), setup.maxVelocity_L );
+   const auto exactSolutionFunction = [domain = blocks->getDomain(), maxVel = setup.maxVelocity_L](auto & p) { return exactVelocity(p, domain, maxVel); };
 
    auto volumetricFlowRate = field::makeVolumetricFlowRateEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
                                                                                                         flagFieldId, Fluid_Flag,
-                                                                                                        std::bind( exactFlowRate, setup.flowRate_L ),
+                                                                                                        [flowRate = setup.flowRate_L] { return exactFlowRate(flowRate); },
                                                                                                         exactSolutionFunction );
    volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
    volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );
@@ -766,9 +766,9 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    if( !vtkBeforeTimeStep )
    {
-      for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-         timeloop.addFuncAfterTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                        output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+      for(auto & output : vtkOutputFunctions)
+         timeloop.addFuncAfterTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
+                                       output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
    }
 
    // remaining time logger

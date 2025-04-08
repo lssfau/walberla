@@ -35,10 +35,10 @@ void SetupBlock::assembleNeighborhood() {
 
    std::set< SetupBlock* > neighborhood;
 
-   for( uint_t n = 0; n != 26; ++n )
-      for( uint_t i = 0; i != neighborhoodSection_[n].size(); ++i )
-         if( neighborhood.insert( neighborhoodSection_[n][i] ).second )
-            neighborhood_.push_back( neighborhoodSection_[n][i] );
+   for( auto & nsec: neighborhoodSection_ )
+      for(auto block : nsec)
+         if( neighborhood.insert(block ).second )
+            neighborhood_.push_back(block );
 }
 
 

@@ -27,6 +27,7 @@
 #include "PhantomBlockForest.h"
 #include "Types.h"
 
+#include "core/EndianIndependentSerialization.h"
 #include "core/debug/Debug.h"
 #include "core/math/Uint.h"
 #include "core/timing/TimingPool.h"
@@ -343,7 +344,7 @@ public:
 
 
    
-   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return internal::BlockDataHandlingAdder( *this, identifier ); }
+   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; }
 
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,
@@ -386,7 +387,7 @@ public:
    void refresh();
 
    /// Functor that calls refresh with given frequency
-   RefreshFunctor getRefreshFunctor( const uint_t checkFrequency = uint_t(1) ) { return RefreshFunctor( *this, checkFrequency ); }
+   RefreshFunctor getRefreshFunctor( const uint_t checkFrequency = uint_t(1) ) { return { *this, checkFrequency }; }
    
    /// Modification stamp is changed when refresh moves a block or refines/coarsens at least one block
    /// however, stamp may (in rare cases) also change if block structure was not altered
@@ -469,7 +470,7 @@ public:
    void restoreSnapshot( const SnapshotRestoreFunction & processMapping, const bool rebelance = true );
 
    SnapshotCreationFunctor getSnapshotCreationFunctor( const SnapshotCreationFunction & function,
-                                                       const uint_t checkFrequency = uint_t(1) ) { return SnapshotCreationFunctor( *this, function, checkFrequency ); }
+                                                       const uint_t checkFrequency = uint_t(1) ) { return { *this, function, checkFrequency }; }
 
    inline uint_t    addCallbackFunctionAfterBlockDataIsRestored( const SnapshotRestoreCallbackFunction & f );
    inline void   removeCallbackFunctionAfterBlockDataIsRestored( const uint_t handle );
@@ -507,7 +508,7 @@ private:
    uint_t process_;
    uint_t processIdBytes_;
 
-   uint_t size_[3];     // number of coarse blocks on the initial grid (= number of octree root blocks) in each direction
+   std::array< uint_t, 3 > size_;     // number of coarse blocks on the initial grid (= number of octree root blocks) in each direction
    uint_t depth_;       // depth := number of levels - 1
    uint_t treeIdDigits_;
 
@@ -577,8 +578,8 @@ inline uint_t BlockForest::getNumberOfBlocks( const uint_t level ) const {
 
    uint_t numberOfBlocks = 0;
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getLevel() == level ) ++numberOfBlocks;
+   for(const auto & bIt : blocks_)
+      if(bIt.second->getLevel() == level ) ++numberOfBlocks;
 
    return numberOfBlocks;
 }
@@ -587,48 +588,48 @@ inline uint_t BlockForest::getNumberOfBlocks( const uint_t level ) const {
 
 inline void BlockForest::getBlocks( std::vector< const Block* >& blocks, const uint_t level ) const {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getLevel() == level ) blocks.push_back( it->second.get() );
+   for(const auto & bIt : blocks_)
+      if(bIt.second->getLevel() == level ) blocks.push_back(bIt.second.get() );
 }
 
 
 
 inline void BlockForest::getBlocks( std::vector< Block* >& blocks, const uint_t level ) {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getLevel() == level ) blocks.push_back( it->second.get() );
+   for(auto & bIt : blocks_)
+      if(bIt.second->getLevel() == level ) blocks.push_back(bIt.second.get() );
 }
 
 
 
 inline void BlockForest::getBlocksContainedWithinAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( aabb.contains( it->second->getAABB() ) ) blocks.push_back( it->second.get() );
+   for(const auto & bIt : blocks_)
+      if( aabb.contains(bIt.second->getAABB() ) ) blocks.push_back(bIt.second.get() );
 }
 
 
 
 inline void BlockForest::getBlocksContainedWithinAABB( std::vector< IBlock* >& blocks, const AABB& aabb ) {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( aabb.contains( it->second->getAABB() ) ) blocks.push_back( it->second.get() );
+   for(auto & bIt : blocks_)
+      if( aabb.contains(bIt.second->getAABB() ) ) blocks.push_back(bIt.second.get() );
 }
 
 
 
 inline void BlockForest::getBlocksOverlappedByAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getAABB().intersects( aabb ) ) blocks.push_back( it->second.get() );
+   for(const auto & bIt : blocks_)
+      if( bIt.second->getAABB().intersects(aabb ) ) blocks.push_back(bIt.second.get() );
 }
 
 
 
 inline void BlockForest::getBlocksOverlappedByAABB( std::vector< IBlock* >& blocks, const AABB& aabb ) {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getAABB().intersects( aabb ) ) blocks.push_back( it->second.get() );
+   for(auto & bIt : blocks_)
+      if( bIt.second->getAABB().intersects(aabb ) ) blocks.push_back(bIt.second.get() );
 }
 
 
@@ -663,8 +664,8 @@ inline Block* BlockForest::getBlock( const IBlockID& id ) {
 
 inline const Block* BlockForest::getBlock( const real_t x, const real_t y, const real_t z ) const {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getAABB().contains(x,y,z) ) return it->second.get();
+   for(const auto & bIt : blocks_)
+      if( bIt.second->getAABB().contains(x, y, z) ) return bIt.second.get();
 
    return nullptr;
 }
@@ -673,8 +674,8 @@ inline const Block* BlockForest::getBlock( const real_t x, const real_t y, const
 
 inline Block* BlockForest::getBlock( const real_t x, const real_t y, const real_t z ) {
 
-   for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
-      if( it->second->getAABB().contains(x,y,z) ) return it->second.get();
+   for(auto & bIt : blocks_)
+      if( bIt.second->getAABB().contains(x, y, z) ) return bIt.second.get();
 
    return nullptr;
 }
@@ -975,8 +976,8 @@ public:
                     std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
                     const blockforest::BlockForest & forest )
    {
-      for( auto function = functions_.begin(); function != functions_.end(); ++function )
-         (*function)( minTargetLevels, blocksAlreadyMarkedForRefinement, forest );
+      for(auto & function : functions_)
+         function( minTargetLevels, blocksAlreadyMarkedForRefinement, forest );
    }
 
 private:

@@ -57,6 +57,7 @@ public:
       walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
       walberla::real_t invMass {real_t(1)};
       walberla::mesa_pd::Vec3 oldForce {real_t(0)};
+      walberla::real_t charge {real_t(0)};
       size_t shapeID {};
       std::shared_ptr<walberla::mesa_pd::data::BaseShape> baseShape {make_shared<walberla::mesa_pd::data::BaseShape>()};
       walberla::mesa_pd::Rot3 rotation {};
@@ -70,6 +71,7 @@ public:
       walberla::mesa_pd::Vec3 hydrodynamicTorque {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicForce {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicTorque {real_t(0)};
+      walberla::mesa_pd::Vec3 electrostaticForce {real_t(0)};
       walberla::real_t totalDisplacement {real_t(0)};
       walberla::real_t collisionForceNorm {real_t(0)};
       walberla::real_t virtualMass {real_t(0)};
@@ -101,6 +103,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setLinearVelocity(data.linearVelocity);
    pIt->setInvMass(data.invMass);
    pIt->setOldForce(data.oldForce);
+   pIt->setCharge(data.charge);
    pIt->setShapeID(data.shapeID);
    pIt->setBaseShape(data.baseShape);
    pIt->setRotation(data.rotation);
@@ -114,6 +117,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setHydrodynamicTorque(data.hydrodynamicTorque);
    pIt->setOldHydrodynamicForce(data.oldHydrodynamicForce);
    pIt->setOldHydrodynamicTorque(data.oldHydrodynamicTorque);
+   pIt->setElectrostaticForce(data.electrostaticForce);
    pIt->setTotalDisplacement(data.totalDisplacement);
    pIt->setCollisionForceNorm(data.collisionForceNorm);
    pIt->setVirtualMass(data.virtualMass);
@@ -160,6 +164,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getLinearVelocity();
    buf << obj.particle_.getInvMass();
    buf << obj.particle_.getOldForce();
+   buf << obj.particle_.getCharge();
    buf << obj.particle_.getShapeID();
    buf << obj.particle_.getBaseShape();
    buf << obj.particle_.getRotation();
@@ -173,6 +178,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getHydrodynamicTorque();
    buf << obj.particle_.getOldHydrodynamicForce();
    buf << obj.particle_.getOldHydrodynamicTorque();
+   buf << obj.particle_.getElectrostaticForce();
    buf << obj.particle_.getTotalDisplacement();
    buf << obj.particle_.getCollisionForceNorm();
    buf << obj.particle_.getVirtualMass();
@@ -200,6 +206,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.linearVelocity;
    buf >> objparam.invMass;
    buf >> objparam.oldForce;
+   buf >> objparam.charge;
    buf >> objparam.shapeID;
    buf >> objparam.baseShape;
    buf >> objparam.rotation;
@@ -213,6 +220,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.hydrodynamicTorque;
    buf >> objparam.oldHydrodynamicForce;
    buf >> objparam.oldHydrodynamicTorque;
+   buf >> objparam.electrostaticForce;
    buf >> objparam.totalDisplacement;
    buf >> objparam.collisionForceNorm;
    buf >> objparam.virtualMass;

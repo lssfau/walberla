@@ -38,7 +38,7 @@ namespace gpu
 inline unsigned int iDivUp( unsigned int a, unsigned int b ) { return ( a + b - 1 ) / b; }
 
 
-dim3 FieldIndexing3DBase::preferredBlockDim_( 32, 2, 2 );
+inline dim3 FieldIndexing3DBase::preferredBlockDim_( 32, 2, 2 );
 
 
 template< typename T>
@@ -88,20 +88,20 @@ FieldIndexing3D<T> FieldIndexing3D<T>::interval( const GPUField<T> & f, const Ce
    char * data = (char*)f.pitchedPtr().ptr;
 
    // position data according to ci
-   cell_idx_t gl = cell_idx_c( f.nrOfGhostLayers() );
+   cell_idx_t const gl = cell_idx_c( f.nrOfGhostLayers() );
    data += ( ci.xMin() + gl ) * cell_idx_c(xOffset) +
            ( ci.yMin() + gl ) * cell_idx_c(yOffset) +
            ( ci.zMin() + gl ) * cell_idx_c(zOffset);
 
 
-   dim3 idxDim( (unsigned int)ci.xSize(), (unsigned int)ci.ySize(), (unsigned int)ci.zSize() );
+   dim3 const idxDim( (unsigned int)ci.xSize(), (unsigned int)ci.ySize(), (unsigned int)ci.zSize() );
    unsigned int const bx = std::min( preferredBlockDim_.x, idxDim.x );
    unsigned int const by = std::min( preferredBlockDim_.y, idxDim.y );
    unsigned int const bz = std::min( preferredBlockDim_.z, idxDim.z );
-   dim3 gridDim( iDivUp( idxDim.x, bx ),
+   dim3 const gridDim( iDivUp( idxDim.x, bx ),
                  iDivUp( idxDim.y, by ),
                  iDivUp( idxDim.z, bz ) );
-   dim3 blockDim( bx, by, bz );
+   dim3 const blockDim( bx, by, bz );
 
    return FieldIndexing3D<T>( f, blockDim, gridDim,
                               FieldAccessor3D<T>( data, xOffset, yOffset, zOffset, fOffset,
@@ -111,7 +111,7 @@ FieldIndexing3D<T> FieldIndexing3D<T>::interval( const GPUField<T> & f, const Ce
 template< typename T>
 FieldIndexing3D<T> FieldIndexing3D<T>::xyz ( const GPUField<T> & f )
 {
-   CellInterval ci( 0,0,0,
+   CellInterval const ci( 0,0,0,
                     cell_idx_c( f.xSize() ) - 1,
                     cell_idx_c( f.ySize() ) - 1,
                     cell_idx_c( f.zSize() ) - 1 );

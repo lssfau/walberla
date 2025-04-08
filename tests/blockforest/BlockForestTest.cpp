@@ -89,8 +89,7 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest ) {
       suids.emplace_back( oss.str(), false );
    }
 
-   for( uint_t i = 0; i != blocks.size(); ++i ) {
-      SetupBlock* block = blocks[i];
+   for(auto block : blocks) {
       block->setMemory( numeric_cast< memory_t >( 1.0 ) );
       block->setWorkload( numeric_cast< workload_t >( std::pow( 2.0, numeric_cast<double>(block->getLevel()) ) ) );
       if( block->getLevel() > 0 )
@@ -102,11 +101,11 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest ) {
 
 static memory_t communicationCalculationFunction( const SetupBlock* const a, const SetupBlock* const b ) {
 
-   uint_t faces[] = { 4, 10, 12, 13, 15, 21 };
+   std::array< uint_t, 6 > faces = { 4, 10, 12, 13, 15, 21 };
 
-   for( uint_t i = 0; i != 6; ++i ) {
-      for( uint_t j = 0; j != a->getNeighborhoodSectionSize(faces[i]); ++j )
-         if( a->getNeighbor(faces[i],j) == b )
+   for(uint_t face : faces) {
+      for( uint_t j = 0; j != a->getNeighborhoodSectionSize(face); ++j )
+         if( a->getNeighbor(face,j) == b )
             return 1000.0;
    }
 
@@ -457,8 +456,8 @@ static void test() {
       setupBlockSet.insert( block->getId() );
    }
 
-   for( auto blockId = blockIds.begin(); blockId != blockIds.end(); ++blockId ) {
-      const BlockID id = *dynamic_cast< BlockID* >( blockId->get() );
+   for(auto & blockId : blockIds) {
+      const BlockID id = *dynamic_cast< BlockID* >( blockId.get() );
       WALBERLA_CHECK_EQUAL( forestBlockSet.find( id ), forestBlockSet.end() )
       forestBlockSet.insert( id );
    }

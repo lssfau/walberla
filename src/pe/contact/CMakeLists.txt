@@ -1,4 +1,4 @@
-target_sources( pe
+target_sources( walberla_pe
     PRIVATE
     Contact.h
     ContactFunctions.h

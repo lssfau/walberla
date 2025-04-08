@@ -80,7 +80,7 @@ public:
    //**Access operators****************************************************************************
    /*!\name Access operators */
    //@{
-   inline reference operator*()   {return static_cast<reference>( *(cur_->get()) );}
+   inline reference operator*()   {return static_cast<reference>( **cur_ );}
    inline pointer   operator->()  {return static_cast<pointer>(     cur_->get()  );}
    //@}
    //**********************************************************************************************
@@ -228,7 +228,7 @@ public:
    //**Access operators****************************************************************************
    /*!\name Access operators */
    //@{
-   inline reference operator*()   {return static_cast<reference>( *(cur_->get()) );}
+   inline reference operator*()   {return static_cast<reference>( **cur_ );}
    inline pointer   operator->()  {return static_cast<pointer>(     cur_->get()  );}
    //@}
    //**********************************************************************************************

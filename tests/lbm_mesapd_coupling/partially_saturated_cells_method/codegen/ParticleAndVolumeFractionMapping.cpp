@@ -150,6 +150,8 @@ int main(int argc, char** argv)
 
    mpi::Environment env(argc, argv);
 
+   logging::Logging::instance()->setLogLevel(logging::Logging::INFO);
+
    auto processes = MPIManager::instance()->numProcesses();
 
    if (processes != 27)

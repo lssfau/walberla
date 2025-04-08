@@ -226,7 +226,7 @@ PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::PerformanceEvalu
      fluidCells_( fluidCellCounter )
 {
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the program that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
    threadsPerProcess_ = std::atoi( std::getenv( "OMP_NUM_THREADS" ) );

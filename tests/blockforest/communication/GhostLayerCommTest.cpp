@@ -43,7 +43,7 @@
 namespace walberla {
 namespace wlb = walberla;
 
-typedef GhostLayerField<real_t,19> PdfField;
+using PdfField = GhostLayerField<real_t, 19>;
 
 
 template<typename Sten>
@@ -65,7 +65,7 @@ class StreamingSweep
 
          for(PdfField::iterator i = dst->begin(); i != dst->end(); ++i )
          {
-            stencil::Direction d = Sten::dir[i.f()];
+            stencil::Direction d = Sten::dir[uint_c(i.f())];
             *i = src->get( i.x() - cx[d], i.y() - cy[d], i.z() - cz[d], i.f() );
          }
          src->swapDataPointers( dst );
@@ -131,7 +131,7 @@ class CompareSweep
          PdfField * bf = block->getData<PdfField>(bigField_);
 
          const AABB & bb = block->getAABB();
-         const cell_idx_t offset [3] = { wlb::cell_idx_c(bb.min(0)),
+         const std::array< cell_idx_t, 3 > offset = { wlb::cell_idx_c(bb.min(0)),
                                          wlb::cell_idx_c(bb.min(1)),
                                          wlb::cell_idx_c(bb.min(2)) };
 
@@ -187,8 +187,8 @@ int main(int argc, char **argv)
    auto mpiManager = MPIManager::instance();
    mpiManager->initializeMPI(&argc,&argv);
 
-   const uint_t cells [] = { 5,2,7 };
-   const uint_t blockCount [] = { uint_c( mpiManager->numProcesses() ), 1, 1 };
+   const std::array< uint_t, 3 > cells = { 5,2,7 };
+   const std::array< uint_t, 3 > blockCount = { uint_c( mpiManager->numProcesses() ), 1, 1 };
    const uint_t nrOfTimeSteps = 30;
    bool periodic = true;
    const field::Layout layout = field::fzyx;

@@ -122,7 +122,7 @@ void createSimulation(math::AABB& simulationDomain,
         IBlock & currentBlock = *blkIt;
         for (auto it = grid_generator::HCPIterator(currentBlock.getAABB(), Vector3<real_t>(-5,-5,-5), spacing); it != grid_generator::HCPIterator(); ++it)
         {
-            SphereID sp = pe::createSphere( *(info.globalBodyStorage.get()), info.forest->getBlockStorage(), info.storageID, static_cast<walberla::id_t>(mpi::MPIManager::instance()->worldRank() * 1000000 + numParticles), *it, radius);
+            SphereID sp = pe::createSphere( *info.globalBodyStorage, info.forest->getBlockStorage(), info.storageID, static_cast<walberla::id_t>(mpi::MPIManager::instance()->worldRank()) * 1000000u + static_cast<walberla::id_t>(numParticles), *it, radius);
             Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator));
             if (sp != nullptr) sp->setLinearVel(rndVel);
             if (sp != nullptr) ++numParticles;

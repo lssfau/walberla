@@ -61,9 +61,9 @@ class VCycles
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > PdeField_T;
-   typedef std::vector< real_t  > Weight_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using PdeField_T = GhostLayerField<real_t, 1>;
+   using Weight_T = std::vector<real_t>;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    //*******************************************************************************************************************
    /*! Creates a multigrid V-cycle with a fixed stencil

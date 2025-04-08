@@ -16,7 +16,7 @@ PIDController::PIDController()
    : commandVariable_(0), actuatingVariable_(0), proportionalGain_(0), derivateGain_(0), integralGain_(0), maxRamp_(0),
      minActuatingVariable_(0), maxActuatingVariable_(0), errorIntegral_(0)
 {
-   std::fill(errorHistory_, errorHistory_ + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
+   std::fill(errorHistory_.data(), errorHistory_.data() + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
 }
 
 PIDController::PIDController(const real_t commandVariable, const real_t initialActuatingVariable,
@@ -26,7 +26,7 @@ PIDController::PIDController(const real_t commandVariable, const real_t initialA
      proportionalGain_(proportionalGain), derivateGain_(derivateGain), integralGain_(integralGain), maxRamp_(maxRamp),
      minActuatingVariable_(minActuatingVariable), maxActuatingVariable_(maxActuatingVariable), errorIntegral_(0)
 {
-   std::fill(errorHistory_, errorHistory_ + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
+   std::fill(errorHistory_.data(), errorHistory_.data() + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
 
    if (integralGain_ > real_t(0))
       errorIntegral_ = initialActuatingVariable / integralGain_;
@@ -41,7 +41,7 @@ PIDController::PIDController(const real_t commandVariable, const real_t initialA
      maxRamp_(std::numeric_limits< real_t >::max()), minActuatingVariable_(-std::numeric_limits< real_t >::max()),
      maxActuatingVariable_(std::numeric_limits< real_t >::max()), errorIntegral_(0)
 {
-   std::fill(errorHistory_, errorHistory_ + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
+   std::fill(errorHistory_.data(), errorHistory_.data() + sizeof(errorHistory_) / sizeof(real_t), real_t(0));
 
    if (integralGain_ > real_t(0))
       errorIntegral_ = initialActuatingVariable / integralGain_;
@@ -56,7 +56,8 @@ real_t PIDController::update(const real_t controlledVariable)
 
    const real_t d =
       (error + real_t(3) * errorHistory_[0] - real_t(3) * errorHistory_[1] - errorHistory_[2]) * ONE_OVER_SIX;
-   std::rotate(errorHistory_, errorHistory_ + 1, errorHistory_ + sizeof(errorHistory_) / sizeof(real_t));
+   std::rotate(errorHistory_.data(), errorHistory_.data() + 1,
+               errorHistory_.data() + sizeof(errorHistory_) / sizeof(real_t));
    errorHistory_[sizeof(errorHistory_) / sizeof(real_t) - size_t(1)] = error;
 
    real_t newActuationVariable = proportionalGain_ * error + derivateGain_ * d + integralGain_ * errorIntegral_;

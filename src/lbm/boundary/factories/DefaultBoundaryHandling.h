@@ -173,8 +173,8 @@ DefaultBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( walberla::
    FlagFieldT * const flagField = block->getData< FlagFieldT >( flagField_ );
 
    flag_t mask = 0;
-   for( auto flag = flagUIDSet_.begin(); flag != flagUIDSet_.end(); ++flag )
-      mask = static_cast< flag_t >( mask | flagField->getOrRegisterFlag( *flag ) );
+   for(auto flag : flagUIDSet_)
+      mask = static_cast< flag_t >( mask | flagField->getOrRegisterFlag( flag ) );
 
    BoundaryHandling * handling = new BoundaryHandling( "default lbm boundary handling", flagField, mask,
         BcNoSlip        ( getNoSlipBoundaryUID(),    getNoSlip(),    pdfField ),

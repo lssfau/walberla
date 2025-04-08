@@ -46,7 +46,7 @@ public:
    inline Array( const std::vector<T>& vector );
    inline Array( const Array& array );
 
-   ~Array() { if( array_ != nullptr ) delete[] array_; }
+   ~Array() { delete[] array_; }
 
    uint_t size() const { return size_; }
    bool  empty() const { return size_ == 0; }
@@ -78,7 +78,7 @@ protected:
 
 
 template< typename T >
-inline Array<T>::Array( const uint_t n, const T& t ) : array_( n == 0 ? NULL : new T[n] ), size_( n )
+inline Array<T>::Array( const uint_t n, const T& t ) : array_( n == 0 ? nullptr : new T[n] ), size_( n )
 {
    for( uint_t i = 0; i != n; ++i )
       array_[i] = t;
@@ -89,7 +89,7 @@ inline Array<T>::Array( const uint_t n, const T& t ) : array_( n == 0 ? NULL : n
 template< typename T >
 inline Array<T>::Array( const std::vector<T>& vector ) :
 
-   array_( vector.size() == 0 ? NULL : new T[ vector.size() ] ), size_( vector.size() )
+   array_( vector.empty() ? nullptr : new T[ vector.size() ] ), size_( vector.size() )
 {
    for( uint_t i = 0; i != size_; ++i )
       array_[i] = vector[i];
@@ -100,7 +100,7 @@ inline Array<T>::Array( const std::vector<T>& vector ) :
 template< typename T >
 inline Array<T>::Array( const Array& array ) :
 
-   array_( array.size_ == 0 ? NULL : new T[ array.size_ ] ), size_( array.size_ )
+   array_( array.size_ == 0 ? nullptr : new T[ array.size_ ] ), size_( array.size_ )
 {
    for( uint_t i = 0; i != size_; ++i )
       array_[i] = array.array_[i];

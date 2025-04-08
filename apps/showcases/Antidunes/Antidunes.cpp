@@ -106,7 +106,7 @@ using PdfCommunication_T    = blockforest::SimpleCommunication< LatticeModelSten
 // the geometry computations in SurfaceGeometryHandler require meaningful values in the ghost layers in corner
 // directions (flag field and fill level field); this holds, even if the lattice model uses a D3Q19 stencil
 using CommunicationStencil_T =
-   typename std::conditional< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+   std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
 using Communication_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
 using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithBaseShape;
@@ -308,19 +308,19 @@ void initHydrostaticPressure(const std::weak_ptr< StructuredBlockForest >& block
 
       CellInterval local = pdfField->xyzSizeWithGhostLayer(); // block-, i.e., process-local cell interval
 
-      for (auto cellIt = local.begin(); cellIt != local.end(); ++cellIt)
+      for (const auto& cell : local)
       {
          // initialize the (hydrostatic) pressure, i.e., LBM density
          // Bernoulli: p = p0 + density * gravity * height
          // => LBM (density=1): rho = rho0 + gravity * height = 1 + 1/cs^2 * g * h = 1 + 3 * g * h
          // shift global cell by 0.5 since density is set for cell center
 
-         Vector3< real_t > cellCenter = blockForest->getBlockLocalCellCenter(*blockIt, *cellIt);
+         Vector3< real_t > cellCenter = blockForest->getBlockLocalCellCenter(*blockIt, cell);
          const real_t rho             = hydrostaticDensityFct(cellCenter);
 
-         const Vector3< real_t > velocity = pdfField->getVelocity(*cellIt);
+         const Vector3< real_t > velocity = pdfField->getVelocity(cell);
 
-         pdfField->setDensityAndVelocity(*cellIt, velocity, rho);
+         pdfField->setDensityAndVelocity(cell, velocity, rho);
       }
    }
 }
@@ -591,11 +591,9 @@ int main(int argc, char** argv)
    // read model parameters from parameter file
    const auto modelParameters               = configPtr->getOneBlock("ModelParameters");
    const std::string pdfReconstructionModel = modelParameters.getParameter< std::string >("pdfReconstructionModel");
-   const std::string pdfRefillingModel      = modelParameters.getParameter< std::string >("pdfRefillingModel");
    const std::string excessMassDistributionModel =
       modelParameters.getParameter< std::string >("excessMassDistributionModel");
    const walberla::free_surface::ExcessMassDistributionModel excessMassModel(excessMassDistributionModel);
-   const std::string curvatureModel          = modelParameters.getParameter< std::string >("curvatureModel");
    const bool useSimpleMassExchange          = modelParameters.getParameter< bool >("useSimpleMassExchange");
    const real_t cellConversionThreshold      = modelParameters.getParameter< real_t >("cellConversionThreshold");
    const real_t cellConversionForceThreshold = modelParameters.getParameter< real_t >("cellConversionForceThreshold");
@@ -1144,8 +1142,7 @@ int main(int argc, char** argv)
                           "Second ghost layer update: after excess mass distribution sweep (fill level field)")
          // update bubble model, i.e., perform registered bubble merges/splits; bubble merges/splits are
          // already detected and registered by CellConversionSweep
-         << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
-                          "Sweep: bubble model update");
+         << AfterFunction([&bubbleModel]() { bubbleModel->update(); }, "Sweep: bubble model update");
    }
    else
    {
@@ -1163,8 +1160,7 @@ int main(int argc, char** argv)
                              "Second ghost layer update: after excess mass distribution sweep (fill level field)")
             // update bubble model, i.e., perform registered bubble merges/splits; bubble merges/splits
             // are already detected and registered by CellConversionSweep
-            << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
-                             "Sweep: bubble model update");
+            << AfterFunction([&]() { bubbleModel->update(); }, "Sweep: bubble model update");
       }
       else
       {
@@ -1184,8 +1180,7 @@ int main(int argc, char** argv)
                                 "Second ghost layer update: after excess mass distribution sweep (fill level field)")
                // update bubble model, i.e., perform registered bubble merges/splits; bubble
                // merges/splits are already detected and registered by CellConversionSweep
-               << AfterFunction(std::bind(&walberla::free_surface::bubble_model::BubbleModelBase::update, bubbleModel),
-                                "Sweep: bubble model update");
+               << AfterFunction([&]() { bubbleModel->update(); }, "Sweep: bubble model update");
          }
       }
    }
@@ -1540,14 +1535,14 @@ int main(int argc, char** argv)
          {
             WALBERLA_LOG_INFO_ON_ROOT("Writing checkpointing file in time step " << t)
 
-            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + pdfFieldFile, pdfFieldID);
-            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + fillFieldFile, fillFieldID);
-            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + excessMassFieldFile, excessMassFieldID);
-            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" + particleStorageFile, particleStorageID);
+            blockForest->saveBlockData(snapshotBaseFolder + std::string("/tmp_") += pdfFieldFile, pdfFieldID);
+            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" += fillFieldFile, fillFieldID);
+            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" += excessMassFieldFile, excessMassFieldID);
+            blockForest->saveBlockData(snapshotBaseFolder + "/tmp_" += particleStorageFile, particleStorageID);
 
             WALBERLA_ROOT_SECTION()
             {
-               std::string tmpCheckpointConfigFile = snapshotBaseFolder + "/tmp_" + checkpointConfigFile;
+               std::string tmpCheckpointConfigFile = snapshotBaseFolder + "/tmp_" += checkpointConfigFile;
                std::ofstream file;
                file.open(tmpCheckpointConfigFile.c_str());
 
@@ -1566,14 +1561,14 @@ int main(int argc, char** argv)
             // checkpointing
             WALBERLA_ROOT_SECTION()
             {
-               renameFile(snapshotBaseFolder + "/tmp_" + pdfFieldFile, snapshotBaseFolder + "/" + pdfFieldFile);
-               renameFile(snapshotBaseFolder + "/tmp_" + fillFieldFile, snapshotBaseFolder + "/" + fillFieldFile);
-               renameFile(snapshotBaseFolder + "/tmp_" + excessMassFieldFile,
-                          snapshotBaseFolder + "/" + excessMassFieldFile);
-               renameFile(snapshotBaseFolder + "/tmp_" + particleStorageFile,
-                          snapshotBaseFolder + "/" + particleStorageFile);
-               renameFile(snapshotBaseFolder + "/tmp_" + checkpointConfigFile,
-                          snapshotBaseFolder + "/" + checkpointConfigFile);
+               renameFile(snapshotBaseFolder + "/tmp_" += pdfFieldFile, snapshotBaseFolder + "/" += pdfFieldFile);
+               renameFile(snapshotBaseFolder + "/tmp_" += fillFieldFile, snapshotBaseFolder + "/" += fillFieldFile);
+               renameFile(snapshotBaseFolder + "/tmp_" += excessMassFieldFile,
+                          snapshotBaseFolder + "/" += excessMassFieldFile);
+               renameFile(snapshotBaseFolder + "/tmp_" += particleStorageFile,
+                          snapshotBaseFolder + "/" += particleStorageFile);
+               renameFile(snapshotBaseFolder + "/tmp_" += checkpointConfigFile,
+                          snapshotBaseFolder + "/" += checkpointConfigFile);
             }
          }
       }

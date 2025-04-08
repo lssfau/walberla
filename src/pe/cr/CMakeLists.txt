@@ -1,4 +1,4 @@
-target_sources( pe
+target_sources( walberla_pe
     PRIVATE
     HCSITSBodyTrait.h
     Integrators.h

@@ -85,8 +85,8 @@ void configureGlobalState( const shared_ptr<Config> & config ) {
       states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
 
       Set<SUID> state;
-      for( auto it = states.begin(); it != states.end(); ++it )
-         state += SUID( *it );
+      for(auto & it : states)
+         state += SUID( it );
 
       uid::GlobalState::instance()->configure( state );
    }

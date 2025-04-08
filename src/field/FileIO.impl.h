@@ -342,9 +342,9 @@ void FieldWriter< FieldT >::writeToFileNonMPI(const std::vector< const IBlock* >
 {
    std::ofstream ofs(filename_.c_str(), std::ofstream::out | std::ofstream::binary);
 
-   for (auto block = blocks.begin(); block != blocks.end(); ++block)
+   for (auto block : blocks)
    {
-      const FieldT* field = (*block)->template getData< FieldT >(fieldID_);
+      const FieldT* field = block->template getData< FieldT >(fieldID_);
 
       for (auto fieldIt = field->begin(); fieldIt != field->end(); ++fieldIt)
       {
@@ -360,9 +360,9 @@ void FieldWriter< FieldT >::readFromFileNonMPI(const std::vector< IBlock* >& blo
 {
    std::ifstream ifs(filename_.c_str(), std::ifstream::in | std::ifstream::binary);
 
-   for (auto block = blocks.begin(); block != blocks.end(); ++block)
+   for (auto block : blocks)
    {
-      FieldT* field = (*block)->template getData< FieldT >(fieldID_);
+      FieldT* field = block->template getData< FieldT >(fieldID_);
 
       for (auto fieldIt = field->begin(); fieldIt != field->end(); ++fieldIt)
       {
@@ -379,9 +379,9 @@ std::vector< uint_t > FieldWriter< FieldT >::computeBlockOffsets(const std::vect
    std::vector< uint_t > blockOffsets;
    blockOffsets.push_back(0);
 
-   for (auto block = blocks.begin(); block != blocks.end(); ++block)
+   for (auto block : blocks)
    {
-      const FieldT* field = (*block)->template getData< FieldT >(fieldID_);
+      const FieldT* field = block->template getData< FieldT >(fieldID_);
       const uint_t offset = blockOffsets.back() + field->xSize() * field->ySize() * field->zSize() * field->fSize();
       blockOffsets.push_back(offset);
    }
@@ -395,9 +395,9 @@ std::vector< uint_t > FieldWriter< FieldT >::computeBlockOffsets(const std::vect
    std::vector< uint_t > blockOffsets;
    blockOffsets.push_back(0);
 
-   for (auto block = blocks.begin(); block != blocks.end(); ++block)
+   for (auto block : blocks)
    {
-      const FieldT* field = (*block)->template getData< FieldT >(fieldID_);
+      const FieldT* field = block->template getData< FieldT >(fieldID_);
       const uint_t offset = blockOffsets.back() + field->xSize() * field->ySize() * field->zSize() * field->fSize();
       blockOffsets.push_back(offset);
    }

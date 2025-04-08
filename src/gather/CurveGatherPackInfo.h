@@ -106,7 +106,7 @@ class CurveGatherPackInfo : public GatherPackInfo
                            const shared_ptr<DataProcessor> & dp);
 
 
-      ~CurveGatherPackInfo() override {}
+      ~CurveGatherPackInfo() override = default;
 
       //@}
       //****************************************************************************************************************

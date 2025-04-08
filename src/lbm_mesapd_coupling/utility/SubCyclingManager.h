@@ -77,7 +77,7 @@ private:
 
    size_t numberOfSubCycles_;
    shared_ptr<WcTimingPool> timingPool_;
-   uint_t currentTimeStep_;
+   uint_t currentTimeStep_{0};
 
    std::vector<IdentifiedFunc> beforeFunctions_;
    std::vector<IdentifiedFunc> duringFunctions_;

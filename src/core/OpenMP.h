@@ -63,22 +63,22 @@ inline void    omp_set_max_active_levels (int) { WALBERLA_OPENMP_FUNCTION_ERROR 
 inline void    omp_set_schedule          (omp_sched_t, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* query API functions */
-inline int     omp_get_num_threads  (void) { return 1; }
-inline int     omp_get_dynamic      (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_nested       (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_max_threads  (void) { return 1; }
-inline int     omp_get_thread_num   (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_num_procs    (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_in_parallel      (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_in_final         (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_active_level        (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_level               (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_num_threads  () { return 1; }
+inline int     omp_get_dynamic      () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_nested       () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_max_threads  () { return 1; }
+inline int     omp_get_thread_num   () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_num_procs    () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_in_parallel      () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_in_final         () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_active_level        () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_level               () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int     omp_get_ancestor_thread_num (int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int     omp_get_team_size           (int) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_thread_limit        (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_max_active_levels   (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_thread_limit        () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_max_active_levels   () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void    omp_get_schedule            (omp_sched_t *, int *) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_max_task_priority   (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_max_task_priority   () { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* lock API functions */
 using omp_lock_t = struct omp_lock_t {
@@ -119,21 +119,21 @@ inline void omp_init_lock_with_hint(omp_lock_t *, omp_lock_hint_t) { WALBERLA_OP
 inline void omp_init_nest_lock_with_hint(omp_nest_lock_t *, omp_lock_hint_t) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* time API functions */
-inline double  omp_get_wtime (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline double  omp_get_wtick (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline double  omp_get_wtime () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline double  omp_get_wtick () { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* OpenMP 4.0 */
-inline int   omp_get_default_device (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_get_default_device () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void  omp_set_default_device (int) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int   omp_is_initial_device (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int   omp_get_num_devices (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int   omp_get_num_teams (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int   omp_get_team_num (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int   omp_get_cancellation (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_is_initial_device () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_get_num_devices () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_get_num_teams () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_get_team_num () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int   omp_get_cancellation () { WALBERLA_OPENMP_FUNCTION_ERROR }
 
-#   include <stdlib.h>
+#   include <stdlib.h> // NOLINT(modernize-deprecated-headers)
 /* OpenMP 4.5 */
-inline int    omp_get_initial_device (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int    omp_get_initial_device () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void*  omp_target_alloc(size_t, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void   omp_target_free(void *, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int    omp_target_is_present(void *, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
@@ -152,14 +152,14 @@ using omp_proc_bind_t = enum omp_proc_bind_t {
     omp_proc_bind_spread = 4
 };
 
-inline omp_proc_bind_t omp_get_proc_bind (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline omp_proc_bind_t omp_get_proc_bind () { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* OpenMP 4.5 affinity API */
-inline int  omp_get_num_places (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int  omp_get_num_places () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int  omp_get_place_num_procs (int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void omp_get_place_proc_ids (int, int *) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int  omp_get_place_num (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int  omp_get_partition_num_places (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int  omp_get_place_num () { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int  omp_get_partition_num_places () { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void omp_get_partition_place_nums (int *) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 } //namespace walberla

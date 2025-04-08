@@ -34,8 +34,8 @@ template< typename MeshType >
 class DefaultTesselation
 {
 public:
-   typedef typename MeshType::VertexHandle VertexHandle;
-   typedef typename MeshType::FaceHandle   FaceHandle;
+   using VertexHandle = typename MeshType::VertexHandle;
+   using FaceHandle = typename MeshType::FaceHandle;
 
    void operator()( const walberla::pe::RigidBody & body, MeshType & mesh, std::vector<VertexHandle> & newVertices, std::vector<FaceHandle> & newFaces )
    {

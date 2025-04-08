@@ -4,7 +4,7 @@ waLBerla_link_files_to_builddir( *.txt )
 waLBerla_add_executable (
         NAME PackedBedCreation
         FILES PackedBedCreation.cpp
-        DEPENDS blockforest core field geometry timeloop pe pe_coupling vtk)
+      DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::timeloop walberla::pe walberla::pe_coupling walberla::vtk )
 
 waLBerla_generate_target_from_python(
         NAME GeneratedLatticeModel
@@ -14,5 +14,5 @@ waLBerla_generate_target_from_python(
 waLBerla_add_executable (
         NAME PorousMedia
         FILES PorousMediaCumulantLBMKernel.py PorousMedia.cpp
-        DEPENDS blockforest core field lbm geometry timeloop pe pe_coupling GeneratedLatticeModel )
+      DEPENDS walberla::blockforest walberla::core walberla::field walberla::lbm walberla::geometry walberla::timeloop walberla::pe walberla::pe_coupling GeneratedLatticeModel )
 

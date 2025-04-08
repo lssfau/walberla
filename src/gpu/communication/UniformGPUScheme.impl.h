@@ -103,7 +103,7 @@ namespace communication {
 
 
       if( !sendFromGPU_ )
-         for( auto it : headers_ )
+         for( const auto& it : headers_ )
             bufferSystemGPU_.sendBuffer( it.first ).clear();
 
       // wait until communication dependent kernels are finished

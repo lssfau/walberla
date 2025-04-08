@@ -33,15 +33,15 @@ template <typename MeshType>
 class Node
 {
 public:
-   typedef typename MeshType::Point                    Point;
-   typedef typename MeshType::Normal                   Normal;
-   typedef typename MeshType::Scalar                   Scalar;  
-   typedef typename MeshType::FaceHandle               FaceHandle; 
-   typedef typename math::GenericAABB<Scalar>          AABB;
+   using Point = typename MeshType::Point;
+   using Normal = typename MeshType::Normal;
+   using Scalar = typename MeshType::Scalar;  
+   using FaceHandle = typename MeshType::FaceHandle; 
+   using AABB = typename math::GenericAABB<Scalar>;
 
    template< typename InputIterator >
    Node( const MeshType & mesh, InputIterator beginFh, InputIterator endFh ) : aabb_( computeAABBForFaces( mesh, beginFh, endFh ) ) {}
-   virtual ~Node() { }
+   virtual ~Node() = default;
 
    const AABB & getAABB() const { return aabb_; }
 
@@ -54,6 +54,8 @@ public:
    virtual Scalar sqDistance( const Point & p, FaceHandle & closestTriangle ) const = 0;
    virtual Scalar sqDistance( const Point & p, Point & closestPoint ) const = 0;
    virtual Scalar sqDistance( const Point & p, Point & closestPoint, Point & normal ) const = 0;
+   
+   virtual Scalar getRayDistanceToMeshObject(const Point & ray_origin, const Point & normalised_ray_direction) const = 0;
 
    virtual uint_t numTriangles() const = 0;
    virtual void numTrianglesToStream( std::ostream & os, const uint_t level ) const = 0;

@@ -26,7 +26,7 @@ waLBerla_link_files_to_builddir( "*.py" )
         waLBerla_add_executable(
                         NAME 		LBM_validation
                         FILES		ScalarLBM.cpp
-                        DEPENDS 	LBM_validation_py boundary core lbm lbm_generated  vtk
+                        DEPENDS 	LBM_validation_py walberla::boundary walberla::core walberla::lbm walberla::lbm_generated  walberla::vtk
                 )
         
     endif()

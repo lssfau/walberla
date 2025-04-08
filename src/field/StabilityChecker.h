@@ -301,7 +301,7 @@ public:
                                   "With FASTMATH activated NaNs are not defined and thus the checkFunction will not work. "
                                   "To make it work provide a different checkFunction.")
 #endif
-     static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+     static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
                    "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
   }
 
@@ -314,7 +314,7 @@ public:
    outputToStream_( outputToStream ), outputVTK_( outputVTK ),
    requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
   {
-     static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
+     static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
                    "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
   }
 
@@ -384,27 +384,27 @@ void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::operator()()
       std::ostringstream oss;
       oss << "Check for finiteness failed on process " << MPIManager::instance()->rank();
 
-      for( auto block = failedCells_.begin(); block != failedCells_.end(); ++block )
+      for(const auto & block : failedCells_)
       {
-         oss << "\n - on block " << block->first->getId() <<
-                "\n - on level " << blocks->getLevel( *(block->first) )  <<
+         oss << "\n - on block " << block.first->getId() <<
+                "\n - on level " << blocks->getLevel( *(block.first) )  <<
                 "\n - for:";
 
-         for( auto cell = block->second.begin(); cell != block->second.end(); ++cell )
+         for(const auto & cell : block.second )
          {
-            const cell_idx_t x = cell->first[0];
-            const cell_idx_t y = cell->first[1];
-            const cell_idx_t z = cell->first[2];
+            const cell_idx_t x = cell.first[0];
+            const cell_idx_t y = cell.first[1];
+            const cell_idx_t z = cell.first[2];
 
             Vector3< real_t > center;
-            blocks->getBlockLocalCellCenter( *(block->first), cell->first, center );
+            blocks->getBlockLocalCellCenter( *(block.first), cell.first, center );
 
             Cell gCell(x,y,z);
-            blocks->transformBlockLocalToGlobalCell( gCell, *(block->first) );
+            blocks->transformBlockLocalToGlobalCell( gCell, *(block.first) );
 
-            for( auto f = cell->second.begin(); f != cell->second.end(); ++f )
+            for(int const f : cell.second)
             {
-               oss << "\n   + block local cell( " << x << ", " << y << ", " << z << " ) at index " << *f <<
+               oss << "\n   + block local cell( " << x << ", " << y << ", " << z << " ) at index " << f <<
                       "\n     = global cell ( " << gCell.x() << ", " << gCell.y() << ", " << gCell.z() << " ) with "
                       "cell center ( " << center[0] << ", " << center[1] << ", " << center[2] << " )";
             }
@@ -627,7 +627,7 @@ inline void stabilityCheckerConfigParser( const Config::BlockHandle & parentBloc
 {
    if( parentBlockHandle )
    {
-      Config::BlockHandle block = parentBlockHandle.getBlock( configBlockName );
+      Config::BlockHandle const block = parentBlockHandle.getBlock( configBlockName );
       if( block )
       {
          defaultCheckFrequency = block.getParameter< uint_t >( "checkFrequency", defaultCheckFrequency );

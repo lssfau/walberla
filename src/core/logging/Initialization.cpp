@@ -35,11 +35,11 @@ namespace logging {
 
 static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector< walberla::regex > & regexes )
 {
-   for( auto ignoreBlock = ignoreBlocks.begin(); ignoreBlock != ignoreBlocks.end(); ++ignoreBlock )
+   for(auto ignoreBlock : ignoreBlocks)
    {
-      if( ignoreBlock->isDefined( "callerPathPattern" ) )
+      if( ignoreBlock.isDefined( "callerPathPattern" ) )
       {
-         std::string regexString = ignoreBlock->getParameter<std::string>( "callerPathPattern" );
+         std::string regexString = ignoreBlock.getParameter<std::string>( "callerPathPattern" );
          // Replace slashes with a regex to allow for windows/linux compatibility
          string_replace_all( regexString, "/", "(\\\\|/)" );
          try
@@ -217,14 +217,14 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    loggingBlock.getBlocks( "ignore", ignoreBlocks );
    std::vector< walberla::regex > regexes;
    parseIgnoreBlocks( ignoreBlocks, regexes );
-   for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
-      logging::Logging::instance()->addIgnoreRegex( *regex );
+   for(auto & regexe : regexes)
+      logging::Logging::instance()->addIgnoreRegex( regexe );
 
    regexes.clear();
    loggingBlock.getBlocks( "ignoreWarning", ignoreWarningBlocks );
    parseIgnoreBlocks( ignoreWarningBlocks, regexes );
-   for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
-      logging::Logging::instance()->addIgnoreWarningRegex( *regex );
+   for(auto & regexe : regexes)
+      logging::Logging::instance()->addIgnoreWarningRegex( regexe );
 }
 
 

@@ -196,8 +196,8 @@ VTKOutput::~VTKOutput()
 void VTKOutput::forceWrite( uint_t number, const bool immediatelyWriteCollectors, const int simultaneousIOOperations,
                             const Set<SUID>& requiredStates, const Set<SUID>& incompatibleStates )
 {
-   for( auto func = beforeFunctions_.begin(); func != beforeFunctions_.end(); ++func )
-      ( *func )( );
+   for(auto & beforeFunction : beforeFunctions_)
+      beforeFunction( );
 
    std::ostringstream path;
    path << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << number;
@@ -352,9 +352,9 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
        << "    <DataArray type=\"" << vtk::typeToString< float >() << "\" NumberOfComponents=\"3\" format=\"" << format_ << "\">\n";
 
    std::vector< float > vertex;
-   for( auto block = blocks.begin(); block != blocks.end(); ++block )
+   for(auto & block : blocks)
    {
-      const AABB& aabb = (*block)->getAABB();
+      const AABB& aabb = block->getAABB();
       vertex.push_back( numeric_cast< float >( aabb.xMin() ) ); vertex.push_back( numeric_cast< float >( aabb.yMin() ) );
       vertex.push_back( numeric_cast< float >( aabb.zMin() ) );
       vertex.push_back( numeric_cast< float >( aabb.xMax() ) ); vertex.push_back( numeric_cast< float >( aabb.yMin() ) );
@@ -376,8 +376,8 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    if( binary_ )
    {
       Base64Writer base64;
-      for( auto v = vertex.begin(); v != vertex.end(); ++v )
-         base64 << *v;
+      for(float & v : vertex)
+         base64 << v;
       ofs << "     "; base64.toStream( ofs );
    }
    else for( uint_t i = 0; i != vertex.size(); i += 3 )
@@ -435,14 +435,14 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    if( binary_ )
    {
       Base64Writer base64;
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
-         base64 << uint8_c( unstructuredBlockStorage_->getLevel( **block ) );
+      for(auto & block : blocks)
+         base64 << uint8_c( unstructuredBlockStorage_->getLevel( *block ) );
       base64.toStream( ofs );
    }
    else
    {
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
-         ofs << unstructuredBlockStorage_->getLevel( **block ) << " ";
+      for(auto & block : blocks)
+         ofs << unstructuredBlockStorage_->getLevel( *block ) << " ";
       ofs << "\n";
    }
 
@@ -977,9 +977,9 @@ void VTKOutput::computeVTUCells( const IBlock& block, CellVector & cellsOut ) co
       cellInclusionFunctions_[ 0 ]( includedCells, block, *blockStorage_, ghostLayers_ );
    }
    else {
-      for( auto func = cellInclusionFunctions_.begin(); func != cellInclusionFunctions_.end(); ++func ) {
+      for(const auto & cellInclusionFunction : cellInclusionFunctions_) {
          CellSet cellSet;
-         ( *func )( cellSet, block, *blockStorage_, ghostLayers_ );
+         cellInclusionFunction( cellSet, block, *blockStorage_, ghostLayers_ );
          includedCells += cellSet;
       }
    }
@@ -990,9 +990,9 @@ void VTKOutput::computeVTUCells( const IBlock& block, CellVector & cellsOut ) co
       cellExclusionFunctions_[ 0 ]( excludedCells, block, *blockStorage_, ghostLayers_ );
    }
    else {
-      for( auto func = cellExclusionFunctions_.begin(); func != cellExclusionFunctions_.end(); ++func ) {
+      for(const auto & cellExclusionFunction : cellExclusionFunctions_) {
          CellSet cellSet;
-         ( *func )( cellSet, block, *blockStorage_, ghostLayers_ );
+         cellExclusionFunction( cellSet, block, *blockStorage_, ghostLayers_ );
          excludedCells += cellSet;
       }
    }
@@ -1035,10 +1035,10 @@ void VTKOutput::writeBlocks( const std::string& path, const Set<SUID>& requiredS
          if( selectable::isSetSelected( uid::globalState() + block->getState(), requiredStates, incompatibleStates ) )
             blocks.push_back( block.get() );
       }
-      for( auto it = blocks.begin(); it != blocks.end(); ++it )
+      for( auto & it : blocks )
       {
-         WALBERLA_ASSERT_NOT_NULLPTR( *it );
-         const IBlock& block = **it;
+         WALBERLA_ASSERT_NOT_NULLPTR( it );
+         const IBlock& block = *it;
          const uint_t level = blockStorage_->getLevel(block);
 
          std::ostringstream file;
@@ -1096,10 +1096,10 @@ void VTKOutput::writeBlockPieces( std::ostream & oss, const Set<SUID>& requiredS
       configured_ = true;
    }
 
-   for( auto it = blocks.begin(); it != blocks.end(); ++it )
+   for( auto & it : blocks )
    {
-      WALBERLA_ASSERT_NOT_NULLPTR( *it );
-      const IBlock& block = **it;
+      WALBERLA_ASSERT_NOT_NULLPTR( it );
+      const IBlock& block = *it;
 
       if( uniformGrid_ ) // uniform data -> vti
       {
@@ -1213,11 +1213,11 @@ void VTKOutput::writeVTIPiece_sampling( std::ostream& ofs, const IBlock& block )
        << "   <CellData>\n";
 
    CellVector cells;
-   for( auto it = cellBB.begin(); it != cellBB.end(); ++it )
+   for(auto it : cellBB)
    {
-      Vector3<real_t> world( domain.xMin() + ( real_c( it->x() ) + real_t(0.5) ) * samplingDx_,
-         domain.yMin() + ( real_c( it->y() ) + real_t(0.5) ) * samplingDy_,
-         domain.zMin() + ( real_c( it->z() ) + real_t(0.5) ) * samplingDz_ );
+      Vector3<real_t> world( domain.xMin() + ( real_c( it.x() ) + real_t(0.5) ) * samplingDx_,
+         domain.yMin() + ( real_c( it.y() ) + real_t(0.5) ) * samplingDy_,
+         domain.zMin() + ( real_c( it.z() ) + real_t(0.5) ) * samplingDz_ );
 
       Cell cell;
       blockStorage_->getCell( cell, world[0], world[1], world[2], level );
@@ -1272,15 +1272,15 @@ void VTKOutput::writeParallelVTU( std::ostream& ofs, const Set<SUID>& requiredSt
       const cell_idx_t factorToFinest = 1 << (finestLevel - level);
       const CellInterval cells = blockStorage_->getBlockCellBB(*block); //  These are global cells
 
-      for (auto cell = cells.begin(); cell != cells.end(); ++cell)
+      for (auto cell : cells)
       {
          numberOfCells++;
-         const AABB aabb = blockStorage_->getCellAABB(*cell, level);
+         const AABB aabb = blockStorage_->getCellAABB(cell, level);
          for (cell_idx_t z = 0; z != 2; ++z) {
             for (cell_idx_t y = 0; y != 2; ++y) {
                for (cell_idx_t x = 0; x != 2; ++x)
                {
-                  const Vertex v((cell->x() + x) * factorToFinest, (cell->y() + y) * factorToFinest, (cell->z() + z) * factorToFinest);
+                  const Vertex v((cell.x() + x) * factorToFinest, (cell.y() + y) * factorToFinest, (cell.z() + z) * factorToFinest);
                   auto mapping = vimap.find(v);
                   if (mapping != vimap.end()) // vertex already exists
                   {
@@ -1326,16 +1326,16 @@ void VTKOutput::writeVTUPiece( std::ostream& ofs, const IBlock& block, const Cel
    std::vector< VertexCoord >               vc;    // vertex coordinates
    std::vector< Index >                     ci;    // ci[0] to ci[7]: indices for cell number one, ci[8] to ci[15]: ...
 
-   for (auto cell = cells.begin(); cell != cells.end(); ++cell)
+   for (auto cell : cells)
    {
       AABB aabb;
-      blockStorage_->getBlockLocalCellAABB(block, *cell, aabb);
+      blockStorage_->getBlockLocalCellAABB(block, cell, aabb);
 
       for (cell_idx_t z = 0; z != 2; ++z) {
          for (cell_idx_t y = 0; y != 2; ++y) {
             for (cell_idx_t x = 0; x != 2; ++x)
             {
-               Vertex v(cell->x() + x, cell->y() + y, cell->z() + z);
+               Vertex v(cell.x() + x, cell.y() + y, cell.z() + z);
 
                auto mapping = vimap.find(v);
                if (mapping != vimap.end()) // vertex already exists
@@ -1372,14 +1372,14 @@ void VTKOutput::writeVTUPiece( std::ostream& ofs, const IBlock& block, const Cel
       if (binary_)
       {
          Base64Writer base64;
-         for (auto cell = cells.begin(); cell != cells.end(); ++cell)
-            base64 << ghostLayerNr(block, cell->x(), cell->y(), cell->z());
+         for (auto cell : cells)
+            base64 << ghostLayerNr(block, cell.x(), cell.y(), cell.z());
          base64.toStream(ofs);
       }
       else
       {
-         for (auto cell = cells.begin(); cell != cells.end(); ++cell)
-            ofs << uint_c(ghostLayerNr(block, cell->x(), cell->y(), cell->z())) << " ";
+         for (auto cell : cells)
+            ofs << uint_c(ghostLayerNr(block, cell.x(), cell.y(), cell.z())) << " ";
          ofs << "\n";
       }
 
@@ -1419,12 +1419,12 @@ void VTKOutput::writeVTUPiece_sampling(std::ostream& ofs, const IBlock& block, c
    std::vector< VertexCoord >               vc;    // vertex coordinates
    std::vector< Index >                     ci;    // ci[0] to ci[7]: indices for cell number one, ci[8] to ci[15]: ...
 
-   for (auto cell = cells.begin(); cell != cells.end(); ++cell) {
+   for (auto & cell : cells) {
       for (cell_idx_t z = 0; z != 2; ++z) {
          for (cell_idx_t y = 0; y != 2; ++y) {
             for (cell_idx_t x = 0; x != 2; ++x)
             {
-               Vertex v(cell->coordinates_.x() + x, cell->coordinates_.y() + y, cell->coordinates_.z() + z);
+               Vertex v(cell.coordinates_.x() + x, cell.coordinates_.y() + y, cell.coordinates_.z() + z);
 
                auto mapping = vimap.find(v);
                if (mapping != vimap.end()) // vertex already exists
@@ -1435,9 +1435,9 @@ void VTKOutput::writeVTUPiece_sampling(std::ostream& ofs, const IBlock& block, c
                {
                   vimap[v] = numeric_cast< Index >(vc.size());
                   ci.push_back(numeric_cast< Index >(vc.size()));
-                  vc.emplace_back((x == 0) ? cell->aabb_.xMin() : cell->aabb_.xMax(),
-                     (y == 0) ? cell->aabb_.yMin() : cell->aabb_.yMax(),
-                     (z == 0) ? cell->aabb_.zMin() : cell->aabb_.zMax());
+                  vc.emplace_back((x == 0) ? cell.aabb_.xMin() : cell.aabb_.xMax(),
+                     (y == 0) ? cell.aabb_.yMin() : cell.aabb_.yMax(),
+                     (z == 0) ? cell.aabb_.zMin() : cell.aabb_.zMax());
                }
             }
          }
@@ -1482,14 +1482,14 @@ void VTKOutput::writeVTUHeaderPiece( std::ostream& ofs, const uint_t numberOfCel
    if( binary_ )
    {
       Base64Writer base64;
-      for( auto vertex = vc.begin(); vertex != vc.end(); ++vertex )
-         base64 << numeric_cast<float>( std::get<0>( *vertex ) ) << numeric_cast<float>( std::get<1>( *vertex ) )
-                << numeric_cast<float>( std::get<2>( *vertex ) );
+      for(const auto & vertex : vc)
+         base64 << numeric_cast<float>( std::get<0>( vertex ) ) << numeric_cast<float>( std::get<1>( vertex ) )
+                << numeric_cast<float>( std::get<2>( vertex ) );
       ofs << "     "; base64.toStream( ofs );
    }
-   else for( auto vertex = vc.begin(); vertex != vc.end(); ++vertex )
-      ofs << "     " << numeric_cast<float>( std::get<0>( *vertex ) ) << " " << numeric_cast<float>( std::get<1>( *vertex ) )
-          << " " << numeric_cast<float>( std::get<2>( *vertex ) ) << "\n";
+   else for(const auto & vertex : vc)
+      ofs << "     " << numeric_cast<float>( std::get<0>( vertex ) ) << " " << numeric_cast<float>( std::get<1>( vertex ) )
+          << " " << numeric_cast<float>( std::get<2>( vertex ) ) << "\n";
 
    ofs << "    </DataArray>\n"
        << "   </Points>\n"
@@ -1635,29 +1635,29 @@ void VTKOutput::writeCellData( std::ostream& ofs, const IBlock& block, const Cel
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
 
-   for( auto writer = cellDataWriter_.begin(); writer != cellDataWriter_.end(); ++writer )
+   for(const auto & writer : cellDataWriter_)
    {
-      (*writer)->configure( block, *blockStorage_ );
+      writer->configure( block, *blockStorage_ );
 
-      ofs << "    <DataArray type=\"" << (*writer)->typeString() << "\" Name=\"" << (*writer)->identifier()
-                                      << "\" NumberOfComponents=\"" << (*writer)->fSize() << "\" format=\"" << format_ << "\">\n";
+      ofs << "    <DataArray type=\"" << writer->typeString() << "\" Name=\"" << writer->identifier()
+                                      << "\" NumberOfComponents=\"" << writer->fSize() << "\" format=\"" << format_ << "\">\n";
 
       if( binary_ )
       {
          Base64Writer base64;
-         for( auto cell = cells.begin(); cell != cells.end(); ++cell )
-            for( uint_t f = 0; f != (*writer)->fSize(); ++f )
-               (*writer)->push( base64, cell->x(), cell->y(), cell->z(), cell_idx_c(f) );
+         for(auto cell : cells)
+            for( uint_t f = 0; f != writer->fSize(); ++f )
+               writer->push( base64, cell.x(), cell.y(), cell.z(), cell_idx_c(f) );
          ofs << "     "; base64.toStream( ofs );
       }
       else
       {
-         for( auto cell = cells.begin(); cell != cells.end(); ++cell ) {
+         for(auto cell : cells) {
             ofs << "     ";
-            for( uint_t f = 0; f != (*writer)->fSize(); ++f )
+            for( uint_t f = 0; f != writer->fSize(); ++f )
             {
-               (*writer)->push( ofs, cell->x(), cell->y(), cell->z(), cell_idx_c(f) );
-               ofs << ( ( f == (*writer)->fSize() - 1 ) ? "\n" : " " );
+               writer->push( ofs, cell.x(), cell.y(), cell.z(), cell_idx_c(f) );
+               ofs << ( ( f == writer->fSize() - 1 ) ? "\n" : " " );
             }
          }
       }
@@ -1671,10 +1671,10 @@ void VTKOutput::writeCellData( std::ostream& ofs, const Set<SUID>& requiredState
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
 
-   for( auto writer = cellDataWriter_.begin(); writer != cellDataWriter_.end(); ++writer )
+   for(const auto & writer : cellDataWriter_)
    {
-      ofs << "    <DataArray type=\"" << (*writer)->typeString() << "\" Name=\"" << (*writer)->identifier()
-          << "\" NumberOfComponents=\"" << (*writer)->fSize() << "\" format=\"" << format_ << "\">\n";
+      ofs << "    <DataArray type=\"" << writer->typeString() << "\" Name=\"" << writer->identifier()
+          << "\" NumberOfComponents=\"" << writer->fSize() << "\" format=\"" << format_ << "\">\n";
 
       for( auto block = blockStorage_->begin(); block != blockStorage_->end(); ++block )
       {
@@ -1683,24 +1683,24 @@ void VTKOutput::writeCellData( std::ostream& ofs, const Set<SUID>& requiredState
 
          CellVector cells; // cells to be written to file
          computeVTUCells(*block, cells);
-         (*writer)->configure( *block, *blockStorage_ );
+         writer->configure( *block, *blockStorage_ );
 
          if( binary_ )
          {
             Base64Writer base64;
-            for( auto cell = cells.begin(); cell != cells.end(); ++cell )
-               for( uint_t f = 0; f != (*writer)->fSize(); ++f )
-                  (*writer)->push( base64, cell->x(), cell->y(), cell->z(), cell_idx_c(f) );
+            for(auto & cell : cells)
+               for( uint_t f = 0; f != writer->fSize(); ++f )
+                  writer->push( base64, cell.x(), cell.y(), cell.z(), cell_idx_c(f) );
             ofs << "     "; base64.toStream( ofs );
          }
          else
          {
-            for( auto cell = cells.begin(); cell != cells.end(); ++cell ) {
+            for(auto & cell : cells) {
                ofs << "     ";
-               for( uint_t f = 0; f != (*writer)->fSize(); ++f )
+               for( uint_t f = 0; f != writer->fSize(); ++f )
                {
-                  (*writer)->push( ofs, cell->x(), cell->y(), cell->z(), cell_idx_c(f) );
-                  ofs << ( ( f == (*writer)->fSize() - 1 ) ? "\n" : " " );
+                  writer->push( ofs, cell.x(), cell.y(), cell.z(), cell_idx_c(f) );
+                  ofs << ( ( f == writer->fSize() - 1 ) ? "\n" : " " );
                }
             }
          }
@@ -1714,35 +1714,35 @@ void VTKOutput::writeCellData( std::ostream& ofs, const IBlock& block, const std
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
 
-   for( auto writer = cellDataWriter_.begin(); writer != cellDataWriter_.end(); ++writer )
+   for(const auto & writer : cellDataWriter_)
    {
-      (*writer)->configure( block, *blockStorage_ );
+      writer->configure( block, *blockStorage_ );
 
-      ofs << "    <DataArray type=\"" << (*writer)->typeString() << "\" Name=\"" << (*writer)->identifier()
-                                      << "\" NumberOfComponents=\"" << (*writer)->fSize() << "\" format=\"" << format_ << "\">\n";
+      ofs << "    <DataArray type=\"" << writer->typeString() << "\" Name=\"" << writer->identifier()
+                                      << "\" NumberOfComponents=\"" << writer->fSize() << "\" format=\"" << format_ << "\">\n";
 
       if( binary_ )
       {
          Base64Writer base64;
-         for( auto cell = cells.begin(); cell != cells.end(); ++cell )
-            for( uint_t f = 0; f != (*writer)->fSize(); ++f )
-               (*writer)->push( base64, cell->localCell_.x(), cell->localCell_.y(), cell->localCell_.z(), cell_idx_c(f),
-                                        cell->localCellX_,    cell->localCellY_,    cell->localCellZ_,
-                                        cell->globalX_   ,    cell->globalY_,       cell->globalZ_,
+         for(const auto & cell : cells)
+            for( uint_t f = 0; f != writer->fSize(); ++f )
+               writer->push( base64, cell.localCell_.x(), cell.localCell_.y(), cell.localCell_.z(), cell_idx_c(f),
+                                        cell.localCellX_,    cell.localCellY_,    cell.localCellZ_,
+                                        cell.globalX_   ,    cell.globalY_,       cell.globalZ_,
                                         samplingDx_,          samplingDy_,          samplingDz_ );
          ofs << "     "; base64.toStream( ofs );
       }
       else
       {
-         for( auto cell = cells.begin(); cell != cells.end(); ++cell ) {
+         for(const auto & cell : cells) {
             ofs << "     ";
-            for( uint_t f = 0; f != (*writer)->fSize(); ++f )
+            for( uint_t f = 0; f != writer->fSize(); ++f )
             {
-               (*writer)->push( ofs, cell->localCell_.x(), cell->localCell_.y(), cell->localCell_.z(), cell_idx_c(f),
-                                     cell->localCellX_,    cell->localCellY_,    cell->localCellZ_,
-                                     cell->globalX_   ,    cell->globalY_,       cell->globalZ_,
+               writer->push( ofs, cell.localCell_.x(), cell.localCell_.y(), cell.localCell_.z(), cell_idx_c(f),
+                                     cell.localCellX_,    cell.localCellY_,    cell.localCellZ_,
+                                     cell.globalX_   ,    cell.globalY_,       cell.globalZ_,
                                      samplingDx_,          samplingDy_,          samplingDz_ );
-               ofs << ( ( f == (*writer)->fSize() - 1 ) ? "\n" : " " );
+               ofs << ( ( f == writer->fSize() - 1 ) ? "\n" : " " );
             }
          }
       }
@@ -1768,24 +1768,24 @@ void VTKOutput::writeCollectors( const bool barrier )
 
 
 
-   for( auto collector = collectorsToWrite_.begin(); collector != collectorsToWrite_.end(); ++collector )
+   for(unsigned long & collector : collectorsToWrite_)
    {
       if( uniformGrid_ )
       {
          if( samplingDx_ <= real_c(0) || samplingDy_ <= real_c(0) || samplingDz_ <= real_c(0) )
-            writePVTI( *collector );
+            writePVTI( collector );
          else
-            writePVTI_sampled( *collector );
+            writePVTI_sampled( collector );
       }
       else if (amrFileFormat_)
       {
          writeVTHBSeries();
-         writeVTHB( *collector );
+         writeVTHB( collector );
       }
       else
       {
-         writePVTU( *collector ); // also applies for outputDomainDecomposition_ == true and pointDataSource_ != NULL
-                                  // and polylineDataSource_ != NULL (uniformGrid_ will be false)
+         writePVTU( collector ); // also applies for outputDomainDecomposition_ == true and pointDataSource_ != nullptr
+                                  // and polylineDataSource_ != nullptr (uniformGrid_ will be false)
       }
    }
 
@@ -1845,11 +1845,11 @@ void VTKOutput::writePVD()
          ending = ".pvti";
    }
 
-   for( auto collector = allCollectors_.begin(); collector != allCollectors_.end(); ++collector )
+   for(unsigned long & allCollector : allCollectors_)
    {
       std::ostringstream collection;
-      collection << identifier_ << "/" << executionFolder_ << "_" << *collector << ending;
-      ofs << "  <DataSet timestep=\"" << *collector << "\" file=\"" << collection.str() << "\"/>\n";
+      collection << identifier_ << "/" << executionFolder_ << "_" << allCollector << ending;
+      ofs << "  <DataSet timestep=\"" << allCollector << "\" file=\"" << collection.str() << "\"/>\n";
    }
    allCollectors_.clear();
 
@@ -1882,7 +1882,7 @@ void VTKOutput::writeVTHBSeries()
    {
       for( std::string line; std::getline(ofs, line); )
       {
-         if( line.find("]") != std::string::npos )
+         if( line.find(']') != std::string::npos )
          {
             WALBERLA_ASSERT_GREATER( ofs.tellg(), 0 );
             pvdEnd_ = ofs.tellg();
@@ -1901,11 +1901,11 @@ void VTKOutput::writeVTHBSeries()
 
    std::string ending = ".vthb";
 
-   for( auto collector = allCollectors_.begin(); collector != allCollectors_.end(); ++collector )
+   for(unsigned long & allCollector : allCollectors_)
    {
       std::ostringstream collection;
-      collection << identifier_ << "/" << executionFolder_ << "_" << *collector << ending;
-      ofs << "      { \"name\" : \"" << collection.str() << "\", \"time\":" << *collector << " },\n";
+      collection << identifier_ << "/" << executionFolder_ << "_" << allCollector << ending;
+      ofs << "      { \"name\" : \"" << collection.str() << "\", \"time\":" << allCollector << " },\n";
    }
    allCollectors_.clear();
 
@@ -1946,9 +1946,9 @@ void VTKOutput::writePVTI( const uint_t collector ) const
    std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
-   for( auto file = files.begin(); file != files.end(); ++file )
+   for(auto & file : files)
    {
-      std::ifstream ifs( file->string().c_str() );
+      std::ifstream ifs( file.string().c_str() );
 
       std::string piece;
       for( uint_t i = 0; i != 4; ++i )
@@ -1957,7 +1957,7 @@ void VTKOutput::writePVTI( const uint_t collector ) const
 
       piece.erase( piece.length()-1, 1 );
 
-      ofs << piece << " Source=\"" << executionFolder_ << "_" << collector << "/" << file->filename().string() << "\"/>\n";
+      ofs << piece << " Source=\"" << executionFolder_ << "_" << collector << "/" << file.filename().string() << "\"/>\n";
    }
 
    ofs << " </PImageData>\n"
@@ -1987,8 +1987,8 @@ void VTKOutput::writeVTHB( const uint_t collector ) const
    for( uint_t level = 0; level < files.size(); level++){
       ofs << "  <Block level=\"" << level << "\">\n";
       walberla::uint_t index = 0;
-      for( auto file = files[level].begin(); file != files[level].end(); ++file ){
-         ofs << "   <DataSet index=\"" << index << "\" file=\"" << executionFolder_ << "_" << collector << "/" << file->filename().string() << "\"/>\n";
+      for(auto & file : files[level]){
+         ofs << "   <DataSet index=\"" << index << "\" file=\"" << executionFolder_ << "_" << collector << "/" << file.filename().string() << "\"/>\n";
          index++;
       }
       ofs << "  </Block>\n";
@@ -2030,9 +2030,9 @@ void VTKOutput::writePVTI_sampled( const uint_t collector ) const
    std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
-   for( auto file = files.begin(); file != files.end(); ++file )
+   for(auto & file : files)
    {
-      std::ifstream ifs( file->string().c_str() );
+      std::ifstream ifs( file.string().c_str() );
 
       std::string piece;
       for( uint_t i = 0; i != 4; ++i )
@@ -2041,7 +2041,7 @@ void VTKOutput::writePVTI_sampled( const uint_t collector ) const
 
       piece.erase( piece.length()-1, 1 );
 
-      ofs << piece << " Source=\"" << executionFolder_ << "_" << collector << "/" << file->filename().string() << "\"/>\n";
+      ofs << piece << " Source=\"" << executionFolder_ << "_" << collector << "/" << file.filename().string() << "\"/>\n";
    }
 
    ofs << " </PImageData>\n"
@@ -2178,8 +2178,8 @@ void VTKOutput::writePVTU( const uint_t collector ) const
    std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
-   for( auto file = files.begin(); file != files.end(); ++file )
-      ofs << "  <Piece Source=\"" << executionFolder_ << "_" << collector << "/" << file->filename().string() << "\"/>\n";
+   for(auto & file : files)
+      ofs << "  <Piece Source=\"" << executionFolder_ << "_" << collector << "/" << file.filename().string() << "\"/>\n";
 
    ofs << " </PUnstructuredGrid>\n"
        << "</VTKFile>\n";
@@ -2276,16 +2276,16 @@ void VTKOutput::writePPointData( std::ofstream& ofs ) const
    if( pointDataSource_ )
    {
       auto attributes = pointDataSource_->getAttributes();
-      for( auto dataArray = attributes.begin(); dataArray != attributes.end(); ++dataArray )
-         ofs << "   <PDataArray type=\"" << dataArray->type << "\" Name=\"" << dataArray->name
-                                         << "\" NumberOfComponents=\"" << dataArray->components << "\" format=\"" << format_ << "\"/>\n";
+      for(auto & attribute : attributes)
+         ofs << "   <PDataArray type=\"" << attribute.type << "\" Name=\"" << attribute.name
+                                         << "\" NumberOfComponents=\"" << attribute.components << "\" format=\"" << format_ << "\"/>\n";
    }
    else if( polylineDataSource_ )
    {
       auto attributes = polylineDataSource_->getAttributes();
-      for( auto dataArray = attributes.begin(); dataArray != attributes.end(); ++dataArray )
-         ofs << "   <PDataArray type=\"" << dataArray->type << "\" Name=\"" << dataArray->name
-                                         << "\" NumberOfComponents=\"" << dataArray->components << "\" format=\"" << format_ << "\"/>\n";
+      for(auto & attribute : attributes)
+         ofs << "   <PDataArray type=\"" << attribute.type << "\" Name=\"" << attribute.name
+                                         << "\" NumberOfComponents=\"" << attribute.components << "\" format=\"" << format_ << "\"/>\n";
    }
 }
 
@@ -2301,10 +2301,10 @@ void VTKOutput::writePCellData( std::ofstream& ofs ) const
                                       << "\" Name=\"Process\" NumberOfComponents=\"1\" format=\"" << format_ << "\"/>\n";
    }
 
-   for( auto writer = cellDataWriter_.begin(); writer != cellDataWriter_.end(); ++writer )
+   for(const auto & writer : cellDataWriter_)
    {
-      ofs << "   <PDataArray type=\"" << (*writer)->typeString() << "\" Name=\"" << (*writer)->identifier()
-                                      << "\" NumberOfComponents=\"" << (*writer)->fSize() << "\" format=\"" << format_ << "\"/>\n";
+      ofs << "   <PDataArray type=\"" << writer->typeString() << "\" Name=\"" << writer->identifier()
+                                      << "\" NumberOfComponents=\"" << writer->fSize() << "\" format=\"" << format_ << "\"/>\n";
    }
 }
 

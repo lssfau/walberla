@@ -31,7 +31,7 @@ namespace raytracing {
 
 // Implemented following the description in
 // "FAST RAY - CONVEX POLYHEDRON INTERSECTION" by Eric Haines
-inline bool intersects(const mesh::pe::ConvexPolyhedronID poly, const Ray& ray, real_t& t_near, Vec3& n)
+inline bool intersects(mesh::pe::ConstConvexPolyhedronID poly, const Ray& ray, real_t& t_near, Vec3& n)
 {
    Ray transformedRay = ray.transformedToBF(poly);
 

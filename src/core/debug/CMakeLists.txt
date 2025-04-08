@@ -1,4 +1,4 @@
-target_sources(core
+target_sources( walberla_core
       PRIVATE
       CMakeLists.txt
       CheckFunctions.cpp

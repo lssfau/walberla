@@ -102,13 +102,13 @@ private:
    PDFField* const pdfField_;
 
    real_t val_;
-   bool   init_;
+   bool   init_{false};
 
 }; // class SimpleDiffusionDirichlet
 
 template< typename LatticeModel_T, typename flag_t >
 inline SimpleDiffusionDirichlet< LatticeModel_T, flag_t >::SimpleDiffusionDirichlet( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField, const real_t val ) :
-   Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), val_( val ), init_(false)
+   Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), val_( val )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
 }

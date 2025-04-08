@@ -106,9 +106,9 @@ namespace config {
       using std::vector;
       using std::string;
 
-      for( auto param = params.begin(); param != params.end(); ++param )
+      for(const auto & param : params)
       {
-         vector< string > equalitySignSplitResult = string_split( *param, "=" );
+         vector< string > equalitySignSplitResult = string_split( param, "=" );
 
          std::string value;
          if ( equalitySignSplitResult.empty() )
@@ -124,7 +124,7 @@ namespace config {
          }
          else
          {
-            WALBERLA_LOG_WARNING( "Ignoring illegally formed command line parameter: '" << *param << "'  (Multiple '='s )");
+            WALBERLA_LOG_WARNING( "Ignoring illegally formed command line parameter: '" << param << "'  (Multiple '='s )");
             continue;
          }
 
@@ -133,7 +133,7 @@ namespace config {
          vector< string > blocks = string_split( blockDescriptor, "." );
 
          if ( blocks.empty() ) {
-            WALBERLA_LOG_WARNING( "Ignoring Parameter: Missing block descriptor on left hand side: '" << *param <<"'" );
+            WALBERLA_LOG_WARNING( "Ignoring Parameter: Missing block descriptor on left hand side: '" << param <<"'" );
             continue;
          }
 
@@ -146,7 +146,7 @@ namespace config {
             if ( blockName.empty() )
             {
                currentBlock = nullptr;
-               WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' empty block name");
+               WALBERLA_LOG_WARNING("Ignoring Parameter '" << param << "' empty block name");
                break;
             }
             vector< Config::Block * > possibleBlocks;
@@ -154,7 +154,7 @@ namespace config {
             if ( possibleBlocks.size() > 1 )
             {
                currentBlock = nullptr;
-               WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' since block is ambiguous: " << blockName );
+               WALBERLA_LOG_WARNING("Ignoring Parameter '" << param << "' since block is ambiguous: " << blockName );
                break;
             }
             else if ( possibleBlocks.empty() ) {
@@ -171,7 +171,7 @@ namespace config {
          string_trim( blocks.back() );
          if ( blocks.back().empty() )
          {
-            WALBERLA_LOG_WARNING( "Ignoring Parameter '" << *param << "' since key is empty");
+            WALBERLA_LOG_WARNING( "Ignoring Parameter '" << param << "' since key is empty");
             continue;
          }
          else
@@ -212,7 +212,7 @@ namespace config {
    {
    public:
       MultipleConfigGenerator( const std::string & baseName, const std::string & extension, int numberOfDigits )
-         : baseName_( baseName ), extension_( extension ), numberOfDigits_( numberOfDigits), counter_(-1) {}
+         : baseName_( baseName ), extension_( extension ), numberOfDigits_( numberOfDigits) {}
 
       shared_ptr<Config> next() override
       {
@@ -231,7 +231,7 @@ namespace config {
       std::string baseName_;
       std::string extension_;
       int numberOfDigits_;
-      int counter_;
+      int counter_{-1};
    };
 
 
@@ -275,7 +275,7 @@ namespace config {
          auto config = make_shared<Config>();
          createFromTextFile( *config, filename );
          substituteCommandLineArgs( *config, argc, argv );
-         return config::Iterator( make_shared<SingleConfigGenerator> ( config ) );
+         return { make_shared< SingleConfigGenerator >(config) };
       }
    }
 
@@ -283,7 +283,7 @@ namespace config {
    {
       // Intel compiler complains when casting shared_ptr<MultipleConfigGenerator> to shared_ptr<ConfigGenerator>
       ConfigGenerator * cg = new MultipleConfigGenerator( basename, extension, nrOfDigits );
-      return Iterator( shared_ptr<config::ConfigGenerator>(cg) );
+      return { shared_ptr< config::ConfigGenerator >(cg) };
    }
 
 

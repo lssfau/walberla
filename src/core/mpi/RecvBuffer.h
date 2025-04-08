@@ -124,8 +124,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-                              GenericRecvBuffer& >::type
+   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+                              GenericRecvBuffer& >
    operator>>( V& value );
    //@}
    //*******************************************************************************************************************
@@ -159,8 +159,8 @@ private:
    /*!\name Utility functions */
    //@{
    template< typename V >
-   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-                              GenericRecvBuffer& >::type
+   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+                              GenericRecvBuffer& >
    get( V& value );
    //@}
    //*******************************************************************************************************************
@@ -168,7 +168,7 @@ private:
 
 
    //**Compile time checks**********************************************************************************************
-   static_assert( std::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
+   static_assert( std::is_arithmetic_v<T>, "SendBuffer<T>: T has to be native datatype" ) ;
    //*******************************************************************************************************************
 };
 //**********************************************************************************************************************
@@ -227,7 +227,7 @@ inline GenericRecvBuffer<T>::GenericRecvBuffer( GenericSendBuffer<T,G> & sb )
    , cur_( sb.begin_ )
    , end_( sb.end_ )
 {
-   sb.begin_ = new T[0];
+   sb.begin_ = nullptr;
    sb.cur_   = sb.begin_;
    sb.end_   = sb.begin_;
 }
@@ -385,12 +385,12 @@ inline bool GenericRecvBuffer<T>::isEmpty() const
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-                           GenericRecvBuffer<T> & >::type
+std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+                           GenericRecvBuffer<T> & >
 GenericRecvBuffer<T>::get( V& value )
 {
    // Compile time check that V is built-in data type
-   static_assert( std::is_arithmetic<V>::value || std::is_enum<V>::value,
+   static_assert( std::is_arithmetic_v<V> || std::is_enum_v<V>,
                             "RecvBuffer accepts only built-in data types");
 
 
@@ -400,11 +400,11 @@ GenericRecvBuffer<T>::get( V& value )
 
 
    // Checking the validity of the read operation
-   WALBERLA_ASSERT_LESS_EQUAL( cur_ + (sizeof(V) / sizeof(T)), end_ );
+   WALBERLA_ASSERT_LESS_EQUAL( cur_ + (sizeof(V) / sizeof(T)), end_ ); // NOLINT(bugprone-sizeof-expression)
 
    // Extracting the data value
    std::memcpy( &value, cur_, sizeof(V) );
-   cur_ += sizeof(V) / sizeof(T);
+   cur_ += sizeof(V) / sizeof(T); // NOLINT(bugprone-sizeof-expression)
 
    // Invariants check
    WALBERLA_ASSERT_LESS_EQUAL( cur_, end_);
@@ -427,8 +427,8 @@ GenericRecvBuffer<T>::get( V& value )
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
-                           GenericRecvBuffer<T> & >::type
+std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
+                           GenericRecvBuffer<T> & >
 GenericRecvBuffer<T>::operator>>( V& value )
 {
    readDebugMarker( typeid(V).name() );
@@ -550,7 +550,7 @@ template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
 inline void GenericRecvBuffer<T>::peek( V& value ) const
 {
-   WALBERLA_STATIC_ASSERT( std::is_arithmetic<V>::value );
+   WALBERLA_STATIC_ASSERT( std::is_arithmetic_v<V> );
 
    WALBERLA_STATIC_ASSERT( sizeof(V) > sizeof(T) );
    WALBERLA_STATIC_ASSERT( sizeof(V) % sizeof(T) == 0);

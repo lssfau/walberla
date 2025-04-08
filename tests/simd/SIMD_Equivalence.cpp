@@ -166,7 +166,7 @@ void print1( const is1::double4_t& vec)
 
 void checkVecEqual ( is0::double4_t a, is1::double4_t b, const std::string & description = "" )
 {
-   if ( description.size() > 0) 
+   if ( not description.empty() )
    {
       double meanError = std::abs( is0::getComponent(a, 0 )- is1::getComponent(b,0 ) ) +
 			 std::abs( is0::getComponent(a, 1 )- is1::getComponent(b,1 ) ) +

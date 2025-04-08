@@ -134,7 +134,7 @@ void BlockReconstruction::reconstructNeighborhood( BLOCK* block, const std::vect
    std::vector< real_t >                                      neighborhoodSectionBlockCenters;
    std::set< const NeighborhoodReconstructionBlock* >         neighborhood;
    std::map< const NeighborhoodReconstructionBlock*, uint_t > neighborhoodIndex;
-   std::vector< uint_t >                                      neighborhoodSectionBlocks[26];
+   std::array< std::vector< uint_t >, 26 >                    neighborhoodSectionBlocks;
 
    block->clearNeighborhood();
 
@@ -158,20 +158,20 @@ void BlockReconstruction::reconstructNeighborhood( BLOCK* block, const std::vect
          if( z <  domain.zMin() && zPeriodic ) z = domain.zMax() - domain.zMin() + z;
          if( z >= domain.zMax() && zPeriodic ) z = domain.zMin() - domain.zMax() + z;
 
-         for( uint_t i = 0; i != neighbors.size(); ++i ) {
-            if( neighbors[i].getAABB().contains( x, y, z ) ) {
+         for(const auto & neighbor : neighbors) {
+            if( neighbor.getAABB().contains(x, y, z ) ) {
 
-               const NeighborhoodReconstructionBlock* neighbor = &(neighbors[i]);
+               const NeighborhoodReconstructionBlock* neighborPtr = &neighbor;
                uint_t index = 0;
 
-               if( neighborhood.insert( neighbor ).second ) {
+               if( neighborhood.insert(neighborPtr ).second ) {
 
                   index = block->getNeighborhoodSize();
-                  neighborhoodIndex[ neighbor ] = index;
+                  neighborhoodIndex[ neighborPtr ] = index;
 
-                  block->addNeighbor( neighbor->getId(), neighbor->getProcess(), neighbor->getState() );
+                  block->addNeighbor(neighborPtr->getId(), neighborPtr->getProcess(), neighborPtr->getState() );
                }
-               else index = neighborhoodIndex[ neighbor ];
+               else index = neighborhoodIndex[ neighborPtr ];
 
                if( neighborhoodSectionBlocks[n].empty() || neighborhoodSectionBlocks[n].back() != index )
                   neighborhoodSectionBlocks[n].push_back( index );
@@ -274,8 +274,8 @@ void BlockReconstruction::reconstructNeighborhoodSections( BLOCK* block, const A
 
       block->clearNeighborhoodSection(n);
 
-      for( uint_t i = 0; i != neighborhoodSectionBlocks.size(); ++i )
-         block->addNeighbor( n, neighborhoodSectionBlocks[i] );
+      for(uint_t & neighborhoodSectionBlock : neighborhoodSectionBlocks)
+         block->addNeighbor( n, neighborhoodSectionBlock );
 
       neighborhoodSectionBlocks.clear();
       neighborhoodSectionBlockCenters.clear();

@@ -714,7 +714,6 @@ RECURSIVE              = YES
 
 EXCLUDE                =  @walberla_SOURCE_DIR@/src/openCL/CL/cl.hpp \
 			  @walberla_SOURCE_DIR@/src/openCL/cl.hpp \
-			  @walberla_SOURCE_DIR@/src/gui/extern \
                           @walberla_SOURCE_DIR@/src/blockforest/metis
 
 

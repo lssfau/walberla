@@ -1,4 +1,4 @@
-target_sources( python_coupling
+target_sources( walberla_python_coupling
     PRIVATE
     GatherExport.impl.h
     VTKExport.cpp

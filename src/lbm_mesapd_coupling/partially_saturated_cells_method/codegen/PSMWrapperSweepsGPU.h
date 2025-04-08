@@ -84,16 +84,12 @@ class SetParticleVelocitiesSweep
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
-      // Allocate unified memory for the particle information required for computing the velocity at a WF point (used in
+      // Allocate memory for the particle information required for computing the velocity at a WF point (used in
       // the solid collision operator)
-      real_t* linearVelocities;
-      WALBERLA_GPU_CHECK(gpuMallocManaged(&linearVelocities, arraySizes));
-      WALBERLA_GPU_CHECK(gpuMemset(linearVelocities, 0, arraySizes));
-      real_t* angularVelocities;
-      WALBERLA_GPU_CHECK(gpuMallocManaged(&angularVelocities, arraySizes));
-      WALBERLA_GPU_CHECK(gpuMemset(angularVelocities, 0, arraySizes));
+      real_t* linearVelocities_h  = (real_t*) malloc(arraySizes);
+      real_t* angularVelocities_h = (real_t*) malloc(arraySizes);
 
-      // Store particle information inside unified memory to communicate information to the GPU
+      // Store particle information inside memory to communicate information to the GPU
       size_t idxMapped = 0;
       for (size_t idx = 0; idx < ac_->size(); ++idx)
       {
@@ -101,12 +97,19 @@ class SetParticleVelocitiesSweep
          {
             for (size_t d = 0; d < 3; ++d)
             {
-               linearVelocities[idxMapped * 3 + d]  = ac_->getLinearVelocity(idx)[d];
-               angularVelocities[idxMapped * 3 + d] = ac_->getAngularVelocity(idx)[d];
+               linearVelocities_h[idxMapped * 3 + d]  = ac_->getLinearVelocity(idx)[d];
+               angularVelocities_h[idxMapped * 3 + d] = ac_->getAngularVelocity(idx)[d];
             }
             idxMapped++;
          }
       }
+
+      real_t* linearVelocities;
+      WALBERLA_GPU_CHECK(gpuMalloc(&linearVelocities, arraySizes));
+      WALBERLA_GPU_CHECK(gpuMemcpy(linearVelocities, linearVelocities_h, arraySizes, gpuMemcpyHostToDevice));
+      real_t* angularVelocities;
+      WALBERLA_GPU_CHECK(gpuMalloc(&angularVelocities, arraySizes));
+      WALBERLA_GPU_CHECK(gpuMemcpy(angularVelocities, angularVelocities_h, arraySizes, gpuMemcpyHostToDevice));
 
       auto nOverlappingParticlesField =
          block->getData< nOverlappingParticlesFieldGPU_T >(particleAndVolumeFractionSoA_.nOverlappingParticlesFieldID);
@@ -129,7 +132,10 @@ class SetParticleVelocitiesSweep
       velocitiesKernel();
 
       WALBERLA_GPU_CHECK(gpuFree(linearVelocities));
+      free(linearVelocities_h);
+
       WALBERLA_GPU_CHECK(gpuFree(angularVelocities));
+      free(angularVelocities_h);
    }
 
  private:
@@ -173,23 +179,13 @@ class ReduceParticleForcesSweep
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
-      // TODO: for multiple blocks per process, this data is transferred multiple times per time step (unnecessarily)
-      // Allocate unified memory for the reduction of the particle forces and torques on the GPU
+      // Allocate memory for the reduction of the particle forces and torques on the GPU
       real_t* hydrodynamicForces;
-      WALBERLA_GPU_CHECK(gpuMallocManaged(&hydrodynamicForces, arraySizes));
-      // Using unsafeAtomicAdd() required coarse grained memory, see:
-      // https://fs.hlrs.de/projects/par/events/2023/GPU-AMD/day3/11.%20AMD_Node_Memory_Model.pdf
-#ifdef WALBERLA_BUILD_WITH_HIP
-      int deviceId = -1;
-      WALBERLA_GPU_CHECK(hipGetDevice(&deviceId));
-      WALBERLA_GPU_CHECK(hipMemAdvise(hydrodynamicForces, arraySizes, hipMemAdviseSetCoarseGrain, deviceId));
-#endif
+      WALBERLA_GPU_CHECK(gpuMalloc(&hydrodynamicForces, arraySizes));
       WALBERLA_GPU_CHECK(gpuMemset(hydrodynamicForces, 0, arraySizes));
+
       real_t* hydrodynamicTorques;
-      WALBERLA_GPU_CHECK(gpuMallocManaged(&hydrodynamicTorques, arraySizes));
-#ifdef WALBERLA_BUILD_WITH_HIP
-      WALBERLA_GPU_CHECK(hipMemAdvise(hydrodynamicTorques, arraySizes, hipMemAdviseSetCoarseGrain, deviceId));
-#endif
+      WALBERLA_GPU_CHECK(gpuMalloc(&hydrodynamicTorques, arraySizes));
       WALBERLA_GPU_CHECK(gpuMemset(hydrodynamicTorques, 0, arraySizes));
 
       auto nOverlappingParticlesField =
@@ -216,6 +212,12 @@ class ReduceParticleForcesSweep
 
       WALBERLA_GPU_CHECK(gpuDeviceSynchronize());
 
+      real_t* hydrodynamicForces_h = (real_t*) malloc(arraySizes);
+      WALBERLA_GPU_CHECK(gpuMemcpy(hydrodynamicForces_h, hydrodynamicForces, arraySizes, gpuMemcpyDeviceToHost));
+
+      real_t* hydrodynamicTorques_h = (real_t*) malloc(arraySizes);
+      WALBERLA_GPU_CHECK(gpuMemcpy(hydrodynamicTorques_h, hydrodynamicTorques, arraySizes, gpuMemcpyDeviceToHost));
+
       // Copy forces and torques of particles from GPU to CPU
       size_t idxMapped = 0;
       for (size_t idx = 0; idx < ac_->size(); ++idx)
@@ -224,15 +226,18 @@ class ReduceParticleForcesSweep
          {
             for (size_t d = 0; d < 3; ++d)
             {
-               ac_->getHydrodynamicForceRef(idx)[d] += hydrodynamicForces[idxMapped * 3 + d];
-               ac_->getHydrodynamicTorqueRef(idx)[d] += hydrodynamicTorques[idxMapped * 3 + d];
+               ac_->getHydrodynamicForceRef(idx)[d] += hydrodynamicForces_h[idxMapped * 3 + d];
+               ac_->getHydrodynamicTorqueRef(idx)[d] += hydrodynamicTorques_h[idxMapped * 3 + d];
             }
             idxMapped++;
          }
       }
 
       WALBERLA_GPU_CHECK(gpuFree(hydrodynamicForces));
+      free(hydrodynamicForces_h);
+
       WALBERLA_GPU_CHECK(gpuFree(hydrodynamicTorques));
+      free(hydrodynamicTorques_h);
    }
 
  private:

@@ -1,4 +1,4 @@
-target_sources( pde
+target_sources( walberla_pde
     PRIVATE
     JacobiIteration.h
     JacobiIteration.cpp

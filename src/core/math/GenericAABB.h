@@ -44,7 +44,7 @@ namespace math {
 template< typename T >
 class GenericAABB
 {
-   static_assert( std::is_floating_point< T >::value, "GenericAABB only works with floating point types for T!" );
+   static_assert( std::is_floating_point_v< T >, "GenericAABB only works with floating point types for T!" );
 
 public:
    // Typedefs
@@ -196,7 +196,7 @@ public:
    inline friend mpi::GenericRecvBuffer< ET > & operator>>( mpi::GenericRecvBuffer< ET > & buf, GenericAABB< T > & aabb )
    {
       buf.readDebugMarker( "bb" );
-      static_assert ( std::is_trivially_copyable< GenericAABB< T > >::value,
+      static_assert ( std::is_trivially_copyable_v< GenericAABB< T > >,
                       "type has to be trivially copyable for the memcpy to work correctly" );
       auto pos = buf.skip(sizeof(GenericAABB< T >));
       std::memcpy(&aabb, pos, sizeof(GenericAABB< T >));
@@ -217,7 +217,7 @@ private:
    vector_type minCorner_; /// minimal values
    vector_type maxCorner_; /// maximal values
 };
-static_assert( std::is_trivially_copyable<GenericAABB<real_t>>::value, "GenericAABB<real_t> has to be trivially copyable!");
+static_assert( std::is_trivially_copyable_v<GenericAABB<real_t>>, "GenericAABB<real_t> has to be trivially copyable!");
 
 
 

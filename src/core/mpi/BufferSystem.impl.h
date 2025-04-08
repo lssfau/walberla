@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -41,7 +41,7 @@ std::set<int> GenericBufferSystem<Rb, Sb>::activeTags_;
 
 template< typename Rb, typename Sb>
 GenericBufferSystem<Rb, Sb>::iterator::iterator( GenericBufferSystem<Rb, Sb> & bufferSystem, bool begin )
-    : bufferSystem_( bufferSystem), currentRecvBuffer_( nullptr ), currentSenderRank_( -1 )
+    : bufferSystem_( bufferSystem), currentRecvBuffer_( nullptr )
 {
    if ( begin ) // init iterator
       ++(*this);
@@ -129,9 +129,7 @@ GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const MPI_Comm & communicator,
      unknownSizeComm_( communicator, tag ),
      unknownSizeCommIProbe_( communicator, tag ),
      noMPIComm_( communicator, tag ),
-     currentComm_    ( nullptr ),
-     sizeChangesEverytime_( true ),
-     communicationRunning_( false )
+     currentComm_    ( nullptr )
 {
 }
 
@@ -165,21 +163,24 @@ GenericBufferSystem<Rb, Sb> & GenericBufferSystem<Rb, Sb>::operator=( const Gene
 {
    WALBERLA_ASSERT( !communicationRunning_, "Can't copy GenericBufferSystem while communication is running" )
 
-   sizeChangesEverytime_ = other.sizeChangesEverytime_;
-   communicationRunning_ = other.communicationRunning_;
-   recvInfos_ = other.recvInfos_;
-   sendInfos_ = other.sendInfos_;
+   if (&other != this)
+   {
+      sizeChangesEverytime_ = other.sizeChangesEverytime_;
+      communicationRunning_ = other.communicationRunning_;
+      recvInfos_ = other.recvInfos_;
+      sendInfos_ = other.sendInfos_;
 
-   if( other.currentComm_ == &other.knownSizeComm_ )
-      currentComm_ = &knownSizeComm_;
-   else if ( other.currentComm_ == &other.unknownSizeComm_ )
-      currentComm_ = &unknownSizeComm_;
-   else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
-      currentComm_ = &unknownSizeCommIProbe_;
-   else if ( other.currentComm_ == &other.noMPIComm_ )
-      currentComm_ = &noMPIComm_;
-   else
-      currentComm_ = nullptr; // receiver information not yet set
+      if( other.currentComm_ == &other.knownSizeComm_ )
+         currentComm_ = &knownSizeComm_;
+      else if ( other.currentComm_ == &other.unknownSizeComm_ )
+         currentComm_ = &unknownSizeComm_;
+      else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
+         currentComm_ = &unknownSizeCommIProbe_;
+      else if ( other.currentComm_ == &other.noMPIComm_ )
+         currentComm_ = &noMPIComm_;
+      else
+         currentComm_ = nullptr; // receiver information not yet set
+   }
 
    return *this;
 }

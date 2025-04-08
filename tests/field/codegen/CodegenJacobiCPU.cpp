@@ -38,7 +38,7 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<real_t, 1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 
 
 void testJacobi2D()
@@ -66,8 +66,8 @@ void testJacobi2D()
             f->get( x, y, 0 ) = real_c(1.0);
    }
 
-   typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
-   typedef field::communication::PackInfo<ScalarField> Packing;
+   using CommScheme = blockforest::communication::UniformBufferedScheme<stencil::D2Q9>;
+   using Packing = field::communication::PackInfo<ScalarField>;
    CommScheme commScheme(blocks);
    commScheme.addDataToCommunicate( make_shared<Packing>(fieldID) );
 
@@ -115,13 +115,13 @@ void testJacobi3D()
                f->get( x, y, z ) = real_c(1.0);
    }
 
-   typedef blockforest::communication::UniformBufferedScheme<stencil::D3Q7> CommScheme;
-   typedef field::communication::PackInfo<ScalarField> Packing;
+   using CommScheme = blockforest::communication::UniformBufferedScheme<stencil::D3Q7>;
+   using Packing = field::communication::PackInfo<ScalarField>;
    CommScheme commScheme(blocks);
    commScheme.addDataToCommunicate( make_shared<Packing>(fieldID) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(800); // number of timesteps for non-gui runs
+   const uint_t numberOfTimesteps = uint_t(800); // number of timesteps
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

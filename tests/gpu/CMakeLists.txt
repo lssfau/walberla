@@ -6,19 +6,21 @@
 
 if( WALBERLA_BUILD_WITH_CUDA )
 
-waLBerla_compile_test( FILES communication/GPUPackInfoTest.cpp DEPENDS blockforest )
+   waLBerla_compile_test( FILES communication/GPUPackInfoTest.cpp DEPENDS walberla::blockforest )
 waLBerla_execute_test( NAME  GPUPackInfoTest )
 
-waLBerla_compile_test( FILES communication/GPUPackInfoCommunicationTest.cpp DEPENDS domain_decomposition blockforest stencil )
+   waLBerla_compile_test( FILES communication/GPUPackInfoCommunicationTest.cpp
+         DEPENDS walberla::domain_decomposition walberla::blockforest walberla::stencil )
 waLBerla_execute_test( NAME  GPUPackInfoCommunicationTest )
 
-waLBerla_compile_test( FILES communication/GPUBlockSelectorCommunicationTest.cpp DEPENDS domain_decomposition blockforest stencil )
+   waLBerla_compile_test( FILES communication/GPUBlockSelectorCommunicationTest.cpp
+         DEPENDS walberla::domain_decomposition walberla::blockforest walberla::stencil )
 waLBerla_execute_test( NAME  GPUBlockSelectorCommunicationTest )
 
 waLBerla_compile_test( FILES FieldTransferTest.cpp )
 waLBerla_execute_test( NAME  FieldTransferTest )
 
-waLBerla_compile_test( FILES SimpleKernelTest.cpp Kernels.cu DEPENDS blockforest timeloop gui )
+   waLBerla_compile_test( FILES SimpleKernelTest.cpp Kernels.cu DEPENDS walberla::blockforest walberla::timeloop )
 waLBerla_execute_test( NAME  SimpleKernelTest )
 
 waLBerla_compile_test( FILES FieldIndexing3DTest.cpp FieldIndexing3DTest.cu )
@@ -29,22 +31,22 @@ waLBerla_generate_target_from_python(NAME CodegenJacobiGPUGeneratedCudaJacobiKer
       OUT_FILES CudaJacobiKernel2D.cu CudaJacobiKernel2D.h
       CudaJacobiKernel3D.cu CudaJacobiKernel3D.h)
 waLBerla_compile_test( FILES codegen/CodegenJacobiGPU.cpp
-                       DEPENDS blockforest timeloop gui CodegenJacobiGPUGeneratedCudaJacobiKernel )
+      DEPENDS walberla::blockforest walberla::timeloop CodegenJacobiGPUGeneratedCudaJacobiKernel )
 waLBerla_execute_test( NAME CodegenJacobiGPU )
 
 waLBerla_generate_target_from_python(NAME CodegenPoissonGPUGeneratedKernel FILE codegen/CudaPoisson.py
         OUT_FILES PoissonGPU.cu PoissonGPU.h )
-waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS gui gpu timeloop CodegenPoissonGPUGeneratedKernel)
+   waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS walberla::gpu walberla::timeloop CodegenPoissonGPUGeneratedKernel )
 waLBerla_execute_test( NAME CodegenPoissonGPU )
 
 # The following tests work only for CUDA enabled MPI
 waLBerla_compile_test( FILES communication/CommTest.cpp )
 #waLBerla_execute_test( NAME  CommTest PROCESSES 2)
 
-waLBerla_compile_test( FILES CudaMPI.cpp DEPENDS blockforest timeloop gui )
+   waLBerla_compile_test( FILES CudaMPI.cpp DEPENDS walberla::blockforest walberla::timeloop )
 #waLBerla_execute_test( NAME  CudaMPI )
 
-waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS blockforest timeloop )
+   waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS walberla::blockforest walberla::timeloop )
 
 waLBerla_generate_target_from_python(NAME MicroBenchmarkGpuLbmGenerated FILE codegen/MicroBenchmarkGpuLbm.py
       OUT_FILES MicroBenchmarkStreamKernel.cu MicroBenchmarkCopyKernel.cu MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
@@ -54,14 +56,14 @@ waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldPackInfo FILE 
         OUT_FILES ScalarFieldCommunicationGPU.cu ScalarFieldCommunicationGPU.h
         ScalarFieldPullReductionGPU.cu ScalarFieldPullReductionGPU.h )
 waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTestGPU.cpp
-        DEPENDS blockforest core field CodegenGeneratedGPUFieldPackInfo )
+      DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldPackInfoTestGPU )
 
     if (WALBERLA_BUILD_WITH_PYTHON)
 
         waLBerla_link_files_to_builddir( *.py )
 
-        waLBerla_compile_test( FILES TestShiftedPeriodicityGPU.cpp DEPENDS gpu blockforest field python_coupling )
+        waLBerla_compile_test( FILES TestShiftedPeriodicityGPU.cpp DEPENDS walberla::gpu walberla::blockforest walberla::field walberla::python_coupling )
         waLBerla_execute_test( NAME TestShiftedPeriodicityGPU COMMAND $<TARGET_FILE:TestShiftedPeriodicityGPU> ${CMAKE_CURRENT_SOURCE_DIR}/TestShiftedPeriodicitySetupGPU.py )
 
     endif()

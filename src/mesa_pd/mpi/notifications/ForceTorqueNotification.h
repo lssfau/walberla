@@ -57,19 +57,19 @@ public:
 };
 
 template <>
-void reset<ForceTorqueNotification>(data::Particle& p)
+inline void reset<ForceTorqueNotification>(data::Particle& p)
 {
    p.setForce( Vec3(real_t(0)) );
    p.setTorque( Vec3(real_t(0)) );
 }
 
-void reduce(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
 {
    p.getForceRef() += objparam.force_;
    p.getTorqueRef() += objparam.torque_;
 }
 
-void update(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
+inline void update(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
 {
    p.setForce( objparam.force_ );
    p.setTorque( objparam.torque_ );

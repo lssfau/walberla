@@ -106,8 +106,7 @@ class DragForceEvaluator
                       const BlockDataID& pdfFieldID, const BlockDataID& particleAndVolumeFractionFieldID,
                       const shared_ptr< ParticleAccessor_T >& ac, walberla::id_t sphereID)
       : timeloop_(timeloop), setup_(setup), blocks_(blocks), pdfFieldID_(pdfFieldID),
-        particleAndVolumeFractionFieldID_(particleAndVolumeFractionFieldID), ac_(ac), sphereID_(sphereID),
-        normalizedDragOld_(0.0), normalizedDragNew_(0.0)
+        particleAndVolumeFractionFieldID_(particleAndVolumeFractionFieldID), ac_(ac), sphereID_(sphereID)
    {
       // calculate the analytical drag force value based on the series expansion of chi
       // see also Sangani - Slow flow through a periodic array of spheres, IJMF 1982. Eq. 60 and Table 1
@@ -115,14 +114,15 @@ class DragForceEvaluator
       real_t tempChiPowS    = real_c(1);
 
       // coefficients to calculate the drag in a series expansion
-      real_t dragCoefficients[31] = { real_c(1.000000),  real_c(1.418649),  real_c(2.012564),   real_c(2.331523),
-                                      real_c(2.564809),  real_c(2.584787),  real_c(2.873609),   real_c(3.340163),
-                                      real_c(3.536763),  real_c(3.504092),  real_c(3.253622),   real_c(2.689757),
-                                      real_c(2.037769),  real_c(1.809341),  real_c(1.877347),   real_c(1.534685),
-                                      real_c(0.9034708), real_c(0.2857896), real_c(-0.5512626), real_c(-1.278724),
-                                      real_c(1.013350),  real_c(5.492491),  real_c(4.615388),   real_c(-0.5736023),
-                                      real_c(-2.865924), real_c(-4.709215), real_c(-6.870076),  real_c(0.1455304),
-                                      real_c(12.51891),  real_c(9.742811),  real_c(-5.566269) };
+      std::array< real_t, 31 > dragCoefficients = {
+         real_c(1.000000),  real_c(1.418649),  real_c(2.012564),  real_c(2.331523),   real_c(2.564809),
+         real_c(2.584787),  real_c(2.873609),  real_c(3.340163),  real_c(3.536763),   real_c(3.504092),
+         real_c(3.253622),  real_c(2.689757),  real_c(2.037769),  real_c(1.809341),   real_c(1.877347),
+         real_c(1.534685),  real_c(0.9034708), real_c(0.2857896), real_c(-0.5512626), real_c(-1.278724),
+         real_c(1.013350),  real_c(5.492491),  real_c(4.615388),  real_c(-0.5736023), real_c(-2.865924),
+         real_c(-4.709215), real_c(-6.870076), real_c(0.1455304), real_c(12.51891),   real_c(9.742811),
+         real_c(-5.566269)
+      };
 
       for (uint_t s = 0; s <= uint_t(30); ++s)
       {
@@ -231,8 +231,8 @@ class DragForceEvaluator
    const walberla::id_t sphereID_;
 
    // drag coefficient
-   real_t normalizedDragOld_;
-   real_t normalizedDragNew_;
+   real_t normalizedDragOld_{0.0};
+   real_t normalizedDragNew_{0.0};
 };
 
 //////////

@@ -89,7 +89,7 @@ inline bool pointInFrontOfPlane( const Vector3<real_t>& normal, const Vector3<re
 inline bool originInTetrahedron( const Vector3<real_t>& A, const Vector3<real_t>& B, const Vector3<real_t>& C, const Vector3<real_t>& D ) {
    using namespace walberla::math;
 
-   Vector3<real_t> aoT = A;
+   Vector3<real_t> const aoT = A;
 
    //using fpuAccuracy instead of real(0.0) to avoid numeric problems
    if((aoT * (B % C)) < -Limits<real_t>::fpuAccuracy()) {

@@ -51,11 +51,11 @@
 namespace walberla {
 namespace mesh {
 
-typedef field::GhostLayerField< real_t                        , 1 > DistanceField;
-typedef field::GhostLayerField< uint8_t                       , 1 > ErrorMarkerField;
-typedef field::GhostLayerField< mesh::TriangleMesh::FaceHandle, 1 > FaceHandleField;
+using DistanceField = field::GhostLayerField<real_t, 1>;
+using ErrorMarkerField = field::GhostLayerField<uint8_t, 1>;
+using FaceHandleField = field::GhostLayerField<mesh::TriangleMesh::FaceHandle, 1>;
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

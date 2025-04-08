@@ -91,8 +91,7 @@ public:
    bool positiveIndicesOnly() const { return x() >= cell_idx_c(0) && y() >= cell_idx_c(0) && z() >= cell_idx_c(0); }
 
 private:
-
-   cell_idx_t cell[3]; ///< Array of the cells coordinates. cell == {x, y, z}.
+   std::array< cell_idx_t, 3 > cell; ///< Array of the cells coordinates. cell == {x, y, z}.
 };
 
 
@@ -129,8 +128,8 @@ inline Cell::Cell( const Vector3<uint_t> _vec )
  **********************************************************************************************************************/
 inline bool Cell::operator<( const Cell & rhs ) const
 {
-   return std::lexicographical_compare( std::reverse_iterator<const cell_idx_t*>( this->cell + 3 ), std::reverse_iterator<const cell_idx_t*>( this->cell ),
-                                        std::reverse_iterator<const cell_idx_t*>( rhs.cell + 3 ),   std::reverse_iterator<const cell_idx_t*>( rhs.cell ) );
+   return std::lexicographical_compare( std::reverse_iterator<const cell_idx_t*>( this->cell.data() + 3 ), std::reverse_iterator<const cell_idx_t*>( this->cell.data() ),
+                                        std::reverse_iterator<const cell_idx_t*>( rhs.cell.data() + 3 ),   std::reverse_iterator<const cell_idx_t*>( rhs.cell.data() ) );
 }
 
 
@@ -245,7 +244,7 @@ inline Cell Cell::operator+() const
  **********************************************************************************************************************/
 inline Cell Cell::operator-() const
 {
-   return Cell( -x(), -y(), -z() );
+   return { -x(), -y(), -z() };
 }
 
 

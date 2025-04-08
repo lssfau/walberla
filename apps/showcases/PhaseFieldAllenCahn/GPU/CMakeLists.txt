@@ -18,4 +18,4 @@ waLBerla_generate_target_from_python(NAME PhaseFieldCodeGenGPU
 
 waLBerla_add_executable(NAME multiphaseGPU
         FILES multiphase.cpp PythonExports.cpp InitializerFunctions.cpp util.cpp multiphase_codegen.py
-        DEPENDS blockforest core gpu field postprocessing python_coupling lbm geometry timeloop PhaseFieldCodeGenGPU)
+      DEPENDS walberla::blockforest walberla::core walberla::gpu walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop PhaseFieldCodeGenGPU )

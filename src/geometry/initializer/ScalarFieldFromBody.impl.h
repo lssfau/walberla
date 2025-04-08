@@ -32,6 +32,8 @@
 #include "core/mpi/Reduce.h"
 #include "core/stringToNum.h"
 
+#include <utility>
+
 
 namespace walberla {
 namespace geometry {
@@ -60,7 +62,7 @@ namespace initializer {
          addOrSet = false;
       
       auto        id         = subBlock.getParameter< std::vector<BlockDataID>::size_type > ( "id", 0 );
-      std::string shape      = subBlock.getParameter< std::string >                         ( "shape" );
+      std::ignore            = subBlock.getParameter< std::string >                         ( "shape" );
       std::string expression = subBlock.getParameter< std::string >                         ( "value" );
       
       try

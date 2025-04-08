@@ -159,7 +159,7 @@ protected:
    static void writeHeader( SendBuffer & buffer, const BlockID & sender, const BlockID & receiver, const stencil::Direction & dir );
    static void  readHeader( RecvBuffer & buffer,       BlockID & sender,       BlockID & receiver,       stencil::Direction & dir );
 
-   static void send( SendBuffer & buffer, std::vector< SendBufferFunction > & functions );
+   static void send( SendBuffer & buffer, const std::vector< SendBufferFunction > & functions );
           void receive( RecvBuffer & buffer );
 
    void localBufferPacking( INDEX i, uint_t j, uint_t bufferIndex, const PackInfo & packInfo,
@@ -709,8 +709,11 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
 
       for( auto & sender : sendFunctions)
       {
-         bufferSystem->addSendingFunction  ( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
-         bufferSystem->addReceivingFunction( int_c(sender.first), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+         auto sendingFunc = [sfunc = sender.second](SendBuffer & sbuf) { NonUniformBufferedScheme< Stencil >::send(sbuf, sfunc); };
+         bufferSystem->addSendingFunction  ( int_c(sender.first), sendingFunc );
+
+         auto receivingFunc = [this](RecvBuffer & rbuf){ this->receive(rbuf); };
+         bufferSystem->addReceivingFunction( int_c(sender.first), receivingFunc );
       }
 
       setupBeforeNextCommunication = char(0);
@@ -851,11 +854,15 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender : sendFunctions )
-         bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
+      for( auto const &sender : sendFunctions ){
+          auto sendingFunc = [sfunc = sender.second](SendBuffer & sbuf) { NonUniformBufferedScheme< Stencil >::send(sbuf, sfunc); };
+          bufferSystem->addSendingFunction( int_c(sender.first), sendingFunc );
+      }
 
-      for(auto receiver : ranksToReceiveFrom)
-         bufferSystem->addReceivingFunction( int_c(receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+      for(auto receiver : ranksToReceiveFrom){
+          auto receivingFunc = [this](RecvBuffer & rbuf){ this->receive(rbuf); };
+          bufferSystem->addReceivingFunction( int_c(receiver), receivingFunc );
+      }
 
       setupBeforeNextCommunication = char(0);
    }
@@ -996,11 +1003,15 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
 
       resetBufferSystem( bufferSystem );
 
-      for( auto sender : sendFunctions )
-         bufferSystem->addSendingFunction( int_c(sender.first), std::bind(  NonUniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender.second ) );
+      for( auto const &sender : sendFunctions ){
+          auto sendingFunc = [sfunc = sender.second](SendBuffer & sbuf) { NonUniformBufferedScheme< Stencil >::send(sbuf, sfunc); };
+          bufferSystem->addSendingFunction( int_c(sender.first), sendingFunc );
+      }
 
-      for(auto receiver : ranksToReceiveFrom)
-         bufferSystem->addReceivingFunction( int_c(receiver), std::bind( &NonUniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
+      for(auto receiver : ranksToReceiveFrom){
+          auto receivingFunc = [this](RecvBuffer & rbuf){ this->receive(rbuf); };
+          bufferSystem->addReceivingFunction( int_c(receiver), receivingFunc );
+      }
 
       setupBeforeNextCommunication = char(0);
    }
@@ -1141,7 +1152,7 @@ void NonUniformBufferedScheme<Stencil>::readHeader( RecvBuffer & buffer, BlockID
 
 
 template< typename Stencil >
-void NonUniformBufferedScheme<Stencil>::send( SendBuffer & buffer, std::vector< SendBufferFunction > & functions )
+void NonUniformBufferedScheme<Stencil>::send( SendBuffer & buffer, const std::vector< SendBufferFunction > & functions )
 {
    for(auto & function : functions)
       function( buffer );

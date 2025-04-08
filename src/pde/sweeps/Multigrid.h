@@ -43,7 +43,7 @@ class Restrict
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored
@@ -77,7 +77,7 @@ class ProlongateAndCorrect
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored
@@ -111,8 +111,8 @@ class ComputeResidual
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 >                Field_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using Field_T = GhostLayerField<real_t, 1>;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored
@@ -151,8 +151,8 @@ class ComputeResidualFixedStencil
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
-   typedef std::vector< real_t  > Weight_T;
+   using Field_T = GhostLayerField<real_t, 1>;
+   using Weight_T = std::vector<real_t>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored
@@ -188,7 +188,7 @@ class Zeroize
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the field is stored
@@ -223,7 +223,7 @@ class CoarsenStencilFieldsDCA
 {
 public:
 
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored
@@ -269,7 +269,7 @@ class CoarsenStencilFieldsGCA
 {
 public:
 
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
 
    //*******************************************************************************************************************
    /* \param blocks the block storage where the fields are stored

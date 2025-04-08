@@ -23,6 +23,7 @@
 #include "demangle.h"
 #include "core/DataTypes.h"
 
+#include <array>
 #include <iostream>
 
 
@@ -42,6 +43,7 @@ void printStacktrace()
 #include WALBERLA_BACKTRACE_HEADER
 #include <cstdlib>
 #include <string>
+#include <utility>
 
 namespace walberla {
 namespace debug {
@@ -53,12 +55,12 @@ namespace debug {
       using std::endl;
 
       const int BACKTRACE_LENGTH = 20;
-      void * array[BACKTRACE_LENGTH];
+      std::array< void*, BACKTRACE_LENGTH > array;
       size_t size;
       char **strings;
 
-      size = numeric_cast< size_t >( backtrace (array, BACKTRACE_LENGTH) );
-      strings = backtrace_symbols (array, int_c(size) );
+      size = numeric_cast< size_t >( backtrace (array.data(), BACKTRACE_LENGTH) );
+      strings = backtrace_symbols (array.data(), int_c(size) );
 
       os << "Backtrace: " << std::endl;
 
@@ -92,12 +94,12 @@ namespace debug {
 
          string appName     = line.substr( 0, leftBracket );
          string bracketPart = line.substr( leftBracket+1, rightBracket - leftBracket -1 );
-         string rest        = line.substr( rightBracket +1 );
+         std::ignore        = line.substr( rightBracket +1 ); /*rest*/
 
          // split the bracketPart on plus sign
          size_t plusPos = bracketPart.find_first_of('+');
          string functionName = bracketPart.substr(0, plusPos );
-         string offset       = bracketPart.substr( plusPos+1 );
+         std::ignore = bracketPart.substr( plusPos+1 ); /*offset*/
 #endif
 
          // try to demangle -> no return code if successful
@@ -109,7 +111,7 @@ namespace debug {
 
          os << "\t" << appName << " \t " << demangled << endl;
       }
-      free (strings);
+      free (reinterpret_cast<void*>(strings));
    }
 
 

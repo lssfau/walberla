@@ -46,16 +46,16 @@ uint_t StaticLevelwiseCurveBalance::operator()( SetupBlockForest & forest, const
    {
       std::vector< SetupBlock * > blocksOnLevel;
 
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
-         if( (*block)->getLevel() == level )
-            blocksOnLevel.push_back( *block );
+      for(auto & block : blocks)
+         if( block->getLevel() == level )
+            blocksOnLevel.push_back( block );
 
       const uint_t nBlocks = blocksOnLevel.size();
 
       if( nBlocks <= ( numberOfProcesses - border ) )
       {
-         for( auto block = blocksOnLevel.begin(); block != blocksOnLevel.end(); ++block )
-            (*block)->assignTargetProcess( border++ );
+         for(auto & block : blocksOnLevel)
+            block->assignTargetProcess( border++ );
 
          WALBERLA_ASSERT_LESS_EQUAL( border, numberOfProcesses );
 
@@ -107,15 +107,15 @@ uint_t StaticLevelwiseCurveBalanceWeighted::operator()( SetupBlockForest & fores
    {
       std::vector< SetupBlock * > blocksOnLevel;
 
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
-         if( (*block)->getLevel() == level )
-            blocksOnLevel.push_back( *block );
+      for(auto & block : blocks)
+         if( block->getLevel() == level )
+            blocksOnLevel.push_back( block );
 
       workload_t totalWeight( 0 );
-      for( auto block = blocksOnLevel.begin(); block != blocksOnLevel.end(); ++block )
+      for(auto & block : blocksOnLevel)
       {
-         WALBERLA_ASSERT( !( (*block)->getWorkload() < workload_t(0) ) );
-         totalWeight += (*block)->getWorkload();
+         WALBERLA_ASSERT( !( block->getWorkload() < workload_t(0) ) );
+         totalWeight += block->getWorkload();
       }
 
       uint_t c( uint_t(0) );

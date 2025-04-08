@@ -23,23 +23,13 @@
 
 #include "waLBerlaDefinitions.h"
 
-#ifndef WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM
 #include <filesystem>
-#else
-#define _LIBCPP_NO_EXPERIMENTAL_DEPRECATION_WARNING_FILESYSTEM
-#include <experimental/filesystem>
-#endif
-
 
 
 namespace walberla {
 namespace filesystem {
 
-#ifndef WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM
 using namespace std::filesystem;
-#else
-using namespace std::experimental::filesystem;
-#endif
 
 }
 }

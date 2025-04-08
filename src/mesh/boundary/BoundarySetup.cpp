@@ -33,12 +33,9 @@ BoundarySetup::BoundarySetup( const shared_ptr< StructuredBlockStorage > & struc
 
     if (doRefinementCorrection)
     {
-        try {
-            auto & blockForest = dynamic_cast< StructuredBlockForest & >( *structuredBlockStorage_ );
-            if( !blockForest.storesUniformBlockGrid() )
-                refinementCorrection( blockForest );
-        }
-        catch( const std::bad_cast &  ) {} // If it's not a BlockForest no refinement correction is done
+         auto & blockForest = dynamic_cast< StructuredBlockForest & >( *structuredBlockStorage_ );
+         if( !blockForest.storesUniformBlockGrid() )
+             refinementCorrection( blockForest );
     }
 }
 
@@ -208,7 +205,7 @@ void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
             {
                const auto c = stencil::c[i][*dir];
 
-               if( c == -1 ) 
+               if( c == -1 )
                {
                   coarseRegion.min()[i] -= cell_idx_c( numGhostLayers_ );
                   coarseRegion.max()[i] = cells.min()[i] + cell_idx_c( 2 * numGhostLayers_ - 1 );

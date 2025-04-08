@@ -19,9 +19,6 @@
 using namespace walberla;
 using namespace stencil;
 
-using std::cout;
-using std::endl;
-
 
 template <typename S>
 void stencilIteration()

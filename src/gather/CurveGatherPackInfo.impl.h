@@ -185,8 +185,8 @@ void CurveGatherPackInfo<GlF,IP>::unpackData( mpi::RecvBuffer & buffer )
 
    for( size_t i=0; i< nrPoints; ++i )
    {
-      receivedData.push_back(std::vector<real_t>(fieldSize+1)); //+1 because we also store t value as first entry
-      std::vector<real_t> & pointVec = receivedData[receivedData.size()-1];
+      receivedData.emplace_back(std::vector<real_t>(fieldSize+1)); //+1 because we also store t value as first entry
+      std::vector<real_t> & pointVec = receivedData.back();
 
       real_t t;
       real_t val;

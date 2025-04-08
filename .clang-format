@@ -77,8 +77,6 @@ IncludeCategories:
     Priority:        11
   - Regex:           '^"gpu/'
     Priority:        12
-  - Regex:           '^"gui/'
-    Priority:        12
   - Regex:           '^"lbm/'
     Priority:        13
   - Regex:           '^"lbm_mesapd_coupling/'

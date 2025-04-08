@@ -67,7 +67,7 @@ namespace field {
       using Ptr = typename Field<T, fSize_>::Ptr;
       using ConstPtr = typename Field<T, fSize_>::ConstPtr;
 
-      using FlattenedField = typename std::conditional<VectorTrait<T>::F_SIZE != 0, GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, GhostLayerField<T, fSize_>>::type;
+      using FlattenedField = std::conditional_t<VectorTrait<T>::F_SIZE != 0, GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, GhostLayerField<T, fSize_>>;
       //@}
       //****************************************************************************************************************
 

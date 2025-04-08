@@ -38,8 +38,8 @@ class ResidualNormStencilField
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
-   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+   using Field_T = GhostLayerField<real_t, 1>;
+   using StencilField_T = GhostLayerField<real_t, Stencil_T::Size>;
    
    ResidualNormStencilField( const BlockStorage & blocks, const ConstBlockDataID & uId, const ConstBlockDataID & fId, const BlockDataID & stencilId,
                  const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),

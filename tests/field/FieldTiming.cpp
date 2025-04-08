@@ -42,7 +42,7 @@ using std::stringstream;
 
 const uint_t fSize = 19;
 
-typedef Field<double,fSize > DoubleField;
+using DoubleField = Field<double, fSize>;
 
 
 double sumHandWritten(const DoubleField & field)

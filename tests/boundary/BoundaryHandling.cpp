@@ -43,8 +43,8 @@ namespace walberla {
 using flag_t = uint8_t;
 
 using FlagField_T = FlagField<flag_t>;
-typedef GhostLayerField< uint_t, stencil::D3Q27::Size > WorkField_T;
-typedef GhostLayerField< uint_t, 1 >                    FactorField_T;
+using WorkField_T = GhostLayerField<uint_t, stencil::D3Q27::Size>;
+using FactorField_T = GhostLayerField<uint_t, 1>;
 
 
 
@@ -60,7 +60,7 @@ public:
       { return make_shared<BoundaryConfiguration>(); }
 
    CopyBoundary( const FlagUID& uid1, const FlagUID& uid2, WorkField_T* const field ) :
-      Boundary<flag_t>("CopyBoundary"), uid1_( uid1 ), uid2_( uid2 ), field_( field ), beforeCounter_(0), afterCounter_(0) { WALBERLA_ASSERT_NOT_NULLPTR( field_ ); }
+      Boundary<flag_t>("CopyBoundary"), uid1_( uid1 ), uid2_( uid2 ), field_( field ) { WALBERLA_ASSERT_NOT_NULLPTR( field_ ); }
 
    void pushFlags( std::vector< FlagUID >& uids ) const { uids.push_back( uid1_ ); uids.push_back( uid2_ ); }
 
@@ -70,7 +70,7 @@ public:
    void registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const BoundaryConfiguration& ) {
       registeredCells_.push_back(x,y,z); }
    void registerCells( const flag_t, const CellInterval& interval, const BoundaryConfiguration& ) {
-      for( auto cell = interval.begin(); cell != interval.end(); ++cell ) registeredCells_.push_back( cell->x(), cell->y(), cell->z() ); }
+      for(auto cell : interval) registeredCells_.push_back( cell.x(), cell.y(), cell.z() ); }
    template< typename CellIterator >
    void registerCells( const flag_t, const CellIterator& begin, const CellIterator& end, const BoundaryConfiguration& ) {
       for( auto cell = begin; cell != end; ++cell ) registeredCells_.push_back( cell->x(), cell->y(), cell->z() ); }
@@ -108,8 +108,8 @@ private:
 
    WorkField_T* const field_;
 
-   uint_t beforeCounter_;
-   uint_t afterCounter_;
+   uint_t beforeCounter_{0};
+   uint_t afterCounter_{0};
 
    CellVector registeredCells_;
    CellVector unregisteredCells_;
@@ -154,8 +154,8 @@ public:
       factorField_->get(x,y,z) = dynamic_cast< const Configuration& >( factor ).f();
    }
    inline void registerCells( const flag_t, const CellInterval& cells, const BoundaryConfiguration& factor ) {
-      for( auto cell = cells.begin(); cell != cells.end(); ++cell )
-         factorField_->get( cell->x(), cell->y(), cell->z() ) = dynamic_cast< const Configuration& >( factor ).f();
+      for(auto cell : cells)
+         factorField_->get( cell.x(), cell.y(), cell.z() ) = dynamic_cast< const Configuration& >( factor ).f();
    }
    template< typename CellIterator >
    inline void registerCells( const flag_t, const CellIterator& begin, const CellIterator& end, const BoundaryConfiguration& factor ) {
@@ -201,7 +201,7 @@ private:
 // TEST BOUNDARY HANDLING //
 ////////////////////////////
 
-typedef BoundaryHandling< FlagField_T, stencil::D3Q27, CopyBoundary, AddBoundary > TestBoundaryHandling;
+using TestBoundaryHandling = BoundaryHandling<FlagField_T, stencil::D3Q27, CopyBoundary, AddBoundary>;
 
 
 
@@ -444,22 +444,22 @@ static int main( int argc, char **argv )
    CellVector cellVec;
    for( uint_t i = 3; i != 8; ++i )
       cellVec.push_back( cell_idx_c(1), cell_idx_c(5), cell_idx_c(i) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
-      flagField_Ref.addMask( c->x(), c->y(), c->z(), domainFlag1 );
+   for(auto & c : cellVec)
+      flagField_Ref.addMask( c.x(), c.y(), c.z(), domainFlag1 );
    handling.setDomain( domainFlag1, cellVec.begin(), cellVec.end() );
 
    cellVec.clear();
    for( uint_t i = 1; i != 5; ++i )
       cellVec.push_back( cell_idx_c(1), cell_idx_c(3), cell_idx_c(i) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), domainFlag1 );
+   for(auto & c : cellVec)
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), domainFlag1 );
    handling.setDomain( domainFlag1, cellVec.begin(), cellVec.end() );
 
    CellSet cellSet;
    for( cell_idx_t i = -1; i != 4; ++i )
       cellSet.insert( cell_idx_c(1), cell_idx_c(1), i );
-   for( auto c = cellSet.begin(); c != cellSet.end(); ++c )
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), domainFlag2 );
+   for(auto c : cellSet)
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), domainFlag2 );
    handling.setDomain( domainFlag2, cellSet.begin(), cellSet.end() );
 
    WALBERLA_CHECK_EQUAL( flagField_Ref, flagField_BH );
@@ -467,13 +467,13 @@ static int main( int argc, char **argv )
    // setDomain - interval
 
    CellInterval cells( cell_idx_c(-1), cell_idx_c(2), cell_idx_c(2), cell_idx_c(-1), cell_idx_c(4), cell_idx_c(6) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      flagField_Ref.addMask( c->x(), c->y(), c->z(), domainFlag1 );
+   for(auto c : cells)
+      flagField_Ref.addMask( c.x(), c.y(), c.z(), domainFlag1 );
    handling.setDomain( domainFlag1, cells );
 
    cells = CellInterval( cell_idx_c(2), cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(3), cell_idx_c(5), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), domainFlag2 );
+   for(auto c : cells)
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), domainFlag2 );
    handling.setDomain( domainFlag2, cells );
 
    WALBERLA_CHECK_EQUAL( flagField_Ref, flagField_BH );
@@ -515,18 +515,18 @@ static int main( int argc, char **argv )
    // setBoundary - interval
 
    cells = CellInterval( cell_idx_c(4), cell_idx_c(1), cell_idx_c(-1), cell_idx_c(4), cell_idx_c(2), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
+   for(auto c : cells)
    {
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), addFlag );
-      factorField_Ref( c->x(), c->y(), c->z() ) = uint_c(42);
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), addFlag );
+      factorField_Ref( c.x(), c.y(), c.z() ) = uint_c(42);
    }
    handling.setBoundary( add, cells, AddBoundary::Configuration( uint_c(42) ) );
 
    cells = CellInterval( cell_idx_c(4), cell_idx_c(3), cell_idx_c(-1), cell_idx_c(4), cell_idx_c(5), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
+   for(auto c : cells)
    {
-      flagField_Ref.addMask( c->x(), c->y(), c->z(), copyFlag1 );
-      registeredCells.push_back( c->x(), c->y(), c->z() );
+      flagField_Ref.addMask( c.x(), c.y(), c.z(), copyFlag1 );
+      registeredCells.push_back( c.x(), c.y(), c.z() );
    }
    handling.setBoundary( copyFlag1, cells );
 
@@ -535,20 +535,20 @@ static int main( int argc, char **argv )
    cellVec.clear();
    for( uint_t i = 1; i != 4; ++i )
       cellVec.push_back( cell_idx_c(6), cell_idx_c(2), cell_idx_c(i) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
+   for(auto & c : cellVec)
    {
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), addFlag );
-      factorField_Ref( c->x(), c->y(), c->z() ) = uint_c(5);
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), addFlag );
+      factorField_Ref( c.x(), c.y(), c.z() ) = uint_c(5);
    }
    handling.setBoundary( add, cellVec.begin(), cellVec.end(), AddBoundary::Configuration( uint_c(5) ) );
 
    cellSet.clear();
    for( uint_t i = 1; i != 4; ++i )
       cellSet.insert( cell_idx_c(6), cell_idx_c(3), cell_idx_c(i) );
-   for( auto c = cellSet.begin(); c != cellSet.end(); ++c )
+   for(auto c : cellSet)
    {
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), copyFlag2 );
-      registeredCells.push_back( c->x(), c->y(), c->z() );
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), copyFlag2 );
+      registeredCells.push_back( c.x(), c.y(), c.z() );
    }
    handling.setBoundary( copyFlag2, cellSet.begin(), cellSet.end() );
 
@@ -679,20 +679,20 @@ static int main( int argc, char **argv )
    // forceBoundary - interval
 
    cells = CellInterval( cell_idx_c(8), cell_idx_c(3), cell_idx_c(-1), cell_idx_c(8), cell_idx_c(3), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
+   for(auto c : cells)
    {
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), addFlag );
-      factorField_Ref( c->x(), c->y(), c->z() ) = uint_c(5);
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), addFlag );
+      factorField_Ref( c.x(), c.y(), c.z() ) = uint_c(5);
    }
    handling.forceBoundary( add, cells, AddBoundary::Configuration( uint_c(5) ) );
 
    cells = CellInterval( cell_idx_c(8), cell_idx_c(4), cell_idx_c(4), cell_idx_c(8), cell_idx_c(5), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
+   for(auto c : cells)
    {
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
-      flagField_Ref.addMask( c->x(), c->y(), c->z(), copyFlag1 );
-      registeredCells.push_back( c->x(), c->y(), c->z() );
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
+      flagField_Ref.addMask( c.x(), c.y(), c.z(), copyFlag1 );
+      registeredCells.push_back( c.x(), c.y(), c.z() );
    }
    handling.forceBoundary( copyFlag1, cells );
 
@@ -701,22 +701,22 @@ static int main( int argc, char **argv )
    cellVec.clear();
    for( uint_t i = 1; i != 4; ++i )
       cellVec.push_back( cell_idx_c(10), cell_idx_c(i), cell_idx_c(3) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
+   for(auto & c : cellVec)
    {
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), addFlag );
-      factorField_Ref( c->x(), c->y(), c->z() ) = uint_c(23);
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), addFlag );
+      factorField_Ref( c.x(), c.y(), c.z() ) = uint_c(23);
    }
    handling.forceBoundary( add, cellVec.begin(), cellVec.end(), AddBoundary::Configuration( uint_c(23) ) );
 
    cellSet.clear();
    for( uint_t i = 1; i != 6; ++i )
       cellSet.insert( cell_idx_c(10), cell_idx_c(2), cell_idx_c(i) );
-   for( auto c = cellSet.begin(); c != cellSet.end(); ++c )
+   for(auto c : cellSet)
    {
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
-      flagField_Ref.addFlag( c->x(), c->y(), c->z(), copyFlag1 );
-      registeredCells.push_back( c->x(), c->y(), c->z() );
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
+      flagField_Ref.addFlag( c.x(), c.y(), c.z(), copyFlag1 );
+      registeredCells.push_back( c.x(), c.y(), c.z() );
    }
    handling.forceBoundary( copyFlag1, cellSet.begin(), cellSet.end() );
 
@@ -760,13 +760,13 @@ static int main( int argc, char **argv )
    // removeBoundary - interval
 
    cells = CellInterval( cell_idx_c(4), cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(4), cell_idx_c(2), cell_idx_c(5) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 | addFlag ), c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
+   for(auto c : cells)
+      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 | addFlag ), c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
    handling.removeBoundary( cells );
 
    cells = CellInterval( cell_idx_c(4), cell_idx_c(3), cell_idx_c(4), cell_idx_c(4), cell_idx_c(5), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 ), c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
+   for(auto c : cells)
+      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 ), c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
    handling.removeBoundary( numeric_cast<flag_t>( copyFlag1 | copyFlag2 ), cells );
 
    // removeBoundary - iterators
@@ -774,15 +774,15 @@ static int main( int argc, char **argv )
    cellVec.clear();
    for( uint_t i = 1; i != 4; ++i )
       cellVec.push_back( cell_idx_c(6), cell_idx_c(2), cell_idx_c(i) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
-      remove( addFlag, c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
+   for(auto & c : cellVec)
+      remove( addFlag, c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
    handling.removeBoundary( add, cellVec.begin(), cellVec.end() );
 
    cellSet.clear();
    for( uint_t i = 1; i != 4; ++i )
       cellSet.insert( cell_idx_c(6), cell_idx_c(3), cell_idx_c(i) );
-   for( auto c = cellSet.begin(); c != cellSet.end(); ++c )
-      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 | addFlag ), c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
+   for(auto c : cellSet)
+      remove( numeric_cast<flag_t>( copyFlag1 | copyFlag2 | addFlag ), c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, add, unregisteredCells );
    handling.removeBoundary( cellSet.begin(), cellSet.end() );
 
    resetNearFlags( flagField_Ref, domain1, domain2, near, copy1, copy2, add );
@@ -819,27 +819,27 @@ static int main( int argc, char **argv )
    handling.clear( cell.x(), cell.y(), cell.z() );
 
    cells = CellInterval( cell_idx_c(8), cell_idx_c(3), cell_idx_c(4), cell_idx_c(8), cell_idx_c(3), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
+   for(auto c : cells)
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
    handling.clear( cells );
 
    cells = CellInterval( cell_idx_c(8), cell_idx_c(5), cell_idx_c(4), cell_idx_c(8), cell_idx_c(5), cell_idx_c(8) );
-   for( auto c = cells.begin(); c != cells.end(); ++c )
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
+   for(auto c : cells)
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
    handling.clear( cells );
 
    cellVec.clear();
    for( uint_t i = 0; i != 3; ++i )
       cellVec.push_back( cell_idx_c(10), cell_idx_c(i), cell_idx_c(3) );
-   for( auto c = cellVec.begin(); c != cellVec.end(); ++c )
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
+   for(auto & c : cellVec)
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
    handling.clear( cellVec.begin(), cellVec.end() );
 
    cellSet.clear();
    for( uint_t i = 0; i != 4; ++i )
       cellSet.insert( cell_idx_c(10), cell_idx_c(2), cell_idx_c(i) );
-   for( auto c = cellSet.begin(); c != cellSet.end(); ++c )
-      clear( c->x(), c->y(), c->z(), flagField_Ref, copy1, copy2, unregisteredCells );
+   for(auto c : cellSet)
+      clear( c.x(), c.y(), c.z(), flagField_Ref, copy1, copy2, unregisteredCells );
    handling.clear( cellSet.begin(), cellSet.end() );
 
    resetNearFlags( flagField_Ref, domain1, domain2, near, copy1, copy2, add );

@@ -55,7 +55,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
 {
 
-   static_assert(std::is_same<OperatorCoarsening_T, CoarsenStencilFieldsDCA<Stencil_T>>::value, "Use of weight requires DCA, use constructor with stencil field if you want to employ GCA");
+   static_assert(std::is_same_v<OperatorCoarsening_T, CoarsenStencilFieldsDCA<Stencil_T>>, "Use of weight requires DCA, use constructor with stencil field if you want to employ GCA");
 
    // Set up fields for finest level
    uId_.push_back( uFieldId );
@@ -90,7 +90,8 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
+      auto getSize = [lvl](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
+         return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(lvl, bs, b); };
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
@@ -103,7 +104,8 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    }
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
+   auto getFineSize = [finestLvl = numLvl-1](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
+      return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(finestLvl, bs, b); };
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
 
@@ -126,7 +128,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
    {
       RBGSFixedSweeps_.push_back( walberla::make_shared<RBGSFixedStencil< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], weights_[lvl] ) );
-      RBGSIteration_.push_back( RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
+      RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
                                 RBGSFixedSweeps_.back()->getRedSweep(), RBGSFixedSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
    }
@@ -136,7 +138,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    {
       computeResidual_.push_back( ComputeResidualFixedStencil< Stencil_T >( blocks, uId_[lvl], fId_[lvl], weights_[lvl], rId_[lvl] ) );
       restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
-      zeroize_.push_back( Zeroize(blocks, uId_[lvl+1]) );
+      zeroize_.emplace_back(Zeroize(blocks, uId_[lvl+1]) );
       prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 
@@ -196,7 +198,8 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
+      auto getSize = [lvl](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
+         return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(lvl, bs, b); };
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
@@ -208,7 +211,9 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    operatorCoarsening(stencilId_);
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
+   auto getFineSize = [finestLvl = numLvl-1](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
+      return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(finestLvl, bs, b);
+   };
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
 
@@ -231,7 +236,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
    {
       RBGSSweeps_.push_back( walberla::make_shared<RBGS< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl] ) );
-      RBGSIteration_.push_back( RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
+      RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
                                 RBGSSweeps_.back()->getRedSweep(), RBGSSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
    }
@@ -241,7 +246,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    {
       computeResidual_.push_back( ComputeResidual< Stencil_T >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl], rId_[lvl] ) );
       restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
-      zeroize_.push_back( Zeroize(blocks, uId_[lvl+1]) );
+      zeroize_.emplace_back(Zeroize(blocks, uId_[lvl+1]) );
       prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 

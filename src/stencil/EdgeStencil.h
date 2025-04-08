@@ -69,14 +69,14 @@ namespace stencil {
          static const bool   containsCenter   = false;
          static const uint_t noCenterFirstIdx = 0;
 
-         static const Direction dir           [12];
-         static const Direction dir_pos       [POS_Q];
-         static const uint_t    idx           [NR_OF_DIRECTIONS];
-         static const Direction d_per_d       [NR_OF_DIRECTIONS][12/2];
-         static const uint_t    d_per_d_length[NR_OF_DIRECTIONS];
+         static const std::array< Direction, 12 > dir;
+         static const std::array< Direction, POS_Q > dir_pos;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > idx;
+         static const std::array< std::array<Direction, 12/2>, NR_OF_DIRECTIONS> d_per_d;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length;
 
-         static const Direction dir_neighbors        [NR_OF_DIRECTIONS][NR_OF_DIRECTIONS];
-         static const uint_t    dir_neighbors_length [NR_OF_DIRECTIONS];
+         static const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > dir_neighbors;
+         static const std::array< uint_t, NR_OF_DIRECTIONS > dir_neighbors_length;
 
          static bool   containsDir(Direction d) { return idx[d] < NR_OF_DIRECTIONS; }
          static uint_t invDirIdx  (Direction d) { return idx[stencil::inverseDir[d]]; }
@@ -111,7 +111,7 @@ namespace stencil {
 
       /// Subset of directions. Defines the stencil
       template<typename Dummy>
-      const Direction EdgeStencil<Dummy>::dir[12] = { NW,NE,SW,SE,TN,TS,TW,TE,BN,BS,BW,BE };
+      const std::array< Direction, 12 > EdgeStencil<Dummy>::dir{ NW,NE,SW,SE,TN,TS,TW,TE,BN,BS,BW,BE };
 
 
       /**
@@ -121,7 +121,7 @@ namespace stencil {
        * the direction together with its inverse direction.
        */
       template<typename Dummy>
-      const Direction EdgeStencil<Dummy>::dir_pos[POS_Q] = { NE,SE,TN,TE,BN,BE };
+      const std::array< Direction, EdgeStencil<Dummy>::POS_Q > EdgeStencil<Dummy>::dir_pos{ NE,SE,TN,TE,BN,BE };
 
 
       /**
@@ -134,7 +134,7 @@ namespace stencil {
        *  So a stencil class is needed to map back from direction to field index
        */
       template<typename Dummy>
-      const uint_t EdgeStencil<Dummy>::idx[NR_OF_DIRECTIONS] = { INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,0,1,2,3,4,5,6,7,8,9,10,11,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR };
+      const std::array< uint_t, NR_OF_DIRECTIONS > EdgeStencil<Dummy>::idx{ INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,0,1,2,3,4,5,6,7,8,9,10,11,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR,INVALID_DIR };
 
 
       /**
@@ -154,7 +154,7 @@ namespace stencil {
        *
        */
       template<typename Dummy>
-      const Direction EdgeStencil<Dummy>::d_per_d[NR_OF_DIRECTIONS][12/2] = { {},
+      const std::array< std::array< Direction, 12/2 >, NR_OF_DIRECTIONS > EdgeStencil<Dummy>::d_per_d{ { {},
 								{NW,NE,TN,BN},
 								{SW,SE,TS,BS},
 								{NW,SW,TW,BW},
@@ -180,7 +180,7 @@ namespace stencil {
 								{},
 								{},
 								{},
-								{} };
+								{} } };
 
 
       /**
@@ -188,7 +188,7 @@ namespace stencil {
        * For usage see documentation of d_per_d
        */
       template<typename Dummy>
-      const uint_t EdgeStencil<Dummy>::d_per_d_length [NR_OF_DIRECTIONS] = { 0,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0 };
+      const std::array< uint_t, NR_OF_DIRECTIONS > EdgeStencil<Dummy>::d_per_d_length{ 0,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0 };
 
 
       /**
@@ -201,7 +201,7 @@ namespace stencil {
        * By definition, the neighbors of C are identical to the dir[] array without C itself.
        */
       template<typename Dummy>
-      const Direction EdgeStencil<Dummy>::dir_neighbors[NR_OF_DIRECTIONS][NR_OF_DIRECTIONS] = { {NW,NE,SW,SE,TN,TS,TW,TE,BN,BS,BW,BE},
+      const std::array< std::array< Direction, NR_OF_DIRECTIONS >, NR_OF_DIRECTIONS > EdgeStencil<Dummy>::dir_neighbors{ { {NW,NE,SW,SE,TN,TS,TW,TE,BN,BS,BW,BE},
 								{W,E,T,B,TNE,TNW,BNE,BNW},
 								{W,E,T,B,TSE,TSW,BSE,BSW},
 								{N,S,T,B,TNW,TSW,BNW,BSW},
@@ -227,7 +227,7 @@ namespace stencil {
 								{N,E,B},
 								{N,W,B},
 								{S,E,B},
-								{S,W,B} };
+								{S,W,B} } };
 
 
       /**
@@ -235,7 +235,7 @@ namespace stencil {
        * For usage see documentation of dir_neighbors
        */
       template<typename Dummy>
-      const uint_t EdgeStencil<Dummy>::dir_neighbors_length[NR_OF_DIRECTIONS] = { 12,8,8,8,8,8,8,5,5,5,5,5,5,5,5,5,5,5,5,3,3,3,3,3,3,3,3 };
+      const std::array<uint_t, NR_OF_DIRECTIONS> EdgeStencil<Dummy>::dir_neighbors_length{ 12,8,8,8,8,8,8,5,5,5,5,5,5,5,5,5,5,5,5,3,3,3,3,3,3,3,3 };
 
    } // namespace internal
 

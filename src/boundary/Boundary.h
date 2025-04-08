@@ -117,11 +117,11 @@ template< typename flag_t >
 class Boundary {
 public:
 
-   static_assert( std::is_unsigned<flag_t>::value, "You are trying to instantiate walberla::boundary::Boundary with "
+   static_assert( std::is_unsigned_v<flag_t>, "You are trying to instantiate walberla::boundary::Boundary with "
                                                      "a flag_t which is not an unsigned integer!" );
 
 #ifndef NDEBUG
-   Boundary( const BoundaryUID & boundaryUID ) : boundaryUID_( boundaryUID ), mask_(0), maskSet_(false) {}
+   Boundary( const BoundaryUID & boundaryUID ) : boundaryUID_( boundaryUID ), mask_(0) {}
 
    void   setMask( const flag_t mask ) { WALBERLA_ASSERT( !maskSet_ ); mask_ = mask; maskSet_ = true; } // called by BoundaryHandler
    flag_t getMask() const { WALBERLA_ASSERT( maskSet_ ); return mask_; }
@@ -142,7 +142,7 @@ protected:
                  // If part of this mask is set for a specific cell, this boundary class/condition is responsible for the corresponding boundary treatment.
 
 #ifndef NDEBUG
-   bool maskSet_; // only used in debug mode!
+   bool maskSet_{false}; // only used in debug mode!
 #endif
 
 }; // class Boundary
@@ -156,7 +156,7 @@ struct isThreadSafe
 };
 
 template< typename Boundary_T >
-struct isThreadSafe< Boundary_T, typename std::enable_if< Boundary_T::threadsafe >::type >
+struct isThreadSafe< Boundary_T, typename std::enable_if_t< Boundary_T::threadsafe > >
 {
    static const bool value = Boundary_T::threadsafe;
 };

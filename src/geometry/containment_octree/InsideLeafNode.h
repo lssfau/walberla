@@ -41,12 +41,12 @@ public:
     
    using KahanAccumulator = typename LeafNode<ContainmentOctreeT>::KahanAccumulator;
 
-   virtual ~InsideLeafNode() = default;
+   ~InsideLeafNode() override = default;
 
-   virtual bool contains( const Point & /*p*/ ) const { return true; }
+   bool contains( const Point & /*p*/ ) const override { return true; }
 
-   virtual void numNodes( uint_t & numInside, uint_t & /*numOutside*/, uint_t & /*numIndeterminate*/, uint_t & /*numBranch*/ ) const { ++numInside; }
-   virtual void volumes( KahanAccumulator & insideVolume, KahanAccumulator & /*outsideVolume*/, KahanAccumulator & /*indeterminateVolume*/, Scalar volume ) const { insideVolume += volume; }
+   void numNodes( uint_t & numInside, uint_t & /*numOutside*/, uint_t & /*numIndeterminate*/, uint_t & /*numBranch*/ ) const override { ++numInside; }
+   void volumes( KahanAccumulator & insideVolume, KahanAccumulator & /*outsideVolume*/, KahanAccumulator & /*indeterminateVolume*/, Scalar volume ) const override { insideVolume += volume; }
 };
 
    

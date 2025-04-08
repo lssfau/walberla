@@ -51,7 +51,7 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::mesh::pe;
 
-typedef std::tuple<ConvexPolyhedron, Plane> BodyTuple ;
+using BodyTuple = std::tuple<ConvexPolyhedron, Plane> ;
 
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
@@ -145,7 +145,7 @@ int main( int argc, char ** argv )
    cr.setRelaxationParameter( real_t(0.7) );
    cr.setGlobalLinearAcceleration( Vec3(0,0,5) );
 
-   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
+   std::function<void(void)> syncCall = [&capture0 = *forest, storageID, capture1 = real_c(0.0)] { pe::syncNextNeighbors<BodyTuple>(capture0, storageID, static_cast<WcTimingTree*>(nullptr), capture1, false); };
 
    using OutputMeshType = mesh::FloatPolyMesh;
    using TesselationType = mesh::pe::DefaultTesselation<OutputMeshType>;

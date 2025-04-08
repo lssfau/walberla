@@ -42,7 +42,7 @@ template< typename DistanceObject >
 class RefinementSelection
 {
 public:
-   typedef typename DistanceObject::Scalar Scalar;
+   using Scalar = typename DistanceObject::Scalar;
 
    RefinementSelection( const shared_ptr< DistanceObject > & distanceObject, const uint_t level, const real_t distance, real_t maxError ) : distanceObject_( distanceObject ), level_( level ), distance_( distance ), maxError_( maxError )  {  }
 

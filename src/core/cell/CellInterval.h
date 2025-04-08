@@ -191,7 +191,7 @@ CellInterval::const_iterator CellInterval::begin() const
    if( empty() )
       return end();
    else
-      return CellIntervalIterator(*this, min());
+      return { *this, min() };
 }
 
 CellInterval::const_iterator CellInterval::end()   const { return ++CellIntervalIterator(*this, max()); }
@@ -236,6 +236,7 @@ inline bool CellInterval::overlaps( const CellInterval& other ) const
    if( empty() || other.empty() )
       return false;
 
+   // NOLINTNEXTLINE(readability-simplify-boolean-expr)
    return !(other.min_.x() > max_.x() || other.min_.y() > max_.y() || other.min_.z() > max_.z() ||
        other.max_.x() < min_.x() || other.max_.y() < min_.y() || other.max_.z() < min_.z());
 }

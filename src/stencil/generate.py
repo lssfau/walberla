@@ -221,7 +221,7 @@ tmpl = tmplFile.read().replace("{", "{{")
 tmpl = tmpl.replace("}", "}}")
 
 # Then we replace all "$var" constructs by "{var}"
-tmpl = re.sub("\$[A-Za-z_]*", (lambda x: "{" + x.group(0)[1:] + "}"), tmpl)  # noqa: W605
+tmpl = re.sub("\\$[A-Za-z_]*", (lambda x: "{" + x.group(0)[1:] + "}"), tmpl)  # noqa: W605
 
 """Reads stencil dict and generates header files"""
 for stencil in stencils:

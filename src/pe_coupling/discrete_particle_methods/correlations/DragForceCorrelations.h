@@ -45,7 +45,7 @@ namespace discrete_particle_methods {
 
 // equation to calculate the drag coefficient on isolated spherical particle
 // Schiller, L., Naumann, A., 1935. A drag coefficient correlation. Vdi Zeitung 77, 318-320.
-real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
+inline real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( reynoldsNumber, real_t(0) );
 
@@ -55,7 +55,7 @@ real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
 
 // Coefficient from Stokes' law for drag, only valid for Stokes regime (low Reynolds numbers)
 // = 3 * math::pi * mu * D * fluidVolumeFraction
-real_t dragCoeffStokes ( real_t fluidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity )
+inline real_t dragCoeffStokes ( real_t fluidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity )
 {
    return real_t(3) * math::pi * diameter * fluidDynamicViscosity * fluidVolumeFraction;
 }
@@ -72,6 +72,7 @@ const real_t thresholdAbsoluteVelocityDifference = real_t(1e-10);
 //////////////////////
 
 // Stokes drag law
+inline
 Vector3<real_t> dragForceStokes( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                  real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t /*fluidDensity*/ )
 {
@@ -92,6 +93,7 @@ Vector3<real_t> dragForceStokes( const Vector3<real_t> & fluidVel, const Vector3
 // S. Ergun, Fluid flow through packed columns. Chemical Engineering Progress 48 (1952), 89-94.
 // Y. C. Wen, Y.H. Yu, Mechanics of fluidization. Chemical Engineering Progress Symposium Series 62 (1966), 100-111.
 // see also Beetstra, van der Hoef, Kuipers, "Drag Force of Intermediate Reynolds Number Flow Past Mono- and Bidisperse Arrays of Spheres" (2007)
+inline
 Vector3<real_t>  dragForceErgunWenYu( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                       real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
@@ -123,6 +125,7 @@ Vector3<real_t>  dragForceErgunWenYu( const Vector3<real_t> & fluidVel, const Ve
 
 // drag correlation proposed by Tang et al. - "A New Drag Correlation from Fully Resolved Simulations of Flow Past
 // Monodisperse Static Arrays of Spheres", AiChE, 2014
+inline
 Vector3<real_t> dragForceTang( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
@@ -151,6 +154,7 @@ Vector3<real_t> dragForceTang( const Vector3<real_t> & fluidVel, const Vector3<r
 
 // drag correlation based on findings from Felice (1994)
 // used e.g. in Kafui et al (2002)
+inline
 Vector3<real_t> dragForceFelice( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                  real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
@@ -180,6 +184,7 @@ Vector3<real_t> dragForceFelice( const Vector3<real_t> & fluidVel, const Vector3
 // drag correlation based on findings from Tenneti, Garg, Subramaniam (2011)
 // used e.g. in Finn, Li, Apte - Particle based modelling and simulation of natural sand dynamics in the wave bottom boundary layer (2016)
 // could be generalized also for non-spherical particles, see Finn et al (2016)
+inline
 Vector3<real_t> dragForceTenneti( const Vector3<real_t> & fluidVel, const Vector3<real_t> & particleVel,
                                   real_t solidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity, real_t fluidDensity )
 {
@@ -211,6 +216,7 @@ Vector3<real_t> dragForceTenneti( const Vector3<real_t> & fluidVel, const Vector
 }
 
 
+inline
 Vector3<real_t> noDragForce( const Vector3<real_t> & /*fluidVel*/, const Vector3<real_t> & /*particleVel*/,
                              real_t /*solidVolumeFraction*/, real_t /*diameter*/, real_t /*fluidDynamicViscosity*/, real_t /*fluidDensity*/ )
 {

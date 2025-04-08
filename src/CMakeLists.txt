@@ -1,6 +1,6 @@
 
 # List modules here that should not be built
-#set ( excludedModules core )
+#set ( excludedModules walberla::core )
 #
 #
 #
@@ -33,7 +33,6 @@ endif()
 add_subdirectory( field )
 add_subdirectory( gather )
 add_subdirectory( geometry )
-add_subdirectory( gui )
 add_subdirectory( lbm )
 add_subdirectory( lbm_generated )
 add_subdirectory( lbm_mesapd_coupling )
@@ -55,3 +54,24 @@ add_subdirectory( stencil )
 add_subdirectory( timeloop )
 add_subdirectory( vtk )
 
+#### TODO: Remove with waLBerla 7.2.
+list( APPEND MODULES blockforest boundary communication core gpu domain_decomposition executiontree field gather geometry lbm lbm_generated
+      lbm_mesapd_coupling mesa_pd pde pe pe_coupling postprocessing simd sqlite stencil timeloop vtk )
+if ( WALBERLA_BUILD_WITH_FFT AND FFTW3_FOUND )
+   list( APPEND MODULES fft )
+endif ()
+if ( OPENMESH_FOUND )
+   list( APPEND MODULES mesh mesh_common )
+endif ()
+if ( WALBERLA_BUILD_WITH_PYTHON )
+   list( APPEND MODULES python_coupling )
+endif ()
+
+
+foreach ( MODULE IN LISTS MODULES )
+   add_library( ${MODULE} INTERFACE )
+   target_link_libraries( ${MODULE} INTERFACE walberla::${MODULE} )
+   set_target_properties( ${MODULE} PROPERTIES DEPRECATION "Target '${MODULE}' is deprecated and will be removed with waLBerla 7.2.
+   Please use 'walberla::${MODULE}' instead." )
+endforeach ()
+#### TODO: Remove until here

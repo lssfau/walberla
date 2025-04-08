@@ -27,11 +27,13 @@
 #include "field/Field.h"
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "stencil/D2Q5.h"
 
-#include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
+
+#include "vtk/all.h"
 
 #include <cmath>
 #include <vector>
@@ -48,14 +50,14 @@ using Stencil_T = stencil::D2Q5;
 void initBC( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & srcID, const BlockDataID & dstID )
 {
    // iterate all blocks with an iterator 'block'
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   for( auto &block : *blocks )
    {
       // The Dirichlet boundary condition is non-zero only at the top boundary.
-      if( blocks->atDomainYMaxBorder( *block ) )
+      if( blocks->atDomainYMaxBorder( block ) )
       {
          // get the field data out of the blocks
-         auto src = block->getData< ScalarField >( srcID );
-         auto dst = block->getData< ScalarField >( dstID );
+         auto src = block.getData< ScalarField >( srcID );
+         auto dst = block.getData< ScalarField >( dstID );
 
          // obtain a CellInterval object that holds information about the number of cells in x,y,z direction of the field including ghost layers
          // Since src and dst have the same size, one object is enough.
@@ -65,14 +67,14 @@ void initBC( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDat
          xyz.yMin() = xyz.yMax();
 
          // iterate all cells in the top boundary with the iterator 'cell'
-         for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+         for( auto cell : xyz )
          {
             // obtain the physical coordinate of the center of the current cell
-            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( block, cell );
 
             // set the values of the Dirichlet boundary condition given by the function u(x,1) = sin(2*PI*x)*sinh(2*PI) in the source and destination field
-            src->get( *cell ) = std::sin( real_c(2) * math::pi * p[0] ) * std::sinh( real_c(2) * math::pi );
-            dst->get( *cell ) = std::sin( real_c(2) * math::pi * p[0] ) * std::sinh( real_c(2) * math::pi );
+            src->get( cell ) = std::sin( real_c(2) * math::pi * p[0] ) * std::sinh( real_c(2) * math::pi );
+            dst->get( cell ) = std::sin( real_c(2) * math::pi * p[0] ) * std::sinh( real_c(2) * math::pi );
          }
       }
    }
@@ -84,22 +86,22 @@ void initBC( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDat
 void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & rhsID )
 {
    // iterate all blocks with an iterator 'block'
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   for( auto &block : *blocks )
    {
       // get the field data out of the block
-      auto f = block->getData< ScalarField >( rhsID );
+      auto f = block.getData< ScalarField >( rhsID );
 
       // obtain a CellInterval object that holds information about the number of cells in x,y,z direction of the field excluding ghost layers
       CellInterval xyz = f->xyzSize();
 
       // iterate all (inner) cells in the field
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for( auto cell : xyz )
       {
          // obtain the physical coordinate of the center of the current cell
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
+         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( block, cell );
 
          // set the right-hand side, given by the function f(x,y) = 4*PI*PI*sin(2*PI*x)*sinh(2*PI*y)
-         f->get( *cell ) = real_c(4) * math::pi * math::pi * std::sin( real_c(2) * math::pi * p[0] ) *
+         f->get( cell ) = real_c(4) * math::pi * math::pi * std::sin( real_c(2) * math::pi * p[0] ) *
                            std::sinh( real_c(2) * math::pi * p[1] );
       }
    }
@@ -291,9 +293,14 @@ int main( int argc, char ** argv )
    timeloop.add() << BeforeFunction( myCommScheme, "Communication" )
                   << Sweep( JacobiSweepStencil( srcID, dstID, rhsID, weights ), "JacobiSweepStencil" );
 
-   // start the GUI and run the simulation
-   GUI gui ( timeloop, blocks, argc, argv );
-   gui.run();
+   // Create vtk output object, a dataWriter and write the output
+   vtk::writeDomainDecomposition(blocks);
+   auto vtkOutput  = vtk::createVTKOutput_BlockData(*blocks);
+   auto dataWriter = make_shared< field::VTKWriter< Field< real_t, 1 > > >(srcID, "field");
+   vtkOutput->addCellDataWriter(dataWriter);
+   timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+
+   timeloop.run();
 
    return 0;
 }

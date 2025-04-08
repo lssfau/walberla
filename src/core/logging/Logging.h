@@ -165,8 +165,8 @@ private:
 
 
 
-   LogLevel streamLogLevel_;
-   LogLevel   fileLogLevel_;
+   LogLevel streamLogLevel_{ WALBERLA_LOGLEVEL };
+   LogLevel   fileLogLevel_{ WALBERLA_LOGLEVEL };
 
    std::ofstream file_;
 
@@ -174,10 +174,10 @@ private:
    uint_t numberOfProcesses_;
 
    double startTime_;
-   bool showTimeStamp_;
+   bool showTimeStamp_{ true };
    shared_ptr< CustomStamp > additionalStamp_;
 
-   bool logCallerPath_;
+   bool logCallerPath_{ false };
 
    std::vector< walberla::regex > ignoreRegexes_;
    std::vector< walberla::regex > ignoreWarningRegexes_;
@@ -186,10 +186,9 @@ private:
 
 
 inline Logging::Logging() : singleton::Singleton<Logging>(),
-   streamLogLevel_( WALBERLA_LOGLEVEL ), fileLogLevel_( WALBERLA_LOGLEVEL ),
    processId_( uint_c( mpi::MPIManager::instance()->worldRank() ) ),
    numberOfProcesses_( uint_c( mpi::MPIManager::instance()->numProcesses() ) ),
-   startTime_( timing::WcPolicy::getTimestamp() ), showTimeStamp_( true ), logCallerPath_( false )
+   startTime_( timing::WcPolicy::getTimestamp() )
 {
 }
 

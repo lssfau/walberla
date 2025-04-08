@@ -114,7 +114,7 @@ inline shared_ptr< PhantomBlock > PhantomBlockForest::getBlock( const BlockID & 
    auto it = blocks_.find( id );
    if( it != blocks_.end() )
       return it->second;
-   return shared_ptr< PhantomBlock >();
+   return {};
 }
 
 

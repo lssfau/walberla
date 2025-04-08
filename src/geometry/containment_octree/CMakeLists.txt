@@ -1,4 +1,4 @@
-target_sources( geometry
+target_sources( walberla_geometry
     PRIVATE
     InsideLeafNode.h
     OutsideLeafNode.h

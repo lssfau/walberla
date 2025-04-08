@@ -84,9 +84,9 @@ private:
 template< typename LatticeModel_T, typename FlagField_T, typename CellOperation >
 void ActiveCellSweep< LatticeModel_T, FlagField_T, CellOperation >::operator()( IBlock * const block )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, dst, flagField );
 

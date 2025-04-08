@@ -55,6 +55,8 @@ CMakeLists.txt.user.*
 logfile*.txt
 *TestLog_p*.txt
 
+# Python venv
+.venv
 
 # Compiled python
 *.pyc
@@ -67,6 +69,7 @@ logfile*.txt
 
 
 # CMake
+CMakeUserPresets.json
 /CMakeLists.txt.user
 
 # CMake build files
@@ -80,3 +83,10 @@ CMakeDefs.h
 /moduleStatistics.json
 /walberla-config.cmake
 cmake-build-*
+
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/

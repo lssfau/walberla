@@ -142,7 +142,7 @@ void EPA::EPA_Triangle::silhouette( size_t index, const Vec3& w,
    if (!obsolete_) {
       real_t test = (closest_ * w);
       if (test < sqrDist_) {
-         edgeBuffer.push_back(EPA_Edge(this, index));
+         edgeBuffer.emplace_back(this, index);
       }
       else {
          obsolete_ = true; // Facet is visible
@@ -271,7 +271,7 @@ bool EPA::doEPA( Support &geom1,
 
    for(EPA_EntryBuffer::iterator it=entryBuffer.begin(); it != entryBuffer.end(); ++it) {
       if(it->isClosestInternal()) {
-         entryHeap.push_back(&(*it));
+         entryHeap.emplace_back(&(*it));
       }
    }
 
@@ -402,7 +402,7 @@ bool EPA::doEPA( Support &geom1,
          }
 
          EPA_EdgeBuffer::const_iterator it = edgeBuffer.begin();
-         entryBuffer.push_back(EPA_Triangle(it->getEnd(), it->getStart(), epaVolume.size()-1, epaVolume));
+         entryBuffer.emplace_back(it->getEnd(), it->getStart(), epaVolume.size()-1, epaVolume);
 
          EPA_Triangle* firstTriangle = &(entryBuffer.back());
          //if it is expanding candidate add to heap
@@ -416,7 +416,7 @@ bool EPA::doEPA( Support &geom1,
                && firstTriangle->getSqrDist() > lowerBoundSqr
                && firstTriangle->getSqrDist() < upperBoundSqr)
          {
-            entryHeap.push_back(firstTriangle);
+            entryHeap.emplace_back(firstTriangle);
             std::push_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
          }
 
@@ -431,7 +431,7 @@ bool EPA::doEPA( Support &geom1,
                break;
             }
 
-            entryBuffer.push_back(EPA_Triangle(it->getEnd(), it->getStart(), epaVolume.size()-1, epaVolume));
+            entryBuffer.emplace_back(it->getEnd(), it->getStart(), epaVolume.size()-1, epaVolume);
             EPA_Triangle* newTriangle = &(entryBuffer.back());
 
             //std::cerr << "Considering Triangle (" << newTriangle->getSqrDist() << ") {"  << (*newTriangle)[0] <<  "," << (*newTriangle)[1] <<  ","<< (*newTriangle)[2] << "} ("<< epaVolume[(*newTriangle)[0]] * newTriangle->getNormal() << ")" << std::endl;
@@ -446,7 +446,7 @@ bool EPA::doEPA( Support &geom1,
                   &&  newTriangle->getSqrDist() > lowerBoundSqr
                   &&  newTriangle->getSqrDist() < upperBoundSqr)
             {
-               entryHeap.push_back(newTriangle);
+               entryHeap.emplace_back(newTriangle);
                std::push_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
             }
 
@@ -572,11 +572,11 @@ inline void EPA::createInitialSimplex( size_t numPoints,
       //check for containment inside
       if(originInTetrahedron(epaVolume[0], epaVolume[2], epaVolume[3], epaVolume[4]) || originInTetrahedron(epaVolume[1], epaVolume[2], epaVolume[3], epaVolume[4]) ){
          //insert triangle 1
-         entryBuffer.push_back(EPA_Triangle(1, 2, 3, epaVolume)); //[0] up->ccw1->ccw2
+         entryBuffer.emplace_back(1, 2, 3, epaVolume); //[0] up->ccw1->ccw2
          //insert triangle 2
-         entryBuffer.push_back(EPA_Triangle(1, 3, 4, epaVolume)); //[1] up->ccw2->ccw3
+         entryBuffer.emplace_back(1, 3, 4, epaVolume); //[1] up->ccw2->ccw3
          //insert triangle 3
-         entryBuffer.push_back(EPA_Triangle(1, 4, 2, epaVolume)); //[2] up->ccw3->ccw1
+         entryBuffer.emplace_back(1, 4, 2, epaVolume); //[2] up->ccw3->ccw1
 
          //link these 3 triangles
          entryBuffer[0].link(2, &(entryBuffer[1]), 0); //edge up->ccw1
@@ -585,11 +585,11 @@ inline void EPA::createInitialSimplex( size_t numPoints,
 
 
          //insert triangle 4
-         entryBuffer.push_back(EPA_Triangle(0, 2, 4, epaVolume)); //[3] down->ccw1->ccw3
+         entryBuffer.emplace_back(0, 2, 4, epaVolume); //[3] down->ccw1->ccw3
          //insert triangle 5
-         entryBuffer.push_back(EPA_Triangle(0, 4, 3, epaVolume)); //[4] down->ccw3->ccw2
+         entryBuffer.emplace_back(0, 4, 3, epaVolume); //[4] down->ccw3->ccw2
          //insert triangle 6
-         entryBuffer.push_back(EPA_Triangle(0, 3, 2, epaVolume)); //[5] down->ccw2->ccw1
+         entryBuffer.emplace_back(0, 3, 2, epaVolume); //[5] down->ccw2->ccw1
 
          //link these 3 triangles
          entryBuffer[3].link(2, &(entryBuffer[4]), 0); //edge down->ccw3
@@ -643,11 +643,11 @@ inline void EPA::createInitialSimplex( size_t numPoints,
       else {
          //Build the hexahedron as it is convex
          //insert triangle 1
-         entryBuffer.push_back(EPA_Triangle(3, 2, 1, epaVolume)); //[0] support1->A->B
+         entryBuffer.emplace_back(3, 2, 1, epaVolume); //[0] support1->A->B
          //insert triangle 2
-         entryBuffer.push_back(EPA_Triangle(3, 1, 0, epaVolume)); //[1] support1->B->C
+         entryBuffer.emplace_back(3, 1, 0, epaVolume); //[1] support1->B->C
          //insert triangle 3
-         entryBuffer.push_back(EPA_Triangle(3, 0, 2, epaVolume)); //[2] support1->C->A
+         entryBuffer.emplace_back(3, 0, 2, epaVolume); //[2] support1->C->A
 
          //link these 3 triangles
          entryBuffer[0].link(2, &(entryBuffer[1]), 0); //edge support1->A
@@ -656,11 +656,11 @@ inline void EPA::createInitialSimplex( size_t numPoints,
 
 
          //insert triangle 4
-         entryBuffer.push_back(EPA_Triangle(4, 2, 0, epaVolume)); //[3] support2->A->C
+         entryBuffer.emplace_back(4, 2, 0, epaVolume); //[3] support2->A->C
          //insert triangle 5
-         entryBuffer.push_back(EPA_Triangle(4, 0, 1, epaVolume)); //[4] support2->C->B
+         entryBuffer.emplace_back(4, 0, 1, epaVolume); //[4] support2->C->B
          //insert triangle 6
-         entryBuffer.push_back(EPA_Triangle(4, 1, 2, epaVolume)); //[5] support2->B->A
+         entryBuffer.emplace_back(4, 1, 2, epaVolume); //[5] support2->B->A
 
          //link these 3 triangles
          entryBuffer[3].link(2, &(entryBuffer[4]), 0); //edge support2->C
@@ -768,13 +768,13 @@ inline void EPA::createInitialTetrahedron( size_t top,
                                            EPA_EntryBuffer& entryBuffer )
 {
    //insert triangle 1
-   entryBuffer.push_back(EPA_Triangle(top, frontLeft, frontRight, epaVolume)); //[0] vorne
+   entryBuffer.emplace_back(top, frontLeft, frontRight, epaVolume); //[0] vorne
    //insert triangle 2
-   entryBuffer.push_back(EPA_Triangle(top, frontRight, back, epaVolume)); //[1] rechts hinten
+   entryBuffer.emplace_back(top, frontRight, back, epaVolume); //[1] rechts hinten
    //insert triangle 3
-   entryBuffer.push_back(EPA_Triangle(top, back, frontLeft, epaVolume)); //[2] links hinten
+   entryBuffer.emplace_back(top, back, frontLeft, epaVolume); //[2] links hinten
    //insert triangle 4
-   entryBuffer.push_back(EPA_Triangle(back, frontRight, frontLeft, epaVolume)); //[3] unten
+   entryBuffer.emplace_back(back, frontRight, frontLeft, epaVolume); //[3] unten
 
    //make links between the triangles
    entryBuffer[0].link(0, &(entryBuffer[2]), 2); //Kante vorne links

@@ -38,8 +38,8 @@ namespace accuracy_evaluation_test {
    
 using namespace walberla;
 
-typedef field::GhostLayerField< real_t, 1 >           ScalarField_T;
-typedef field::GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
+using ScalarField_T = field::GhostLayerField<real_t, 1>;
+using VectorField_T = field::GhostLayerField<Vector3<real_t>, 1>;
 
 const real_t          scalarValue( real_c(23) );
 const Vector3<real_t> vectorValue( real_c(23), real_c(42), real_c(5) );
@@ -56,7 +56,7 @@ Vector3<real_t> vectorSolution( const Vector3<real_t> & )
 }
 
 
-int main( int argc, char* argv[] )
+int main( int argc, char** argv )
 {
    debug::enterTestMode();
 

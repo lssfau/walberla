@@ -55,7 +55,7 @@ void test()
    WALBERLA_CHECK_EQUAL( convWbMesh.getNumVertices(), convOmMesh.n_vertices() );
 }
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );

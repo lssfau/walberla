@@ -44,12 +44,12 @@ public:
    IndeterminateLeafNode( const shared_ptr<const DistanceObject> & distanceObject, const Scalar epsilon )
       :  distanceObject_( distanceObject ), sqEpsilon_( epsilon * epsilon ) { }
 
-   virtual ~IndeterminateLeafNode() = default;
+   ~IndeterminateLeafNode() override = default;
 
-   virtual bool contains( const Point & p ) const { return distanceObject_->sqSignedDistance(p) <= sqEpsilon_; }
+   bool contains( const Point & p ) const override { return distanceObject_->sqSignedDistance(p) <= sqEpsilon_; }
 
-   virtual void numNodes( uint_t & /*numInside*/, uint_t & /*numOutside*/, uint_t & numIndeterminate, uint_t & /*numBranch*/ ) const { ++numIndeterminate; }
-   virtual void volumes( KahanAccumulator & /*insideVolume*/, KahanAccumulator & /*outsideVolume*/, KahanAccumulator & indeterminateVolume, Scalar volume ) const { indeterminateVolume += volume; }
+   void numNodes( uint_t & /*numInside*/, uint_t & /*numOutside*/, uint_t & numIndeterminate, uint_t & /*numBranch*/ ) const override { ++numIndeterminate; }
+   void volumes( KahanAccumulator & /*insideVolume*/, KahanAccumulator & /*outsideVolume*/, KahanAccumulator & indeterminateVolume, Scalar volume ) const override { indeterminateVolume += volume; }
 
 protected:
    shared_ptr<const DistanceObject> distanceObject_;

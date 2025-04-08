@@ -85,7 +85,7 @@ private:
    int numProcesses_ = walberla::mpi::MPIManager::instance()->numProcesses();
 };
 
-void ReduceContactHistory::operator()(data::ParticleStorage& ps) const
+inline void ReduceContactHistory::operator()(data::ParticleStorage& ps) const
 {
    //no need to reduce if run with only one process
    if (numProcesses_ != 1)

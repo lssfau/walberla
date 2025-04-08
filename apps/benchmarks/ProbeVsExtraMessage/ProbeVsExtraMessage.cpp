@@ -63,7 +63,7 @@ private:
    shared_ptr<mpi::MPIManager> manager_;
    Vector3<uint_t> procs_;
    Vector3<bool>   periodicity_;
-   Vector3<int>    pos_;
+   std::array<int, 3>    pos_;
    std::array<int, 27> ranks_;
 };
 
@@ -73,7 +73,7 @@ MPIInfo::MPIInfo( const Vector3<uint_t>& procs, const Vector3<bool>& periodicity
    , periodicity_(periodicity)
 {
    manager_->createCartesianComm(procs[0], procs[1], procs[2], periodicity[0], periodicity[1], periodicity[2]);
-   manager_->cartesianCoord(pos_.data());
+   manager_->cartesianCoord(pos_);
 
    for (auto dirIt = stencil::D3Q27::beginNoCenter(); dirIt != stencil::D3Q27::end(); ++dirIt)
    {
@@ -137,9 +137,9 @@ void communicate( MPIInfo& mpiInfo,
       WALBERLA_MPI_BARRIER();
       tp["unpack"].start();
       auto& recvInfos = bs.getRecvInfos();
-      for (auto recvIt = recvInfos.begin(); recvIt != recvInfos.end(); ++recvIt)
+      for (auto & recvInfoItem : recvInfos)
       {
-         auto& rb = recvIt->second.buffer;
+         auto& rb = recvInfoItem.second.buffer;
          rb >> recvBuf;
          WALBERLA_ASSERT(rb.isEmpty());
       }
@@ -259,7 +259,7 @@ int main( int argc, char ** argv )
 }
 } // namespace walberla
 
-int main( int argc, char* argv[] )
+int main( int argc, char** argv )
 {
    return walberla::main( argc, argv );
 }

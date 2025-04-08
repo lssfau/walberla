@@ -46,6 +46,6 @@ class PIDController
    real_t minActuatingVariable_;
    real_t maxActuatingVariable_;
 
-   real_t errorHistory_[3];
+   std::array< real_t, 3 > errorHistory_;
    real_t errorIntegral_;
 };

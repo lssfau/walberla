@@ -59,7 +59,7 @@ protected:
 
       real_t rho = pdf_->getDensityAndEquilibriumMomentumDensity( v, x, y, z );
 
-      return numeric_cast< OutputType >( pdf_->get( x, y, z, f ) - lbm::EquilibriumDistribution< LatticeModel_T >::get( Stencil::dir[f], v, rho ) );
+      return numeric_cast< OutputType >( pdf_->get( x, y, z, f ) - lbm::EquilibriumDistribution< LatticeModel_T >::get( Stencil::dir[uint_c(f)], v, rho ) );
    }
 
    const ConstBlockDataID bdid_;

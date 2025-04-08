@@ -1,9 +1,10 @@
- add_library( python_coupling )
- target_link_libraries( python_coupling PUBLIC pybind11::embed core communication domain_decomposition stencil field blockforest vtk )
+ add_library( walberla_python_coupling )
+ add_library( walberla::python_coupling ALIAS walberla_python_coupling )
+ target_link_libraries( walberla_python_coupling PUBLIC pybind11::embed walberla::core walberla::communication walberla::domain_decomposition walberla::stencil walberla::field walberla::blockforest walberla::vtk )
  if( WALBERLA_BUILD_WITH_GPU_SUPPORT )
-  target_link_libraries( python_coupling PUBLIC gpu )
+  target_link_libraries( walberla_python_coupling PUBLIC walberla::gpu )
  endif()
- target_sources( python_coupling
+ target_sources( walberla_python_coupling
        PRIVATE
        Manager.cpp
        PythonWrapper.h

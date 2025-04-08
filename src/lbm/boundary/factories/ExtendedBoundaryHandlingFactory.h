@@ -87,7 +87,7 @@ public:
    using BoundaryHandling = walberla::boundary::BoundaryHandling<FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved>;
 
    static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
-                                                    BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet)
+                                                    BlockDataID  /*flagFieldID*/, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet)
    {
       return addBoundaryHandlingToStorage(bs, identifier, pdfFieldID, pdfFieldID, flagUIDSet,BoundaryHandling::Mode::OPTIMIZED_SPARSE_TRAVERSAL );
    }
@@ -158,8 +158,8 @@ ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( IBlock * 
    FlagFieldT * const flagField = block->getData< FlagFieldT >( flagField_ );
 
    flag_t mask = 0;
-   for( auto flag = flagUIDSet_.begin(); flag != flagUIDSet_.end(); ++flag )
-      mask = static_cast< flag_t >( mask | flagField->getOrRegisterFlag( *flag ) );
+   for(auto flag : flagUIDSet_)
+      mask = static_cast< flag_t >( mask | flagField->getOrRegisterFlag( flag ) );
 
 
 

@@ -86,7 +86,7 @@ namespace field {
       using Ptr = FieldPointer<Field<T, fSize_>, Field<T, fSize_>, T>;
       using ConstPtr = FieldPointer<Field<T, fSize_>, const Field<T, fSize_>, const T>;
 
-      using FlattenedField = typename std::conditional<VectorTrait<T>::F_SIZE != 0, Field<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, Field<T, fSize_>>::type;
+      using FlattenedField = std::conditional_t<VectorTrait<T>::F_SIZE != 0, Field<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, Field<T, fSize_>>;
 
       static const uint_t F_SIZE = fSize_;
       //@}
@@ -125,6 +125,14 @@ namespace field {
       //@}
       //****************************************************************************************************************
 
+      //**Operators************************************************************************************
+      /*! \name Operators */
+      //@{
+
+      Field & operator=( const Field & ) = delete;
+
+      //@}
+      //****************************************************************************************************************
 
       //** Element Access **********************************************************************************************
       /*! \name Element Access */
@@ -348,8 +356,6 @@ namespace field {
       //****************************************************************************************************************
 
    private:
-
-      Field & operator=( const Field & );
 
       T * values_;           //!< Linearized, 1-dimensional representation of the 4D data grid.
       T * valuesWithOffset_; //!< set by setOffsets(), to allow derived classes to change the offset

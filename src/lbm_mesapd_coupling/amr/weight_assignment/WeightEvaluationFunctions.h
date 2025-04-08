@@ -26,7 +26,7 @@ namespace walberla {
 namespace lbm_mesapd_coupling  {
 namespace amr {
 
-real_t defaultWeightEvaluationFunction(const PhantomBlock * /*block*/)
+inline real_t defaultWeightEvaluationFunction(const PhantomBlock * /*block*/)
 {
    return real_t(1);
 }

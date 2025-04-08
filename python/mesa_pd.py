@@ -23,6 +23,7 @@ if __name__ == '__main__':
     ps.add_property("invMass", "walberla::real_t", defValue="real_t(1)", syncMode="ON_GHOST_CREATION")
     ps.add_property("force", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
     ps.add_property("oldForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("charge", "walberla::real_t", defValue="real_t(0)", syncMode="ALWAYS")
 
     # shape definition for cases with small number of different shapes
     ps.add_property("shapeID", "size_t", defValue="", syncMode="ON_GHOST_CREATION")
@@ -70,6 +71,12 @@ if __name__ == '__main__':
                     syncMode="ON_OWNERSHIP_CHANGE")
     ps.add_property("oldHydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
                     syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("electrostaticForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+
+    # Properties for evaluation purposes
+    ps.add_property("totalDisplacement", "walberla::real_t", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("collisionForceNorm", "walberla::real_t", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
 
     # Properties for evaluation purposes
     ps.add_property("totalDisplacement", "walberla::real_t", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
@@ -154,6 +161,8 @@ if __name__ == '__main__':
     hftn = mpd.add(mpi.PropertyNotification('HydrodynamicForceTorqueNotification'))
     hftn.add_property('hydrodynamicForce', 'mesa_pd::Vec3', 'Vec3(real_t(0))')
     hftn.add_property('hydrodynamicTorque', 'mesa_pd::Vec3', 'Vec3(real_t(0))')
+    eftn = mpd.add(mpi.PropertyNotification('ElectrostaticForceNotification'))
+    eftn.add_property('electrostaticForce', 'mesa_pd::Vec3', 'Vec3(real_t(0))')
     hfn = mpd.add(mpi.PropertyNotification('HeatFluxNotification'))
     hfn.add_property('heatFlux', 'real_t', 'real_t(0)')
     ncn = mpd.add(mpi.PropertyNotification('NumContactNotification'))

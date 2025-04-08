@@ -39,7 +39,7 @@ public:
    inline bool symbolExists(const std::string & symbol) const { return parser_[0].symbolExists(symbol); }
 
 private:
-   std::unique_ptr< FunctionParser[] > parser_;
+   std::unique_ptr< FunctionParser[] > parser_; // NOLINT
 #ifndef NDEBUG
    int num_parsers_;
 #endif

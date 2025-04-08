@@ -1,19 +1,20 @@
 
 ###################################################################################################
 #
-# Module field ( lattice data structure )
+# Module walberla::field ( lattice data structure )
 #
 ###################################################################################################
 
 OPTION ( WALBERLA_FIELD_MONITORED_ACCESS "Enable (slow) monitoring mechanism for Fields" )
-OPTION ( WALBERLA_THREAD_SAFE_FIELD_ALLOCATION "Enables/Disables thread-safe field allocation (do NOT disable if you are not absolutely sure what you are doing!)" ON )
+OPTION( WALBERLA_THREAD_SAFE_FIELD_ALLOCATION "Enables/Disables thread-safe walberla::field allocation (do NOT disable if you are not absolutely sure what you are doing!)" ON )
 mark_as_advanced( WALBERLA_THREAD_SAFE_FIELD_ALLOCATION )
 
 configure_file ( CMakeDefs.in.h  CMakeDefs.h )
 
-add_library( field )
-target_link_libraries( field PUBLIC blockforest core communication domain_decomposition stencil vtk )
-target_sources( field
+add_library( walberla_field )
+add_library( walberla::field ALIAS walberla_field )
+target_link_libraries( walberla_field PUBLIC walberla::blockforest walberla::core walberla::communication walberla::domain_decomposition walberla::stencil walberla::vtk )
+target_sources( walberla_field
       PRIVATE
       SwapableCompare.h
       AccuracyEvaluation.h

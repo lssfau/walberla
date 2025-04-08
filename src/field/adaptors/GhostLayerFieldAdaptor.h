@@ -302,7 +302,7 @@ typename GhostLayerFieldAdaptor<Functor,glD>::const_iterator GhostLayerFieldAdap
 
 template< typename Functor, uint_t glD >
 typename GhostLayerFieldAdaptor<Functor,glD>::const_iterator GhostLayerFieldAdaptor<Functor,glD>::beginGhostLayerOnlyXYZ(
-         stencil::Direction dir, cell_idx_t f ) const
+         stencil::Direction dir, cell_idx_t /*f*/ ) const
 {
    CellInterval ci;
    getGhostRegion(dir,ci);
@@ -326,7 +326,7 @@ typename GhostLayerFieldAdaptor<Functor,glD>::const_iterator GhostLayerFieldAdap
 
 template< typename Functor, uint_t glD >
 typename GhostLayerFieldAdaptor<Functor,glD>::const_iterator GhostLayerFieldAdaptor<Functor,glD>::beginSliceBeforeGhostLayerXYZ(
-         stencil::Direction dir, cell_idx_t width, cell_idx_t f) const
+         stencil::Direction dir, cell_idx_t width, cell_idx_t /*f*/) const
 {
    CellInterval ci;
    getSliceBeforeGhostLayer(dir,ci,width);

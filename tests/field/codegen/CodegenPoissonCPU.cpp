@@ -37,7 +37,7 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<real_t, 1> ScalarField_T;
+using ScalarField_T = GhostLayerField<real_t, 1>;
 
 // U with Dirichlet Boundary
 void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & srcId )
@@ -49,10 +49,10 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          ScalarField_T * src = block->getData< ScalarField_T >( srcId );
          CellInterval xyz = src->xyzSizeWithGhostLayer();
          xyz.yMin() = xyz.yMax();
-         for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+         for(const auto& cell : xyz)
          {
-            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-            src->get( *cell ) = std::sin( math::pi * p[0] ) * std::sinh( math::pi * p[1] );
+            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
+            src->get( cell ) = std::sin( math::pi * p[0] ) * std::sinh( math::pi * p[1] );
          }
       }
    }
@@ -65,9 +65,9 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
    {
       ScalarField_T * f = block->getData< ScalarField_T >( fId );
       CellInterval xyz = f->xyzSize();
-      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      for(const auto& cell : xyz)
       {
-         f->get( *cell ) = real_c(0.0);
+         f->get( cell ) = real_c(0.0);
       }
    }
 }
@@ -98,8 +98,8 @@ void testPoisson()
    BlockDataID fId = field::addToStorage< ScalarField_T >( blocks, "f", real_c(0.0));
    initF( blocks, fId );
 
-   typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
-   typedef field::communication::PackInfo<ScalarField_T> Packing;
+   using CommScheme = blockforest::communication::UniformBufferedScheme<stencil::D2Q9>;
+   using Packing = field::communication::PackInfo<ScalarField_T>;
    CommScheme commScheme(blocks);
    commScheme.addDataToCommunicate( make_shared<Packing>(fieldID) );
 

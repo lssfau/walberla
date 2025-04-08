@@ -1,4 +1,4 @@
-target_sources( mesh
+target_sources( walberla_mesh
     PRIVATE
     RefinementSelection.h
     BlockForestInitialization.cpp

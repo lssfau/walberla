@@ -88,7 +88,7 @@ private:
 }; // class LubricationForceEvaluator
 
 
-void LubricationForceEvaluator::operator ()()
+inline void LubricationForceEvaluator::operator ()()
 {
    WALBERLA_LOG_PROGRESS( "Calculating Lubrication Force" );
 
@@ -142,7 +142,7 @@ void LubricationForceEvaluator::operator ()()
    }
 }
 
-void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
+inline void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
 {
 
    WALBERLA_ASSERT_UNEQUAL( sphereI->getSystemID(), sphereJ->getSystemID() );
@@ -182,7 +182,7 @@ void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sph
 
 }
 
-void LubricationForceEvaluator::treatLubricationSphrPlane( const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
+inline void LubricationForceEvaluator::treatLubricationSphrPlane( const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
 {
 
    real_t gap = pe::getSurfaceDistance( sphereI, planeJ );
@@ -207,7 +207,7 @@ void LubricationForceEvaluator::treatLubricationSphrPlane( const pe::SphereID sp
 }
 
 
-pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const pe::SphereID sphereI, const pe::SphereID sphereJ) const
+inline pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const pe::SphereID sphereI, const pe::SphereID sphereJ) const
 {
    const pe::Vec3 &posSphereI = sphereI->getPosition();
    const pe::Vec3 &posSphereJ = sphereJ->getPosition();
@@ -260,7 +260,7 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const p
    return fLub;
 }
 
-pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t gap, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
+inline pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t gap, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
 {
    const pe::Vec3 &posSphereI( sphereI->getPosition() );
    real_t radiusSphereI = sphereI->getRadius();

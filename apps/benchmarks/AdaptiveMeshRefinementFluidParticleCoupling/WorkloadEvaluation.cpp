@@ -540,7 +540,7 @@ int main( int argc, char **argv )
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
 
-   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, &timingTreePE, overlap, false );
+   std::function<void(void)> syncCall = [&capture0 = blocks->getBlockForest(), bodyStorageID, capture1 = &timingTreePE, overlap] { pe::syncNextNeighbors<BodyTypeTuple>(capture0, bodyStorageID, capture1, overlap, false); };
 
    auto generationDomain = AABB( real_t(0), real_t(0), real_t(0), real_c(XCells), real_c(YCells), real_c(ZCells) - topWallOffset);
    auto peMaterial = pe::createMaterial( "mat", densityRatio, real_t(1), real_t(0.25), real_t(0.25), real_t(0), real_t(200), real_t(100), real_t(100), real_t(100) );
@@ -761,11 +761,11 @@ int main( int argc, char **argv )
                          ( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag, pe_coupling::selectRegularBodies, optimizeForSmallObstacleFraction ), "PDF Restore" );
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = [bodiesFTContainer1] { bodiesFTContainer1->store(); };
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = [bodiesFTContainer2] { bodiesFTContainer2->setOnBodies(); };
    shared_ptr<pe_coupling::ForceTorqueOnBodiesScaler> forceScaler = make_shared<pe_coupling::ForceTorqueOnBodiesScaler>(blocks, bodyStorageID, real_t(1));
-   std::function<void(void)> setForceScalingFactorToHalf = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
+   std::function<void(void)> setForceScalingFactorToHalf = [forceScaler] { forceScaler->resetScalingFactor(real_t(0.5)); };
 
    if( averageForceTorqueOverTwoTimSteps ) {
       bodiesFTContainer2->store();

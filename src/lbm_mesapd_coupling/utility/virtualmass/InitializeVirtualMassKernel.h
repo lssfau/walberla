@@ -47,7 +47,7 @@ public:
 template <typename Accessor>
 inline void InitializeVirtualMassKernel::operator()(const size_t i, Accessor& ac, const real_t C_v, const real_t C_v_omega,
         const real_t fluidDensity) const {
-   static_assert(std::is_base_of<mesa_pd::data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, Accessor>, "please provide a valid accessor");
 
    const real_t virtualMass = C_v * fluidDensity * ac.getVolume(i);
    ac.setVirtualMass(i, virtualMass);

@@ -75,7 +75,7 @@ namespace field {
       using pointer = T*;
       using reference = T&;
 
-      using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
+      using FieldType = Field<std::remove_const_t<T>, fieldFSize>;
 
       static const uint_t F_SIZE = fieldFSize;
 
@@ -162,7 +162,7 @@ namespace field {
       //****************************************************************************************************************
 
 
-      friend class Field<typename std::remove_const<T>::type, fieldFSize>;
+      friend class Field<std::remove_const_t<T>, fieldFSize>;
 
       void incrementLine();
       void decrementLine();
@@ -174,13 +174,13 @@ namespace field {
       /// In the following vectors [0] is the slowest and [3] the fastest coordinate
       /// Current values of the coordinates, forth coordinate implicitly stored in linePtr_
       /// and if needed written to fastestCoord_
-      cell_idx_t cur_[3];
+      std::array<cell_idx_t, 3> cur_;
 
       /// Number of elements to skip when coordinate wraps around
-      uint_t  skips_[4];
+      std::array<uint_t, 4>  skips_;
 
       /// Size of each coordinate
-      uint_t  sizes_[4];
+      std::array<uint_t, 4>  sizes_;
 
       /// Field where iterator belongs to
       const FieldType * f_;
@@ -220,7 +220,7 @@ namespace field {
    {
    public:
       using Parent = FieldIterator<T, fieldFSize>;
-      using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
+      using FieldType = Field<std::remove_const_t<T>, fieldFSize>;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */
@@ -263,7 +263,7 @@ namespace field {
    {
    public:
        using Parent = FieldIterator<T, fieldFSize>;
-       using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
+       using FieldType = Field<std::remove_const_t<T>, fieldFSize>;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */

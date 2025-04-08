@@ -59,10 +59,10 @@ public:
 
 private:
 
-   bool      configured_;
+   bool      configured_{ false };
    Set<SUID> state_;
 
-   GlobalState() : configured_( false ) {}
+   GlobalState() {}
 
 };
 

@@ -95,7 +95,7 @@ So far, we know how to access blocks and the data stored on them. Hence, we coul
 an algorithm without using the sweep concept or the provided time loop classes.
 
 However, if you use the time loop classes you obtain additional features like the sweep/data selection per
-block (explained in a later tutorial), automatic time measurement, or time loop control from the GUI.
+block (explained in a later tutorial), or automatic time measurement.
 
 So let us start with writing our first sweep. A sweep function is a simple function that takes 
 as its only argument an IBlock pointer. 

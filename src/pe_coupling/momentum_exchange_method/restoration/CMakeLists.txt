@@ -1,4 +1,4 @@
-target_sources( pe_coupling
+target_sources( walberla_pe_coupling
     PRIVATE
     ExtrapolationDirectionFinder.h
     ExtrapolationDirectionFinder.cpp

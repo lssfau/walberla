@@ -23,6 +23,7 @@
 
 #include <ostream>
 #include <vector>
+#include <array>
 
 
 namespace walberla {
@@ -74,29 +75,28 @@ public:
    void toStream( std::ostream& os );
 
 private:
-
-   void encodeblock( unsigned char in[3], unsigned char out[4], int len )
+   void encodeblock( const std::array< unsigned char, 3 > in,  std::array< unsigned char, 4 > & out, int len )
    {
-      static const unsigned char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+      std::array< unsigned char, 65 > cb64 { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" };
 
       switch( len )
       {
       case 1:
          out[0] = cb64[ in[0] >> 2 ];
-         out[1] = cb64[ ((in[0] & 0x03) << 4) ];
+         out[1] = cb64[ ((in[0] & 0x03u) << 4) ];
          out[2] = '=';
          out[3] = '=';
          break;
       case 2:
          out[0] = cb64[ in[0] >> 2 ];
-         out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
-         out[2] = cb64[ ((in[1] & 0x0f) << 2) ];
+         out[1] = cb64[ ((in[0] & 0x03u) << 4) | ((in[1] & 0xf0u) >> 4) ];
+         out[2] = cb64[ ((in[1] & 0x0fu) << 2) ];
          out[3] = '=';
          break;
       default:
          out[0] = cb64[ in[0] >> 2 ];
-         out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
-         out[2] = cb64[ ((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6) ];
+         out[1] = cb64[ ((in[0] & 0x03u) << 4) | ((in[1] & 0xf0u) >> 4) ];
+         out[2] = cb64[ ((in[1] & 0x0fu) << 2) | ((in[2] & 0xc0u) >> 6) ];
          out[3] = cb64[ in[2] & 0x3f ];
       }
    }

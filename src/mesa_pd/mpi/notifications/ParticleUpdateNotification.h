@@ -48,6 +48,7 @@ public:
    walberla::id_t uid {UniqueID<data::Particle>::invalidID()};
    walberla::mesa_pd::Vec3 position {real_t(0)};
    walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
+   walberla::real_t charge {real_t(0)};
    walberla::mesa_pd::Rot3 rotation {};
    walberla::mesa_pd::Vec3 angularVelocity {real_t(0)};
    walberla::real_t radiusAtTemperature {real_t(0)};
@@ -85,6 +86,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getUid();
    buf << obj.particle_.getPosition();
    buf << obj.particle_.getLinearVelocity();
+   buf << obj.particle_.getCharge();
    buf << obj.particle_.getRotation();
    buf << obj.particle_.getAngularVelocity();
    buf << obj.particle_.getRadiusAtTemperature();
@@ -100,6 +102,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.uid;
    buf >> objparam.position;
    buf >> objparam.linearVelocity;
+   buf >> objparam.charge;
    buf >> objparam.rotation;
    buf >> objparam.angularVelocity;
    buf >> objparam.radiusAtTemperature;

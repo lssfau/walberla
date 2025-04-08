@@ -88,7 +88,7 @@ public:
       
       const uint_t neighborhoodSize = cell_idx_t(1);
 
-      CellInterval cellNeighborhood( centerCell[0] - cell_idx_c(neighborhoodSize), centerCell[1] - cell_idx_c(neighborhoodSize), centerCell[2] - cell_idx_c(neighborhoodSize),
+      CellInterval const cellNeighborhood( centerCell[0] - cell_idx_c(neighborhoodSize), centerCell[1] - cell_idx_c(neighborhoodSize), centerCell[2] - cell_idx_c(neighborhoodSize),
                                      centerCell[0] + cell_idx_c(neighborhoodSize), centerCell[1] + cell_idx_c(neighborhoodSize), centerCell[2] + cell_idx_c(neighborhoodSize) );
 
       const uint_t kernelSizeOneDirection = uint_t(2) * neighborhoodSize + uint_t(1);
@@ -99,10 +99,10 @@ public:
       real_t sumOfWeightsUnavailable = real_t(0);
 
       // get distribution weights and count available cells in surrounding cells
-      for( auto cellIt = cellNeighborhood.begin(); cellIt != cellNeighborhood.end(); ++cellIt )
+      for(const auto & cellIt : cellNeighborhood)
       {
-         Vector3<real_t> curCellCenter = blockStorage->getBlockLocalCellCenter( block_, *cellIt );
-         if( flagField_.isPartOfMaskSet( *cellIt, evaluationMask_ ) )
+         Vector3<real_t> curCellCenter = blockStorage->getBlockLocalCellCenter( block_, cellIt );
+         if( flagField_.isPartOfMaskSet( cellIt, evaluationMask_ ) )
          {
             weights[counter] = kernelweights::kernelWeightFunction( x, y, z, curCellCenter[0], curCellCenter[1], curCellCenter[2], dx, dy, dz );
             sumOfWeights += weights[counter];
@@ -124,11 +124,11 @@ public:
 
       // distribute the values to the neighboring domain cells with the corresponding (scaled) weighting
       counter = uint_t(0);
-      for( auto cellIt = cellNeighborhood.begin(); cellIt != cellNeighborhood.end(); ++cellIt )
+      for(const auto & cellIt : cellNeighborhood)
       {
          if ( weights[counter] > real_t(0) )
          {
-            addWeightedCellValue( distributeValueBegin, *cellIt, scalingFactor * weights[counter] );
+            addWeightedCellValue( distributeValueBegin, cellIt, scalingFactor * weights[counter] );
          }
          ++counter;
       }

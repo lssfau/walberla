@@ -23,10 +23,10 @@
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
 #   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMWrapperSweepsGPU.h"
-#   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/ParticleAndVolumeFractionMappingGPU.h"
+#   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/ParticleAndVolumeFractionMappingSweepsGPU.h"
 #else
 #   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMWrapperSweepsCPU.h"
-#   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/ParticleAndVolumeFractionMappingCPU.h"
+#   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/ParticleAndVolumeFractionMappingSweepsCPU.h"
 #endif
 
 namespace walberla
@@ -39,7 +39,7 @@ namespace gpu
 {
 
 // The deviceSyncWrapper can be used so that the timeloop measures the correct device runtime
-auto deviceSyncWrapper = [](std::function< void(IBlock*) > sweep) {
+inline auto deviceSyncWrapper = [](std::function< void(IBlock*) > sweep) {
    return [sweep](IBlock* b) {
       sweep(b);
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
@@ -56,14 +56,14 @@ class PSMSweepCollection
                       const ParticleSelector_T& ps,
                       ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA,
                       const Vector3< uint_t > particleSubBlockSize = Vector3< uint_t >(10))
-      : particleMappingSweep(SphereFractionMapping< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
+      : particleMappingSweep(SphereFractionMappingSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA, particleSubBlockSize)),
         setParticleVelocitiesSweep(SetParticleVelocitiesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA)),
         reduceParticleForcesSweep(ReduceParticleForcesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA))
    {}
-   SphereFractionMapping< ParticleAccessor_T, ParticleSelector_T, Weighting_T > particleMappingSweep;
+   SphereFractionMappingSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > particleMappingSweep;
    SetParticleVelocitiesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > setParticleVelocitiesSweep;
    ReduceParticleForcesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > reduceParticleForcesSweep;
 };

@@ -153,7 +153,7 @@ public:
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-static const uint8_t logBase2LookupTable[256] =
+static const std::array< uint8_t, 256 > logBase2LookupTable =
 {
 #define logBase2LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
       0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -275,11 +275,11 @@ public:
 
    static uint_type firstUID() { return 1; }
 
-   static uint_type nextUID( const uint_type /*uid*/ ) { WALBERLA_ASSERT( false ); return 1; }
+   static uint_type nextUID( [[maybe_unused]] const uint_type uid ) { WALBERLA_ASSERT( false ); return 1; }
 
-   static uint_type toIndex( const uint_type uid ) { WALBERLA_ASSERT_EQUAL( uid, 1 ); return 0; }
+   static uint_type toIndex( [[maybe_unused]] const uint_type uid ) { WALBERLA_ASSERT_EQUAL( uid, 1 ); return 0; }
 
-   static uint_type toBitMask( const uint_type uid ) { WALBERLA_ASSERT_EQUAL( uid, 1 ); return 1; }
+   static uint_type toBitMask( [[maybe_unused]] const uint_type uid ) { WALBERLA_ASSERT_EQUAL( uid, 1 ); return 1; }
 
    static const char* getType() { static const char* const type = "singleton generator"; return type; }
 

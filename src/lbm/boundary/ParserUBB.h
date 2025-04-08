@@ -117,7 +117,7 @@ public:
 
 
    ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-              FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
+              const FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
               const uint_t level, const AABB & aabb );
    ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
               FlagField<flag_t> * const flagField,  const uint_t level, const AABB & aabb );
@@ -220,19 +220,19 @@ template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternal
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::Parser::Parser( const std::array< std::string, 3 > & equations )
 : parsers_(), equations_( equations ), timeDependent_( false )
 {
-   if( equations_[0].length() > 0 )
+   if( not equations_[0].empty() )
    {
       parsers_[0].parse( equations_[0] );
       if( parsers_[0].symbolExists( "t" ) )
          timeDependent_ = true;
    }
-   if( equations_[1].length() > 0 )
+   if( not equations_[1].empty() )
    {
       parsers_[1].parse( equations_[1] );
       if( parsers_[1].symbolExists( "t" ) )
          timeDependent_ = true;
    }
-   if( equations_[2].length() > 0 )
+   if( not equations_[2].empty() )
    {
       parsers_[2].parse( equations_[2] );
       if( parsers_[2].symbolExists( "t" ) )
@@ -285,7 +285,7 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce>
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-                                                                                   FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
+                                                                                   const FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
                                                                                    const uint_t level, const AABB & aabb )
    : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), timeTracker_( timeTracker ), time_( real_t(0) ), level_( level )
 {
@@ -297,7 +297,7 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForc
    origin_[1] = aabb.yMin() + real_c(0.5) * dx_[1];
    origin_[2] = aabb.zMin() + real_c(0.5) * dx_[2];
 
-   if(flagField != NULL)
+   if(flagField != nullptr)
    {
       parserField_   = make_shared<ParserField>  ( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );
       velocityField_ = make_shared<VelocityField>( pdfField->xSize(), pdfField->ySize(), pdfField->zSize(), flagField->nrOfGhostLayers(), field::fzyx );

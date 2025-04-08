@@ -17,12 +17,12 @@ waLBerla_execute_test( NAME VoxelFileTestLong COMMAND $<TARGET_FILE:VoxelFileTes
 set_property( TEST VoxelFileTestLong PROPERTY DEPENDS VoxelFileTest ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
 
 
-waLBerla_compile_test( FILES ScalarFieldFromBodyTest.cpp DEPENDS gui )
+waLBerla_compile_test( FILES ScalarFieldFromBodyTest.cpp DEPENDS )
 waLBerla_execute_test( NAME ScalarFieldFromBodyTest )
 
 
 file( COPY "test.png" DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
-waLBerla_compile_test( FILES ScalarFieldFromGrayScaleImageTest.cpp DEPENDS gui )
+waLBerla_compile_test( FILES ScalarFieldFromGrayScaleImageTest.cpp DEPENDS )
 waLBerla_execute_test( NAME ScalarFieldFromGrayScaleImageTest )
 
 

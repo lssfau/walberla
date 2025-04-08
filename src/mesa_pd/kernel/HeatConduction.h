@@ -81,7 +81,7 @@ private:
    std::vector<real_t> conductance_ {};
 };
 
-HeatConduction::HeatConduction(const uint_t numParticleTypes)
+inline HeatConduction::HeatConduction(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    

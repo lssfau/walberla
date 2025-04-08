@@ -232,9 +232,9 @@ size_t TriangleMesh::removeDuplicateVertices( real_t tolerance )
 
 
    // adapt the indices in the triangles
-   for(size_t i=0; i < vertexIndices_.size(); ++i) {
-      WALBERLA_ASSERT_LESS( oldToNewIndex[ vertexIndices_[i] ], vInd.size() - removedVertices);
-      vertexIndices_[i] = index_t( oldToNewIndex[ vertexIndices_[i] ] );
+   for(unsigned int & vertexIndice : vertexIndices_) {
+      WALBERLA_ASSERT_LESS( oldToNewIndex[ vertexIndice ], vInd.size() - removedVertices);
+      vertexIndice = index_t( oldToNewIndex[ vertexIndice ] );
    }
 
    return removedVertices;
@@ -293,9 +293,9 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
 
    // split vertices by triangle connections
    set< vector< TriangleMeshNode* > > ssnode;
-   for( auto nit = nodes.begin(); nit != nodes.end(); ++nit )
+   for(auto & nit : nodes)
    {
-      TriangleMeshNode* node = nit->second;
+      TriangleMeshNode* node = nit.second;
       if( node->used )
          continue;
 
@@ -325,9 +325,8 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
    size_t index = size_t(0u);
    for( auto srcIt = ssnode.begin(); srcIt != ssnode.end(); ++srcIt, ++index)
    {
-      for( auto it = srcIt->begin(); it != srcIt->end(); ++it )
+      for(auto node : *srcIt)
       {
-         TriangleMeshNode* node = *it;
          index_t vIndex;
          if( hasVertexColors() )
             vIndex = meshes[index].addVertex( vertices_[node->vOld], vertexColors_[node->vOld] );
@@ -336,11 +335,11 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
          vid[index][node->vOld] = vIndex;
 
          if( hasNormalIndices() ){
-            for( auto nOld = node->nOld.begin(); nOld != node->nOld.end(); ++nOld ){
-               if( nid[index].find(*nOld) != nid[index].end() )
+            for(unsigned int  const& nOld : node->nOld){
+               if( nid[index].find(nOld) != nid[index].end() )
                   continue;
-               const index_t nIndex = meshes[index].addVertexNormal( vertexNormals_[*nOld] );
-               nid[index][*nOld] = nIndex;
+               const index_t nIndex = meshes[index].addVertexNormal( vertexNormals_[nOld] );
+               nid[index][nOld] = nIndex;
             }
          } else if( hasVertexNormals() ){
             const index_t nIndex = meshes[index].addVertexNormal( vertexNormals_[node->vOld] );
@@ -377,9 +376,9 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
    }
 
    // clear memory
-   for( auto it = nodes.begin(); it != nodes.end(); ++it )
+   for(auto & node : nodes)
    {
-      delete it->second;
+      delete node.second;
    }
 }
 
@@ -396,8 +395,8 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
 //*********************************************************************************************************************/
 void TriangleMesh::merge(const TriangleMesh & other, const Vector3<real_t> & offset)
 {
-   index_t oldNumVertices      = index_c( vertices_.size() );
-   index_t oldNumVertexNormals = index_c( vertexNormals_.size() );
+   index_t const oldNumVertices      = index_c( vertices_.size() );
+   index_t const oldNumVertexNormals = index_c( vertexNormals_.size() );
 
    // Add vertices
    for(index_t i=0; i < other.getNumVertices(); ++i) {
@@ -411,11 +410,11 @@ void TriangleMesh::merge(const TriangleMesh & other, const Vector3<real_t> & off
    std::copy(other.vertexColors_.begin(),  other.vertexColors_.end(),  std::back_inserter(vertexColors_)  );
 
    // Add faces
-   for( auto it = other.vertexIndices_.begin(); it != other.vertexIndices_.end(); ++it )
-      vertexIndices_.push_back( index_c( *it + oldNumVertices ) );
+   for(unsigned int const vertexIndice : other.vertexIndices_)
+      vertexIndices_.push_back( index_c( vertexIndice + oldNumVertices ) );
 
-   for( auto it = other.normalIndices_.begin(); it != other.normalIndices_.end(); ++it )
-      normalIndices_.push_back( index_c( *it + oldNumVertexNormals ) );
+   for(unsigned int const normalIndice : other.normalIndices_)
+      normalIndices_.push_back( index_c( normalIndice + oldNumVertexNormals ) );
 }
 
 math::AABB TriangleMesh::getAABB() const
@@ -424,33 +423,33 @@ math::AABB TriangleMesh::getAABB() const
    if( vertices_.empty() )
       WALBERLA_ABORT( "You are trying to compute the bounding box of an empty mesh!" );
 
-   return math::AABB( vertices_.begin(), vertices_.end() );
+   return { vertices_.begin(), vertices_.end() };
 }
 
 void TriangleMesh::translate( const Vector3<real_t> & offset )
 {
-   for( auto it = vertices_.begin(); it != vertices_.end(); ++it )
-      *it += offset;
+   for(auto & vertice : vertices_)
+      vertice += offset;
 }
 
 void TriangleMesh::scale( const Vector3<real_t> & scaleFactors )
 {
-   for( auto it = vertices_.begin(); it != vertices_.end(); ++it )
+   for(auto & vertice : vertices_)
    {
-      (*it)[0] *= scaleFactors[0];
-      (*it)[1] *= scaleFactors[1];
-      (*it)[2] *= scaleFactors[2];
+      vertice[0] *= scaleFactors[0];
+      vertice[1] *= scaleFactors[1];
+      vertice[2] *= scaleFactors[2];
    }
 }
 
 void TriangleMesh::exchangeAxes( uint_t xAxisId, uint_t yAxisId, uint_t zAxisId )
 {
-   for( auto it = vertices_.begin(); it != vertices_.end(); ++it )
+   for(auto & vertice : vertices_)
    {
-      vertex_t copy = *it;
-      (*it)[0] = copy[xAxisId];
-      (*it)[1] = copy[yAxisId];
-      (*it)[2] = copy[zAxisId];
+      vertex_t copy = vertice;
+      vertice[0] = copy[xAxisId];
+      vertice[1] = copy[yAxisId];
+      vertice[2] = copy[zAxisId];
    }
 }
 

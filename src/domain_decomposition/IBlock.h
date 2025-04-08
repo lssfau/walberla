@@ -100,8 +100,8 @@ public:
    template< typename U >
    const U* get() const {
       try { thr_(ptr_); }
-      catch ( U* ptr ) { return ptr; }
-      catch (...) {}
+      catch ( U* ptr ) { return ptr; } // NOLINT(misc-throw-by-value-catch-by-reference)
+      catch (...) {} // NOLINT(bugprone-empty-catch)
 #ifndef NDEBUG
       WALBERLA_ABORT( "BlockData access type violation! (The block data you added is of a different type than the block data you are trying to access!)"
                       "\nThe original data type was:       " << debug::demangle( typeInfo_ ) <<
@@ -135,8 +135,8 @@ public:
    template< typename U >
    bool isClassOrSubclassOf() const {
       try { thr_(ptr_); }
-      catch ( U* ) { return true; }
-      catch (...) {}
+      catch ( U* ) { return true; } // NOLINT(misc-throw-by-value-catch-by-reference)
+      catch (...) {} // NOLINT(bugprone-empty-catch)
       return false;
    }
 
@@ -156,7 +156,9 @@ private:
 #  pragma warning( disable : 4670 )
 #  pragma warning( disable : 4673 )
 #endif //_MSC_VER
-   template< typename T > static void thrower( void* ptr ) { throw static_cast< T* >( ptr ); }
+   template< typename T > static void thrower( void* ptr ) {
+      throw static_cast< T* >( ptr ); // NOLINT(misc-throw-by-value-catch-by-reference)
+   }
 #ifdef _MSC_VER
 #  pragma warning(pop)
 #endif //_MSC_VER
@@ -206,6 +208,7 @@ class StructuredBlockStorage; // forward declaration
 class IBlock : private NonCopyable
 {
 public:
+   IBlock() = delete;
 
    using BlockData = internal::BlockData;
 
@@ -271,8 +274,6 @@ protected:
    AABB aabb_; ///< an axis-aligned bounding box that defines the exact part of the simulation space that is assigned to this block
 
 private:
-
-   IBlock(); ///< Must not be made public or protected! Derived classes must call one of the available public/protected constructors.
 
    /// helper function for assigning data to this block (called by 'BlockStorage'), must not be made public or protected!
    inline void addData( const BlockDataID & index, BlockData* const data );
@@ -359,7 +360,7 @@ inline T* IBlock::getData( const BlockDataID & index ) {
 //**********************************************************************************************************************
 /*!
 *   Function for removing all data that corresponds to block data ID 'index'.
-*   Further calls to "getData" with 'index' will return NULL.
+*   Further calls to "getData" with 'index' will return nullptr.
 */
 //**********************************************************************************************************************
 inline void IBlock::deleteData( const BlockDataID & index )

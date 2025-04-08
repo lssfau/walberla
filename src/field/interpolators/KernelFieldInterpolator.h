@@ -42,7 +42,7 @@ namespace kernelweights
 // f(r) != 0 for abs(r) < 1.5 -> requires three neighborhood cells
 inline real_t smoothedDeltaFunction( const real_t & r )
 {
-   real_t rAbs = std::fabs(r);
+   real_t const rAbs = std::fabs(r);
    if( rAbs <= real_t(0.5) )
    {
       return (real_t(1) + std::sqrt( - real_t(3) * r * r + real_t(1) ) ) * (real_t(1) / real_t(3));
@@ -142,11 +142,11 @@ public:
       // store the calculated weighting factors of the UNavailable cells, i.e. cells not included in the evaluation mask
       std::vector<real_t> weightsUnavailable( kernelSizeOneDirection * kernelSizeOneDirection * kernelSizeOneDirection, real_t(0) );
 
-      cell_idx_t cellIdx0x = cellNeighborhood.xMin();
-      cell_idx_t cellIdx0y = cellNeighborhood.yMin();
-      cell_idx_t cellIdx0z = cellNeighborhood.zMin();
-      uint_t nx = kernelSizeOneDirection;
-      uint_t nxy = kernelSizeOneDirection * kernelSizeOneDirection;
+      cell_idx_t const cellIdx0x = cellNeighborhood.xMin();
+      cell_idx_t const cellIdx0y = cellNeighborhood.yMin();
+      cell_idx_t const cellIdx0z = cellNeighborhood.zMin();
+      uint_t const nx = kernelSizeOneDirection;
+      uint_t const nxy = kernelSizeOneDirection * kernelSizeOneDirection;
       Vector3<real_t> cellCenter0 = blockStorage->getBlockLocalCellCenter( block_, Cell(cellIdx0x, cellIdx0y, cellIdx0z) ); // = cell in neighborhood with smallest x-, y-, and z-indices
 
       // calculate kernel weights of all cells in neighborhood
@@ -224,9 +224,9 @@ public:
 
       const real_t scalingFactor = real_t(1) + sumOfWeightsUnavailable / sumOfWeights;
 
-      for( auto weightIt = weights.begin(); weightIt != weights.end(); ++weightIt )
+      for(auto & weight : weights)
       {
-         *weightIt *= scalingFactor;
+         weight *= scalingFactor;
       }
 
       // interpolate value to interpolation position using the previously calculated weights

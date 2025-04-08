@@ -115,6 +115,7 @@ void ParseMessage::operator()(int sender,
       pIt->setUid(objparam.uid);
       pIt->setPosition(objparam.position);
       pIt->setLinearVelocity(objparam.linearVelocity);
+      pIt->setCharge(objparam.charge);
       pIt->setRotation(objparam.rotation);
       pIt->setAngularVelocity(objparam.angularVelocity);
       pIt->setRadiusAtTemperature(objparam.radiusAtTemperature);
@@ -153,6 +154,7 @@ void ParseMessage::operator()(int sender,
       pIt->setHydrodynamicTorque(objparam.hydrodynamicTorque_);
       pIt->setOldHydrodynamicForce(objparam.oldHydrodynamicForce_);
       pIt->setOldHydrodynamicTorque(objparam.oldHydrodynamicTorque_);
+      pIt->setElectrostaticForce(objparam.electrostaticForce_);
       pIt->setTotalDisplacement(objparam.totalDisplacement_);
       pIt->setCollisionForceNorm(objparam.collisionForceNorm_);
       pIt->setVirtualMass(objparam.virtualMass_);
