@@ -60,10 +60,10 @@ class GeneratedNonUniformGPUPackInfo
    virtual void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, gpuStream_t stream) = 0;
    virtual void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, GpuBuffer_T & buffer, gpuStream_t stream) = 0;
 
-   virtual uint_t sizeEqualLevelSend( const Block * sender, stencil::Direction dir) = 0;
-   virtual uint_t sizeCoarseToFineSend ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir) = 0;
-   virtual uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) = 0;
-   virtual uint_t sizeFineToCoarseSend ( const Block * fineSender, stencil::Direction dir) = 0;
+   virtual uint_t sizeEqualLevelSend( const Block * sender, stencil::Direction dir) const = 0;
+   virtual uint_t sizeCoarseToFineSend ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir) const = 0;
+   virtual uint_t sizeCoarseToFineReceive ( Block * fineReceiver, stencil::Direction dir) const = 0;
+   virtual uint_t sizeFineToCoarseSend ( const Block * fineSender, stencil::Direction dir) const = 0;
 
    virtual void sync() = 0;
 

@@ -59,6 +59,14 @@ waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTestGPU.cpp
       DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldPackInfoTestGPU )
 
+
+waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldNonUniformPackInfo FILE codegen/GeneratedFieldNonUniformPackInfoTestGPU.py
+        OUT_FILES ScalarFieldNonUniformCommunicationGPU.cu ScalarFieldNonUniformCommunicationGPU.h)
+waLBerla_compile_test( FILES codegen/GeneratedFieldNonUniformPackInfoTestGPU.cpp
+        DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldNonUniformPackInfo )
+waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestGPU )
+
+
     if (WALBERLA_BUILD_WITH_PYTHON)
 
         waLBerla_link_files_to_builddir( *.py )

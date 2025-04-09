@@ -97,4 +97,9 @@ waLBerla_generate_target_from_python(NAME CodeGenEK FILE codegen/EK.py
         OUT_FILES EKFlux.cpp EKFlux.h EKContinuity.cpp EKContinuity.h )
 waLBerla_compile_test( FILES codegen/EK.cpp DEPENDS walberla::blockforest walberla::core walberla::field walberla::timeloop CodeGenEK )
 waLBerla_execute_test( NAME EK )
+
+waLBerla_generate_target_from_python(NAME CodegenGeneratedNonUniformPackInfoTest FILE codegen/GeneratedFieldNonUniformPackInfoTestCPU.py
+        OUT_FILES ScalarFieldNonUniformCommunicationCPU.cpp ScalarFieldNonUniformCommunicationCPU.h )
+waLBerla_compile_test( FILES codegen/GeneratedFieldNonUniformPackInfoTestCPU.cpp DEPENDS walberla::blockforest walberla::core walberla::field walberla::timeloop CodegenGeneratedNonUniformPackInfoTest )
+waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestCPU )
 endif()
