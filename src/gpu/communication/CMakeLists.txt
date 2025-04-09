@@ -10,4 +10,5 @@ target_sources( walberla_gpu
     NonUniformGPUScheme.h
     GeneratedGPUPackInfo.h
     GeneratedNonUniformGPUPackInfo.h
+    GeneratedNonUniformGPUFieldPackInfo.h
     )
