@@ -3,16 +3,30 @@
 
 \image html waLBerla.png
 
+Welcome to the waLBerla Framework, a widely applicable lattice Boltzmann simulation code from Erlangen.
+These are the documentation pages for the project's C++ code base.
+
+\note
+This is the documentation for waLBerla version \doxyconfig PROJECT_NUMBER.
+To find the documentation for the current development revision,
+please refer to our Git repository at https://i10git.cs.fau.de/walberla/walberla.
+
+\section getting-started Setup Instructions
+
+On the following pages, you can find instructions on downloading and
+setting up waLBerla both as a standalone project and as a library:
+
+- \ref setup-instructions
+- \ref using-as-library
+- \ref faq
+
 \section tutorials Tutorials
 
 \subsection basics Basics
 
-Welcome to the waLBerla Framework, a widely applicable lattice Boltzmann simulation code
-from Erlangen. The following tutorials show you how to get and build waLBerla and describe
+The following tutorials show you how to get and build waLBerla and describe
 all the basic data strcutures and concepts of the framework.
 
-- \ref setup_instructions \n
-  This page describes how to obtain a copy of waLBerla and how to setup your environment for development.
 - \ref tutorial_basics_01 \n
   The first tutorial explains the basic data structures of waLBerla and how to setup a simple domain.
 - \ref tutorial_basics_02 \n

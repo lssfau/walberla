@@ -789,6 +789,7 @@ FILE_PATTERNS          = *.c \
                          *.prm \
                          *.par \
                          *.dox \
+                         *.md \
                          *.sh
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should

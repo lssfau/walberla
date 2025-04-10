@@ -8,6 +8,7 @@ stages:
    - pretest
    - "Code Quality"
    - test
+   - documentation
    - deploy
    - benchmark
 
@@ -1919,6 +1920,8 @@ aocc_4_hybrid_dbg_sp:
 
 doc:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
+   stage: documentation
+   needs: []
    script:
       - cmake --version
       - doxygen --version

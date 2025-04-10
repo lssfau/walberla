@@ -71,6 +71,7 @@ logfile*.txt
 # CMake
 CMakeUserPresets.json
 /CMakeLists.txt.user
+CMakeUserPresets.json
 
 # CMake build files
 CMakeFiles
