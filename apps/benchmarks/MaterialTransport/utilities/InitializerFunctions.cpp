@@ -155,8 +155,8 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {
          Cell globalCell;
          const auto cellAABB                 = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
-         FluidVelocityField->get(x, y, z, 0) = uInflow[0];
-         FluidVelocityField->get(x, y, z, 1) = uInflow[1];
+         FluidVelocityField->get(x, y, z, 0) = real_t(0);//uInflow[0];
+         FluidVelocityField->get(x, y, z, 1) = real_t(0);//uInflow[1];
          if(domainSize[2] != 1)
          {
             FluidVelocityField->get(x, y, z, 2) = 0;
