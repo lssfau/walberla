@@ -366,8 +366,8 @@ int main(int argc, char** argv)
    boundariesBlockString += "\n BoundariesConcentration";
 
    boundariesBlockString += "{"
-                            "Border { direction W;    walldistance -1;  flag Density_Concentration_west; }"
-                            "Border { direction E;    walldistance -1;  flag Density_Concentration_east; }";
+                            "Border { direction W;    walldistance -1;  flag Neumann_Concentration; }"
+                            "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
 
    if (!periodicInY)
    {
@@ -377,8 +377,8 @@ int main(int argc, char** argv)
 
    if (!periodicInZ)
    {
-      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Concentration; }"
-                               "Border { direction B;    walldistance -1;  flag Neumann_Concentration; }";
+      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Density_Concentration_west; }"
+                               "Border { direction B;    walldistance -1;  flag Density_Concentration_east; }";
    }
    boundariesBlockString += "}";
    WALBERLA_ROOT_SECTION()
@@ -450,7 +450,7 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,
       particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1.0),rho_0);*/
 
-   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),rho_0);
+   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),real_t(0),rho_0);
    pystencils::InitializeConcentrationDomain pdfSetterConcentration(
       densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
 #endif
@@ -471,10 +471,14 @@ int main(int argc, char** argv)
       if (useParticles) {
          psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
       }
+
       pdfSetterFluid(&(*blockIt));
+      WALBERLA_LOG_INFO_ON_ROOT("reached till here 4");
       pdfSetterConcentration(&(*blockIt));
 
+
    }
+
    ///////////////////////
    // ADD COMMUNICATION //
    //////////////////////

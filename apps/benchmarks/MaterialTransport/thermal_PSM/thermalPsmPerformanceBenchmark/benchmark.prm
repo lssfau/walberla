@@ -2,11 +2,11 @@
 NumericalSetup
 {
     // product of number of blocks should be equal to number of used processes
-    numXBlocks 1;
+    numXBlocks 2;
     numYBlocks 1;
-    numZBlocks 1;
+    numZBlocks 2;
 
-    cellsPerBlockPerDirection 200;
+    cellsPerBlockPerDirection 100;
 
     periodicInY false;
     periodicInZ false;
@@ -23,18 +23,18 @@ NumericalSetup
     Mach 0.01;
     relaxationRate 1.5;
 
-    timeSteps 1000000;
+    timeSteps 50000;
 
 
     // particle distribution in LBM units
 
-    useParticles false; // if true, PSM/particle mapping/velocity computation/hydrodynamic force reduction is used, else LBM is used
+    useParticles true; // if true, PSM/particle mapping/velocity computation/hydrodynamic force reduction is used, else LBM is used
     particleDiameter 10.0;
     particleGenerationSpacing 11.0;
     generationDomainFraction <0.8, 1.0, 1.0>; // fraction of the domain where particles are generated
     generationPointOfReferenceOffset <0, 0, 0>; // offset of point of reference from domain center, see SCIterator.h
     useParticleOffset true; // offset every second particle layer in flow direction
-    particleSubBlockSize <8, 8, 8>;
+    particleSubBlockSize <10, 10, 10>;
 
     // fluid quantities in LBM units
     uInflow 0.00008;
