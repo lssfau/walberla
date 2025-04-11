@@ -34,7 +34,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${walberla_SOURCE_DIR}/cmake ${walb
 
 include ( waLBerlaFunctions )
 
-set_version( 7 0 )
+set_version( 7 1 )
 
 include( CMakeParseArguments )
 
