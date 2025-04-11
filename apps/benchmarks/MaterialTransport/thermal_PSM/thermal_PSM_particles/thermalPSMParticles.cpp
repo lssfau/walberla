@@ -30,6 +30,7 @@
 #include "core/grid_generator/SCIterator.h"
 #include "core/logging/all.h"
 #include "core/timing/RemainingTimeLogger.h"
+#include "core/math/all.h"
 
 #include "field/AddToStorage.h"
 #include "field/vtk/all.h"
@@ -189,6 +190,7 @@ int main(int argc, char** argv)
    const real_t rho_0 = 1.0;
    const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
    const real_t omega_t = lbm::collision_model::omegaFromViscosity(thermalDiffusivityLB);
+   const real_t omega_c = (omega_t);
    const real_t qk = 1/(4*thermalDiffusivityLB + 0.5);
    const real_t qe = 1.0;
    //  calculations for verification and correctness
@@ -256,17 +258,11 @@ int main(int argc, char** argv)
                                  simulationDomain.yMax() * (real_t(1) + generationDomainFraction[1]) / real_t(2),
                                  simulationDomain.zMax() * (real_t(1) + generationDomainFraction[2]) / real_t(2)));
       real_t particleOffset = particleGenerationSpacing / real_t(2);
-      for (auto pt :
-           grid_generator::SCGrid(generationDomain, generationDomain.center() + generationPointOfReferenceOffset,
-                                  particleGenerationSpacing))
-      {
-         // Offset every second particle layer in flow direction to avoid channels in flow direction
-         if (useParticleOffset &&
-             uint_t(round(math::abs(generationDomain.center()[0] - pt[0]) / (particleGenerationSpacing))) % uint_t(2) !=
-                uint_t(0))
-         {
-            pt = pt + Vector3(real_t(0), particleOffset, particleOffset);
-         }
+      /*for (auto pt :
+           grid_generator::SCGrid(generationDomain, generationDomain.center(),
+                                  particleGenerationSpacing))*/
+      //{
+      auto pt = Vector3< real_t >(simulationDomain.xMax()/2,simulationDomain.yMax()/2,simulationDomain.zMax()/2);
          if (rpdDomain->isContainedInProcessSubdomain(uint_c(mpi::MPIManager::instance()->rank()), pt))
          {
             mesa_pd::data::Particle&& p = *ps->create();
@@ -275,9 +271,14 @@ int main(int argc, char** argv)
             p.setOwner(mpi::MPIManager::instance()->rank());
             p.setShapeID(sphereShape);
             p.setType(0);
-            p.setTemperature(0.4);
+            p.setTemperature(math::realRandom(real_t(0.2),real_t(1)));
+
+            //p.setTemperature(0.308382);
+            //p.setLinearVelocity(Vector3<real_t>(0.1,0.1,0.1));
+
+
          }
-      }
+      //}
    }
 
    ////////////////////////
@@ -367,8 +368,8 @@ int main(int argc, char** argv)
    boundariesBlockString += "\n BoundariesConcentration";
 
    boundariesBlockString += "{"
-                            "Border { direction W;    walldistance -1;  flag Neumann_Concentration; }"
-                            "Border { direction E;    walldistance -1;  flag Neumann_Concentration; }";
+                            "Border { direction W;    walldistance -1;  flag Density_Concentration_east; }"
+                            "Border { direction E;    walldistance -1;  flag Density_Concentration_east; }";
 
    if (!periodicInY)
    {
@@ -378,8 +379,8 @@ int main(int argc, char** argv)
 
    if (!periodicInZ)
    {
-      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Density_Concentration_west; }"
-                               "Border { direction B;    walldistance -1;  flag Density_Concentration_east; }";
+      boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Concentration; }"
+                               "Border { direction B;    walldistance -1;  flag Neumann_Concentration; }";
    }
    boundariesBlockString += "}";
    WALBERLA_ROOT_SECTION()
@@ -451,9 +452,19 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,
       particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1.0),rho_0);*/
 
-   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),real_t(0),rho_0);
-   pystencils::InitializeConcentrationDomain pdfSetterConcentration(
-      densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),real_t(0),real_t(0),real_t(0),rho_0);
+   //pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),real_t(0),real_t(0),real_t(0),rho_0);
+   //pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravityLB,real_t(1),real_t(0),rho_0);
+
+   WALBERLA_LOG_INFO_ON_ROOT("reached here fluid initi done");
+   pystencils::InitializeConcentrationDomain pdfSetterConcentration(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,
+      densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleTemperaturesFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+
+   /*pystencils::InitializeConcentrationDomain pdfSetterConcentration(particleAndVolumeFractionSoA.BsFieldID,
+                                                                    particleAndVolumeFractionSoA.particleTemperaturesFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);*/
+   //pystencils::InitializeConcentrationDomain pdfSetterConcentration(pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+
+   WALBERLA_LOG_INFO_ON_ROOT("reached here concentr initi done");
 #endif
 
 
@@ -471,11 +482,14 @@ int main(int argc, char** argv)
       //initializeFluidDomain(&(*blockIt));
       if (useParticles) {
          psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
+         psmSweepCollection.setParticleTemperaturesSweep(&(*blockIt));
+         WALBERLA_LOG_INFO_ON_ROOT("set the particle temps");
       }
 
       pdfSetterFluid(&(*blockIt));
-      WALBERLA_LOG_INFO_ON_ROOT("reached till here 4");
+      WALBERLA_LOG_INFO_ON_ROOT("set the fluid pdfs");
       pdfSetterConcentration(&(*blockIt));
+      WALBERLA_LOG_INFO_ON_ROOT("set the conce pdfs");
 
 
    }
@@ -517,8 +531,9 @@ int main(int argc, char** argv)
                                                   pdfFieldFluidID, velFieldFluidID, T0, alphaLB, gravityLB,
                                                   rho_0);
 #else
-   pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldID, densityFluidFieldID,
-                                                  pdfFieldFluidCPUGPUID, velFieldFluidID, T0, alphaLB, gravityLB,
+   WALBERLA_LOG_INFO_ON_ROOT("reachd till hereeeeeee in ceod");
+   pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID, densityFluidFieldID,
+                                                  pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, T0, alphaLB, gravityLB,
                                                   rho_0);
 
 #endif
@@ -526,7 +541,7 @@ int main(int argc, char** argv)
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID, pdfFieldConcentrationID);
 #else
-   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldID,
+   pystencils::ConcentrationMacroGetter getterSweep_concentration(densityConcentrationFieldCPUGPUID,
                                                                   pdfFieldConcentrationCPUGPUID);
 #endif
 
@@ -587,24 +602,29 @@ int main(int argc, char** argv)
          make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
 #else
       vtkOutput_Fluid->addCellDataWriter(
-         make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
+         make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
 #endif
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID, "OverlapFraction"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleAndVolumeFractionSoA.particleTemperaturesFieldID, "particle temp filed"));
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Concentration->addCellDataWriter(
          make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
 #else
       vtkOutput_Concentration->addCellDataWriter(
-         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldCPUGPUID, "Concentration"));
 #endif
 
       vtkOutput_Concentration->addCellDataWriter(
          make_shared< field::VTKWriter< FlagField_T > >(flagFieldConcentrationID, "ConcentrationFlagField"));
 
+      //WALBERLA_LOG_INFO("reache here in vtk ");
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Fluid), "VTK output Fluid");
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput_Concentration), "VTK output Concentration");
    }
@@ -624,14 +644,23 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.particleVelocitiesFieldID,
       pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0,frameWidth);
 
-   pystencils::LBMFluidSweep lbmFluidSweep(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,omega_f);
+   pystencils::PSMConcentrationSweep psmConcentrationSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleTemperaturesFieldID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID,omega_c);
 
-   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,omega_f,frameWidth);
+   /*pystencils::PSMConcentrationSweep psmConcentrationSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID,omega_c);
+*/
+
+   pystencils::LBMFluidSweep lbmFluidSweep(densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0);
+
+   pystencils::LBMFluidSplitSweep lbmFluidSplitSweep(densityConcentrationFieldCPUGPUID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,T0,alphaLB,gravityLB,omega_f,rho_0,frameWidth);
 
    pystencils::LBMConcentrationSweep lbmConcentrationSweep(densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID,
                                                            velFieldFluidCPUGPUID,qe,qk);
 
-   pystencils::LBMConcentrationSplitSweep lbmConcentrationSplitSweep(densityConcentrationFieldCPUGPUID,pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID,qe,qk, frameWidth);
+
 
 
    // Add LBM (fluid and concentration) communication function and boundary handling sweep
@@ -660,56 +689,37 @@ int main(int argc, char** argv)
 
    if (useParticles)
    {
-      if(useCommunicationHiding){
-         commTimeloop.add() << BeforeFunction([&]() { com_fluid.startCommunication(); })
-                            << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
-         commTimeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
-                                     "Set particle velocities");
-         commTimeloop.add() << Sweep(deviceSyncWrapper(psmFluidSplitSweep.getInnerSweep()), "PSM inner sweep")
-                            << AfterFunction([&]() { com_fluid.wait(); }, "LBM Communication (wait)");
-         timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSplitSweep.getOuterSweep()), "PSM outer sweep");
 
-         commTimeloop.add() << BeforeFunction([&]() { com_concentration.startCommunication(); }, "LBM concentration Communication (start)")
-                            << Sweep(deviceSyncWrapper(lbmConcentrationSplitSweep.getInnerSweep()), "LBM concentration inner sweep")
-                            << AfterFunction([&]() { com_concentration.wait(); }, "LBM concentration Communication (wait)");
-         timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSplitSweep.getOuterSweep()), "LBM concentration outer sweep");
-
-         // after both the sweeps, reduce the particle forces.
-         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
-                                 "Reduce particle forces");
-      }
-      else
-      {
          timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
          timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
                                  "Set particle velocities");
          timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
-         timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
+         //timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleTemperaturesSweep),
+                                 "Set particle temperatures");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmConcentrationSweep), "PSM Concentration sweep");
 
          // after both the sweeps, reduce the particle forces.
          timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
                                  "Reduce particle forces");
-      }
+
    }
    else{
-      if (useCommunicationHiding)
-      {
-         commTimeloop.add() << BeforeFunction([&]() { com_fluid.startCommunication(); })
-                            << Sweep(deviceSyncWrapper(lbmFluidSplitSweep.getInnerSweep()), "PSM inner sweep")
-                            << AfterFunction([&]() { com_fluid.wait(); }, "LBM Communication (wait)");
-         timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSplitSweep.getOuterSweep()), "PSM outer sweep");
 
-         commTimeloop.add() << BeforeFunction([&]() { com_concentration.startCommunication(); }, "LBM concentration Communication (start)")
-                            << Sweep(deviceSyncWrapper(lbmConcentrationSplitSweep.getInnerSweep()), "LBM concentration inner sweep")
-                            << AfterFunction([&]() { com_concentration.wait(); }, "LBM concentration Communication (wait)");
-         timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSplitSweep.getOuterSweep()), "LBM concentration outer sweep");
-
-      }
-      else
-      {
+         /*WALBERLA_LOG_INFO_ON_ROOT("No particles used so executing normal fluid and concentration sweeps");
          timeloop.add() << Sweep(deviceSyncWrapper(lbmFluidSweep), "LBM Fluid sweep");
-         timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
-      }
+         timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");*/
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                                 "Set particle velocities");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
+         //timeloop.add() << Sweep(deviceSyncWrapper(lbmConcentrationSweep), "LBM Concentration sweep");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmConcentrationSweep), "PSM Concentration sweep");
+
+         // after both the sweeps, reduce the particle forces.
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                                 "Reduce particle forces");
+
    }
 
 

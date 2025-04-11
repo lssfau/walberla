@@ -46,7 +46,7 @@ const bool infoCsePdfs = {cse_pdfs};
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
     stencil_fluid = LBStencil(Stencil.D3Q19)
-    stencil_concentration = LBStencil(Stencil.D3Q7)
+    stencil_concentration = LBStencil(Stencil.D3Q27)
     omega = sp.Symbol("omega")  # for now same for both the sweeps
     init_density_fluid = sp.Symbol("init_density_fluid")
     init_density_concentration = sp.Symbol("init_density_concentration")
@@ -101,13 +101,14 @@ with CodeGeneration() as ctx:
         f"particle_v({MaxParticlesPerCell * stencil_fluid.D}), particle_f({MaxParticlesPerCell * stencil_fluid.D}), Bs({MaxParticlesPerCell}): {data_type}[3D]",
         layout=layout,
     )
+    particle_temperatures = ps.fields(f"particle_t({MaxParticlesPerCell}) :{data_type}[3D]",layout=layout)
 
     # Solid fraction field
     B = ps.fields(f"b({1}): {data_type}[3D]", layout=layout)
 
 
-    #force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
-    force_concentration_on_fluid = sp.Matrix([0, 0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
+    force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
+    #force_concentration_on_fluid = sp.Matrix([0, 0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
 
     # Fluid LBM optimisation
     lbm_fluid_opt = LBMOptimisation(
@@ -132,8 +133,8 @@ with CodeGeneration() as ctx:
         relaxation_rate=omega_f,
         #relaxation_rates=[0,1,1,Sv,Sv,Sv,Sq,Sq,Sv],
         output={"velocity": velocity_field},
-        #force= force_concentration_on_fluid,
-        #force_model=ForceModel.GUO,
+        force= force_concentration_on_fluid,
+        force_model=ForceModel.GUO,
         compressible=True,
     )
 
@@ -163,7 +164,7 @@ with CodeGeneration() as ctx:
         stencil=stencil_concentration,
         method=Method.MRT,
         relaxation_rates=[1,qk,qk,qk,qe,qe,qe],  # MRT 2
-        #relaxation_rate=omega,
+        #relaxation_rate=omega_c,
         velocity_input=velocity_field,
         output={"density": concentration_field},
         compressible=True,
@@ -178,6 +179,7 @@ with CodeGeneration() as ctx:
         MaxParticlesPerCell=MaxParticlesPerCell,
         individual_fraction_field=Bs,
         particle_force_field=None,
+        particle_temperature_field=particle_temperatures,
     )
 
     psm_concentration_config = LBMConfig(
@@ -186,7 +188,6 @@ with CodeGeneration() as ctx:
         relaxation_rate=omega_c,
         velocity_input=velocity_field,
         output={"density": concentration_field},
-        #force_model=ForceModel.LUO,
         compressible=True,
         psm_config=psm_config_C,
     )
@@ -199,7 +200,7 @@ with CodeGeneration() as ctx:
     # =====================
 
     method_fluid = create_lb_method(lbm_config=psm_fluid_config)
-    method_concentration = create_lb_method(lbm_config=lbm_concentration_config)
+    method_concentration = create_lb_method(lbm_config=psm_concentration_config)
     init_velocity = sp.symbols("init_velocity_:3")
     pdfs_fluid_setter = macroscopic_values_setter(
         method_fluid, density=init_density_fluid, velocity=init_velocity, pdfs=pdfs_fluid.center_vector
@@ -210,16 +211,29 @@ with CodeGeneration() as ctx:
     )
 
     # Use average velocity of all intersecting particles when setting PDFs (mandatory for SC=3)
+    rhs = []
     for i, sub_exp in enumerate(pdfs_fluid_setter.subexpressions[-3:]):
-        rhs = []
-        for summand in sub_exp.rhs.args:
-            rhs.append(summand * (1.0 - B.center))
+        if(len(sub_exp.rhs.args) > 0):
+            for summand in (sub_exp.rhs.args):
+                rhs.append(summand * (1.0 - B.center))
+        else:
+            rhs.append(sub_exp.rhs * (1.0 - B.center))
         for p in range(2):
             rhs.append(particle_velocities(p * stencil_fluid.D + i) * Bs.center(p))
         pdfs_fluid_setter.subexpressions.remove(sub_exp)
         pdfs_fluid_setter.subexpressions.append(Assignment(sub_exp.lhs, Add(*rhs)))
+        rhs = []
 
+    # Use average temperature of all intersecting particles when setting PDFs (mandatory for SC=3)
 
+    sub_exp_con = pdfs_concentration_setter.subexpressions[0]
+    rhs_con = []
+    rhs_con.append(sub_exp_con.rhs * (1.0 - B.center))
+    for p in range(2):
+        rhs_con.append(particle_temperatures(p) * Bs.center(p))
+    pdfs_concentration_setter.subexpressions.remove(sub_exp_con)
+    pdfs_concentration_setter.subexpressions.append(Assignment(sub_exp_con.lhs, Add(*rhs_con)))
+    print("con setter after manip ", pdfs_concentration_setter.subexpressions)
     # specify the target
 
     if ctx.gpu:

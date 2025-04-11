@@ -47,6 +47,73 @@ namespace gpu
 {
 
 template< typename ParticleAccessor_T, typename ParticleSelector_T, int Weighting_T >
+class SetParticleTemperaturesSweep
+{
+ public:
+   SetParticleTemperaturesSweep(const shared_ptr< StructuredBlockStorage >& bs,
+                                const shared_ptr< ParticleAccessor_T >& ac,
+                                const ParticleSelector_T& mappingParticleSelector,
+                                ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA)
+      : bs_(bs), ac_(ac), mappingParticleSelector_(mappingParticleSelector),
+        particleAndVolumeFractionSoA_(particleAndVolumeFractionSoA)
+   {}
+   void operator()(IBlock* block)
+   {
+      // Check that uids of the particles have not changed since the last mapping to avoid incorrect indices
+      std::vector< walberla::id_t > currentUIDs;
+      for (size_t idx = 0; idx < ac_->size(); ++idx)
+      {
+         if (mappingParticleSelector_(idx, *ac_)) { currentUIDs.push_back(ac_->getUid(idx)); }
+      }
+      WALBERLA_ASSERT(particleAndVolumeFractionSoA_.mappingUIDs == currentUIDs);
+
+      size_t numMappedParticles = 0;
+      for (size_t idx = 0; idx < ac_->size(); ++idx)
+      {
+         if (mappingParticleSelector_(idx, *ac_)) { numMappedParticles++; }
+      }
+
+      if (numMappedParticles == uint_t(0)) return;
+
+      size_t arraySizes = numMappedParticles * sizeof(real_t) * 1;
+
+      // Allocate unified memory for the particle information required for computing the temperature (used in
+      // the solid collision operator for temperature field)
+      real_t* temperatures = (real_t*) malloc(arraySizes);
+      memset(temperatures, 0, arraySizes);
+
+      // Store particle information inside memory
+      size_t idxMapped = 0;
+      for (size_t idx = 0; idx < ac_->size(); ++idx)
+      {
+         if (mappingParticleSelector_(idx, *ac_))
+         {
+            temperatures[idxMapped] = ac_->getTemperature(idx);
+            WALBERLA_LOG_INFO("temperature from accessor is  " << ac_->getTemperature(idx));
+            idxMapped++;
+         }
+      }
+
+      auto nOverlappingParticlesField =
+         block->getData< nOverlappingParticlesField_T >(particleAndVolumeFractionSoA_.nOverlappingParticlesFieldID);
+      auto idxField = block->getData< idxField_T >(particleAndVolumeFractionSoA_.idxFieldID);
+      auto particleTemperaturesField =
+         block->getData< particleTemperaturesField_T >(particleAndVolumeFractionSoA_.particleTemperaturesFieldID);
+      WALBERLA_FOR_ALL_CELLS_XYZ(
+         particleTemperaturesField, for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++) {
+            particleTemperaturesField->get(x, y, z, p) = temperatures[idxField->get(x, y, z, p)];
+         })
+      free(temperatures);
+   }
+
+ private:
+   shared_ptr< StructuredBlockStorage > bs_;
+   const shared_ptr< ParticleAccessor_T > ac_;
+   const ParticleSelector_T& mappingParticleSelector_;
+   ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA_;
+};
+
+template< typename ParticleAccessor_T, typename ParticleSelector_T, int Weighting_T >
 class SetParticleVelocitiesSweep
 {
  public:
