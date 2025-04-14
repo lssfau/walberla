@@ -2112,61 +2112,6 @@ mac_MpiOnly:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       OMPI_MCA_btl: "self,tcp"
 
-###############################################################################
-##                                                                           ##
-##    Deploy jobs                                                            ##
-##                                                                           ##
-###############################################################################
-
-.conda-deploy: &conda_deploy_definition
-   stage: deploy
-   before_script:
-      - conda install -y conda-build anaconda-client
-      - anaconda login --username $CONDA_DEPLOY_USER --password $CONDA_DEPLOY_PASSWORD --hostname $CI_JOB_ID
-      - conda config --set anaconda_upload yes
-      - conda config --add channels lssfau
-   after_script:
-      - anaconda logout
-   dependencies: []
-   when: manual
-   only:
-      - master@walberla/walberla
-      - tags@walberla/walberla
-
-conda-py36-win:
-   <<: *conda_deploy_definition
-   tags:
-      - win
-   script:
-      - conda build --python=3.6 --user=lssfau utilities\\conda\\walberla
-
-conda-py37-win:
-   <<: *conda_deploy_definition
-   tags:
-      - win
-   script:
-      - conda build --python=3.7 --user=lssfau utilities\\conda\\walberla
-
-conda-py37-linux:
-   <<: *conda_deploy_definition
-   tags:
-      - docker
-   image: continuumio/miniconda3
-   script:
-      - apt-get update
-      - apt-get install -y build-essential
-      - conda build --python=3.7 --user=lssfau utilities/conda/walberla
-
-conda-py36-linux:
-   <<: *conda_deploy_definition
-   tags:
-      - docker
-   image: continuumio/miniconda3
-   script:
-      - apt-get update
-      - apt-get install -y build-essential
-      - conda build --python=3.6 --user=lssfau utilities/conda/walberla
-
 
 ###############################################################################
 ##                                                                           ##
