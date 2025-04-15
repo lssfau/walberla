@@ -1,3 +1,29 @@
+PhysicalSetup // all to be specified in SI units!
+{
+    showcase true;
+    xSize 0.05; // = width
+    ySize 0.05; // = depth
+    zSize 0.05; // = height
+
+    periodicInX false;
+    periodicInY false;
+
+    runtime 4;
+
+    uInflow 0.005;
+    gravitationalAcceleration 9.81;
+
+    kinematicViscosityFluid 1e-5;
+    densityFluid 1000.;
+
+    particleDiameter 0.005;
+    densityParticle 1100.;
+    dynamicFrictionCoefficient 0.15;
+    coefficientOfRestitution 0.6;
+    collisionTimeFactor 1.0;
+
+    particleGenerationSpacing 0.005;
+}
 
 NumericalSetup
 {
