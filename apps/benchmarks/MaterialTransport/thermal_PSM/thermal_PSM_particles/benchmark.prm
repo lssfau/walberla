@@ -27,49 +27,42 @@ PhysicalSetup // all to be specified in SI units!
 
 NumericalSetup
 {
+    dx 0.001; // in m
+    uInflow 0; // in LBM units, should be smaller than 0.1, this then determines dt if not equal to 0
+    dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
+
     // product of number of blocks should be equal to number of used processes
     numXBlocks 1;
     numYBlocks 1;
     numZBlocks 1;
 
-    cellsPerBlockPerDirection 32;
+    useLubricationForces true;
+    numberOfParticleSubCycles 10;
+    useParticles true;
+    useIntegrators true;
+    particleSubBlockSize <10, 10, 10>;
+    linkedCellWidthRation 1.01;
+    particleBarriers true;
+    generationDomainFraction <0.8,1,1>;
+}
 
-    periodicInY false;
-    periodicInZ false;
-    gravity 9.81;
-
-    sendDirectlyFromGPU false; // use GPU-GPU communication
-    useCommunicationHiding false;
-    frameWidth <1, 1, 1>; // width of the outer region if splitting the LBM/PSM into inner and outer (only used if useCommunicationHiding is true)
-
+TemperatureSetup
+{
     Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
     Tcold 0;
     PrandtlNumber 0.71;
-    RayleighNumber 100000;
+    RayleighNumber 1000000;
     Mach 0.1;
-    relaxationRate 1.5;
-
-    timeSteps 1000;
-
-
-    // particle distribution in LBM units
-
-    useParticles true; // if true, PSM/particle mapping/velocity computation/hydrodynamic force reduction is used, else LBM is used
-    particleDiameter 10.0;
-    particleGenerationSpacing 5.0;
-    generationDomainFraction <0.8, 1.0, 1.0>; // fraction of the domain where particles are generated
-    generationPointOfReferenceOffset <0, 0, 0>; // offset of point of reference from domain center, see SCIterator.h
-    useParticleOffset true; // offset every second particle layer in flow direction
-    particleSubBlockSize <4, 4, 4>;
-
-    // fluid quantities in LBM units
-    uInflow 0.00008;
+    particleTemperature 0.7;
 }
 
 Output
 {
-    vtkSpacing 1;
+    infoSpacing 0.0; // in s
+
+    vtkSpacingParticles 0.1; // in s
+    vtkSpacingFluid 0.1; // in s
     vtkFolder vtk_out;
 
-    performanceLogFrequency 10;
+    performanceLogFrequency 5000000000;
 }
