@@ -107,8 +107,8 @@ with CodeGeneration() as ctx:
     B = ps.fields(f"b({1}): {data_type}[3D]", layout=layout)
 
 
-    force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
-    #force_concentration_on_fluid = sp.Matrix([0, 0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
+    #force_concentration_on_fluid = sp.Matrix([0, (rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM,0])
+    force_concentration_on_fluid = sp.Matrix([0, 0,(rho_0)*alpha*(concentration_field.center - T0)*gravity_LBM])
 
     # Fluid LBM optimisation
     lbm_fluid_opt = LBMOptimisation(
@@ -190,6 +190,8 @@ with CodeGeneration() as ctx:
         output={"density": concentration_field},
         compressible=True,
         psm_config=psm_config_C,
+        continuous_equilibrium=False,
+        zero_centered=False,
     )
 
     if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
