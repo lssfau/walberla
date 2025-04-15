@@ -72,6 +72,25 @@ class PSMSweepCollection
    SetParticleTemperaturesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >setParticleTemperaturesSweep;
 };
 
+template< typename SweepCollection, typename PSMSweepFluid,typename PSMSweepTemperature >
+void addThermalPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCollection, PSMSweepFluid& psmFluidSweep,PSMSweepTemperature& psmTempSweep)
+{
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                           "Set particle velocities");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleTemperaturesSweep),
+                           "Set particle temperatures");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmTempSweep), "PSM Concentration sweep");
+
+   // after both the sweeps, reduce the particle forces.
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                           "Reduce particle forces");
+}
+
+
+
+
 template< typename SweepCollection, typename PSMSweep >
 void addPSMSweepsToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCollection, PSMSweep& psmSweep,
                             bool synchronize = true)

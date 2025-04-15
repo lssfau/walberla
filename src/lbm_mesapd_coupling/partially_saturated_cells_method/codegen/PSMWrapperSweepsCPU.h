@@ -89,7 +89,6 @@ class SetParticleTemperaturesSweep
          if (mappingParticleSelector_(idx, *ac_))
          {
             temperatures[idxMapped] = ac_->getTemperature(idx);
-            WALBERLA_LOG_INFO("temperature from accessor is  " << ac_->getTemperature(idx));
             idxMapped++;
          }
       }
