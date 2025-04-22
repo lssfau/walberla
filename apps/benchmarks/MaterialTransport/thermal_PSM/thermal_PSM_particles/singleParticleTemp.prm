@@ -1,0 +1,72 @@
+PhysicalSetup // all to be specified in SI units!
+{
+    showcase false;         // single particle validation. Showcase is true only
+    dimensional true;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
+    xSize 0.04; // = width  // 4dp
+    ySize 0.04; // = depth  // 4dp
+    zSize 0.2; // = height  // 20dp
+
+    periodicInX false;
+    periodicInY false;
+    periodicInZ false;
+
+    runtime 40;
+
+    uInflow 0.005;
+    gravitationalAcceleration 9.81;
+
+    kinematicViscosityFluid 1e-5;
+    densityFluid 1000.;
+
+    particleDiameter 0.01;  // 1cm
+    densityParticle 1010.;
+    particleRe 50;
+    dynamicFrictionCoefficient 0.15;
+    coefficientOfRestitution 0.6;
+    collisionTimeFactor 1.0;
+
+    particleGenerationSpacing 0.005;
+}
+
+NumericalSetup
+{
+    dx 0.0005; // in m
+    uInflow 0; // in LBM units, should be smaller than 0.1, this then determines dt if not equal to 0
+    dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
+
+    // product of number of blocks should be equal to number of used processes
+    numXBlocks 1;
+    numYBlocks 1;
+    numZBlocks 1;
+
+    useLubricationForces false;
+    numberOfParticleSubCycles 10;
+    useParticles true;
+    useIntegrators true;
+    particleSubBlockSize <10, 10, 10>;
+    linkedCellWidthRation 1.01;
+    particleBarriers true;
+    generationDomainFraction <0.8,0.8,0.8>;
+}
+
+TemperatureSetup
+{
+    Thot 310;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
+    Tcold 300;
+    PrandtlNumber 1;
+    RayleighNumber 1000000;
+    Mach 0.1;
+    particleTemperature 290;
+    thermal_expansion_coeff 1.04e-4;
+}
+
+Output
+{
+    infoSpacing 0.01; // in s
+
+    vtkSpacingParticles 0.01; // in s
+    vtkSpacingFluid 0; // in s
+    vtkFolder vtk_out;
+
+    performanceLogFrequency 5000000000;
+}
