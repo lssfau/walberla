@@ -36,7 +36,7 @@ namespace walberla
 {
 
 void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& ConcentrationFieldID,
-                            const math::AABB& domainAABB, Vector3< uint_t > domainSize, bool performanceBenchmark)
+                            const math::AABB& domainAABB, Vector3< uint_t > domainSize, bool performanceBenchmark,const real_t Tref)
 {
    //const real_t radius = real_c(domainSize[1] / 10);
    for (auto& block : *blocks)
@@ -54,7 +54,7 @@ void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, 
             ConcentrationField->get(x, y, z) = real_t(0.2);
          }
          else{
-            ConcentrationField->get(x, y, z) = real_t(0);
+            ConcentrationField->get(x, y, z) = real_t(Tref);
          }
 
       }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
@@ -155,11 +155,11 @@ void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDat
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(FluidVelocityField, {
          Cell globalCell;
          const auto cellAABB                 = blocks->getBlockLocalCellAABB(block, Cell(x, y, z));
-         FluidVelocityField->get(x, y, z, 0) = real_t(0);//uInflow[0];
-         FluidVelocityField->get(x, y, z, 1) = real_t(0);//uInflow[1];
+         FluidVelocityField->get(x, y, z, 0) = uInflow[0];
+         FluidVelocityField->get(x, y, z, 1) = uInflow[1];
          if(domainSize[2] != 1)
          {
-            FluidVelocityField->get(x, y, z, 2) = 0;
+            FluidVelocityField->get(x, y, z, 2) = uInflow[2];
          }
       }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
    }

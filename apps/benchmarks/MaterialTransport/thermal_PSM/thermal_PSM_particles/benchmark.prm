@@ -1,14 +1,16 @@
 PhysicalSetup // all to be specified in SI units!
 {
     showcase true;
-    xSize 0.05; // = width
-    ySize 0.05; // = depth
-    zSize 0.05; // = height
+    dimensional false;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
+    xSize 0.10; // = width
+    ySize 0.03; // = depth
+    zSize 0.03; // = height
 
-    periodicInX false;
-    periodicInY false;
+    periodicInX true;
+    periodicInY true;
+    periodicInZ true;
 
-    runtime 4;
+    runtime 40;
 
     uInflow 0.005;
     gravitationalAcceleration 9.81;
@@ -18,6 +20,7 @@ PhysicalSetup // all to be specified in SI units!
 
     particleDiameter 0.005;
     densityParticle 1100.;
+    particleRe 50;
     dynamicFrictionCoefficient 0.15;
     coefficientOfRestitution 0.6;
     collisionTimeFactor 1.0;
@@ -29,38 +32,39 @@ NumericalSetup
 {
     dx 0.001; // in m
     uInflow 0; // in LBM units, should be smaller than 0.1, this then determines dt if not equal to 0
-    dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
+    dt 1e-4;      // this is the dt_SI if at all uInflow is set to 0.
 
     // product of number of blocks should be equal to number of used processes
-    numXBlocks 1;
-    numYBlocks 1;
+    numXBlocks 2;
+    numYBlocks 2;
     numZBlocks 1;
 
-    useLubricationForces true;
-    numberOfParticleSubCycles 10;
+    useLubricationForces false;
+    numberOfParticleSubCycles 1;
     useParticles true;
     useIntegrators true;
-    particleSubBlockSize <10, 10, 10>;
+    particleSubBlockSize <5, 5, 5>;
     linkedCellWidthRation 1.01;
     particleBarriers true;
-    generationDomainFraction <0.8,1,1>;
+    generationDomainFraction <0.6,0.8,0.8>;
 }
 
 TemperatureSetup
 {
     Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
     Tcold 0;
-    PrandtlNumber 0.71;
+    PrandtlNumber 1;
     RayleighNumber 1000000;
     Mach 0.1;
-    particleTemperature 0.7;
+    particleTemperature 0;
+    thermal_expansion_coeff 1.04e-4;
 }
 
 Output
 {
-    infoSpacing 0.0; // in s
+    infoSpacing 0.1; // in s
 
-    vtkSpacingParticles 0.1; // in s
+    vtkSpacingParticles 0; // in s
     vtkSpacingFluid 0.1; // in s
     vtkFolder vtk_out;
 

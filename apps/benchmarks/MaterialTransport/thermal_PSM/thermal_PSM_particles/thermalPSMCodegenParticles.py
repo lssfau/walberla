@@ -205,7 +205,7 @@ with CodeGeneration() as ctx:
     method_concentration = create_lb_method(lbm_config=psm_concentration_config)
     init_velocity = sp.symbols("init_velocity_:3")
     pdfs_fluid_setter = macroscopic_values_setter(
-        method_fluid, density=init_density_fluid, velocity=init_velocity, pdfs=pdfs_fluid.center_vector
+        method_fluid, density=init_density_fluid, velocity=velocity_field, pdfs=pdfs_fluid.center_vector
     )
 
     pdfs_concentration_setter = macroscopic_values_setter(

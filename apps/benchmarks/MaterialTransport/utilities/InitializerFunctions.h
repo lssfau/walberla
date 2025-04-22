@@ -33,7 +33,7 @@
 namespace walberla
 {
 void initConcentrationField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& ConcentrationFieldID,
-                            const math::AABB& domainAABB, Vector3< uint_t > domainSize, bool performanceBenchmark = false);
+                            const math::AABB& domainAABB, Vector3< uint_t > domainSize, bool performanceBenchmark = false,const real_t Tref = 0);
 void initConcentrationFieldGaussian(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& ConcentrationFieldID,const math::AABB& domainAABB,Vector3< uint_t > domainSize, const real_t sigma_0, const real_t sigma_D,const Vector3<real_t> uInflow,const Vector3< real_t > x_0);
 void initFluidField(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& FluidFieldID,const Vector3<real_t> uInflow,Vector3< uint_t > domainSize);
 void initFluidFieldPoiseuille(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID& FluidFieldID,
