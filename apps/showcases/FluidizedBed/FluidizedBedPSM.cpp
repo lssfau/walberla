@@ -131,9 +131,9 @@ class MyBoundaryHandling
 
    MyBoundaryHandling(const BlockDataID& flagFieldID, const BlockDataID& pdfFieldID,
                       const shared_ptr< ParticleAccessor_T >& ac, Vector3< real_t > inflowVelocity, bool periodicInX,
-                      bool periodicInY)
+                      bool periodicInY,bool periodicInZ)
       : flagFieldID_(flagFieldID), pdfFieldID_(pdfFieldID), ac_(ac), inflowVelocity_(inflowVelocity),
-        periodicInX_(periodicInX), periodicInY_(periodicInY)
+        periodicInX_(periodicInX), periodicInY_(periodicInY),periodicInZ_(periodicInZ)
    {}
 
    Type* operator()(IBlock* const block, const StructuredBlockStorage* const storage) const
@@ -167,18 +167,20 @@ class MyBoundaryHandling
       domainBB.yMin() -= cell_idx_c(FieldGhostLayers);
       domainBB.yMax() += cell_idx_c(FieldGhostLayers);
 
-      // inflow at bottom
-      CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(),
-                          domainBB.zMin());
-      storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
-      handling->forceBoundary(inflow, bottom);
+      if(!periodicInZ_)
+      {
+         // inflow at bottom
+         CellInterval bottom(domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(),
+                             domainBB.zMin());
+         storage->transformGlobalToBlockLocalCellInterval(bottom, *block);
+         handling->forceBoundary(inflow, bottom);
 
-      // outflow at top
-      CellInterval top(domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(),
-                       domainBB.zMax());
-      storage->transformGlobalToBlockLocalCellInterval(top, *block);
-      handling->forceBoundary(outflow, top);
-
+         // outflow at top
+         CellInterval top(domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(),
+                          domainBB.zMax());
+         storage->transformGlobalToBlockLocalCellInterval(top, *block);
+         handling->forceBoundary(outflow, top);
+      }
       if (!periodicInX_)
       {
          // left
@@ -223,6 +225,7 @@ class MyBoundaryHandling
    Vector3< real_t > inflowVelocity_;
    bool periodicInX_;
    bool periodicInY_;
+   bool periodicInZ_;
 };
 //*******************************************************************************************************************
 
@@ -242,7 +245,7 @@ void createPlane(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
 
 void createPlaneSetup(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
                       const shared_ptr< mesa_pd::data::ShapeStorage >& ss, const math::AABB& simulationDomain,
-                      bool periodicInX, bool periodicInY, real_t offsetAtInflow, real_t offsetAtOutflow)
+                      bool periodicInX, bool periodicInY,bool periodicInZ, real_t offsetAtInflow, real_t offsetAtOutflow)
 {
    createPlane(ps, ss, simulationDomain.minCorner() + Vector3< real_t >(0, 0, offsetAtInflow),
                Vector3< real_t >(0, 0, 1));
@@ -410,6 +413,7 @@ int main(int argc, char** argv)
    const real_t zSize_SI                     = physicalSetup.getParameter< real_t >("zSize");
    const bool periodicInX                    = physicalSetup.getParameter< bool >("periodicInX");
    const bool periodicInY                    = physicalSetup.getParameter< bool >("periodicInY");
+   const bool periodicInZ                    = physicalSetup.getParameter< bool >("periodicInZ");
    const real_t runtime_SI                   = physicalSetup.getParameter< real_t >("runtime");
    const real_t uInflow_SI                   = physicalSetup.getParameter< real_t >("uInflow");
    const real_t gravitationalAcceleration_SI = physicalSetup.getParameter< real_t >("gravitationalAcceleration");
@@ -457,7 +461,7 @@ int main(int argc, char** argv)
                         "number of cells in z of " << domainSize[2]
                                                    << " is not divisible by given number of blocks in z direction");
 
-   WALBERLA_CHECK_GREATER(
+   WALBERLA_CHECK_GREATER_EQUAL(
       particleDiameter_SI / dx_SI, 5_r,
       "Your numerical resolution is below 5 cells per diameter and thus too small for such simulations!");
 
@@ -511,7 +515,7 @@ int main(int argc, char** argv)
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const bool periodicInZ                     = false;
+   //const bool periodicInZ                     = false;
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
       numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1],
       cellsPerBlockPerDirection[2], dx, 0, false, false, periodicInX, periodicInY, periodicInZ, // periodicity
@@ -534,7 +538,7 @@ int main(int argc, char** argv)
    // prevent particles from interfering with inflow and outflow by putting the bounding planes slightly in front
    const real_t planeOffsetFromInflow  = dx;
    const real_t planeOffsetFromOutflow = dx;
-   createPlaneSetup(ps, ss, simulationDomain, periodicInX, periodicInY, planeOffsetFromInflow, planeOffsetFromOutflow);
+   createPlaneSetup(ps, ss, simulationDomain, periodicInX, periodicInY,periodicInZ, planeOffsetFromInflow, planeOffsetFromOutflow);
 
    auto sphereShape = ss->create< mesa_pd::data::Sphere >(diameter * real_t(0.5));
    ss->shapes[sphereShape]->updateMassAndInertia(densityParticle);
@@ -551,7 +555,7 @@ int main(int argc, char** argv)
          p.setOwner(mpi::MPIManager::instance()->rank());
          p.setShapeID(sphereShape);
          p.setType(0);
-         p.setLinearVelocity(0.1_r * Vector3< real_t >(math::realRandom(
+         p.setLinearVelocity(0_r * Vector3< real_t >(math::realRandom(
                                         -uInflow, uInflow))); // set small initial velocity to break symmetries
       }
    }
@@ -572,7 +576,7 @@ int main(int argc, char** argv)
    // add boundary handling
    using BoundaryHandling_T       = MyBoundaryHandling< ParticleAccessor_T >::Type;
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
-      MyBoundaryHandling< ParticleAccessor_T >(flagFieldID, pdfFieldID, accessor, inflowVec, periodicInX, periodicInY),
+      MyBoundaryHandling< ParticleAccessor_T >(flagFieldID, pdfFieldID, accessor, inflowVec, periodicInX, periodicInY,periodicInZ),
       "boundary handling");
 
    // set up RPD functionality
