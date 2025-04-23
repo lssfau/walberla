@@ -813,7 +813,7 @@ int main(int argc, char** argv)
       densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
 
 #else
-   initConcentrationField(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSizeLB,false,Tref);
+   //initConcentrationField(blocks, densityConcentrationFieldCPUGPUID, simulationDomain, domainSizeLB,false,Tref);
    initFluidField(blocks, velFieldFluidCPUGPUID, Uinitialize, domainSizeLB);
 
    // Map particles into the fluid domain
@@ -822,10 +822,11 @@ int main(int argc, char** argv)
                                          particleAndVolumeFractionSoA, particleSubBlockSize);
    // Initialize PDFs
 
-   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,Tref,alphaLB,gravityLB,real_t(1),rho_0);
-   pystencils::InitializeConcentrationDomain pdfSetterConcentration(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,
+   //pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,Tref,alphaLB,gravityLB,real_t(1),rho_0);
+   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,velFieldFluidCPUGPUID,real_t(1));
+   /*pystencils::InitializeConcentrationDomain pdfSetterConcentration(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,
       densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleTemperaturesFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
-
+*/
 #endif
 
 
@@ -843,10 +844,10 @@ int main(int argc, char** argv)
       //initializeFluidDomain(&(*blockIt));
       if (useParticles) {
          psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
-         psmSweepCollection.setParticleTemperaturesSweep(&(*blockIt));
+         //psmSweepCollection.setParticleTemperaturesSweep(&(*blockIt));
       }
       pdfSetterFluid(&(*blockIt));
-      pdfSetterConcentration(&(*blockIt));
+      //pdfSetterConcentration(&(*blockIt));
 
 
    }
@@ -888,9 +889,11 @@ int main(int argc, char** argv)
                                                   pdfFieldFluidID, velFieldFluidID, T0, alphaLB, gravityLB,
                                                   rho_0);
 #else
-   pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID, densityFluidFieldID,
+   /*pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID, densityFluidFieldID,
                                                   pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, Tref, alphaLB, gravityLB,
-                                                  rho_0);
+                                                  rho_0);*/
+   pystencils::FluidMacroGetter getterSweep_fluid(densityFluidFieldID,
+                                                  pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID);
 
 #endif
 
@@ -989,10 +992,15 @@ int main(int argc, char** argv)
    ////////////////////////////////////////////////////////////////////////////////////////////////
    // add LBM communication, boundary handling and the LBM sweeps to the time loop  for codegen //
    //////////////////////////////////////////////////////////////////////////////////////////////
-   pystencils::PSMFluidSweep psmFluidSweep(
+   /*pystencils::PSMFluidSweep psmFluidSweep(
       particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
       particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
-      pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, Tref, alphaLB, gravityLB, omega_f, rho_0);
+      pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, Tref, alphaLB, gravityLB, omega_f, rho_0);*/
+
+   pystencils::PSMFluidSweep psmFluidSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+      particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
+      pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, omega_f);
 
 
    pystencils::PSMConcentrationSweep psmConcentrationSweep(
@@ -1014,13 +1022,13 @@ int main(int argc, char** argv)
                                           "Boundary Handling (fluid ubb)");
       timeloop.add() << Sweep(deviceSyncWrapper(density_fluid_bc.getSweep()),
                               "Boundary Handling (fluid density)");
-      timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
+      /*timeloop.add() << BeforeFunction(communication_concentration, "LBM concentration Communication")
                      << Sweep(deviceSyncWrapper(neumann_concentration_bc.getSweep()),
                               "Boundary Handling (Concentration Neumann)");
       timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_west.getSweep()),
                               "Boundary Handling (Concentration Density west)");
       timeloop.add() << Sweep(deviceSyncWrapper(density_concentration_bc_east.getSweep()),
-                              "Boundary Handling (Concentration Density east)");
+                              "Boundary Handling (Concentration Density east)");*/
 
 
    if (useParticles)

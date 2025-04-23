@@ -1,13 +1,13 @@
 PhysicalSetup // all to be specified in SI units!
 {
     showcase true;
-    dimensional false;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
-    xSize 0.10; // = width
+    dimensional true;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
+    xSize 0.03; // = width
     ySize 0.03; // = depth
     zSize 0.03; // = height
 
     periodicInX true;
-    periodicInY true;
+    periodicInY false;
     periodicInZ true;
 
     runtime 40;
@@ -36,8 +36,8 @@ NumericalSetup
 
     // product of number of blocks should be equal to number of used processes
     numXBlocks 2;
-    numYBlocks 2;
-    numZBlocks 1;
+    numYBlocks 1;
+    numZBlocks 2;
 
     useLubricationForces false;
     numberOfParticleSubCycles 1;
@@ -62,10 +62,10 @@ TemperatureSetup
 
 Output
 {
-    infoSpacing 0.1; // in s
+    infoSpacing 0.01; // in s
 
     vtkSpacingParticles 0; // in s
-    vtkSpacingFluid 0.1; // in s
+    vtkSpacingFluid 0; // in s
     vtkFolder vtk_out;
 
     performanceLogFrequency 5000000000;

@@ -153,7 +153,7 @@ with CodeGeneration() as ctx:
         method=Method.SRT,
         relaxation_rate=omega_f,
         output={"velocity": velocity_field},
-        force= force_concentration_on_fluid,
+        #force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
         compressible=True,
         psm_config=psm_config_F,
