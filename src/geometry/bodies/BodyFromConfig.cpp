@@ -163,10 +163,6 @@ shared_ptr<AbstractBody> bodyFromConfig (const Config::BlockHandle & block )
       return bodyNOTFromConfig  ( block );
 
    WALBERLA_ABORT( "Unknown Block " << block.getKey() << "\nAllowed blocks are 'Sphere', 'Cylinder', 'Torus' and 'Ellipsoid'" );
-
-#ifdef __IBMCPP__
-   return shared_ptr<AbstractBody>(); // never reached, helps to suppress a warning from the IBM compiler
-#endif
 }
 
 shared_ptr<AbstractBody> bodyANDFromConfig (const Config::BlockHandle & block )

@@ -109,9 +109,6 @@ public:
 #else
       WALBERLA_ABORT( "BlockData access type violation! (The block data you added is of a different type than the block data you are trying to access!)" )
 #endif
-#ifdef __IBMCPP__
-      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
-#endif
    }
 
    template< typename U >

@@ -405,9 +405,6 @@ MPI_Op MPITrait< T >::operation(const mpi::Operation& op)
    default:
       WALBERLA_ABORT("Unknown operation!");
    }
-#ifdef __IBMCPP__
-   return MPI_SUM; // never reached, helps to suppress a warning from the IBM compiler
-#endif
 }
 
 } // namespace walberla
