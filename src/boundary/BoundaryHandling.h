@@ -430,10 +430,6 @@ private:
          return std::get<N>( boundaryConditions );
       else
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
-
-#ifdef __IBMCPP__
-      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
-#endif
    }
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
@@ -473,10 +469,6 @@ private:
          return std::get<0>( boundaryConditions );
       else
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
-
-#ifdef __IBMCPP__
-      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
-#endif
    }
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
@@ -493,10 +485,6 @@ private:
                                                                                                          std::false_type > >* /*dummy*/ = nullptr ) const
    {
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
-
-#ifdef __IBMCPP__
-      return *(static_cast< Boundary_T * >( nullptr )); // silencing incorrect IBM compiler warning
-#endif
    }
 
    //*******************************************************************************************************************
@@ -2499,10 +2487,6 @@ inline typename std::enable_if_t<(N==-1), BoundaryUID> BoundaryHandling< FlagFie
    const FlagUID & flagUID = flagField_->getFlagUID( flag );
    WALBERLA_ABORT( "The requested flag " << flagUID.getIdentifier() << " is not handled by any boundary condition of "\
                    "boundary handling " << uid_.getIdentifier() << "!" );
-
-#ifdef __IBMCPP__
-   return *(static_cast< BoundaryUID * >( nullptr )); // silencing incorrect IBM compiler warning
-#endif
 }
 
 

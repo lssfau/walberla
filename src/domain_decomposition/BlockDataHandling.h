@@ -93,16 +93,10 @@ public:
    void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) override
    {
       WALBERLA_ABORT( "You are trying to serialize a block data item for which only an initialization function was registered" )
-#ifdef __IBMCPP__
-      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
-#endif
    }
    T * deserialize( IBlock * const ) override
    {
       WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" )
-#ifdef __IBMCPP__
-      return nullptr; // never reached, helps to suppress a warning from the IBM compiler
-#endif
    }
    void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) override
    {
