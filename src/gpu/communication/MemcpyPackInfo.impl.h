@@ -19,7 +19,7 @@ void MemcpyPackInfo< GPUFieldType >::pack(stencil::Direction dir, unsigned char 
                                           IBlock * block, gpuStream_t stream)
 {
    // Extract field data pointer from the block
-   const GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
+   const GPUFieldType * fieldPtr = block->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR( fieldPtr )
    // 
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
@@ -72,8 +72,8 @@ void MemcpyPackInfo< GPUFieldType >::communicateLocal( stencil::Direction dir, c
 
 
    // Extract field data pointer from the block
-   const GPUFieldType * senderFieldPtr = sender->getData< GPUFieldType >( pdfsID );
-   const GPUFieldType * receiverFieldPtr = receiver->getData< GPUFieldType >( pdfsID );
+   const GPUFieldType * senderFieldPtr = sender->getData< GPUFieldType >( fieldId_ );
+   const GPUFieldType * receiverFieldPtr = receiver->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR( senderFieldPtr )
    WALBERLA_ASSERT_NOT_NULLPTR( receiverFieldPtr )
 
@@ -128,7 +128,7 @@ template<typename GPUFieldType>
 void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned char * byte_buffer,
                                             IBlock * block, gpuStream_t stream)
 {
-   GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
+   GPUFieldType * fieldPtr = block->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr)
 
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
@@ -173,7 +173,7 @@ void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned cha
 template<typename GPUFieldType>
 uint_t MemcpyPackInfo< GPUFieldType >::size(stencil::Direction dir, IBlock * block)
 {
-    auto pdfs = block->getData< GPUFieldType >(pdfsID);
+    auto pdfs = block->getData< GPUFieldType >(fieldId_);
 
     CellInterval ci;
     cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( pdfs ) );

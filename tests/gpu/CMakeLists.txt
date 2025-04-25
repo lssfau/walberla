@@ -4,7 +4,7 @@
 #
 ###################################################################################################
 
-if( WALBERLA_BUILD_WITH_CUDA )
+if( WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP )
 
    waLBerla_compile_test( FILES communication/GPUPackInfoTest.cpp DEPENDS walberla::blockforest )
 waLBerla_execute_test( NAME  GPUPackInfoTest )
@@ -17,8 +17,22 @@ waLBerla_execute_test( NAME  GPUPackInfoCommunicationTest )
          DEPENDS walberla::domain_decomposition walberla::blockforest walberla::stencil )
 waLBerla_execute_test( NAME  GPUBlockSelectorCommunicationTest )
 
+waLBerla_compile_test(
+   NAME TestGenericGpuPackInfos
+   FILES communication/TestGenericGpuPackInfos.cpp
+   DEPENDS walberla::blockforest walberla::stencil walberla::gpu
+)
+
+waLBerla_execute_test( NAME TestGenericGpuPackInfos_1 COMMAND $<TARGET_FILE:TestGenericGpuPackInfos> PROCESSES 1 )
+waLBerla_execute_test( NAME TestGenericGpuPackInfos_2 COMMAND $<TARGET_FILE:TestGenericGpuPackInfos> PROCESSES 2 )
+waLBerla_execute_test( NAME TestGenericGpuPackInfos_4 COMMAND $<TARGET_FILE:TestGenericGpuPackInfos> PROCESSES 4 )
+
+
 waLBerla_compile_test( FILES FieldTransferTest.cpp )
 waLBerla_execute_test( NAME  FieldTransferTest )
+
+if( WALBERLA_BUILD_WITH_CUDA)
+# These tests include handwritten CUDA code and won't compile with HIP
 
    waLBerla_compile_test( FILES SimpleKernelTest.cpp Kernels.cu DEPENDS walberla::blockforest walberla::timeloop )
 waLBerla_execute_test( NAME  SimpleKernelTest )
@@ -46,22 +60,24 @@ waLBerla_compile_test( FILES communication/CommTest.cpp )
    waLBerla_compile_test( FILES CudaMPI.cpp DEPENDS walberla::blockforest walberla::timeloop )
 #waLBerla_execute_test( NAME  CudaMPI )
 
+endif()
+
    waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS walberla::blockforest walberla::timeloop )
 
 waLBerla_generate_target_from_python(NAME MicroBenchmarkGpuLbmGenerated FILE codegen/MicroBenchmarkGpuLbm.py
-      OUT_FILES MicroBenchmarkStreamKernel.cu MicroBenchmarkCopyKernel.cu MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
+      OUT_FILES MicroBenchmarkStreamKernel.${CODEGEN_FILE_SUFFIX} MicroBenchmarkCopyKernel.${CODEGEN_FILE_SUFFIX} MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
 waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp DEPENDS MicroBenchmarkGpuLbmGenerated)
 
 waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldPackInfo FILE codegen/GeneratedFieldPackInfoTestGPU.py
-        OUT_FILES ScalarFieldCommunicationGPU.cu ScalarFieldCommunicationGPU.h
-        ScalarFieldPullReductionGPU.cu ScalarFieldPullReductionGPU.h )
+        OUT_FILES ScalarFieldCommunicationGPU.${CODEGEN_FILE_SUFFIX} ScalarFieldCommunicationGPU.h
+        ScalarFieldPullReductionGPU.${CODEGEN_FILE_SUFFIX} ScalarFieldPullReductionGPU.h )
 waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTestGPU.cpp
       DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldPackInfoTestGPU )
 
 
 waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldNonUniformPackInfo FILE codegen/GeneratedFieldNonUniformPackInfoTestGPU.py
-        OUT_FILES ScalarFieldNonUniformCommunicationGPU.cu ScalarFieldNonUniformCommunicationGPU.h)
+        OUT_FILES ScalarFieldNonUniformCommunicationGPU.${CODEGEN_FILE_SUFFIX} ScalarFieldNonUniformCommunicationGPU.h)
 waLBerla_compile_test( FILES codegen/GeneratedFieldNonUniformPackInfoTestGPU.cpp
         DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldNonUniformPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestGPU )
