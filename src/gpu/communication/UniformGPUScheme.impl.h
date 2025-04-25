@@ -120,6 +120,7 @@ namespace communication {
 
             for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir )
             {
+               const uint_t dirIdx = Stencil::idx[*dir];
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
 
                if( senderBlock->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
@@ -133,7 +134,7 @@ namespace communication {
                   auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
                   for (auto& pi : packInfos_)
                   {
-                     pi->communicateLocal(*dir, senderBlock, receiverBlock, streams_[*dir]);
+                     pi->communicateLocal(*dir, senderBlock, receiverBlock, streams_[dirIdx]);
                   }
                }
                else
@@ -145,13 +146,13 @@ namespace communication {
                      auto size = pi->size( *dir, senderBlock );
                      auto gpuDataPtr = bufferSystemGPU_.sendBuffer( nProcess ).advanceNoResize( size );
                      WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                     pi->pack( *dir, gpuDataPtr, senderBlock, streams_[*dir] );
+                     pi->pack( *dir, gpuDataPtr, senderBlock, streams_[dirIdx] );
 
                      if( !sendFromGPU_ )
                      {
                         auto cpuDataPtr = bufferSystemCPU_.sendBuffer( nProcess ).advanceNoResize( size );
                         WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
-                        WALBERLA_GPU_CHECK( gpuMemcpyAsync( cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir] ))
+                        WALBERLA_GPU_CHECK( gpuMemcpyAsync( cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[dirIdx] ))
                      }
                   }
                }
@@ -194,7 +195,7 @@ namespace communication {
                   auto size = pi->size( header.dir, block );
                   auto gpuDataPtr = recvInfo.buffer().advanceNoResize( size );
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
-                  pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[header.dir] );
+                  pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[Stencil::idx[header.dir]] );
                }
             }
          }
@@ -218,8 +219,8 @@ namespace communication {
                   WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr )
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr )
                      WALBERLA_GPU_CHECK( gpuMemcpyAsync( gpuDataPtr, cpuDataPtr, size,
-                                                           gpuMemcpyHostToDevice, streams_[header.dir] ))
-                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[header.dir] );
+                                                           gpuMemcpyHostToDevice, streams_[Stencil::idx[header.dir]] ))
+                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, streams_[Stencil::idx[header.dir]] );
                }
             }
          }

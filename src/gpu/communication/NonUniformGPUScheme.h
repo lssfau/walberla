@@ -350,7 +350,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
             auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
             for (auto& pi : packInfos_)
             {
-               pi->communicateLocalEqualLevel(senderBlock, receiverBlock, *dir, streams_[*dir]);
+               pi->communicateLocalEqualLevel(senderBlock, receiverBlock, *dir, streams_[Stencil::idx[*dir]]);
             }
          }
          else
@@ -364,17 +364,17 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
                WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.remainingSize(), pi->sizeEqualLevelSend(senderBlock, *dir))
                if(sendFromGPU_)
                {
-                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[Stencil::idx[*dir]]);
                }
                else
                {
                   auto gpuDataPtr = gpuDataBuffer.cur();
                   // packDataEqualLevel moves the pointer with advanceNoResize
-                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[Stencil::idx[*dir]]);
                   auto size = pi->sizeEqualLevelSend(senderBlock, *dir);
                   auto cpuDataPtr = bufferSystemCPU_[EQUAL_LEVEL][index].sendBuffer(nProcess).advanceNoResize(size);
                   WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
-                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir]))
+                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[Stencil::idx[*dir]]))
                }
             }
          }
@@ -622,7 +622,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateEqualLevel(const uint_t leve
             {
                GpuBuffer_T& gpuDataBuffer = recvInfo.buffer();
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
-               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[stencil::inverseDir[header.dir]]);
+               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]);
             }
          }
       }
@@ -648,8 +648,8 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateEqualLevel(const uint_t leve
                WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataPtr)
 
-               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[stencil::inverseDir[header.dir]]))
-               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuBuffer, streams_[stencil::inverseDir[header.dir]]);
+               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]))
+               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuBuffer, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]);
             }
          }
       }
