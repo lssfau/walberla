@@ -58,12 +58,6 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_compile_test( FILES DistributedMeshVTKTest.cpp DEPENDS walberla::mesh )
    waLBerla_execute_test( NAME  DistributedMeshVTKTest  COMMAND $<TARGET_FILE:DistributedMeshVTKTest> sphere.obj )
 
-   waLBerla_compile_test( FILES PeVTKMeshWriterTest.cpp DEPENDS walberla::mesh )
-   waLBerla_execute_test( NAME  PeVTKMeshWriterTest  COMMAND $<TARGET_FILE:PeVTKMeshWriterTest> )
-
-   waLBerla_compile_test( FILES MeshPeRaytracing.cpp DEPENDS walberla::mesh walberla::pe )
-   waLBerla_execute_test( NAME  MeshPeRaytracing )
-
    waLBerla_compile_test( FILES MeshAABBIntersectionTest.cpp DEPENDS walberla::mesh )
    waLBerla_execute_test( NAME  MeshAABBIntersectionTestDbg COMMAND $<TARGET_FILE:MeshAABBIntersectionTest> 10                                          )
    waLBerla_execute_test( NAME  MeshAABBIntersectionTest    COMMAND $<TARGET_FILE:MeshAABBIntersectionTest> 10000 CONFIGURATIONS Release RelWithDbgInfo )
@@ -108,7 +102,4 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_execute_test( NAME  NumericIntegrationTestCube   COMMAND $<TARGET_FILE:NumericIntegrationTest> cube.obj )
    waLBerla_execute_test( NAME  NumericIntegrationTestSphere COMMAND $<TARGET_FILE:NumericIntegrationTest> sphere.obj )
    waLBerla_execute_test( NAME  NumericIntegrationTestBunny  COMMAND $<TARGET_FILE:NumericIntegrationTest> bunny.obj CONFIGURATIONS Release RelWithDbgInfo )
-
-   waLBerla_compile_test( FILES MeshMarshalling.cpp DEPENDS walberla::core walberla::mesh )
-   waLBerla_execute_test( NAME  MeshMarshalling )
 endif()

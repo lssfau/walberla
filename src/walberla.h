@@ -31,7 +31,6 @@
 #include "geometry/all.h"
 #include "lbm/all.h"
 #include "pde/all.h"
-#include "pe_coupling/all.h"
 #include "postprocessing/all.h"
 #include "stencil/all.h"
 #include "timeloop/all.h"
