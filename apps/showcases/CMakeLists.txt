@@ -1,5 +1,3 @@
-add_subdirectory( BidisperseFluidizedBed )
-add_subdirectory( CombinedResolvedUnresolved )
 add_subdirectory( FluidizedBed )
 add_subdirectory( FreeSurface )
 add_subdirectory( HeatConduction )
@@ -16,10 +14,6 @@ if ( WALBERLA_BUILD_WITH_CODEGEN)
    if (WALBERLA_BUILD_WITH_PYTHON)
       add_subdirectory( PhaseFieldAllenCahn )
    endif ()
-
-   if(NOT WALBERLA_BUILD_WITH_OPENMP)
-      add_subdirectory( PorousMedia )
-   endif()
 
    if (WALBERLA_DOUBLE_ACCURACY)
       add_subdirectory( Thermocapillary )

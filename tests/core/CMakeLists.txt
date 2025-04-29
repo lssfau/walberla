@@ -158,9 +158,9 @@ waLBerla_execute_test( NAME SweepTimeloopTimerReduction PROCESSES 9  )
 ########
 
 if ( WALBERLA_BUILD_WITH_PYTHON )
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling walberla::python_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::python_coupling )
 else()
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry )
 endif()
 waLBerla_execute_test( NAME AllHeaderTest )
 
