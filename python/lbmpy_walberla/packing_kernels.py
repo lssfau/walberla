@@ -76,7 +76,13 @@ def generate_packing_kernels(generation_context: CodeGenerationContext, class_na
     header = env.get_template(f"{template_name}.tmpl.h").render(**jinja_context)
     source = env.get_template(f"{template_name}.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 

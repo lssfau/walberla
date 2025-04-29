@@ -153,7 +153,13 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
     header = env.get_template("LBMSweepCollection.tmpl.h").render(**jinja_context)
     source = env.get_template("LBMSweepCollection.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and ctx.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and ctx.hip
+        else "cu"
+        if target == Target.GPU and ctx.cuda
+        else "cpp"
+    )
     ctx.write_file(f"{class_name}.h", header)
     ctx.write_file(f"{class_name}.{source_extension}", source)
 

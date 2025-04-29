@@ -204,7 +204,13 @@ def generate_pack_info(generation_context: CodeGenerationContext, class_name: st
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
@@ -323,7 +329,13 @@ def generate_nonuniform_pack_info_for_field(generation_context: CodeGenerationCo
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
