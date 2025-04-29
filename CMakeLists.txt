@@ -695,9 +695,12 @@ if ( WALBERLA_BUILD_WITH_HIP )
 
     if( CMAKE_HIP_COMPILER )
         enable_language(HIP)
+        find_package(hip REQUIRED)
         # since waLBerla also supports CUDA we only use HIP on an AMD platform
         add_compile_definitions(__HIP_PLATFORM_AMD__)
         # include_directories(${HSA_HEADER})
+        #HIP_FOUND is need for our cmake mechanism
+        set ( HIP_FOUND TRUE )
         set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE)
     else()
          message("HIP compiler not found. HIP support is not possible")
@@ -705,6 +708,9 @@ if ( WALBERLA_BUILD_WITH_HIP )
     endif ( )
 endif ( )
 
+if (WALBERLA_BUILD_WITH_HIP AND HIP_FOUND)
+    set(CODEGEN_FILE_SUFFIX "hip")
+endif()
 ############################################################################################################################
 
 

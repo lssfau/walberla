@@ -152,7 +152,13 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
     header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
     source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
@@ -209,6 +215,12 @@ def generate_sweep_collection(generation_context: CodeGenerationContext, class_n
     header = env.get_template("SweepCollection.tmpl.h").render(**jinja_context)
     source = env.get_template("SweepCollection.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)

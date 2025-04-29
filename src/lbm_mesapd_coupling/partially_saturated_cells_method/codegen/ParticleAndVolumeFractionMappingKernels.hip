@@ -13,11 +13,11 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PSMWrapperKernels.cpp
+//! \file ParticleAndVolumeFractionMappingKernels.hip
 //! \ingroup lbm_mesapd_coupling
 //! \author Samuel Kemmler <samuel.kemmler@fau.de>
-//! \brief Mirror PSMWrapperKernels.cu to provide a .cpp file for HIP
+//! \brief Mirror ParticleAndVolumeFractionMappingKernels.cu to provide a .cpp file for HIP
 //
 //======================================================================================================================
 
-#include "PSMWrapperKernels.cu"
+#include "ParticleAndVolumeFractionMappingKernels.cu"
