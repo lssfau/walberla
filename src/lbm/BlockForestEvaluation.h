@@ -30,7 +30,6 @@
 #include "core/math/DistributedSample.h"
 #include "core/mpi/MPIManager.h"
 #include "core/selectable/IsSetSelected.h"
-#include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
 #include "domain_decomposition/BlockCounter.h"

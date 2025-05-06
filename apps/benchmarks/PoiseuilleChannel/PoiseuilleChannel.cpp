@@ -815,7 +815,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync, setup );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );   
    
    const bool vtkBeforeTimeStep = configBlock.getParameter< bool >( "vtkBeforeTimeStep", true );
@@ -823,8 +823,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    if( vtkBeforeTimeStep )
    {
       for(auto & output : vtkOutputFunctions)
-         timeloop.addFuncBeforeTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
-                                        output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
+         timeloop.addFuncBeforeTimeStep( output.second, std::string("VTK: ") + output.first );
    }
 
    // add 'refinement' LB time step to time loop
@@ -886,8 +885,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    if( !vtkBeforeTimeStep )
    {
       for(auto & output : vtkOutputFunctions)
-         timeloop.addFuncAfterTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
-                                       output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
+         timeloop.addFuncAfterTimeStep( output.second, std::string("VTK: ") + output.first );
    }
 
    // remaining time logger

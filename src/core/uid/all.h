@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "GlobalState.h"
 #include "SUID.h"
 #include "UID.h"
 #include "UIDGenerators.h"

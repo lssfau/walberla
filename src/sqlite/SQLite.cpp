@@ -74,7 +74,6 @@ SQLiteDB::~SQLiteDB ()
    *  The generated database is called "runs". The columns of the table are the keys of the given maps.
    *  If a column does not yet exist, it is appended to the database. The entries that have no value in this column
    *  are set to default value ( zero or empty string ).
-   *  Additionally a column is created for each activated global state, and its value is set to 1
    *
    *  \param dbHandle     Database cursor
    *  \param filename     Database path
@@ -130,16 +129,6 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
          WALBERLA_LOG_WARNING( "Skipping column \"" << i->first << "\" while inserting a row into the run table of the "
                                                                    "sqlite3 database \"" << filename << "\" due to non-finite value \"" << i->second << "\"." );
       }
-   }
-
-   // Add columns for global state selectors
-   for(auto i : uid::globalState())
-   {
-      insertRunCommand += "," + i.getIdentifier();
-      values << " ,1";
-      // no boolean in sqlite3, use integer instead
-      string const command = "ALTER TABLE runs ADD COLUMN " + i.getIdentifier() + " INTEGER ";
-      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    insertRunCommand += " )  ";
@@ -232,7 +221,6 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
    *  The generated database is called "runs". The columns of the table are the keys of the given maps.
    *  If a column does not yet exist, it is appended to the database. The entries that have no value in this column
    *  are set to default value ( zero or empty string ).
-   *  Additionally a column is created for each activated global state, and its value is set to 1
    *
    *  \param integerProperties,stringProperties,realProperties  Map of column names to value
    *  \returns            The primary key of the inserted data set.

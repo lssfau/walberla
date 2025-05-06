@@ -78,7 +78,7 @@ static void addStates( Set<SUID>& set, const std::string& string )
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
                           const shared_ptr< const StructuredBlockStorage > & storage,
                           const shared_ptr< Config > & config, const std::string & configBlockName,
                           const std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
@@ -95,7 +95,7 @@ struct CaseInsensitiveCompare {
    bool operator()( const std::string& lhs, const std::string& rhs ) const { return ( string_icompare(lhs, rhs) < 0 ); }
 }; // only required in 'initializeVTKOutput' below
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
                           const shared_ptr< const StructuredBlockStorage > & storage,
                           const Config::BlockHandle & parentBlockHandle, const std::string & configBlockName,
                           const std::vector< shared_ptr< BlockCellDataWriterInterface > > & _writers,
@@ -352,20 +352,6 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          }
       }
 
-      Set<SUID> requiredGlobalStates;
-      if( block.isDefined( "requiredGlobalStates" ) )
-      {
-         std::string states = block.getParameter< std::string >( "requiredGlobalStates" );
-         addStates( requiredGlobalStates, states );
-      }
-
-      Set<SUID> incompatibleGlobalStates;
-      if( block.isDefined( "incompatibleGlobalStates" ) )
-      {
-         std::string states = block.getParameter< std::string >( "incompatibleGlobalStates" );
-         addStates( incompatibleGlobalStates, states );
-      }
-
       Set<SUID> requiredBlockStates;
       if( block.isDefined( "requiredBlockStates" ) )
       {
@@ -380,17 +366,16 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          addStates( incompatibleBlockStates, states );
       }
 
-      outputFunctions[ identifier ] = SelectableOutputFunction( writeFiles( vtkOutput, true, simultaneousIOOperations,
-                                                                                requiredGlobalStates +     requiredBlockStates,
-                                                                            incompatibleGlobalStates + incompatibleBlockStates ),
-                                                                requiredGlobalStates, incompatibleGlobalStates );
+      outputFunctions[ identifier ] = OutputFunction(
+         writeFiles( vtkOutput, true, simultaneousIOOperations, requiredBlockStates, incompatibleBlockStates ));
    }
 }
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions,
-                          const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
+                          const shared_ptr< const StructuredBlockStorage > & storage,
+                          const shared_ptr< Config > & config,
                           const std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
                           const std::map< std::string, VTKOutput::CellFilter > & filters,
                           const std::map< std::string, VTKOutput::BeforeFunction > & beforeFunctions )
@@ -401,7 +386,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
                           const shared_ptr< const StructuredBlockStorage > & storage,
                           const Config::BlockHandle & parentBlockHandle,
                           const std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
@@ -548,8 +533,6 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 *            [...]                    // which must be implemented by the user
 *         }
 *
-*         requiredGlobalStates      [SUID identifier #1], [SUID identifier #2], ...; // (optional, default=[none])
-*         incompatibleGlobalStates  [SUID identifier #1], [SUID identifier #2], ...; // (optional, default=[none])
 *         requiredBlockStates       [SUID identifier #1], [SUID identifier #2], ...; // (optional, default=[none])
 *         incompatibleBlockStates   [SUID identifier #1], [SUID identifier #2], ...; // (optional, default=[none])
 *      }
@@ -571,8 +554,10 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 *   \param configBlockName           Name of the block in the configuration that is used to setup the VTK output
 */
 //**********************************************************************************************************************
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
-                          const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
+                          const RegisterVTKOutputFunction& registerVTKOutputFunction,
+                          const shared_ptr< const StructuredBlockStorage > & storage,
+                          const shared_ptr< Config > & config,
                           const std::string & configBlockName )
 {
    if( !!config )
@@ -581,8 +566,10 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
-                          const shared_ptr< const StructuredBlockStorage > & storage, const Config::BlockHandle & parentBlockHandle,
+void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFunctions,
+                          const RegisterVTKOutputFunction& registerVTKOutputFunction,
+                          const shared_ptr< const StructuredBlockStorage > & storage,
+                          const Config::BlockHandle & parentBlockHandle,
                           const std::string & configBlockName )
 {
    std::vector< shared_ptr< BlockCellDataWriterInterface > > _writers;

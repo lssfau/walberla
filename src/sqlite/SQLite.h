@@ -27,7 +27,6 @@
 #include "core/timing/TimingPool.h"
 #include "core/timing/TimingTree.h"
 #include "core/timing/TimingNode.h"
-#include "core/uid/GlobalState.h"
 
 #include <map>
 #include <string>

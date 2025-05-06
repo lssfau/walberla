@@ -712,12 +712,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );
 
    for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                      output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+      timeloop.addFuncBeforeTimeStep( output->second, std::string("VTK: ") + output->first );
                                       
    // add 'refinement' LB time step to time loop
 

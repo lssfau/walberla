@@ -27,7 +27,6 @@
 #include "core/mpi/Reduce.h"
 #include "core/mpi/Tokenizing.h"
 #include "core/mpi/MPIWrapper.h"
-#include "core/uid/GlobalState.h"
 #include "core/selectable/IsSetSelected.h"
 
 #include <algorithm>
@@ -339,7 +338,7 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    std::vector< const IBlock * > blocks;
    for( auto block = unstructuredBlockStorage_->begin(); block != unstructuredBlockStorage_->end(); ++block )
    {
-      if( selectable::isSetSelected( uid::globalState() + block->getState(), requiredStates, incompatibleStates ) )
+      if( selectable::isSetSelected( block->getState(), requiredStates, incompatibleStates ) )
          blocks.push_back( block.get() );
    }
 
@@ -1032,7 +1031,7 @@ void VTKOutput::writeBlocks( const std::string& path, const Set<SUID>& requiredS
       std::vector< const IBlock* > blocks;
       for( auto block = blockStorage_->begin(); block != blockStorage_->end(); ++block )
       {
-         if( selectable::isSetSelected( uid::globalState() + block->getState(), requiredStates, incompatibleStates ) )
+         if( selectable::isSetSelected( block->getState(), requiredStates, incompatibleStates ) )
             blocks.push_back( block.get() );
       }
       for( auto & it : blocks )
@@ -1083,7 +1082,7 @@ void VTKOutput::writeBlockPieces( std::ostream & oss, const Set<SUID>& requiredS
    std::vector< const IBlock* > blocks;
    for( auto block = blockStorage_->begin(); block != blockStorage_->end(); ++block )
    {
-      if( selectable::isSetSelected( uid::globalState() + block->getState(), requiredStates, incompatibleStates ) )
+      if( selectable::isSetSelected( block->getState(), requiredStates, incompatibleStates ) )
          blocks.push_back( block.get() );
    }
 
@@ -1262,7 +1261,7 @@ void VTKOutput::writeParallelVTU( std::ostream& ofs, const Set<SUID>& requiredSt
 
    for( auto block = blockStorage_->begin(); block != blockStorage_->end(); ++block )
    {
-      if( !selectable::isSetSelected( uid::globalState() + block->getState(), requiredStates, incompatibleStates ) )
+      if( !selectable::isSetSelected( block->getState(), requiredStates, incompatibleStates ) )
          continue;
 
       // CellVector cells; // cells to be written to file
@@ -1678,7 +1677,7 @@ void VTKOutput::writeCellData( std::ostream& ofs, const Set<SUID>& requiredState
 
       for( auto block = blockStorage_->begin(); block != blockStorage_->end(); ++block )
       {
-         if (!selectable::isSetSelected(uid::globalState() + block->getState(), requiredStates, incompatibleStates))
+         if( !selectable::isSetSelected( block->getState(), requiredStates, incompatibleStates ) )
             continue;
 
          CellVector cells; // cells to be written to file
