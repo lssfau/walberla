@@ -43,9 +43,8 @@ namespace timeloop {
     * or after the sweep. Here one can register functions that have a close relation to the sweep, for example
     * communication steps that are necessary before the sweep can run.
     *
-    * The SweepTimeloop supports the Selectable concept, so that the execution of sweeps can depend on the current
-    * uid::globalState(), together with the current block state. This mechanism makes the registration of Sweeps somewhat
-    * complex.
+    * The SweepTimeloop supports the Selectable concept, so that the execution of sweeps can depend
+    * on the current block state. This mechanism makes the registration of Sweeps somewhat complex.
     *
     * \section sweepTimeloop_simple Simple Registration
     *

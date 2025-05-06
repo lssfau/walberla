@@ -29,7 +29,6 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 #include "core/selectable/SetSelectableObject.h"
-#include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
 #include <string>
@@ -252,7 +251,7 @@ public:
    {
       shared_ptr< BlockDataHandlingWrapper > dataHandling;
 
-      const Set<SUID> selection( uid::globalState() + block->getState() + state );
+      const Set<SUID> selection( block->getState() + state );
       const size_t  numMatches = dataHandling_.get( dataHandling, selection );
 
       if( numMatches > size_t(1) )
@@ -261,8 +260,7 @@ public:
                          " - number of matching data handling objects: " << numMatches << "\n"
                          " - block ID: " << block->getId() << "\n"
                          " - block state: " << block->getState() << "\n"
-                         " - global state: " << uid::globalState() << "\n"
-                         " - additional state: " << state << "\n" 
+                         " - additional state: " << state << "\n"
                          " - \"selector\": " << selection )
       }
       

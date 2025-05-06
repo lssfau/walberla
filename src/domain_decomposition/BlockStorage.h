@@ -31,7 +31,6 @@
 #include "core/math/Vector3.h"
 #include "core/mpi/MPIWrapper.h"
 #include "core/selectable/IsSetSelected.h"
-#include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
 #include <functional>
@@ -111,7 +110,7 @@ public:
       {
          if( it_ != end_ && !( requiredSelectors_.empty() && incompatibleSelectors_.empty() ) )
          {
-            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState() + uid::globalState(), requiredSelectors_, incompatibleSelectors_ ) )
+            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState(), requiredSelectors_, incompatibleSelectors_ ) )
             {
                ++it_;
             }
@@ -156,7 +155,7 @@ public:
       {
          if( it_ != end_ && !( requiredSelectors_.empty() && incompatibleSelectors_.empty() ) )
          {
-            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState() + uid::globalState(), requiredSelectors_, incompatibleSelectors_ ) )
+            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState(), requiredSelectors_, incompatibleSelectors_ ) )
             {
                ++it_;
             }

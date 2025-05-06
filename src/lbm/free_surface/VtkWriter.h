@@ -205,12 +205,11 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
    };
 
    // add VTK output to timeloop
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput(vtkOutputFunctions, vtkConfigFunc, blockForest, config);
    for (auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output)
    {
-      timeloop.addFuncBeforeTimeStep(output->second.outputFunction, std::string("VTK: ") + output->first,
-                                     output->second.requiredGlobalStates, output->second.incompatibleGlobalStates);
+      timeloop.addFuncBeforeTimeStep(output->second, std::string("VTK: ") + output->first);
    }
 }
 

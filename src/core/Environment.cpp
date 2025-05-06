@@ -28,7 +28,6 @@
 #include "core/logging/Tracing.h"
 #include "core/mpi/MPIManager.h"
 #include "core/StringUtility.h"
-#include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
 #include <algorithm>
@@ -54,9 +53,6 @@ Environment::Environment( int & argc, char ** & argv, bool mpiAbortOnException )
 
   // Use configuration file to setup logging
   logging::configureLogging( config_ );
-
-  // Use configuration file to setup the global state
-  configureGlobalState( config_ );
 }
 
 
@@ -66,32 +62,5 @@ Environment::~Environment()
    WALBERLA_MPI_WORLD_BARRIER();
    WALBERLA_ROOT_SECTION() { std::cout << logging::Logging::getHeaderFooter( false ) << std::endl; }
 }
-
-
-
-//======================================================================================================================
-//
-//  Global State Setup
-//
-//======================================================================================================================
-
-void configureGlobalState( const shared_ptr<Config> & config ) {
-
-   if( !!config && config->isDefined( "GlobalState" ) ) {
-
-      std::string suids = config->getParameter< std::string >( "GlobalState" );
-
-      std::vector< std::string > states = string_split( suids, ", \t" );
-      states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
-
-      Set<SUID> state;
-      for(auto & it : states)
-         state += SUID( it );
-
-      uid::GlobalState::instance()->configure( state );
-   }
-}
-
-
 
 } // namespace walberla

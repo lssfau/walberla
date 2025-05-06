@@ -28,7 +28,6 @@
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIIO.h"
-#include "core/uid/GlobalState.h"
 #include "core/mpi/Gather.h"
 
 
