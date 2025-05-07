@@ -21,8 +21,6 @@ stages:
 
 .build_template:
    script:
-      - source /entrypoint.sh
-      - pip install -I cmake==3.16.3 jinja2
       - export NUM_CORES=$(nproc --all)
       - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
       - "[[ $MAX_BUILD_CORES -lt $NUM_CORES ]] && export NUM_BUILD_CORES=$MAX_BUILD_CORES || export NUM_BUILD_CORES=$NUM_CORES"
@@ -63,7 +61,6 @@ stages:
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
    after_script:
-      - pip3 install lxml
       - python3 cmake/ctest2junit.py build > report.xml
    tags:
       - docker
@@ -98,7 +95,7 @@ stages:
 
 icx_2024_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -113,7 +110,7 @@ icx_2024_serial:
 
 icx_2024_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -126,7 +123,7 @@ icx_2024_mpionly:
 
 icx_2024_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
    tags:
@@ -135,7 +132,7 @@ icx_2024_hybrid:
 
 icx_2024_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -148,7 +145,7 @@ icx_2024_serial_dbg:
 
 icx_2024_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -159,7 +156,7 @@ icx_2024_mpionly_dbg:
 
 icx_2024_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -169,7 +166,7 @@ icx_2024_hybrid_dbg:
 
 icx_2024_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/icx-2024:38
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -182,16 +179,14 @@ icx_2024_hybrid_dbg_sp:
 
 gcc_10_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -211,16 +206,14 @@ gcc_10_serial:
 
 gcc_10_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -238,16 +231,14 @@ gcc_10_mpionly:
 
 gcc_10_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -264,16 +255,14 @@ gcc_10_hybrid:
 
 gcc_10_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -294,16 +283,14 @@ gcc_10_serial_dbg:
 
 gcc_10_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -322,16 +309,14 @@ gcc_10_mpionly_dbg:
 
 gcc_10_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -346,16 +331,14 @@ gcc_10_hybrid_dbg:
 
 gcc_10_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-10:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -376,16 +359,14 @@ gcc_10_hybrid_dbg_sp:
 
 gcc_11_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -405,16 +386,14 @@ gcc_11_serial:
 
 gcc_11_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -432,16 +411,14 @@ gcc_11_mpionly:
 
 gcc_11_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -458,16 +435,14 @@ gcc_11_hybrid:
 
 gcc_11_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -488,16 +463,14 @@ gcc_11_serial_dbg:
 
 gcc_11_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -516,16 +489,14 @@ gcc_11_mpionly_dbg:
 
 gcc_11_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -543,16 +514,14 @@ gcc_11_hybrid_dbg:
 
 gcc_11_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-11:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -573,16 +542,14 @@ gcc_11_hybrid_dbg_sp:
 
 gcc_12_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -602,16 +569,14 @@ gcc_12_serial:
 
 gcc_12_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -629,16 +594,14 @@ gcc_12_mpionly:
 
 gcc_12_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -655,16 +618,14 @@ gcc_12_hybrid:
 
 gcc_12_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -685,16 +646,14 @@ gcc_12_serial_dbg:
 
 gcc_12_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -713,16 +672,14 @@ gcc_12_mpionly_dbg:
 
 gcc_12_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -740,16 +697,14 @@ gcc_12_hybrid_dbg:
 
 gcc_12_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -770,16 +725,14 @@ gcc_12_hybrid_dbg_sp:
 
 gcc_13_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -790,7 +743,6 @@ gcc_13_serial:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
@@ -800,16 +752,14 @@ gcc_13_serial:
 
 gcc_13_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -818,7 +768,6 @@ gcc_13_mpionly:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
@@ -828,17 +777,15 @@ gcc_13_mpionly:
 
 gcc_13_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    stage: pretest
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -846,23 +793,20 @@ gcc_13_hybrid:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    tags:
       - cuda11
       - docker
 
 gcc_13_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -874,23 +818,20 @@ gcc_13_serial_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    tags:
       - cuda11
       - docker
 
 gcc_13_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -900,23 +841,20 @@ gcc_13_mpionly_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    tags:
       - cuda11
       - docker
 
 gcc_13_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -925,23 +863,20 @@ gcc_13_hybrid_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
    tags:
       - cuda11
       - docker
 
 gcc_13_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=gcc CXX=g++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -953,414 +888,20 @@ gcc_13_hybrid_dbg_sp:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "ON"
-   tags:
-      - cuda11
-      - docker
-
-clang_14_serial:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_14_mpionly:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_14_hybrid:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_14_serial_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_14_mpionly_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_14_hybrid_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   tags:
-      - cuda11
-      - docker
-
-clang_14_hybrid_dbg_sp:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-14:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_DOUBLE_ACCURACY: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_METIS: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_serial:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_mpionly:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_hybrid:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_serial_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_mpionly_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_hybrid_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda11
-      - docker
-
-clang_15_hybrid_dbg_sp:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-15:32
-   before_script:
-      - python3 -m venv ci-venv
-      - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
-      - cd python
-      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
-      - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
-      - cd ..
-      - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_DOUBLE_ACCURACY: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_METIS: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
-      WALBERLA_BUILD_WITH_PYTHON: "ON"
-      Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_16_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1380,16 +921,14 @@ clang_16_serial:
 
 clang_16_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1407,16 +946,14 @@ clang_16_mpionly:
 
 clang_16_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1433,16 +970,14 @@ clang_16_hybrid:
 
 clang_16_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1463,16 +998,14 @@ clang_16_serial_dbg:
 
 clang_16_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1491,16 +1024,14 @@ clang_16_mpionly_dbg:
 
 clang_16_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1509,25 +1040,20 @@ clang_16_hybrid_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_16_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-16:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1548,16 +1074,14 @@ clang_16_hybrid_dbg_sp:
 
 clang_17_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1577,16 +1101,14 @@ clang_17_serial:
 
 clang_17_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1604,16 +1126,14 @@ clang_17_mpionly:
 
 clang_17_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1621,22 +1141,23 @@ clang_17_hybrid:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_17_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1648,22 +1169,23 @@ clang_17_serial_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_17_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1673,22 +1195,23 @@ clang_17_mpionly_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_17_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1697,23 +1220,23 @@ clang_17_hybrid_dbg:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
 clang_17_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:32
-   stage: pretest
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1725,22 +1248,23 @@ clang_17_hybrid_dbg_sp:
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       Python_ROOT_DIR: "./ci-venv"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
-aocc_4_serial:
+clang_18_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1758,18 +1282,16 @@ aocc_4_serial:
       - cuda11
       - docker
 
-aocc_4_mpionly:
+clang_18_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1785,18 +1307,16 @@ aocc_4_mpionly:
       - cuda11
       - docker
 
-aocc_4_hybrid:
+clang_18_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1808,18 +1328,16 @@ aocc_4_hybrid:
       - cuda11
       - docker
 
-aocc_4_serial_dbg:
+clang_18_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1835,18 +1353,16 @@ aocc_4_serial_dbg:
       - cuda11
       - docker
 
-aocc_4_mpionly_dbg:
+clang_18_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1860,18 +1376,16 @@ aocc_4_mpionly_dbg:
       - cuda11
       - docker
 
-aocc_4_hybrid_dbg:
+clang_18_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1884,18 +1398,17 @@ aocc_4_hybrid_dbg:
       - cuda11
       - docker
 
-aocc_4_hybrid_dbg_sp:
+clang_18_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/aocc-4:32
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:38
+   stage: pretest
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate
-      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest
+      - python3 -m pip install lbmpy==1.3.7 jinja2 pytest numpy setuptools lxml
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - python3 -m pip list
-      - deactivate
-      - python3 -m pip install numpy
       - cd ..
       - CC=clang CXX=clang++ ci-venv/bin/python -m pip install cupy-cuda11x
    variables:
@@ -1921,7 +1434,7 @@ aocc_4_hybrid_dbg_sp:
 doc:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
    stage: documentation
-   needs: []
+   needs: [ ]
    script:
       - cmake --version
       - doxygen --version
@@ -1948,7 +1461,7 @@ doc:
 clang-tidy:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-18:33
    stage: "Code Quality"
-   needs: []
+   needs: [ ]
    before_script:
       - python3 -m venv ci-venv
       - source ci-venv/bin/activate

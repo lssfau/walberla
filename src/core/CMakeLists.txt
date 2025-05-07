@@ -31,6 +31,10 @@ if ( MPI_FOUND )
    target_link_libraries( walberla_core PUBLIC MPI::MPI_CXX )
 endif ()
 
+if ( OpenMP_CXX_FOUND )
+   target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
+endif ()
+
 if ( WALBERLA_BUILD_WITH_HIP )
    target_link_libraries( walberla_core PUBLIC hip::host )
 endif ( WALBERLA_BUILD_WITH_HIP )
