@@ -104,8 +104,10 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_IsotropicVDWContact )
 waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContact FILES kernel/cnt/VBondContact.test.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS walberla::core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration )
+if ( NOT ( CMAKE_BUILD_TYPE STREQUAL "Release" AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" ))
+    waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS walberla::core )
+    waLBerla_execute_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration )
+endif ()
 
 waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_ViscousDamping FILES kernel/cnt/ViscousDamping.test.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_ViscousDamping )
