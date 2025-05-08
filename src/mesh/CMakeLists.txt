@@ -16,7 +16,6 @@ target_sources( walberla_mesh
       )
 
 add_subdirectory( blockforest )
-add_subdirectory( pe )
 add_subdirectory( boundary )
 
 ###################################################################################################

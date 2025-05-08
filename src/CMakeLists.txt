@@ -54,7 +54,7 @@ add_subdirectory( vtk )
 
 #### TODO: Remove with waLBerla 7.2.
 list( APPEND MODULES blockforest boundary communication core gpu domain_decomposition executiontree field gather geometry lbm lbm_generated
-      lbm_mesapd_coupling mesa_pd pde pe pe_coupling postprocessing simd sqlite stencil timeloop vtk )
+      lbm_mesapd_coupling mesa_pd pde pe_coupling postprocessing simd sqlite stencil timeloop vtk )
 if ( WALBERLA_BUILD_WITH_FFT AND FFTW3_FOUND )
    list( APPEND MODULES fft )
 endif ()
