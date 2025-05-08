@@ -51,11 +51,11 @@ namespace lbm {
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename LM_Hydro >
-class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                                      LM_AdvDiff::CollisionModel::constant &&
-                                                                                      LM_AdvDiff::compressible &&
-                                                                                      std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value
-                                                                                      >::type >
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > )
+class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro >
 {
 public:
 
@@ -126,11 +126,11 @@ private:
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename LM_Hydro >
-class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                                      LM_AdvDiff::CollisionModel::constant &&
-                                                                                      LM_AdvDiff::compressible &&
-                                                                                      std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value
-                                                                                      >::type >
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > )
+class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro >
 {
 public:
 

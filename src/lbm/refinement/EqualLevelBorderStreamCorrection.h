@@ -42,15 +42,17 @@ namespace refinement {
 
 
 namespace internal {
-template< typename LatticeModel_T, class Enable = void  >
+template< typename LatticeModel_T  >
 struct EdgeCornerStencil;
 template< typename LatticeModel_T >
-struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
+requires( LatticeModel_T::Stencil::D == 2 )
+struct EdgeCornerStencil< LatticeModel_T >
 {
    using type = stencil::D2CornerStencil;
 };
 template< typename LatticeModel_T >
-struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
+requires( LatticeModel_T::Stencil::D == 3 )
+struct EdgeCornerStencil< LatticeModel_T >
 {
    using type = stencil::D3EdgeCornerStencil;
 };

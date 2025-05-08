@@ -133,35 +133,36 @@ const FlagUID NoSlip_Flag( "no slip" );
 // OUTPUT HELPERS  //
 /////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct StencilString< LatticeModel_T >
 {
    static const char * str() { return "D3Q19"; }
 };
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::SRT_tag >)
+struct CollisionModelString< LatticeModel_T>
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::MRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "MRT"; }
 };
@@ -612,7 +613,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor(ts), info );
 }
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AddRefinementTimeStep
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
@@ -650,8 +651,8 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           lbm::collision_model::MRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag > )
+struct AddRefinementTimeStep< LatticeModel_T >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,

@@ -141,7 +141,7 @@ endif()
 
 ############################################################################################################################
 
-set( CMAKE_CXX_STANDARD 17 )
+set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
@@ -650,12 +650,6 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
 endif ( )
-
-if (WALBERLA_BUILD_WITH_CUDA AND (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0" OR CMAKE_VERSION VERSION_LESS 3.18.0))
-    # CUDA < 11 does not support C++17. std::experimental::any works with C++14, unlike std::any.
-    set(CMAKE_CUDA_STANDARD 14)
-    set(WALBERLA_USE_STD_EXPERIMENTAL_ANY 1)
-endif()
 
 # Can be used in CMake files containing generated files where the file suffix is dependent on the target
 if (WALBERLA_BUILD_WITH_CUDA AND CUDA_FOUND)

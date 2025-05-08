@@ -31,7 +31,8 @@ namespace simd {
 
 // enable output operator only for vector4 types
 template<typename VEC4>
-typename std::enable_if<is_vector4_type<VEC4>::value, std::ostream&>::type
+requires is_vector4_type<VEC4>::value
+std::ostream&
 operator<< ( std::ostream & os, VEC4 v ) {
    os << "[" << getComponent(v,3) <<", "
              << getComponent(v,2) <<", "

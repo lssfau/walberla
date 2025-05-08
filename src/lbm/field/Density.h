@@ -35,7 +35,7 @@ namespace lbm {
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct Density;
 
 //////////////////
@@ -43,7 +43,8 @@ struct Density;
 //////////////////
 
 template< typename LatticeModel_T >
-struct Density< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
+requires( LatticeModel_T::compressible )
+struct Density< LatticeModel_T >
 {
    static_assert( LatticeModel_T::compressible, "Only works with compressible models!" );
 
@@ -78,7 +79,8 @@ struct Density< LatticeModel_T, typename std::enable_if< LatticeModel_T::compres
 ////////////////////
 
 template< typename LatticeModel_T >
-struct Density< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible >::type >
+requires( ! LatticeModel_T::compressible )
+struct Density< LatticeModel_T >
 {
    static_assert( !LatticeModel_T::compressible, "Only works with incompressible models!" );
 

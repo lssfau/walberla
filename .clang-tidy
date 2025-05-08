@@ -37,6 +37,7 @@ modernize-*,
 -modernize-use-nodiscard,
 -modernize-macro-to-enum,
 -modernize-concat-nested-namespaces,
+-modernize-use-std-numbers,
 
 mpi-*,
 -mpi-type-mismatch,

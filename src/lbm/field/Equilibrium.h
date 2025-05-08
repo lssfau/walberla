@@ -40,7 +40,7 @@ namespace lbm {
 // set equilibrium distribution (x,y,z) //
 //////////////////////////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct Equilibrium
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -51,10 +51,8 @@ struct Equilibrium
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                             ! LatticeModel_T::compressible &&
-                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
-                                                             >::type >
+requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct Equilibrium< LatticeModel_T>
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                                "Only works with incompressible models!" );
@@ -89,9 +87,8 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typ
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                             LatticeModel_T::equilibriumAccuracyOrder == 1
-                                                             >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+struct Equilibrium< LatticeModel_T >
 {
    static_assert( LatticeModel_T::compressible == false,         "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
@@ -127,10 +124,8 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::c
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                             LatticeModel_T::compressible &&
-                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
-                                                             >::type >
+requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct Equilibrium< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                         "Only works with compressible models!" );
@@ -165,9 +160,8 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typ
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
-	                                                          LatticeModel_T::equilibriumAccuracyOrder == 1
-	                                                          >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+struct Equilibrium< LatticeModel_T >
 {
    static_assert( LatticeModel_T::compressible,                  "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
@@ -201,10 +195,8 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< LatticeModel_T::com
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                             ! LatticeModel_T::compressible &&
-                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
-                                                             >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct Equilibrium< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                       "Only works with incompressible models!" );
@@ -350,10 +342,8 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typen
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-	                                                          LatticeModel_T::compressible &&
-	                                                          LatticeModel_T::equilibriumAccuracyOrder == 2
-	                                                          >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct Equilibrium< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                "Only works with compressible models!" );
@@ -502,7 +492,7 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typen
 // set equilibrium distribution (range) //
 //////////////////////////////////////////
 
-template< typename LatticeModel_T, typename FieldIteratorXYZ, class Enable = void >
+template< typename LatticeModel_T, typename FieldIteratorXYZ >
 struct EquilibriumRange
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -511,9 +501,8 @@ struct EquilibriumRange
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 2
-                                                                                    >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -534,9 +523,8 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 1
-                                                                                    >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -557,9 +545,8 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 2
-                                                                                    >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -580,9 +567,8 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 1
-                                                                                    >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )

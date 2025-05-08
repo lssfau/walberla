@@ -37,7 +37,7 @@ namespace lbm {
 
 namespace internal {
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AdaptVelocityToForce
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -46,10 +46,8 @@ struct AdaptVelocityToForce
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                      LatticeModel_T::ForceModel::constant &&
-                                                                      LatticeModel_T::ForceModel::shiftMacVel
-                                                                      >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct AdaptVelocityToForce< LatticeModel_T >
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
    {
@@ -70,10 +68,8 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeMod
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                                      LatticeModel_T::ForceModel::constant &&
-                                                                      LatticeModel_T::ForceModel::shiftMacVel
-                                                                      >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct AdaptVelocityToForce< LatticeModel_T >
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
    {
@@ -94,10 +90,8 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeM
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                      ! LatticeModel_T::ForceModel::constant &&
-                                                                      LatticeModel_T::ForceModel::shiftMacVel
-                                                                      >::type >
+requires( LatticeModel_T::compressible && ! LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct AdaptVelocityToForce< LatticeModel_T >
 {
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
@@ -120,10 +114,8 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeMod
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                                      ! LatticeModel_T::ForceModel::constant &&
-                                                                      LatticeModel_T::ForceModel::shiftMacVel
-                                                                      >::type >
+requires( ! LatticeModel_T::compressible && ! LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct AdaptVelocityToForce< LatticeModel_T >
 {
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
@@ -146,7 +138,8 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeM
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel >::type >
+requires( ! LatticeModel_T::ForceModel::shiftMacVel )
+struct AdaptVelocityToForce< LatticeModel_T >
 {
    static Vector3<real_t> get( const LatticeModel_T &, const Vector3< real_t > & velocity, const real_t )
    {
@@ -198,7 +191,7 @@ struct DensityAndVelocity
 // set density and velocity (range) //
 //////////////////////////////////////
 
-template< typename LatticeModel_T, typename FieldIteratorXYZ, class Enable = void >
+template< typename LatticeModel_T, typename FieldIteratorXYZ >
 struct DensityAndVelocityRange
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -209,7 +202,8 @@ struct DensityAndVelocityRange
 
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::ForceModel::constant >::type >
+requires( LatticeModel_T::ForceModel::constant )
+struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static_assert( LatticeModel_T::ForceModel::constant, "Only works with constant forces!" );
 
@@ -224,7 +218,8 @@ struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename std::
 
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::ForceModel::constant >::type >
+requires( ! LatticeModel_T::ForceModel::constant )
+struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ >
 {
    static_assert( LatticeModel_T::ForceModel::constant == false, "Does not work with constant forces!" );
 

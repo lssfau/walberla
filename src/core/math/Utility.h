@@ -47,9 +47,11 @@ template< typename T >
 inline const T sign( T a );
 
 template< typename T >
-inline const typename std::enable_if_t<  std::is_unsigned_v<T>, T > abs( T a );
+requires( std::is_unsigned_v<T> )
+inline const T abs( T a );
 template< typename T >
-inline const typename std::enable_if_t< ! std::is_unsigned_v<T>, T > abs( T a );
+requires( !std::is_unsigned_v<T> )
+inline const T abs( T a );
 
 
 template< typename T1, typename T2 >
@@ -104,13 +106,15 @@ inline const T sign( T a )
 // \return The value if it is greater than or equal to zero, -1 times the value if the value is smaller than zero.
  */
 template< typename T >
-inline const typename std::enable_if_t<  std::is_unsigned_v<T>, T > abs( T a )
+requires( std::is_unsigned_v<T> )
+inline const T abs( T a )
 {
    return a;
 }
 
 template< typename T >
-inline const typename std::enable_if_t< !std::is_unsigned_v<T>, T > abs( T a )
+requires( !std::is_unsigned_v<T> )
+inline const T abs( T a )
 {
    return std::abs( a );
 }

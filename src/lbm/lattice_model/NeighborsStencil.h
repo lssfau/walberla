@@ -33,17 +33,19 @@ namespace lbm {
 
 
 
-template< typename LatticeModel_T, class Enable = void  >
+template< typename LatticeModel_T  >
 struct NeighborsStencil;
 
 template< typename LatticeModel_T >
-struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
+requires( LatticeModel_T::Stencil::D == 2 )
+struct NeighborsStencil< LatticeModel_T >
 {
    using type = stencil::D2Q9;
 };
 
 template< typename LatticeModel_T >
-struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
+requires( LatticeModel_T::Stencil::D == 3 )
+struct NeighborsStencil< LatticeModel_T >
 {
    using type = stencil::D3Q27;
 };

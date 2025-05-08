@@ -149,14 +149,15 @@ protected:
 
 
 
-template< typename Boundary_T, class Enable = void >
+template< typename Boundary_T >
 struct isThreadSafe
 {
    static const bool value = false;
 };
 
 template< typename Boundary_T >
-struct isThreadSafe< Boundary_T, typename std::enable_if_t< Boundary_T::threadsafe > >
+requires( Boundary_T::threadsafe )
+struct isThreadSafe< Boundary_T >
 {
    static const bool value = Boundary_T::threadsafe;
 };

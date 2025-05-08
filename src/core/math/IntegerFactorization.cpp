@@ -49,11 +49,11 @@ std::vector< uint_t > getFactors( const uint_t number, const uint_t numberOfFact
 
    std::vector< uint_t > primes = getPrimeFactors( number );
 
-   for( auto prime = primes.rbegin(); prime != primes.rend(); ++prime )
+   for( const auto prime: primes )
    {
       auto smallestCurrentFactor = std::min_element( factors.begin(), factors.end() );
       WALBERLA_ASSERT( smallestCurrentFactor != factors.end(), "vector\"factors\" is empty" );
-      *smallestCurrentFactor *= *prime;
+      *smallestCurrentFactor *= prime;
    }
 
    return factors;
@@ -70,7 +70,7 @@ std::vector< uint_t > getFactors( const uint_t number, const uint_t numberOfFact
 
    std::vector< uint_t > primes = getPrimeFactors( number );
 
-   for( auto prime = primes.rbegin(); prime != primes.rend(); ++prime )
+   for( const auto prime: primes )
    {
       uint_t smallestWeightedFactor = 0;
       for( uint_t factor = 1; factor < numberOfFactors; ++factor )
@@ -78,7 +78,7 @@ std::vector< uint_t > getFactors( const uint_t number, const uint_t numberOfFact
          if( ( real_c(factors[factor]) / weight[factor] ) < ( real_c(factors[smallestWeightedFactor]) / weight[smallestWeightedFactor] ) )
             smallestWeightedFactor = factor;
       }
-      factors[smallestWeightedFactor] *= *prime;
+      factors[smallestWeightedFactor] *= prime;
    }
 
    return factors;

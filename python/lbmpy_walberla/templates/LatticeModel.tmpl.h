@@ -197,15 +197,15 @@ private:
 
     // Backend classes can access private members:
     friend class {{class_name}}::Sweep;
-    template<class LM, class Enable> friend class  EquilibriumDistribution;
-    template<class LM, class Enable> friend struct Equilibrium;
-    template<class LM, class Enable> friend struct internal::AdaptVelocityToForce;
-    template<class LM, class Enable> friend struct Density;
-    template<class LM>               friend struct DensityAndVelocity;
-    template<class LM, class Enable> friend struct DensityAndMomentumDensity;
-    template<class LM, class Enable> friend struct MomentumDensity;
-    template<class LM, class It, class Enable> friend struct DensityAndVelocityRange;
-    template<class LM>               friend struct PressureTensor;
+    template<class LM>           friend class  EquilibriumDistribution;
+    template<class LM>           friend struct Equilibrium;
+    template<class LM>           friend struct internal::AdaptVelocityToForce;
+    template<class LM>           friend struct Density;
+    template<class LM>           friend struct DensityAndVelocity;
+    template<class LM>           friend struct DensityAndMomentumDensity;
+    template<class LM>           friend struct MomentumDensity;
+    template<class LM, class It> friend struct DensityAndVelocityRange;
+    template<class LM>           friend struct PressureTensor;
 
     friend mpi::SendBuffer & ::walberla::mpi::operator<< (mpi::SendBuffer & , const {{class_name}} & );
     friend mpi::RecvBuffer & ::walberla::mpi::operator>> (mpi::RecvBuffer & ,       {{class_name}} & );
@@ -224,7 +224,7 @@ private:
 
 
 template<>
-class EquilibriumDistribution< {{class_name}}, void>
+class EquilibriumDistribution< {{class_name}} >
 {
 public:
    typedef typename {{class_name}}::Stencil Stencil;
@@ -279,7 +279,7 @@ public:
 namespace internal {
 
 template<>
-struct AdaptVelocityToForce<{{class_name}}, void>
+struct AdaptVelocityToForce<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
    static Vector3<{{dtype}}> get( FieldPtrOrIterator & it, const {{class_name}} & lm,
@@ -311,7 +311,7 @@ struct AdaptVelocityToForce<{{class_name}}, void>
 
 
 template<>
-struct Equilibrium< {{class_name}}, void >
+struct Equilibrium< {{class_name}} >
 {
 
    template< typename FieldPtrOrIterator >
@@ -344,7 +344,7 @@ struct Equilibrium< {{class_name}}, void >
 
 
 template<>
-struct Density<{{class_name}}, void>
+struct Density<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
    static inline {{dtype}} get( const {{class_name}} & , const FieldPtrOrIterator & it )

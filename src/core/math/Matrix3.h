@@ -148,8 +148,8 @@ public:
    template< typename Other > inline const Vector3<HIGH> operator* ( const Vector3<Other>& rhs ) const;
    template< typename Other > inline const Matrix3<HIGH> operator* ( const Matrix3<Other>& rhs ) const;
 
-   template< typename Other > inline std::enable_if_t< std::is_arithmetic_v<Other>, Matrix3&            >operator*=( Other rhs );
-   template< typename Other > inline std::enable_if_t< std::is_arithmetic_v<Other>, const Matrix3<HIGH> >operator* ( Other rhs ) const;
+   template< typename Other > requires std::is_arithmetic_v<Other> inline Matrix3&            operator*=( Other rhs );
+   template< typename Other > requires std::is_arithmetic_v<Other> inline const Matrix3<HIGH> operator* ( Other rhs ) const;
    //@}
    //*******************************************************************************************************************
 
@@ -690,7 +690,8 @@ inline Matrix3<Type>& Matrix3<Type>::operator-=( const Matrix3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline std::enable_if_t< std::is_arithmetic_v<Other>, Matrix3<Type>& >Matrix3<Type>::operator*=( Other rhs )
+requires std::is_arithmetic_v<Other>
+inline Matrix3<Type>& Matrix3<Type>::operator*=( Other rhs )
 {
    v_[0] *= rhs;
    v_[1] *= rhs;
@@ -814,7 +815,8 @@ inline const Matrix3<Type> operator-( const Matrix3<Type>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline std::enable_if_t< std::is_arithmetic_v<Other> ,const Matrix3<HIGH> >Matrix3<Type>::operator*( Other rhs ) const
+requires std::is_arithmetic_v<Other>
+inline const Matrix3<HIGH> Matrix3<Type>::operator*( Other rhs ) const
 {
    return Matrix3<HIGH>( v_[0]*rhs, v_[1]*rhs, v_[2]*rhs,
                          v_[3]*rhs, v_[4]*rhs, v_[5]*rhs,
@@ -1405,7 +1407,8 @@ inline const Matrix3<Type> fabs( const Matrix3<Type>& m );
 // \return The scaled result matrix.
 */
 template< typename Type, typename Other >
-inline std::enable_if_t< std::is_arithmetic_v< Other >, const Matrix3< HIGH > >
+requires( std::is_arithmetic_v< Other > )
+inline const Matrix3< HIGH >
 operator*(Other scalar, const Matrix3< Type >& matrix)
 {
    return matrix * scalar;

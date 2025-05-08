@@ -37,7 +37,7 @@ namespace mpi {
    const uint_t BUFFER_DEBUG_OVERHEAD = 0;
 #endif
 
-   template< typename T, class Enable = void >
+   template< typename T >
    struct BufferSizeTrait   { };
 
    #define BufferSizeTraitSpecialization( TYPE ) \
@@ -67,7 +67,8 @@ namespace mpi {
 
    // Specialization for all enums
    template< typename T>
-   struct BufferSizeTrait< T, std::enable_if_t< std::is_enum_v< T > > >
+   requires( std::is_enum_v< T > )
+   struct BufferSizeTrait< T >
    {
       static const bool constantSize = true;
       static const size_t size = sizeof( T ) + BUFFER_DEBUG_OVERHEAD;

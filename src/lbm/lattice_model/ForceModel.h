@@ -247,18 +247,19 @@ class EDMField
 {
 private:
 
-   template< typename LatticeModel_T, class Enable = void >
+   template< typename LatticeModel_T >
    struct DirectionIndependentTerm
    {
       static real_t get( const real_t ) { return real_t(0); }
    };
    template< typename LatticeModel_T >
-   struct DirectionIndependentTerm< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
+   requires( LatticeModel_T::compressible )
+   struct DirectionIndependentTerm< LatticeModel_T >
    {
       static real_t get( const real_t rho ) { return real_t(1) / rho; }
    };
 
-   template< typename LatticeModel_T, class Enable = void >
+   template< typename LatticeModel_T >
    struct ShiftedVelocity
    {
       static Vector3<real_t> get( const Vector3<real_t> & velocity, const Vector3<real_t> & forceDensity, const real_t )
@@ -267,7 +268,8 @@ private:
       }
    };
    template< typename LatticeModel_T >
-   struct ShiftedVelocity< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
+   requires( LatticeModel_T::compressible )
+   struct ShiftedVelocity< LatticeModel_T >
    {
       static Vector3<real_t> get( const Vector3<real_t> & velocity, const Vector3<real_t> & forceDensity, const real_t rhoInv )
       {
