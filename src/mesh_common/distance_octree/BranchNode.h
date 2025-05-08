@@ -28,7 +28,7 @@
 #include "mesh_common/DistanceComputations.h"
 #include "mesh_common/MatrixVectorOperations.h"
 #include "mesh_common/MeshOperations.h"
-# include "pe/raytracing/Intersects.h"
+#include "mesh_common/distance_octree/Ray.h"
 
 #include <algorithm>
 #include <iterator>
@@ -117,8 +117,8 @@ private:
          real_t distance;
          Vector3<real_t> ray_normal;
 
-         bool intersects { pe::raytracing::intersects(   child->getAABB(), 
-                                                         pe::raytracing::Ray(
+         bool intersects { mesh::rayAABBIntersection(   child->getAABB(),
+                                                        mesh::Ray(
                                                                toWalberla( ray_origin ), 
                                                                (toWalberla( ray_direction )).getNormalized()),
                                                          distance, real_t(0.0), &ray_normal
