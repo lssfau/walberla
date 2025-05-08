@@ -179,12 +179,12 @@ void addTest( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & time
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AddTest;
 
 template< typename LatticeModel_T  >
-struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                             lbm::collision_model::SRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::SRT_tag > )
+struct AddTest< LatticeModel_T >
 {
    static void add( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & timeloop, std::vector< BlockDataID > & fieldIds,
                     field::Layout layout, const BlockDataID & flagFieldId, const real_t velocity, const char * fieldName )
@@ -195,8 +195,8 @@ struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename 
 };
 
 template< typename LatticeModel_T  >
-struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                             lbm::collision_model::TRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag > )
+struct AddTest< LatticeModel_T >
 {
    static void add( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & timeloop, std::vector< BlockDataID > & fieldIds,
                     field::Layout layout, const BlockDataID & flagFieldId, const real_t velocity, const char * fieldName )
@@ -207,8 +207,8 @@ struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename 
 };
 
 template< typename LatticeModel_T  >
-struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel,
-                                                                             lbm::collision_model::D3Q19MRT >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel, lbm::collision_model::D3Q19MRT > )
+struct AddTest< LatticeModel_T >
 {
    static void add( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & timeloop, std::vector< BlockDataID > & fieldIds,
                     field::Layout layout, const BlockDataID & flagFieldId, const real_t velocity, const char * fieldName )
@@ -221,12 +221,12 @@ struct AddTest< LatticeModel_T, typename std::enable_if< std::is_same< typename 
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AddTRTTest;
 
 template< typename LatticeModel_T  >
-struct AddTRTTest< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                lbm::collision_model::TRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag > )
+struct AddTRTTest< LatticeModel_T >
 {
    static void add( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & timeloop, std::vector< BlockDataID > & fieldIds,
                     field::Layout layout, const BlockDataID & flagFieldId, const real_t velocity, const char * fieldName )
@@ -237,8 +237,8 @@ struct AddTRTTest< LatticeModel_T, typename std::enable_if< std::is_same< typena
 };
 
 template< typename LatticeModel_T  >
-struct AddTRTTest< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel,
-                                                                                lbm::collision_model::D3Q19MRT >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel, lbm::collision_model::D3Q19MRT > )
+struct AddTRTTest< LatticeModel_T >
 {
    static void add( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & timeloop, std::vector< BlockDataID > & fieldIds,
                     field::Layout layout, const BlockDataID & flagFieldId, const real_t velocity, const char * fieldName )

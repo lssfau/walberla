@@ -88,11 +88,7 @@ public:
    T getData() const { return walberla::any_cast<T>( data_ ); }
    
    bool hasData() const {
-#ifndef WALBERLA_USE_STD_EXPERIMENTAL_ANY
       return data_.has_value();
-#else
-      return !(data_.empty());
-#endif
    }
    
    inline       void                             clearNeighborhoodSection  ( const uint_t index );

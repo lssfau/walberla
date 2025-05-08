@@ -167,7 +167,7 @@ real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, c
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct DensityAndMomentumDensity
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -176,7 +176,8 @@ struct DensityAndMomentumDensity
 };
 
 template< typename LatticeModel_T >
-struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct DensityAndMomentumDensity< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "For D3Q19 there is an optimized version!" );
 
@@ -216,7 +217,8 @@ struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< ! std
 };
 
 template< typename LatticeModel_T >
-struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct DensityAndMomentumDensity< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 

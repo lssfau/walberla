@@ -141,8 +141,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-   GenericSendBuffer&  >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericSendBuffer&
    operator<<( V value );
 
    //@}
@@ -189,8 +189,8 @@ private:
    void extendMemory( size_t newCapacity );
 
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-   GenericSendBuffer&  >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericSendBuffer&
    put( V value );
 
    inline std::ptrdiff_t getOffset() const;
@@ -438,8 +438,8 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-GenericSendBuffer<T,G>& >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericSendBuffer<T,G>&
 GenericSendBuffer<T,G>::put( V value )
 {
    // Compile time check that V is built-in data type
@@ -483,8 +483,8 @@ GenericSendBuffer<T,G>::put( V value )
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-GenericSendBuffer<T,G>& >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericSendBuffer<T,G>&
 GenericSendBuffer<T,G>::operator<<( V value )
 {
    addDebugMarker( typeid(V).name() );

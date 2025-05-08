@@ -142,7 +142,7 @@ void getMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const PdfFiel
 // force correction - macroscopic velocity //
 /////////////////////////////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct MacroscopicForceCorrection
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -151,9 +151,8 @@ struct MacroscopicForceCorrection
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::constant &&
-                                                                            LatticeModel_T::ForceModel::shiftMacVel
-                                                                            >::type >
+requires( LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct MacroscopicForceCorrection< LatticeModel_T >
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
@@ -178,9 +177,8 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< Latt
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::constant &&
-                                                                            LatticeModel_T::ForceModel::shiftMacVel
-                                                                            >::type >
+requires( ! LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftMacVel )
+struct MacroscopicForceCorrection< LatticeModel_T >
 {
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
@@ -217,7 +215,8 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel >::type >
+requires( ! LatticeModel_T::ForceModel::shiftMacVel )
+struct MacroscopicForceCorrection< LatticeModel_T >
 {
    static void apply( const LatticeModel_T &, Vector3< real_t > & ) {}
 
@@ -231,7 +230,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 // force correction - equilibrium velocity //
 /////////////////////////////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct EquilibriumForceCorrection
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -240,9 +239,8 @@ struct EquilibriumForceCorrection
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::constant &&
-	                                                                         LatticeModel_T::ForceModel::shiftEquVel
-	                                                                         >::type >
+requires( LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftEquVel )
+struct EquilibriumForceCorrection< LatticeModel_T >
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
@@ -267,9 +265,8 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< Latt
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::constant &&
-                                                                            LatticeModel_T::ForceModel::shiftEquVel
-                                                                            >::type >
+requires( ! LatticeModel_T::ForceModel::constant && LatticeModel_T::ForceModel::shiftEquVel )
+struct EquilibriumForceCorrection< LatticeModel_T >
 {
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
@@ -306,7 +303,8 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftEquVel >::type >
+requires( ! LatticeModel_T::ForceModel::shiftEquVel )
+struct EquilibriumForceCorrection< LatticeModel_T >
 {
    static void apply( const LatticeModel_T &, Vector3< real_t > & ) {}
 
@@ -320,7 +318,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct MomentumDensity
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -329,7 +327,8 @@ struct MomentumDensity
 };
 
 template< typename LatticeModel_T >
-struct MomentumDensity< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct MomentumDensity< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "For D3Q19 there is an optimized version!" );
 
@@ -365,7 +364,8 @@ struct MomentumDensity< LatticeModel_T, typename std::enable_if< ! std::is_same<
 };
 
 template< typename LatticeModel_T >
-struct MomentumDensity< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct MomentumDensity< LatticeModel_T >
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 

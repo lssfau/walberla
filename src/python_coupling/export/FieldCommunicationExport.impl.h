@@ -58,7 +58,8 @@ namespace py = pybind11;
 //===================================================================================================================
 
 template< typename FieldType >
-typename std::enable_if<FieldType::F_SIZE == 27, py::object>::type
+requires( FieldType::F_SIZE == 27 )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
    typedef GhostLayerField<typename FieldType::value_type, 27> GlField_T;
@@ -67,7 +68,8 @@ createStencilRestrictedPackInfoObject( BlockDataID bdId )
 }
 
 template< typename FieldType >
-typename std::enable_if<FieldType::F_SIZE == 19, py::object>::type
+requires( FieldType::F_SIZE == 19 )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
    typedef GhostLayerField<typename FieldType::value_type, 19> GlField_T;
@@ -76,7 +78,8 @@ createStencilRestrictedPackInfoObject( BlockDataID bdId )
 }
 
 template< typename FieldType >
-typename std::enable_if<FieldType::F_SIZE == 15, py::object>::type
+requires( FieldType::F_SIZE == 15 )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
    typedef GhostLayerField<typename FieldType::value_type, 15> GlField_T;
@@ -85,7 +88,8 @@ createStencilRestrictedPackInfoObject( BlockDataID bdId )
 }
 
 template< typename FieldType >
-typename std::enable_if<FieldType::F_SIZE == 7, py::object>::type
+requires( FieldType::F_SIZE == 7 )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
    typedef GhostLayerField<typename FieldType::value_type, 7> GlField_T;
@@ -94,7 +98,8 @@ createStencilRestrictedPackInfoObject( BlockDataID bdId )
 }
 
 template< typename FieldType >
-typename std::enable_if<FieldType::F_SIZE == 9, py::object>::type
+requires( FieldType::F_SIZE == 9 )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
    typedef GhostLayerField<typename FieldType::value_type, 9> GlField_T;
@@ -103,11 +108,12 @@ createStencilRestrictedPackInfoObject( BlockDataID bdId )
 }
 
 template< typename FieldType >
-typename std::enable_if<!(FieldType::F_SIZE == 9  ||
-                          FieldType::F_SIZE == 7  ||
-                          FieldType::F_SIZE == 15 ||
-                          FieldType::F_SIZE == 19 ||
-                          FieldType::F_SIZE == 27), py::object>::type
+requires( !(FieldType::F_SIZE == 9  ||
+            FieldType::F_SIZE == 7  ||
+            FieldType::F_SIZE == 15 ||
+            FieldType::F_SIZE == 19 ||
+            FieldType::F_SIZE == 27) )
+py::object
 createStencilRestrictedPackInfoObject( BlockDataID )
 {
    throw py::value_error("This works only for fields with fSize in 7, 9, 15, 19 or 27");

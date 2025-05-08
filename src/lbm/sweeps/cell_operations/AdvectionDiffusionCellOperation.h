@@ -26,7 +26,7 @@
 namespace walberla {
 namespace lbm {
 
-template< typename LM_AdvDiff, typename LM_Hydro, class Enable = void >
+template< typename LM_AdvDiff, typename LM_Hydro >
 class AdvectionDiffusionCellOperation;
 
 } // namespace lbm

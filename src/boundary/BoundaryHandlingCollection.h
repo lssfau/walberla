@@ -230,24 +230,32 @@ private:
    CellInterval getGhostLayerCellInterval( const uint_t numberOfGhostLayersToInclude ) const;
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>isEmpty( const HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
+   requires( N!=-1 )
+   inline bool isEmpty( const HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>isEmpty( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return true; }
+   requires( N==-1 )
+   inline bool isEmpty( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return true; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>isEmpty( const HandlersTuple & boundaryHandlers, const ConstFlagFieldBaseIterator & it ) const;
+   requires( N!=-1 )
+   inline bool isEmpty( const HandlersTuple & boundaryHandlers, const ConstFlagFieldBaseIterator & it ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>isEmpty( const HandlersTuple &, const ConstFlagFieldBaseIterator & ) const { return true; }
+   requires( N==-1 )
+   inline bool isEmpty( const HandlersTuple &, const ConstFlagFieldBaseIterator & ) const { return true; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>consideredByAllHandlers( const HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
+   requires( N!=-1 )
+   inline bool consideredByAllHandlers( const HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>consideredByAllHandlers( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return true; }
+   requires( N==-1 )
+   inline bool consideredByAllHandlers( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return true; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>consideredByAllHandlers( const HandlersTuple & boundaryHandlers, const ConstFlagFieldBaseIterator & it ) const;
+   requires( N!=-1 )
+   inline bool consideredByAllHandlers( const HandlersTuple & boundaryHandlers, const ConstFlagFieldBaseIterator & it ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>consideredByAllHandlers( const HandlersTuple &, const ConstFlagFieldBaseIterator & ) const { return true; }
+   requires( N==-1 )
+   inline bool consideredByAllHandlers( const HandlersTuple &, const ConstFlagFieldBaseIterator & ) const { return true; }
 
    //** Get Boundary Handling (private helper functions) ***************************************************************
    /*! \name Get Boundary Handling (private helper functions) */
@@ -256,8 +264,8 @@ private:
    // matching type (-> BoundaryHandling_T) not yet found ...
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N!=0), BoundaryHandling_T>::type & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                          std::enable_if_t< std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > >* /*dummy*/ = 0 ) const
+   requires( N!=0 && std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >  )
+   inline const BoundaryHandling_T & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers) const
    {
       if( uid == std::get<N>( boundaryHandlers ).getUID() )
          return std::get<N>( boundaryHandlers );
@@ -267,8 +275,8 @@ private:
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N==0), BoundaryHandling_T>::type & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                          std::enable_if_t< std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > >* /*dummy*/ = 0 ) const
+   requires( N==0 && std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >  )
+   inline const BoundaryHandling_T & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers) const
    {
       if( uid == std::get<N>( boundaryHandlers ).getUID() )
          return std::get<N>( boundaryHandlers );
@@ -277,17 +285,15 @@ private:
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N!=0), BoundaryHandling_T>::type & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                          std::enable_if_t< std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type,
-                                                                                                     std::false_type > >* /*dummy*/ = 0 ) const
+   requires( N!=0 && std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type, std::false_type > )
+   inline const BoundaryHandling_T & getBoundaryHandling( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers ) const
    {
       return getBoundaryHandling< BoundaryHandling_T, HandlersTuple, N-1 >( uid, boundaryHandlers );
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N==0), BoundaryHandling_T>::type & getBoundaryHandling( const BoundaryHandlingUID & /*uid*/, const HandlersTuple & /*boundaryHandlers*/,
-                                                          std::enable_if_t< std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type,
-                                                                                                     std::false_type > >* /*dummy*/ = 0 ) const
+   requires( N==0 && std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type, std::false_type > )
+   inline const BoundaryHandling_T & getBoundaryHandling( const BoundaryHandlingUID & /*uid*/, const HandlersTuple & /*boundaryHandlers*/ ) const
    {
       static_assert( sizeof(BoundaryHandling_T) == 0, "The requested boundary handling is not part of this boundary handling collection." );
    }
@@ -295,8 +301,8 @@ private:
    // matching type (-> BoundaryHandling_T) exists!
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N!=0), BoundaryHandling_T>::type & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                                     std::enable_if_t< std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > >* /*dummy*/ = 0 ) const
+   requires( N!=0 && std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > )
+   inline const BoundaryHandling_T & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers ) const
    {
       if( uid == std::get<N>( boundaryHandlers ).getUID() )
          return std::get<N>( boundaryHandlers );
@@ -306,8 +312,8 @@ private:
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N==0), BoundaryHandling_T>::type & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                                     std::enable_if_t< std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > >* /*dummy*/ = 0 ) const
+   requires( N==0 && std::is_same_v< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type > )
+   inline const BoundaryHandling_T & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers ) const
    {
       if( uid == std::get<N>( boundaryHandlers ).getUID() )
          return std::get<N>( boundaryHandlers );
@@ -316,17 +322,15 @@ private:
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N!=0), BoundaryHandling_T>::type & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers,
-                                                                     std::enable_if_t< std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type,
-                                                                                                                std::false_type > >* /*dummy*/ = 0 ) const
+   requires( N!=0 && std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type, std::false_type > )
+   inline const BoundaryHandling_T & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & boundaryHandlers ) const
    {
       return getBoundaryHandling_TypeExists< BoundaryHandling_T, HandlersTuple, N-1 >( uid, boundaryHandlers );
    }
 
    template< typename BoundaryHandling_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline const typename std::enable_if<(N==0), BoundaryHandling_T>::type & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & /*boundaryHandlers*/,
-                                                                     std::enable_if_t< std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type,
-                                                                                                                std::false_type > >* /*dummy*/ = 0 ) const
+   requires( N==0 && std::is_same_v< typename std::is_same< BoundaryHandling_T, typename std::tuple_element<N, HandlersTuple>::type >::type, std::false_type > )
+   inline const BoundaryHandling_T & getBoundaryHandling_TypeExists( const BoundaryHandlingUID & uid, const HandlersTuple & /*boundaryHandlers*/) const
    {
       WALBERLA_ABORT( "The requested boundary handler " << uid.getIdentifier() << " is not part of this boundary handling collection." );
    }
@@ -334,115 +338,153 @@ private:
    //*******************************************************************************************************************
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & boundaryHandlers ) const;
+   requires( N!=-1 )
+   inline void checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & boundaryHandlers ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & ) const {}
+   requires( N==-1 )
+   inline void checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & ) const {}
 
    inline std::vector< BoundaryUID > getBoundaryUIDs() const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>getBoundaryUIDs( const HandlersTuple & boundaryHandlers, std::vector< BoundaryUID > & uids ) const;
+   requires( N!=-1 )
+   inline void getBoundaryUIDs( const HandlersTuple & boundaryHandlers, std::vector< BoundaryUID > & uids ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>getBoundaryUIDs( const HandlersTuple &, std::vector< BoundaryUID > & ) const {}
+   requires( N==-1 )
+   inline void getBoundaryUIDs( const HandlersTuple &, std::vector< BoundaryUID > & ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>checkForIdenticalFlagFields( const HandlersTuple & boundaryHandlers ) const;
+   requires( N!=-1 )
+   inline bool checkForIdenticalFlagFields( const HandlersTuple & boundaryHandlers ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>checkForIdenticalFlagFields( const HandlersTuple & ) const { return true; }
+   requires( N==-1 )
+   inline bool checkForIdenticalFlagFields( const HandlersTuple & ) const { return true; }
 
    inline uint_t numberOfMatchingBoundaryHandlers( const BoundaryHandlingUID & uid ) const;
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), uint_t>numberOfMatchingBoundaryHandlers( const HandlersTuple & boundaryHandlers, const BoundaryHandlingUID & uid ) const;
+   requires( N!=-1 )
+   inline uint_t numberOfMatchingBoundaryHandlers( const HandlersTuple & boundaryHandlers, const BoundaryHandlingUID & uid ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), uint_t>numberOfMatchingBoundaryHandlers( const HandlersTuple &, const BoundaryHandlingUID & ) const { return uint_c(0); }
+   requires( N==-1 )
+   inline uint_t numberOfMatchingBoundaryHandlers( const HandlersTuple &, const BoundaryHandlingUID & ) const { return uint_c(0); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), uint_t>numberOfMatchingHandlers( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
+   requires( N!=-1 )
+   inline uint_t numberOfMatchingHandlers( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), uint_t>numberOfMatchingHandlers( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
+   requires( N==-1 )
+   inline uint_t numberOfMatchingHandlers( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), uint_t>numberOfMatchingHandlersForDomain( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
+   requires( N!=-1 )
+   inline uint_t numberOfMatchingHandlersForDomain( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), uint_t>numberOfMatchingHandlersForDomain( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
+   requires( N==-1 )
+   inline uint_t numberOfMatchingHandlersForDomain( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), uint_t>numberOfMatchingHandlersForBoundary( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
+   requires( N!=-1 )
+   inline uint_t numberOfMatchingHandlersForBoundary( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), uint_t>numberOfMatchingHandlersForBoundary( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
+   requires( N==-1 )
+   inline uint_t numberOfMatchingHandlersForBoundary( const HandlersTuple &, const flag_t ) const { return uint_c(0); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>containsBoundaryCondition( const HandlersTuple & boundaryHandlers, const BoundaryUID & uid ) const;
+   requires( N!=-1 )
+   inline bool containsBoundaryCondition( const HandlersTuple & boundaryHandlers, const BoundaryUID & uid ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>containsBoundaryCondition( const HandlersTuple &, const BoundaryUID & ) const { return false; }
+   requires( N==-1 )
+   inline bool containsBoundaryCondition( const HandlersTuple &, const BoundaryUID & ) const { return false; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>containsBoundaryCondition( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
+   requires( N!=-1 )
+   inline bool containsBoundaryCondition( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>containsBoundaryCondition( const HandlersTuple &, const flag_t ) const { return false; }
+   requires( N==-1 )
+   inline bool containsBoundaryCondition( const HandlersTuple &, const flag_t ) const { return false; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), flag_t>getBoundaryMask( const HandlersTuple & boundaryHandlers, const BoundaryUID & uid ) const;
+   requires( N!=-1 )
+   inline flag_t getBoundaryMask( const HandlersTuple & boundaryHandlers, const BoundaryUID & uid ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), flag_t>getBoundaryMask( const HandlersTuple &, const BoundaryUID & ) const { return numeric_cast<flag_t>(0); }
+   requires( N==-1 )
+   inline flag_t getBoundaryMask( const HandlersTuple &, const BoundaryUID & ) const { return numeric_cast<flag_t>(0); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), BoundaryUID>getBoundaryUID( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
+   requires( N!=-1 )
+   inline BoundaryUID getBoundaryUID( const HandlersTuple & boundaryHandlers, const flag_t flag ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), BoundaryUID>getBoundaryUID( const HandlersTuple &, const flag_t ) const;
+   requires( N==-1 )
+   inline BoundaryUID getBoundaryUID( const HandlersTuple &, const flag_t ) const;
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), shared_ptr<BoundaryConfiguration>>createBoundaryConfiguration( const HandlersTuple & boundaryHandlers,
+   requires( N!=-1 )
+   inline shared_ptr<BoundaryConfiguration> createBoundaryConfiguration( const HandlersTuple & boundaryHandlers,
                                                                          const BoundaryUID & uid, const Config::BlockHandle & config ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), shared_ptr<BoundaryConfiguration>>createBoundaryConfiguration( const HandlersTuple &, const BoundaryUID &,
+   requires( N==-1 )
+   inline shared_ptr<BoundaryConfiguration>createBoundaryConfiguration( const HandlersTuple &, const BoundaryUID &,
                                                                          const Config::BlockHandle & ) const
                                                                                   { WALBERLA_ASSERT( false ); return make_shared<BoundaryConfiguration>(); }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), bool>checkConsistency( const HandlersTuple & boundaryHandlers, const CellInterval & cells ) const;
+   requires( N!=-1 )
+   inline bool checkConsistency( const HandlersTuple & boundaryHandlers, const CellInterval & cells ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), bool>checkConsistency( const HandlersTuple &, const CellInterval & ) const { return true; }
+   requires( N==-1 )
+   inline bool checkConsistency( const HandlersTuple &, const CellInterval & ) const { return true; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>refresh(       HandlersTuple & boundaryHandlers, const CellInterval & cells );
+   requires( N!=-1 )
+   inline void refresh(       HandlersTuple & boundaryHandlers, const CellInterval & cells );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>refresh( const HandlersTuple &, const CellInterval & ) const {}
+   requires( N==-1 )
+   inline void refresh( const HandlersTuple &, const CellInterval & ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>refreshOutermostLayer(       HandlersTuple & boundaryHandlers, cell_idx_t thickness );
+   requires( N!=-1 )
+   inline void refreshOutermostLayer(       HandlersTuple & boundaryHandlers, cell_idx_t thickness );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>refreshOutermostLayer( const HandlersTuple &, cell_idx_t ) const {}
+   requires( N==-1 )
+   inline void refreshOutermostLayer( const HandlersTuple &, cell_idx_t ) const {}
 
    //** General Flag Handling (private helper functions) ***************************************************************
    /*! \name General Flag Handling (private helper functions) */
    //@{
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-          std::enable_if_t<(N!=-1), void>setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+   requires( N!=-1 )
+          void setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                         const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const BoundaryConfiguration & parameter );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>setFlag( const HandlersTuple &, const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+   requires( N==-1 )
+   inline void setFlag( const HandlersTuple &, const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                         const BoundaryConfiguration & );
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-          std::enable_if_t<(N!=-1), void>setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+   requires( N!=-1 )
+          void setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                         const CellInterval & cells, const BoundaryConfiguration & parameter );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>setFlag( const HandlersTuple &, const flag_t flag, const CellInterval & cells, const BoundaryConfiguration & );
+   requires( N!=-1 )
+   inline void setFlag( const HandlersTuple &, const flag_t flag, const CellInterval & cells, const BoundaryConfiguration & );
 
    void forceFlagHelper( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const BoundaryConfiguration & parameter );
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-          std::enable_if_t<(N!=-1), flag_t>flagsToRemove( HandlersTuple & boundaryHandlers, const flag_t flag,
+   requires( N!=-1 )
+          flag_t flagsToRemove( HandlersTuple & boundaryHandlers, const flag_t flag,
                                 const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), flag_t>flagsToRemove( const HandlersTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return 0; }
+   requires( N==-1 )
+   inline flag_t flagsToRemove( const HandlersTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return 0; }
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-          std::enable_if_t<(N!=-1), void>removeFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+   requires( N!=-1 )
+          void removeFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                            const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>removeFlag( const HandlersTuple &, const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+   requires( N!=-1 )
+   inline void removeFlag( const HandlersTuple &, const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    //@}
    //*******************************************************************************************************************
 
@@ -450,9 +492,11 @@ private:
    /*! \name Clear Cells (private helper functions) */
    //@{
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-          std::enable_if_t<(N!=-1), flag_t>clear( HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+   requires( N!=-1 )
+          flag_t clear( HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), flag_t>clear( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return 0; }
+   requires( N==-1 )
+   inline flag_t clear( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { return 0; }
    //@}
    //*******************************************************************************************************************
 
@@ -460,34 +504,46 @@ private:
    /*! \name Boundary Treatment (private helper functions) */
    //@{
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>execute( HandlersTuple & boundaryHandlers, const uint_t numberOfGhostLayersToInclude );
+   requires( N!=-1 )
+   inline void execute( HandlersTuple & boundaryHandlers, const uint_t numberOfGhostLayersToInclude );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>execute( const HandlersTuple &, const uint_t ) const {}
+   requires( N==-1 )
+   inline void execute( const HandlersTuple &, const uint_t ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>execute( HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+   requires( N!=-1 )
+   inline void execute( HandlersTuple & boundaryHandlers, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>execute( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
+   requires( N==-1 )
+   inline void execute( const HandlersTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>execute( HandlersTuple & boundaryHandlers, const CellInterval & cells );
+   requires( N!=-1 )
+   inline void execute( HandlersTuple & boundaryHandlers, const CellInterval & cells );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>execute( const HandlersTuple &, const CellInterval & ) const {}
+   requires( N==-1 )
+   inline void execute( const HandlersTuple &, const CellInterval & ) const {}
 
    template< typename CellIterator, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>execute( HandlersTuple & boundaryHandlers, const CellIterator & begin, const CellIterator & end );
+   requires( N!=-1 )
+   inline void execute( HandlersTuple & boundaryHandlers, const CellIterator & begin, const CellIterator & end );
    template< typename CellIterator, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>execute( const HandlersTuple &, const CellIterator &, const CellIterator & ) const {}
+   requires( N==-1 )
+   inline void execute( const HandlersTuple &, const CellIterator &, const CellIterator & ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>beforeBoundaryTreatment( HandlersTuple & boundaryHandlers );
+   requires( N!=-1 )
+   inline void beforeBoundaryTreatment( HandlersTuple & boundaryHandlers );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>beforeBoundaryTreatment( const HandlersTuple & ) const {}
+   requires( N==-1 )
+   inline void beforeBoundaryTreatment( const HandlersTuple & ) const {}
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void> afterBoundaryTreatment( HandlersTuple & boundaryHandlers );
+   requires( N!=-1 )
+   inline void  afterBoundaryTreatment( HandlersTuple & boundaryHandlers );
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void> afterBoundaryTreatment( const HandlersTuple & ) const {}
+   requires( N==-1 )
+   inline void afterBoundaryTreatment( const HandlersTuple & ) const {}
    //@}
    //*******************************************************************************************************************
 
@@ -508,23 +564,29 @@ private:
    inline CellInterval getUnpackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const;
 
    template< typename Buffer_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>pack( const HandlersTuple & boundaryHandlers, Buffer_T & buffer, const flag_t mask,
+   requires( N!=-1 )
+   inline void pack( const HandlersTuple & boundaryHandlers, Buffer_T & buffer, const flag_t mask,
                      const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
    template< typename Buffer_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>pack( const HandlersTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
+   requires( N==-1 )
+   inline void pack( const HandlersTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
 
    template< typename Buffer_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>unpack( HandlersTuple & boundaryHandlers, Buffer_T & buffer, const flag_t mask,
+   requires( N!=-1 )
+   inline void unpack( HandlersTuple & boundaryHandlers, Buffer_T & buffer, const flag_t mask,
                        const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    template< typename Buffer_T, typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>unpack( const HandlersTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
+   requires( N==-1 )
+   inline void unpack( const HandlersTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
    //@}
    //*******************************************************************************************************************
 
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N!=-1), void>toStream( const HandlersTuple & boundaryHandlers, std::ostream & os ) const;
+   requires( N!=-1 )
+   inline void toStream( const HandlersTuple & boundaryHandlers, std::ostream & os ) const;
    template< typename HandlersTuple, int N = std::tuple_size<HandlersTuple>::value - 1 >
-   inline std::enable_if_t<(N==-1), void>toStream( const HandlersTuple &, std::ostream & ) const {}
+   requires( N==-1 )
+   inline void toStream( const HandlersTuple &, std::ostream & ) const {}
 
 
 
@@ -1199,7 +1261,8 @@ CellInterval BoundaryHandlingCollection< FlagField_T, Handlers... >::getGhostLay
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::isEmpty( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::isEmpty( const HandlersTuple & boundaryHandlers,
                                                                        const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    if( !(std::get<N>( boundaryHandlers ).isEmpty(x,y,z)) )
@@ -1211,7 +1274,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::isEmpty( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::isEmpty( const HandlersTuple & boundaryHandlers,
                                                                        const ConstFlagFieldBaseIterator & it ) const
 {
    if( !(std::get<N>( boundaryHandlers ).isEmpty(it)) )
@@ -1223,7 +1287,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::consideredByAllHandlers( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::consideredByAllHandlers( const HandlersTuple & boundaryHandlers,
                                                                                          const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    if( std::get<N>( boundaryHandlers ).isEmpty(x,y,z) )
@@ -1235,7 +1300,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::consideredByAllHandlers( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::consideredByAllHandlers( const HandlersTuple & boundaryHandlers,
                                                                                          const ConstFlagFieldBaseIterator & it ) const
 {
    if( std::get<N>( boundaryHandlers ).isEmpty(it) )
@@ -1247,7 +1313,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & boundaryHandlers ) const
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::checkForUniqueBoundaryHandlingUIDs( const HandlersTuple & boundaryHandlers ) const
 {
    if( numberOfMatchingBoundaryHandlers( std::get<N>( boundaryHandlers ).getUID() ) != uint_c(1) )
       WALBERLA_ABORT( "Every boundary handler registered at the same boundary handling collection must have a unique boundary handling UID!\n"
@@ -1270,7 +1337,8 @@ inline std::vector< BoundaryUID > BoundaryHandlingCollection< FlagField_T, Handl
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUIDs( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUIDs( const HandlersTuple & boundaryHandlers,
                                                                                std::vector< BoundaryUID > & uids ) const
 {
    std::vector< BoundaryUID > handlerUIDs = std::get<N>( boundaryHandlers ).getBoundaryUIDs();
@@ -1282,7 +1350,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::checkForIdenticalFlagFields( const HandlersTuple & boundaryHandlers ) const
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::checkForIdenticalFlagFields( const HandlersTuple & boundaryHandlers ) const
 {
    return checkForIdenticalFlagFields< HandlersTuple, N-1 >( boundaryHandlers ) &&
           std::get<N>( boundaryHandlers ).getFlagField() == flagField_ && std::get<N>( boundaryHandlers ).outerBB_ == outerBB_;
@@ -1300,7 +1369,8 @@ inline uint_t BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMa
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingBoundaryHandlers( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline uint_t BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingBoundaryHandlers( const HandlersTuple & boundaryHandlers,
                                                                                                   const BoundaryHandlingUID & uid ) const
 {
    return ( ( std::get<N>( boundaryHandlers ).getUID() == uid ) ? uint_c(1) : uint_c(0) ) +
@@ -1311,7 +1381,8 @@ inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T,
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlers( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline uint_t BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlers( const HandlersTuple & boundaryHandlers,
                                                                                           const flag_t flag ) const
 {
    return ( ( (std::get<N>( boundaryHandlers ).getBoundaryMask() | std::get<N>( boundaryHandlers ).getDomainMask()) & flag ) == flag ? 1 : 0 ) +
@@ -1322,7 +1393,8 @@ inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T,
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlersForDomain( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline uint_t BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlersForDomain( const HandlersTuple & boundaryHandlers,
                                                                                                    const flag_t flag ) const
 {
    return ( ( std::get<N>( boundaryHandlers ).getDomainMask() & flag ) == flag ? 1 : 0 ) +
@@ -1333,7 +1405,8 @@ inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T,
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlersForBoundary( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline uint_t BoundaryHandlingCollection< FlagField_T, Handlers... >::numberOfMatchingHandlersForBoundary( const HandlersTuple & boundaryHandlers,
                                                                                                      const flag_t flag ) const
 {
    return ( ( std::get<N>( boundaryHandlers ).getBoundaryMask() & flag ) == flag ? 1 : 0 ) +
@@ -1344,7 +1417,8 @@ inline std::enable_if_t<(N!=-1), uint_t>BoundaryHandlingCollection< FlagField_T,
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::containsBoundaryCondition( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::containsBoundaryCondition( const HandlersTuple & boundaryHandlers,
                                                                                          const BoundaryUID & uid ) const
 {
    if( std::get<N>( boundaryHandlers ).containsBoundaryCondition( uid ) )
@@ -1356,7 +1430,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::containsBoundaryCondition( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::containsBoundaryCondition( const HandlersTuple & boundaryHandlers,
                                                                                          const flag_t flag ) const
 {
    if( std::get<N>( boundaryHandlers ).containsBoundaryCondition( flag ) )
@@ -1368,7 +1443,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t>
+requires( N!=-1 )
+inline typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t
    BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryMask( const HandlersTuple & boundaryHandlers,
                                                                       const BoundaryUID & uid ) const
 {
@@ -1381,7 +1457,8 @@ inline std::enable_if_t<(N!=-1), typename BoundaryHandlingCollection< FlagField_
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), BoundaryUID>BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUID( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline BoundaryUID BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUID( const HandlersTuple & boundaryHandlers,
                                                                                      const flag_t flag ) const
 {
    const auto & boundaryHandler = std::get<N>( boundaryHandlers );
@@ -1400,7 +1477,8 @@ inline std::enable_if_t<(N!=-1), BoundaryUID>BoundaryHandlingCollection< FlagFie
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N==-1), BoundaryUID>BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUID( const HandlersTuple &, const flag_t flag ) const
+requires( N==-1 )
+inline BoundaryUID BoundaryHandlingCollection< FlagField_T, Handlers... >::getBoundaryUID( const HandlersTuple &, const flag_t flag ) const
 {
    if( !flagField_->isRegistered( flag ) )
       WALBERLA_ABORT( "The requested flag with value " << flag << " is not registered at the flag field and is not handled "\
@@ -1415,7 +1493,8 @@ inline std::enable_if_t<(N==-1), BoundaryUID>BoundaryHandlingCollection< FlagFie
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), shared_ptr<BoundaryConfiguration>>
+requires( N!=-1 )
+inline shared_ptr<BoundaryConfiguration>
    BoundaryHandlingCollection< FlagField_T, Handlers... >::createBoundaryConfiguration( const HandlersTuple & boundaryHandlers,
                                                                                   const BoundaryUID & uid, const Config::BlockHandle & config ) const
 {
@@ -1428,7 +1507,8 @@ inline std::enable_if_t<(N!=-1), shared_ptr<BoundaryConfiguration>>
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, Handlers... >::checkConsistency( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline bool BoundaryHandlingCollection< FlagField_T, Handlers... >::checkConsistency( const HandlersTuple & boundaryHandlers,
                                                                                 const CellInterval & cells ) const
 {
    return checkConsistency< HandlersTuple, N-1 >( boundaryHandlers, cells ) && std::get<N>( boundaryHandlers ).checkConsistency(cells);
@@ -1438,7 +1518,8 @@ inline std::enable_if_t<(N!=-1), bool>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::refresh( HandlersTuple & boundaryHandlers, const CellInterval & cells )
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::refresh( HandlersTuple & boundaryHandlers, const CellInterval & cells )
 {
    std::get<N>( boundaryHandlers ).refresh( cells );
    refresh< HandlersTuple, N-1 >( boundaryHandlers, cells );
@@ -1448,7 +1529,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::refreshOutermostLayer( HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::refreshOutermostLayer( HandlersTuple & boundaryHandlers,
                                                                                      cell_idx_t thickness )
 {
    std::get<N>( boundaryHandlers ).refreshOutermostLayer( thickness );
@@ -1459,7 +1541,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+requires( N!=-1 )
+void BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                                                                 const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                 const BoundaryConfiguration & parameter )
 {
@@ -1480,7 +1563,8 @@ std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N==-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
+requires( N==-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
                                                                        const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                        const BoundaryConfiguration & /*parameter*/ )
 {
@@ -1493,7 +1577,8 @@ inline std::enable_if_t<(N==-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+requires( N!=-1 )
+void BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                                                                 const CellInterval & cells, const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( outerBB_.contains(cells) );
@@ -1518,7 +1603,8 @@ std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N==-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::setFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
                                                                        const CellInterval & cells, const BoundaryConfiguration & /*parameter*/ )
 {
    WALBERLA_ASSERT( outerBB_.contains(cells) );
@@ -1554,7 +1640,8 @@ void BoundaryHandlingCollection< FlagField_T, Handlers... >::forceFlagHelper( co
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t>
+requires( N!=-1 )
+inline typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t
 BoundaryHandlingCollection< FlagField_T, Handlers... >::flagsToRemove( HandlersTuple & boundaryHandlers, const flag_t flag,
                                                                  const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
@@ -1575,7 +1662,8 @@ BoundaryHandlingCollection< FlagField_T, Handlers... >::flagsToRemove( HandlersT
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::removeFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
+requires( N!=-1 )
+void BoundaryHandlingCollection< FlagField_T, Handlers... >::removeFlag( HandlersTuple & boundaryHandlers, const flag_t flag,
                                                                    const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
@@ -1595,7 +1683,8 @@ std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N==-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::removeFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::removeFlag( const HandlersTuple & /*boundaryHandlers*/, const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
@@ -1607,7 +1696,8 @@ inline std::enable_if_t<(N==-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t>
+requires( N!=-1 )
+inline typename BoundaryHandlingCollection< FlagField_T, Handlers... >::flag_t
 BoundaryHandlingCollection< FlagField_T, Handlers... >::clear( HandlersTuple & boundaryHandlers,
                                                          const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
@@ -1625,7 +1715,8 @@ BoundaryHandlingCollection< FlagField_T, Handlers... >::clear( HandlersTuple & b
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
                                                                        const uint_t numberOfGhostLayersToInclude )
 {
    std::get<N>( boundaryHandlers )( numberOfGhostLayersToInclude );
@@ -1636,7 +1727,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
                                                                        const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    std::get<N>( boundaryHandlers )(x,y,z);
@@ -1647,7 +1739,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers, const CellInterval & cells )
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers, const CellInterval & cells )
 {
    std::get<N>( boundaryHandlers )( cells );
    execute< HandlersTuple, N-1 >( boundaryHandlers, cells );
@@ -1657,7 +1750,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename CellIterator, typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::execute( HandlersTuple & boundaryHandlers,
                                                                        const CellIterator & begin, const CellIterator & end )
 {
    std::get<N>( boundaryHandlers )( begin, end );
@@ -1668,7 +1762,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::beforeBoundaryTreatment( HandlersTuple & boundaryHandlers )
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::beforeBoundaryTreatment( HandlersTuple & boundaryHandlers )
 {
    std::get<N>( boundaryHandlers ).beforeBoundaryTreatment();
    beforeBoundaryTreatment< HandlersTuple, N-1 >( boundaryHandlers );
@@ -1678,7 +1773,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::afterBoundaryTreatment( HandlersTuple & boundaryHandlers )
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::afterBoundaryTreatment( HandlersTuple & boundaryHandlers )
 {
    std::get<N>( boundaryHandlers ).afterBoundaryTreatment();
    afterBoundaryTreatment< HandlersTuple, N-1 >( boundaryHandlers );
@@ -1714,7 +1810,8 @@ inline CellInterval BoundaryHandlingCollection< FlagField_T, Handlers... >::getU
 
 template< typename FlagField_T, typename... Handlers >
 template< typename Buffer_T, typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::pack( const HandlersTuple & boundaryHandlers, Buffer_T & buffer,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::pack( const HandlersTuple & boundaryHandlers, Buffer_T & buffer,
                                                                     const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    std::get<0>( boundaryHandlers_ ).pack( buffer, mask, x, y, z );
@@ -1725,7 +1822,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename Buffer_T, typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::unpack( HandlersTuple & boundaryHandlers, Buffer_T & buffer,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::unpack( HandlersTuple & boundaryHandlers, Buffer_T & buffer,
                                                                       const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
@@ -1746,7 +1844,8 @@ inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, H
 
 template< typename FlagField_T, typename... Handlers >
 template< typename HandlersTuple, int N >
-inline std::enable_if_t<(N!=-1), void>BoundaryHandlingCollection< FlagField_T, Handlers... >::toStream( const HandlersTuple & boundaryHandlers,
+requires( N!=-1 )
+inline void BoundaryHandlingCollection< FlagField_T, Handlers... >::toStream( const HandlersTuple & boundaryHandlers,
                                                                         std::ostream & os ) const
 {
    os << std::get<N>( boundaryHandlers );

@@ -831,7 +831,8 @@ inline const Matrix2<Type> fabs( const Matrix2<Type>& m );
 // \return The scaled result matrix.
 */
 template< typename Type, typename Other >
-inline std::enable_if_t< std::is_fundamental_v< Other >, Matrix2< HIGH > >
+requires( std::is_fundamental_v< Other > )
+inline Matrix2< HIGH >
 operator*(Other scalar, const Matrix2< Type >& matrix)
 {
    return matrix * scalar;

@@ -124,8 +124,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                              GenericRecvBuffer& >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericRecvBuffer&
    operator>>( V& value );
    //@}
    //*******************************************************************************************************************
@@ -159,8 +159,8 @@ private:
    /*!\name Utility functions */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                              GenericRecvBuffer& >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericRecvBuffer&
    get( V& value );
    //@}
    //*******************************************************************************************************************
@@ -385,8 +385,8 @@ inline bool GenericRecvBuffer<T>::isEmpty() const
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                           GenericRecvBuffer<T> & >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericRecvBuffer<T> &
 GenericRecvBuffer<T>::get( V& value )
 {
    // Compile time check that V is built-in data type
@@ -427,8 +427,8 @@ GenericRecvBuffer<T>::get( V& value )
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                           GenericRecvBuffer<T> & >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericRecvBuffer<T> &
 GenericRecvBuffer<T>::operator>>( V& value )
 {
    readDebugMarker( typeid(V).name() );

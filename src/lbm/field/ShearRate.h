@@ -40,15 +40,15 @@ namespace lbm {
 
 namespace internal {
 
-    template<typename CollisionModel_T, class Enable = void>
+    template<typename CollisionModel_T>
     struct ShearRelaxationParameter {
         static_assert(never_true<CollisionModel_T>::value,
                       "For your current LB collision model, there is yet no implementation for calculating the shear rate!");
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
-                                                                                                 collision_model::SRT_tag>::value>::type>
+    requires(std::is_same_v<typename CollisionModel_T::tag, collision_model::SRT_tag>)
+    struct ShearRelaxationParameter<CollisionModel_T>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t x, cell_idx_t y, cell_idx_t z)
         {
@@ -57,8 +57,8 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
-                                                                                                 collision_model::TRT_tag>::value>::type>
+    requires(std::is_same_v<typename CollisionModel_T::tag, collision_model::TRT_tag>)
+    struct ShearRelaxationParameter<CollisionModel_T>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t, cell_idx_t, cell_idx_t) {
            return lm.lambda_e();
@@ -66,8 +66,8 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
-                                                                                               collision_model::MRT_tag>::value>::type>
+    requires(std::is_same_v<typename CollisionModel_T::tag, collision_model::MRT_tag>)
+    struct ShearRelaxationParameter<CollisionModel_T>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t, cell_idx_t, cell_idx_t) {
            return lm.omega();
@@ -75,8 +75,8 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
-                                                                                                 collision_model::Cumulant_tag>::value>::type>
+    requires(std::is_same_v<typename CollisionModel_T::tag, collision_model::Cumulant_tag>)
+    struct ShearRelaxationParameter<CollisionModel_T>
     {
         static inline real_t get(const CollisionModel_T &cm, cell_idx_t, cell_idx_t, cell_idx_t) {
            return cm.omega1();
