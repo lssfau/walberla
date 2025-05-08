@@ -67,7 +67,7 @@ class SurfaceDynamicsHandler
 
    // communication in corner directions (D2Q9/D3Q27) is required for all fields but the PDF field
    using CommunicationStencil_T =
-      typename std::conditional< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
    using CommunicationCorner_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
    using FreeSurfaceBoundaryHandling_T = FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >;

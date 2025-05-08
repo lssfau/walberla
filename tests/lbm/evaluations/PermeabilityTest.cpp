@@ -144,7 +144,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q19MRT >( const shared_ptr<Str
 template< >
 BlockDataID initPdfField< lbm::collision_model::D3Q27Cumulant >( const shared_ptr<StructuredBlockForest> & blocks, real_t omega )
 {
-   typedef lbm::D3Q27< lbm::collision_model::D3Q27Cumulant, true > LatticeModel_T;
+   using LatticeModel_T = lbm::D3Q27< lbm::collision_model::D3Q27Cumulant, true >;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q27Cumulant( omega ) );
    return lbm::addPdfFieldToStorage( blocks, "PDF Field (Cumulant)", latticeModel, Vector3<real_t>(), real_t(1) );
@@ -154,7 +154,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q27Cumulant >( const shared_pt
 template< typename LatticeModel_T >
 BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const FlagUID & fluid, Setup setup )
 {
-   typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory_T;
+   using BHFactory_T = lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T >;
    using BoundaryHandling_T = typename BHFactory_T::BoundaryHandling;
 
    BlockDataID boundaryHandlingId = BHFactory_T::addBoundaryHandlingToStorage( blocks, "boundary handling", flagFieldId, pdfFieldId, fluid,
@@ -188,8 +188,8 @@ BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, co
 
    // set no-slip bcs inside the spheres
    geometry::initializer::BoundaryFromBody< BoundaryHandling_T > bodyInitializer( *blocks, boundaryHandlingId );
-   for( size_t i = 0; i < spheres.size(); ++i )
-      bodyInitializer.template init< geometry::Sphere >( spheres.at( i ), BHFactory_T::getNoSlip() );
+   for( auto const &sphere : spheres )
+      bodyInitializer.template init< geometry::Sphere >( sphere, BHFactory_T::getNoSlip() );
 
    // set top and bottom pressure bcs
    geometry::initializer::BoundaryFromDomainBorder< BoundaryHandling_T > borderInitializer( *blocks, boundaryHandlingId );
@@ -208,7 +208,7 @@ template< typename LM_T >
 int setupAndExecute( Setup setup )
 {
    using PdfField_T = lbm::PdfField< LM_T >;
-   typedef lbm::DefaultBoundaryHandlingFactory< LM_T, FlagField_T > BHFactory_T;
+   using BHFactory_T = lbm::DefaultBoundaryHandlingFactory< LM_T, FlagField_T >;
    using BoundaryHandling_T = typename BHFactory_T::BoundaryHandling;
 
    Vector3<uint_t> blockLength;
@@ -246,7 +246,7 @@ int setupAndExecute( Setup setup )
    const real_t tau( real_c(1) / setup.omega );
    const real_t nu( ( tau - real_c(0.5) ) / real_c(3) );
 
-   typedef lbm::evaluations::Permeability< PdfField_T, BoundaryHandling_T > Permeability_T;
+   using Permeability_T = lbm::evaluations::Permeability< PdfField_T, BoundaryHandling_T >;
    shared_ptr< Permeability_T > permEval = make_shared< Permeability_T >( nu, pdfFieldId, boundaryHandlingId, fluid, blocks );
    permEval->init( blocks->getDomainCellBB(), uint_t(2), setup.checkFrequency );
 

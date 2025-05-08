@@ -88,10 +88,10 @@ namespace MergeInformationTest
 void mergeAndReorderTest1()
 {
    std::vector< bubble_model::Bubble > bubbles;
-   bubbles.emplace_back(real_c(10));                       // BubbleID 0
-   bubbles.emplace_back(bubble_model::Bubble(real_c(11))); // BubbleID 1
-   bubbles.emplace_back(bubble_model::Bubble(real_c(12))); // BubbleID 2
-   bubbles.emplace_back(bubble_model::Bubble(real_c(13))); // BubbleID 3
+   bubbles.emplace_back(real_c(10)); // BubbleID 0
+   bubbles.emplace_back(real_c(11)); // BubbleID 1
+   bubbles.emplace_back(real_c(12)); // BubbleID 2
+   bubbles.emplace_back(real_c(13)); // BubbleID 3
 
    bubble_model::MergeInformation mi(bubbles.size());
    mi.registerMerge(0, 1);
@@ -110,12 +110,12 @@ void mergeAndReorderTest1()
 void mergeAndReorderTest2()
 {
    std::vector< bubble_model::Bubble > bubbles;
-   bubbles.emplace_back(bubble_model::Bubble(real_c(10))); // BubbleID 0
-   bubbles.emplace_back(bubble_model::Bubble(real_c(11))); // BubbleID 1
-   bubbles.emplace_back(bubble_model::Bubble(real_c(12))); // BubbleID 2
-   bubbles.emplace_back(bubble_model::Bubble(real_c(13))); // BubbleID 3
-   bubbles.emplace_back(bubble_model::Bubble(real_c(14))); // BubbleID 4
-   bubbles.emplace_back(real_c(15));                       // BubbleID 5
+   bubbles.emplace_back(real_c(10)); // BubbleID 0
+   bubbles.emplace_back(real_c(11)); // BubbleID 1
+   bubbles.emplace_back(real_c(12)); // BubbleID 2
+   bubbles.emplace_back(real_c(13)); // BubbleID 3
+   bubbles.emplace_back(real_c(14)); // BubbleID 4
+   bubbles.emplace_back(real_c(15)); // BubbleID 5
 
    bubble_model::MergeInformation mi(bubbles.size());
    mi.registerMerge(4, 3);

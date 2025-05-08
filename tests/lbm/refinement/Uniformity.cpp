@@ -75,9 +75,9 @@ using walberla::uint_t;
 // TYPEDEFS //
 //////////////
 
-typedef lbm::D3Q19< lbm::collision_model::SRT,      false > LatticeModel_T;
-//typedef lbm::D3Q19< lbm::collision_model::TRT,      false > LatticeModel_T;
-//typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT,      false >;
+//using LatticeModel_T = lbm::D3Q19< lbm::collision_model::TRT,      false >;
+//using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT, false >;
 using Stencil_T = LatticeModel_T::Stencil;
 
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -88,8 +88,8 @@ using FlagField_T = FlagField<flag_t>;
 const uint_t FieldGhostLayers = 4;
 
 // dummy boundary handling
-typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T > BoundaryHandling_T;
+using NoSlip_T = lbm::NoSlip< LatticeModel_T, flag_t >;
+using BoundaryHandling_T = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T >;
 
 ///////////
 // FLAGS //
@@ -122,20 +122,20 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
    AABB shiftedBox( xMiddle +             xSpan, yMiddle +             ySpan, zMiddle +             zSpan,
                     xMiddle + real_t(3) * xSpan, yMiddle + real_t(3) * ySpan, zMiddle + real_t(3) * zSpan );
 
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for( auto & block : forest )
    {
-      if( block->getAABB().intersects( middleBox ) || block->getAABB().intersects( shiftedBox ) )
-         if( block->getLevel() < ( levels - uint_t(1) ) )
-            block->setMarker( true );
+      if( block.getAABB().intersects( middleBox ) || block.getAABB().intersects( shiftedBox ) )
+         if( block.getLevel() < ( levels - uint_t(1) ) )
+            block.setMarker( true );
    }
 }
 
 static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 {
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for( auto & block : forest )
    {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( numeric_cast< memory_t >(1) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
 
@@ -393,7 +393,7 @@ int main( int argc, char ** argv )
 
    // check constant velocity
 
-   //typedef GhostLayerField<real_t,1> ErrorField;
+   //using ErrorField = GhostLayerField<real_t,1>;
    //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t(0), field::fzyx, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )

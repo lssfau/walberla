@@ -48,11 +48,11 @@ namespace lbm {
 // The moments are weighted orthogonal (Eq. 2.58)
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_MRT_1 \
-   std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value && \
+   std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_MRT_1 )
 
@@ -183,7 +183,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
                                                    _1_12 * mStar7  - _1_24 * mStar8  + _1_48 * mStar9  + _1_48 * mStar10 - _1_16 * mStar11 -
                                                    _1_16 * mStar12 - _1_4  * mStar15 - _1_8  * mStar16 - _1_8  * mStar18;
          
-         if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value == false)
+         if (!std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >)
          {
             const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
@@ -322,7 +322,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
                                                    _1_12 * mStar7  - _1_24 * mStar8  + _1_48 * mStar9  + _1_48 * mStar10 - _1_16 * mStar11 -
                                                    _1_16 * mStar12 - _1_4  * mStar15 - _1_8  * mStar16 - _1_8  * mStar18;
          
-         if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value == false)
+         if (!std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >)
          {
             const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )

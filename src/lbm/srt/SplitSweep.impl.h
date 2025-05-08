@@ -51,20 +51,20 @@ namespace lbm {
 ///////////////////////////////
 
 template< typename LatticeModel_T, typename FlagField_T >
-class SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                        LatticeModel_T::CollisionModel::constant &&
-                                                                        std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19>::value &&
-                                                                        ! LatticeModel_T::compressible &&
-                                                                        std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                           >::type > :
+class SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                          LatticeModel_T::CollisionModel::constant &&
+                                                                          std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> &&
+                                                                          ! LatticeModel_T::compressible &&
+                                                                          std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                             > > :
    public FlagFieldSweepBase< LatticeModel_T, FlagField_T >
 {
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,                       "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible == false,                                                    "Only works with incompressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = typename FlagFieldSweepBase<LatticeModel_T, FlagField_T>::PdfField_T;
@@ -85,12 +85,12 @@ public:
 };
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       ! LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         ! LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
    >::operator()( IBlock * const block )
 {
    PdfField_T * src( nullptr );
@@ -485,12 +485,12 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 }
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       ! LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         ! LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    PdfField_T * src( nullptr );
@@ -503,12 +503,12 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 }
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       ! LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         ! LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
 #ifdef NDEBUG
    >::collide( IBlock * const block, const uint_t /*numberOfGhostLayersToInclude*/ )
 #else
@@ -886,20 +886,20 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 ///////////////////////////////
 
 template< typename LatticeModel_T, typename FlagField_T >
-class SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                        LatticeModel_T::CollisionModel::constant &&
-                                                                        std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                        LatticeModel_T::compressible &&
-                                                                        std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                           >::type > :
+class SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                          LatticeModel_T::CollisionModel::constant &&
+                                                                          std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                          LatticeModel_T::compressible &&
+                                                                          std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                             > > :
    public FlagFieldSweepBase< LatticeModel_T, FlagField_T >
 {
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,                       "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible,                                                             "Only works with compressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = typename FlagFieldSweepBase<LatticeModel_T, FlagField_T>::PdfField_T;
@@ -920,12 +920,12 @@ public:
 };
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
    >::operator()( IBlock * const block )                                              
 {
    PdfField_T * src( nullptr );
@@ -1325,12 +1325,12 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 }
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    PdfField_T * src( nullptr );
@@ -1343,12 +1343,12 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 }
 
 template< typename LatticeModel_T, typename FlagField_T >
-void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                       LatticeModel_T::CollisionModel::constant &&
-                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                       LatticeModel_T::compressible &&
-                                                                       std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                          >::type
+void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                         LatticeModel_T::CollisionModel::constant &&
+                                                                         std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                         LatticeModel_T::compressible &&
+                                                                         std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                            >
 #ifdef NDEBUG                                                                                                
    >::collide( IBlock * const block, const uint_t /*numberOfGhostLayersToInclude*/ )
 #else

@@ -91,10 +91,10 @@ class MyBoundaryHandling
 {
 public:
 
-   typedef lbm::NoSlip< LatticeModel_T, flag_t >    NoSlip_T;
-   typedef lbm::SimpleUBB< LatticeModel_T, flag_t > UBB_T;
+   using NoSlip_T = lbm::NoSlip< LatticeModel_T, flag_t >;
+   using UBB_T = lbm::SimpleUBB< LatticeModel_T, flag_t >;
 
-   typedef BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, NoSlip_T, UBB_T > BoundaryHandling_T;
+   using BoundaryHandling_T = BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, NoSlip_T, UBB_T >;
 
    MyBoundaryHandling( const std::string & id, const BlockDataID & flagField, const BlockDataID & pdfField, const real_t velocity ) :
       id_( id ), flagField_( flagField ), pdfField_( pdfField ), velocity_( velocity ) {}
@@ -364,7 +364,7 @@ int main( int argc, char ** argv )
 
    // SRT
 
-   typedef lbm::D3Q19< lbm::collision_model::SRT, false > D3Q19_SRT_INCOMP;
+   using D3Q19_SRT_INCOMP = lbm::D3Q19< lbm::collision_model::SRT, false >;
 
    AddTest< D3Q19_SRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 SRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_SRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -409,7 +409,7 @@ int main( int argc, char ** argv )
 
    // TRT
 
-   typedef lbm::D3Q19< lbm::collision_model::TRT, false > D3Q19_TRT_INCOMP;
+   using D3Q19_TRT_INCOMP = lbm::D3Q19< lbm::collision_model::TRT, false >;
 
    AddTest< D3Q19_TRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 TRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_TRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -454,7 +454,7 @@ int main( int argc, char ** argv )
 
    // MRT
 
-   typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > D3Q19_MRT_INCOMP;
+   using D3Q19_MRT_INCOMP = lbm::D3Q19< lbm::collision_model::D3Q19MRT, false >;
 
    AddTest< D3Q19_MRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 MRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_MRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -491,7 +491,7 @@ int main( int argc, char ** argv )
 
    // SRT
 
-   typedef lbm::D3Q19< lbm::collision_model::SRT, true > D3Q19_SRT_COMP;
+   using D3Q19_SRT_COMP = lbm::D3Q19< lbm::collision_model::SRT, true >;
 
    AddTest< D3Q19_SRT_COMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 SRT comp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_SRT_COMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -522,7 +522,7 @@ int main( int argc, char ** argv )
 
    // TRT
 
-   typedef lbm::D3Q19< lbm::collision_model::TRT, true > D3Q19_TRT_COMP;
+   using D3Q19_TRT_COMP = lbm::D3Q19< lbm::collision_model::TRT, true >;
 
    AddTest< D3Q19_TRT_COMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 TRT comp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_TRT_COMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -554,7 +554,7 @@ int main( int argc, char ** argv )
 
    // SRT
 
-   typedef lbm::D3Q27< lbm::collision_model::SRT, false > D3Q27_SRT_INCOMP;
+   using D3Q27_SRT_INCOMP = lbm::D3Q27< lbm::collision_model::SRT, false >;
 
    AddTest< D3Q27_SRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q27 SRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q27_SRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -585,7 +585,7 @@ int main( int argc, char ** argv )
 
    // TRT
 
-   typedef lbm::D3Q27< lbm::collision_model::TRT, false > D3Q27_TRT_INCOMP;
+   using D3Q27_TRT_INCOMP = lbm::D3Q27< lbm::collision_model::TRT, false >;
 
    AddTest< D3Q27_TRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q27 TRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q27_TRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -617,7 +617,7 @@ int main( int argc, char ** argv )
 
    // SRT
 
-   typedef lbm::D3Q27< lbm::collision_model::SRT, true > D3Q27_SRT_COMP;
+   using D3Q27_SRT_COMP = lbm::D3Q27< lbm::collision_model::SRT, true >;
 
    AddTest< D3Q27_SRT_COMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q27 SRT comp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q27_SRT_COMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -634,7 +634,7 @@ int main( int argc, char ** argv )
 
    // TRT
 
-   typedef lbm::D3Q27< lbm::collision_model::TRT, true > D3Q27_TRT_COMP;
+   using D3Q27_TRT_COMP = lbm::D3Q27< lbm::collision_model::TRT, true >;
 
    AddTest< D3Q27_TRT_COMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q27 TRT comp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q27_TRT_COMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -681,7 +681,7 @@ int main( int argc, char ** argv )
 
    // MRT
 
-   typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > D3Q19_MRT_INCOMP;
+   using D3Q19_MRT_INCOMP = lbm::D3Q19< lbm::collision_model::D3Q19MRT, false >;
 
    AddTRTTest< D3Q19_MRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D3Q19 MRT (TRT) incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D3Q19_MRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -704,7 +704,7 @@ int main( int argc, char ** argv )
 
    // SRT
 
-   typedef lbm::D2Q9< lbm::collision_model::SRT, false > D2Q9_SRT_INCOMP;
+   using D2Q9_SRT_INCOMP = lbm::D2Q9< lbm::collision_model::SRT, false >;
 
    AddTest< D2Q9_SRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D2Q9 SRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D2Q9_SRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),
@@ -735,7 +735,7 @@ int main( int argc, char ** argv )
 
    // TRT
 
-   typedef lbm::D2Q9< lbm::collision_model::TRT, false > D2Q9_TRT_INCOMP;
+   using D2Q9_TRT_INCOMP = lbm::D2Q9< lbm::collision_model::TRT, false >;
 
    AddTest< D2Q9_TRT_INCOMP >::add( blocks, timeloop, fieldIds.back(), field::zyxf, flagFieldId, velocity, "(D2Q9 TRT incomp zyxf cell-wise)" );
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< D2Q9_TRT_INCOMP, FlagField_T >( fieldIds.back().back(), flagFieldId, Fluid_Flag ) ),

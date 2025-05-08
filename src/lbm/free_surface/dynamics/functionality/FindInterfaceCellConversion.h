@@ -79,10 +79,10 @@ void findInterfaceCellConversion(const BoundaryHandling_T& handling, const Scala
                                  const FlagInfo< FlagField_T >& flagInfo, real_t cellConversionThreshold,
                                  real_t cellConversionForceThreshold)
 {
-   static_assert(std::is_same< typename FlagField_T::value_type, typename FlagIt_T::value_type >::value,
+   static_assert(std::is_same_v< typename FlagField_T::value_type, typename FlagIt_T::value_type >,
                  "The given flagFieldIt does not seem to be an iterator of the provided FlagField_T.");
 
-   static_assert(std::is_floating_point< typename ScalarIt_T::value_type >::value,
+   static_assert(std::is_floating_point_v< typename ScalarIt_T::value_type >,
                  "The given fillFieldIt has to be a floating point value.");
 
    cellConversionThreshold      = std::abs(cellConversionThreshold);

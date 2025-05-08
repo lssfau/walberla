@@ -97,11 +97,8 @@ void testAABB()
          testPoints.emplace_back( outerPoint, innerPoint - outerPoint );
       }
       
-      for( auto pointIt = testPoints.begin(); pointIt != testPoints.end(); ++pointIt )
+      for( auto const &[fluidPoint, direction] : testPoints )
       {
-         const Vector3<real_t> & fluidPoint = pointIt->first;
-         const Vector3<real_t> & direction  = pointIt->second;
-
          real_t q = lbm::intersectionRatio( *aabbIt, fluidPoint, direction, EPSILON );
          Vector3<real_t> intersectionPoint = fluidPoint + direction * q;
          WALBERLA_CHECK_LESS( std::fabs( aabbIt->sqSignedDistance( intersectionPoint ) ), EPSILON * EPSILON );

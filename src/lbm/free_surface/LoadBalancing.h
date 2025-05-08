@@ -220,23 +220,23 @@ class LoadBalancer
                        const PhantomBlockForest&) >
       blockWeightAssignment =
          [this](std::vector< std::pair< const PhantomBlock*, walberla::any > >& blockData, const PhantomBlockForest&) {
-            for (auto it = blockData.begin(); it != blockData.end(); ++it)
+            for (auto &[block, data] : blockData)
             {
-               if (it->first->getState().contains(BlockStateDetectorSweep< FlagField_T >::fullFreeSurface))
+               if (block->getState().contains(BlockStateDetectorSweep< FlagField_T >::fullFreeSurface))
                {
-                  it->second = PhantomWeight(blockWeightFullFreeSurface_);
+                  data = PhantomWeight(blockWeightFullFreeSurface_);
                }
                else
                {
-                  if (it->first->getState().contains(BlockStateDetectorSweep< FlagField_T >::onlyLBM))
+                  if (block->getState().contains(BlockStateDetectorSweep< FlagField_T >::onlyLBM))
                   {
-                     it->second = PhantomWeight(blockWeightOnlyLBM_);
+                     data = PhantomWeight(blockWeightOnlyLBM_);
                   }
                   else
                   {
-                     if (it->first->getState().contains(BlockStateDetectorSweep< FlagField_T >::onlyGasAndBoundary))
+                     if (block->getState().contains(BlockStateDetectorSweep< FlagField_T >::onlyGasAndBoundary))
                      {
-                        it->second = PhantomWeight(blockWeightOnlyGasAndBoundary_);
+                        data = PhantomWeight(blockWeightOnlyGasAndBoundary_);
                      }
                      else { WALBERLA_ABORT("Unknown block state"); }
                   }
@@ -315,14 +315,16 @@ class ProcessLoadEvaluator
       return weightSum;
    }
 
-   void print(const std::vector< real_t >& weightSum)
+   void print([[maybe_unused]] const std::vector< real_t >& weightSum)
    {
       WALBERLA_ROOT_SECTION()
       {
-         const std::vector< real_t >::const_iterator max = std::max_element(weightSum.cbegin(), weightSum.end());
-         const std::vector< real_t >::const_iterator min = std::min_element(weightSum.cbegin(), weightSum.end());
-         const real_t sum = std::accumulate(weightSum.cbegin(), weightSum.end(), real_c(0));
-         const real_t avg = sum / real_c(MPIManager::instance()->numProcesses());
+#ifdef WALBERLA_LOGLEVEL_INFO
+         const auto max = std::ranges::max_element(weightSum);
+         const auto min = std::ranges::min_element(weightSum);
+         const auto sum = std::accumulate(weightSum.cbegin(), weightSum.end(), real_c(0));
+         const auto avg = sum / real_c(MPIManager::instance()->numProcesses());
+#endif
 
          WALBERLA_LOG_INFO("Load balancing:");
          WALBERLA_LOG_INFO("\t Average weight per process " << avg);

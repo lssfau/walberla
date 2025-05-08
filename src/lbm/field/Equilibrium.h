@@ -54,7 +54,7 @@ template< typename LatticeModel_T >
 requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
 struct Equilibrium< LatticeModel_T>
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                                "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -127,7 +127,7 @@ template< typename LatticeModel_T >
 requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
 struct Equilibrium< LatticeModel_T >
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                         "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -198,8 +198,8 @@ template< typename LatticeModel_T >
 requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
 struct Equilibrium< LatticeModel_T >
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible == false,                                       "Only works with incompressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible == false,                              "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using Stencil = typename LatticeModel_T::Stencil;
@@ -345,8 +345,8 @@ template< typename LatticeModel_T >
 requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
 struct Equilibrium< LatticeModel_T >
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible,                                                "Only works with compressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible,                                       "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using Stencil = typename LatticeModel_T::Stencil;

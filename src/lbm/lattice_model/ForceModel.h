@@ -162,7 +162,7 @@ public:
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
-   { return DirectionIndependentTerms_T(); }
+   { return {}; }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
@@ -215,7 +215,7 @@ public:
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
-   { return DirectionIndependentTerms_T(); }
+   { return {}; }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
@@ -374,7 +374,7 @@ public:
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
-   { return DirectionIndependentTerms_T(); }
+   { return {}; }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & velocity, const real_t /*rho*/,
@@ -434,7 +434,7 @@ public:
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
-   { return DirectionIndependentTerms_T(); }
+   { return {}; }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const Vector3<real_t> & velocity, const real_t /*rho*/,
@@ -498,7 +498,7 @@ public:
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk, const real_t /*omega_odd*/ ) const
    {
-      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
+      if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
          const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
 
@@ -521,14 +521,14 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/, const real_t omega_odd ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
+      if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
          const real_t one_third  = real_t(1) / real_t(3);
 
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
          return real_t(3.0) * w * ( bodyForceDensity_ * c + real_t(1.5) * common);
       }
-      else if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value)
+      else if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >)
       {
          return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
                                     ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForceDensity_ ) +
@@ -591,7 +591,7 @@ public:
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                           const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk, const real_t /*omega_odd*/ ) const
    {
-      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
+      if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
          const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
 
@@ -614,14 +614,14 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/, const real_t omega_odd ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
+      if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
          const real_t one_third  = real_t(1) / real_t(3);
 
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
          return real_t(3.0) * w * ( forceDensity(x,y,z) * c + real_t(1.5) * common);
       }
-      else if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value)
+      else if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >)
       {
          return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
                                     ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * forceDensity(x,y,z) ) +

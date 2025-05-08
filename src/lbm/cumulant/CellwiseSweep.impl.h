@@ -47,12 +47,12 @@ namespace lbm{
 
 // I will need to some changes to this also 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_CUMULANT_1 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::Cumulant_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::Cumulant_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > && \
    LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
    
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_CUMULANT_1 ) // changed to SRT_1 for cumulant only in this file 
 

@@ -46,12 +46,12 @@ namespace lbm {
 //////////////////////////
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_7 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_7 )
 
@@ -190,12 +190,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 ///////////////////////////
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_1 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_1 )
 
@@ -388,12 +388,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_2 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && \
    LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_2 )
 
@@ -594,12 +594,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_3 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Simple_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Simple_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_3 )
 
@@ -806,12 +806,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 ///////////////////////////
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_4 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation>::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation>)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_4 )
 
@@ -1058,12 +1058,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_5 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > && \
    LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_5 )
 
@@ -1320,12 +1320,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_6 \
-   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
-   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value && \
+   (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
+   std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > && \
    ! LatticeModel_T::compressible && \
    LatticeModel_T::equilibriumAccuracyOrder == 2 && \
-   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Simple_tag >::value && \
-   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
+   std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Simple_tag > && \
+   std::is_same_v< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >)
 
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_6 )
 
@@ -1587,7 +1587,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_FOOT()
 ////////////////////////////////
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT \
-   std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value && \
+   std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag > && \
    ! ( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_1 || \
        WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_2 || \
        WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_TRT_3 || \
@@ -1625,7 +1625,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          Vector3<real_t> velocity;
          real_t rho = this->densityVelocityIn( velocity, dst, x, y, z );
 
-         if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value)
+         if (std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >)
             velocity -= real_c(0.5) * lm.forceModel().forceDensity(x,y,z);
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );
@@ -1676,7 +1676,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          Vector3<real_t> velocity;
          real_t rho = this->densityVelocityIn( velocity, src, x, y, z );
 
-         if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value)
+         if (std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >)
             velocity -= real_c(0.5) * lm.forceModel().forceDensity(x,y,z);
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );

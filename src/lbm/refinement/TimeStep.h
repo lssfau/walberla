@@ -811,9 +811,9 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::createTimers( cons
       timers.push_back( getTimingPoolString( "stream" ) );
       timers.push_back( getTimingPoolString( "stream & collide" ) );
       
-      for( auto timer = timers.begin(); timer != timers.end(); ++timer )
-         if( ! timingPool_->timerExists( *timer ) )
-            timingPool_->registerTimer( *timer );
+      for( auto &timer : timers )
+         if( ! timingPool_->timerExists( timer ) )
+            timingPool_->registerTimer( timer );
             
       timers.clear();
       timers.push_back( getLevelwiseTimingPoolString( "stream & collide", levels - uint_t(1) ) );
@@ -839,9 +839,9 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::createTimers( cons
          }
       }
       
-      for( auto timer = timers.begin(); timer != timers.end(); ++timer )
-         if( ! levelwiseTimingPool_->timerExists( *timer ) )
-            levelwiseTimingPool_->registerTimer( *timer );
+      for( auto &timer : timers )
+         if( ! levelwiseTimingPool_->timerExists( timer ) )
+            levelwiseTimingPool_->registerTimer( timer );
    }
 }
 
@@ -857,9 +857,9 @@ std::vector< Block * > TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::
    
    std::vector< Block * > sBlocks;
    
-   for( auto block = levelBlocks.begin(); block != levelBlocks.end(); ++block )
-      if( selectable::isSetSelected( (*block)->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
-         sBlocks.push_back( *block );
+   for( auto block : levelBlocks )
+      if( selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+         sBlocks.push_back( block );
    
    return sBlocks;
 }
@@ -891,37 +891,37 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::collide( std::vect
 {
    if( timing_ )
    {
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for( auto block : blocks )
       {
          startTiming( "collide", level );
-         sweep_->collide( *block );
+         sweep_->collide( block );
          stopTiming( "collide", level );
 
-         for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
+         for( auto const &func : postCollideBlockFunctions_[level] )
          {
-            startTiming( func->second, level );
-            (func->first)( *block, level, executionCount );
-            stopTiming( func->second, level );
+            startTiming( func.second, level );
+            (func.first)( block, level, executionCount );
+            stopTiming( func.second, level );
          }
       }
-      for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
+      for( auto const &func : postCollideVoidFunctions_[level] )
       {
-         startTiming( func->second, level );
-         (func->first)( level, executionCount );
-         stopTiming( func->second, level );
+         startTiming( func.second, level );
+         (func.first)( level, executionCount );
+         stopTiming( func.second, level );
       }
    }
    else
    {
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for( auto block : blocks )
       {
-         sweep_->collide( *block );
+         sweep_->collide( block );
 
-         for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
-            (func->first)( *block, level, executionCount );
+         for( auto const &func : postCollideBlockFunctions_[level] )
+            (func.first)( block, level, executionCount );
       }
-      for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
-         (func->first)( level, executionCount );
+      for( auto const &func : postCollideVoidFunctions_[level] )
+         (func.first)( level, executionCount );
    }
 }
 
@@ -940,111 +940,111 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
    {
       if( postBoundaryHandlingVoidFunctions_[level].empty() )
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
             {
                startTiming( "boundary handling", level );
-               boundarySweepWithLayers_( *block );
+               boundarySweepWithLayers_( block );
                stopTiming( "boundary handling", level );
 
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                {
-                  startTiming( func->second, level );
-                  (func->first)( *block, level, executionCount );
-                  stopTiming( func->second, level );
+                  startTiming( func.second, level );
+                  (func.first)( block, level, executionCount );
+                  stopTiming( func.second, level );
                }
 
                startTiming( "stream", level );
-               sweep_->stream( *block, StreamIncludedGhostLayers );
+               sweep_->stream( block, StreamIncludedGhostLayers );
                stopTiming( "stream", level );
             }
             else
             {
                startTiming( "boundary handling", level );
-               boundarySweep_( *block );
+               boundarySweep_( block );
                stopTiming( "boundary handling", level );
 
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                {
-                  startTiming( func->second, level );
-                  (func->first)( *block, level, executionCount );
-                  stopTiming( func->second, level );
+                  startTiming( func.second, level );
+                  (func.first)( block, level, executionCount );
+                  stopTiming( func.second, level );
                }
 
                startTiming( "stream", level );
-               sweep_->stream( *block, uint_t(0) );
+               sweep_->stream( block, uint_t(0) );
                stopTiming( "stream", level );
             }
             
             if( doEqualLevelBorderStreamCorrection )
             {
                startTiming( "equal level border stream correction", level, "[prepare]" );
-               equalLevelBorderStreamCorrection_.prepare( *block );
+               equalLevelBorderStreamCorrection_.prepare( block );
                stopTiming( "equal level border stream correction", level, "[prepare]" );
             }
          }
       }
       else
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
             {
                startTiming( "boundary handling", level );
-               boundarySweepWithLayers_( *block );
+               boundarySweepWithLayers_( block );
                stopTiming( "boundary handling", level );
             }
             else
             {
                startTiming( "boundary handling", level );
-               boundarySweep_( *block );
+               boundarySweep_( block );
                stopTiming( "boundary handling", level );
             }
-            for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+            for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
             {
-               startTiming( func->second, level );
-               (func->first)( *block, level, executionCount );
-               stopTiming( func->second, level );
+               startTiming( func.second, level );
+               (func.first)( block, level, executionCount );
+               stopTiming( func.second, level );
             }
          }
-         for( auto func = postBoundaryHandlingVoidFunctions_[level].begin(); func != postBoundaryHandlingVoidFunctions_[level].end(); ++func )
+         for( auto const &func : postBoundaryHandlingVoidFunctions_[level] )
          {
-            startTiming( func->second, level );
-            (func->first)( level, executionCount );
-            stopTiming( func->second, level );
+            startTiming( func.second, level );
+            (func.first)( level, executionCount );
+            stopTiming( func.second, level );
          }
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
                
             if( coarseNeighbors )
             {
                startTiming( "stream", level );
-               sweep_->stream( *block, StreamIncludedGhostLayers );
+               sweep_->stream( block, StreamIncludedGhostLayers );
                stopTiming( "stream", level );
             }
             else
             {
                startTiming( "stream", level );
-               sweep_->stream( *block, uint_t(0) );
+               sweep_->stream( block, uint_t(0) );
                stopTiming( "stream", level );
             }
             
             if( doEqualLevelBorderStreamCorrection )
             {
                startTiming( "equal level border stream correction", level, "[prepare]" );
-               equalLevelBorderStreamCorrection_.prepare( *block );
+               equalLevelBorderStreamCorrection_.prepare( block );
                stopTiming( "equal level border stream correction", level, "[prepare]" );
             }
          }
@@ -1054,69 +1054,69 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
    {
       if( postBoundaryHandlingVoidFunctions_[level].empty() )
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
             {
-               boundarySweepWithLayers_( *block );
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-                  (func->first)( *block, level, executionCount );
-               sweep_->stream( *block, StreamIncludedGhostLayers );
+               boundarySweepWithLayers_( block );
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+                  (func.first)( block, level, executionCount );
+               sweep_->stream( block, StreamIncludedGhostLayers );
             }
             else
             {
-               boundarySweep_( *block );
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-                  (func->first)( *block, level, executionCount );
-               sweep_->stream( *block, uint_t(0) );
+               boundarySweep_( block );
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+                  (func.first)( block, level, executionCount );
+               sweep_->stream( block, uint_t(0) );
             }
             
             if( doEqualLevelBorderStreamCorrection )
-               equalLevelBorderStreamCorrection_.prepare( *block );
+               equalLevelBorderStreamCorrection_.prepare( block );
          }
       }
       else
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
             {
-               boundarySweepWithLayers_( *block );
+               boundarySweepWithLayers_( block );
             }
             else
             {
-               boundarySweep_( *block );
+               boundarySweep_( block );
             }
-            for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-               (func->first)( *block, level, executionCount );
+            for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+               (func.first)( block, level, executionCount );
          }
-         for( auto func = postBoundaryHandlingVoidFunctions_[level].begin(); func != postBoundaryHandlingVoidFunctions_[level].end(); ++func )
-            (func->first)( level, executionCount );
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto const &func : postBoundaryHandlingVoidFunctions_[level] )
+            (func.first)( level, executionCount );
+         for( auto block : blocks )
          {
             bool coarseNeighbors = false;
             for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-               coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+               coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
                      
             if( coarseNeighbors )
             {
-               sweep_->stream( *block, StreamIncludedGhostLayers );
+               sweep_->stream( block, StreamIncludedGhostLayers );
             }
             else
             {
-               sweep_->stream( *block, uint_t(0) );
+               sweep_->stream( block, uint_t(0) );
             }
             
             if( doEqualLevelBorderStreamCorrection )
-               equalLevelBorderStreamCorrection_.prepare( *block );            
+               equalLevelBorderStreamCorrection_.prepare( block );
          }
       }
    }
@@ -1135,40 +1135,40 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::finishStream( std:
 
    if( timing_ )
    {
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for( auto block : blocks )
       {
          if( doEqualLevelBorderStreamCorrection )
          {
             startTiming( "equal level border stream correction", level, "[apply]" );
-            equalLevelBorderStreamCorrection_.apply( *block );
+            equalLevelBorderStreamCorrection_.apply( block );
             stopTiming( "equal level border stream correction", level, "[apply]" );
          }
-         for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
+         for( auto const &func : postStreamBlockFunctions_[level] )
          {
-            startTiming( func->second, level );
-            (func->first)( *block, level, executionCount );
-            stopTiming( func->second, level );
+            startTiming( func.second, level );
+            (func.first)( block, level, executionCount );
+            stopTiming( func.second, level );
          }
       }
-      for( auto func = postStreamVoidFunctions_[level].begin(); func != postStreamVoidFunctions_[level].end(); ++func )
+      for( auto const &func : postStreamVoidFunctions_[level] )
       {
-         startTiming( func->second, level );
-         (func->first)( level, executionCount );
-         stopTiming( func->second, level );
+         startTiming( func.second, level );
+         (func.first)( level, executionCount );
+         stopTiming( func.second, level );
       }
    }
    else
    {
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for( auto block : blocks )
       {
          if( doEqualLevelBorderStreamCorrection )
-            equalLevelBorderStreamCorrection_.apply( *block );
+            equalLevelBorderStreamCorrection_.apply( block );
             
-         for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
-            (func->first)( *block, level, executionCount );
+         for( auto const &func : postStreamBlockFunctions_[level] )
+            (func.first)( block, level, executionCount );
       }
-      for( auto func = postStreamVoidFunctions_[level].begin(); func != postStreamVoidFunctions_[level].end(); ++func )
-         (func->first)( level, executionCount );
+      for( auto const &func : postStreamVoidFunctions_[level] )
+         (func.first)( level, executionCount );
    }
 }
 
@@ -1189,145 +1189,145 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
       {
          if( postBoundaryHandlingVoidFunctions_[level].empty() )
          {
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
-                  coarseNeighborsOrPostStreamFunctions = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
                {
                   startTiming( "boundary handling", level );
-                  boundarySweepWithLayers_( *block );
+                  boundarySweepWithLayers_( block );
                   stopTiming( "boundary handling", level );
 
-                  for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+                  for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                   {
-                     startTiming( func->second, level );
-                     (func->first)( *block, level, executionCount );
-                     stopTiming( func->second, level );
+                     startTiming( func.second, level );
+                     (func.first)( block, level, executionCount );
+                     stopTiming( func.second, level );
                   }
 
                   startTiming( "stream", level );
-                  sweep_->stream( *block, StreamIncludedGhostLayers );
+                  sweep_->stream( block, StreamIncludedGhostLayers );
                   stopTiming( "stream", level );
 
-                  for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
+                  for( auto const &func : postStreamBlockFunctions_[level] )
                   {
-                     startTiming( func->second, level );
-                     (func->first)( *block, level, executionCount );
-                     stopTiming( func->second, level );
+                     startTiming( func.second, level );
+                     (func.first)( block, level, executionCount );
+                     stopTiming( func.second, level );
                   }
 
                   startTiming( "collide", level );
-                  sweep_->collide( *block );
+                  sweep_->collide( block );
                   stopTiming( "collide", level );
                }
                else
                {
                   startTiming( "boundary handling", level );
-                  boundarySweep_( *block );
+                  boundarySweep_( block );
                   stopTiming( "boundary handling", level );
 
-                  for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+                  for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                   {
-                     startTiming( func->second, level );
-                     (func->first)( *block, level, executionCount );
-                     stopTiming( func->second, level );
+                     startTiming( func.second, level );
+                     (func.first)( block, level, executionCount );
+                     stopTiming( func.second, level );
                   }
 
                   startTiming( "stream & collide", level );
-                  (*sweep_)( *block );
+                  (*sweep_)( block );
                   stopTiming( "stream & collide", level );
                }
-               for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
+               for( auto const &func : postCollideBlockFunctions_[level] )
                {
-                  startTiming( func->second, level );
-                  (func->first)( *block, level, executionCount + uint_t(1) );
-                  stopTiming( func->second, level );
+                  startTiming( func.second, level );
+                  (func.first)( block, level, executionCount + uint_t(1) );
+                  stopTiming( func.second, level );
                }
             }
-            for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
+            for( auto const &func : postCollideVoidFunctions_[level] )
             {
-               startTiming( func->second, level );
-               (func->first)( level, executionCount + uint_t(1) );
-               stopTiming( func->second, level );
+               startTiming( func.second, level );
+               (func.first)( level, executionCount + uint_t(1) );
+               stopTiming( func.second, level );
             }
          }
          else
          {
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto block : blocks )
             {
                bool coarseNeighbors = false;
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-                  coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighbors )
                {
                   startTiming( "boundary handling", level );
-                  boundarySweepWithLayers_( *block );
+                  boundarySweepWithLayers_( block );
                   stopTiming( "boundary handling", level );
                }
                else
                {
                   startTiming( "boundary handling", level );
-                  boundarySweep_( *block );
+                  boundarySweep_( block );
                   stopTiming( "boundary handling", level );
                }
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                {
-                  startTiming( func->second, level );
-                  (func->first)( *block, level, executionCount );
-                  stopTiming( func->second, level );
+                  startTiming( func.second, level );
+                  (func.first)( block, level, executionCount );
+                  stopTiming( func.second, level );
                }
             }
-            for( auto func = postBoundaryHandlingVoidFunctions_[level].begin(); func != postBoundaryHandlingVoidFunctions_[level].end(); ++func )
+            for( auto const &func : postBoundaryHandlingVoidFunctions_[level] )
             {
-               startTiming( func->second, level );
-               (func->first)( level, executionCount );
-               stopTiming( func->second, level );
+               startTiming( func.second, level );
+               (func.first)( level, executionCount );
+               stopTiming( func.second, level );
             }
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
-                  coarseNeighborsOrPostStreamFunctions = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
                {
                   startTiming( "stream", level );
-                  sweep_->stream( *block, StreamIncludedGhostLayers );
+                  sweep_->stream( block, StreamIncludedGhostLayers );
                   stopTiming( "stream", level );
 
-                  for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
+                  for( auto const &func : postStreamBlockFunctions_[level] )
                   {
-                     startTiming( func->second, level );
-                     (func->first)( *block, level, executionCount );
-                     stopTiming( func->second, level );
+                     startTiming( func.second, level );
+                     (func.first)( block, level, executionCount );
+                     stopTiming( func.second, level );
                   }
 
                   startTiming( "collide", level );
-                  sweep_->collide( *block );
+                  sweep_->collide( block );
                   stopTiming( "collide", level );
                }
                else
                {
                   startTiming( "stream & collide", level );
-                  (*sweep_)( *block );
+                  (*sweep_)( block );
                   stopTiming( "stream & collide", level );
                }
-               for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
+               for( auto const &func : postCollideBlockFunctions_[level] )
                {
-                  startTiming( func->second, level );
-                  (func->first)( *block, level, executionCount + uint_t(1) );
-                  stopTiming( func->second, level );
+                  startTiming( func.second, level );
+                  (func.first)( block, level, executionCount + uint_t(1) );
+                  stopTiming( func.second, level );
                }
             }
-            for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
+            for( auto const &func : postCollideVoidFunctions_[level] )
             {
-               startTiming( func->second, level );
-               (func->first)( level, executionCount + uint_t(1) );
-               stopTiming( func->second, level );
+               startTiming( func.second, level );
+               (func.first)( level, executionCount + uint_t(1) );
+               stopTiming( func.second, level );
             }
          }
       }
@@ -1335,78 +1335,78 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
       {
          if( postBoundaryHandlingVoidFunctions_[level].empty() )
          {
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
-                  coarseNeighborsOrPostStreamFunctions = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
                {
-                  boundarySweepWithLayers_( *block );
-                  for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-                     (func->first)( *block, level, executionCount );
-                  sweep_->stream( *block, StreamIncludedGhostLayers );
-                  for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
-                     (func->first)( *block, level, executionCount );
-                  sweep_->collide( *block );
+                  boundarySweepWithLayers_( block );
+                  for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+                     (func.first)( block, level, executionCount );
+                  sweep_->stream( block, StreamIncludedGhostLayers );
+                  for( auto const &func : postStreamBlockFunctions_[level] )
+                     (func.first)( block, level, executionCount );
+                  sweep_->collide( block );
                }
                else
                {
-                  boundarySweep_( *block );
-                  for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-                     (func->first)( *block, level, executionCount );
-                  (*sweep_)( *block );
+                  boundarySweep_( block );
+                  for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+                     (func.first)( block, level, executionCount );
+                  (*sweep_)( block );
                }
-               for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
-                  (func->first)( *block, level, executionCount + uint_t(1) );
+               for( auto const &func : postCollideBlockFunctions_[level] )
+                  (func.first)( block, level, executionCount + uint_t(1) );
             }
-            for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
-               (func->first)( level, executionCount + uint_t(1) );
+            for( auto const &func : postCollideVoidFunctions_[level] )
+               (func.first)( level, executionCount + uint_t(1) );
          }
          else
          {
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto block : blocks )
             {
                bool coarseNeighbors = false;
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
-                  coarseNeighbors = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighbors )
                {
-                  boundarySweepWithLayers_( *block );
+                  boundarySweepWithLayers_( block );
                }
                else
                {
-                  boundarySweep_( *block );
+                  boundarySweep_( block );
                }
-               for( auto func = postBoundaryHandlingBlockFunctions_[level].begin(); func != postBoundaryHandlingBlockFunctions_[level].end(); ++func )
-                  (func->first)( *block, level, executionCount );
+               for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
+                  (func.first)( block, level, executionCount );
             }
-            for( auto func = postBoundaryHandlingVoidFunctions_[level].begin(); func != postBoundaryHandlingVoidFunctions_[level].end(); ++func )
-               (func->first)( level, executionCount );
-            for( auto block = blocks.begin(); block != blocks.end(); ++block )
+            for( auto const &func : postBoundaryHandlingVoidFunctions_[level] )
+               (func.first)( level, executionCount );
+            for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
                for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
-                  coarseNeighborsOrPostStreamFunctions = (*block)->neighborhoodSectionHasLargerBlock(i);
+                  coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
                {
-                  sweep_->stream( *block, StreamIncludedGhostLayers );
-                  for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
-                     (func->first)( *block, level, executionCount );
-                  sweep_->collide( *block );
+                  sweep_->stream( block, StreamIncludedGhostLayers );
+                  for( auto const &func : postStreamBlockFunctions_[level] )
+                     (func.first)( block, level, executionCount );
+                  sweep_->collide( block );
                }
                else
                {
-                  (*sweep_)( *block );
+                  (*sweep_)( block );
                }
-               for( auto func = postCollideBlockFunctions_[level].begin(); func != postCollideBlockFunctions_[level].end(); ++func )
-                  (func->first)( *block, level, executionCount + uint_t(1) );
+               for( auto const &func : postCollideBlockFunctions_[level] )
+                  (func.first)( block, level, executionCount + uint_t(1) );
             }
-            for( auto func = postCollideVoidFunctions_[level].begin(); func != postCollideVoidFunctions_[level].end(); ++func )
-               (func->first)( level, executionCount + uint_t(1) );
+            for( auto const &func : postCollideVoidFunctions_[level] )
+               (func.first)( level, executionCount + uint_t(1) );
          }
       }
    }
@@ -1416,31 +1416,31 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
 
       if( timing_ )
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
-            for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
+            for( auto const &func : postStreamBlockFunctions_[level] )
             {
-               startTiming( func->second, level );
-               (func->first)( *block, level, executionCount );
-               stopTiming( func->second, level );
+               startTiming( func.second, level );
+               (func.first)( block, level, executionCount );
+               stopTiming( func.second, level );
             }
          }
-         for( auto func = postStreamVoidFunctions_[level].begin(); func != postStreamVoidFunctions_[level].end(); ++func )
+         for( auto const &func : postStreamVoidFunctions_[level] )
          {
-            startTiming( func->second, level );
-            (func->first)( level, executionCount );
-            stopTiming( func->second, level );
+            startTiming( func.second, level );
+            (func.first)( level, executionCount );
+            stopTiming( func.second, level );
          }
       }
       else
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
-            for( auto func = postStreamBlockFunctions_[level].begin(); func != postStreamBlockFunctions_[level].end(); ++func )
-               (func->first)( *block, level, executionCount );
+            for( auto const &func : postStreamBlockFunctions_[level] )
+               (func.first)( block, level, executionCount );
          }
-         for( auto func = postStreamVoidFunctions_[level].begin(); func != postStreamVoidFunctions_[level].end(); ++func )
-            (func->first)( level, executionCount );
+         for( auto const &func : postStreamVoidFunctions_[level] )
+            (func.first)( level, executionCount );
       }
 
       collide( blocks, level, executionCount + uint_t(1) );
@@ -1558,17 +1558,17 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::performLinearExplo
    {
       if( timing_ )
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
+         for( auto block : blocks )
          {
             startTiming( "linear explosion", level );
-            linearExplosion_( *block );
+            linearExplosion_( block );
             stopTiming( "linear explosion", level );
          }
       }
       else
       {
-         for( auto block = blocks.begin(); block != blocks.end(); ++block )
-            linearExplosion_( *block );
+         for( auto block : blocks )
+            linearExplosion_( block );
       }
    }
 }

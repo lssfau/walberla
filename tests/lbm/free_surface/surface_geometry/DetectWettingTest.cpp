@@ -162,8 +162,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(0), cell_idx_c(1), cell_idx_c(1)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(-1), real_c(-1), real_c(-1));
@@ -175,8 +174,7 @@ int main(int argc, char** argv)
    };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(1), real_c(1), real_c(0));
@@ -188,8 +186,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(1), cell_idx_c(1), cell_idx_c(2)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(0), real_c(1), real_c(1));
@@ -201,8 +198,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(2), cell_idx_c(1), cell_idx_c(1)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(1), real_c(0), real_c(1));
@@ -214,8 +210,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(1)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(-1), real_c(0), real_c(-1));
@@ -227,8 +222,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(2)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(-1), real_c(0), real_c(-1));
@@ -240,8 +234,7 @@ int main(int argc, char** argv)
                                                Cell(cell_idx_c(1), cell_idx_c(2), cell_idx_c(1)) };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(1), real_c(1), real_c(1));
@@ -253,8 +246,7 @@ int main(int argc, char** argv)
    };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(1), real_c(1), real_c(0));
@@ -267,8 +259,7 @@ int main(int argc, char** argv)
    };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    normal               = Vector3< real_t >(real_c(0), real_c(1), real_c(0));
@@ -281,8 +272,7 @@ int main(int argc, char** argv)
    };
    WALBERLA_LOG_INFO("Testing wetting cells with normal=" << normal << " and fill level=" << fillLevel);
    computedWettingCells = detectWettingCells(normal, fillLevel);
-   vectorsEqual         = std::is_permutation(computedWettingCells.begin(), computedWettingCells.end(),
-                                              expectedWettingCells.begin(), expectedWettingCells.end());
+   vectorsEqual         = std::ranges::is_permutation(computedWettingCells, expectedWettingCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    return EXIT_SUCCESS;

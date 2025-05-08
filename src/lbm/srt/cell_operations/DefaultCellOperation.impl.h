@@ -52,17 +52,17 @@ namespace lbm {
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                     LatticeModel_T::CollisionModel::constant &&
-                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                     >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                       LatticeModel_T::CollisionModel::constant &&
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                       std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                       > >
 {
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),              "There is a specialization for D3Q19!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,                     "There is a specialization for D3Q19!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = PdfField<LatticeModel_T>;
@@ -125,15 +125,15 @@ private:
 /////////////////////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                     LatticeModel_T::CollisionModel::constant &&
-                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value
-                                                                     >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                       LatticeModel_T::CollisionModel::constant &&
+                                                                       std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >
+                                                                       > >
 {                                                                                   
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value),         "Only works with Guo constant force model !" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >,         "Only works with Guo constant force model !" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = PdfField<LatticeModel_T>;
@@ -215,19 +215,19 @@ private:
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                     LatticeModel_T::CollisionModel::constant &&
-                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                     ! LatticeModel_T::compressible &&
-                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                     >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                       LatticeModel_T::CollisionModel::constant &&
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                       ! LatticeModel_T::compressible &&
+                                                                       std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                       > >
 {
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,                       "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible == false,                                                    "Only works with incompressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = PdfField<LatticeModel_T>;
@@ -258,12 +258,12 @@ private:
 };
 
 template< typename LatticeModel_T >
-void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                    LatticeModel_T::CollisionModel::constant &&
-                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                    ! LatticeModel_T::compressible &&
-                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                    >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                      LatticeModel_T::CollisionModel::constant &&
+                                                                      std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                      ! LatticeModel_T::compressible &&
+                                                                      std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                      >
    >::operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
 {
    using namespace stencil;
@@ -356,12 +356,12 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same
 
 template< typename LatticeModel_T >
 template< typename FieldPtrOrIterator >
-void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                    LatticeModel_T::CollisionModel::constant &&
-                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                    ! LatticeModel_T::compressible &&
-                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                    >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                      LatticeModel_T::CollisionModel::constant &&
+                                                                      std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                      ! LatticeModel_T::compressible &&
+                                                                      std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                      >
    >::operator()( FieldPtrOrIterator & src, FieldPtrOrIterator & dst ) const
 {
    using namespace stencil;
@@ -461,19 +461,19 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                     LatticeModel_T::CollisionModel::constant &&
-                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                     LatticeModel_T::compressible &&
-                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                     >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                       LatticeModel_T::CollisionModel::constant &&
+                                                                       std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                       LatticeModel_T::compressible &&
+                                                                       std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                       > >
 {
 public:
 
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
-   static_assert( LatticeModel_T::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,                       "Only works with D3Q19!" );
+   static_assert( LatticeModel_T::compressible,                                                             "Only works with compressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    using PdfField_T = PdfField<LatticeModel_T>;
@@ -505,12 +505,12 @@ private:
 };
 
 template< typename LatticeModel_T >
-void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                    LatticeModel_T::CollisionModel::constant &&
-                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                    LatticeModel_T::compressible &&
-                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                    >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                      LatticeModel_T::CollisionModel::constant &&
+                                                                      std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                      LatticeModel_T::compressible &&
+                                                                      std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                      >
    >::operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
 {
    using namespace stencil;
@@ -608,12 +608,12 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same
 
 template< typename LatticeModel_T >
 template< typename FieldPtrOrIterator >
-void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                                                    LatticeModel_T::CollisionModel::constant &&
-                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
-                                                                    LatticeModel_T::compressible &&
-                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
-                                                                    >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag > &&
+                                                                      LatticeModel_T::CollisionModel::constant &&
+                                                                      std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > &&
+                                                                      LatticeModel_T::compressible &&
+                                                                      std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >
+                                                                      >
    >::operator()( FieldPtrOrIterator & src, FieldPtrOrIterator & dst ) const
 {
    using namespace stencil;
