@@ -34,7 +34,7 @@ namespace data {
  *
  * Contact Accessors passed via templated arguments might be checked like
  * \code
- * static_assert(std::is_base_of<IContactAccessor, X>::value, typeid(X).name() + " is not a accessor");
+ * static_assert(std::is_base_of_v<IContactAccessor, X>, typeid(X).name() + " is not a accessor");
  * \endcode
  */
 class IContactAccessor

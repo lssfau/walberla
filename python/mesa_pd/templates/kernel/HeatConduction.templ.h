@@ -123,7 +123,7 @@ inline void HeatConduction::operator()(const size_t p_idx1,
                                        const size_t p_idx2,
                                        Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    if (p_idx1 != p_idx2)
    {

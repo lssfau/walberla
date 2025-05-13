@@ -269,9 +269,9 @@ bool EPA::doEPA( Support &geom1,
       createInitialSimplex(numPoints, geom1, geom2, supportA, supportB, epaVolume, entryBuffer, margin);
    }
 
-   for(EPA_EntryBuffer::iterator it=entryBuffer.begin(); it != entryBuffer.end(); ++it) {
-      if(it->isClosestInternal()) {
-         entryHeap.emplace_back(&(*it));
+   for(auto &it : entryBuffer) {
+      if(it.isClosestInternal()) {
+         entryHeap.emplace_back(&it);
       }
    }
 
@@ -280,14 +280,14 @@ bool EPA::doEPA( Support &geom1,
       return false;
    }
 
-   std::make_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
+   std::ranges::make_heap(entryHeap, EPA::EPA_TriangleComp());
    EPA_Triangle* current = nullptr;
 
    numIterations_ = 0;
    //EPA Main-Loop
    do {
       ++numIterations_;
-      std::pop_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
+      std::ranges::pop_heap(entryHeap, EPA::EPA_TriangleComp());
       current = entryHeap.back();
       entryHeap.pop_back();
       if(!current->isObsolete()) {
@@ -417,7 +417,7 @@ bool EPA::doEPA( Support &geom1,
                && firstTriangle->getSqrDist() < upperBoundSqr)
          {
             entryHeap.emplace_back(firstTriangle);
-            std::push_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
+            std::ranges::push_heap(entryHeap, EPA::EPA_TriangleComp());
          }
 
          firstTriangle->link(0, it->getTriangle(), it->getIndex());
@@ -447,7 +447,7 @@ bool EPA::doEPA( Support &geom1,
                   &&  newTriangle->getSqrDist() < upperBoundSqr)
             {
                entryHeap.emplace_back(newTriangle);
-               std::push_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
+               std::ranges::push_heap(entryHeap, EPA::EPA_TriangleComp());
             }
 
             if(!newTriangle->link(0, it->getTriangle(), it->getIndex())) {

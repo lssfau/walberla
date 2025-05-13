@@ -70,7 +70,7 @@ template <typename Accessor>
 inline void PFCDamping::operator()(const size_t p_idx,
                                    Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    Vec3 damp_F(0,0,0);
    Vec3 damp_M(0,0,0);

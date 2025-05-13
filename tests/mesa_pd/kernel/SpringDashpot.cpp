@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
    mpi::MPIManager::instance()->useWorldComm();
 
-   if (std::is_same<real_t, float>::value)
+   if (std::is_same_v<real_t, float>)
    {
       WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
       return EXIT_SUCCESS;

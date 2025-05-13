@@ -64,9 +64,8 @@ void BlockForestDomain::refresh()
 
          //check if neighbor aabb is already present
          const BlockID& nbBlkId = blk.getNeighborId(nb);
-         if (std::find_if(neighborSubdomains_.begin(),
-                          neighborSubdomains_.end(),
-                          [&nbBlkId](const auto& subdomain){return subdomain.blockID == nbBlkId;}) ==
+         if (std::ranges::find_if(neighborSubdomains_,
+                                  [&nbBlkId](const auto& subdomain){return subdomain.blockID == nbBlkId;}) ==
              neighborSubdomains_.end())
          {
             neighborSubdomains_.emplace_back(int_c(blk.getNeighborProcess(nb)), nbBlkId, blk.getNeighborAABB(nb));
@@ -75,9 +74,8 @@ void BlockForestDomain::refresh()
    }
 
    //sort by rank
-   std::sort(neighborSubdomains_.begin(),
-             neighborSubdomains_.end(),
-             [](const auto& lhs, const auto& rhs){ return lhs.rank < rhs.rank; });
+   std::ranges::sort(neighborSubdomains_,
+                     [](const auto& lhs, const auto& rhs){ return lhs.rank < rhs.rank; });
 
    //generate list of neighbor processes
    int prevRank = -1;
@@ -108,9 +106,8 @@ bool BlockForestDomain::isContainedInProcessSubdomain(const uint_t rank, const V
                                      neighborSubdomains_.end(),
                                      [](const auto& lhs, const auto& rhs){ return lhs.rank < rhs.rank;}));
 
-      auto begin = std::find_if(neighborSubdomains_.begin(),
-                                neighborSubdomains_.end(),
-                                [&rank](const auto& subdomain){ return subdomain.rank == int_c(rank); });
+      auto begin = std::ranges::find_if(neighborSubdomains_,
+                                        [&rank](const auto& subdomain){ return subdomain.rank == int_c(rank); });
       if (begin == neighborSubdomains_.end()) return false; //no information for rank available
       auto end = std::find_if(begin,
                               neighborSubdomains_.end(),
@@ -127,10 +124,9 @@ bool BlockForestDomain::isContainedInProcessSubdomain(const uint_t rank, const V
 bool   BlockForestDomain::isContainedInLocalSubdomain(const Vec3& pt,
                                                       const real_t& radius) const
 {
-   return std::any_of(localAABBs_.begin(),
-                      localAABBs_.end(),
-                      [&](auto& aabb)
-                      {return isInsideAABB(pt, radius, aabb);});
+   return std::ranges::any_of(localAABBs_,
+                              [&](auto& aabb)
+                              {return isInsideAABB(pt, radius, aabb);});
 }
 
 bool BlockForestDomain::isContainedInProcessSubdomain(const Vec3& pt, const real_t& radius) const
@@ -152,11 +148,10 @@ bool BlockForestDomain::isContainedInProcessSubdomain(const Vec3& pt, const real
    }
 
    //intersects one of the neighboring subdomains?
-   return std::none_of(neighborSubdomains_.begin(),
-                       neighborSubdomains_.end(),
-                       [&](const auto &subdomain) {
-                          return sqDistancePointToAABB(pt, subdomain.aabb) < radius * radius;
-                       });
+   return std::ranges::none_of(neighborSubdomains_,
+                               [&](const auto &subdomain) {
+                                  return sqDistancePointToAABB(pt, subdomain.aabb) < radius * radius;
+                               });
 }
 
 int BlockForestDomain::findContainingProcessRank(const Vec3& pt) const

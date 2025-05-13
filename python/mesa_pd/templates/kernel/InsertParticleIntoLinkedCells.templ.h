@@ -69,7 +69,7 @@ public:
 template <typename Accessor>
 inline void InsertParticleIntoLinkedCells::operator()(const size_t p_idx, Accessor& ac, data::LinkedCells& lc) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    const auto& minCorner = lc.domain_.minCorner();
    if (data::particle_flags::isSet(ac.getFlags(p_idx), data::particle_flags::INFINITE))

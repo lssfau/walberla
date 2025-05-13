@@ -107,7 +107,7 @@ template <typename Accessor>
 inline void TemperatureIntegration::operator()(const size_t p_idx,
                                                Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    //formula for heat capacity
    ac.setTemperature(p_idx, getInvSpecificHeat(ac.getType(p_idx)) * ac.getInvMass(p_idx) * ac.getHeatFlux(p_idx) * dt_ + ac.getTemperature(p_idx));

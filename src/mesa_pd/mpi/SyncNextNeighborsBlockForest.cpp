@@ -168,7 +168,7 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(walberla::mpi
       for( uint_t nb = uint_t(0); nb < currentBlock->getNeighborhoodSize(); ++nb )
       {
          auto nbProcessRank = currentBlock->getNeighborProcess(nb);
-         if (std::find(ranksAlreadyTreated.begin(), ranksAlreadyTreated.end(), int_c(nbProcessRank)) != ranksAlreadyTreated.end())
+         if (std::ranges::find(ranksAlreadyTreated, int_c(nbProcessRank)) != ranksAlreadyTreated.end())
          {
             continue;
          }
@@ -201,9 +201,8 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(walberla::mpi
            ghostOwnerIt != pIt->getGhostOwnersRef().end();
            )
       {
-         if (std::find(ranksAlreadyTreated.begin(),
-                       ranksAlreadyTreated.end(),
-                       int_c(*ghostOwnerIt)) == ranksAlreadyTreated.end())
+         if (std::ranges::find(ranksAlreadyTreated,
+                               int_c(*ghostOwnerIt)) == ranksAlreadyTreated.end())
          {
             // In case the rigid particle no longer intersects the remote process nor interacts with it but is registered,
             // send removal notification.

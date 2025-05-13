@@ -117,9 +117,9 @@ void checkTestScenario( real_t radiusRatio )
                          ac.getPosition(idx2), ac.getInteractionRadius(idx2) ))
       {
          if(ac.getUid(idx2) < ac.getUid(idx1))
-            csBF.push_back(IdxPair_T(idx2, idx1));
+            csBF.emplace_back(idx2, idx1);
          else
-            csBF.push_back(IdxPair_T(idx1, idx2));
+            csBF.emplace_back(idx1, idx2);
       }
    },
    accessor );
@@ -136,9 +136,9 @@ void checkTestScenario( real_t radiusRatio )
                          ac.getPosition(idx2), ac.getInteractionRadius(idx2) ))
       {
          if(ac.getUid(idx2) < ac.getUid(idx1))
-            csHG1.push_back(IdxPair_T(idx2, idx1));
+            csHG1.emplace_back(idx2, idx1);
          else
-            csHG1.push_back(IdxPair_T(idx1, idx2));
+            csHG1.emplace_back(idx1, idx2);
       }
    },
    accessor );
@@ -146,8 +146,8 @@ void checkTestScenario( real_t radiusRatio )
    WALBERLA_CHECK_EQUAL(csBF.size(), csHG1.size());
    WALBERLA_LOG_DEVEL(csBF.size() << " contacts detected");
 
-   std::sort(csBF.begin(), csBF.end(), compPair);
-   std::sort(csHG1.begin(), csHG1.end(), compPair);
+   std::ranges::sort(csBF, compPair);
+   std::ranges::sort(csHG1, compPair);
 
    for (size_t i = 0; i < csBF.size(); ++i)
    {
@@ -170,16 +170,16 @@ void checkTestScenario( real_t radiusRatio )
                                                     ac.getPosition(idx2), ac.getInteractionRadius(idx2) ))
                                  {
                                     if(ac.getUid(idx2) < ac.getUid(idx1))
-                                       csHG2.push_back(IdxPair_T(idx2, idx1));
+                                       csHG2.emplace_back(idx2, idx1);
                                     else
-                                       csHG2.push_back(IdxPair_T(idx1, idx2));
+                                       csHG2.emplace_back(idx1, idx2);
                                  }
                               },
                               accessor );
 
    WALBERLA_CHECK_EQUAL(csBF.size(), csHG2.size());
 
-   std::sort(csHG2.begin(), csHG2.end(), compPair);
+   std::ranges::sort(csHG2, compPair);
 
    for (size_t i = 0; i < csBF.size(); ++i)
    {
@@ -201,16 +201,16 @@ void checkTestScenario( real_t radiusRatio )
                                                     ac.getPosition(idx2), ac.getInteractionRadius(idx2) ))
                                  {
                                     if(ac.getUid(idx2) < ac.getUid(idx1))
-                                       csHG3.push_back(IdxPair_T(idx2, idx1));
+                                       csHG3.emplace_back(idx2, idx1);
                                     else
-                                       csHG3.push_back(IdxPair_T(idx1, idx2));
+                                       csHG3.emplace_back(idx1, idx2);
                                  }
                               },
                               accessor );
 
    WALBERLA_CHECK_EQUAL(csBF.size(), csHG3.size());
 
-   std::sort(csHG3.begin(), csHG3.end(), compPair);
+   std::ranges::sort(csHG3, compPair);
 
    for (size_t i = 0; i < csBF.size(); ++i)
    {
