@@ -48,10 +48,10 @@ public:
 void ReGrid_Switcher::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                   std::vector< const Block * > &, const BlockForest & /*forest*/ )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for( auto &[block, level] : minTargetLevels )
    {
-      it->second = it->first->getLevel() == 0 ? 1 : 0;
-      WALBERLA_LOG_DETAIL("setting block to level: " << it->second);
+      level = block->getLevel() == 0 ? 1 : 0;
+      WALBERLA_LOG_DETAIL("setting block to level: " << level);
    }
 }
 

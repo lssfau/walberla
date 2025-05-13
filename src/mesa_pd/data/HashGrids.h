@@ -676,7 +676,7 @@ template <typename Selector, typename Accessor, typename Func, typename... Args>
 void HashGrids::HashGrid::checkEachParticlePairHalfAndStore( ParticleIdxVector& particlesOnGrid,
                                                              const bool openmp, const Selector& selector, Accessor& ac, Func&& func, Args&&... args ) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
 
    particlesOnGrid = ParticleIdxVector(particleCount_);
@@ -734,7 +734,7 @@ template <typename Selector, typename Accessor, typename Func, typename... Args>
 void HashGrids::HashGrid::checkAgainstVectorEachParticlePairHalf( const ParticleIdxVector& particlesOnGrid,
                                                                   const bool openmp, const Selector& selector, Accessor& ac, Func&& func, Args&&... args ) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
 
    // For each particle 'a' that is stored in 'particles' ...
@@ -783,8 +783,8 @@ inline void HashGrids::clearAll()
 // useful for "updating" the data structure in each time step, but also prevents clean-up of unnecessary grids
 inline void HashGrids::clear()
 {
-   for( auto gridIt = gridList_.begin(); gridIt != gridList_.end(); ++gridIt ) {
-      (*gridIt)->clear();
+   for( auto &item : gridList_ ) {
+      item->clear();
    }
    infiniteParticles_.clear();
 }
@@ -792,7 +792,7 @@ inline void HashGrids::clear()
 template <typename Accessor>
 void HashGrids::operator()(const size_t p_idx, Accessor& ac)
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    if (data::particle_flags::isSet(ac.getFlags(p_idx), data::particle_flags::INFINITE))
    {
@@ -858,7 +858,7 @@ inline void HashGrids::addInfiniteParticle(size_t p_idx)
 template <typename Selector, typename Accessor, typename Func, typename... Args>
 inline void HashGrids::forEachParticlePairHalf(const bool openmp, const Selector& selector, Accessor& ac, Func&& func, Args&&... args) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
 
    // Pair generation by traversing through all hash grids (which are sorted in ascending order

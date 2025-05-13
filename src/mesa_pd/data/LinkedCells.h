@@ -111,7 +111,7 @@ math::AABB getCellAABB(const LinkedCells& ll,
    const real_t xMax = ll.cellDiameter_[0] * real_c(hash0 + 1) + minCorner[0];
    const real_t yMax = ll.cellDiameter_[1] * real_c(hash1 + 1) + minCorner[1];
    const real_t zMax = ll.cellDiameter_[2] * real_c(hash2 + 1) + minCorner[2];
-   return math::AABB(xMin, yMin, zMin, xMax, yMax, zMax);
+   return {xMin, yMin, zMin, xMax, yMax, zMax};
 }
 
 inline
@@ -168,7 +168,7 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
    WALBERLA_CHECK_GREATER_EQUAL(real_c(numCellsPerDim_[1]) * cellDiameter_[1], domain.size(1));
    WALBERLA_CHECK_GREATER_EQUAL(real_c(numCellsPerDim_[2]) * cellDiameter_[2], domain.size(2));
 
-   std::fill(cells_.begin(), cells_.end(), -1);
+   std::ranges::fill(cells_, -1);
 }
 
 inline void LinkedCells::clear()
@@ -182,7 +182,7 @@ inline void LinkedCells::clear()
 template <typename Selector, typename Accessor, typename Func, typename... Args>
 inline void LinkedCells::forEachParticlePair(const bool openmp, const Selector& selector, Accessor& acForLC, Func&& func, Args&&... args) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
    for (int z = 0; z < numCellsPerDim_[2]; ++z)
    {
@@ -274,7 +274,7 @@ inline void LinkedCells::forEachParticlePair(const bool openmp, const Selector& 
 template <typename Selector, typename Accessor, typename Func, typename... Args>
 inline void LinkedCells::forEachParticlePairHalf(const bool openmp, const Selector& selector, Accessor& acForLC, Func&& func, Args&&... args) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
    for (int z = 0; z < numCellsPerDim_[2]; ++z)
    {

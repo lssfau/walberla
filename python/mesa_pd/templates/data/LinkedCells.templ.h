@@ -183,7 +183,7 @@ void LinkedCells::clear()
 template <typename Selector, typename Accessor, typename Func, typename... Args>
 inline void LinkedCells::forEachParticlePair{%- if half %}Half{%- endif %}(const bool openmp, const Selector& selector, Accessor& acForLC, Func&& func, Args&&... args) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
    {%- if module.enableOpenMP %}
    #pragma omp parallel for collapse(2) schedule(static) firstprivate(selector,func) if (openmp)

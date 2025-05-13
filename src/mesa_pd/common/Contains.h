@@ -112,7 +112,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::Sphere& sphere, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return isPointInsideSphere(point, ac.getPosition(particleIdx), sphere.getRadius() );
    }
@@ -120,7 +120,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::HalfSpace& halfSpace, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return isPointInsideHalfSpace(point, ac.getPosition(particleIdx), halfSpace.getNormal() );
    }
@@ -128,7 +128,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::Box& box, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return isPointInsideBoxBF(mesa_pd::transformPositionFromWFtoBF(particleIdx, ac, point), box.getEdgeLength());
    }
@@ -136,7 +136,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::Ellipsoid& ellipsoid, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return isPointInsideEllipsoidBF(mesa_pd::transformPositionFromWFtoBF(particleIdx, ac, point), ellipsoid.getSemiAxes());
    }
@@ -144,7 +144,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::CylindricalBoundary& cylindricalBoundary, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return isPointInsideCylindricalBoundary(point, ac.getPosition(particleIdx), cylindricalBoundary.getRadius(), cylindricalBoundary.getAxis());
    }
@@ -153,7 +153,7 @@ struct ContainsPointFunctor
    template<typename ParticleAccessor_T>
    bool operator()(const size_t particleIdx, const mesa_pd::data::ConvexPolyhedron& convexPolyhedron, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       auto pointBF = mesa_pd::transformPositionFromWFtoBF(particleIdx, ac, point);
       if( pointBF.sqrLength() > convexPolyhedron.getBoundingSphereRadius() * convexPolyhedron.getBoundingSphereRadius() )

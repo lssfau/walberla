@@ -203,7 +203,7 @@ inline void SpringDashpotSpring::operator()(const size_t p_idx1,
                                       const real_t& penetrationDepth,
                                       const real_t dt) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    if (p_idx1 != p_idx2)
    {

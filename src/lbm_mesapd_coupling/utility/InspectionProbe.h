@@ -124,12 +124,12 @@ private:
       WALBERLA_LOG_INFO(outputString.str());
    }
 
-   void printToScreen(bool isFluid, real_t rho, Vector3<real_t> velocity)
+   void printToScreen([[maybe_unused]] bool isFluid, [[maybe_unused]] real_t rho, [[maybe_unused]] const Vector3<real_t> &velocity)
    {
       if(printToScreen_) WALBERLA_LOG_INFO("Values in probe at position " << probeLocation_ << " on rank " << mpi::MPIManager::instance()->rank() << ": " << (isFluid?"F":"P") << ", rho = " << rho << ", velocity = " << velocity);
    }
 
-   void writeToFile(bool isFluid, real_t rho, Vector3<real_t> velocity)
+   void writeToFile(bool isFluid, real_t rho, const Vector3<real_t> &velocity)
    {
       if(!outputFileName_.empty())
       {

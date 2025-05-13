@@ -157,7 +157,7 @@ struct RayParticleIntersectionRatioFunctor
    template<typename ParticleAccessor_T, typename Shape_T>
    real_t operator()(const size_t particleIdx, const Shape_T& /*shape*/, const ParticleAccessor_T& ac, const Vec3& rayOrigin, const Vec3& rayDirection, real_t epsilon )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return intersectionRatioBisection(particleIdx, ac, rayOrigin, rayDirection, epsilon );
    }
@@ -165,7 +165,7 @@ struct RayParticleIntersectionRatioFunctor
    template<typename ParticleAccessor_T>
    real_t operator()(const size_t particleIdx, const mesa_pd::data::Sphere& sphere, const ParticleAccessor_T& ac, const Vec3& rayOrigin, const Vec3& rayDirection, real_t /*epsilon*/ )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return raySphereIntersectionRatio(rayOrigin, rayDirection, ac.getPosition(particleIdx), sphere.getRadius() );
    }
@@ -173,7 +173,7 @@ struct RayParticleIntersectionRatioFunctor
    template<typename ParticleAccessor_T>
    real_t operator()(const size_t particleIdx, const mesa_pd::data::HalfSpace& halfSpace, const ParticleAccessor_T& ac, const Vec3& rayOrigin, const Vec3& rayDirection, real_t /*epsilon*/ )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return rayHalfSpaceIntersectionRatio(rayOrigin, rayDirection, ac.getPosition(particleIdx), halfSpace.getNormal() );
    }
@@ -181,7 +181,7 @@ struct RayParticleIntersectionRatioFunctor
    template<typename ParticleAccessor_T>
    real_t operator()(const size_t particleIdx, const mesa_pd::data::Ellipsoid& ellipsoid, const ParticleAccessor_T& ac, const Vec3& rayOrigin, const Vec3& rayDirection, real_t /*epsilon*/ )
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
       return rayEllipsoidIntersectionRatioBF(mesa_pd::transformPositionFromWFtoBF(particleIdx, ac, rayOrigin), mesa_pd::transformVectorFromWFtoBF(particleIdx, ac, rayDirection), ellipsoid.getSemiAxes() );
    }

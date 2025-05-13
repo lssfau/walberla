@@ -66,12 +66,12 @@ std::vector< math::Vector3<uint_t> > generateHilbertCurve(const uint_t size)
    std::stack< Node > stack;
    std::stack< uint_t > orientation;
 
-   stack.push( std::make_pair(size, math::Vector3<uint_t>(size)) );
+   stack.emplace( size, math::Vector3<uint_t>(size) );
    orientation.push( uint_t(0) );
 
    while( !stack.empty() )
    {
-      const Node node = stack.top();
+      const auto node = stack.top();
       uint_t hilbertIndex = orientation.top();
 
       stack.pop();
@@ -81,8 +81,8 @@ std::vector< math::Vector3<uint_t> > generateHilbertCurve(const uint_t size)
       {
          for( uint_t c = 8; c-- != 0; )
          {
-            stack.push( std::make_pair( node.first >> 1,
-                                        getChildPosition(node.first, node.second, blockforest::hilbertOrder[hilbertIndex][c]) ));
+            stack.emplace( node.first >> 1,
+                           getChildPosition(node.first, node.second, blockforest::hilbertOrder[hilbertIndex][c]) );
             orientation.push( blockforest::hilbertOrientation[hilbertIndex][c] );
          }
       }

@@ -149,8 +149,8 @@ int main( int argc, char ** argv )
    std::vector<size_t> cs2_idx(cs2.size());
    std::iota(cs1_idx.begin(), cs1_idx.end(), 0);
    std::iota(cs2_idx.begin(), cs2_idx.end(), 0);
-   std::sort(cs1_idx.begin(), cs1_idx.end(), comp(cs1));
-   std::sort(cs2_idx.begin(), cs2_idx.end(), comp(cs2));
+   std::ranges::sort(cs1_idx, comp(cs1));
+   std::ranges::sort(cs2_idx, comp(cs2));
 
 
    for (size_t i = 0; i < cs1.size(); ++i)

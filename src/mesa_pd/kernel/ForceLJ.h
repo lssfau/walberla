@@ -127,7 +127,7 @@ inline real_t ForceLJ::getSigma(const size_t type1, const size_t type2) const
 template <typename Accessor>
 inline void ForceLJ::operator()(const size_t p_idx, const size_t np_idx, Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    if (p_idx != np_idx)
    {

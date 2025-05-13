@@ -74,7 +74,7 @@ template <typename Accessor>
 inline void InitParticlesForHCSITS::operator()(size_t j, Accessor& ac, real_t dt)
 {
    using namespace data::particle_flags;
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
    auto particle_flags = ac.getFlagsRef(j);
    if (isSet(particle_flags, GLOBAL)){
       WALBERLA_CHECK( isSet(particle_flags, FIXED), "Global bodies need to have infinite mass as they are not communicated!" );

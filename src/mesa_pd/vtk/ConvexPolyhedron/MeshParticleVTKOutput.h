@@ -71,7 +71,7 @@ public:
 
    template<typename AccessorWithShape_T>
    void operator()(AccessorWithShape_T & accessor) {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, AccessorWithShape_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, AccessorWithShape_T>, "Provide a valid accessor as template");
 
       if(meshWriter_.isWriteScheduled()) {
          assembleMesh(accessor);
@@ -166,7 +166,7 @@ template<typename MeshType>
 template<typename AccessorWithShape_T>
 void MeshParticleVTKOutput<MeshType>::assembleMesh(AccessorWithShape_T & accessor) {
 
-   static_assert(std::is_base_of<mesa_pd::data::IAccessor, AccessorWithShape_T>::value, "Provide a valid accessor as template");
+   static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, AccessorWithShape_T>, "Provide a valid accessor as template");
    // those will save the newly created vertices and faces for each mesh
    // to make it possible to map a vertex/face to the corresponding particle
    std::vector<typename MeshType::VertexHandle> newVertices;

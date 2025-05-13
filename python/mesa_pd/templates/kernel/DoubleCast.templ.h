@@ -68,7 +68,7 @@ public:
 template <typename Accessor, typename func, typename... Args>
 auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args&&... args )
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    using namespace mesa_pd::data;
 

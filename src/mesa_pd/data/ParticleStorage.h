@@ -723,7 +723,7 @@ public:
    std::vector<segmentID_type> segmentID_ {};
    std::vector<neighborState_type> neighborState_ {};
    std::unordered_map<uid_type, size_t> uidToIdx_;
-   static_assert(std::is_same<uid_type, id_t>::value,
+   static_assert(std::is_same_v<uid_type, id_t>,
                  "Property uid of type id_t is missing. This property is required!");
 };
 using Particle = ParticleStorage::Particle;
@@ -1342,7 +1342,7 @@ inline void ParticleStorage::forEachParticle(const bool openmp,
                                              Accessor& acForPS,
                                              Func&& func, Args&&... args) 
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
@@ -1358,7 +1358,7 @@ inline void ParticleStorage::forEachParticle(const bool openmp,
                                              Accessor& acForPS,
                                              Func&& func, Args&&... args) const
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
@@ -1374,7 +1374,7 @@ inline void ParticleStorage::forEachParticlePair(const bool openmp,
                                                  Accessor& acForPS,
                                                  Func&& func, Args&&... args) 
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
@@ -1398,7 +1398,7 @@ inline void ParticleStorage::forEachParticlePair(const bool openmp,
                                                  Accessor& acForPS,
                                                  Func&& func, Args&&... args) const
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
@@ -1422,7 +1422,7 @@ inline void ParticleStorage::forEachParticlePairHalf(const bool openmp,
                                                      Accessor& acForPS,
                                                      Func&& func, Args&&... args) 
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
@@ -1443,7 +1443,7 @@ inline void ParticleStorage::forEachParticlePairHalf(const bool openmp,
                                                      Accessor& acForPS,
                                                      Func&& func, Args&&... args) const
 {
-   static_assert (std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor" );
+   static_assert (std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor" );
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();

@@ -33,6 +33,10 @@
 #include "core/math/Random.h"
 #include "core/math/Vector2.h"
 
+#include <array>
+#include <cmath>
+#include <type_traits>
+
 namespace walberla {
 namespace mesa_pd {
 
@@ -60,12 +64,10 @@ bool gjkEPAcollideHybrid(Support &geom1, Support &geom2, Vec3& normal, Vec3& con
 
 //Define Test values for different precision levels
 #ifdef WALBERLA_DOUBLE_ACCURACY
-static const int distancecount = 6;
-static const real_t depth[distancecount] = {real_t(-1e-5), real_t(1e-5), real_t(1e-4), real_t(1e-2), real_t(0.1), real_t(1.0)};
+static const std::array depths = {real_t(-1e-5), real_t(1e-5), real_t(1e-4), real_t(1e-2), real_t(0.1), real_t(1.0)};
 static const real_t test_accuracy = real_t(1e-3);
 #else
-static const int distancecount = 3;
-static const real_t depth[distancecount] = {real_t(1e-2), real_t(0.1), real_t(1.0)};
+static const std::array depths = {real_t(1e-2), real_t(0.1), real_t(1.0)};
 static const real_t test_accuracy = real_t(1e-2); //Single Precision is v. bad!
 #endif
 
@@ -118,25 +120,25 @@ void runCollisionDataTest(Support &rb1, Support &rb2, const Vec3& dir1, const re
    Vec3 pos1, pos2;
    real_t comp_pen_depth1, comp_pen_depth2;
 
-   for(int j = 0; j < distancecount; j++){
+   for(auto depth : depths){
       //move rb1.
-      rb2.pos_ = (org_pos + depth[j]*dir1);
-//      WALBERLA_LOG_INFO("Using depth: "+ std::to_string(depth[j]));
+      rb2.pos_ = (org_pos + depth*dir1);
+//      WALBERLA_LOG_INFO("Using depth: "+ std::to_string(depth));
       //Compute collision between rb1 and rb2 and vice versa
       bool result1 = gjkEPAcollideHybrid(rb1, rb2, normal1, pos1, comp_pen_depth1);
 //      WALBERLA_LOG_DEVEL( normal1 << " " << pos1 << " " <<  comp_pen_depth1);
       bool result2 = gjkEPAcollideHybrid(rb2, rb1, normal2, pos2, comp_pen_depth2);
 //      WALBERLA_LOG_DEVEL( normal2 << " " << pos2 << " " <<  comp_pen_depth2);
-      if(depth[j] > real_t(0.0)){
+      if(depth > real_t(0.0)){
          WALBERLA_CHECK(result1);
          WALBERLA_CHECK(result2);
          //Check contact information
          checkContact( pos1, normal1, comp_pen_depth1,
-                       witnesspoint + depth[j] * witnessmove, real_axis, -depth[j] * penetration_factor, planeNormal, accuracy );
+                       witnesspoint + depth * witnessmove, real_axis, -depth * penetration_factor, planeNormal, accuracy );
          checkContact( pos2, normal2, comp_pen_depth2,
-                       witnesspoint + depth[j] * witnessmove, real_t(-1.0)*real_axis, -depth[j] * penetration_factor, planeNormal, accuracy );
+                       witnesspoint + depth * witnessmove, real_t(-1.0)*real_axis, -depth * penetration_factor, planeNormal, accuracy );
       }
-      if(depth[j] < real_t(0.0)){
+      if(depth < real_t(0.0)){
          WALBERLA_CHECK(!result1);
          WALBERLA_CHECK(!result2);
       }
@@ -343,7 +345,7 @@ int main( int argc, char** argv )
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   if (std::is_same<walberla::real_t, float>::value)
+   if (std::is_same_v<walberla::real_t, float>)
    {
       WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
       return EXIT_SUCCESS;

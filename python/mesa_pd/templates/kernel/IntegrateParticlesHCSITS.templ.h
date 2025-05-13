@@ -85,7 +85,7 @@ template <typename PAccessor>
 inline void IntegrateParticlesHCSITS::operator()(size_t j, PAccessor& ac, real_t dt)
 {
    using namespace data::particle_flags;
-   static_assert(std::is_base_of<data::IAccessor, PAccessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, PAccessor>, "please provide a valid accessor");
 
    auto body_flags = ac.getFlagsRef(j);
    if (isSet(body_flags, FIXED)){
