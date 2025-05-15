@@ -50,9 +50,9 @@ real_t DistanceInfo::getDistanceToNearestBubble(const BubbleID& ownID, real_t ma
    real_t minDistance = maxDistance;
 
    // find the minimum distance
-   for (auto it = bubbleInfos_.begin(); it != bubbleInfos_.end(); it++)
+   for (auto const [bubble_id, distance] : bubbleInfos_)
    {
-      if (minDistance > it->second && it->first != ownID) { minDistance = it->second; }
+      if (minDistance > distance && bubble_id != ownID) { minDistance = distance; }
    }
 
    return minDistance;
@@ -64,20 +64,20 @@ void DistanceInfo::combine(const DistanceInfo& other, real_t linkDistance, real_
    real_t sumDistance = real_c(0);
 
    // loop over the "bubbleInfos" (std::map) of another cell
-   for (auto it = other.bubbleInfos_.begin(); it != other.bubbleInfos_.end(); it++)
+   for (auto const [bubble_id, distance] : other.bubbleInfos_)
    {
-      // the other cell's bubble is not in contained in this cell's bubbleInfos, yet
-      if (bubbleInfos_.find(it->first) == bubbleInfos_.end())
+      // the other cell's bubble is not contained in this cell's bubbleInfos, yet
+      if (not bubbleInfos_.contains(bubble_id))
       {
-         sumDistance = it->second + linkDistance;
+         sumDistance = distance + linkDistance;
 
          // add an entry for the other cell's nearest bubble, if the summed distance is below maxDistance
-         if (sumDistance < maxDistance) { bubbleInfos_[it->first] = sumDistance; }
+         if (sumDistance < maxDistance) { bubbleInfos_[bubble_id] = sumDistance; }
       }
       else // the other cell's bubble is contained in this cell's bubbleInfos
       {
-         sumDistance   = it->second + linkDistance;
-         real_t& entry = bubbleInfos_[it->first];
+         sumDistance   = distance + linkDistance;
+         real_t& entry = bubbleInfos_[bubble_id];
 
          // update the distance for this bubble if it is less than the currently known distance
          if (entry > sumDistance) { entry = sumDistance; }
@@ -101,9 +101,9 @@ bool DistanceInfo::operator==(DistanceInfo& other) { return (this->bubbleInfos_ 
 
 void DistanceInfo::print(std::ostream& os) const
 {
-   for (auto it = bubbleInfos_.begin(); it != bubbleInfos_.end(); it++)
+   for (auto const [bubble_id, distance] : bubbleInfos_)
    {
-      os << "( " << it->first << "," << it->second << ")\n";
+      os << "( " << bubble_id << "," << distance << ")\n";
    }
 }
 

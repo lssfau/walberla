@@ -37,7 +37,7 @@ class D2Q9 : public LatticeModelBase< CollisionModel_T, Compressible, ForceModel
 {
 public:
 
-   static_assert( ( ! std::is_same< CollisionModel_T, collision_model::D3Q19MRT >::value), "D3Q19MRT only works with D3Q19!" );
+   static_assert( ! std::is_same_v< CollisionModel_T, collision_model::D3Q19MRT >, "D3Q19MRT only works with D3Q19!" );
 
    using CollisionModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::CollisionModel;
    using ForceModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::ForceModel;
@@ -60,7 +60,7 @@ public:
    D2Q9( const CollisionModel_T & cm ) :
       LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >( cm, force_model::None() )
    {
-      static_assert( (std::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
+      static_assert( std::is_same_v< ForceModel_T, force_model::None >, "This constructor is only available if the force model is equal to force_model::None!" );
    }
 
    ~D2Q9() override = default;

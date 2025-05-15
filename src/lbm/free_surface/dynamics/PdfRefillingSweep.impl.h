@@ -214,13 +214,13 @@ Vector3< cell_idx_t >
    if (!isFlagInNeighborhood< Stencil_T >(flagPtr, obstacleFlagMask))
    {
       normal_computation::computeNormal<
-         typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type >(
+         typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 > >(
          normal, fillPtr, flagPtr, liquidInterfaceGasMask);
    }
    else
    {
       normal_computation::computeNormalNearSolidBoundary<
-         typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type >(
+         typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 > >(
          normal, fillPtr, flagPtr, liquidInterfaceGasMask, obstacleFlagMask);
    }
 

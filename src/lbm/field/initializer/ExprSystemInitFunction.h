@@ -59,10 +59,10 @@ public:
 
    std::vector<real_t> operator()( const Cell & globalCell );
 
-private:
+   ExprSystemInitFunction( const ExprSystemInitFunction & ) = delete;
+   ExprSystemInitFunction & operator=( const ExprSystemInitFunction & ) = delete;
 
-   ExprSystemInitFunction( const ExprSystemInitFunction & other );
-   ExprSystemInitFunction & operator=( const ExprSystemInitFunction & other );
+private:
 
    const shared_ptr<StructuredBlockForest> blocks_;
 

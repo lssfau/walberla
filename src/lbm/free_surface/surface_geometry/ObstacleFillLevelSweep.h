@@ -61,8 +61,8 @@ class ObstacleFillLevelSweep
  protected:
    using FlagUIDSet = Set< FlagUID >;
 
-   using vector_t = typename std::remove_const< typename VectorField_T::value_type >::type;
-   using flag_t   = typename std::remove_const< typename FlagField_T::value_type >::type;
+   using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
+   using flag_t   = typename std::remove_const_t< typename FlagField_T::value_type >;
 
  public:
    ObstacleFillLevelSweep(const BlockDataID& fillFieldDstID, const ConstBlockDataID& fillFieldSrcID,

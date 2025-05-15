@@ -123,9 +123,9 @@ std::shared_ptr< CommunicatedNewBubbles > NewBubbleCommunication::communicate(si
    sendBuffer.reserve(bytesPerBubble);
 
    // pack local new bubble data into sendBuffer
-   for (auto i = bubblesToCreate_.begin(); i != bubblesToCreate_.end(); ++i)
+   for (auto const &bubble : bubblesToCreate_)
    {
-      sendBuffer << *i;
+      sendBuffer << bubble;
    }
 
    // compute the byte size of numNewBubblesPerProcess[i] and offsetVector[i]

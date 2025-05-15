@@ -167,8 +167,7 @@ void testWettingConversion()
    };
    WALBERLA_LOG_INFO("Testing interface conversion with wetting cells, contact angle=" << contactAngle << " degrees");
    computedInterfaceCells = runSimulation< LatticeModel_T >(timesteps, contactAngle);
-   vectorsEqual           = std::is_permutation(computedInterfaceCells.begin(), computedInterfaceCells.end(),
-                                                expectedInterfaceCells.begin(), expectedInterfaceCells.end());
+   vectorsEqual           = std::ranges::is_permutation(computedInterfaceCells, expectedInterfaceCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
    MPIManager::instance()->resetMPI();
 
@@ -184,8 +183,7 @@ void testWettingConversion()
    };
    WALBERLA_LOG_INFO("Testing interface conversion with wetting cells, contact angle=" << contactAngle << " degrees");
    computedInterfaceCells = runSimulation< LatticeModel_T >(timesteps, contactAngle);
-   vectorsEqual           = std::is_permutation(computedInterfaceCells.begin(), computedInterfaceCells.end(),
-                                                expectedInterfaceCells.begin(), expectedInterfaceCells.end());
+   vectorsEqual           = std::ranges::is_permutation(computedInterfaceCells, expectedInterfaceCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
    MPIManager::instance()->resetMPI();
 
@@ -201,8 +199,7 @@ void testWettingConversion()
    };
    WALBERLA_LOG_INFO("Testing interface conversion with wetting cells, contact angle=" << contactAngle << " degrees");
    computedInterfaceCells = runSimulation< LatticeModel_T >(timesteps, contactAngle);
-   vectorsEqual           = std::is_permutation(computedInterfaceCells.begin(), computedInterfaceCells.end(),
-                                                expectedInterfaceCells.begin(), expectedInterfaceCells.end());
+   vectorsEqual           = std::ranges::is_permutation(computedInterfaceCells, expectedInterfaceCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
    MPIManager::instance()->resetMPI();
 
@@ -219,8 +216,7 @@ void testWettingConversion()
    };
    WALBERLA_LOG_INFO("Testing interface conversion with wetting cells, contact angle=" << contactAngle << " degrees");
    computedInterfaceCells = runSimulation< LatticeModel_T >(timesteps, contactAngle);
-   vectorsEqual           = std::is_permutation(computedInterfaceCells.begin(), computedInterfaceCells.end(),
-                                                expectedInterfaceCells.begin(), expectedInterfaceCells.end());
+   vectorsEqual           = std::ranges::is_permutation(computedInterfaceCells, expectedInterfaceCells);
    if (!vectorsEqual) { WALBERLA_ABORT("Wrong cells converted."); }
 
    MPIManager::instance()->resetMPI();

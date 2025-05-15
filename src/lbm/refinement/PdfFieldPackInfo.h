@@ -1359,11 +1359,11 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::blocksConnectedByFaces( const Block * block, const BlockID & neighbor )
 #endif
 {
-   const uint_t face[] = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
-   for( int i = 0; i != 6; ++i )
+   const uint_t faces[] = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
+   for( uint_t face : faces )
    {
-      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face[i] ); ++n )
-         if( block->getNeighborId( face[i], n ) == neighbor )
+      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face ); ++n )
+         if( block->getNeighborId( face, n ) == neighbor )
             return true;
    }
    return false;
@@ -1379,13 +1379,13 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::blocksConnectedByEdges( const Block * block, const BlockID & neighbor )
 #endif
 {
-   const uint_t face[] = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
-                           uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
+   const uint_t faces[] = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
+                            uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
 
-   for( int i = 0; i != 12; ++i )
+   for( uint_t face : faces )
    {
-      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face[i] ); ++n )
-         if( block->getNeighborId( face[i], n ) == neighbor )
+      for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face ); ++n )
+         if( block->getNeighborId( face, n ) == neighbor )
             return true;
    }
    return false;

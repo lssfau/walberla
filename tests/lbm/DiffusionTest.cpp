@@ -85,12 +85,12 @@ namespace walberla {
 using flag_t = uint8_t;
 using vec3_t = Vector3<real_t>;
 
-typedef GhostLayerField< real_t, 1         >  ScalarField;
-typedef GhostLayerField< vec3_t, 1         >  VectorField;
+using ScalarField = GhostLayerField< real_t, 1 >;
+using VectorField = GhostLayerField< vec3_t, 1 >;
 using MyFlagField = FlagField<flag_t>;
 
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 > AdvDiffLatticeModel_Corr;
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 > AdvDiffLatticeModel_None;
+using AdvDiffLatticeModel_Corr = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 >;
+using AdvDiffLatticeModel_None = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 >;
 
 const FlagUID& getFluidFlag(){ static FlagUID uid( "Fluid" ); return uid; }
 

@@ -54,30 +54,30 @@ FlagInfo< FlagField_T >::FlagInfo(const FlagField_T* field, const Set< field::Fl
 {
    // create obstacleFlagMask from obstacleIDs using bitwise OR
    obstacleFlagMask = 0;
-   for (auto obstacleID = obstacleIDs.begin(); obstacleID != obstacleIDs.end(); ++obstacleID)
+   for (auto const obstacleID : obstacleIDs)
    {
-      obstacleFlagMask = flag_t(obstacleFlagMask | field->getFlag(*obstacleID));
+      obstacleFlagMask = flag_t(obstacleFlagMask | field->getFlag(obstacleID));
    }
 
    // create outflowFlagMask from outflowIDs using bitwise OR
    outflowFlagMask = 0;
-   for (auto outflowID = outflowIDs.begin(); outflowID != outflowIDs.end(); ++outflowID)
+   for (auto const outflowID : outflowIDs)
    {
-      outflowFlagMask = flag_t(outflowFlagMask | field->getFlag(*outflowID));
+      outflowFlagMask = flag_t(outflowFlagMask | field->getFlag(outflowID));
    }
 
    // create inflowFlagMask from inflowIDs using bitwise OR
    inflowFlagMask = 0;
-   for (auto inflowID = inflowIDs.begin(); inflowID != inflowIDs.end(); ++inflowID)
+   for (auto const inflowID : inflowIDs)
    {
-      inflowFlagMask = flag_t(inflowFlagMask | field->getFlag(*inflowID));
+      inflowFlagMask = flag_t(inflowFlagMask | field->getFlag(inflowID));
    }
 
    // create freeSlipFlagMask from freeSlipIDs using bitwise OR
    freeSlipFlagMask = 0;
-   for (auto freeSlipID = freeSlipIDs.begin(); freeSlipID != freeSlipIDs.end(); ++freeSlipID)
+   for (auto const freeSlipID : freeSlipIDs)
    {
-      freeSlipFlagMask = flag_t(freeSlipFlagMask | field->getFlag(*freeSlipID));
+      freeSlipFlagMask = flag_t(freeSlipFlagMask | field->getFlag(freeSlipID));
    }
 }
 
@@ -105,15 +105,15 @@ FlagInfo< FlagField_T >::FlagInfo(const Set< field::FlagUID >& obstacleIDs, cons
 
    // define flags for obstacles, outflow, inflow and freeSlip
    auto setUnion = obstacleIDs + outflowIDs + inflowIDs + freeSlipIDs;
-   for (auto id = setUnion.begin(); id != setUnion.end(); ++id)
+   for (auto const id : setUnion)
    {
-      if (obstacleIDs.contains(*id)) { obstacleFlagMask = obstacleFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
+      if (obstacleIDs.contains(id)) { obstacleFlagMask = obstacleFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
 
-      if (outflowIDs.contains(*id)) { outflowFlagMask = outflowFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
+      if (outflowIDs.contains(id)) { outflowFlagMask = outflowFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
 
-      if (inflowIDs.contains(*id)) { inflowFlagMask = inflowFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
+      if (inflowIDs.contains(id)) { inflowFlagMask = inflowFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
 
-      if (freeSlipIDs.contains(*id)) { freeSlipFlagMask = freeSlipFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
+      if (freeSlipIDs.contains(id)) { freeSlipFlagMask = freeSlipFlagMask | flag_t((flag_t(1) << nextFreeBit)); }
 
       nextFreeBit++;
    }
@@ -138,9 +138,9 @@ void FlagInfo< FlagField_T >::registerFlags(FlagField_T* field, const Set< field
 
    // extract flags
    auto setUnion = obstacleIDs + outflowIDs + inflowIDs + freeSlipIDs;
-   for (auto id = setUnion.begin(); id != setUnion.end(); ++id)
+   for (auto const id : setUnion)
    {
-      field->registerFlag(*id, nextFreeBit++);
+      field->registerFlag(id, nextFreeBit++);
    }
 }
 

@@ -84,16 +84,16 @@ public:
       collisionModel_( cm ), forceModel_( fm ) {
 
       if (Compressible && forceModel_.constant &&
-          !std::is_same< typename ForceModel::tag, force_model::None_tag >::value)
+          !std::is_same_v< typename ForceModel::tag, force_model::None_tag >)
       {
          WALBERLA_LOG_WARNING_ON_ROOT("WARNING: You are using a compressible lattice model with a constant force "
                                       "model. You should consider using a field-based force model, and adjust the body "
                                       "force density according to the change in the fluid density in every time step.");
       }
 
-      if ((std::is_same< typename CollisionModel_T::tag, collision_model::TRT_tag >::value ||
-           std::is_same< typename CollisionModel_T::tag, collision_model::MRT_tag >::value) &&
-          std::is_same< typename ForceModel_T::tag, force_model::Guo_tag >::value)
+      if ((std::is_same_v< typename CollisionModel_T::tag, collision_model::TRT_tag > ||
+           std::is_same_v< typename CollisionModel_T::tag, collision_model::MRT_tag >) &&
+           std::is_same_v< typename ForceModel_T::tag, force_model::Guo_tag >)
       {
          WALBERLA_LOG_WARNING_ON_ROOT(
             "WARNING: waLBerla currently does not support using a TRT or MRT collision model in combination with "

@@ -181,7 +181,7 @@ class BubbleModel : public BubbleModelBase
                                   cell_idx_t neighborhood = 2);
 
    using StencilForSplit_T =
-      typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+      typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
 
    // split bubbles, assign new global bubble IDs, and handle potential bubble merges resulting from splitting (involves
    // global MPI communication)

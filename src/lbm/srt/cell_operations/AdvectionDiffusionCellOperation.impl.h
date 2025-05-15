@@ -59,9 +59,9 @@ class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro >
 {
 public:
 
-   static_assert( (std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
 
    using AdvDiffPdfField_T = PdfField<LM_AdvDiff>;
    using HydroPdfField_T = PdfField<LM_Hydro>;
@@ -134,9 +134,9 @@ class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro >
 {
 public:
 
-   static_assert( (std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value),  "Only works with correction force!" );
+   static_assert( std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >,  "Only works with correction force!" );
 
    using AdvDiffPdfField_T = PdfField<LM_AdvDiff>;
    using HydroPdfField_T = PdfField<LM_Hydro>;

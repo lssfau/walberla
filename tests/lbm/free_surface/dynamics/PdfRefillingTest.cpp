@@ -931,10 +931,10 @@ void runSimulation(const PdfRefillingModel& pdfRefillingModel, const initCallbac
            Vector3< real_t >{ real_c(0.05), real_c(0.00), real_c(0.00) } }
       };
 
-      for (auto velocity = velocities.begin(); velocity != velocities.end(); velocity++)
+      for (auto const &[cell, velocity] : velocities)
       {
-         pdfField->setDensityAndVelocity(velocity->first, velocity->second, initDensity);
-         pdfOrgField->setDensityAndVelocity(velocity->first, velocity->second, initDensity);
+         pdfField->setDensityAndVelocity(cell, velocity, initDensity);
+         pdfOrgField->setDensityAndVelocity(cell, velocity, initDensity);
       }
 
       // modify the PDFs to achieve inequality for the equalAndNonEqualRefilling

@@ -58,7 +58,7 @@ public:
    D3Q19( const CollisionModel_T & cm ) :
       LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >( cm, force_model::None() )
    {
-      static_assert( (std::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
+      static_assert( std::is_same_v< ForceModel_T, force_model::None >, "This constructor is only available if the force model is equal to force_model::None!" );
    }
 
    ~D3Q19() override = default;

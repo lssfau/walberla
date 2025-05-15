@@ -53,9 +53,9 @@ template< typename Stencil_T, typename FlagField_T, typename ScalarField_T, type
 class NormalSweep
 {
  protected:
-   using vector_t = typename std::remove_const< typename VectorField_T::value_type >::type;
-   using scalar_t = typename std::remove_const< typename ScalarField_T::value_type >::type;
-   using flag_t   = typename std::remove_const< typename FlagField_T::value_type >::type;
+   using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
+   using scalar_t = typename std::remove_const_t< typename ScalarField_T::value_type >;
+   using flag_t   = typename std::remove_const_t< typename FlagField_T::value_type >;
 
  public:
    NormalSweep(const BlockDataID& normalFieldID, const ConstBlockDataID& fillFieldID,

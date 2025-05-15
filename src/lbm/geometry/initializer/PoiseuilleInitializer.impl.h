@@ -227,14 +227,14 @@ void Poiseuille<BH_T,LM,SP,UBB>::initVelocityBoundary( Scenario scenario, Axis f
          Cell offset( 0,0,0 );
          storage_.transformBlockLocalToGlobalCell( offset, *blockIt );
 
-         for( auto cellIt = ci.begin(); cellIt != ci.end(); ++cellIt )
+         for( auto const &&cell : ci )
          {
-            Cell  globalCell =  *cellIt + offset;
+            Cell  globalCell =  cell + offset;
 
             Vector3<real_t> vel ( 0 );
             vel[ flowAxis ] = getVelocity( globalCell, scenario, flowAxis, maxVelocity, parabolaAxis );
             typename UBB::Velocity ubbVel ( vel );
-            handling->forceBoundary( ubbFlag_, cellIt->x(), cellIt->y(), cellIt->z(), ubbVel  );
+            handling->forceBoundary( ubbFlag_, cell.x(), cell.y(), cell.z(), ubbVel  );
          }
       }
 
@@ -244,8 +244,8 @@ void Poiseuille<BH_T,LM,SP,UBB>::initVelocityBoundary( Scenario scenario, Axis f
          CellInterval ci;
          auto direction = stencil::directionFromAxis( flowAxis, false );
          pdfField->getGhostRegion( direction, ci, 1, true );
-         for( auto cellIt = ci.begin(); cellIt != ci.end(); ++cellIt )
-            handling->forceBoundary( pressureFlag1_, cellIt->x(), cellIt->y(), cellIt->z()  );
+         for( auto const &&cell : ci )
+            handling->forceBoundary( pressureFlag1_, cell.x(), cell.y(), cell.z()  );
       }
    }
 }

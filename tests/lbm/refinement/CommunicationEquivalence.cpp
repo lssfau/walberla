@@ -69,9 +69,9 @@ namespace walberla{
 // TYPEDEFS //
 //////////////
 
-typedef lbm::D3Q19< lbm::collision_model::SRT,      false > LatticeModel_T;
-//typedef lbm::D3Q19< lbm::collision_model::TRT,      false > LatticeModel_T;
-//typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT,      false >;
+//using LatticeModel_T = lbm::D3Q19< lbm::collision_model::TRT,      false >;
+//using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT, false >;
 using Stencil_T = LatticeModel_T::Stencil;
 
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -81,10 +81,10 @@ using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers = 4;
 
-typedef lbm::NoSlip< LatticeModel_T, flag_t >     NoSlip_T;
-typedef lbm::SimpleUBB< LatticeModel_T, flag_t >  UBB_T;
+using NoSlip_T = lbm::NoSlip< LatticeModel_T, flag_t >;
+using UBB_T = lbm::SimpleUBB< LatticeModel_T, flag_t >;
 
-typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, UBB_T > BoundaryHandling_T;
+using BoundaryHandling_T = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, UBB_T >;
 
 ///////////
 // FLAGS //
@@ -106,12 +106,12 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 
    if( testMode == ENTIRE_TOP )
    {
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for( auto &block : forest )
       {
-         auto aabb = block->getAABB();
+         auto aabb = block.getAABB();
          if( realIsEqual( aabb.zMax(), domain.zMax() ) )
-            if( block->getLevel() < ( levels - uint_t(1) ) )
-               block->setMarker( true );
+            if( block.getLevel() < ( levels - uint_t(1) ) )
+               block.setMarker( true );
       }
    }
    else if( testMode == TOP )
@@ -123,11 +123,11 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
                       domain.yMin() + domain.yMax() / real_t(14),
                       domain.zMax() );
 
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for( auto &block : forest )
       {
-         if( block->getAABB().intersects( topCorner ) )
-            if( block->getLevel() < ( levels - uint_t(1) ) )
-               block->setMarker( true );
+         if( block.getAABB().intersects( topCorner ) )
+            if( block.getLevel() < ( levels - uint_t(1) ) )
+               block.setMarker( true );
       }
    }
    else if( testMode == MIDDLE )
@@ -143,31 +143,31 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
       AABB middleBox( xMiddle - xSpan, yMiddle - ySpan, zMiddle - zSpan,
                       xMiddle + xSpan, yMiddle + ySpan, zMiddle + zSpan );
 
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for( auto &block : forest )
       {
-         if( block->getAABB().intersects( middleBox ) )
-            if( block->getLevel() < ( levels - uint_t(1) ) )
-               block->setMarker( true );
+         if( block.getAABB().intersects( middleBox ) )
+            if( block.getLevel() < ( levels - uint_t(1) ) )
+               block.setMarker( true );
       }
    }
    else if( testMode == ENTIRE_BOTTOM )
    {
-      for( auto block = forest.begin(); block != forest.end(); ++block )
+      for( auto &block : forest )
       {
-         auto aabb = block->getAABB();
+         auto aabb = block.getAABB();
          if( realIsEqual( aabb.zMin(), domain.zMin() ) )
-            if( block->getLevel() < ( levels - uint_t(1) ) )
-               block->setMarker( true );
+            if( block.getLevel() < ( levels - uint_t(1) ) )
+               block.setMarker( true );
       }
    }
 }
 
 static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 {
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for( auto &block : forest )
    {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( numeric_cast< memory_t >(1) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
 
@@ -245,14 +245,14 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
 
 void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
 {
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   for( auto &block : *blocks )
    {
-      BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingId );
+      BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingId );
 
-      const uint_t level = blocks->getLevel(*block);
+      const uint_t level = blocks->getLevel(block);
 
       CellInterval domainBB = blocks->getDomainCellBB( level );
-      blocks->transformGlobalToBlockLocalCellInterval( domainBB, *block );
+      blocks->transformGlobalToBlockLocalCellInterval( domainBB, block );
 
       domainBB.xMin() -= cell_idx_c( FieldGhostLayers );
       domainBB.xMax() += cell_idx_c( FieldGhostLayers );

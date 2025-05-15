@@ -63,7 +63,7 @@
 namespace walberla {
 
    using flag_t = uint8_t;
-   typedef lbm::D3Q19< lbm::collision_model::SRT, false > LatticeModel;
+   using LatticeModel = lbm::D3Q19< lbm::collision_model::SRT, false >;
    using Stencil = LatticeModel::Stencil;
    using CommunicationStencil = LatticeModel::CommunicationStencil;
    using PDFField = lbm::PdfField<LatticeModel>;
@@ -107,9 +107,9 @@ const FlagUID& getSimplePABRightFlag() { static FlagUID uid( "SimplePABRight" );
 class BoundaryHandlingCreator
 {
 public:
-   typedef lbm::NoSlip<LatticeModel,flag_t>                              MyNoSlip;
-   typedef lbm::SimplePAB<LatticeModel,MyFlagField>                      MySimplePAB;
-   typedef BoundaryHandling< MyFlagField, Stencil, MyNoSlip, MySimplePAB, MySimplePAB > BoundaryHandlingT;
+   using MyNoSlip = lbm::NoSlip<LatticeModel,flag_t>;
+   using MySimplePAB = lbm::SimplePAB<LatticeModel,MyFlagField>;
+   using BoundaryHandlingT = BoundaryHandling< MyFlagField, Stencil, MyNoSlip, MySimplePAB, MySimplePAB >;
 
    BoundaryHandlingCreator( const BlockDataID& flagField, const BlockDataID& pdfField,
                             const real_t leftLatticeDensity, const real_t rightLatticeDensity,
