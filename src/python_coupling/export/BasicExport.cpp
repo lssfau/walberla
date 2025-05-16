@@ -344,15 +344,14 @@ py::dict buildDictFromTimingNode(const WcTimingNode & tn)
    py::dict result;
 
    result["all"] = tn.timer_;
-   for ( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it)
+   for ( const auto &[key, node] : tn.tree_ )
    {
-      std::string key = it->first;
-      if (it->second.tree_.empty())
+      if (node.tree_.empty())
       {
-         result[key.c_str()] = it->second.timer_;
+         result[key.c_str()] = node.timer_;
       } else
       {
-         result[key.c_str()] = buildDictFromTimingNode(it->second);
+         result[key.c_str()] = buildDictFromTimingNode(node);
       }
    }
 

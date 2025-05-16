@@ -69,8 +69,8 @@ int main( int argc, char** argv )
            }
         }
 
-        std::sort(ids.begin(), ids.end());
-        auto it = std::adjacent_find(ids.begin(), ids.end());
+        std::ranges::sort(ids);
+        auto it = std::ranges::adjacent_find(ids);
         WALBERLA_CHECK_EQUAL(it, ids.end());
 
     }

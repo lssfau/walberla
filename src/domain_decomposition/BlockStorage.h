@@ -660,7 +660,7 @@ template< typename T >
 inline BlockDataID BlockStorage::addBlockData( const shared_ptr< T > & dataHandling, const std::string & identifier,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   //static_assert( std::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
+   //static_assert( std::is_base_of_v< BlockDataHandling<typename T::value_type>, T > );
    internal::SelectableBlockDataHandlingWrapper sbdhw( walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
                                                        requiredSelectors, incompatibleSelectors, identifier );
 
@@ -723,10 +723,10 @@ inline void BlockStorage::clearBlockData( const BlockDataID & id )
       block->deleteData( id );
 
    //also delete block data from data handling vector
-   auto elementToErase = std::remove_if(blockDataItem_.begin(), blockDataItem_.end(),
+   auto ret = std::ranges::remove_if(blockDataItem_,
                                  [id](const internal::BlockDataItem& dataItem)
                                  { return dataItem.getId() == id; });
-   blockDataItem_.erase(elementToErase, blockDataItem_.end());
+   blockDataItem_.erase(ret.begin(), ret.end());
 }
 
 

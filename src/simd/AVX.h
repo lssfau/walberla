@@ -30,7 +30,7 @@ namespace walberla {
 namespace simd {
 namespace avx {
 
-   typedef __m256d double4_t;
+   using double4_t = __m256d;
 
    inline const char * usedInstructionSet() { return "AVX"; }
 

@@ -41,7 +41,7 @@ namespace pde {
 
 template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
 VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::VCycles(
-		shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
+        shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
         const Weight_T weights, const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
         const uint_t coarseIters, const std::function< real_t () > & residualNorm,
@@ -127,7 +127,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up RBGS iterations
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
    {
-      RBGSFixedSweeps_.push_back( walberla::make_shared<RBGSFixedStencil< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], weights_[lvl] ) );
+      RBGSFixedSweeps_.emplace_back( walberla::make_shared<RBGSFixedStencil< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], weights_[lvl] ) );
       RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
                                 RBGSFixedSweeps_.back()->getRedSweep(), RBGSFixedSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
@@ -136,10 +136,10 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up restriction and prolongation
    for (uint_t lvl = 0; lvl < numLvl-1; ++lvl)
    {
-      computeResidual_.push_back( ComputeResidualFixedStencil< Stencil_T >( blocks, uId_[lvl], fId_[lvl], weights_[lvl], rId_[lvl] ) );
-      restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
+      computeResidual_.emplace_back( ComputeResidualFixedStencil< Stencil_T >( blocks, uId_[lvl], fId_[lvl], weights_[lvl], rId_[lvl] ) );
+      restrict_.emplace_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
       zeroize_.emplace_back(Zeroize(blocks, uId_[lvl+1]) );
-      prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
+      prolongateAndCorrect_.emplace_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 
    // Set up CG coarse-grid iteration
@@ -152,7 +152,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
 template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
 VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::VCycles(
-		shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
+        shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
         const BlockDataID & stencilFieldId, const OperatorCoarsening_T & operatorCoarsening,
         const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
@@ -235,7 +235,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up RBGS iterations
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
    {
-      RBGSSweeps_.push_back( walberla::make_shared<RBGS< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl] ) );
+      RBGSSweeps_.emplace_back( walberla::make_shared<RBGS< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl] ) );
       RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
                                 RBGSSweeps_.back()->getRedSweep(), RBGSSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
@@ -244,10 +244,10 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up restriction and prolongation
    for (uint_t lvl = 0; lvl < numLvl-1; ++lvl)
    {
-      computeResidual_.push_back( ComputeResidual< Stencil_T >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl], rId_[lvl] ) );
-      restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
+      computeResidual_.emplace_back( ComputeResidual< Stencil_T >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl], rId_[lvl] ) );
+      restrict_.emplace_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
       zeroize_.emplace_back(Zeroize(blocks, uId_[lvl+1]) );
-      prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
+      prolongateAndCorrect_.emplace_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 
    // Set up CG coarse-grid iteration
@@ -280,7 +280,7 @@ void VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_
                                                         "the simulation has probably diverged." );
 
             // calculating convergence rate
-            convergenceRate_.push_back( residualNorm / residualNorm_old );
+            convergenceRate_.emplace_back( residualNorm / residualNorm_old );
             residualNorm_old = residualNorm;
             if( i > 0 )
             {
@@ -302,7 +302,7 @@ void VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_
 
       // perform one V-cycle
       VCycle();
-      
+
       iterationsPerformed_ = i+1;
    }
 

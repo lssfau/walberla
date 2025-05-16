@@ -781,11 +781,11 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
    for(const auto & blocks : blocksPerLevel)
    {
       long double totalWeight( 0 );
-      for( auto block = blocks.begin(); block != blocks.end(); ++block )
+      for( const auto &block : blocks )
       {
-         WALBERLA_ASSERT_LESS( block->first, allBlocks.size() );
-         WALBERLA_ASSERT_LESS( block->second, allBlocks[ uint_c( block->first ) ].size() );
-         totalWeight += numeric_cast< long double >( allBlocks[ uint_c( block->first ) ][ block->second ].second );
+         WALBERLA_ASSERT_LESS( block.first, allBlocks.size() );
+         WALBERLA_ASSERT_LESS( block.second, allBlocks[ uint_c( block.first ) ].size() );
+         totalWeight += numeric_cast< long double >( allBlocks[ uint_c( block.first ) ][ block.second ].second );
       }
       
       uint_t c( uint_t(0) );

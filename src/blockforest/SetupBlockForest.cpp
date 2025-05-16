@@ -1471,7 +1471,7 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
 
    WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
 
-   std::sort( blocks.begin(), blocks.end(), BlockSorter() );
+   std::ranges::sort( blocks, BlockSorter() );
 
    std::vector< workload_t > workload( numberOfWorkerProcesses, workload_c(0) );
    std::vector< memory_t   > memory  ( numberOfWorkerProcesses, memory_c(0) );

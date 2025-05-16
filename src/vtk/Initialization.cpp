@@ -59,7 +59,7 @@ static std::vector< std::string > splitList( const std::string& string )
    std::vector< std::string > list;
 
    list = string_split( string, ", \t" );
-   list.erase( std::remove_if( list.begin(), list.end(), [](auto &s){ return s.empty(); } ), list.end() );
+   list.erase( std::ranges::remove_if( list, [](auto &s){ return s.empty(); } ).end(), list.end() );
 
    return list;
 }
@@ -70,7 +70,7 @@ static void addStates( Set<SUID>& set, const std::string& string )
 {
    std::vector< std::string > states;
    states = string_split( string, ", \t" );
-   states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
+   states.erase( std::ranges::remove_if( states, [](auto &s){ return s.empty(); } ).end(), states.end() );
 
    for(auto & state : states)
       set += SUID( state );
@@ -146,7 +146,7 @@ void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFuncti
       Config::Blocks subBlocks;
       block.getBlocks( subBlocks );
 
-      const std::string identifier( block.getKey() );
+      const auto &identifier = block.getKey();
 
       const int    simultaneousIOOperations = block.getParameter< int >( "simultaneousIOOperations", 0 );
       const uint_t writeFrequency           = block.getParameter< uint_t >( "writeFrequency", uint_c(1) );
@@ -180,12 +180,12 @@ void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFuncti
 
       if( writersBlock )
       {
-         for( auto writerId = writersBlock.begin(); writerId != writersBlock.end(); ++writerId )
+         for( const auto &writerId : writersBlock )
          {
-            if( writers.find( writerId->first ) != writers.end() )
-               selectedWriters.push_back( writers[ writerId->first ] );
+            if( writers.find( writerId.first ) != writers.end() )
+               selectedWriters.push_back( writers[ writerId.first ] );
             else
-               WALBERLA_ABORT( "You have requested a block data writer \"" << writerId->first << "\". This writer is not available!" );
+               WALBERLA_ABORT( "You have requested a block data writer \"" << writerId.first << "\". This writer is not available!" );
          }
       }
 

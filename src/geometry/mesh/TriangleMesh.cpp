@@ -173,7 +173,7 @@ size_t TriangleMesh::removeDuplicateVertices( real_t tolerance )
       vInd.push_back(i);
 
    // the index vector is sorted according to the vertex positions
-   sort( vInd.begin(), vInd.end(), LessThan( vertices_, tolerance ) );
+   std::ranges::sort( vInd, LessThan( vertices_, tolerance ) );
 
 
    // now remove duplicate vertices. This is done using an algorithm similar
@@ -406,8 +406,8 @@ void TriangleMesh::merge(const TriangleMesh & other, const Vector3<real_t> & off
    }
 
    // Add Normals
-   std::copy(other.vertexNormals_.begin(), other.vertexNormals_.end(), std::back_inserter(vertexNormals_) );
-   std::copy(other.vertexColors_.begin(),  other.vertexColors_.end(),  std::back_inserter(vertexColors_)  );
+   std::ranges::copy(other.vertexNormals_, std::back_inserter(vertexNormals_) );
+   std::ranges::copy(other.vertexColors_,  std::back_inserter(vertexColors_)  );
 
    // Add faces
    for(unsigned int const vertexIndice : other.vertexIndices_)

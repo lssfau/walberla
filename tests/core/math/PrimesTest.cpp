@@ -48,7 +48,7 @@ void runTests( const uint_t n )
    WALBERLA_CHECK( ::is_sorted( primes.begin(), primes.end() ) );
    for(uint_t i = 1; i <= n; ++i)
    {
-      WALBERLA_CHECK_EQUAL( walberla::math::isPrime(i), std::binary_search( primes.begin(), primes.end(), i ) );
+      WALBERLA_CHECK_EQUAL( walberla::math::isPrime(i), std::ranges::binary_search( primes, i ) );
       WALBERLA_CHECK_EQUAL( n % i == 0, devisors.find( i ) != devisors.end() );
    }
 

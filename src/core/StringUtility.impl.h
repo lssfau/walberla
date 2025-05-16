@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -31,8 +32,8 @@ namespace walberla
 // Convert (in place) every character in string to uppercase.
 inline void string_to_upper(std::string& s)
 {
-   std::transform(s.begin(), s.end(), s.begin(),
-                  [](char c) { return static_cast< char >(std::toupper(static_cast< unsigned char >(c))); });
+   std::ranges::transform(
+      s, s.begin(), [](char c) { return static_cast< char >(std::toupper(static_cast< unsigned char >(c))); });
 }
 
 // Convert (copy) every character in string to uppercase.
@@ -46,8 +47,8 @@ inline std::string string_to_upper_copy(const std::string& s)
 // Convert (in place) every character in string to lowercase.
 inline void string_to_lower(std::string& s)
 {
-   std::transform(s.begin(), s.end(), s.begin(),
-                  [](char c) { return static_cast< char >(std::tolower(static_cast< unsigned char >(c))); });
+   std::ranges::transform(
+      s, s.begin(), [](char c) { return static_cast< char >(std::tolower(static_cast< unsigned char >(c))); });
 }
 
 // Convert (copy) every character in string to lowercase.
@@ -62,14 +63,16 @@ inline std::string string_to_lower_copy(const std::string& s)
 inline void string_trim_left(std::string& s)
 {
    s.erase(s.begin(),
-           std::find_if(s.begin(), s.end(), [](char c) { return !std::isspace(static_cast< unsigned char >(c)); }));
+           std::ranges::find_if(s, [](char c) { return !std::isspace(static_cast< unsigned char >(c)); }));
 }
 
 // Remove (in place) all whitespaces at the end of a string.
 inline void string_trim_right(std::string& s)
 {
    s.erase(
-      std::find_if(s.rbegin(), s.rend(), [](char c) { return !std::isspace(static_cast< unsigned char >(c)); }).base(),
+      std::ranges::find_if(
+         std::ranges::reverse_view(s),
+         [](char c) { return !std::isspace(static_cast< unsigned char >(c)); }).base(),
       s.end());
 }
 

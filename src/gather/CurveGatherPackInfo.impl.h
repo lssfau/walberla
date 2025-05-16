@@ -115,7 +115,7 @@ void CurveGatherPackInfo<GlF,IP>::addSample( real_t t, const RealVec3 & p )
    }
 
    // Find block for global coordinate and translate sample to local cell coordinates
-   IBlock * block = blocks_->getBlock( p[0], p[1], p[2] );
+   auto * block = blocks_->getBlock( p[0], p[1], p[2] );
    if ( ! block ) // non-local block
       return;
 
@@ -128,7 +128,7 @@ void CurveGatherPackInfo<GlF,IP>::addSample( real_t t, const RealVec3 & p )
    pLocal[1] /= blocks_->dy();
    pLocal[2] /= blocks_->dz();
 
-   Samples & s = localSamplePoints_[ block ];
+   auto & s = localSamplePoints_[ block ];
    s.t.push_back(t);
    s.coord.push_back( pLocal );
 }
@@ -147,16 +147,16 @@ void CurveGatherPackInfo<GlF,IP>::addSample( real_t t, const RealVec3 & p )
 template< typename GlF, typename Interpolator>
 void CurveGatherPackInfo<GlF,Interpolator>::packData( const IBlock * sender, mpi::SendBuffer & outBuffer )
 {
-   auto i = localSamplePoints_.find( sender );
+   const auto it = localSamplePoints_.find( sender );
 
-   if(i == localSamplePoints_.end() ) //nothing to send
+   if( it == localSamplePoints_.end() ) //nothing to send
       return;
 
-   const std::vector<RealVec3> & points = i->second.coord;
-   const std::vector<real_t> & t        = i->second.t;
+   const auto & points = it->second.coord;
+   const auto & t      = it->second.t;
    WALBERLA_ASSERT_EQUAL(t.size(), points.size() );
 
-   const GlF* field = sender->getData<GlF>( fieldID_ );
+   const auto* field = sender->getData<GlF>( fieldID_ );
    Interpolator ip ( *field );
    const size_t fieldSize = Interpolator::F_SIZE;
 
@@ -185,8 +185,8 @@ void CurveGatherPackInfo<GlF,IP>::unpackData( mpi::RecvBuffer & buffer )
 
    for( size_t i=0; i< nrPoints; ++i )
    {
-      receivedData.emplace_back(std::vector<real_t>(fieldSize+1)); //+1 because we also store t value as first entry
-      std::vector<real_t> & pointVec = receivedData.back();
+      receivedData.emplace_back(fieldSize+1); //+1 because we also store t value as first entry
+      auto & pointVec = receivedData.back();
 
       real_t t;
       real_t val;

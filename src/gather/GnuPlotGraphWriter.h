@@ -37,7 +37,7 @@ namespace gather {
 class GnuPlotGraphWriter : public DataProcessor
 {
    public:
-      typedef std::vector<real_t> DataPoint;
+      using DataPoint = std::vector<real_t>;
 
       GnuPlotGraphWriter(const std::string & filename, const std::string & fileEnding = "dat")
             : filename_(filename), fileEnding_(fileEnding), callNr(0) {}
@@ -49,9 +49,9 @@ class GnuPlotGraphWriter : public DataProcessor
          curFileName << filename_ << '_' << callNr << "." << fileEnding_;
 
          std::ofstream outfile (curFileName.str().c_str() );
-         for(unsigned int row = 0; row < dataset.size(); ++ row)
+         for(unsigned int row = 0; row < dataset.size(); ++ row) // NOLINT(modernize-loop-convert)
          {
-            for(unsigned int col=0; col < dataset[row].size(); ++ col)
+            for(unsigned int col=0; col < dataset[row].size(); ++ col) // NOLINT(modernize-loop-convert)
                outfile << dataset[row][col] << "\t";
 
             outfile << std::endl;

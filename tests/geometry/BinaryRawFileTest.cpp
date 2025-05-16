@@ -125,7 +125,7 @@ int main( int argc, char * argv[] )
 
    std::vector< std::string > args( argv, argv + argc );
 
-   auto it = std::find( args.begin(), args.end(), std::string( "--vtk" ) );
+   auto it = std::ranges::find( args, std::string( "--vtk" ) );
    const bool vtk = it != args.end();
    if (it != args.end())
       args.erase( it );

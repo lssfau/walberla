@@ -28,9 +28,7 @@ namespace mesh {
 class Ray {
  public:
 
-   Ray () {
-      Ray (Vector3<real_t>(0,0,0), Vector3<real_t>(1,0,0));
-   }
+   Ray () : Ray (Vector3<real_t>(0,0,0), Vector3<real_t>(1,0,0)) {}
 
    Ray (Vector3<real_t> origin, Vector3<real_t> direction) {
       setDirection(direction);

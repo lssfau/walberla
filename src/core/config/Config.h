@@ -838,7 +838,7 @@ inline Config::size_type Config::Block::getNumBlocks() const
 template< typename Type >
 inline Config::Parameter<Type> Config::Block::getParameter( std::string key ) const
 {
-   Map::const_iterator it = params_.find( key );
+   const auto it = params_.find( key );
 
    if( it != params_.end() ) {
       Type tmp;
@@ -880,7 +880,7 @@ inline Config::Parameter<T> Config::Block::getParameter( const std::string& key,
 template<>
 inline Config::Parameter<std::string> Config::Block::getParameter<std::string>( std::string key ) const
 {
-   Map::const_iterator it = params_.find( key );
+   const auto it = params_.find( key );
 
    if( it != params_.end() )
       return Parameter<std::string>( it->second, noerror, key );
@@ -901,7 +901,7 @@ inline Config::Parameter<std::string> Config::Block::getParameter<std::string>( 
 template<>
 inline Config::Parameter<bool> Config::Block::getParameter<bool>( std::string key ) const
 {
-   Map::const_iterator it = params_.find( key );
+   const auto it = params_.find( key );
 
    if( it != params_.end() )
    {
@@ -941,7 +941,7 @@ inline Config::Parameter<bool> Config::Block::getParameter<bool>( std::string ke
 template<>
 inline Config::Parameter<unsigned int> Config::Block::getParameter<unsigned int>( std::string key ) const
 {
-   Map::const_iterator it = params_.find( key );
+   const auto it = params_.find( key );
 
    if( it != params_.end() ) {
       int tmp;

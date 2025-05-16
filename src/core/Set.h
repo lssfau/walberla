@@ -140,7 +140,7 @@ public:
 
    inline const_iterator end() const { return set_.end(); }
    inline iterator       end()       { return set_.end(); }
-   
+
    inline const std::set<T> & get() const { return set_; }
    inline       std::set<T> & get()       { return set_; }
 
@@ -206,8 +206,8 @@ void Set<T>::toStream( std::ostream& os ) const {
 
    os << "{ ";
 
-   for( const_iterator it = begin(); it != end(); ++it ) {
-      const_iterator next = it;
+   for( auto it = begin(); it != end(); ++it ) {
+      auto next = it;
       os << (*it) << ( ( ++next == end() ) ? " " : ", " );
    }
 

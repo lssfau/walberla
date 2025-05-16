@@ -74,7 +74,7 @@ protected:
 template<typename GhostLayerField_T>
 void PackInfo<GhostLayerField_T>::unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer)
 {
-   GhostLayerField_T * f = receiver->getData< GhostLayerField_T >( bdId_ );
+   auto * f = receiver->getData< GhostLayerField_T >( bdId_ );
    WALBERLA_ASSERT_NOT_NULLPTR(f);
 
    uint_t nrOfGhostLayers = numberOfGhostLayersToCommunicate( f );
@@ -96,8 +96,8 @@ void PackInfo<GhostLayerField_T>::unpackData(IBlock * receiver, stencil::Directi
 template<typename GhostLayerField_T>
 void PackInfo<GhostLayerField_T>::communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir)
 {
-   const GhostLayerField_T * sf = sender  ->getData< GhostLayerField_T >( bdId_ );
-         GhostLayerField_T * rf = receiver->getData< GhostLayerField_T >( bdId_ );
+   const auto * sf = sender  ->getData< GhostLayerField_T >( bdId_ );
+         auto * rf = receiver->getData< GhostLayerField_T >( bdId_ );
 
    WALBERLA_ASSERT_EQUAL(sf->xSize(), rf->xSize());
    WALBERLA_ASSERT_EQUAL(sf->ySize(), rf->ySize());
@@ -121,7 +121,7 @@ void PackInfo<GhostLayerField_T>::communicateLocal(const IBlock * sender, IBlock
 template<typename GhostLayerField_T>
 void PackInfo<GhostLayerField_T>::packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const
 {
-   const GhostLayerField_T * f = sender->getData< GhostLayerField_T >( bdId_ );
+   const auto * f = sender->getData< GhostLayerField_T >( bdId_ );
    WALBERLA_ASSERT_NOT_NULLPTR(f);
 
 #ifndef NDEBUG

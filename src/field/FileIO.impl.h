@@ -321,7 +321,7 @@ std::vector< IBlock* > FieldWriter< FieldT >::getBlocks(BlockStorage& blockStora
    std::vector< IBlock* > blocks;
    for (auto it = blockStorage.begin(requiredSelectors_, incompatibleSelectors_); it != blockStorage.end(); ++it)
       blocks.push_back(it.get());
-   std::sort(blocks.begin(), blocks.end(), sortBlocksByID);
+   std::ranges::sort(blocks, sortBlocksByID);
    return blocks;
 }
 
@@ -333,7 +333,7 @@ std::vector< const IBlock* > FieldWriter< FieldT >::getBlocks(const BlockStorage
    std::vector< const IBlock* > blocks;
    for (auto it = blockStorage.begin(requiredSelectors_, incompatibleSelectors_); it != blockStorage.end(); ++it)
       blocks.push_back(it.get());
-   std::sort(blocks.begin(), blocks.end(), sortConstBlocksByID);
+   std::ranges::sort(blocks, sortConstBlocksByID);
    return blocks;
 }
 

@@ -64,22 +64,22 @@ public:
 
 private:
    union {
-      double   data[4];
-      uint64_t uintData[4];
+      double   data[4];     // NOLINT(modernize-avoid-c-arrays)
+      uint64_t uintData[4]; // NOLINT(modernize-avoid-c-arrays)
    };
 };
 
 inline const char * usedInstructionSet() { return "scalar emulation"; }
 
-inline double4_t make_double4   ( double d, double c, double b, double a ) { return double4_t ( d,c,b,a ); }
-inline double4_t make_double4_r ( double a, double b, double c, double d ) { return double4_t ( d,c,b,a ); }
+inline double4_t make_double4   ( double d, double c, double b, double a ) { return { d,c,b,a }; }
+inline double4_t make_double4_r ( double a, double b, double c, double d ) { return { d,c,b,a }; }
 
-inline double4_t make_double4  ( double a                               )  { return double4_t ( a,a,a,a ); }
+inline double4_t make_double4  ( double a                               )  { return { a,a,a,a }; }
 
 inline double4_t make_zero()   { return make_double4(0.0); }
 
-inline double4_t load_aligned    ( double const * m )         { return make_double4_r( m[0], m[1],m[2],m[3] ); }
-inline double4_t load_unaligned  ( double const * m )         { return make_double4_r( m[0], m[1],m[2],m[3] ); }
+inline double4_t load_aligned    ( double const * m )         { return { m[0], m[1],m[2],m[3] }; }
+inline double4_t load_unaligned  ( double const * m )         { return { m[0], m[1],m[2],m[3] }; }
 inline void      store_aligned ( double * m, double4_t a )  { m[0]=a[0]; m[1]=a[1]; m[2]=a[2]; m[3]=a[3];    }
 
 inline void loadNeighbors( const double * p, double4_t & r_left, double4_t & r_center, double4_t & r_right )

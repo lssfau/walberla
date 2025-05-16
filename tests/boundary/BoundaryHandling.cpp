@@ -77,13 +77,8 @@ public:
 
    void unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) { unregisteredCells_.push_back(x,y,z); }
 
-#ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
-#else
-   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
-#endif
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, [[maybe_unused]] const flag_t mask )
    {
       WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
       WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );
@@ -165,13 +160,8 @@ public:
 
    void unregisterCell( const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
 
-#ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
-#else
-   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
-#endif
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, [[maybe_unused]] const flag_t mask )
    {
       WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
       WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );

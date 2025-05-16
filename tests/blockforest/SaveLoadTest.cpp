@@ -73,8 +73,8 @@ void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool br
    WALBERLA_CHECK_EQUAL(forestDump->getDomain(), forestCheck->getDomain())
    WALBERLA_CHECK_EQUAL(forestDump->getNumberOfBlocks(), forestCheck->getNumberOfBlocks())
 
-   std::sort(dump.begin(), dump.end());
-   std::sort(check.begin(), check.end());
+   std::ranges::sort(dump);
+   std::ranges::sort(check);
 
    WALBERLA_CHECK_EQUAL( dump.size(), check.size() )
    for (size_t i = 0; i < dump.size(); ++i)

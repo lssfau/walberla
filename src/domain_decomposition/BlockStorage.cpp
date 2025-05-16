@@ -144,7 +144,7 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
    std::vector< IBlock * > blocks;
    for( auto block = begin(); block != end(); ++block )
       blocks.push_back( block.get() );
-   std::sort( blocks.begin(), blocks.end(), internal::sortBlocksByID );
+   std::ranges::sort( blocks, internal::sortBlocksByID );
    
    for(auto block : blocks)
    {
@@ -191,7 +191,7 @@ void BlockStorage::serializeBlockData( const BlockDataID & id, mpi::SendBuffer &
    std::vector< IBlock * > blocks;
    for( auto block = begin(); block != end(); ++block )
       blocks.push_back( block.get() );
-   std::sort( blocks.begin(), blocks.end(), internal::sortBlocksByID );
+   std::ranges::sort( blocks, internal::sortBlocksByID );
 
    auto & item = blockDataItem_[ uint_t(id) ];
 
@@ -217,7 +217,7 @@ void BlockStorage::deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer
    std::vector< IBlock * > blocks;
    for( auto block = begin(); block != end(); ++block )
       blocks.push_back( block.get() );
-   std::sort( blocks.begin(), blocks.end(), internal::sortBlocksByID );
+   std::ranges::sort( blocks, internal::sortBlocksByID );
 
    auto & item = blockDataItem_[ uint_t(id) ];
 

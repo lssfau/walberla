@@ -51,8 +51,8 @@ template< typename GhostLayerField_T,
 class CurveGatherPackInfo : public GatherPackInfo
 {
    public:
-      typedef Vector3<real_t>  RealVec3;
-      typedef std::function<RealVec3 (real_t t) > CurveCallback;
+      using RealVec3 = Vector3<real_t>;
+      using CurveCallback = std::function<RealVec3 (real_t t) >;
 
 
       //**Construction & Destruction*************************************************************************

@@ -62,7 +62,7 @@ requires( FieldType::F_SIZE == 27 )
 py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
-   typedef GhostLayerField<typename FieldType::value_type, 27> GlField_T;
+   using GlField_T = GhostLayerField<typename FieldType::value_type, 27>;
    using field::communication::StencilRestrictedPackInfo;
    return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q27> >( bdId) );
 }
@@ -72,7 +72,7 @@ requires( FieldType::F_SIZE == 19 )
 py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
-   typedef GhostLayerField<typename FieldType::value_type, 19> GlField_T;
+   using GlField_T = GhostLayerField<typename FieldType::value_type, 19>;
    using field::communication::StencilRestrictedPackInfo;
    return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q19> >( bdId) );
 }
@@ -82,7 +82,7 @@ requires( FieldType::F_SIZE == 15 )
 py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
-   typedef GhostLayerField<typename FieldType::value_type, 15> GlField_T;
+   using GlField_T = GhostLayerField<typename FieldType::value_type, 15>;
    using field::communication::StencilRestrictedPackInfo;
    return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q15> >( bdId) );
 }
@@ -92,7 +92,7 @@ requires( FieldType::F_SIZE == 7 )
 py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
-   typedef GhostLayerField<typename FieldType::value_type, 7> GlField_T;
+   using GlField_T = GhostLayerField<typename FieldType::value_type, 7>;
    using field::communication::StencilRestrictedPackInfo;
    return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q7> >( bdId) );
 }
@@ -102,7 +102,7 @@ requires( FieldType::F_SIZE == 9 )
 py::object
 createStencilRestrictedPackInfoObject( BlockDataID bdId )
 {
-   typedef GhostLayerField<typename FieldType::value_type, 9> GlField_T;
+   using GlField_T = GhostLayerField<typename FieldType::value_type, 9>;
    using field::communication::StencilRestrictedPackInfo;
    return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D2Q9> >( bdId) );
 }
@@ -129,9 +129,9 @@ class StencilRestrictedPackInfoExporter
    template< typename FieldType>
    void operator() ( python_coupling::NonCopyableWrap<FieldType> )
    {
-      typedef typename FieldType::value_type T;
-      const uint_t F_SIZE = FieldType::F_SIZE;
-      typedef GhostLayerField<T, F_SIZE> GlField_T;
+      using T = typename FieldType::value_type;
+      constexpr uint_t F_SIZE = FieldType::F_SIZE;
+      using GlField_T = GhostLayerField<T, F_SIZE>;
       IBlock * firstBlock =  & ( * blocks_->begin() );
       if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
       {
@@ -186,9 +186,9 @@ class PackInfoExporter
    template< typename FieldType>
    void operator() ( python_coupling::NonCopyableWrap<FieldType> )
    {
-      typedef typename FieldType::value_type T;
-      const uint_t F_SIZE = FieldType::F_SIZE;
-      typedef GhostLayerField<T, F_SIZE> GlField_T;
+      using T = typename FieldType::value_type;
+      constexpr uint_t F_SIZE = FieldType::F_SIZE;
+      using GlField_T = GhostLayerField<T, F_SIZE>;
       IBlock * firstBlock =  & ( * blocks_->begin() );
       if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
       {
@@ -252,9 +252,9 @@ class UniformMPIDatatypeInfoExporter
    template< typename FieldType>
    void operator() ( python_coupling::NonCopyableWrap<FieldType> )
    {
-      typedef typename FieldType::value_type T;
-      const uint_t F_SIZE = FieldType::F_SIZE;
-      typedef GhostLayerField<T, F_SIZE> GlField_T;
+      using T = typename FieldType::value_type;
+      constexpr uint_t F_SIZE = FieldType::F_SIZE;
+      using GlField_T = GhostLayerField<T, F_SIZE>;
       IBlock * firstBlock =  & ( * blocks_->begin() );
       if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
       {
@@ -310,25 +310,25 @@ void exportStencilRestrictedPackInfo(py::module_& m)
 {
    using field::communication::StencilRestrictedPackInfo;
    {
-      typedef StencilRestrictedPackInfo< GhostLayerField< T, 9 >, stencil::D2Q9 > Pi;
+      using Pi = StencilRestrictedPackInfo< GhostLayerField< T, 9 >, stencil::D2Q9 >;
       py::class_< Pi, shared_ptr< Pi >, walberla::communication::UniformPackInfo >(m, "StencilRestrictedPackInfo_D2Q9");
    }
    {
-      typedef StencilRestrictedPackInfo< GhostLayerField< T, 7 >, stencil::D3Q7 > Pi;
+      using Pi = StencilRestrictedPackInfo< GhostLayerField< T, 7 >, stencil::D3Q7 >;
       py::class_< Pi, shared_ptr< Pi >, walberla::communication::UniformPackInfo >(m, "StencilRestrictedPackInfo_D3Q7");
    }
    {
-      typedef StencilRestrictedPackInfo< GhostLayerField< T, 15 >, stencil::D3Q15 > Pi;
+      using Pi = StencilRestrictedPackInfo< GhostLayerField< T, 15 >, stencil::D3Q15 >;
       py::class_< Pi, shared_ptr< Pi >, walberla::communication::UniformPackInfo >(m,
                                                                                    "StencilRestrictedPackInfo_D3Q15");
    }
    {
-      typedef StencilRestrictedPackInfo< GhostLayerField< T, 19 >, stencil::D3Q19 > Pi;
+      using Pi = StencilRestrictedPackInfo< GhostLayerField< T, 19 >, stencil::D3Q19 >;
       py::class_< Pi, shared_ptr< Pi >, walberla::communication::UniformPackInfo >(m,
                                                                                    "StencilRestrictedPackInfo_D3Q19");
    }
    {
-      typedef StencilRestrictedPackInfo< GhostLayerField< T, 27 >, stencil::D3Q27 > Pi;
+      using Pi = StencilRestrictedPackInfo< GhostLayerField< T, 27 >, stencil::D3Q27 >;
       py::class_< Pi, shared_ptr< Pi >, walberla::communication::UniformPackInfo >(m,
                                                                                    "StencilRestrictedPackInfo_D3Q27");
    }

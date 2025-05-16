@@ -70,8 +70,6 @@ namespace py = pybind11;
 //
 //======================================================================================================================
 
-#ifdef WALBERLA_BUILD_WITH_PYTHON
-
 void NoSuchBlockData::translate(  const NoSuchBlockData & e ) {
    throw py::cast_error(e.what());
 }
@@ -79,13 +77,6 @@ void NoSuchBlockData::translate(  const NoSuchBlockData & e ) {
 void BlockDataNotConvertible::translate(  const BlockDataNotConvertible & e ) {
    throw py::cast_error(e.what());
 }
-#else
-
-void NoSuchBlockData::translate(  const NoSuchBlockData &  ) {}
-
-void BlockDataNotConvertible::translate(  const BlockDataNotConvertible &  ) {}
-
-#endif
 
 BlockDataID blockDataIDFromString(BlockStorage& bs, const std::string& stringID)
 {
@@ -116,9 +107,9 @@ py::iterator StructuredBlockForest_iter(const shared_ptr< StructuredBlockForest 
    std::vector<py::object> resultList;
    resultList.reserve(blocks.size());
 
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
+   for (auto &block : blocks)
    {
-      py::object theObject = py::cast(*it);
+      py::object theObject = py::cast(block);
       resultList.push_back(theObject);
    }
 
@@ -142,8 +133,9 @@ std::vector<py::object> StructuredBlockForest_blocksOverlappedByAABB(StructuredB
    s.getBlocksOverlappedByAABB(blocks, aabb);
 
    std::vector<py::object> resultList;
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
-      resultList.push_back(py::cast(*it));
+   resultList.reserve(blocks.size());
+   for (auto &block : blocks)
+      resultList.push_back(py::cast(block));
    return resultList;
 }
 
@@ -153,8 +145,9 @@ std::vector<py::object> StructuredBlockForest_blocksContainedWithinAABB(Structur
    s.getBlocksContainedWithinAABB(blocks, aabb);
 
    std::vector<py::object> resultList;
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
-      resultList.push_back(py::cast(*it));
+   resultList.reserve(blocks.size());
+   for (auto &block : blocks)
+      resultList.push_back(py::cast(block));
    return resultList;
 }
 

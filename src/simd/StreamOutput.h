@@ -22,6 +22,8 @@
 #pragma once
 
 #include "SIMD.h"
+
+#include <ostream>
 #include <type_traits>
 
 

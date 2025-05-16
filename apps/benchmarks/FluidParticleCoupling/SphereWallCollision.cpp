@@ -394,7 +394,7 @@ struct NonCollidingSphereSelector
    template< typename ParticleAccessor_T >
    bool inline operator()(const size_t particleIdx, const ParticleAccessor_T & ac) const
    {
-      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+      static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
       return !mesa_pd::data::particle_flags::isSet( ac.getFlags(particleIdx), mesa_pd::data::particle_flags::FIXED) &&
              !mesa_pd::data::particle_flags::isSet( ac.getFlags(particleIdx), mesa_pd::data::particle_flags::GLOBAL) &&
              ac.getPosition(particleIdx)[2] > radius_;

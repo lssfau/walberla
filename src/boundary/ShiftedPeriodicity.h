@@ -583,10 +583,10 @@ class ShiftedPeriodicity : public ShiftedPeriodicityBase<ShiftedPeriodicity<Ghos
       auto bufferIt = buffer.begin();
 
       // forward iterate over ci and add values to value vector
-      for(auto cellIt = ci.begin(); cellIt != ci.end(); ++cellIt) {
+      for(auto &&cell : ci) {
          for(cell_idx_t f = 0; f < this->fSize_; ++f, ++bufferIt) {
-            WALBERLA_ASSERT(field->coordinatesValid(cellIt->x(), cellIt->y(), cellIt->z(), f))
-            *bufferIt = field->get(*cellIt, f);
+            WALBERLA_ASSERT(field->coordinatesValid(cell.x(), cell.y(), cell.z(), f))
+            *bufferIt = field->get(cell, f);
          }
       }
 
@@ -602,10 +602,10 @@ class ShiftedPeriodicity : public ShiftedPeriodicityBase<ShiftedPeriodicity<Ghos
       auto bufferIt = buffer.begin();
 
       // forward iterate over ci and add values to value vector
-      for(auto cellIt = ci.begin(); cellIt != ci.end(); ++cellIt) {
+      for(auto &&cell : ci) {
          for(cell_idx_t f = 0; f < this->fSize_; ++f, ++bufferIt) {
-            WALBERLA_ASSERT(field->coordinatesValid(cellIt->x(), cellIt->y(), cellIt->z(), f))
-            field->get(*cellIt, f) = *bufferIt;
+            WALBERLA_ASSERT(field->coordinatesValid(cell.x(), cell.y(), cell.z(), f))
+            field->get(cell, f) = *bufferIt;
          }
       }
 

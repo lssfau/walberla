@@ -113,7 +113,7 @@ void addData( const shared_ptr< StructuredBlockForest > &blocks, const config::C
     auto numPdfFields = configBlock.getParameter< uint_t >( "pdf" );
     for ( uint_t i = 0; i < numPdfFields; ++i )
     {
-        typedef field::GhostLayerField< real_t, Scheme1::Stencil::Q > Field_T;
+        using Field_T = field::GhostLayerField< real_t, Scheme1::Stencil::Q >;
         BlockDataID bdId = field::addToStorage< Field_T >( blocks, "pdf", 0.0, layout, ghostLayers );
         addDataToCommunicate< Field_T >( scheme1, bdId, ghostLayers );
         addDataToCommunicate< Field_T >( scheme2, bdId, ghostLayers );
@@ -123,7 +123,7 @@ void addData( const shared_ptr< StructuredBlockForest > &blocks, const config::C
     auto numPdfOptFields = configBlock.getParameter< uint_t >( "pdfOpt" );
     for ( uint_t i = 0; i < numPdfOptFields; ++i )
     {
-        typedef field::GhostLayerField< real_t, Scheme1::Stencil::Q > Field_T;
+        using Field_T = field::GhostLayerField< real_t, Scheme1::Stencil::Q >;
         BlockDataID bdId = field::addToStorage< Field_T >( blocks, "pdfopt", 0.0, layout, ghostLayers );
         addDataToCommunicate< Field_T >( scheme1, bdId, ghostLayers, true );
         addDataToCommunicate< Field_T >( scheme2, bdId, ghostLayers, true );
@@ -133,7 +133,7 @@ void addData( const shared_ptr< StructuredBlockForest > &blocks, const config::C
     auto numVectorFields = configBlock.getParameter< uint_t >( "vector" );
     for ( uint_t i = 0; i < numVectorFields; ++i )
     {
-        typedef field::GhostLayerField< real_t, 3 > Field_T;
+        using Field_T = field::GhostLayerField< real_t, 3 >;
         BlockDataID bdId = field::addToStorage< Field_T >( blocks, "vector", 0.0, layout, ghostLayers );
         addDataToCommunicate< Field_T >( scheme1, bdId, ghostLayers );
         addDataToCommunicate< Field_T >( scheme2, bdId, ghostLayers );
@@ -142,7 +142,7 @@ void addData( const shared_ptr< StructuredBlockForest > &blocks, const config::C
     auto numScalarFields = configBlock.getParameter< uint_t >( "scalar" );
     for ( uint_t i = 0; i < numScalarFields; ++i )
     {
-        typedef field::GhostLayerField< real_t, 1 > Field_T;
+        using Field_T = field::GhostLayerField< real_t, 1 >;
         BlockDataID bdId = field::addToStorage< Field_T >( blocks, "scalar", 0.0, layout, ghostLayers );
         addDataToCommunicate< Field_T >( scheme1, bdId, ghostLayers );
         addDataToCommunicate< Field_T >( scheme2, bdId, ghostLayers );
