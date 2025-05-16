@@ -37,7 +37,7 @@
 
 namespace walberla {
 
-typedef GhostLayerField<real_t,1> GlField;
+using GlField = GhostLayerField<real_t,1>;
 
 
 

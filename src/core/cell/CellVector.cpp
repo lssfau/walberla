@@ -42,13 +42,13 @@ namespace cell {
 //**********************************************************************************************************************
 CellVector::difference_type CellVector::removeDuplicates()
 {
-   std::sort(cells_.begin(), cells_.end());
+   std::ranges::sort(cells_, std::less<>{});
 
-   iterator newEnd = std::unique(cells_.begin(), cells_.end());
+   auto ret = std::ranges::unique(cells_);
 
-   const difference_type numDuplicates = std::distance(newEnd, cells_.end());
+   const difference_type numDuplicates = std::ranges::distance(ret);
 
-   cells_.erase(newEnd, cells_.end());
+   cells_.erase(ret.begin(), ret.end());
 
    return numDuplicates;
 }

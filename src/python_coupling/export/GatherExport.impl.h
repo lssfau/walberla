@@ -61,7 +61,7 @@ class GatherExporter
    template< typename FieldType>
    void operator() ( python_coupling::NonCopyableWrap<FieldType> )
    {
-      typedef Field< typename FieldType::value_type, FieldType::F_SIZE > ResultField;
+      using ResultField = Field< typename FieldType::value_type, FieldType::F_SIZE >;
       IBlock * firstBlock =  & ( * blocks_->begin() );
       if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
       {

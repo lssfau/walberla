@@ -25,8 +25,8 @@
 
 #include <algorithm>
 #include <type_traits>
-
-#include <type_traits>
+#include <ostream>
+#include <sstream>
 
 /// \cond internal
 
@@ -106,8 +106,8 @@ inline bool check_float_equal( const T & lhs, const U & rhs )
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
-   LowType low_lhs = static_cast<LowType>( lhs );
-   LowType low_rhs = static_cast<LowType>( rhs );
+   auto const low_lhs = static_cast<LowType>( lhs );
+   auto const low_rhs = static_cast<LowType>( rhs );
 
    return floatIsEqual( low_lhs, low_rhs ) || floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0) );
 }
@@ -120,8 +120,8 @@ inline bool check_float_unequal( const T & lhs, const U & rhs )
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
-   LowType low_lhs = static_cast<LowType>( lhs );
-   LowType low_rhs = static_cast<LowType>( rhs );
+   auto const low_lhs = static_cast<LowType>( lhs );
+   auto const low_rhs = static_cast<LowType>( rhs );
 
    return !floatIsEqual( low_lhs, low_rhs ) && !floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0) );
 }
@@ -135,8 +135,8 @@ inline bool check_float_equal_eps( const T & lhs, const U & rhs,
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
-   LowType low_lhs = static_cast<LowType>( lhs );
-   LowType low_rhs = static_cast<LowType>( rhs );
+   auto const low_lhs = static_cast<LowType>( lhs );
+   auto const low_rhs = static_cast<LowType>( rhs );
 
    return floatIsEqual( low_lhs, low_rhs, epsilon ) || floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0), epsilon );
 }
@@ -150,8 +150,8 @@ inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
 
    using LowType = typename math::MathTrait<T, U>::Low;
 
-   LowType low_lhs = static_cast<LowType>( lhs );
-   LowType low_rhs = static_cast<LowType>( rhs );
+   auto const low_lhs = static_cast<LowType>( lhs );
+   auto const low_rhs = static_cast<LowType>( rhs );
 
    return !floatIsEqual( low_lhs, low_rhs, epsilon ) && !floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0), epsilon );
 }

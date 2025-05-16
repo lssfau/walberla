@@ -42,7 +42,7 @@ namespace python_coupling {
 
 
           config::Iterator configBegin( int argc, char ** argv);
-   inline config::Iterator configEnd()                              { return config::Iterator(); }
+   inline config::Iterator configEnd() { return {}; }
 
 //@}
 //****************************************************************************************************************

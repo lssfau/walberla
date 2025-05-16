@@ -61,7 +61,7 @@ private:
       Data( T* data ) : data_( data ) {}
       ~Data() override { delete data_; }
       bool operator==( const DataBase& rhs ) const override {
-         const Data<T>* rhsData = dynamic_cast< const Data<T>* >( &rhs );
+         const auto* rhsData = dynamic_cast< const Data<T>* >( &rhs );
          return ( rhsData == &rhs ) && ( *data_ == *(rhsData->data_) ); // every object that is registered as block data
                                                                         // must be comparable with "==" !
       }
@@ -257,7 +257,7 @@ public:
    inline const T* uncheckedFastGetData( const BlockDataID & index ) const;
    template< typename T >
    inline       T* uncheckedFastGetData( const BlockDataID & index );
-         
+
 protected:
 
    IBlock( BlockStorage& storage, const AABB& aabb, const IBlockID::IDType& id, const bool local = true );

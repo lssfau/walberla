@@ -122,7 +122,7 @@ public:
    inline bool contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
    inline bool contains( const uint_t     x, const uint_t     y, const uint_t     z ) const;
 
-   inline void sort() { std::sort(cells_.begin(), cells_.end()); }
+   inline void sort() { std::ranges::sort(cells_, std::less<>{}); }
    //@}
 
    friend inline bool operator==( const CellVector& lhs, const CellVector& rhs ) { return lhs.cells_ == rhs.cells_; } ///< compares the content of two CellVectors
@@ -163,7 +163,7 @@ inline void CellVector::push_back( const uint_t x, const uint_t y, const uint_t 
 //**********************************************************************************************************************
 inline bool CellVector::contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const {
 
-   return std::find( cells_.begin(), cells_.end(), Cell(x,y,z) ) != cells_.end();
+   return std::ranges::find( cells_, Cell(x,y,z) ) != cells_.end();
 }
 
 
@@ -171,7 +171,7 @@ inline bool CellVector::contains( const cell_idx_t x, const cell_idx_t y, const 
 /// for documentation see "contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )"
 inline bool CellVector::contains( const uint_t x, const uint_t y, const uint_t z ) const {
 
-   return std::find( cells_.begin(), cells_.end(), Cell(x,y,z) ) != cells_.end();
+   return std::ranges::find( cells_, Cell(x,y,z) ) != cells_.end();
 }
 
 

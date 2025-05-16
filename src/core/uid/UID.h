@@ -210,7 +210,7 @@ void UID<T>::init( const std::string& identifier, const bool newUid, const bool 
    }
    else { // if another UID with the same identifier already exists this UID is chosen, otherwise a new UID is created
 
-      typename std::map< std::string, uint_type >::iterator it = stringToUid().find( identifier );
+      auto it = stringToUid().find( identifier );
 
       if( it == stringToUid().end() ) {
 
@@ -291,7 +291,7 @@ UID<T> UID<T>::getOrConstruct( const std::string& identifier ) {
 
    WALBERLA_ASSERT( !identifier.empty() );
 
-   typename std::map< std::string, uint_type >::iterator it = stringToUid().find( identifier );
+   auto it = stringToUid().find( identifier );
 
    if( it == stringToUid().end() ) {
 

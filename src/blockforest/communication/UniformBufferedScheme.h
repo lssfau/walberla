@@ -285,7 +285,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
 
       for( auto it = forest->begin(); it != forest->end(); ++it )
       {
-         Block * block = dynamic_cast< Block * >( it.get() );
+         auto * block = dynamic_cast< Block * >( it.get() );
 
          if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
             continue;

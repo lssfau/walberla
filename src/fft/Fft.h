@@ -31,13 +31,13 @@ class FourierTransform
    
       ptrdiff_t local_no[3];
 #ifdef WALBERLA_USE_PFFT
-      typedef std::unique_ptr<double[], std::function<void(double*)> > FFTReal;
-      typedef std::unique_ptr<pfft_complex[], std::function<void(pfft_complex*)> > FFTComplex;
-      typedef std::unique_ptr<std::remove_pointer<pfft_plan>::type, std::function<void(pfft_plan)> > FFTPlan;
+      using FFTReal = std::unique_ptr<double[], std::function<void(double*)> >;
+      using FFTComplex = std::unique_ptr<pfft_complex[], std::function<void(pfft_complex*)> >;
+      using FFTPlan = std::unique_ptr<std::remove_pointer_t<pfft_plan>, std::function<void(pfft_plan)> >;
 #else
       using FFTReal = std::unique_ptr<double [], std::function<void (double *)>>;
-      typedef std::unique_ptr<fftw_complex[], std::function<void(fftw_complex*)> > FFTComplex;
-      typedef std::unique_ptr<std::remove_pointer<fftw_plan>::type, std::function<void(fftw_plan)> > FFTPlan;
+      using FFTComplex = std::unique_ptr<fftw_complex[], std::function<void(fftw_complex*)> >;
+      using FFTPlan = std::unique_ptr<std::remove_pointer_t<fftw_plan>, std::function<void(fftw_plan)> >;
 #endif
       FFTReal in_, greens_;
       FFTComplex out_;

@@ -853,7 +853,7 @@ template< typename T >
 inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandling, const std::string & identifier,
                                               const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   //static_assert( std::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
+   //static_assert( std::is_base_of_v< BlockDataHandling<typename T::value_type>, T > );
 
    auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
@@ -994,7 +994,7 @@ public:
 
    using MinTargetLevelDeterminationFunction = blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction;
 
-   CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::max_element(t.begin(), t.end());})
+   CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::ranges::max_element(t);})
    : targetLevelReductionFct_( targetLevelReductionFct )
    {
 

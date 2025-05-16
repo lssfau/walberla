@@ -47,7 +47,7 @@ public:
 
    void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t(0) ) const
    {
-      const FlagField_T* flagField = block.getData< FlagField_T >( flagField_ );
+      const auto* flagField = block.getData< FlagField_T >( flagField_ );
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );
 
       std::vector< FlagUID > existingFlags;
@@ -57,7 +57,7 @@ public:
 
       if( !existingFlags.empty() )
       {
-         flag_t filterMask( flag_t(0) );
+         flag_t filterMask(0);
          for(const auto & existingFlag : existingFlags)
             filterMask = static_cast< flag_t >( filterMask | flagField->getFlag( existingFlag ) );
 

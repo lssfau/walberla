@@ -59,8 +59,8 @@ int main( int argc, char ** argv )
    real_t density    = real_c(2.5);
 
    // these values have actually no influence here and are just computed for completeness
-   real_t dx_SI = diameter_SI / diameter;
-   real_t dt_SI = uNin / uNin_SI * dx_SI;
+   [[maybe_unused]] real_t dx_SI = diameter_SI / diameter;
+   [[maybe_unused]] real_t dt_SI = uNin / uNin_SI * dx_SI;
 
    real_t impactAngle       = real_t(0);
    real_t dt                = real_t(0.1); // = (1 / #sub steps)
@@ -163,8 +163,8 @@ int main( int argc, char ** argv )
          maxPenetration = std::max( maxPenetration, std::abs(penetration));
 
          dem(acd.getIdx1(), acd.getIdx2(), *accessor, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth(), dt);
-         auto force = accessor->getForce(0);
-         auto torque = accessor->getTorque(0);
+         [[maybe_unused]] auto force = accessor->getForce(0);
+         [[maybe_unused]] auto torque = accessor->getTorque(0);
          WALBERLA_LOG_INFO(steps << ": penetration = " << penetration << " || vel = " << accessor->getLinearVelocity(0) << " || force = " << force << ", torque = " << torque);
       }
       rch(*ps);

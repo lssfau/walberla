@@ -48,7 +48,7 @@ splitGhostLayerField(const GhostLayerField<T,fs> & fieldToSplit,
                      const std::vector<size_t> & cutsY,
                      const std::vector<size_t> & cutsZ)
 {
-   typedef Field<shared_ptr<GhostLayerField<T,fs> >,1 > FieldOfFieldPtrs;
+   using FieldOfFieldPtrs = Field<shared_ptr<GhostLayerField<T,fs> >,1 >;
    cell_idx_t gl = cell_idx_c ( fieldToSplit.nrOfGhostLayers() );
 
    cell_idx_t fieldsX = cell_idx_c ( cutsX.size()+1 );
@@ -114,7 +114,7 @@ void multipleFields()
    const uint_t fieldSize = uint_t(3 * radius);
    const uint_t midpoint  = uint_t(1.5 * radius);
 
-   typedef GhostLayerField<real_t,1> GlF;
+   using GlF = GhostLayerField<real_t,1>;
    GlF f (fieldSize,fieldSize,fieldSize,1,0);
 
    for(ScalarField::iterator i = f.begin(); i != f.end(); ++i)

@@ -60,7 +60,7 @@ struct UniformBufferedSchemeExporter
    template< typename Stencil >
    void operator()(python_coupling::NonCopyableWrap< Stencil >) const
    {
-      typedef UniformBufferedSchemeWrapper< Stencil > UBS;
+      using UBS = UniformBufferedSchemeWrapper< Stencil >;
       std::string class_name = "UniformBufferedScheme" + std::string(Stencil::NAME);
 
       py::class_< UBS, shared_ptr< UBS > >(m_, class_name.c_str())
@@ -143,7 +143,7 @@ struct UniformDirectSchemeExporter
    template< typename Stencil >
    void operator()(python_coupling::NonCopyableWrap< Stencil >) const
    {
-      typedef UniformDirectSchemeWrapper< Stencil > UDS;
+      using UDS = UniformDirectSchemeWrapper< Stencil >;
       std::string class_name = "UniformDirectScheme_" + std::string(Stencil::NAME);
 
       py::class_< UDS, shared_ptr<UDS> >(m_, class_name.c_str() )

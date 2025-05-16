@@ -201,9 +201,9 @@ namespace field {
       // take care of proper thread<->memory assignment (first-touch allocation policy !)
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( this,
 
-         for( uint_t f = uint_t(0); f < fSize_; ++f )
+         for( uint_t f = 0; f < fSize_; ++f )
             this->get(x,y,z,f) = value;
-      
+
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic pop
@@ -218,7 +218,7 @@ namespace field {
    void GhostLayerField<T,fSize_>::setWithGhostLayer (const std::vector<T> & fValues)
    {
       WALBERLA_ASSERT(fValues.size() == fSize_);
-          
+
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
@@ -227,9 +227,9 @@ namespace field {
       // take care of proper thread<->memory assignment (first-touch allocation policy !)
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( this,
 
-         for( uint_t f = uint_t(0); f < fSize_; ++f )
+         for( uint_t f = 0; f < fSize_; ++f )
             this->get(x,y,z,f) = fValues[f];
-      
+
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic pop

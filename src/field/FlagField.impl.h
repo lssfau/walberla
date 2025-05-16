@@ -78,7 +78,7 @@ namespace field {
    template<typename T>
    FlagField<T>::~FlagField()
    {
-      uint_t const refs = Field<T,1>::referenceCount();
+      const uint_t refs = Field<T,1>::referenceCount();
       if( refs == 1 ) // last field that uses this data
          delete data_;
    }
@@ -101,7 +101,7 @@ namespace field {
    template<typename T>
    inline FlagField<T> * FlagField<T>::clone() const
    {
-      FlagField<T> * ff = dynamic_cast<FlagField<T>* > ( GhostLayerField<T,1>::clone() );
+      auto * ff = dynamic_cast<FlagField<T>* > ( GhostLayerField<T,1>::clone() );
       // make a deep copy of Registration data, reference counting is done by FieldAllocator
       ff->data_ = new RegistrationData( *data_ );
       return ff;
@@ -110,7 +110,7 @@ namespace field {
    template<typename T>
    inline FlagField<T> * FlagField<T>::cloneUninitialized() const
    {
-      FlagField<T> * ff = dynamic_cast<FlagField<T>* > ( GhostLayerField<T,1>::cloneUninitialized() );
+      auto * ff = dynamic_cast<FlagField<T>* > ( GhostLayerField<T,1>::cloneUninitialized() );
       // make a deep copy of Registration data, reference counting is done by FieldAllocator
       ff->data_ = new RegistrationData();
       return ff;
@@ -148,9 +148,9 @@ namespace field {
       //check that mask contains only registered bits
       WALBERLA_ASSERT( ! ( mask & (~ data_->usedMask) ));
 
-      for( auto i = this->begin(); i != this->end(); ++i)
-         if(*i & mask )
-            cv.push_back(Cell(i.x(),i.y(), i.z() ));
+      for( auto &it : *this)
+         if( it & mask )
+            cv.push_back(Cell(it.x(),it.y(), it.z() ));
    }
 
 
@@ -213,7 +213,7 @@ namespace field {
          throw std::runtime_error( "Not enough space in flag_type for additional flags." );
 
 
-      flag_t f = flag_t(T(1) << data_->nextFreeBit);
+      auto f = flag_t(T(1) << data_->nextFreeBit);
       data_->uidToFlag[uid] = f;
 
       data_->flagToUID[data_->nextFreeBit] = uid;
@@ -248,7 +248,7 @@ namespace field {
          throw std::runtime_error("Already registered flag " + data_->flagToUID[bitNr].getIdentifier() +
                                     " at the given position of FlagField.");
 
-      flag_t f = flag_t(T(1) << bitNr);
+      auto f = flag_t(T(1) << bitNr);
       data_->uidToFlag[uid] = f;
       data_->flagToUID[bitNr] = uid;
       data_->usedMask = static_cast< flag_t >( data_->usedMask | f );
@@ -267,11 +267,11 @@ namespace field {
    template<typename T>
    T FlagField<T>::getFlag( const FlagUID & uid ) const
    {
-      auto i = data_->uidToFlag.find(uid);
-      if(i == data_->uidToFlag.end() )
+      auto const it = data_->uidToFlag.find(uid);
+      if(it == data_->uidToFlag.end() )
          throw std::runtime_error("The flag named " + uid.getIdentifier() + " was not registered at the FlagField");
 
-      return i->second;
+      return it->second;
    }
 
 
@@ -372,7 +372,7 @@ namespace field {
       for(uint_t i=0; i< sizeof(T)*8; ++i)
       {
          if( ( ( numeric_cast< flag_t >(1) << i ) & data_->usedMask ) != numeric_cast< flag_t >(0) )
-            os << i << ":\t" << data_->flagToUID[i] << std::endl;
+            os << i << ":\t" << data_->flagToUID.at(i) << std::endl;
       }
    }
 
@@ -387,10 +387,10 @@ namespace field {
    void FlagField<T>::printCell( std::ostream & os, const Cell & cell ) const
    {
       os << "Flags set in cell " << cell;
-      for ( auto i = data_->uidToFlag.begin(); i != data_->uidToFlag.end(); ++i)
+      for ( const auto &it : data_->uidToFlag)
       {
-          const std::string & name = i->first.getIdentifier();
-          const flag_t & flagVal   = i->second;
+          const auto & name = it.first.getIdentifier();
+          const auto & flagVal = it.second;
 
           if( field::isFlagSet( this->get(cell), flagVal ) )
              os << "\n  - " << name;
@@ -405,8 +405,8 @@ namespace field {
    template<typename T>
    inline void FlagField<T>::getAllRegisteredFlags(std::vector<FlagUID> & out) const
    {
-      for ( auto i = data_->uidToFlag.begin(); i != data_->uidToFlag.end(); ++i) {
-         out.push_back( i->first );
+      for ( const auto &it : data_->uidToFlag) {
+         out.push_back( it->first );
       }
    }
 
@@ -484,11 +484,11 @@ namespace field {
     //******************************************************************************************************************
     /*!\brief Ores the neighborhood of the specified stencil and checks whether the bits of mask are set
      *
-     * \param[in] i     field pointer.
+     * \param[in] it    field pointer.
      * \param[in] mask  bit mask. Test if a cell is added: (content & mask) == true
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
-    inline bool isFlagInNeighborhood(const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_type mask)
+    inline bool isFlagInNeighborhood(const FieldPtrOrIterator & it, typename FieldPtrOrIterator::value_type mask)
     {
        using T = std::remove_const_t<typename FieldPtrOrIterator::value_type>;
 
@@ -500,7 +500,7 @@ namespace field {
 
        T flag = 0;
        for( auto d = Sten::beginNoCenter(); d != Sten::end(); ++d ) {
-          flag = static_cast<T>( flag | i.neighbor(*d) );
+          flag = static_cast<T>( flag | it.neighbor(*d) );
        }
        return (flag & mask) > T(0);
     }
@@ -508,17 +508,17 @@ namespace field {
 
     //******************************************************************************************************************
     /*!\brief Ores the neighborhood of the specified stencil and returns mask
-     * \param[in] i     field pointer.
+     * \param[in] it    field pointer.
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
     inline std::remove_const_t<typename FieldPtrOrIterator::value_type>
-       getOredNeighborhood(const FieldPtrOrIterator & i)
+       getOredNeighborhood(const FieldPtrOrIterator & it)
     {
        using RetType = std::remove_const_t<typename FieldPtrOrIterator::value_type>;
 
        RetType flag = 0;
        for( auto d = Sten::beginNoCenter(); d != Sten::end(); ++d ) {
-          flag = static_cast<RetType>( flag | i.neighbor(*d) );
+          flag = static_cast<RetType>( flag | it.neighbor(*d) );
        }
        return flag;
     }

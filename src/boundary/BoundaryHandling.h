@@ -52,11 +52,11 @@ namespace boundary {
 namespace internal {
 #if defined(__GLIBCXX__) && (!defined(_GLIBCXX_RELEASE) || _GLIBCXX_RELEASE < 7)
 template< typename T >
-struct tuple_size : std::tuple_size_v<std::tuple<>>
+struct tuple_size : std::tuple_size<std::tuple<>>
 {};
 
 template< typename... Members >
-struct tuple_size_v< std::tuple<Members...> > : std::tuple_size_v<std::tuple<Members...>>
+struct tuple_size< std::tuple<Members...> > : std::tuple_size<std::tuple<Members...>>
 {};
 #else
 using std::tuple_size;

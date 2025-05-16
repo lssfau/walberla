@@ -204,8 +204,8 @@ namespace field {
       res->valuesWithOffset_ = res->values_ + offset;
 
       WALBERLA_ASSERT ( hasSameSize     ( *res ) );
-      WALBERLA_ASSERT ( hasSameAllocSize( *res ) );    
-      
+      WALBERLA_ASSERT ( hasSameAllocSize( *res ) );
+
       return res;
    }
 
@@ -919,9 +919,9 @@ namespace field {
       // take care of proper thread<->memory assignment (first-touch allocation policy !)
       WALBERLA_FOR_ALL_CELLS_XYZ( this,
 
-         for( uint_t f = uint_t(0); f < fSize_; ++f )
+         for( uint_t f = 0; f < fSize_; ++f )
             get(x,y,z,f) = value;
-      
+
       ) // WALBERLA_FOR_ALL_CELLS_XYZ
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic pop
@@ -939,7 +939,7 @@ namespace field {
    void Field<T,fSize_>::set (const std::vector<T> & fValues)
    {
       WALBERLA_ASSERT(fValues.size() == fSize_);
-      
+
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
@@ -948,9 +948,9 @@ namespace field {
       // take care of proper thread<->memory assignment (first-touch allocation policy !)
       WALBERLA_FOR_ALL_CELLS_XYZ( this,
 
-         for( uint_t f = uint_t(0); f < fSize_; ++f )
+         for( uint_t f = 0; f < fSize_; ++f )
             get(x,y,z,f) = fValues[f];
-      
+
       ) // WALBERLA_FOR_ALL_CELLS_XYZ
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic pop

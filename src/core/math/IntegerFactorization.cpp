@@ -51,7 +51,7 @@ std::vector< uint_t > getFactors( const uint_t number, const uint_t numberOfFact
 
    for( const auto prime: primes )
    {
-      auto smallestCurrentFactor = std::min_element( factors.begin(), factors.end() );
+      auto smallestCurrentFactor = std::ranges::min_element( factors );
       WALBERLA_ASSERT( smallestCurrentFactor != factors.end(), "vector\"factors\" is empty" );
       *smallestCurrentFactor *= prime;
    }

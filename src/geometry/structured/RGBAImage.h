@@ -84,7 +84,7 @@ namespace geometry   {
 
       uint_t size( uint_t coord ) const;
 
-      void setToWhite() { std::fill( image_.begin(), image_.end(), static_cast<unsigned char>(255) ); }
+      void setToWhite() { std::ranges::fill( image_, static_cast<unsigned char>(255) ); }
 
       real_t operator() ( cell_idx_t x, cell_idx_t y, Channel c ) const;
 

@@ -716,8 +716,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );
 
-   for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second, std::string("VTK: ") + output->first );
+   for( auto const &[identifier, function] : vtkOutputFunctions )
+      timeloop.addFuncBeforeTimeStep( function, std::string("VTK: ") + identifier );
                                       
    // add 'refinement' LB time step to time loop
 
@@ -914,12 +914,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          {
             double restTime( 0.0 );
             double refreshTime( 0.0 );
-            for( auto it = reducedTimeloopTiming->begin(); it != reducedTimeloopTiming->end(); ++it )
+            for( auto const &[name, loop_timer] : *reducedTimeloopTiming )
             {
-               if( it->first == refreshFunctorName )
-                  refreshTime += it->second.total();
+               if( name == refreshFunctorName )
+                  refreshTime += loop_timer.total();
                else
-                  restTime += it->second.total();
+                  restTime += loop_timer.total();
             }
             const double timeStepTime = restTime / double_c(innerTimeSteps);
             
@@ -928,18 +928,18 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             double loadBalanceTime( 0.0 );
             double phantomForestCreationTime( 0.0 );
             
-            for( auto it = reducedRefreshTiming->begin(); it != reducedRefreshTiming->end(); ++it )
+            for( auto const &[name, refresh_timer] : *reducedRefreshTiming )
             {
-               if( it->first == "block level determination" )
-                  blockLevelDeterminationTime += it->second.total();
-               else if( it->first == "block level determination (callback function)" )
-                  blockLevelDeterminationTime += it->second.total();
-               else if( it->first == "block structure update (includes data migration)" )
-                  dataMigrationTime += it->second.total();
-               else if( it->first == "phantom block redistribution (= load balancing)" )
-                  loadBalanceTime += it->second.total();
-               else if( it->first == "phantom forest creation" )
-                  phantomForestCreationTime += it->second.total();
+               if( name == "block level determination" )
+                  blockLevelDeterminationTime += refresh_timer.total();
+               else if( name == "block level determination (callback function)" )
+                  blockLevelDeterminationTime += refresh_timer.total();
+               else if( name == "block structure update (includes data migration)" )
+                  dataMigrationTime += refresh_timer.total();
+               else if( name == "phantom block redistribution (= load balancing)" )
+                  loadBalanceTime += refresh_timer.total();
+               else if( name == "phantom forest creation" )
+                  phantomForestCreationTime += refresh_timer.total();
             }
             
             refreshPerformance = refreshTime / timeStepTime;

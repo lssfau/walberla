@@ -5,6 +5,7 @@ add_library(
         lodepng.h
 )
 
+set_target_properties(lodepng PROPERTIES CXX_CLANG_TIDY "")
 target_include_directories(lodepng PUBLIC SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}")
 if (MSVC)
    target_compile_options( lodepng PRIVATE /w )

@@ -353,7 +353,7 @@ inline std::ostream& BlockID::toStream( std::ostream& os ) const {
 template< typename Buffer_T >
 void BlockID::toBuffer( Buffer_T& buffer ) const {
 
-   const uint8_t bytes = uint8_t( getUsedBytes() );
+   const auto bytes = uint8_t( getUsedBytes() );
    buffer << bytes;
    for( uint8_t i = 0; i != bytes; ++i )
       buffer << uint8_c( ( id_ >> ( uint_c(i) * uint_c(8) ) ) & uint_c(255) );

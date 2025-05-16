@@ -707,8 +707,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );
 
-   for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second, std::string("VTK: ") + output->first );
+   for( auto const &[identifier, function] : vtkOutputFunctions )
+      timeloop.addFuncBeforeTimeStep( function, std::string("VTK: ") + identifier );
 
    // add LB kernel, boundary handling, and communication to time loop
 

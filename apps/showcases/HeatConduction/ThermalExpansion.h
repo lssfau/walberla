@@ -72,7 +72,7 @@ template <typename Accessor>
 inline void ThermalExpansion::operator()(const size_t p_idx,
                                          Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    const auto Tc = ac.getTemperature(p_idx)-real_t(273);
    ac.setRadiusAtTemperature(p_idx, ac.getRadius273K(p_idx) * (real_t(1) + Tc * getLinearExpansionCoefficient(ac.getType(p_idx))));

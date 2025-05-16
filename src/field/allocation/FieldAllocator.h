@@ -76,7 +76,7 @@ namespace field {
                          uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3)
          {
             T * mem = allocateMemory(size0,size1,size2,size3,allocSize1,allocSize2,allocSize3);
-            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+            auto * bmem = reinterpret_cast<BaseType *>(mem);
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
             #pragma omp critical( walberla_field_allocator_refcount )
@@ -101,7 +101,7 @@ namespace field {
          T * allocate ( uint_t allocSize )
          {
             T * mem = allocateMemory( allocSize );
-            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+            auto * bmem = reinterpret_cast<BaseType *>(mem);
             
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
@@ -125,7 +125,7 @@ namespace field {
           */
          void incrementReferenceCount( T * mem )
          {
-            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+            auto * bmem = reinterpret_cast<BaseType *>(mem);
 
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
@@ -151,7 +151,7 @@ namespace field {
           */
          bool decrementReferenceCount( T * mem )
          {
-            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+            auto * bmem = reinterpret_cast<BaseType *>(mem);
             bool memoryFreed = false;
             
             uint_t refCount = 0;
@@ -179,7 +179,7 @@ namespace field {
 
          uint_t referenceCount ( T * mem ) const
          {
-            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+            auto * bmem = reinterpret_cast<BaseType *>(mem);
             uint_t refCount = 0;
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
@@ -265,7 +265,7 @@ namespace field {
             // placement new
             new (ptr) T[ size ];
 
-            T * ret = reinterpret_cast<T*>( ptr );
+            auto * ret = reinterpret_cast<T*>( ptr );
 
             #ifdef _OPENMP
             #pragma omp critical( walberla_field_aligned_allocator_nrOfElements )

@@ -258,7 +258,7 @@ inline uint_t StructuredBlockForest::getNumberOfCells( const IBlock& block, cons
 
 inline bool StructuredBlockForest::equal( const StructuredBlockStorage* rhs ) const {
 
-   const StructuredBlockForest* forest = dynamic_cast< const StructuredBlockForest* >( rhs );
+   const auto* forest = dynamic_cast< const StructuredBlockForest* >( rhs );
 
    if( forest != rhs )
       return false;

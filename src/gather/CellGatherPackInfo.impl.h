@@ -33,20 +33,20 @@ CellGatherPackInfo<Field_T,CC>::CellGatherPackInfo( const shared_ptr<StructuredB
                                                     const shared_ptr<DataProcessor> & dp )
      : blocks_(bs), fieldID_( fieldID ), dataProcessor_(dp)
 {
-   for ( auto blockIt = bs->begin(); blockIt != bs->end(); ++blockIt )
+   for ( auto & block : *bs )
    {
       uint_t cellNr = 0;
-      Samples & s = localSamplePoints_[ & (*blockIt) ];
-      for( auto cellIt = containerOfGlobalCells.begin(); cellIt != containerOfGlobalCells.end(); ++ cellIt )
+      auto & s = localSamplePoints_[ &block ];
+      for( const auto & cell : containerOfGlobalCells )
       {
          Cell localCell;
-         bs->transformGlobalToBlockLocalCell( localCell, *blockIt, *cellIt );
+         bs->transformGlobalToBlockLocalCell( localCell, block, cell );
          if ( localCell[0] >= 0 &&
               localCell[1] >= 0 &&
               localCell[2] >= 0 &&
-              localCell[0] < cell_idx_c( bs->getNumberOfXCells( *blockIt  ) ) &&
-              localCell[1] < cell_idx_c( bs->getNumberOfYCells( *blockIt  ) ) &&
-              localCell[2] < cell_idx_c( bs->getNumberOfZCells( *blockIt  ) )    )
+              localCell[0] < cell_idx_c( bs->getNumberOfXCells( block  ) ) &&
+              localCell[1] < cell_idx_c( bs->getNumberOfYCells( block  ) ) &&
+              localCell[2] < cell_idx_c( bs->getNumberOfZCells( block  ) )    )
          {
             s.globalCellNr.push_back( cellNr );
             s.cells.push_back( localCell );
@@ -60,16 +60,16 @@ template< typename Field_T, typename CC>
 void CellGatherPackInfo<Field_T,CC>::packData  ( const IBlock * sender,
                                                  mpi::SendBuffer & outBuffer )
 {
-   auto i = localSamplePoints_.find( sender );
+   const auto it = localSamplePoints_.find( sender );
 
-   if(i == localSamplePoints_.end() ) //nothing to send
+   if(it == localSamplePoints_.end() ) //nothing to send
       return;
 
-   const std::vector<uint_t> & cellNumbers = i->second.globalCellNr;
-   const CellVector & cells                = i->second.cells;
+   const auto & cellNumbers = it->second.globalCellNr;
+   const auto & cells       = it->second.cells;
    WALBERLA_ASSERT_EQUAL( cells.size(), cellNumbers.size() );
 
-   auto field = sender->getData<Field_T>( fieldID_ );
+   const auto * field = sender->getData<Field_T>( fieldID_ );
 
    const size_t fieldSize = Field_T::F_SIZE;
 
@@ -99,8 +99,8 @@ void CellGatherPackInfo<Field_T,CC>::unpackData( mpi::RecvBuffer & buffer )
 
    for( size_t i=0; i< nrPoints; ++i )
    {
-      receivedData.emplace_back(std::vector<real_t>(fieldSize+1)); //+1 because we also store t value as first entry
-      std::vector<real_t> & pointVec = receivedData.back();
+      receivedData.emplace_back(fieldSize+1); //+1 because we also store t value as first entry
+      auto & pointVec = receivedData.back();
 
       uint_t t;
       real_t val;

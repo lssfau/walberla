@@ -92,8 +92,8 @@ int main()
    {
       std::vector<int> a( 5, 0 );
       WALBERLA_CHECK_EQUAL( a.begin(), a.begin() );
-      WALBERLA_CHECK_EQUAL( std::find( a.begin(), a.end(), 1 ), a.end() );
-      WALBERLA_CHECK_UNEQUAL( std::find( a.begin(), a.end(), 0 ), a.end() );
+      WALBERLA_CHECK_EQUAL( std::ranges::find( a, 1 ), a.end() );
+      WALBERLA_CHECK_UNEQUAL( std::ranges::find( a, 0 ), a.end() );
    }
 
    {
