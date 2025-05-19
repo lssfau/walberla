@@ -130,12 +130,15 @@ void createPlane(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
 
 void createPlaneSetup(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
                       const shared_ptr< mesa_pd::data::ShapeStorage >& ss, const math::AABB& simulationDomain,
-                      bool periodicInX, bool periodicInY, real_t offsetAtInflow, real_t offsetAtOutflow)
+                      bool periodicInX, bool periodicInY,bool periodicInZ, real_t offsetAtInflow, real_t offsetAtOutflow)
 {
-   createPlane(ps, ss, simulationDomain.minCorner() + Vector3< real_t >(0, 0, offsetAtInflow),
-               Vector3< real_t >(0, 0, 1));
-   createPlane(ps, ss, simulationDomain.maxCorner() + Vector3< real_t >(0, 0, offsetAtOutflow),
-               Vector3< real_t >(0, 0, -1));
+   if(!periodicInZ)
+   {
+      createPlane(ps, ss, simulationDomain.minCorner() + Vector3< real_t >(0, 0, offsetAtInflow),
+                  Vector3< real_t >(0, 0, 1));
+      createPlane(ps, ss, simulationDomain.maxCorner() + Vector3< real_t >(0, 0, offsetAtOutflow),
+                  Vector3< real_t >(0, 0, -1));
+   }
 
    if (!periodicInX)
    {
@@ -300,6 +303,7 @@ int main(int argc, char** argv)
    const real_t zSize_SI                     = physicalSetup.getParameter< real_t >("zSize");
    const bool periodicInX                    = physicalSetup.getParameter< bool >("periodicInX");
    const bool periodicInY                    = physicalSetup.getParameter< bool >("periodicInY");
+   const bool periodicInZ                    = physicalSetup.getParameter< bool >("periodicInZ");
    const real_t runtime_SI                   = physicalSetup.getParameter< real_t >("runtime");
    const real_t uInflow_SI                   = physicalSetup.getParameter< real_t >("uInflow");
    const real_t gravitationalAcceleration_SI = physicalSetup.getParameter< real_t >("gravitationalAcceleration");
@@ -415,7 +419,7 @@ int main(int argc, char** argv)
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const bool periodicInZ                     = false;
+
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
       numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1],
       cellsPerBlockPerDirection[2], dx, 0, false, false, periodicInX, periodicInY, periodicInZ, // periodicity

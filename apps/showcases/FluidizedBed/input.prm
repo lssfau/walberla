@@ -1,12 +1,12 @@
 PhysicalSetup // all to be specified in SI units!
 {
-    xSize 0.03; // = width
-    ySize 0.03; // = depth
-    zSize 0.03; // = height
+    xSize 0.06; // = width
+    ySize 0.06; // = depth
+    zSize 0.06; // = height
 
-    periodicInX true;
-    periodicInY true;
-    periodicInZ true;
+    periodicInX false;
+    periodicInY false;
+    periodicInZ false;
 
     runtime 30;
 
@@ -16,12 +16,12 @@ PhysicalSetup // all to be specified in SI units!
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
 
-    particleDiameter 0.005;
+    particleDiameter 0.010;
     densityParticle 1100.;
     dynamicFrictionCoefficient 0.15;
     coefficientOfRestitution 0.6;
 
-    particleGenerationSpacing 0.005;
+    particleGenerationSpacing 0.010;
 }
 
 NumericalSetup
@@ -32,7 +32,7 @@ NumericalSetup
     // product of number of blocks should be equal to number of used processes
     numXBlocks 2;
     numYBlocks 2;
-    numZBlocks 2;
+    numZBlocks 1;
 
     useLubricationForces false;
     numberOfParticleSubCycles 1;
@@ -40,9 +40,9 @@ NumericalSetup
 
 Output
 {
-    infoSpacing 0.01; // in s
+    infoSpacing 0.1; // in s
 
-    vtkSpacingParticles 0; // in s
+    vtkSpacingParticles 0.1; // in s
     vtkSpacingFluid 0; // in s
     vtkFolder vtk_out;
 }

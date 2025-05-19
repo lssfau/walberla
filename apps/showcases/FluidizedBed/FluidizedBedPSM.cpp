@@ -247,10 +247,13 @@ void createPlaneSetup(const shared_ptr< mesa_pd::data::ParticleStorage >& ps,
                       const shared_ptr< mesa_pd::data::ShapeStorage >& ss, const math::AABB& simulationDomain,
                       bool periodicInX, bool periodicInY,bool periodicInZ, real_t offsetAtInflow, real_t offsetAtOutflow)
 {
-   createPlane(ps, ss, simulationDomain.minCorner() + Vector3< real_t >(0, 0, offsetAtInflow),
-               Vector3< real_t >(0, 0, 1));
-   createPlane(ps, ss, simulationDomain.maxCorner() + Vector3< real_t >(0, 0, offsetAtOutflow),
-               Vector3< real_t >(0, 0, -1));
+   if(!periodicInZ)
+   {
+      createPlane(ps, ss, simulationDomain.minCorner() + Vector3< real_t >(0, 0, offsetAtInflow),
+                  Vector3< real_t >(0, 0, 1));
+      createPlane(ps, ss, simulationDomain.maxCorner() + Vector3< real_t >(0, 0, offsetAtOutflow),
+                  Vector3< real_t >(0, 0, -1));
+   }
 
    if (!periodicInX)
    {
