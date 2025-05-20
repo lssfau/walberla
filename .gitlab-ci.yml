@@ -78,6 +78,7 @@ stages:
       WALBERLA_BUILD_WITH_FFTW: "ON"
       WALBERLA_LOGLEVEL: "DETAIL"
       WARNING_ERROR: "ON"
+      WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT: "OFF"
    artifacts:
       when: always
       reports:
