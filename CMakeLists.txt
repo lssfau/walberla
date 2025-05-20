@@ -623,36 +623,26 @@ if ( WALBERLA_BUILD_WITH_CUDA )
        message(FATAL_ERROR "For GPU support either use CUDA or HIP. Both simultaneously is not supported.")
     endif()
 
-    include(CheckLanguage)
-    check_language(CUDA)
-    if( CMAKE_CUDA_COMPILER )
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
 
-        if(${CMAKE_VERSION} VERSION_GREATER "3.18.0" AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-            set(CMAKE_CUDA_ARCHITECTURES OFF)
-            message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
-        endif()
+    if(${CMAKE_VERSION} VERSION_GREATER "3.18.0" AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+        set(CMAKE_CUDA_ARCHITECTURES OFF)
+        message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
+    endif()
 
-        enable_language(CUDA)
-
-        #include directories and cudart lib is needed for cpp files that use cuda headers/libs
-        include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-        find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
-        list ( APPEND SERVICE_LIBS ${CUDART_LIBRARY} )
-
-        find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
-        list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
-
-        #CUDA_FOUND is need for our cmake mechanism
-        set ( CUDA_FOUND TRUE )
-        set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE)
+    #include directories and cudart lib is needed for cpp files that use cuda headers/libs
+    list ( APPEND SERVICE_LIBS CUDA::cudart )
+    if (${CUDAToolkit_VERSION} VERSION_LESS "10")
+     list ( APPEND SERVICE_LIBS CUDA::nvToolsExt )
     else()
-        message( WARNING "CUDA could not be enabled. The host compiler might not be compatible. Check CMakeFiles/CMakeError.log for more information" )
-        set ( WALBERLA_BUILD_WITH_CUDA FALSE )
-    endif ( )
+       # nvtx3 was introduced in cuda 10 and replaces nvToolsExt in cuda 12.9
+     list ( APPEND SERVICE_LIBS CUDA::nvtx3)
+    endif()
 endif ( )
 
 # Can be used in CMake files containing generated files where the file suffix is dependent on the target
-if (WALBERLA_BUILD_WITH_CUDA AND CUDA_FOUND)
+if (WALBERLA_BUILD_WITH_CUDA)
     set(CODEGEN_FILE_SUFFIX "cu")
 else()
     set(CODEGEN_FILE_SUFFIX "cpp")
@@ -670,33 +660,26 @@ if ( WALBERLA_BUILD_WITH_HIP )
     if (WALBERLA_BUILD_WITH_CUDA)
        message(FATAL_ERROR "For GPU support either use CUDA or HIP. Both simultaneously is not supported.")
     endif()
-    if (${CMAKE_VERSION} VERSION_LESS "3.21.0")
-       message(FATAL_ERROR "For HIP support CMake > 3.21.0 is needed. Please install a newer version")
-    endif()
 
-    include(CheckLanguage)
-    check_language(HIP)
-
-    if( CMAKE_HIP_COMPILER )
-        enable_language(HIP)
-        find_package(hip REQUIRED)
-        # since waLBerla also supports CUDA we only use HIP on an AMD platform
-        add_compile_definitions(__HIP_PLATFORM_AMD__)
-        # include_directories(${HSA_HEADER})
-        #HIP_FOUND is need for our cmake mechanism
-        set ( HIP_FOUND TRUE )
-        set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE)
-    else()
-         message("HIP compiler not found. HIP support is not possible")
-        set ( WALBERLA_BUILD_WITH_HIP FALSE )
-    endif ( )
+    enable_language(HIP)
+    find_package(hip REQUIRED)
+    # since waLBerla also supports CUDA we only use HIP on an AMD platform
+    add_compile_definitions(__HIP_PLATFORM_AMD__)
+    # include_directories(${HSA_HEADER})
+    list (APPEND SERVICE_LIBS hip::host)
 endif ( )
 
-if (WALBERLA_BUILD_WITH_HIP AND HIP_FOUND)
+if (WALBERLA_BUILD_WITH_HIP)
     set(CODEGEN_FILE_SUFFIX "hip")
 endif()
 ############################################################################################################################
 
+if (WALBERLA_BUILD_WITH_HIP OR WALBERLA_BUILD_WITH_CUDA)
+   set (WALBERLA_BUILD_WITH_GPU_SUPPORT TRUE CACHE BOOL "")
+else()
+   set (WALBERLA_BUILD_WITH_GPU_SUPPORT FALSE CACHE BOOL "")
+endif()
+mark_as_advanced( WALBERLA_BUILD_WITH_GPU_SUPPORT )
 
 
 ############################################################################################################################

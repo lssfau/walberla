@@ -35,10 +35,6 @@ if ( OpenMP_CXX_FOUND )
    target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
 endif ()
 
-if ( WALBERLA_BUILD_WITH_HIP )
-   target_link_libraries( walberla_core PUBLIC hip::host )
-endif ( WALBERLA_BUILD_WITH_HIP )
-
 if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
    # Actual support for float16 is available only since C++23
    #   before is_arithmetic and is_floating_point evaluated to false,

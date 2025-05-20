@@ -88,6 +88,14 @@ function( waLBerla_generate_target_from_python )
     if ( OpenMP_CXX_FOUND )
         target_link_libraries( ${PYGEN_NAME} PUBLIC OpenMP::OpenMP_CXX )
     endif ()
+
+    if ( WALBERLA_BUILD_WITH_CUDA )
+       target_link_libraries( ${PYGEN_NAME} PUBLIC CUDA::cudart)
+    endif ( WALBERLA_BUILD_WITH_CUDA )
+
+    if ( WALBERLA_BUILD_WITH_HIP )
+        target_link_libraries( ${PYGEN_NAME} PUBLIC hip::host )
+    endif ( WALBERLA_BUILD_WITH_HIP )
 endfunction()
 #######################################################################################################################
 
