@@ -94,6 +94,16 @@ struct VTKTrait<uint64_t>
    constexpr static const uint_t components = 1;
 };
 
+#if defined(__clang__) && defined(__apple_build_version__)
+template <>
+struct VTKTrait<unsigned long>
+{
+   using type = uint64_t;
+   constexpr static char const * const type_string = "UInt64";
+   constexpr static const uint_t components = 1;
+};
+#endif
+
 template <>
 struct VTKTrait<float>
 {
