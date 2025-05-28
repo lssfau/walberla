@@ -125,6 +125,7 @@ public:
     {% if calculate_force -%}
 
     struct ForceStruct {
+       {% if dim == 3 -%}
        double F_0;
        double F_1;
        double F_2;
@@ -132,6 +133,15 @@ public:
        bool operator==(const ForceStruct & o) const {
           return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && floatIsEqual(F_2, o.F_2);
        }
+       {%- else -%}
+       double F_0;
+       double F_1;
+       ForceStruct() : F_0(double_c(0.0)), F_1(double_c(0.0)) {}
+       bool operator==(const ForceStruct & o) const {
+          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1);
+       }
+       {%- endif -%}
+
     };
 
     class ForceVector
@@ -160,7 +170,10 @@ public:
           {
              result[0] += it->F_0;
              result[1] += it->F_1;
+             {% if dim == 3 -%}
              result[2] += it->F_2;
+             {% endif -%}
+
           }
           return result;
        }
