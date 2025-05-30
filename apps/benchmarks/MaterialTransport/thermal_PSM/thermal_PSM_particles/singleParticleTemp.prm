@@ -4,7 +4,7 @@ PhysicalSetup // all to be specified in SI units!
     dimensional true;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
     xSize 0.04; // = width  // 4dp
     ySize 0.04; // = depth  // 4dp
-    zSize 0.2; // = height  // 20dp
+    zSize 0.4; // = height  // 20dp
 
     periodicInX false;
     periodicInY false;
@@ -65,7 +65,7 @@ Output
     infoSpacing 0.01; // in s
 
     vtkSpacingParticles 0.01; // in s
-    vtkSpacingFluid 0; // in s
+    vtkSpacingFluid 0.01; // in s
     vtkFolder vtk_out;
 
     performanceLogFrequency 5000000000;

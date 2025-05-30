@@ -17,10 +17,13 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     LBMConcentrationSplitSweep.h LBMConcentrationSplitSweep.${CODEGEN_FILE_SUFFIX}
                     PSMFluidSweepSplit.h PSMFluidSweepSplit.${CODEGEN_FILE_SUFFIX}
                     PSMConcentrationSweepSplit.h PSMConcentrationSweepSplit.${CODEGEN_FILE_SUFFIX}
+                    PSMEnergySweep.h PSMEnergySweep.${CODEGEN_FILE_SUFFIX}
                     PackInfoFluid.h PackInfoFluid.${CODEGEN_FILE_SUFFIX}
                     PackInfoConcentration.h PackInfoConcentration.${CODEGEN_FILE_SUFFIX}
+                    PackInfoEnergy.h PackInfoEnergy.${CODEGEN_FILE_SUFFIX}
                     InitializeFluidDomain.h InitializeFluidDomain.${CODEGEN_FILE_SUFFIX}
                     InitializeConcentrationDomain.h InitializeConcentrationDomain.${CODEGEN_FILE_SUFFIX}
+                    InitializeEnergyDomain.h InitializeEnergyDomain.${CODEGEN_FILE_SUFFIX}
                     BC_Fluid_NoSlip.h BC_Fluid_NoSlip.${CODEGEN_FILE_SUFFIX}
                     BC_Fluid_UBB.h BC_Fluid_UBB.${CODEGEN_FILE_SUFFIX}
                     BC_Fluid_Density.h BC_Fluid_Density.${CODEGEN_FILE_SUFFIX}
@@ -35,11 +38,14 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     FluidMacroGetter.h FluidMacroGetter.cpp
                     ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
                     ConcentrationMacroGetter.h ConcentrationMacroGetter.cpp
+                    EnergyMacroSetter.h EnergyMacroSetter.cpp
+                    EnergyMacroGetter.h EnergyMacroGetter.cpp
+                    compute_temperature_field.h compute_temperature_field.cpp
                     GeneralInfoHeader.h
         )
             message(STATUS "generated in thermal PSM is: ${config}" )
             waLBerla_add_executable(NAME thermalPSMCHT_${config} FILES thermalPSMCHT.cpp ../../utilities/InitializerFunctions.cpp
-                    DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk MTWCodegenThermalPSMParticles_${config})
+                    DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk MTWCodegenThermalPSMCHT_${config})
             target_compile_definitions(thermalPSMCHT_${config} PRIVATE Weighting=2)
         endforeach ()
 

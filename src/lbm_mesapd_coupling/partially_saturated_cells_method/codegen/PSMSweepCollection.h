@@ -27,6 +27,8 @@
 #else
 #   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMWrapperSweepsCPU.h"
 #   include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/ParticleAndVolumeFractionMappingSweepsCPU.h"
+#include "ConcentrationMacroGetter.h"
+#include "compute_temperature_field.h"
 #endif
 
 namespace walberla
@@ -55,17 +57,21 @@ class PSMSweepCollection
    PSMSweepCollection(const shared_ptr< StructuredBlockStorage >& bs, const shared_ptr< ParticleAccessor_T >& ac,
                       const ParticleSelector_T& ps,
                       ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA,
-                      const Vector3< uint_t > particleSubBlockSize = Vector3< uint_t >(10))
+                      BlockDataID & densityConcentrationFieldCPUGPUID,
+                      const Vector3< uint_t > particleSubBlockSize = Vector3< uint_t >(10),
+                      bool uniformParticleTemperature = false)
       : particleMappingSweep(SphereFractionMappingSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA, particleSubBlockSize)),
         setParticleVelocitiesSweep(SetParticleVelocitiesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA)),
         reduceParticleForcesSweep(ReduceParticleForcesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
            bs, ac, ps, particleAndVolumeFractionSoA)),
-        setParticleTemperaturesSweep(SetParticleTemperaturesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
-           bs, ac, ps, particleAndVolumeFractionSoA))
+        setParticleTemperaturesSweep( SetParticleTemperaturesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T >(
+           bs, ac, ps, particleAndVolumeFractionSoA, densityConcentrationFieldCPUGPUID,uniformParticleTemperature))
 
    {}
+
+
    SphereFractionMappingSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > particleMappingSweep;
    SetParticleVelocitiesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > setParticleVelocitiesSweep;
    ReduceParticleForcesSweep< ParticleAccessor_T, ParticleSelector_T, Weighting_T > reduceParticleForcesSweep;
@@ -78,14 +84,34 @@ void addThermalPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmS
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
                            "Set particle velocities");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleTemperaturesSweep),
+                           "Set particle temperatures");
+
    timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
-   /*timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleTemperaturesSweep),
-                           "Set particle temperatures");*/
-   //timeloop.add() << Sweep(deviceSyncWrapper(psmTempSweep), "PSM Concentration sweep");
+
+   timeloop.add() << Sweep(deviceSyncWrapper(psmTempSweep), "PSM Concentration sweep");
 
    // after both the sweeps, reduce the particle forces.
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
                            "Reduce particle forces");
+}
+
+template< typename SweepCollection, typename PSMSweepFluid,typename PSMSweepCHT, typename ComputeTempSweep>
+void addCHTPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCollection, PSMSweepFluid& psmFluidSweep,PSMSweepCHT& psmTempSweep,ComputeTempSweep &compute_temperature_field)
+{
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                           "Set particle velocities");
+
+   timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
+
+   timeloop.add() << Sweep(deviceSyncWrapper(psmTempSweep), "PSM Concentration sweep");
+
+   // after both the sweeps, reduce the particle forces.
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                           "Reduce particle forces");
+
+   timeloop.add() << Sweep(deviceSyncWrapper(compute_temperature_field),"compute temperature field");
 }
 
 

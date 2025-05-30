@@ -26,6 +26,7 @@ PhysicalSetup // all to be specified in SI units!
     collisionTimeFactor 1.0;
 
     particleGenerationSpacing 0.010;
+
 }
 
 NumericalSetup
@@ -58,6 +59,9 @@ TemperatureSetup
     Mach 0.1;
     particleTemperature 0;
     thermal_expansion_coeff 1.04e-4;
+    solidSpecificHeat 1.0;  // J/kg.k
+    fluidSpecificHeat 1.0;  // J/kg.k
+
 }
 
 Output

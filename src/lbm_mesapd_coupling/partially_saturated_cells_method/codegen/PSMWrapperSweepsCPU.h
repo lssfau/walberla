@@ -36,6 +36,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include <cassert>
+#include "GeneralInfoHeader.h"
 
 namespace walberla
 {
@@ -53,9 +54,11 @@ class SetParticleTemperaturesSweep
    SetParticleTemperaturesSweep(const shared_ptr< StructuredBlockStorage >& bs,
                                 const shared_ptr< ParticleAccessor_T >& ac,
                                 const ParticleSelector_T& mappingParticleSelector,
-                                ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA)
+                                ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA,
+                                BlockDataID & densityConcentrationFieldCPUGPUID,bool uniformParticleTemperature = false)
       : bs_(bs), ac_(ac), mappingParticleSelector_(mappingParticleSelector),
-        particleAndVolumeFractionSoA_(particleAndVolumeFractionSoA)
+        particleAndVolumeFractionSoA_(particleAndVolumeFractionSoA), densityConcentrationFieldCPUGPUID_(densityConcentrationFieldCPUGPUID),
+        uniformParticleTemperature_(uniformParticleTemperature)
    {}
    void operator()(IBlock* block)
    {
@@ -98,10 +101,27 @@ class SetParticleTemperaturesSweep
       auto idxField = block->getData< idxField_T >(particleAndVolumeFractionSoA_.idxFieldID);
       auto particleTemperaturesField =
          block->getData< particleTemperaturesField_T >(particleAndVolumeFractionSoA_.particleTemperaturesFieldID);
-      WALBERLA_FOR_ALL_CELLS_XYZ(
-         particleTemperaturesField, for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++) {
-            particleTemperaturesField->get(x, y, z, p) = temperatures[idxField->get(x, y, z, p)];
-         })
+
+      auto BsField =
+         block->getData< BsField_T >(particleAndVolumeFractionSoA_.BsFieldID);
+      auto densityConcentrationField = block->getData< DensityField_concentration_T >(densityConcentrationFieldCPUGPUID_);
+
+      if (uniformParticleTemperature_)
+      {
+         WALBERLA_FOR_ALL_CELLS_XYZ(
+            particleTemperaturesField,
+
+            for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z);
+                 p++) { particleTemperaturesField->get(x, y, z, p) = temperatures[idxField->get(x, y, z, p)]; })
+      }
+      else
+      {
+         WALBERLA_FOR_ALL_CELLS_XYZ(
+            particleTemperaturesField,
+
+            for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z);
+                 p++) { particleTemperaturesField->get(x, y, z, p) = densityConcentrationField->get(x, y, z); })
+      }
       free(temperatures);
    }
 
@@ -110,6 +130,8 @@ class SetParticleTemperaturesSweep
    const shared_ptr< ParticleAccessor_T > ac_;
    const ParticleSelector_T& mappingParticleSelector_;
    ParticleAndVolumeFractionSoA_T< Weighting_T >& particleAndVolumeFractionSoA_;
+   const BlockDataID &densityConcentrationFieldCPUGPUID_;
+   const bool uniformParticleTemperature_;
 };
 
 template< typename ParticleAccessor_T, typename ParticleSelector_T, int Weighting_T >
