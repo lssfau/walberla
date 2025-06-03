@@ -77,12 +77,12 @@ with CodeGeneration() as ctx:
                                     field_data_type=data_type)
     
     noslipQbb = lbm_boundary_generator(class_name='NoSlipQBBBC', flag_uid='NoSlipQBB',
-                                    boundary_object=QuadraticBounceBack( relaxation_rate=omega ),
+                                    boundary_object=QuadraticBounceBack( relaxation_rate=omega, data_type=data_type),
                                     field_data_type=data_type)
     
     wallDistanceCallback = lambda *args: None
     obj_noslipQbb = lbm_boundary_generator(class_name='ObjNoSlipQBBBC', flag_uid='ObjNoSlipQBB',
-                                    boundary_object=QuadraticBounceBack( relaxation_rate=omega ),
+                                    boundary_object=QuadraticBounceBack( relaxation_rate=omega, data_type=data_type),
                                     field_data_type=data_type)
 
     outflow = lbm_boundary_generator( class_name='OutflowBC', flag_uid='Outflow',

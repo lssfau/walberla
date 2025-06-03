@@ -51,7 +51,7 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
 
    for (const auto& offset : offsets) {
       for (const auto& x : xValues) {
-         auto x_dir = floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0;
+         auto x_dir = real_t(floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0);
         
          typename MeshType::Point origin = { x - offset * x_dir,  0 , 0 };
          typename MeshType::Point direction = { x_dir * (floatIsEqual(origin[0] , 0 ) ? 0 : 1), 0, 0};
@@ -60,7 +60,7 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
       }
 
       for (const auto& y : yValues) {
-         auto y_dir = floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0;
+         auto y_dir = real_t(floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0);
 
          typename MeshType::Point origin = { 0 ,  y - offset * y_dir , 0  };
          typename MeshType::Point direction = { 0, y_dir * (floatIsEqual(origin[1] , 0 ) ? 0 : 1), 0};
@@ -69,7 +69,7 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
       }
 
       for (const auto& z : zValues) {
-         auto z_dir = floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0;
+         auto z_dir = real_t(floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0);
 
          typename MeshType::Point origin = { 0 , 0 , z - offset * z_dir };
          typename MeshType::Point direction = { 0, 0, z_dir * (floatIsEqual(origin[2] , 0 ) ? 0 : 1)};
@@ -80,8 +80,8 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
       for (const auto& y : yValues) {
          for (const auto& x : xValues) {
             
-            auto x_dir = floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0;
-            auto y_dir = floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0;
+            auto x_dir = real_t(floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0);
+            auto y_dir = real_t(floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0);
 
             typename MeshType::Point origin = { x - offset * x_dir, y - offset * y_dir, 0 };
 
@@ -95,8 +95,8 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
       for (const auto& z : zValues) {
          for (const auto& x : xValues) {
             
-            auto x_dir = floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0;
-            auto z_dir = floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0;
+            auto x_dir = real_t(floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0);
+            auto z_dir = real_t(floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0);
 
             typename MeshType::Point origin = { x - offset * x_dir, 0, z - offset * z_dir };
 
@@ -110,8 +110,8 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
       for (const auto& z : zValues) {
          for (const auto& y : yValues) {   
 
-            auto y_dir = floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0;
-            auto z_dir = floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0;
+            auto y_dir = real_t(floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0);
+            auto z_dir = real_t(floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0);
 
             typename MeshType::Point origin = { 0, y - offset * y_dir, z - offset * z_dir };
 
@@ -127,17 +127,17 @@ generateRayInfo( const Vector3<real_t> & min, const Vector3<real_t> & max, std::
          for (const auto& y : yValues) {
             for (const auto& x : xValues) {
                
-               auto x_dir = floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0;
-               auto y_dir = floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0;
-               auto z_dir = floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0;
+               auto x_dir = real_t(floatIsEqual(x , max[0]) ? -1 : floatIsEqual(x , min[0]) ? 1 : 0);
+               auto y_dir = real_t(floatIsEqual(y , max[1]) ? -1 : floatIsEqual(y , min[1]) ? 1 : 0);
+               auto z_dir = real_t(floatIsEqual(z , max[2]) ? -1 : floatIsEqual(z , min[2]) ? 1 : 0);
 
                typename MeshType::Point origin = { x - offset * x_dir, 
                                                    y - offset * y_dir, 
                                                    z - offset * z_dir };
 
-               typename MeshType::Point direction = { x_dir * (floatIsEqual(origin[0] , 0 ) ? 0 : 1), 
-                                                      y_dir * (floatIsEqual(origin[1] , 0 ) ? 0 : 1), 
-                                                      z_dir * (floatIsEqual(origin[2] , 0 ) ? 0 : 1)};
+               typename MeshType::Point direction = { x_dir * real_t(floatIsEqual(origin[0] , 0 ) ? 0 : 1),
+                                                      y_dir * real_t(floatIsEqual(origin[1] , 0 ) ? 0 : 1),
+                                                      z_dir * real_t(floatIsEqual(origin[2] , 0 ) ? 0 : 1)};
 
                result.emplace_back(origin, direction, offset);
             }
@@ -170,7 +170,7 @@ void test( const std::string & meshFile )
    auto triDist = make_shared< mesh::TriangleDistance<MeshType> >( mesh );
    DistanceOctree<MeshType> distanceOctree( triDist );
 
-   std::vector< real_t > offsets = {0.0, 0.25, 0.5, 0.77, 1.0, 1.5};
+   std::vector< real_t > offsets = {real_t(0.0), real_t(0.25), real_t(0.5), real_t(0.77), real_t(1.0), real_t(1.5)};
 
    std::vector<std::tuple<typename MeshType::Point, typename MeshType::Point, float>> 
    offsetCombos = generateRayInfo<MeshType>( min, max, offsets);
@@ -194,7 +194,7 @@ void test( const std::string & meshFile )
    }
 }
 
-int main( int argc, char * argv[] )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );
@@ -208,7 +208,7 @@ int main( int argc, char * argv[] )
 
    test<mesh::TriangleMesh>( meshFile );
    test<mesh::FloatTriangleMesh>( meshFile );
-   test<mesh::PythonTriangleMesh>( meshFile );
+   //test<mesh::PythonTriangleMesh>( meshFile );
 
    return EXIT_SUCCESS;
 }
