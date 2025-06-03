@@ -195,7 +195,7 @@ class {{class_name}}
        * @return    The required size of the buffer, in bytes
        * */
       uint_t size (CellInterval & ci, stencil::Direction dir) const {
-         return ci.numCells() * sizes[dir] * uint_c(sizeof(value_type));
+         return ci.numCells() * sizes[Stencil::idx[dir]] * uint_c(sizeof(value_type));
       }
 
       /**
