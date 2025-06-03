@@ -34,7 +34,9 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
 
    waLBerla_compile_test( FILES MeshDistanceCallbackMollerTrumboreTest.cpp DEPENDS walberla::mesh )
    waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  cube.obj )
-   waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestSphere COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  sphere.obj )
+   if ( WALBERLA_DOUBLE_ACCURACY )
+      waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestSphere COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  sphere.obj )
+   endif ()
 
    waLBerla_compile_test( FILES MeshDistancePlausibilityTest.cpp DEPENDS walberla::mesh )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunny     COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  1.25   CONFIGURATIONS Release RelWithDbgInfo )

@@ -13,9 +13,9 @@ To build waLBerla, you are going to need at least:
  - An up-to-date MPI library for shared-memory parallel computing
 
 WaLBerla also has numerous optional dependencies:
-  
+
   - Nvidia CUDA for GPU computing on compatible GPUs
-  - [Metis](https://github.com/KarypisLab/METIS) and [ParMetis](https://github.com/KarypisLab/ParMETIS) 
+  - [Metis](https://github.com/KarypisLab/METIS) and [ParMetis](https://github.com/KarypisLab/ParMETIS)
     for static and dynamic load balancing
   - [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/) for handling of complex geometry meshes
 
@@ -50,7 +50,7 @@ and extract that archive into your filesystem.
 ### Generate the Build System from a CMake Preset  {#cmake-preset}
 
 WaLBerla's CMake build system exposes a large number of configuration options.
-Also, depending on which of its modules you are using, 
+Also, depending on which of its modules you are using,
 you may have to populate numerous additional build parameters with values specific to your local machine.
 In order to document a build setup and to make builds reproducible,
 we recommend to use [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html).
@@ -306,11 +306,11 @@ nvidia-smi
 
 > [!note]
 > In case `nvcc` is not found, adding it to `PATH` may resolve the issue:
-> 
+>
 > ```
 > # may be located somewhere else depending on installation
 > export CUDA_HOME=/usr/local/cuda
-> 
+>
 > export PATH=$PATH:$CUDA_HOME/bin
 > export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/lib64
 > ```
@@ -323,7 +323,7 @@ The CUDA support in CMake is enabled via `WALBERLA_BUILD_WITH_CUDA`.
 When this flag is set to `ON`, waLBerla automates several steps for using CUDA in the CMake project.
 It attempts to find and configure CUDA, enables compile options, sets up preprocessor macros such as `WALBERLA_BUILD_WITH_GPU_SUPPORT`, etc.
 
-It also configures the build pipeline such that the CUDA sources are compiled separately with the compiler specified in `CMAKE_CUDA_COMPILER`.  
+It also configures the build pipeline such that the CUDA sources are compiled separately with the compiler specified in `CMAKE_CUDA_COMPILER`.
 
 The `CMAKE_CUDA_ARCHITECTURES` specifies the compute capability of the target GPU architecture,
 which is then used by `nvcc` to generate hardware-specific code.
@@ -365,31 +365,8 @@ cmake \
 WaLBerla's `mesh_common` and `mesh` modules couple with [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/download),
 an open-source tool developed at RWTH Aachen,
 to import and handle surface meshes of geometric objects.
-To use this feature, download, build, and install OpenMesh according to the instructions on their homepage.
-WaLBerla's build system should then be able to automatically find your OpenMesh installation.
 
-> [!note]
-> You might want to install OpenMesh into a custom prefix path to avoid polluting your system or if you do not have
-> super-user rights.
-> To do this, set `CMAKE_INSTALL_PREFIX` while configuring the OpenMesh CMake system. Here's an example of building and installing
-> OpenMesh into a custom prefix:
-> 
-> ```
-> cmake -DCMAKE_INSTALL_PREFIX="my/custom/path" -S . -B build
-> cd build
-> make
-> make install
-> ```
-> 
-> To make sure waLBerla's build system finds the installation, you need to add `my/custom/path` to the CMake prefix path,
-> e.g. in the preset file:
->
-> ```json
-> "cacheVariables": {
->   "CMAKE_BUILD_TYPE": "Debug",
->   "CMAKE_PREFIX_PATH": "my/custom/path"
-> }
-> ```
+The OpenMesh tool is fetched automatically by CMake, when setting `WALBERLA_BUILD_WITH_OPENMESH=ON`.
 
 ## Metis and ParMetis for Load Balancing
 

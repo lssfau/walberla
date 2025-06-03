@@ -42,6 +42,7 @@ include( CMakeParseArguments )
 enable_testing()
 include( CTest )
 
+include(FetchContent)
 
 ############################################################################################################################
 
@@ -346,8 +347,6 @@ endif()
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
 
-    include(FetchContent)
-
     FetchContent_Declare(
             pybind11
             GIT_REPOSITORY https://github.com/pybind/pybind11.git
@@ -532,19 +531,22 @@ endif()
 ## OpenMesh
 ##
 ############################################################################################################################
-if( (NOT DEFINED WALBERLA_BUILD_WITH_OPENMESH) OR WALBERLA_BUILD_WITH_OPENMESH )
-   find_package( OpenMesh )
-   if( OPENMESH_FOUND )
-      set( WALBERLA_BUILD_WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh support" )
-      include_directories( SYSTEM ${OPENMESH_INCLUDE_DIRS} )
-      list( APPEND SERVICE_LIBS ${OPENMESH_LIBRARIES} )
-      if( WALBERLA_CXX_COMPILER_IS_MSVC )
-         add_definitions(-D_USE_MATH_DEFINES )
-      endif()
-   else()
-      message("   If OpenMesh required, set OPENMESH_LIBRARY_DIR to the OpenMesh directory.")
-      set( WALBERLA_BUILD_WITH_OPENMESH OFF CACHE BOOL "Build with OpenMesh support" FORCE )
-   endif()
+
+if( WALBERLA_BUILD_WITH_OPENMESH )
+
+    FetchContent_Declare(
+            OpenMesh
+            GIT_REPOSITORY https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git
+            GIT_TAG        OpenMesh-11.0
+            EXCLUDE_FROM_ALL
+            SYSTEM
+    )
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "Suppress dev warnings")
+    FetchContent_MakeAvailable(OpenMesh)
+    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 0 CACHE INTERNAL "Suppress dev warnings")
+    target_compile_options(OpenMeshCore PRIVATE -w)
+    target_compile_options(OpenMeshTools PRIVATE -w)
+    list( APPEND SERVICE_LIBS ${OPENMESH_LIBRARIES} )
 endif()
 
 ############################################################################################################################
@@ -783,7 +785,7 @@ if (WALBERLA_BUILD_DOC)
 
      configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
 
-     add_custom_target ( doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
+     add_custom_target ( walberla_doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
                             COMMENT "Generating API documentation with Doxygen" VERBATIM )
 
   endif ( )
