@@ -130,10 +130,11 @@ public:
    //**Get functions****************************************************************************************************
    /*!\name Get functions */
    //@{
-   inline size_t maxSize () const;
-   inline size_t size    () const;
-   inline size_t capacity() const;
-   inline bool   isEmpty () const;
+   inline size_t maxSize  () const;
+   inline size_t size     () const;
+   inline size_t dataSize () const;
+   inline size_t capacity () const;
+   inline bool   isEmpty  () const;
    //@}
    //*******************************************************************************************************************
 
@@ -389,6 +390,20 @@ template< typename T    // Element type
 inline size_t GenericSendBuffer<T,G>::size() const
 {
    return numeric_cast< size_t >( cur_ - begin_ );
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
+/*!\brief Returns the current data size of the send buffer.
+//
+// \return The current data size.
+*/
+template< typename T    // Element type
+          , typename G >  // Growth policy
+inline size_t GenericSendBuffer<T,G>::dataSize() const
+{
+   return sizeof(T) * size();
 }
 //**********************************************************************************************************************
 

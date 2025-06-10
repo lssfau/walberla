@@ -31,7 +31,7 @@
 #   include "blockforest/StructuredBlockForest.h"
 
 #   include "core/StringUtility.h"
-#   include "core/mpi/MPIIO.h"
+#   include "core/mpi/BufferIO.h"
 
 #   include "stencil/D3Q19.h"
 
@@ -186,17 +186,17 @@ py::object SbF_transformLocalToGlobal(StructuredBlockForest& s, IBlock& block, c
    throw py::value_error("Only CellIntervals and cells can be transformed");
 }
 
-void SbF_writeBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file)
+void SbF_writeBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file, const bool forceSerialIO = true)
 {
    mpi::SendBuffer buffer;
    s.serializeBlockData(blockDataIDFromString(s, blockDataId), buffer);
-   mpi::writeMPIIO(file, buffer);
+   mpi::writeBuffer(file, buffer, forceSerialIO);
 }
 
-void SbF_readBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file)
+void SbF_readBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file, const bool forceSerialIO = true)
 {
    mpi::RecvBuffer buffer;
-   mpi::readMPIIO(file, buffer);
+   mpi::readBuffer(file, buffer, forceSerialIO);
 
    s.deserializeBlockData(blockDataIDFromString(s, blockDataId), buffer);
    if (!buffer.isEmpty())

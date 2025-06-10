@@ -148,9 +148,10 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
-   { return blockForest_->loadBlockData( file, dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
+   { return blockForest_->loadBlockData( file, dataHandling, identifier, forceSerialIO, requiredSelectors, incompatibleSelectors ); }
    
    inline void refresh() { blockForest_->refresh(); }
 

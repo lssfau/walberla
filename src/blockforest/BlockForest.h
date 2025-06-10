@@ -365,12 +365,15 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
    BlockDataID loadBlockData( const std::string & file,
-                              const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() )
-   { return BlockStorage::loadBlockData( file, dataHandling, identifier ); }
+                              const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling,
+                              const std::string & identifier = std::string(),
+                              const bool forceSerialIO = true )
+   { return BlockStorage::loadBlockData( file, dataHandling, identifier, forceSerialIO ); }
 
 
    // AMR Pipeline
@@ -877,6 +880,7 @@ inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandli
 
 template< typename T >
 inline BlockDataID BlockForest::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
+                                               const bool forceSerialIO,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
    auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
@@ -887,14 +891,14 @@ inline BlockDataID BlockForest::loadBlockData( const std::string & file, const s
                walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( downcast ),
                requiredSelectors, incompatibleSelectors, identifier );
 
-      return loadBlockData( file, sbdhw, identifier );
+      return loadBlockData( file, sbdhw, identifier, forceSerialIO );
    }
 
    domain_decomposition::internal::SelectableBlockDataHandlingWrapper sbdhw(
             walberla::make_shared< domain_decomposition::internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
             requiredSelectors, incompatibleSelectors, identifier );
 
-   return loadBlockData( file, sbdhw, identifier );
+   return loadBlockData( file, sbdhw, identifier, forceSerialIO );
 }
 
 

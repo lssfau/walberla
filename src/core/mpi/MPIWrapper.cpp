@@ -138,5 +138,11 @@ MPI_Op MPITrait< walberla::float16 >::operation(const mpi::Operation& op)
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ABORT("If MPI is not used, a custom operator should never be called."); }
 }
 
+int MPITrait< walberla::float16 >::size()
+{
+   // Sinze a custom type with size of two bytes is used for FP16 support we return 2 here.
+   return 2;
+}
+
 } // namespace walberla
 #endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
