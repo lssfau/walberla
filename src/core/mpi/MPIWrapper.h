@@ -320,6 +320,7 @@ namespace mpi {
 // the corresponding MPI data types its respective operation required for send, receive and reduce operations.
 // For a particular MPITrait instantiation, the corresponding MPI data type can be obtained by calling type()
 // as well as calling operation( const Operation& ) to the MPI operation corresponding to the MPI data type.
+// Furthermore size() uses MPI_Type_size to return the data size of the MPI data type.
 // The following example demonstrates the application of the MPITrait class:
 
 \code
@@ -336,6 +337,7 @@ struct MPITrait
 {
    static inline MPI_Datatype type();
    static inline MPI_Op operation(const mpi::Operation&      );
+   static inline int size();
 };
 
 /// Macro for specialization of the MPI supported data types in MPITrait::type().
@@ -366,6 +368,7 @@ WALBERLA_CREATE_MPITRAIT_TYPE_SPECIALIZATION(long double, MPI_LONG_DOUBLE)
 template<> struct MPITrait< float16 >{
    static MPI_Datatype type();
    static MPI_Op operation(const mpi::Operation&      );
+   static int size();
 };
 #endif
 
@@ -405,6 +408,19 @@ MPI_Op MPITrait< T >::operation(const mpi::Operation& op)
    default:
       WALBERLA_ABORT("Unknown operation!");
    }
+}
+
+/*!
+ *  \brief Specialization of the static size() method of MPITrait.
+ *
+ *  It returns the size of the MPI datatype.
+ */
+template< typename T >
+int MPITrait< T >::size()
+{
+   int datatypeSize;
+   MPI_Type_size(type(), &datatypeSize);
+   return datatypeSize;
 }
 
 } // namespace walberla

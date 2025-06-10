@@ -32,7 +32,6 @@
 #   include "core/cell/CellInterval.h"
 #   include "core/logging/Logging.h"
 #   include "core/math/AABB.h"
-#   include "core/mpi/MPIIO.h"
 #   include "core/timing/ReduceType.h"
 #   include "core/timing/TimingPool.h"
 #   include "core/timing/TimingTree.h"

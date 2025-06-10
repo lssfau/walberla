@@ -27,7 +27,7 @@
 #include "core/debug/CheckFunctions.h"
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
-#include "core/mpi/MPIIO.h"
+#include "core/mpi/BufferIO.h"
 #include "core/mpi/Gather.h"
 
 
@@ -130,7 +130,7 @@ namespace internal {
 */
 //**********************************************************************************************************************
 BlockDataID BlockStorage::loadBlockData( const std::string & file, const internal::SelectableBlockDataHandlingWrapper & dataHandling,
-                                         const std::string & identifier )
+                                         const std::string & identifier, const bool forceSerialIO )
 {
    WALBERLA_LOG_PROGRESS( "Adding block data (\"" << identifier << "\"), loading data from file \"" << file << "\" ..." );
    
@@ -139,7 +139,7 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
    blockDataItem_.push_back( item );
    
    mpi::RecvBuffer buffer;
-   mpi::readMPIIO(file, buffer);
+   mpi::readBuffer(file, buffer, forceSerialIO);
 
    std::vector< IBlock * > blocks;
    for( auto block = begin(); block != end(); ++block )
@@ -169,13 +169,13 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
 *   restarting a simulation) the data can be loaded by using the member function 'loadBlockData'.
 */
 //**********************************************************************************************************************
-void BlockStorage::saveBlockData( const std::string & file, const BlockDataID & id )
+void BlockStorage::saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO)
 {
    WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
 
    mpi::SendBuffer buffer;
    serializeBlockData(id, buffer);
-   mpi::writeMPIIO(file, buffer);
+   mpi::writeBuffer(file, buffer, forceSerialIO);
 }
 
 

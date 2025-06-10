@@ -43,7 +43,7 @@ const Set< SUID > None(Set< SUID >::emptySet());
 static void refinementSelectionFunction(SetupBlockForest& forest)
 {
    for (auto & block : forest)
-      if (block.getAABB().contains(Vector3< real_t >(real_t(75))))
+      if (block.getAABB().contains(Vector3< real_t >(real_c(75.0))))
          if (!block.hasFather()) block.setMarker(true);
 }
 
@@ -53,11 +53,11 @@ static void workloadMemorySUIDAssignmentFunction(SetupBlockForest& forest)
    {
       block.setMemory(memory_t(1));
       block.setWorkload(workload_t(1));
-      if (block.getAABB().contains(Vector3< real_t >(real_t(25)))) block.addState(Empty);
+      if (block.getAABB().contains(Vector3< real_t >(real_c(25.0)))) block.addState(Empty);
    }
 }
 
-void test()
+void test(const bool forceSerialIO)
 {
    using FieldType = field::GhostLayerField<double, 2>;
 
@@ -68,20 +68,20 @@ void test()
 
    AABB domain(0, 0, 0, 100, 100, 100);
 
-   sforest.init(domain, uint_t(2), uint_t(2), uint_t(2), true, false, false);
+   sforest.init(domain, uint_c(2), uint_c(2), uint_c(2), true, false, false);
 
    sforest.balanceLoad(blockforest::StaticLevelwiseCurveBalance(true), uint_c(MPIManager::instance()->numProcesses()));
 
    auto sbf = make_shared< StructuredBlockForest >(
-      make_shared< BlockForest >(uint_c(MPIManager::instance()->rank()), sforest, true), uint_t(10), uint_t(8),
-      uint_t(14));
+      make_shared< BlockForest >(uint_c(MPIManager::instance()->rank()), sforest, true), uint_c(10), uint_c(8),
+      uint_c(14));
 
    blockforest::BlockForestEvaluation evaluation(sbf->getBlockForest());
    WALBERLA_LOG_INFO_ON_ROOT("BlockForest:\n" << evaluation.toString())
 
    // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::fzyx, uint_t(3), false,
    // None, Empty );
-   auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_t(3), 0.0, field::fzyx);
+   auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_c(3), 0.0, field::fzyx);
    auto originalFieldId = sbf->addBlockData(dataHandling, "OriginalField", None, Empty);
 
    math::seedRandomGenerator(numeric_cast< std::mt19937::result_type >(MPIManager::instance()->rank()));
@@ -94,11 +94,11 @@ void test()
          *dataIt = math::realRandom< FieldType::value_type >();
    }
 
-   sbf->saveBlockData("block.data", originalFieldId);
-
+   forceSerialIO ? sbf->saveBlockData("block.data", originalFieldId, true) : sbf->saveBlockData("blockMPIIO.data", originalFieldId, false);
+      
    WALBERLA_MPI_BARRIER()
 
-   auto readFieldId = sbf->loadBlockData("block.data", dataHandling, "ReadField", None, Empty);
+   auto readFieldId = forceSerialIO ? sbf->loadBlockData("block.data", dataHandling, "ReadField", true, None, Empty) : sbf->loadBlockData("blockMPIIO.data", dataHandling, "ReadField", false, None, Empty);
 
    for (auto it = sbf->begin(None, Empty); it != sbf->end(); ++it)
    {
@@ -121,7 +121,8 @@ int main(int argc, char* argv[])
 
    // test with MPI_WORLD_COMM
    walberla::MPIManager::instance()->useWorldComm();
-   block_data_io_test::test();
+   block_data_io_test::test(true);
+   block_data_io_test::test(false);
 
    // test with Cartesian MPI communicator
    // this is tested additionally because some versions of OpenMPI are known to produce segmentation faults when using
@@ -132,6 +133,7 @@ int main(int argc, char* argv[])
 
       walberla::MPIManager::instance()->createCartesianComm(walberla::uint_c(2), walberla::uint_c(2),
                                                             walberla::uint_c(2), false, false, false);
-      block_data_io_test::test();
+      block_data_io_test::test(true);
+      block_data_io_test::test(false);
    }
 }

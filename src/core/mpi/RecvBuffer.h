@@ -113,10 +113,11 @@ public:
    //**Get functions****************************************************************************************************
    /*!\name Get functions */
    //@{
-   inline size_t maxSize () const;
-   inline size_t size    () const;
-   inline size_t capacity() const;
-   inline bool   isEmpty () const;
+   inline size_t maxSize  () const;
+   inline size_t size     () const;
+   inline size_t dataSize () const;
+   inline size_t capacity () const;
+   inline bool   isEmpty  () const;
    //@}
    //*******************************************************************************************************************
 
@@ -341,6 +342,19 @@ template< typename T >  // Element type
 inline size_t GenericRecvBuffer<T>::size() const
 {
    return numeric_cast< size_t >( end_ - cur_ );
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
+/*!\brief Returns the current data size of the receive buffer.
+//
+// \return The current data size.
+*/
+template< typename T >  // Element type
+inline size_t GenericRecvBuffer<T>::dataSize() const
+{
+   return sizeof(T) * size();
 }
 //**********************************************************************************************************************
 

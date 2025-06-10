@@ -484,13 +484,16 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
    BlockDataID loadBlockData( const std::string & file,
-                              const internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() );
+                              const internal::SelectableBlockDataHandlingWrapper & dataHandling,
+                              const std::string & identifier = std::string(),
+                              const bool forceSerialIO = true );
                               
-   void saveBlockData( const std::string & file, const BlockDataID & id );
+   void saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO = true);
 
    void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer );
    void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer );
@@ -700,12 +703,13 @@ inline BlockDataID BlockStorage::addBlockData( std::function< T* ( IBlock* const
 //**********************************************************************************************************************
 template< typename T >
 inline BlockDataID BlockStorage::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
+                                                const bool forceSerialIO,
                                                 const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
    internal::SelectableBlockDataHandlingWrapper sbdhw( walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
                                                        requiredSelectors, incompatibleSelectors, identifier );
 
-   return loadBlockData( file, sbdhw, identifier );
+   return loadBlockData( file, sbdhw, identifier, forceSerialIO );
 }
 
 

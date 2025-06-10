@@ -254,11 +254,12 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
-   { return blockStorage_->loadBlockData( file, dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
+   { return blockStorage_->loadBlockData( file, dataHandling, identifier, forceSerialIO, requiredSelectors, incompatibleSelectors ); }
    
-   void saveBlockData( const std::string & file, const BlockDataID & id ) { blockStorage_->saveBlockData( file, id ); }
+   void saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO = true) { blockStorage_->saveBlockData( file, id, forceSerialIO); }
    void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer ) { blockStorage_->serializeBlockData(id, buffer); }
    void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer )  { blockStorage_->deserializeBlockData(id, buffer); }
 

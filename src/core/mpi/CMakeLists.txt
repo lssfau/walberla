@@ -15,8 +15,8 @@ target_sources( walberla_core
       Gatherv.h
       MPIHelper.cpp
       MPIHelper.h
-      MPIIO.cpp
-      MPIIO.h
+      BufferIO.cpp
+      BufferIO.h
       MPIManager.cpp
       MPIManager.h
       MPIOperation.h
