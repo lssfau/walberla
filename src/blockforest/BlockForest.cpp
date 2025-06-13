@@ -2066,7 +2066,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    std::map< uint_t, std::vector< uint_t > > recvBufferSizes; // does not include local transfers
 
-   for( auto const [sourceProcess, size] : numberOfBlocksToRecv )
+   for( auto const &[sourceProcess, size] : numberOfBlocksToRecv )
    {
       WALBERLA_ASSERT_GREATER( size, uint_t(0) );
       recvBufferSizes[ sourceProcess ].resize( size );
