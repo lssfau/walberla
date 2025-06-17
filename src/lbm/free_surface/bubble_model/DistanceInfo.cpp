@@ -50,7 +50,7 @@ real_t DistanceInfo::getDistanceToNearestBubble(const BubbleID& ownID, real_t ma
    real_t minDistance = maxDistance;
 
    // find the minimum distance
-   for (auto const [bubble_id, distance] : bubbleInfos_)
+   for (auto const &[bubble_id, distance] : bubbleInfos_)
    {
       if (minDistance > distance && bubble_id != ownID) { minDistance = distance; }
    }
@@ -64,7 +64,7 @@ void DistanceInfo::combine(const DistanceInfo& other, real_t linkDistance, real_
    real_t sumDistance = real_c(0);
 
    // loop over the "bubbleInfos" (std::map) of another cell
-   for (auto const [bubble_id, distance] : other.bubbleInfos_)
+   for (auto const &[bubble_id, distance] : other.bubbleInfos_)
    {
       // the other cell's bubble is not contained in this cell's bubbleInfos, yet
       if (not bubbleInfos_.contains(bubble_id))
@@ -101,7 +101,7 @@ bool DistanceInfo::operator==(DistanceInfo& other) { return (this->bubbleInfos_ 
 
 void DistanceInfo::print(std::ostream& os) const
 {
-   for (auto const [bubble_id, distance] : bubbleInfos_)
+   for (auto const &[bubble_id, distance] : bubbleInfos_)
    {
       os << "( " << bubble_id << "," << distance << ")\n";
    }
