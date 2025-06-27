@@ -1,0 +1,57 @@
+.testsuite-common:
+  before_script:
+    # Check software versions
+    - $CXX --version
+    - cmake --version
+    - ccache --version
+    - mpirun --version
+    - python3 --version
+    # Create and activate Python Environment
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip install jinja2 lbmpy==1.3.7 lxml setuptools
+    # Prepare mesa-pd sources
+    - python python/mesa_pd.py -y .
+    # Prepare CMake presets
+    - >
+      python
+      utilities/workflows/generateWorkflows.py
+      cmake-presets utilities/workflows/ci-workflows.json
+      --patch-main-presets-file CMakePresets.json
+  script:
+    # Run Test Workflow
+    - cmake --workflow --preset ${cmakePresetName}
+  after_script: []
+  artifacts:
+    reports:
+      junit: build/${cmakePresetName}/junit-report.xml
+
+.testsuite-base-linux:
+  extends: .testsuite-common
+  before_script:
+    - !reference [.testsuite-common, before_script]
+    # Install cupy
+    - pip install cupy-cuda12x
+    # Set MPI environment
+    - export MPIEXEC_PREFLAGS="--allow-run-as-root"
+  after_script: []
+  variables:
+    WALBERLA_CI_CUDA_ARCHITECTURES: "60"
+  tags:
+    - docker
+    - cuda
+    - cudaComputeCapability6.1
+
+
+# Patch for clang-19: LLVM OpenMP runtime libary are not on LD_LIBRARY_PATH
+.testsuite-base-patch-clang-19:
+  extends: .testsuite-base-linux
+  script:
+    - export LD_LIBRARY_PATH=/opt/spack/__spack_path_placeholder__/__spack_path_placeholder__/__spack_path_placeholder__/__spack_path_placeholder__/__spack_p/linux-ubuntu24.04-x86_64/gcc-13.3.0/llvm-19.1.3-haobvqckzhrrjtrn34rmdvcdeyynsgg2/lib/x86_64-unknown-linux-gnu/:$LD_LIBRARY_PATH
+    - !reference [.testsuite-common, script]
+
+
+.testsuite-base-MacOS:
+  extends: .testsuite-common
+  tags:
+  - macmini

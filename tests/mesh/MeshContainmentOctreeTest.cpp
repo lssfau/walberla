@@ -39,6 +39,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 namespace walberla {
 namespace mesh {
@@ -52,7 +53,7 @@ int main( int argc, char ** argv )
    std::vector<std::string> args( argv, argv + argc );
 
    bool writeVtk = false;
-   auto vtkArgIt = std::find( args.begin(), args.end(), "--vtk" );
+   auto vtkArgIt = std::ranges::find( args, "--vtk" );
    if(vtkArgIt != args.end())
    {
       writeVtk = true;

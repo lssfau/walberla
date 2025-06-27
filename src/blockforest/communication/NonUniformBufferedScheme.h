@@ -668,13 +668,15 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                      localBuffers.push_back( buffer );
                      const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
 
-                     VoidFunction pack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferPacking, this,
-                                                      EQUAL_LEVEL, index, bufferIndex, std::cref( packInfo ), block, neighbor, *dir );
+                     auto pack = [&, this]() {
+                        this->localBufferPacking(EQUAL_LEVEL, index, bufferIndex, packInfo, block, neighbor, *dir);
+                     };
 
                      threadsafeLocalCommunication.push_back( pack );
 
-                     VoidFunction unpack = std::bind( &NonUniformBufferedScheme<Stencil>::localBufferUnpacking, this,
-                                                        EQUAL_LEVEL, index, bufferIndex, std::cref( packInfo ), neighbor, block, *dir  );
+                     auto unpack = [&, this]() {
+                        this->localBufferUnpacking(EQUAL_LEVEL, index, bufferIndex, packInfo, neighbor, block, *dir);
+                     };
 
                      if( packInfo->threadsafeReceiving() )
                         threadsafeLocalCommunicationUnpack.push_back( unpack );

@@ -59,7 +59,7 @@ int main( int argc, char * argv[] )
       fieldSize.set( stringToNum< uint_t >( args.at(1) ), stringToNum< uint_t >( args.at(2) ) );
       partitions = stringToNum< uint_t >( args.at(3) );
 
-      auto it = std::find( args.begin(), args.end(), "--no-vtk" );
+      auto it = std::ranges::find( args, "--no-vtk" );
       if(it != args.end())
       {
          vtk = false;
@@ -80,7 +80,7 @@ int main( int argc, char * argv[] )
                                                       true,
                                                       true, true, false );
 
-   typedef field::GhostLayerField< int64_t, 1 > FieldType;
+   using FieldType = field::GhostLayerField< int64_t, 1 >;
 
    auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t(-1), field::fzyx, uint_t(1) );
    auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t(-1), field::fzyx, uint_t(1) );

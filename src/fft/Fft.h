@@ -29,10 +29,10 @@ class FourierTransform
       shared_ptr< StructuredBlockForest > & blocks_;
       BlockDataID fieldId_;
    
-      ptrdiff_t local_no[3];
+      std::array< ptrdiff_t, 3 > local_no;
 #ifdef WALBERLA_USE_PFFT
-      using FFTReal = std::unique_ptr<double[], std::function<void(double*)> >;
-      using FFTComplex = std::unique_ptr<pfft_complex[], std::function<void(pfft_complex*)> >;
+      using FFTReal = std::unique_ptr<double[], std::function<void(double*)> >;  // NOLINT(*-avoid-c-arrays)
+      using FFTComplex = std::unique_ptr<pfft_complex[], std::function<void(pfft_complex*)> >;  // NOLINT(*-avoid-c-arrays)
       using FFTPlan = std::unique_ptr<std::remove_pointer_t<pfft_plan>, std::function<void(pfft_plan)> >;
 #else
       using FFTReal = std::unique_ptr<double [], std::function<void (double *)>>;

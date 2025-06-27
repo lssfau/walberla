@@ -1014,7 +1014,7 @@ void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refresh( const Cel
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refreshOutermostLayer( cell_idx_t thickness )
 {
-   uint_t extent = std::min( std::min( innerBB_.xSize(), innerBB_.ySize() ), innerBB_.zSize() );
+   uint_t extent = std::min( { innerBB_.xSize(), innerBB_.ySize(), innerBB_.zSize() } );
    WALBERLA_ASSERT_GREATER( extent, uint_t(0) );
 
    if( extent == 1 )

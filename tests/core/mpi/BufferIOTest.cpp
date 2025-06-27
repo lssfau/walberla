@@ -42,6 +42,7 @@ void bufferIO(const bool forceSerialIO)
    constexpr uint_t s = 10;
 
    std::vector<double> values;
+   values.reserve(s);
    for(uint_t i = 0; i < s; ++i){
       values.emplace_back( math::realRandom(real_c(0.0), real_c(1.0)) );
    }

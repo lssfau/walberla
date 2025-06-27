@@ -58,8 +58,8 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 if( WALBERLA_BUILD_WITH_MPI )
    waLBerla_compile_test( FILES FieldMPIDatatypesTest.cpp DEPENDS walberla::blockforest )
-   waLBerla_execute_test( NAME FieldMPIDatatypesTestRelease  COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1                CONFIGURATIONS Release RelWithDbgInfo )
-   waLBerla_execute_test( NAME FieldMPIDatatypesTestDebug    COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1 LABELS longrun CONFIGURATIONS Debug DebugOptimized   )
+   waLBerla_execute_test( NAME FieldMPIDatatypesTestRelease  COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1                )
+   waLBerla_execute_test( NAME FieldMPIDatatypesTestDebug    COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1 LABELS longrun )
 endif( WALBERLA_BUILD_WITH_MPI )
 
 

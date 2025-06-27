@@ -35,7 +35,6 @@ waLBerla_compile_test( FILES InterpolationNoSlip.cpp DEPENDS InterpolationNoSlip
 # waLBerla_execute_test( NAME InterpolationNoSlip1 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm -Parameters.distanceWall=0.1 )
 # waLBerla_execute_test( NAME InterpolationNoSlip2 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm -Parameters.distanceWall=0.5 )
 waLBerla_execute_test( NAME InterpolationNoSlip3 COMMAND $<TARGET_FILE:InterpolationNoSlip> ${CMAKE_CURRENT_SOURCE_DIR}/InterpolationNoSlip.prm )
-endif()
 
 waLBerla_generate_target_from_python(NAME FreeSlipRefinementGenerated
         FILE FreeSlipRefinement.py
@@ -51,4 +50,6 @@ waLBerla_compile_test( FILES FreeSlipRefinement.cpp DEPENDS FreeSlipRefinementGe
 
 if( WALBERLA_DOUBLE_ACCURACY )
    waLBerla_compile_test( FILES LDC.cpp DEPENDS walberla::blockforest walberla::field walberla::lbm_generated walberla::timeloop )
+endif()
+
 endif()

@@ -1079,9 +1079,16 @@ inline BlockDataID StructuredBlockStorage::addStructuredBlockData(
       std::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
       const std::string& identifier, const Set<SUID>& requiredSelectors, const Set<SUID>& incompatibleSelectors )
 {
-   internal::SelectableBlockDataHandlingWrapper dataHandling(
-            walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( function,  std::placeholders::_1, this ) ) ),
-            requiredSelectors, incompatibleSelectors, identifier );
+   internal::SelectableBlockDataHandlingWrapper dataHandling {
+      std::make_shared< internal::BlockDataHandlingHelper<T> >(
+         std::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >(
+            [function, this](IBlock* const b) {
+               return function(b, this);
+            }
+         )
+      ),
+      requiredSelectors, incompatibleSelectors, identifier 
+   };
 
 
    return blockStorage_->addBlockData( dataHandling, identifier );

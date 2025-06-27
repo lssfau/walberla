@@ -53,7 +53,7 @@ waLBerla_execute_test( NAME RandomTest )
 waLBerla_compile_test( FILES math/SampleTest.cpp )
 waLBerla_execute_test( NAME SampleTest1Proc  COMMAND $<TARGET_FILE:SampleTest> )
 waLBerla_execute_test( NAME SampleTest4Proc  COMMAND $<TARGET_FILE:SampleTest> PROCESSES 4  )
-waLBerla_execute_test( NAME SampleTest10Proc COMMAND $<TARGET_FILE:SampleTest> PROCESSES 10 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_execute_test( NAME SampleTest10Proc COMMAND $<TARGET_FILE:SampleTest> PROCESSES 10 LABELS longrun )
 
 waLBerla_compile_test( FILES math/DistributedSampleTest.cpp )
 waLBerla_execute_test( NAME DistributedSampleTest1Proc  COMMAND $<TARGET_FILE:DistributedSampleTest> )

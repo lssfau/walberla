@@ -32,8 +32,8 @@ template< typename MeshType >
 class BoundaryLocation
 {
 public:
-   typedef typename OpenMesh::FPropHandleT< BoundaryInfo > BoundaryInformation;
-   typedef typename MeshType::FaceHandle FaceHandle;
+   using BoundaryInformation = typename OpenMesh::FPropHandleT< BoundaryInfo >;
+   using FaceHandle = typename MeshType::FaceHandle;
 
    BoundaryLocation( MeshType & mesh ) : boundaryInfos_( mesh, "BoundaryInformation" ) {}
 

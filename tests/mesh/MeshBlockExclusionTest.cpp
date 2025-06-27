@@ -42,6 +42,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 namespace walberla {
 namespace mesh {
@@ -63,10 +64,9 @@ struct AnyPointInAABB
 
    inline bool operator()( const AABB & aabb )
    {
-     for(auto & point : points_)
-        if( aabb.contains( point ) )
-           return true;
-     return false;
+     return std::ranges::any_of(points_, [&aabb](auto& point) {
+      return aabb.contains(point);
+     });
    }
 
    Points points_;
@@ -108,7 +108,7 @@ void test(const shared_ptr< DistanceOctree< MeshType > > & distanceOctree, const
    {
       const AABB & aabb = setupBlock->getAABB();
 
-      uncoveredVertices.erase(std::remove_if(uncoveredVertices.begin(), uncoveredVertices.end(), PointInAABB(aabb)), uncoveredVertices.end());
+      std::erase_if( uncoveredVertices, PointInAABB(aabb) );
    }
 
    WALBERLA_CHECK(uncoveredVertices.empty(), "Not all vertices of the mesh are located in allocated blocks!");

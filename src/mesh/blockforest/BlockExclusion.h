@@ -110,7 +110,7 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       std::mt19937 g( 42 );
       std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-      std::fill( excludeBlock.begin(), excludeBlock.end(), uint8_t( 0 ) );
+      std::ranges::fill( excludeBlock, uint8_t( 0 ) );
 
       #ifdef _OPENMP
       #pragma omp parallel for schedule( dynamic )
@@ -150,7 +150,7 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
    std::mt19937 g( 42 );
    std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-   std::fill( excludeBlock.begin(), excludeBlock.end(), uint8_t( 0 ) );
+   std::ranges::fill( excludeBlock, uint8_t( 0 ) );
 
 #ifdef _OPENMP
 #pragma omp parallel for schedule( dynamic )

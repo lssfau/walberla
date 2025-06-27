@@ -1,0 +1,222 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "displayName": "Base configuration with defaults.",
+            "name": ".ci-base",
+            "hidden": true,
+            "binaryDir": "build/${presetName}",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "WALBERLA_BUILD_WITH_MPI": "ON",
+                "WALBERLA_BUILD_WITH_OPENMP": "ON",
+                "WALBERLA_BUILD_TESTS": true,
+                "WALBERLA_BUILD_BENCHMARKS": true,
+                "WALBERLA_BUILD_TUTORIALS": true,
+                "WALBERLA_BUILD_TOOLS": true,
+                "WALBERLA_BUILD_SHOWCASES": true,
+                "WALBERLA_BUFFER_DEBUG": "OFF",
+                "WALBERLA_DOUBLE_ACCURACY": true,
+                "WALBERLA_BUILD_WITH_METIS": true,
+                "WALBERLA_BUILD_WITH_PARMETIS": true,
+                "WALBERLA_BUILD_WITH_FFTW": true,
+                "WALBERLA_BUILD_WITH_OPENMESH": true,
+                "WARNING_ERROR": true,
+                "WALBERLA_LOGLEVEL": "DETAIL",
+                "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}"
+            }
+        },
+        {
+            "name": ".gcc",
+            "hidden": true,
+            "environment": {
+                "CC": "gcc",
+                "CXX": "g++"
+            }
+        },
+        {
+            "name": ".clang",
+            "hidden": true,
+            "environment": {
+                "CC": "clang",
+                "CXX": "clang++"
+            }
+        },
+        {
+            "name": ".icx",
+            "hidden": true,
+            "environment": {
+                "CC": "icx",
+                "CXX": "icpx"
+            }
+        },
+        {
+            "name": ".mac",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_METIS": false,
+                "WALBERLA_BUILD_WITH_PARMETIS": false,
+                "WALBERLA_BUILD_WITH_FFTW": false,
+                "WALBERLA_BUILD_WITH_OPENMESH": false
+            }
+        },
+        {
+            "name": ".debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": ".debugOptimized",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "DebugOptimized"
+            }
+        },
+        {
+            "name": ".release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "displayName": "Serial build - OpenMP and MPI disabled",
+            "name": ".serial",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMP": false,
+                "WALBERLA_BUILD_WITH_MPI": false,
+                "WALBERLA_BUILD_WITH_PARMETIS": false
+            }
+        },
+        {
+            "displayName": "MPI-only distributed-memory parallelization",
+            "name": ".mpionly",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMP": false,
+                "WALBERLA_BUILD_WITH_MPI": true
+            }
+        },
+        {
+            "displayName": "Hybrid parallelization with OpenMP and MPI",
+            "name": ".hybrid",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMP": true,
+                "WALBERLA_BUILD_WITH_MPI": true
+            }
+        },
+        {
+            "displayName": "Enable CUDA",
+            "name": ".cuda",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_CUDA": true,
+                "CMAKE_CUDA_ARCHITECTURES": "$env{WALBERLA_CI_CUDA_ARCHITECTURES}"
+            }
+        },
+        {
+            "displayName": "Enable HIP",
+            "name": ".hip",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_HIP": true
+            }
+        },
+        {
+            "displayName": "Build in single-precision mode",
+            "name": ".singlePrecision",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_DOUBLE_ACCURACY": false
+            }
+        },
+        {
+            "displayName": "Enable half-precision support",
+            "name": ".fp16",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT": true
+            }
+        },
+        {
+            "displayName": "Enable embedded Python and Codegen",
+            "name": ".python",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_PYTHON": true,
+                "WALBERLA_BUILD_WITH_CODEGEN": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/"
+            }
+        },
+        {
+            "displayName": "Link against Metis",
+            "name": ".metis",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_METIS": true
+            }
+        },
+        {
+            "displayName": "Link against ParMetis (implies Metis)",
+            "name": ".parmetis",
+            "hidden": true,
+            "inherits": ".metis",
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_PARMETIS": true
+            }
+        },
+        {
+            "displayName": "Link against FFTW",
+            "name": ".fftw",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_FFTW": true
+            }
+        },
+        {
+            "displayName": "Link against OpenMesh",
+            "name": ".openmesh",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMESH": true
+            }
+        },
+        {
+            "displayName": "Enable GCOV for collecting coverage information",
+            "name": ".gcov",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_GCOV": true
+            }
+        }
+    ],
+    "testPresets": [
+        {
+            "name": ".ci-test-base",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true,
+                "outputJUnitFile": "junit-report.xml"
+            },
+            "filter": {
+                "exclude": {
+                    "label": "longrun"
+                }
+            },
+            "environment": {
+                "OMP_WAIT_POLICY": "PASSIVE",
+                "OMP_NUM_THREADS": "4"
+            }
+        }
+    ]
+}
