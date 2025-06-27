@@ -1067,13 +1067,14 @@ inline const Quaternion< typename MathTrait<T1,T2>::MultType >
    const MT len2( r*r + i*i + j*j + k*k );
    WALBERLA_ASSERT(!std::isnan(len2), lhs << "\n" << rhs);
 
+   MT ilen;
    if( std::fabs( len2 - MT(1) ) < MT(1E-8) ) {
-      return Quaternion<MT>( r, i, j, k );
+      ilen = MT(1);
    }
    else {
-      const MT ilen( MT(1) / std::sqrt( len2 ) );
-      return Quaternion<MT>( r*ilen, i*ilen, j*ilen, k*ilen );
+      ilen = MT(1) / std::sqrt( len2 ) ;
    }
+   return Quaternion<MT>( r*ilen, i*ilen, j*ilen, k*ilen );
 }
 //*************************************************************************************************
 
