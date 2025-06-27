@@ -8,7 +8,7 @@ This guide describes the necessary steps to download and compile the waLBerla pr
 
 To build waLBerla, you are going to need at least:
 
- - A C++ compiler supporting C++17
+ - A recent C++20 compiler
  - CMake >= 3.24
  - An up-to-date MPI library for shared-memory parallel computing
 

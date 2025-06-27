@@ -52,21 +52,21 @@ namespace walberla
 ///////////////////////
 
 // Communication Pack Info
-typedef pystencils::CumulantMRTPackInfo PackInfo_T;
+using PackInfo_T = pystencils::CumulantMRTPackInfo ;
 
 // LB Method Stencil
-typedef stencil::D2Q9 Stencil_T;
+using Stencil_T = stencil::D2Q9 ;
 
 // PDF field type
-typedef field::GhostLayerField< real_t, Stencil_T::Size > PdfField_T;
+using PdfField_T = field::GhostLayerField< real_t, Stencil_T::Size > ;
 
 // Velocity Field Type
-typedef field::GhostLayerField< real_t, Stencil_T::D > VectorField_T;
+using VectorField_T = field::GhostLayerField< real_t, Stencil_T::D > ;
 
 // Boundary Handling
-typedef walberla::uint8_t flag_t;
-typedef FlagField< flag_t > FlagField_T;
-typedef lbm::CumulantMRTNoSlip NoSlip_T;
+using flag_t = walberla::uint8_t ;
+using FlagField_T = FlagField< flag_t > ;
+using NoSlip_T = lbm::CumulantMRTNoSlip ;
 
 #if defined(WALBERLA_BUILD_WITH_GPU_SUPPORT)
 typedef gpu::GPUField< real_t > GPUField;

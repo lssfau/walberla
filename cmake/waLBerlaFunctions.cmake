@@ -92,6 +92,8 @@ endfunction ( waLBerla_add_executable )
 #
 #######################################################################################################################
 
+add_custom_target( waLBerlaTestsuite )
+
 function ( waLBerla_compile_test )
     set( options )
     set( oneValueArgs NAME )
@@ -110,6 +112,7 @@ function ( waLBerla_compile_test )
     waLBerla_add_executable ( NAME ${ARG_NAME} GROUP "TESTS/${moduleName}"
                               DEPENDS ${ARG_DEPENDS} ${moduleName} FILES ${ARG_FILES} )
 
+   add_dependencies( waLBerlaTestsuite ${ARG_NAME} )
 
 endfunction ( waLBerla_compile_test )
 #######################################################################################################################

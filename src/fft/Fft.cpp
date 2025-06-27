@@ -21,7 +21,7 @@ FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest >
 
    WALBERLA_CHECK_EQUAL(blocks_->size(), 1, "FFT needs one block per process");
    
-   ptrdiff_t n[3];
+   std::array< ptrdiff_t, 3 > n;
    n[0] = int_c( blocks->getNumberOfXCells() );
    n[1] = int_c( blocks->getNumberOfYCells() );
    n[2] = int_c( blocks->getNumberOfZCells() );
@@ -36,12 +36,12 @@ FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest >
 #endif
    
 #ifdef WALBERLA_USE_PFFT
-   ptrdiff_t local_ni[3];
-   ptrdiff_t local_i_start[3];
-   ptrdiff_t local_o_start[3];
+   std::array< ptrdiff_t, 3> local_ni;
+   std::array< ptrdiff_t, 3> local_i_start;
+   std::array< ptrdiff_t, 3> local_o_start;
    MPI_Comm comm = MPIManager::instance()->comm();
-   ptrdiff_t alloc_local = pfft_local_size_dft_r2c_3d(n, comm, PFFT_TRANSPOSED_NONE,
-                                                      local_ni, local_i_start, local_no, local_o_start);
+   ptrdiff_t alloc_local = pfft_local_size_dft_r2c_3d(n.data(), comm, PFFT_TRANSPOSED_NONE,
+                                                      local_ni.data(), local_i_start.data(), local_no.data(), local_o_start.data());
    
    // make sure that PFFT and Walberla use the same domain decomposition
    WALBERLA_ASSERT_EQUAL(local_ni[0], data->xSize());
@@ -56,9 +56,9 @@ FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest >
    if (greens)
       greens_ = FFTReal(pfft_alloc_real(uint_c(alloc_local)+1), pfft_free);
    
-   plan_forward_  = FFTPlan(pfft_plan_dft_r2c_3d(n, in_.get(), out_.get(), comm,
+   plan_forward_  = FFTPlan(pfft_plan_dft_r2c_3d(n.data(), in_.get(), out_.get(), comm,
                                          PFFT_FORWARD, PFFT_TRANSPOSED_NONE | PFFT_DESTROY_INPUT), pfft_destroy_plan);
-   plan_backward_ = FFTPlan(pfft_plan_dft_c2r_3d(n, out_.get(), in_.get(), comm,
+   plan_backward_ = FFTPlan(pfft_plan_dft_c2r_3d(n.data(), out_.get(), in_.get(), comm,
                                          PFFT_BACKWARD, PFFT_TRANSPOSED_NONE | PFFT_DESTROY_INPUT), pfft_destroy_plan);
 #else
    ptrdiff_t local_o_start[3] = {0,0,0};

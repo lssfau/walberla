@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock("Boundaries");
 
-   typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+   using BHFactory = lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T >;
 
    BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage(
       blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,

@@ -300,13 +300,12 @@ waLBerla_compile_test( FILES    free_surface/surface_geometry/WettingCurvatureTe
       DEPENDS walberla::blockforest walberla::field walberla::lbm walberla::timeloop )
 waLBerla_execute_test( NAME     WettingCurvatureTest )
 
-#     Slow-running tests that should only be active in Release mode
+#     Slow-running tests
 
-if( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
-      waLBerla_execute_test( NAME     MovingSpheresTest PROCESSES 2 )
-      waLBerla_execute_test( NAME     WettingConversionTest )
-      waLBerla_execute_test( NAME     CurvatureOfSineTest )
-      waLBerla_execute_test( NAME     CurvatureOfSphereTest )
-      waLBerla_execute_test( NAME     NormalsOfSineTest )
-      waLBerla_execute_test( NAME     NormalsOfSphereTest )
-endif()
+waLBerla_execute_test( NAME     MovingSpheresTest PROCESSES 2 LABELS longrun )
+waLBerla_execute_test( NAME     WettingConversionTest LABELS longrun )
+waLBerla_execute_test( NAME     CurvatureOfSineTest LABELS longrun )
+waLBerla_execute_test( NAME     CurvatureOfSphereTest LABELS longrun )
+waLBerla_execute_test( NAME     NormalsOfSineTest LABELS longrun )
+waLBerla_execute_test( NAME     NormalsOfSphereTest LABELS longrun )
+

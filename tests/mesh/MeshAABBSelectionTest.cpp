@@ -72,7 +72,7 @@ int main( int argc, char ** argv )
       triDist.filterTrianglesForAABB( subAabb, mesh->faces_begin(), mesh->faces_end(), std::back_inserter( subAabbFaces ) );
 
       WALBERLA_CHECK( !subAabbFaces.empty() );
-      WALBERLA_CHECK_EQUAL( std::adjacent_find( subAabbFaces.begin(), subAabbFaces.end() ), subAabbFaces.end(), "Duplicate faces found!" );
+      WALBERLA_CHECK_EQUAL( std::ranges::adjacent_find( subAabbFaces ), subAabbFaces.end(), "Duplicate faces found!" );
 
       WALBERLA_LOG_INFO( "Box " << i + 1 << "/" << numBoxes << ": Volume ratio: " << subAabb.volume() / aabb.volume() << " Faces ratio: " << real_c( subAabbFaces.size() ) / real_c( mesh->n_faces() ) );
 
@@ -86,7 +86,7 @@ int main( int argc, char ** argv )
 
          if( !floatIsEqual( d0, d1 ) )
          {
-            const bool fh0InSubAabbFaces = std::find( subAabbFaces.begin(), subAabbFaces.end(), fh0 ) != subAabbFaces.end();
+            const bool fh0InSubAabbFaces = std::ranges::find( subAabbFaces, fh0 ) != subAabbFaces.end();
             std::ostringstream msg;
             msg << "Mesh AABB:           " << aabb                << "\n";
             msg << "Sub AABB:            " << subAabb             << "\n";

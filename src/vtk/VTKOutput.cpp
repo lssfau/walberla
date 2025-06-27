@@ -1561,7 +1561,7 @@ uint8_t VTKOutput::ghostLayerNr( const IBlock& block, const cell_idx_t x, const 
    else if( z > zMax ) zDistance = z - zMax;
    WALBERLA_ASSERT_GREATER_EQUAL( xDistance, 0 );
 
-   return uint8_c( std::max( xDistance, std::max( yDistance, zDistance )) );
+   return uint8_c( std::max( {xDistance, yDistance, zDistance} ) );
 }
 
 

@@ -8,7 +8,7 @@ waLBerla_compile_test( FILES BlockIDTest.cpp DEPENDS walberla::core )
 waLBerla_execute_test ( NAME BlockIDTest LABELS longrun )
 
 waLBerla_compile_test( FILES SetupBlockForestTest.cpp DEPENDS walberla::core )
-waLBerla_execute_test( NAME SetupBlockForestTest LABELS longrun CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_execute_test( NAME SetupBlockForestTest LABELS longrun )
 
 waLBerla_compile_test( FILES BlockForestTest.cpp DEPENDS walberla::core walberla::domain_decomposition )
 waLBerla_execute_test( NAME BlockForestTest PROCESSES 4 )

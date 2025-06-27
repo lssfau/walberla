@@ -7,6 +7,7 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
 	# Some tests #
 	##############
 
+	add_dependencies( waLBerlaTestsuite MeshDistanceBenchmark )
 	waLBerla_execute_test( NO_MODULE_LABEL NAME MeshDistanceBenchmark COMMAND $<TARGET_FILE:MeshDistanceBenchmark> bunny.obj 10 2 )
 endif()
 

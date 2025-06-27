@@ -97,7 +97,7 @@ inline void walberla::mesh::MeshWorkloadMemory<DistanceObject>::defaultInit()
 template< typename DistanceObject >
 void walberla::mesh::MeshWorkloadMemory<DistanceObject>::countCells( const math::GenericAABB< Scalar > & aabb, const uint_t level, uint_t & numCellsInside, uint_t & numCellsOutside ) const
 {
-   typedef math::GenericAABB< Scalar > Box;
+   using Box = math::GenericAABB< Scalar >;
 
    numCellsInside = uint_t(0);
    numCellsOutside = uint_t(0);
@@ -196,15 +196,15 @@ inline void walberla::mesh::MeshWorkloadMemory<DistanceObject>::operator()( bloc
       shuffle[i] = i;
    }
 
-   //old compilers might need this
-   //std::srand( 42 );
-   //std::random_shuffle( shuffle.begin(), shuffle.end() );
 
    std::mt19937 g( 42 );
    std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-   std::vector<uint_t> insideCells( numBlocks, uint_t( 0 ) );
-   std::vector<uint_t> outsideCells( numBlocks, uint_t( 0 ) );
+   // GCC-14 doesn't accept initialization in constructor here
+   std::vector<uint_t> insideCells;
+   insideCells.resize( numBlocks, uint_t( 0 ) );
+   std::vector<uint_t> outsideCells;
+   outsideCells.resize( numBlocks, uint_t( 0 ) );
 
    #ifdef _OPENMP
    #pragma omp parallel for schedule( dynamic )

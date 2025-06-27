@@ -70,6 +70,7 @@ option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                    
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
 option ( WALBERLA_BUILD_WITH_PARMETIS       "Build with ParMetis graph partitioner"          OFF )
 option ( WALBERLA_BUILD_WITH_FFTW           "Build with FFTW Fourier Transform library"      OFF )
+option ( WALBERLA_BUILD_WITH_OPENMESH       "Build with OpenMesh library for geometry"       OFF )
 
 option ( WALBERLA_BUILD_WITH_GPROF          "Enables gprof"                                      )
 option ( WALBERLA_BUILD_WITH_GCOV           "Enables gcov"                                       )
@@ -346,6 +347,8 @@ endif()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
+
+    set(PYBIND11_FINDPYTHON ON)  # Force FindPython mode
 
     FetchContent_Declare(
             pybind11

@@ -20,6 +20,8 @@
 //
 //======================================================================================================================
 
+#include <algorithm>
+
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 
@@ -53,7 +55,7 @@ int main( int argc, char * argv[] )
    uint_t          partitions;
    bool            vtk = true;
 
-   auto argIt = std::find( args.begin(), args.end(), "--no-vtk" );
+   auto argIt = std::ranges::find( args, "--no-vtk" );
    if(argIt != args.end())
    {
       vtk = false;
@@ -75,7 +77,7 @@ int main( int argc, char * argv[] )
                                                       uint_t(1), uint_t(1), uint_t(1),
                                                       true, true, false );
 
-   typedef field::GhostLayerField< int64_t, 1 > FieldType;
+   using FieldType = field::GhostLayerField< int64_t, 1 >;
 
    auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t(-1), field::fzyx, uint_t(1) );
    auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t(-1), field::fzyx, uint_t(1) );

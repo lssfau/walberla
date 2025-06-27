@@ -116,7 +116,7 @@ void vertexToFaceColor(MeshType& mesh, const typename MeshType::Color& defaultCo
    }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
    Environment env(argc, argv);
    if (!env.config()) { WALBERLA_ABORT_NO_DEBUG_INFO("USAGE: " << argv[0] << " INPUT_FILE") }
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
    auto structuredBlockforest = bfc.createStructuredBlockForest(blockSize);
 
-   typedef lbm::D3Q19< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant > LatticeModel_T;
+   using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant >;
 
    using flag_t      = walberla::uint8_t;
    using FlagField_T = FlagField< flag_t >;
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
       field::addFlagFieldToStorage< FlagField_T >(structuredBlockforest, "flag field", NUM_GHOSTLAYERS);
 
    const FlagUID fluidFlagUID("Fluid");
-   typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+   using BHFactory = lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T >;
 
    auto boundariesConfig = configBlock.getOneBlock("Boundaries");
 
