@@ -20,6 +20,8 @@
 //======================================================================================================================
 #pragma once
 
+#include <utility>
+
 #include "ErrorChecking.h"
 
 namespace walberla
@@ -27,31 +29,47 @@ namespace walberla
 namespace gpu
 {
 
+/**
+ * @brief RAII wrapper for GPU streams
+ */
 class StreamRAII
 {
  public:
+   /**
+    * @brief Create wrapper for the default stream
+    */
+   StreamRAII() = default;
+
    ~StreamRAII()
    {
-      if (stream_ != nullptr) { WALBERLA_GPU_CHECK(gpuStreamDestroy(stream_)) }
+      destroyStream();
    }
 
-   StreamRAII(StreamRAII&& other) noexcept
+   // Move construction and assignment
+   StreamRAII(StreamRAII&& other) noexcept : stream_{ std::exchange(other.stream_, nullptr) } {}
+   
+   StreamRAII& operator=(StreamRAII&& other) noexcept
    {
-      stream_       = other.stream_;
-      other.stream_ = nullptr;
+      destroyStream();
+      stream_ = std::exchange(other.stream_, nullptr);
+      return *this;
    }
 
-   StreamRAII(const StreamRAII&) = delete;
 
+   // Delete copy constructor and assignment
+   
+   StreamRAII(const StreamRAII&) = delete;
    void operator=(const StreamRAII&) = delete;
 
    operator gpuStream_t() const { return stream_; }
 
+   void synchronize() const {
+      WALBERLA_GPU_CHECK(gpuStreamSynchronize(stream_));
+   }
+
    static StreamRAII defaultStream()
    {
-      StreamRAII result;
-      result.stream_ = nullptr;
-      return result;
+      return {};
    }
 
    static StreamRAII newPriorityStream(int priority)
@@ -69,9 +87,12 @@ class StreamRAII
    }
 
  private:
-   StreamRAII() = default;
+   void destroyStream() {
+      if (stream_ != nullptr) { WALBERLA_GPU_CHECK(gpuStreamDestroy(stream_)) }
+      stream_ = nullptr;
+   }
 
-   gpuStream_t stream_;
+   gpuStream_t stream_ { nullptr };
 };
 
 class EventRAII

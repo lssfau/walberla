@@ -31,6 +31,14 @@ waLBerla_execute_test( NAME TestGenericGpuPackInfos_4 COMMAND $<TARGET_FILE:Test
 waLBerla_compile_test( FILES FieldTransferTest.cpp )
 waLBerla_execute_test( NAME  FieldTransferTest )
 
+if( WALBERLA_BUILD_WITH_CUDA )
+   waLBerla_compile_test( FILES TestGpuRAII.cu DEPENDS walberla::gpu )
+elseif( WALBERLA_BUILD_WITH_HIP )
+waLBerla_compile_test( FILES TestGpuRAII.hip DEPENDS walberla::gpu )
+endif()
+
+waLBerla_execute_test( NAME TestGpuRAII )
+
 if( WALBERLA_BUILD_WITH_CUDA)
 # These tests include handwritten CUDA code and won't compile with HIP
 

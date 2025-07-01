@@ -50,8 +50,9 @@ namespace communication {
       if(sendFromGPU_){WALBERLA_LOG_DETAIL_ON_ROOT("Using GPU-Direct Communication in UniformGPUScheme")}
       else{WALBERLA_LOG_DETAIL_ON_ROOT("Using Communication via CPU Memory")}
 
-      for (uint_t i = 0; i < Stencil::Q; ++i)
-         WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
+      for (uint_t i = 0; i < Stencil::Q; ++i){
+         streams_[i] = StreamRAII::newStream();
+      }
    }
 
    template<typename Stencil>
@@ -80,8 +81,9 @@ namespace communication {
       if(sendFromGPU_){WALBERLA_LOG_DETAIL_ON_ROOT("Using GPU-Direct Communication in UniformGPUScheme")}
       else{WALBERLA_LOG_DETAIL_ON_ROOT("Using Communication via CPU Memory")}
 
-      for (uint_t i = 0; i < Stencil::Q; ++i)
-         WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
+      for (uint_t i = 0; i < Stencil::Q; ++i){
+         streams_[i] = StreamRAII::newStream();
+      }
    }
 
 
@@ -162,7 +164,7 @@ namespace communication {
       // wait for packing to finish
       for (uint_t i = 0; i < Stencil::Q; ++i)
       {
-         WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+         streams_[i].synchronize();
       }
 
       if( sendFromGPU_ )
@@ -227,7 +229,7 @@ namespace communication {
       }
       for (uint_t i = 0; i < Stencil::Q; ++i)
       {
-         WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+         streams_[i].synchronize();
       }
       communicationInProgress_ = false;
    }
