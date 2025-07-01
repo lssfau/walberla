@@ -938,16 +938,20 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
          WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling block exclusion callback functions on child blocks ..." )
          for( uint_t c = 0; c != 8; ++c )
          {
+            bool excludeBlock = false;
             for(const auto & blockExclusionFunction : blockExclusionFunctions)
             {
                if(blockExclusionFunction( *blocksToSplit[ uint_c(i) ]->getChild(c)))
                {
-                  WALBERLA_LOG_DETAIL( "Initializing SetupBlockForest: Excluding child block with ID " << blocksToSplit[ uint_c(i) ]->getChild(c)->getId() <<
-                                      "\n                               - AABB: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getAABB() <<
-                                      "\n                               - level: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getLevel() );
-                  blocksToSplit[ uint_c(i) ]->setChild(c, nullptr);
-                  numberOfBlocks_--;
+                  excludeBlock = true;
                }
+            }
+            if (excludeBlock) {
+               WALBERLA_LOG_DETAIL( "Initializing SetupBlockForest: Excluding child block with ID " << blocksToSplit[ uint_c(i) ]->getChild(c)->getId() <<
+                                   "\n                               - AABB: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getAABB() <<
+                                   "\n                               - level: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getLevel() );
+               blocksToSplit[ uint_c(i) ]->setChild(c, nullptr);
+               numberOfBlocks_--;
             }
          }
       }
