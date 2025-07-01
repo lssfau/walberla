@@ -32,6 +32,7 @@
 
 #include "gpu/ErrorChecking.h"
 #include "gpu/GPUWrapper.h"
+#include "gpu/GPURAII.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
 #include "gpu/communication/GeneratedNonUniformGPUPackInfo.h"
 
@@ -58,6 +59,8 @@ class NonUniformGPUScheme
    explicit NonUniformGPUScheme(const weak_ptr< StructuredBlockForest >& bf, const Set< SUID >& requiredBlockSelectors,
                                 const Set< SUID >& incompatibleBlockSelectors, bool sendDirectlyFromGPU = false,
                                 int tag = 5432);
+
+   NonUniformGPUScheme(const NonUniformGPUScheme &) = delete;
 
    ~NonUniformGPUScheme();
 
@@ -129,7 +132,7 @@ class NonUniformGPUScheme
    Set< SUID > requiredBlockSelectors_;
    Set< SUID > incompatibleBlockSelectors_;
 
-   std::array<gpuStream_t, Stencil::Q> streams_;
+   std::array<StreamRAII, Stencil::Q> streams_;
    std::vector< uint8_t > timestepPerLevel_;
 };
 
@@ -186,7 +189,7 @@ void NonUniformGPUScheme< Stencil >::init()
 
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
+      streams_[i] = StreamRAII::newStream();
    }
 }
 
@@ -383,7 +386,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
 
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i){
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -486,7 +489,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -586,7 +589,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -656,7 +659,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateEqualLevel(const uint_t leve
    }
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[EQUAL_LEVEL][level] = false;
 }
@@ -716,7 +719,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateCoarseToFine(const uint_t fi
 
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[COARSE_TO_FINE][fineLevel] = false;
 }
@@ -778,7 +781,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateFineToCoarse(const uint_t fi
    }
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[FINE_TO_COARSE][fineLevel] = false;
 }
@@ -985,11 +988,6 @@ NonUniformGPUScheme< Stencil >::~NonUniformGPUScheme()
       waitCommunicateEqualLevel(i);
       waitCommunicateCoarseToFine(i);
       waitCommunicateFineToCoarse(i);
-   }
-
-   for (uint_t i = 0; i < Stencil::Q; ++i)
-   {
-      WALBERLA_GPU_CHECK(gpuStreamDestroy(streams_[i]))
    }
 }
 
