@@ -1,6 +1,6 @@
 PhysicalSetup // all to be specified in SI units!
 {
-    showcase false;         // single particle validation. Showcase is true only
+    concentrationProblem false;
     dimensional true;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
     xSize 0.04; // = width  // 4dp
     ySize 0.04; // = depth  // 4dp
@@ -47,17 +47,22 @@ NumericalSetup
     linkedCellWidthRation 1.01;
     particleBarriers true;
     generationDomainFraction <0.8,0.8,0.8>;
+    SingleparticleLocation <0.02,0.02,0.14>;
 }
 
 TemperatureSetup
 {
     Thot 310;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
     Tcold 300;
+    Tref  300;
     PrandtlNumber 1;
-    RayleighNumber 1000000;
-    Mach 0.1;
     particleTemperature 290;
     thermal_expansion_coeff 1.04e-4;
+    Cpf 1;
+    Cps 1;
+    Kf  0.01;
+    Ks  0.15;  // 15 times Kf
+    Ra 100;
 }
 
 Output

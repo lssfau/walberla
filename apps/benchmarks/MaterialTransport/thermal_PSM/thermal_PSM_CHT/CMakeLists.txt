@@ -34,6 +34,9 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     BC_Concentration_FreeSlip.h BC_Concentration_FreeSlip.${CODEGEN_FILE_SUFFIX}
                     BC_Concentration_Neumann.h BC_Concentration_Neumann.${CODEGEN_FILE_SUFFIX}
                     BC_Fluid_Outflow.h BC_Fluid_Outflow.${CODEGEN_FILE_SUFFIX}
+                    BC_energy_DiffusionDirichlet_dynamic.h BC_energy_DiffusionDirichlet_dynamic.${CODEGEN_FILE_SUFFIX}
+                    BC_Energy_Neumann.h BC_Energy_Neumann.${CODEGEN_FILE_SUFFIX}
+                    BC_energy_DiffusionDirichlet_static.h BC_energy_DiffusionDirichlet_static.${CODEGEN_FILE_SUFFIX}
                     FluidMacroSetter.h FluidMacroSetter.cpp
                     FluidMacroGetter.h FluidMacroGetter.cpp
                     ConcentrationMacroSetter.h ConcentrationMacroSetter.cpp
@@ -41,12 +44,13 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     EnergyMacroSetter.h EnergyMacroSetter.cpp
                     EnergyMacroGetter.h EnergyMacroGetter.cpp
                     compute_temperature_field.h compute_temperature_field.cpp
+                    compute_temperature_field_particle.h compute_temperature_field_particle.cpp
                     GeneralInfoHeader.h
         )
             message(STATUS "generated in thermal PSM is: ${config}" )
             waLBerla_add_executable(NAME thermalPSMCHT_${config} FILES thermalPSMCHT.cpp ../../utilities/InitializerFunctions.cpp
                     DEPENDS walberla::blockforest walberla::core walberla::field walberla::geometry walberla::gpu walberla::lbm walberla::lbm_mesapd_coupling walberla::mesa_pd walberla::sqlite walberla::vtk MTWCodegenThermalPSMCHT_${config})
-            target_compile_definitions(thermalPSMCHT_${config} PRIVATE Weighting=2)
+            target_compile_definitions(thermalPSMCHT_${config} PRIVATE Weighting=1)
         endforeach ()
 
 

@@ -120,7 +120,19 @@ class SetParticleTemperaturesSweep
             particleTemperaturesField,
 
             for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z);
-                 p++) { particleTemperaturesField->get(x, y, z, p) = densityConcentrationField->get(x, y, z); })
+                 p++) {
+
+               if(BsField->get(x,y,z,p) < 1)
+               {
+                  particleTemperaturesField->get(x, y, z, p) = densityConcentrationField->get(x, y, z);
+
+               }
+               else{
+                  particleTemperaturesField->get(x, y, z, p) = densityConcentrationField->get(x, y, z);
+
+               }
+
+            })
       }
       free(temperatures);
    }

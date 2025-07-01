@@ -1,10 +1,11 @@
 PhysicalSetup // all to be specified in SI units!
 {
-    showcase true;
+    concentrationProblem false;
+    showcase false;
     dimensional true;      // if the problem is described in SI units. Example: For kinematic viscosity, thermal diffusivity etc
-    xSize 0.06; // = width
-    ySize 0.06; // = depth
-    zSize 0.06; // = height
+    xSize 0.05; // = width  // 4dp
+    ySize 0.05; // = depth  // 4dp
+    zSize 0.05; // = height  // 20dp
 
     periodicInX false;
     periodicInY false;
@@ -18,15 +19,14 @@ PhysicalSetup // all to be specified in SI units!
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
 
-    particleDiameter 0.010;
-    densityParticle 1100.;
+    particleDiameter 0.02;  // 1cm
+    densityParticle 1000.;
     particleRe 50;
     dynamicFrictionCoefficient 0.15;
     coefficientOfRestitution 0.6;
     collisionTimeFactor 1.0;
 
-    particleGenerationSpacing 0.010;
-
+    particleGenerationSpacing 0.005;
 }
 
 NumericalSetup
@@ -36,40 +36,42 @@ NumericalSetup
     dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
 
     // product of number of blocks should be equal to number of used processes
-    numXBlocks 2;
+    numXBlocks 1;
     numYBlocks 1;
-    numZBlocks 2;
+    numZBlocks 1;
 
     useLubricationForces false;
     numberOfParticleSubCycles 1;
     useParticles true;
-    useIntegrators true;
-    particleSubBlockSize <5, 5, 5>;
+    useIntegrators false;
+    particleSubBlockSize <10, 10, 1>;
     linkedCellWidthRation 1.01;
     particleBarriers true;
-    generationDomainFraction <0.6,0.8,0.8>;
+    generationDomainFraction <0.8,0.8,0.8>;
+    SingleparticleLocation <0.025,0.025,0.025>;
 }
 
 TemperatureSetup
 {
-    Thot 283;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
-    Tcold 273;
+    Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
+    Tcold 0;
+    Tref  0;
     PrandtlNumber 1;
-    RayleighNumber 1000000;
-    Mach 0.1;
     particleTemperature 0;
     thermal_expansion_coeff 1.04e-4;
-    solidSpecificHeat 1.0;  // J/kg.k
-    fluidSpecificHeat 1.0;  // J/kg.k
-
+    Cpf 1;
+    Cps 1;
+    Kf  0.01;
+    Ks  0.15;  // 15 times Kf
+    Ra 100000;
 }
 
 Output
 {
-    infoSpacing 0.1; // in s
+    infoSpacing 0.01; // in s
 
-    vtkSpacingParticles 0.1; // in s
-    vtkSpacingFluid 0.1; // in s
+    vtkSpacingParticles 0.01; // in s
+    vtkSpacingFluid 0.01; // in s
     vtkFolder vtk_out;
 
     performanceLogFrequency 5000000000;

@@ -97,7 +97,7 @@ void addThermalPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmS
 }
 
 template< typename SweepCollection, typename PSMSweepFluid,typename PSMSweepCHT, typename ComputeTempSweep>
-void addCHTPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCollection, PSMSweepFluid& psmFluidSweep,PSMSweepCHT& psmTempSweep,ComputeTempSweep &compute_temperature_field)
+void addCHTPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCollection, PSMSweepFluid& psmFluidSweep,PSMSweepCHT& psmEnergySweep,ComputeTempSweep &compute_temperature_field)
 {
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
@@ -105,13 +105,13 @@ void addCHTPSMSweepToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweep
 
    timeloop.add() << Sweep(deviceSyncWrapper(psmFluidSweep), "PSM Fluid sweep");
 
-   timeloop.add() << Sweep(deviceSyncWrapper(psmTempSweep), "PSM Concentration sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmEnergySweep), "PSM Energy sweep");
+
+   timeloop.add() << Sweep(deviceSyncWrapper(compute_temperature_field),"compute temperature field");
 
    // after both the sweeps, reduce the particle forces.
    timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
                            "Reduce particle forces");
-
-   timeloop.add() << Sweep(deviceSyncWrapper(compute_temperature_field),"compute temperature field");
 }
 
 
