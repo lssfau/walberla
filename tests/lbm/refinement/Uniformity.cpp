@@ -148,7 +148,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // initialize SetupBlockForest = determine domain decomposition
    SetupBlockForest sforest;
 
-   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, levels ) );
+   sforest.addRefinementSelectionFunction( [=] (auto &forest) { refinementSelection( forest, levels ); } );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( AABB( real_c(0), real_c(0), real_c(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),

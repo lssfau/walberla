@@ -139,7 +139,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
 
     uint_t cells[]  = { length, width, width  };
     uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
-    sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, refinement ) );
+    sforest.addRefinementSelectionFunction( [=] ( auto & forest ) { refinementSelection( forest, refinement ); } );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(

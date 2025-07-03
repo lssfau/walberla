@@ -9,20 +9,20 @@ in particular the fluid-particle coupling.
 It scales from laptops to current and future supercomputers while maintaining
 near-perfect efficiency.
 
-See https://www.walberla.net/ for more information and a showcase of applications.
+See <https://www.walberla.net> for more information and a showcase of applications.
 
 ## Documentation and Tutorials
 
 Documentation for the C++ framework is available in
-[Doxygen](http://walberla.net/doxygen/index.html), while the Python interface
-is documented in [Sphinx](http://walberla.net/sphinx/index.html).
+[Doxygen](https://walberla.net/doxygen/index.html), while the Python interface
+is documented in [Sphinx](https://walberla.net/sphinx/index.html).
 
 ## Getting started
 
-The minimum requirements are a C++17-compliant compiler (e.g. GCC or Clang)
-and the [CMake](http://www.cmake.org)
+The minimum requirements are a C++20-compliant compiler (e.g. GCC or Clang)
+and the [CMake](https://www.cmake.org)
 build system. Furthermore, you need an MPI library (like
-[Open MPI](http://www.open-mpi.org)) if you want to make use of parallel
+[Open MPI](https://www.open-mpi.org)) if you want to make use of parallel
 processing capabilities. All of these dependencies are typically available in
 your operating system's package manager.
 
@@ -35,7 +35,7 @@ The typical steps, assuming your are in the waLBerla source directory, are:
 - `make` build waLBerla
 
 To specify a CMake option you need to use `-D(Option)=(Value)`. For example to set the C++ compiler one can use:
-`cmake -DCMAKE_CXX_COMILER=clang++`
+`cmake -DCMAKE_CXX_COMPILER=clang++`
 
 To list and modify the CMake options the `ccmake` tool can be used. Just call `ccmake .` in your **build** directory to see and change the
 CMake options and variables.
@@ -46,13 +46,14 @@ Some important CMake variables:
 - `Python_ROOT_DIR` Specify the directory of the `python` executable. e.g. `~/miniconda/bin/`
 - `MPI_HOME` Specify the base directory of the MPI installation.
 - `WALBERLA_BUILD_WITH_PYTHON` Support for embedding Python
-- `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support
+- `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support (not compatible with ROCm HIP support)
+- `WALBERLA_BUILD_WITH_HIP` Enable ROCm HIP support (not compatible with CUDA support)
 
-For a full list of CMake Option see the [CMakeLists.txt](CMakeLists.txt) file or use `ccmake` as described above.
+For a full list of CMake options see the [CMakeLists.txt](CMakeLists.txt) file or use `ccmake` as described above.
 
 ### Codegen and Python
 
-To use the `lbmpy`/`pystencils` code generation please install the packages with e.g. `pip3 install lbmpy` and specify the correct python
+To use the `lbmpy`/`pystencils` code generation please install the packages with e.g. `python -m pip install lbmpy` and specify the correct python
 environment when calling CMake.
 
 In previous versions of CMake one could use `PYTHON_EXECUTABLE` or `PYTHON_ROOT_DIR` (all upper case) to specify the python executable or
@@ -85,7 +86,7 @@ Overview:
   https://doi.org/10.1016/j.camwa.2020.01.007.
 
 Grid Refinement:
-- F. Schornbaum and U. Rüde, *Massively parallel algorithms for the lattice boltzmann
+- F. Schornbaum and U. Rüde, *Massively parallel algorithms for the lattice Boltzmann
   method on nonuniform grids*. SIAM Journal on Scientific Computing, 2016.
   https://doi.org/10.1137/15M1035240
 
@@ -106,7 +107,7 @@ Allen-Cahn phase-field LBM
 
 MESA-PD:
 - S. Eibl and U. Rüde, *A Modular and Extensible Software Architecture for Particle Dynamics*.
-  Proceedings Of The 8Th International Conference On Discrete Element Methods.
+  Proceedings of the 8th International Conference on Discrete Element Methods.
   https://mercurylab.co.uk/dem8/full-papers/#page-content
 
 Carbon Nanotubes:

@@ -538,7 +538,7 @@ inline shared_ptr<vtk::BlockCellDataWriterInterface> createVTKWriter(const share
       vtkName = name;
 
    if ( blocks->begin() == blocks->end() )
-      return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      return nullptr;
    auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
    CreateVTKWriterExporter exporter(blocks, fieldID, vtkName);
@@ -601,7 +601,7 @@ inline shared_ptr<vtk::BlockCellDataWriterInterface> createBinarizationVTKWriter
       vtkName = name;
 
    if ( blocks->begin() == blocks->end() )
-      return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      return nullptr;
    auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
    CreateBinarizationVTKWriterExporter exporter(blocks, fieldID, vtkName, mask);

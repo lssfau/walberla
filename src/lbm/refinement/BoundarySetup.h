@@ -45,7 +45,7 @@ namespace refinement {
 namespace internal {
 inline shared_ptr< BoundaryConfiguration > defaultBoundaryConfiguration( const Cell &, const Vector3< real_t > & )
 {
-   return shared_ptr< BoundaryConfiguration >( new BoundaryConfiguration );
+   return std::make_shared< BoundaryConfiguration >();
 }
 }
 

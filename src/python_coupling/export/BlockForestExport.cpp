@@ -268,7 +268,7 @@ py::object * blockDataCreationHelper( IBlock * block,  py::object callable ) //N
 uint_t StructuredBlockForest_addBlockData( StructuredBlockForest & s, const std::string & name, py::object functionPtr ) //NOLINT
 {
     BlockDataID res = s.addBlockData(name)
-            << BlockDataCreator<py::object>( std::bind( &blockDataCreationHelper, std::placeholders::_1, functionPtr ) );
+            << BlockDataCreator<py::object>( [functionPtr](IBlock * block) { return blockDataCreationHelper(block, functionPtr); } );
     return res;
 }
 

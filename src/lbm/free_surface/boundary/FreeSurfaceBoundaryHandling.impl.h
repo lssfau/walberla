@@ -157,10 +157,9 @@ FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::FreeS
    Set< FlagUID > freeSlipIDs;
    freeSlipIDs += freeSlipFlagID;
 
-   // create callable function wrapper with input arguments 1 and 2 unset, whereas arguments 3, 4 and 5 are set to be
-   // obstacleIDs, outflowIDs, and inflowIDs, respectively; this is necessary for field::addFlagFieldToStorage()
-   auto ffInitFunc = std::bind(internal::flagFieldInitFunction< FlagField_T >, std::placeholders::_1,
-                               std::placeholders::_2, obstacleIDs, outflowIDs, inflowIDs, freeSlipIDs);
+   auto ffInitFunc = [=] (FlagField_T* flagField, IBlock* const block) {
+      internal::flagFieldInitFunction< FlagField_T >(
+         flagField, block, obstacleIDs, outflowIDs, inflowIDs, freeSlipIDs); };
 
    // IMPORTANT REMARK: The flag field needs two ghost layers because of function advectMass(). There, the flags of all
    // D3Q* neighbors are determined for each cell, including cells in the first ghost layer. Therefore, all D3Q*

@@ -442,8 +442,8 @@ void EquilibriumAndNonEquilibriumRefillingSweep< LatticeModel_T, FlagField_T, Sc
       block->getData< const ScalarField_T >(ExtrapolationRefillingSweepBase_T::fillFieldID_);
 
    // function to fetch relevant PDFs
-   auto getPdfFunc = std::bind(&ExtrapolationRefillingSweepBase_T::getNonEquilibriumPdfsInCell, this,
-                               std::placeholders::_1, std::placeholders::_2);
+   auto getPdfFunc = [this] ( const Cell& cell, auto& field) {
+      return ExtrapolationRefillingSweepBase_T::getNonEquilibriumPdfsInCell(cell, field); };
 
    WALBERLA_FOR_ALL_CELLS(pdfFieldIt, pdfField, flagFieldIt, flagField, {
       if (RefillingSweepBase_T::flagInfo_.hasConvertedFromGasToInterface(flagFieldIt))
@@ -500,6 +500,10 @@ void ExtrapolationRefillingSweep< LatticeModel_T, FlagField_T, ScalarField_T, Ve
    const ScalarField_T* const fillField =
       block->getData< const ScalarField_T >(ExtrapolationRefillingSweepBase_T::fillFieldID_);
 
+   // function to fetch relevant PDFs
+   auto getPdfFunc = [this] ( const Cell& cell, auto& field) {
+      return ExtrapolationRefillingSweepBase_T::getPdfsInCell(cell, field); };
+
    WALBERLA_FOR_ALL_CELLS(pdfFieldIt, pdfField, flagFieldIt, flagField, {
       if (RefillingSweepBase_T::flagInfo_.hasConvertedFromGasToInterface(flagFieldIt))
       {
@@ -510,10 +514,6 @@ void ExtrapolationRefillingSweep< LatticeModel_T, FlagField_T, ScalarField_T, Ve
             ExtrapolationRefillingSweepBase_T::findExtrapolationDirection(cell, *flagField, *fillField);
          const uint_t numberOfCellsForExtrapolation = ExtrapolationRefillingSweepBase_T::getNumberOfExtrapolationCells(
             cell, *flagField, *pdfField, extrapolationDirection);
-
-         // function to fetch relevant PDFs
-         auto getPdfFunc = std::bind(&ExtrapolationRefillingSweepBase_T::getPdfsInCell, this, std::placeholders::_1,
-                                     std::placeholders::_2);
 
          if (numberOfCellsForExtrapolation >= uint_c(3))
          {
