@@ -553,19 +553,19 @@ void UniformBufferedScheme<Stencil>::localBufferUnpacking( const uint_t index, c
 template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getCommunicateFunctor()
 {
-   return std::bind( &UniformBufferedScheme::communicate, this );
+   return [this] { communicate(); };
 }
 
 template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getStartCommunicateFunctor()
 {
-   return std::bind( &UniformBufferedScheme::startCommunication, this );
+   return [this] { startCommunication(); };
 }
 
 template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getWaitFunctor()
 {
-   return std::bind( &UniformBufferedScheme::wait, this );
+   return [this] { wait(); };
 }
 
 } // namespace communication

@@ -230,15 +230,15 @@ pages:
          - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.txt
          - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.sqlite
 
-benchmark_intel19:
+benchmark_intel22:
    <<: *benchmark_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel-2022
 
-benchmark_gcc8:
+benchmark_gcc13:
    <<: *benchmark_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
 
-benchmark_clang8:
+benchmark_clang17:
    <<: *benchmark_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17
 

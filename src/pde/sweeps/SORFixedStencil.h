@@ -52,12 +52,12 @@ public:
 
    std::function< void ( IBlock * const ) > getRedSweep()
    {
-      return std::bind( &SORFixedStencil::update, this, std::placeholders::_1, true );
+      return [this](IBlock * const block) { update(block, true); };
    }
 
    std::function< void ( IBlock * const ) > getBlackSweep()
    {
-      return std::bind( &SORFixedStencil::update, this, std::placeholders::_1, false );
+      return [this](IBlock * const block) { update(block, false); };
    }
 
 private:

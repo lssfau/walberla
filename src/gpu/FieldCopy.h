@@ -68,7 +68,7 @@ namespace gpu
    template<typename DstType, typename SrcType>
    std::function<void(IBlock*)> fieldCpyFunctor( BlockDataID dstID, ConstBlockDataID srcID )
    {
-      return std::bind( fieldCpySweepFunction<DstType,SrcType>, dstID, srcID, std::placeholders::_1 );
+      return [=] ( IBlock * block ) { fieldCpySweepFunction<DstType,SrcType>( dstID, srcID, block ); };
    }
 
 

@@ -87,8 +87,9 @@ BlockDataID addGPUPdfFieldToStorage(const shared_ptr< StructuredBlockStorage >& 
                                     const bool usePitchedMem = true )
 {
 
-   auto func = std::bind(internal::createGPUPdfField< LatticeStorageSpecification_T >,
-                         std::placeholders::_1, std::placeholders::_2, storageSpecification, nrOfGhostLayers, layout, usePitchedMem);
+   auto func = [=] (const IBlock * const block, const auto * const sbs) {
+      return internal::createGPUPdfField< LatticeStorageSpecification_T >(
+         block, sbs, storageSpecification, nrOfGhostLayers, layout, usePitchedMem); };
    return bs->addStructuredBlockData< GPUPdfField< LatticeStorageSpecification_T > >(func, identifier);
 }
 
@@ -97,8 +98,9 @@ BlockDataID addGPUPdfFieldToStorage(const shared_ptr< StructuredBlockStorage >& 
                                     const LatticeStorageSpecification_T& storageSpecification,
                                     const std::string& identifier, const bool usePitchedMem = true, const bool copyCPUField = true)
 {
-   auto func = std::bind(internal::createGPUPdfFieldFromCPUPdfField< Field_T, LatticeStorageSpecification_T >,
-                         std::placeholders::_1, std::placeholders::_2, storageSpecification, cpuFieldID, usePitchedMem, copyCPUField);
+   auto func = [=] (const IBlock * const block, const auto * const sbs) {
+      return internal::createGPUPdfFieldFromCPUPdfField< Field_T, LatticeStorageSpecification_T >(
+                         block, sbs, storageSpecification, cpuFieldID, usePitchedMem, copyCPUField); };
    return bs->addStructuredBlockData< GPUPdfField< LatticeStorageSpecification_T > >(func, identifier);
 }
 

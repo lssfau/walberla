@@ -49,6 +49,7 @@ waLBerla_compile_test( FILES FieldIndexing3DTest.cpp FieldIndexing3DTest.cu )
 waLBerla_execute_test( NAME  FieldIndexing3DTest )
 
 
+if( WALBERLA_BUILD_WITH_CODEGEN )
 waLBerla_generate_target_from_python(NAME CodegenJacobiGPUGeneratedCudaJacobiKernel FILE codegen/CudaJacobiKernel.py
       OUT_FILES CudaJacobiKernel2D.cu CudaJacobiKernel2D.h
       CudaJacobiKernel3D.cu CudaJacobiKernel3D.h)
@@ -60,6 +61,7 @@ waLBerla_generate_target_from_python(NAME CodegenPoissonGPUGeneratedKernel FILE 
         OUT_FILES PoissonGPU.cu PoissonGPU.h )
    waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS walberla::gpu walberla::timeloop CodegenPoissonGPUGeneratedKernel )
 waLBerla_execute_test( NAME CodegenPoissonGPU )
+endif()
 
 # The following tests work only for CUDA enabled MPI
 waLBerla_compile_test( FILES communication/CommTest.cpp )
@@ -72,6 +74,7 @@ endif()
 
    waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS walberla::blockforest walberla::timeloop )
 
+if( WALBERLA_BUILD_WITH_CODEGEN )
 waLBerla_generate_target_from_python(NAME MicroBenchmarkGpuLbmGenerated FILE codegen/MicroBenchmarkGpuLbm.py
       OUT_FILES MicroBenchmarkStreamKernel.${CODEGEN_FILE_SUFFIX} MicroBenchmarkCopyKernel.${CODEGEN_FILE_SUFFIX} MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
 waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp DEPENDS MicroBenchmarkGpuLbmGenerated)
@@ -89,6 +92,7 @@ waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldNonUniformPack
 waLBerla_compile_test( FILES codegen/GeneratedFieldNonUniformPackInfoTestGPU.cpp
         DEPENDS walberla::blockforest walberla::core walberla::field CodegenGeneratedGPUFieldNonUniformPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestGPU )
+endif()
 
 
     if (WALBERLA_BUILD_WITH_PYTHON)

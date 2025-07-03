@@ -119,7 +119,7 @@ inline void runPythonObject( py::object obj ) {
 template<>
 inline std::function<void()> DictWrapper::get( const char* name ) {
    py::object obj ( d_[name] );
-   return std::bind( &runPythonObject, obj );
+   return [obj] { runPythonObject(obj); };
 }
 
 template<>

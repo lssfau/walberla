@@ -46,7 +46,7 @@ namespace internal
 template<class T, typename... Args>
 std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(Args&&... args) {
-   return std::bind( internal::newFunc<T,Args...>, std::placeholders::_1, std::forward<Args>(args)... );
+   return [&] (auto && arg) { return internal::newFunc<T>(std::forward<decltype(arg)>(arg), args...); };
 }
 
 

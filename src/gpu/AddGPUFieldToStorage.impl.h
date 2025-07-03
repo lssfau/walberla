@@ -74,7 +74,7 @@ namespace gpu
                                     uint_t nrOfGhostLayers,
                                     bool usePitchedMem )
    {
-      auto func = std::bind ( internal::createGPUField<GPUField_T>, std::placeholders::_1, std::placeholders::_2, nrOfGhostLayers, fSize, layout, usePitchedMem );
+      auto func = [=] (const IBlock * const block, const auto * const sbs) { return internal::createGPUField<GPUField_T>(block, sbs, nrOfGhostLayers, fSize, layout, usePitchedMem); };
       return bs->addStructuredBlockData< GPUField_T >( func, identifier );
    }
 
@@ -85,7 +85,7 @@ namespace gpu
                                      const std::string & identifier,
                                      bool usePitchedMem )
    {
-      auto func = [cpuFieldID, usePitchedMem](auto && PH1, auto && PH2) { return internal::createGPUFieldFromCPUField<Field_T>(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), cpuFieldID, usePitchedMem); };
+      auto func = [cpuFieldID, usePitchedMem](const IBlock * const block, const auto * const sbs) { return internal::createGPUFieldFromCPUField<Field_T>(block, sbs, cpuFieldID, usePitchedMem); };
       return bs->addStructuredBlockData< GPUField<typename Field_T::value_type> >( func, identifier );
    }
 

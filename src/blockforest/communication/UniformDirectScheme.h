@@ -113,8 +113,8 @@ public:
    void startCommunication();
    void wait();
 
-   std::function<void()> getStartCommunicateFunctor() { return std::bind( &UniformDirectScheme::startCommunication, this ); }
-   std::function<void()> getWaitFunctor()             { return std::bind( &UniformDirectScheme::wait,               this ); }
+   std::function<void()> getStartCommunicateFunctor() { return [this] { startCommunication(); }; }
+   std::function<void()> getWaitFunctor()             { return [this] { wait(); }; }
    //@}
    //*******************************************************************************************************************
 

@@ -82,8 +82,8 @@ option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation" 
 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
-option ( WALBERLA_BUILD_WITH_CUDA	        "Enable CUDA support"                                )
-option ( WALBERLA_BUILD_WITH_HIP	           "Enable ROCm HIP support"                            )
+option ( WALBERLA_BUILD_WITH_CUDA           "Enable CUDA support"                                )
+option ( WALBERLA_BUILD_WITH_HIP            "Enable ROCm HIP support"                            )
 
 
 option ( WALBERLA_BUILD_WITH_FASTMATH       "Fast math"                                          )

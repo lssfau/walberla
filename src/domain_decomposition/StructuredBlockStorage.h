@@ -114,8 +114,13 @@ public:
                             bdc.incompatibleSelectors_, bdc.identifier_ ); return *this; }
       template< typename T >
       StructuredBlockDataAdder & operator<<( const StructuredBlockDataCreator<T> & sbdc ) {
-         dataHandling_.add( walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( sbdc.function_,  std::placeholders::_1, &storage_ ) ) ),
-                            sbdc.requiredSelectors_, sbdc.incompatibleSelectors_, sbdc.identifier_ ); return *this; }
+         dataHandling_.add(
+            walberla::make_shared< internal::BlockDataHandlingHelper<T> >(
+               walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >(
+                  [this, function=sbdc.function_](IBlock * const block) { return function(block, &storage_ ); } ) ),
+            sbdc.requiredSelectors_, sbdc.incompatibleSelectors_, sbdc.identifier_ );
+         return *this;
+      }
       operator BlockDataID() { return storage_.getBlockStorage().addBlockData( dataHandling_, identifier_ ); }
    private:
       StructuredBlockStorage & storage_;
