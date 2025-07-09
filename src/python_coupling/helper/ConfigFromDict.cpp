@@ -68,6 +68,7 @@ void configFromPythonDict( config::Config::Block & block, py::dict & pythonDict 
          else if ( py::isinstance<py::list>(item.second) )
          {
             py::list childList = py::list(pythonDict[key.c_str()]);
+            // NOLINTNEXTLINE(modernize-loop-convert)
             for(py::size_t i = 0; i < childList.size(); ++i){
                walberla::config::Config::Block & childBlock = block.createBlock( key );
                py::dict d = py::dict(childList[i]);

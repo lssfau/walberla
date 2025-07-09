@@ -121,7 +121,7 @@ template< typename GhostLayerField_T >
 class GhostLayerFieldDataHandling : public field::BlockDataHandling< GhostLayerField_T >
 {
  public:
-   typedef typename GhostLayerField_T::value_type Value_T;
+   using Value_T = typename GhostLayerField_T::value_type;
 
    GhostLayerFieldDataHandling(const weak_ptr< StructuredBlockStorage >& blocks, const uint_t nrOfGhostLayers,
                                const Value_T& initValue, const Layout layout, uint_t alignment = 0)
@@ -209,7 +209,7 @@ void field_swapDataPointers(Field_T& f1, Field_T& f2)
 template< typename Field_T >
 py::object copyAdaptorToField(const Field_T& f)
 {
-   typedef GhostLayerField< typename Field_T::value_type, Field_T::F_SIZE > ResField;
+   using ResField = GhostLayerField< typename Field_T::value_type, Field_T::F_SIZE >;
    auto res = make_shared< ResField >(f.xSize(), f.ySize(), f.zSize(), f.nrOfGhostLayers());
 
    auto srcIt = f.beginWithGhostLayerXYZ();
@@ -288,10 +288,10 @@ struct FieldExporter
    template< typename FieldType >
    void operator()(python_coupling::NonCopyableWrap< FieldType >) const
    {
-      typedef typename FieldType::value_type T;
-      const uint_t F_SIZE = FieldType::F_SIZE;
-      typedef GhostLayerField< T, F_SIZE > GlField_T;
-      typedef Field< T, F_SIZE > Field_T;
+      using T = typename FieldType::value_type;
+      constexpr uint_t F_SIZE = FieldType::F_SIZE;
+      using GlField_T = GhostLayerField< T, F_SIZE >;
+      using Field_T = Field< T, F_SIZE >;
 
       std::string data_type_name = PythonFormatString<T>::get();
 
@@ -325,6 +325,7 @@ struct FieldExporter
 
       using field::communication::PackInfo;
       std::string FieldPackInfo_name = "FieldPackInfo_" + data_type_name + "_" + std::to_string(FieldType::F_SIZE);
+      // NOLINTNEXTLINE(bugprone-unused-raii)
       py::class_< PackInfo< GlField_T >, shared_ptr< PackInfo< GlField_T > >, walberla::communication::UniformPackInfo >(m_, FieldPackInfo_name.c_str());
 
       using field::communication::UniformMPIDatatypeInfo;
@@ -369,13 +370,13 @@ class AddToStorageExporter
    void operator()(python_coupling::NonCopyableWrap<FieldType>) const
    {
       using namespace py;
-      typedef typename FieldType::value_type T;
+      using T = typename FieldType::value_type;
       const uint_t F_SIZE = FieldType::F_SIZE;
 
       if (F_SIZE != fs_) return;
       if(python_coupling::isCppEqualToPythonType<T>(py::cast<std::string>(dtype_.attr("__name__"))))
       {
-         typedef internal::GhostLayerFieldDataHandling< GhostLayerField< T, F_SIZE > > DataHandling;
+         using DataHandling = internal::GhostLayerFieldDataHandling< GhostLayerField< T, F_SIZE > >;
          auto dataHandling = walberla::make_shared< DataHandling >(blocks_, gl_, initValue_, layout_, alignment_);
          blocks_->addBlockData(dataHandling, name_);
          found_ = true;
@@ -448,7 +449,7 @@ class CreateFieldExporter
    template< typename FieldType>
    void operator() ( python_coupling::NonCopyableWrap<FieldType> ) const
    {
-      typedef typename FieldType::value_type T;
+      using T = typename FieldType::value_type;
       const uint_t F_SIZE = FieldType::F_SIZE;
 
       if( F_SIZE != fs_ )
@@ -537,7 +538,7 @@ inline shared_ptr<vtk::BlockCellDataWriterInterface> createVTKWriter(const share
       vtkName = name;
 
    if ( blocks->begin() == blocks->end() )
-      return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      return nullptr;
    auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
    CreateVTKWriterExporter exporter(blocks, fieldID, vtkName);
@@ -571,7 +572,7 @@ class CreateBinarizationVTKWriterExporter
       IBlock * firstBlock =  & ( * blocks_->begin() );
       if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
       {
-         typedef field::BinarizationFieldWriter< FieldType > Writer;
+         using Writer = field::BinarizationFieldWriter< FieldType >;
          writer_ = shared_ptr< Writer >(new Writer(fieldId_, vtkName_, static_cast< typename FieldType::value_type >(mask_)));
       }
    }
@@ -600,7 +601,7 @@ inline shared_ptr<vtk::BlockCellDataWriterInterface> createBinarizationVTKWriter
       vtkName = name;
 
    if ( blocks->begin() == blocks->end() )
-      return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      return nullptr;
    auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
    CreateBinarizationVTKWriterExporter exporter(blocks, fieldID, vtkName, mask);

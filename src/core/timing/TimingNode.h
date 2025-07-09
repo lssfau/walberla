@@ -369,12 +369,12 @@ void synchronizeEntries( TimingNode<TP>& tn )
    {
       childNames.push_back( i->first );
    }
-   
+
    std::vector<std::string> globalChildNames = mpi::allReduceSet( childNames, mpi::UNION );
-   
+
    std::vector<std::string> missingChildNames( globalChildNames.size() - childNames.size() );
-   
-   std::set_difference( globalChildNames.begin(), globalChildNames.end(), childNames.begin(), childNames.end(), missingChildNames.begin() );
+
+   std::ranges::set_difference( globalChildNames, childNames, missingChildNames.begin() );
 
    for(auto & missingChildName : missingChildNames)
    {

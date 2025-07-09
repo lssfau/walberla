@@ -45,7 +45,7 @@ namespace lbm_generated
  * streamOnlyNoAdvancement)
  * @tparam BoundaryCollection_T LBM Boundary collection (Functor that runs all boundary kernels at call)
  */
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T = timeloop::SweepTimeloop < > >
 class BasicRecursiveTimeStepGPU
 {
  public:
@@ -107,7 +107,7 @@ class BasicRecursiveTimeStepGPU
 
 
    void operator()() { timestep(0); };
-   void addRefinementToTimeLoop(SweepTimeloop& timeloop, uint_t level = 0);
+   void addRefinementToTimeLoop(TimeLoop_T & timeloop, uint_t level = 0);
    void addPostBoundaryHandlingBlockFunction( const BlockFunction & function );
 
  private:

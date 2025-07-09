@@ -38,7 +38,7 @@
 
 namespace walberla {
 
-typedef GhostLayerField<cell_idx_t, 1> ScalarField;
+using ScalarField = GhostLayerField<cell_idx_t, 1>;
 
 
 
@@ -146,7 +146,7 @@ int main(int argc, char ** argv )
    using namespace gather;
 
 
-   typedef CellGatherPackInfo<ScalarField, CellInterval > CellGatherPI;
+   using CellGatherPI = CellGatherPackInfo<ScalarField, CellInterval >;
 
    // PackInfo across process P0 and P1
    CellInterval lowerLeftLine (   5, 5, 5,

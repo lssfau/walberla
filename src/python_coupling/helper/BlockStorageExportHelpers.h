@@ -68,14 +68,14 @@ namespace python_coupling {
       IBlock & firstBlock = *(  bs->begin() );
       const FField * flagField = firstBlock.getData< const FField > ( flagFieldID );
 
-      typedef typename FField::flag_t flag_t;
+      using flag_t = typename FField::flag_t;
       flag_t mask = 0;
-      for( auto it = flagList.begin(); it != flagList.end(); ++it )
+      for( auto const &flag : flagList )
       {
-         if ( ! flagField->flagExists( *it ) )
+         if ( ! flagField->flagExists( flag ) )
             throw python_coupling::BlockDataNotConvertible( "Unknown FlagID" );
 
-         mask = flag_t( mask | flagField->getFlag( *it ) );
+         mask = flag_t( mask | flagField->getFlag( flag ) );
       }
 
       return mask;

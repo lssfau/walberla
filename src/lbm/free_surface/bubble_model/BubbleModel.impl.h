@@ -127,9 +127,9 @@ void BubbleModel< Stencil_T >::initFromFillLevelField(const ConstBlockDataID& fi
 template< typename Stencil_T >
 void BubbleModel< Stencil_T >::setDensityOfAllBubbles(real_t rho)
 {
-   for (auto it = bubbles_.begin(); it != bubbles_.end(); ++it)
+   for (auto &bubble : bubbles_)
    {
-      if (!it->hasConstantDensity()) { it->setDensity(rho); }
+      if (!bubble.hasConstantDensity()) { bubble.setDensity(rho); }
    }
 }
 
@@ -237,7 +237,7 @@ void BubbleModel< Stencil_T >::reportLiquidToInterfaceConversion(IBlock* blockIt
    WALBERLA_ASSERT_EQUAL(thisCellID, INVALID_BUBBLE_ID);
 
    // iterate neighborhood and assign the first found bubble ID to this new interface cell
-   using SearchStencil_T = typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+   using SearchStencil_T = typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
    for (auto d = SearchStencil_T::beginNoCenter(); d != SearchStencil_T::end(); ++d)
    {
       // get bubble ID of neighboring cell

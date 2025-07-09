@@ -120,8 +120,8 @@ void simpleSweep( IBlock * block )
 There is still a problem with this function: It can only have a single argument, otherwise we can not register
 it as a sweep at the time loop since we additionally need the BlockDataID of our field.
 One possibility would be to have a global variable where the BlockDataID is stored (very bad design, do not do that!),
-or we could use a construct from the standard library called std::bind().
-The last can transform a function pointer of a two-argument function to a function pointer of a one-argument function
+or we could use a capturing lambda expression.
+The latter can transform a function pointer of a two-argument function to a one-argument closure object
 by keeping the second argument constant: It "binds" the second argument to a fixed value.
 
 So we write the function just as we need it:
@@ -138,18 +138,27 @@ and register it at the time loop with the following:
 
 \code
 SweepTimeloop timeloop( blocks, uint_c(1) );
-auto pointerToTwoArgFunction = & simpleSweep;
-auto pointerToOneArgFunction = std::bind( pointerToTwoArgFunction, _1, fieldID );
-timeloop.add() << Sweep( pointerToOneArgFunction, "BogusAlgorithm" );
+auto oneArgFunction = [fieldID] (IBlock * block) { simpleSweep( block, fieldID ); };
+timeloop.add() << Sweep( twoArgFunction, "BogusAlgorithm" );
 \endcode
 
-Note the strange syntax to add a sweep to the time loop. The add method returns an object (a SweepAdder)
-where the sweep is piped in. Moreover, in this object e.g. a BeforeFunction or a AfterFunction
-can be piped in. If you want to know more about the sweep registration read the documentation of timeloop::SweepTimeloop.
+Note the strange syntax to add a sweep to the time loop. The \c add() method returns an object (a \ref timeloop::SweepAdder)
+where the sweep is piped in. Moreover, in this object e.g. a \ref timeloop::BeforeFunction or a \ref timeloop::AfterFunction
+can be piped in. If you want to know more about the sweep registration read the documentation of \ref timeloop::SweepTimeloop.
+
+It is not necessary to create a free function and bind it with a closure object;
+the body of the `simpleSweep` function can be written directly inside the lambda expression:
+
+\code
+auto oneArgFunction = [fieldID] (IBlock * block) {
+   auto field = block->getData< Field<real_t,1> >( fieldID );
+   // ...
+};
+\endcode
 
 \section tut02_sweep_class Register a Class as Sweep
 
-The variant described above using std::bind() may seem a little strange but there is also another solution.
+The variant described above using a lambda expression is quite compact, but there is also another solution.
 Instead of writing a sweep function, we write a functor class overloading the call operator.
 
 \code
@@ -182,15 +191,23 @@ private:
 };
 \endcode
 
-With this, the registration code does not need std::bind any more:
+With this, the registration code does not need a lambda any more:
 
 \code
 timeloop.add() << Sweep( SimpleSweep(fieldID), "BogusAlgorithmButNowAsFunctor" );
 \endcode
 
-Note that if you define a member function completely within the class definition, this function is automatically marked as `inline`. Also, for
-larger classes, declaring all member functions within the class definition is bad style. Normally, one would have only the function declaration within
-the class definition. The function is then defined outside of the class:
+This is more or less what a lambda expression generates under the hood:
+the square brackets become the constructor, while the round brackets
+and curly braces generate the \c operator()() method.
+A functor class allows for more elaborate constructors, class inheritance,
+and overloaded \c operator()() methods.
+
+Note that if you define a member function completely within the class definition,
+this function is automatically marked as `inline`.
+Also, for larger classes, declaring all member functions within the class definition is bad style.
+Normally, one would have only the function declaration within the class definition.
+The function is then defined outside of the class:
 
 \code
 // class definition including member function declarations (typically inside a header file)

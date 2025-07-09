@@ -52,9 +52,8 @@ namespace field {
    };
 
    template<typename VectorField_T>
-   struct VectorFieldAccessor<VectorField_T,
-                              std::enable_if_t< std::is_same_v< typename VectorField_T::value_type,
-                                                                           Vector3<real_t> > > >
+   requires( std::is_same_v< typename VectorField_T::value_type, Vector3<real_t> > )
+   struct VectorFieldAccessor<VectorField_T>
    {
        using vector_or_constRefVector = const Vector3<real_t> &;
 

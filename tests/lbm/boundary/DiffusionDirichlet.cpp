@@ -87,16 +87,16 @@ namespace walberla {
 using flag_t = uint8_t;
 using vec3_t = Vector3<real_t>;
 
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >  LM;
+using LM = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >;
 
 using CommunicationStencil = LM::CommunicationStencil;
 
 using MyPdfField = lbm::PdfField<LM>;
-typedef GhostLayerField< real_t, 1         >   ScalarField;
-typedef GhostLayerField< Vector3<real_t>, 1>   VectorField;
+using ScalarField = GhostLayerField< real_t, 1>;
+using VectorField = GhostLayerField< Vector3<real_t>, 1>;
 using MyFlagField = FlagField<flag_t>;
 
-typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField >  MyBoundaryHandling;
+using MyBoundaryHandling = lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField >;
 
 const FlagUID& getFluidFlag(){ static FlagUID uid( "Fluid" ); return uid; }
 

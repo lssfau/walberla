@@ -29,7 +29,7 @@
 namespace walberla
 {
 using LatticeModel_T = lbm::D3Q19< lbm::collision_model::SRT, false >;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
 int main(int argc, char** argv)
 {

@@ -246,11 +246,12 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       alpha[*n] = 1.0 / ( double_c( neighborhood.size() ) + 1.0 );
    }
 
-   for( auto rank = alphaRanksToRecvFrom.begin(); rank != alphaRanksToRecvFrom.end(); ++rank )
+   for( const auto &it : alphaRanksToRecvFrom )
    {
-      WALBERLA_ASSERT_UNEQUAL( uint_c(rank->first), blockforest.getProcess() );
-      WALBERLA_ASSERT( alpha.find( uint_c(rank->first) ) != alpha.end() );
-      alphaBufferSystem.sendBuffer( rank->first ) << alpha[ uint_c(rank->first) ];
+      const auto rank = it.first;
+      WALBERLA_ASSERT_UNEQUAL( uint_c(rank), blockforest.getProcess() );
+      WALBERLA_ASSERT( alpha.find( uint_c(rank) ) != alpha.end() );
+      alphaBufferSystem.sendBuffer( rank ) << alpha[ uint_c(rank) ];
    }
 
    alphaBufferSystem.sendAll();
@@ -280,11 +281,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    
    std::vector< double > localWeight( processWeight ); //per level
    
-   double flowIterations( double_c( flowIterations_ ) );
+   auto flowIterations( double_c( flowIterations_ ) );
    if( iteration >= flowIterationsIncreaseStart_ )
       flowIterations += double_c( iteration + uint_t(1) - flowIterationsIncreaseStart_ ) * flowIterationsIncrease_;
    
-   const uint_t iterations = uint_c( flowIterations + 0.5 );
+   const auto iterations = uint_c( flowIterations + 0.5 );
    for( uint_t i = uint_t(0); i < iterations; ++i )
    {
       WALBERLA_ASSERT_EQUAL( localWeight.size(), levels );
@@ -737,10 +738,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       std::map< uint_t, std::vector< std::pair< BlockID, double > > > blocksForNeighborsUnsorted;
       
-      for( auto it = blocksForNeighbors.begin(); it != blocksForNeighbors.end(); ++it )
+      for( auto &[np, list] : blocksForNeighbors )
       {
-         const uint_t np = it->first;
-         WALBERLA_ASSERT_EQUAL( it->second.size(), levels );
+         WALBERLA_ASSERT_EQUAL( list.size(), levels );
          for( uint_t l = uint_t(0); l < levels; ++l )
          {
             if( processLevel[l] )
@@ -748,7 +748,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                if( regardConnectivity_ && iteration < disregardConnectivityStart_ )
                {
                   std::set< uint_t > assigned;
-                  for(auto & type : it->second[l])
+                  for(auto & type : list[l])
                   {
                      for(uint_t index : type)
                      {
@@ -828,14 +828,14 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       std::map< uint_t, std::vector< std::vector< std::pair< BlockID, double > > > > blocksFromNeighbors; // sorted by level
 
-      for( auto it = blocksFromNeighborsUnsorted.begin(); it != blocksFromNeighborsUnsorted.end(); ++it )
+      for( auto &[np, list] : blocksFromNeighborsUnsorted )
       {
-         blocksFromNeighbors[ it->first ].resize( levels );
-         for( auto pr = it->second.begin(); pr != it->second.end(); ++pr )
+         blocksFromNeighbors[ np ].resize( levels );
+         for( auto &pr : list )
          {
-            const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( pr->first ) : uint_t(0);
-            WALBERLA_ASSERT_LESS( level, blocksFromNeighbors[ it->first ].size() );
-            blocksFromNeighbors[ it->first ][ level ].push_back( *pr );
+            const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( pr.first ) : uint_t(0);
+            WALBERLA_ASSERT_LESS( level, blocksFromNeighbors[ np ].size() );
+            blocksFromNeighbors[ np ][ level ].push_back( pr );
          }
       }
       
@@ -937,26 +937,25 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       std::map< BlockID, std::vector< uint_t > > processToSendTo;
       
-      for(auto & it : blocksToSend)
+      for(auto & [pickedProcess, blockIds] : blocksToSend)
       {
-         const uint_t p = it.first;
-         for(auto & id : it.second)
-            processToSendTo[ id ].push_back( p );
+         for(auto & id : blockIds)
+            processToSendTo[ id ].push_back( pickedProcess );
       }
       
-      for( auto it = processToSendTo.begin(); it != processToSendTo.end(); ++it )
+      for( const auto &[id, pickedProcesses] : processToSendTo )
       {
          uint_t index( uint_t(0) );
-         while( index < targetProcess.size() && targetProcess[ index ].first->getId() != it->first )
+         while( index < targetProcess.size() && targetProcess[ index ].first->getId() != id )
          {
             ++index;
          }
-         WALBERLA_ASSERT( index < targetProcess.size() && targetProcess[ index ].first->getId() == it->first );
+         WALBERLA_ASSERT( index < targetProcess.size() && targetProcess[ index ].first->getId() == id );
          const uint_t level = levelwise_ ? targetProcess[ index ].first->getLevel() : uint_t(0);
          
-         auto p = it->second.begin();
-         uint_t pickedProcess = *p;
-         for( ++p; p != it->second.end(); ++p )
+         auto p = pickedProcesses.begin();
+         auto pickedProcess = *p;
+         for( ++p; p != pickedProcesses.end(); ++p )
          {
             WALBERLA_ASSERT( flow.find(*p) != flow.end() );
             if( flow[*p][level] > flow[pickedProcess][level] )
@@ -984,11 +983,12 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    mpi::BufferSystem blocksBufferSystem( MPIManager::instance()->comm(), 1711 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110 + 3
    blocksBufferSystem.setReceiverInfo( blocksRanksToRecvFrom );
 
-   for( auto rank = blocksRanksToRecvFrom.begin(); rank != blocksRanksToRecvFrom.end(); ++rank )
+   for( const auto &it : blocksRanksToRecvFrom )
    {
-      WALBERLA_ASSERT_UNEQUAL( uint_c(rank->first), blockforest.getProcess() );
-      WALBERLA_ASSERT( sendBlocksToNeighbor.find( uint_c(rank->first) ) != sendBlocksToNeighbor.end() );
-      blocksBufferSystem.sendBuffer( rank->first ) << sendBlocksToNeighbor[ uint_c(rank->first) ];
+      const auto rank = it.first;
+      WALBERLA_ASSERT_UNEQUAL( uint_c(rank), blockforest.getProcess() );
+      WALBERLA_ASSERT( sendBlocksToNeighbor.find( uint_c(rank) ) != sendBlocksToNeighbor.end() );
+      blocksBufferSystem.sendBuffer( rank ) << sendBlocksToNeighbor[ uint_c(rank) ];
    }
 
    blocksBufferSystem.sendAll();

@@ -178,7 +178,7 @@ namespace timeloop {
                                                           typename FField::flag_t activeMask,
                                                           uint_t countFreq , real_t scaling )
    {
-      this->addMeasurement( name, std::bind( flagFieldCountFunction<FField>,  std::placeholders::_1, flagFieldID, activeMask ),
+      this->addMeasurement( name, [=] ( const IBlock & block ) { return flagFieldCountFunction<FField>( block, flagFieldID, activeMask ); },
                            countFreq, scaling );
    }
 

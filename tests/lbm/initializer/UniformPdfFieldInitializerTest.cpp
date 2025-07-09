@@ -190,9 +190,9 @@ void testDensityAndVelocityInitFromConfig( const BlockDataID & pdfFieldId, const
 
    uint_t configCounter( 1 );
 
-   for( auto configIt = initBlocks.begin(); configIt != initBlocks.end(); ++configIt )
+   for( auto const &initConfig : initBlocks )
    {
-      initializer.initFromConfig( *configIt );
+      initializer.initFromConfig( initConfig );
 
       if( writeVtk )
       {
@@ -202,7 +202,7 @@ void testDensityAndVelocityInitFromConfig( const BlockDataID & pdfFieldId, const
       }
 
       lbm::initializer::ExprSystemInitFunction initControl( blocks );
-      initControl.parse( *configIt );
+      initControl.parse( initConfig );
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {

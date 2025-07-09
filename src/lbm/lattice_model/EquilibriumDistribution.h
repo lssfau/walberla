@@ -56,15 +56,14 @@ inline real_t multiplyVelocityDirection( const stencil::Direction & direction, c
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 class EquilibriumDistribution;
 
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
-	                                                                     LatticeModel_T::equilibriumAccuracyOrder == 2
-	                                                                     >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+class EquilibriumDistribution< LatticeModel_T >
 {
 public:
 
@@ -118,9 +117,8 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
-                                                                        LatticeModel_T::equilibriumAccuracyOrder == 1
-                                                                        >::type >
+requires( ! LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+class EquilibriumDistribution< LatticeModel_T >
 {
 public:
 
@@ -168,8 +166,8 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                        LatticeModel_T::equilibriumAccuracyOrder == 2 >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 2 )
+class EquilibriumDistribution< LatticeModel_T >
 {
 public:
 
@@ -223,8 +221,8 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
-                                                                        LatticeModel_T::equilibriumAccuracyOrder == 1 >::type >
+requires( LatticeModel_T::compressible && LatticeModel_T::equilibriumAccuracyOrder == 1 )
+class EquilibriumDistribution< LatticeModel_T >
 {
 public:
 

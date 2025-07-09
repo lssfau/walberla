@@ -150,35 +150,37 @@ const FlagUID Curved_Flag( "curved" );
 // OUTPUT HELPERS  //
 /////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > > >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct StencilString< LatticeModel_T >
 {
    static const char * str() { return "D3Q19"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > > >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > )
+struct StencilString< LatticeModel_T >
 {
    static const char * str() { return "D3Q27"; }
 };
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag > > >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::SRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, std::enable_if_t< std::is_same_v< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag > > >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "TRT"; }
 };
@@ -815,7 +817,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync, setup );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );   
    
    const bool vtkBeforeTimeStep = configBlock.getParameter< bool >( "vtkBeforeTimeStep", true );
@@ -823,8 +825,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    if( vtkBeforeTimeStep )
    {
       for(auto & output : vtkOutputFunctions)
-         timeloop.addFuncBeforeTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
-                                        output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
+         timeloop.addFuncBeforeTimeStep( output.second, std::string("VTK: ") + output.first );
    }
 
    // add 'refinement' LB time step to time loop
@@ -886,8 +887,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    if( !vtkBeforeTimeStep )
    {
       for(auto & output : vtkOutputFunctions)
-         timeloop.addFuncAfterTimeStep( output.second.outputFunction, std::string("VTK: ") + output.first,
-                                       output.second.requiredGlobalStates, output.second.incompatibleGlobalStates );
+         timeloop.addFuncAfterTimeStep( output.second, std::string("VTK: ") + output.first );
    }
 
    // remaining time logger

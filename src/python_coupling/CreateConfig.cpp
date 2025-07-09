@@ -53,7 +53,7 @@ shared_ptr< Config > createConfigFromPythonScript(const std::string& scriptFile,
    using py::object;
 
    object returnValue = pythonCallback.data().dict()["returnValue"];
-   if (returnValue.is(object())) return shared_ptr< Config >();
+   if (returnValue.is(object())) return {};
 
    bool isDict = py::isinstance< dict >(returnValue);
    if (!isDict) { WALBERLA_ABORT("Python configuration did not return a dictionary object."); }
@@ -85,7 +85,7 @@ class PythonMultipleConfigGenerator : public config::ConfigGenerator
       }
       catch (py::error_already_set&)
       {
-         return shared_ptr<Config>();
+         return {};
       }
    }
 
@@ -140,7 +140,7 @@ config::Iterator createConfigIteratorFromPythonScript(const std::string& scriptF
       }
    }
 
-   return config::Iterator(generator);
+   return {generator};
 }
 
 } // namespace python_coupling

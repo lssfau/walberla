@@ -38,7 +38,7 @@
 
 namespace walberla
 {
-typedef GhostLayerField< real_t, 1 > ScalarField;
+using ScalarField = GhostLayerField< real_t, 1 >;
 
 void swapFields(StructuredBlockForest& blocks, BlockDataID uID, BlockDataID uTmpID)
 {

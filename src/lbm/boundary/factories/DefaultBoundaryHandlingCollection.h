@@ -66,7 +66,7 @@ public:
    static BlockDataID addDefaultBoundaryHandlingCollectionToStorage(
       const shared_ptr< StructuredBlockStorage >& bs, const std::string & identifier, const BlockDataID& flagFieldID, const BlockDataID& handlingID, const BlockDataID& diffusionHandlingID )
    {
-      auto func = std::bind( createDefaultBoundaryHandlingCollectionFactory, std::placeholders::_1, std::placeholders::_2, flagFieldID, handlingID, diffusionHandlingID );
+      auto func = [=] ( IBlock * const block, const auto * const sbs ) { createDefaultBoundaryHandlingCollectionFactory( block, sbs, flagFieldID, handlingID, diffusionHandlingID ); };
       return bs->addStructuredBlockData< BoundaryHandlingCollection_T >( func, identifier );
    }
 

@@ -114,8 +114,13 @@ public:
                             bdc.incompatibleSelectors_, bdc.identifier_ ); return *this; }
       template< typename T >
       StructuredBlockDataAdder & operator<<( const StructuredBlockDataCreator<T> & sbdc ) {
-         dataHandling_.add( walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( sbdc.function_,  std::placeholders::_1, &storage_ ) ) ),
-                            sbdc.requiredSelectors_, sbdc.incompatibleSelectors_, sbdc.identifier_ ); return *this; }
+         dataHandling_.add(
+            walberla::make_shared< internal::BlockDataHandlingHelper<T> >(
+               walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >(
+                  [this, function=sbdc.function_](IBlock * const block) { return function(block, &storage_ ); } ) ),
+            sbdc.requiredSelectors_, sbdc.incompatibleSelectors_, sbdc.identifier_ );
+         return *this;
+      }
       operator BlockDataID() { return storage_.getBlockStorage().addBlockData( dataHandling_, identifier_ ); }
    private:
       StructuredBlockStorage & storage_;
@@ -254,11 +259,12 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
-   { return blockStorage_->loadBlockData( file, dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
+   { return blockStorage_->loadBlockData( file, dataHandling, identifier, forceSerialIO, requiredSelectors, incompatibleSelectors ); }
    
-   void saveBlockData( const std::string & file, const BlockDataID & id ) { blockStorage_->saveBlockData( file, id ); }
+   void saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO = true) { blockStorage_->saveBlockData( file, id, forceSerialIO); }
    void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer ) { blockStorage_->serializeBlockData(id, buffer); }
    void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer )  { blockStorage_->deserializeBlockData(id, buffer); }
 
@@ -1078,9 +1084,16 @@ inline BlockDataID StructuredBlockStorage::addStructuredBlockData(
       std::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
       const std::string& identifier, const Set<SUID>& requiredSelectors, const Set<SUID>& incompatibleSelectors )
 {
-   internal::SelectableBlockDataHandlingWrapper dataHandling(
-            walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( function,  std::placeholders::_1, this ) ) ),
-            requiredSelectors, incompatibleSelectors, identifier );
+   internal::SelectableBlockDataHandlingWrapper dataHandling {
+      std::make_shared< internal::BlockDataHandlingHelper<T> >(
+         std::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >(
+            [function, this](IBlock* const b) {
+               return function(b, this);
+            }
+         )
+      ),
+      requiredSelectors, incompatibleSelectors, identifier 
+   };
 
 
    return blockStorage_->addBlockData( dataHandling, identifier );

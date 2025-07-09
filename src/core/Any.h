@@ -23,23 +23,13 @@
 
 #include "waLBerlaDefinitions.h"
 
-#ifndef WALBERLA_USE_STD_EXPERIMENTAL_ANY
 #include <any>
-#else
-#undef _LIBCPP_WARN_ON_DEPRECATED_EXPERIMENTAL_HEADER
-#include <experimental/any>
-#endif
 
 
 
 namespace walberla {
 
-#ifndef WALBERLA_USE_STD_EXPERIMENTAL_ANY
 using std::any;
 using std::any_cast;
-#else
-using std::experimental::any;
-using std::experimental::any_cast;
-#endif
 
 }

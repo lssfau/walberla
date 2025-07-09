@@ -46,8 +46,8 @@ namespace python_coupling {
       std::stringstream code;
       code << "import sys" << "\n" ;
       code << "sys.argv = [ ";
-      for( auto argStrIt = argv.begin(); argStrIt != argv.end(); ++argStrIt )
-         code << "'" << *argStrIt  << "',";
+      for( const auto & argStr : argv )
+         code << "'" << argStr  << "',";
       code << "] \n";
 
       filesystem::path path ( fileOrModuleName );

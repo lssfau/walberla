@@ -66,9 +66,9 @@ using PdfField_T = lbm::PdfField<LatticeModel_T>;
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
 
-typedef lbm::SimpleUBB< LatticeModel_T, flag_t, false, true >  UBB_Sphere_T;
-typedef lbm::SimpleUBB< LatticeModel_T, flag_t >  UBB_Wall_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, UBB_Sphere_T, UBB_Wall_T > BoundaryHandling_T;
+using UBB_Sphere_T = lbm::SimpleUBB< LatticeModel_T, flag_t, false, true >;
+using UBB_Wall_T = lbm::SimpleUBB< LatticeModel_T, flag_t >;
+using BoundaryHandling_T = BoundaryHandling< FlagField_T, Stencil_T, UBB_Sphere_T, UBB_Wall_T >;
 
 
 

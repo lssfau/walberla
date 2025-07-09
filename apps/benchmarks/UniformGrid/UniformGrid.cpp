@@ -139,49 +139,51 @@ const FlagUID NoSlip_Flag( "no slip" );
 // OUTPUT HELPERS  //
 /////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct StencilString< LatticeModel_T >
 {
    static const char * str() { return "D3Q19"; }
 };
 
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > )
+struct StencilString< LatticeModel_T >
 {
   static const char * str() { return "D3Q27"; }
 };
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::SRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::MRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "MRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::Cumulant_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::Cumulant_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
   static const char * str() { return "Cumulant"; }
 };
@@ -488,7 +490,7 @@ void MyVTKOutput<LatticeModel_T>::operator()( std::vector< shared_ptr<vtk::Block
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AddLB
 {
    using PdfField = typename Types< LatticeModel_T >::PdfField_T;
@@ -588,9 +590,9 @@ struct AddLB
 };
 
 template< typename LatticeModel_T  >
-struct AddLB< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >::value ||
-                                                       std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::Cumulant_tag >::value
-                                                       >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag > ||
+          std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::Cumulant_tag > )
+struct AddLB< LatticeModel_T >
 {
    using PdfField = typename Types< LatticeModel_T >::PdfField_T;
    using CommunicationStencil = typename Types< LatticeModel_T >::CommunicationStencil_T;
@@ -702,12 +704,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );
 
-   for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                      output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+   for( auto const &[identifier, function] : vtkOutputFunctions )
+      timeloop.addFuncBeforeTimeStep( function, std::string("VTK: ") + identifier );
 
    // add LB kernel, boundary handling, and communication to time loop
 

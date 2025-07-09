@@ -108,7 +108,7 @@
 //! \code
 //! WALBERLA_FOR_ALL_CELLS_YZ( ptrToField,
 //!
-//!    for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < ::walberla::cell_idx_c( ptrToField->xSize() ); x += ::walberla::cell_idx_t(2) )
+//!    for( auto x = ::walberla::cell_idx_t(0); x < ::walberla::cell_idx_c( ptrToField->xSize() ); x += ::walberla::cell_idx_t(2) )
 //!       ptrToField->get(x,y,z) += 42;
 //! )
 //! \endcode
@@ -153,17 +153,17 @@
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
-            for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
+            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -175,9 +175,9 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-            for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
+            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -191,9 +191,9 @@
       const int izMax = ::walberla::int_c( interval.zMax() ); \
       __pragma(omp) \
       for( int iz = ::walberla::int_c( interval.zMin() ); iz <= izMax; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) { \
-            for( ::walberla::cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) { \
+            for( auto x = interval.xMin(); x <= interval.xMax(); ++x ) \
             { \
                CODE \
             } \
@@ -205,9 +205,9 @@
       const int iyMax = ::walberla::int_c( interval.yMax() ); \
       __pragma(omp) \
       for( int iy = ::walberla::int_c( interval.yMin() ); iy <= iyMax; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
-            for( ::walberla::cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) { \
+            for( auto x = interval.xMin(); x <= interval.xMax(); ++x ) \
             { \
                CODE \
             } \
@@ -219,10 +219,10 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
@@ -230,9 +230,9 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( ::walberla::cell_idx_t z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -240,9 +240,9 @@
             } \
          } \
          { \
-            ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-            for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            auto z = ::walberla::cell_idx_c( iz ); \
+            for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+               for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                { \
                   CODE \
                } \
@@ -250,9 +250,9 @@
          } \
          if( iz == (izSize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t z = zSize__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto z = zSize__; z < (zSize__ + gl__); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -268,9 +268,9 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( ::walberla::cell_idx_t y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -278,9 +278,9 @@
             } \
          } \
          { \
-            ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-            for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            auto y = ::walberla::cell_idx_c( iy ); \
+            for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+               for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                { \
                   CODE \
                } \
@@ -288,9 +288,9 @@
          } \
          if( iy == (iySize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t y = ySize__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto y = ySize__; y < (ySize__ + gl__); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -302,15 +302,15 @@
    
 #define WALBERLA_FOR_ALL_CELLS_YZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
          { \
             CODE \
          } \
@@ -321,8 +321,8 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) \
          { \
             CODE \
          } \
@@ -335,8 +335,8 @@
       const int izMax = ::walberla::int_c( interval.zMax() ); \
       __pragma(omp) \
       for( int iz = ::walberla::int_c( interval.zMin() ); iz <= izMax; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) \
          { \
             CODE \
          } \
@@ -347,8 +347,8 @@
       const int iyMax = ::walberla::int_c( interval.yMax() ); \
       __pragma(omp) \
       for( int iy = ::walberla::int_c( interval.yMin() ); iy <= iyMax; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) \
          { \
             CODE \
          } \
@@ -359,9 +359,9 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
@@ -369,24 +369,24 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( ::walberla::cell_idx_t z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
                { \
                   CODE \
                } \
             } \
          } \
          { \
-            ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-            for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            auto z = ::walberla::cell_idx_c( iz ); \
+            for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
             { \
                CODE \
             } \
          } \
          if( iz == (izSize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t z = zSize__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            for( auto z = zSize__; z < (zSize__ + gl__); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
                { \
                      CODE \
                } \
@@ -401,24 +401,24 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( ::walberla::cell_idx_t y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
                { \
                   CODE \
                } \
             } \
          } \
          { \
-            ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-            for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            auto y = ::walberla::cell_idx_c( iy ); \
+            for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
             { \
                CODE \
             } \
          } \
          if( iy == (iySize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t y = ySize__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            for( auto y = ySize__; y < (ySize__ + gl__); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
                { \
                   CODE \
                } \
@@ -430,15 +430,15 @@
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
@@ -452,7 +452,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
@@ -467,15 +467,15 @@
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
    WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -491,7 +491,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -510,15 +510,15 @@
    WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -536,7 +536,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -559,15 +559,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -587,7 +587,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -614,15 +614,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -644,7 +644,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -675,15 +675,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -707,7 +707,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -742,15 +742,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -776,7 +776,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -815,15 +815,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f7)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       __pragma(omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -851,7 +851,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       __pragma(omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -879,17 +879,17 @@
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
-            for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
+            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -901,9 +901,9 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-            for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
+            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -917,9 +917,9 @@
       const int izMax = ::walberla::int_c( interval.zMax() ); \
       _Pragma(#omp) \
       for( int iz = ::walberla::int_c( interval.zMin() ); iz <= izMax; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) { \
-            for( ::walberla::cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) { \
+            for( auto x = interval.xMin(); x <= interval.xMax(); ++x ) \
             { \
                CODE \
             } \
@@ -931,9 +931,9 @@
       const int iyMax = ::walberla::int_c( interval.yMax() ); \
       _Pragma(#omp) \
       for( int iy = ::walberla::int_c( interval.yMin() ); iy <= iyMax; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
-            for( ::walberla::cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) { \
+            for( auto x = interval.xMin(); x <= interval.xMax(); ++x ) \
             { \
                CODE \
             } \
@@ -945,10 +945,10 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
@@ -956,9 +956,9 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( ::walberla::cell_idx_t z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -966,9 +966,9 @@
             } \
          } \
          { \
-            ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-            for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            auto z = ::walberla::cell_idx_c( iz ); \
+            for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+               for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                { \
                   CODE \
                } \
@@ -976,9 +976,9 @@
          } \
          if( iz == (izSize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t z = zSize__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto z = zSize__; z < (zSize__ + gl__); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -994,9 +994,9 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( ::walberla::cell_idx_t y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -1004,9 +1004,9 @@
             } \
          } \
          { \
-            ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-            for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            auto y = ::walberla::cell_idx_c( iy ); \
+            for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+               for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                { \
                   CODE \
                } \
@@ -1014,9 +1014,9 @@
          } \
          if( iy == (iySize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t y = ySize__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-                  for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+            for( auto y = ySize__; y < (ySize__ + gl__); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+                  for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
                      CODE \
                   } \
@@ -1028,15 +1028,15 @@
 
 #define WALBERLA_FOR_ALL_CELLS_YZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
          { \
             CODE \
          } \
@@ -1047,8 +1047,8 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) \
          { \
             CODE \
          } \
@@ -1061,8 +1061,8 @@
       const int izMax = ::walberla::int_c( interval.zMax() ); \
       _Pragma(#omp) \
       for( int iz = ::walberla::int_c( interval.zMin() ); iz <= izMax; ++iz ) { \
-         ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-         for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) \
+         auto z = ::walberla::cell_idx_c( iz ); \
+         for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) \
          { \
             CODE \
          } \
@@ -1073,8 +1073,8 @@
       const int iyMax = ::walberla::int_c( interval.yMax() ); \
       _Pragma(#omp) \
       for( int iy = ::walberla::int_c( interval.yMin() ); iy <= iyMax; ++iy ) { \
-         ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-         for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) \
+         auto y = ::walberla::cell_idx_c( iy ); \
+         for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) \
          { \
             CODE \
          } \
@@ -1085,9 +1085,9 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
@@ -1095,24 +1095,24 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( ::walberla::cell_idx_t z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
                { \
                   CODE \
                } \
             } \
          } \
          { \
-            ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
-            for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            auto z = ::walberla::cell_idx_c( iz ); \
+            for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
             { \
                CODE \
             } \
          } \
          if( iz == (izSize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t z = zSize__; z < (zSize__ + gl__); ++z ) { \
-               for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+            for( auto z = zSize__; z < (zSize__ + gl__); ++z ) { \
+               for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
                { \
                      CODE \
                } \
@@ -1127,24 +1127,24 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( ::walberla::cell_idx_t y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
                { \
                   CODE \
                } \
             } \
          } \
          { \
-            ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
-            for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            auto y = ::walberla::cell_idx_c( iy ); \
+            for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
             { \
                CODE \
             } \
          } \
          if( iy == (iySize - 1) ) \
          { \
-            for( ::walberla::cell_idx_t y = ySize__; y < (ySize__ + gl__); ++y ) { \
-               for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) \
+            for( auto y = ySize__; y < (ySize__ + gl__); ++y ) { \
+               for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
                { \
                   CODE \
                } \
@@ -1156,15 +1156,15 @@
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
@@ -1178,7 +1178,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
@@ -1193,15 +1193,15 @@
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
    WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1217,7 +1217,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1236,15 +1236,15 @@
    WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1262,7 +1262,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1285,15 +1285,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1313,7 +1313,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1340,15 +1340,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1370,7 +1370,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1401,15 +1401,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1433,7 +1433,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1468,15 +1468,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1502,7 +1502,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1541,15 +1541,15 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f7)->xyzSize() ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   const auto xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
    if( zSize__ >= ySize__ ) \
    { \
       const int izSize = ::walberla::int_c( zSize__ ); \
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
-         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const auto z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1577,7 +1577,7 @@
       const int iySize = ::walberla::int_c( ySize__ ); \
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
-         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const auto y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
@@ -1607,12 +1607,12 @@
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-      for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
-         for( ::walberla::cell_idx_t x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
+      for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
+         for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
          { \
             CODE \
          } \
@@ -1620,9 +1620,9 @@
    } }
 
 #define WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ_OMP( interval, omp, CODE ) \
-   { for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
-      for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) { \
-         for( ::walberla::cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x ) \
+   { for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) { \
+      for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) { \
+         for( auto x = interval.xMin(); x <= interval.xMax(); ++x ) \
          { \
             CODE \
          } \
@@ -1633,13 +1633,13 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
-   for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-      for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) { \
-         for( ::walberla::cell_idx_t x = -gl__; x < (xSize__ + gl__); ++x ) \
+   const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
+   for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+      for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
+         for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
          { \
             CODE \
          } \
@@ -1648,18 +1648,18 @@
 
 #define WALBERLA_FOR_ALL_CELLS_YZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   for( ::walberla::cell_idx_t z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-      for( ::walberla::cell_idx_t y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
+      for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
       { \
          CODE \
       } \
    } }
 
 #define WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_YZ_OMP( interval, omp, CODE ) \
-   { for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
-      for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) \
+   { for( auto z = interval.zMin(); z <= interval.zMax(); ++z ) { \
+      for( auto y = interval.yMin(); y <= interval.yMax(); ++y ) \
       { \
          CODE \
       } \
@@ -1669,11 +1669,11 @@
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
-   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
-   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   const ::walberla::cell_idx_t gl__ = ::walberla::cell_idx_c( gl ); \
-   for( ::walberla::cell_idx_t z = -gl__; z < (zSize__ + gl__); ++z ) { \
-      for( ::walberla::cell_idx_t y = -gl__; y < (ySize__ + gl__); ++y ) \
+   const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
+   const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
+   const auto gl__ = ::walberla::cell_idx_c( gl ); \
+   for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
+      for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
       { \
          CODE \
       } \

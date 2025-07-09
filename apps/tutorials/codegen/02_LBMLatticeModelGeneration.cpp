@@ -47,22 +47,22 @@ namespace walberla
 ///////////////////////
 
 // Typedef alias for the lattice model
-typedef lbm::SRTLatticeModel LatticeModel_T;
+using LatticeModel_T = lbm::SRTLatticeModel;
 
 // Communication Pack Info
-typedef pystencils::SRTPackInfo PackInfo_T;
+using PackInfo_T = pystencils::SRTPackInfo;
 
 // Also set aliases for the stencils involved...
-typedef LatticeModel_T::Stencil Stencil_T;
-typedef LatticeModel_T::CommunicationStencil CommunicationStencil_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
 
 // ... and for the required field types.
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
 // Also, for boundary handling, a flag data type and flag field are required.
-typedef walberla::uint8_t flag_t;
-typedef FlagField< flag_t > FlagField_T;
-typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField< flag_t >;
+using BHFactory = lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T >;
 
 /////////////////////////////////////////
 /// Shear Flow Initialization Functor ///

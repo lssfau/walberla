@@ -24,7 +24,7 @@
 #include "TerminalColors.h"
 
 #include "core/mpi/Gatherv.h"
-#include "core/mpi/MPIIO.h"
+#include "core/mpi/BufferIO.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
@@ -85,7 +85,7 @@ void saveConfig(const shared_ptr<data::ParticleStorage>& ps,
       case IO_MODE::USE_MPI_IO:
       {
          WALBERLA_LOG_INFO_ON_ROOT(CYAN << "Saving configuration (MPIIO): " << filename << RESET);
-         walberla::mpi::writeMPIIO(filename + ".mpiio", sb);
+         walberla::mpi::writeBuffer(filename + ".mpiio", sb, false);
          break;
       }
       case IO_MODE::ONE_FILE_PER_RANK:

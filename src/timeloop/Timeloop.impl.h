@@ -22,7 +22,6 @@
 #include "Timeloop.h"
 #include "core/Abort.h"
 #include "core/debug/Debug.h"
-#include "core/uid/GlobalState.h"
 #include "core/mpi/Reduce.h"
 #include "core/perf_analysis/extern/likwid.h"
 
@@ -99,13 +98,15 @@ void Timeloop<TP>::singleStep( const bool logTimeStep )
 
    WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
-   for(auto & beforeFunction : beforeFunctions_)
-      executeSelectable( beforeFunction, uid::globalState(), "Pre-Timestep Function" );
+   const auto state = Set<SUID>::emptySet();
 
-   doTimeStep(uid::globalState());
+   for(auto & beforeFunction : beforeFunctions_)
+      executeSelectable( beforeFunction, state, "Pre-Timestep Function" );
+
+   doTimeStep(state);
 
    for(auto & afterFunction : afterFunctions_)
-      executeSelectable( afterFunction, uid::globalState(),"Post-Timestep Function" );
+      executeSelectable( afterFunction, state, "Post-Timestep Function" );
 
    ++curTimeStep_;
 }
@@ -117,13 +118,15 @@ void Timeloop<TP>::singleStep( timing::TimingPool<TP> & tp, const bool logTimeSt
 
    WALBERLA_LOG_PROGRESS( "Running time step " << curTimeStep_ )
 
-   for(auto & beforeFunction : beforeFunctions_)
-      executeSelectable( beforeFunction, uid::globalState(), "Pre-Timestep Function", tp );
+   const auto state = Set<SUID>::emptySet();
 
-   doTimeStep(uid::globalState(), tp);
+   for(auto & beforeFunction : beforeFunctions_)
+      executeSelectable( beforeFunction, state, "Pre-Timestep Function", tp );
+
+   doTimeStep(state, tp);
 
    for(auto & afterFunction : afterFunctions_)
-      executeSelectable( afterFunction, uid::globalState(),"Post-Timestep Function", tp );
+      executeSelectable( afterFunction, state, "Post-Timestep Function", tp );
 
    ++curTimeStep_;
 }
@@ -172,7 +175,7 @@ void Timeloop<TP>::addFuncAfterTimeStep(const Timeloop::FctHandle & h,
 
 
 template < typename TP >
-void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
+void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments, SUID> & selectable,
                                   const Set<SUID> & selector,
                                   const std::string & what )
 {
@@ -192,7 +195,7 @@ void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<Void
 }
 
 template < typename TP >
-void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments,SUID> & selectable,
+void Timeloop<TP>::executeSelectable( const selectable::SetSelectableObject<VoidFctNoArguments, SUID> & selectable,
                                   const Set<SUID> & selector,
                                   const std::string & what,
                                   timing::TimingPool<TP> & timing )

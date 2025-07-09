@@ -32,7 +32,6 @@
 #   include "core/cell/CellInterval.h"
 #   include "core/logging/Logging.h"
 #   include "core/math/AABB.h"
-#   include "core/mpi/MPIIO.h"
 #   include "core/timing/ReduceType.h"
 #   include "core/timing/TimingPool.h"
 #   include "core/timing/TimingTree.h"
@@ -344,15 +343,14 @@ py::dict buildDictFromTimingNode(const WcTimingNode & tn)
    py::dict result;
 
    result["all"] = tn.timer_;
-   for ( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it)
+   for ( const auto &[key, node] : tn.tree_ )
    {
-      std::string key = it->first;
-      if (it->second.tree_.empty())
+      if (node.tree_.empty())
       {
-         result[key.c_str()] = it->second.timer_;
+         result[key.c_str()] = node.timer_;
       } else
       {
-         result[key.c_str()] = buildDictFromTimingNode(it->second);
+         result[key.c_str()] = buildDictFromTimingNode(node);
       }
    }
 

@@ -203,12 +203,11 @@ void VTKOutput<LatticeModel, FlagFieldT>::addToTimeloop( Timeloop & timeloop, co
 
    VTKOutput vtkOutput( pdfField, flagField, domainFlagUID, pdfGhostLayerSync, flagFieldMapping );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, vtkOutput, blocks, config, configBlockName );
 
    for(auto & vtkOutputFunction : vtkOutputFunctions)
-      timeloop.addFuncBeforeTimeStep( vtkOutputFunction.second.outputFunction, std::string("VTK (LBM): ") + vtkOutputFunction.first,
-                                      vtkOutputFunction.second.requiredGlobalStates, vtkOutputFunction.second.incompatibleGlobalStates );
+      timeloop.addFuncBeforeTimeStep( vtkOutputFunction.second, std::string("VTK (LBM): ") + vtkOutputFunction.first );
 }
 
 

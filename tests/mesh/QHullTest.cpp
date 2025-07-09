@@ -245,7 +245,7 @@ int main( int argc, char ** argv ) {
    std::vector<std::string> args( argv, argv + argc );
 
    bool doVTKOutput = false;
-   auto it = std::find( args.begin(), args.end(), std::string("--vtk") );
+   auto it = std::ranges::find( args, std::string("--vtk") );
    if(it != args.end())
    {
       doVTKOutput = true;
@@ -253,7 +253,7 @@ int main( int argc, char ** argv ) {
    }
 
    bool useFloatMesh = false;
-   it = std::find( args.begin(), args.end(), std::string("--floatMesh") );
+   it = std::ranges::find( args, std::string("--floatMesh") );
    if(it != args.end())
    {
       useFloatMesh = true;

@@ -37,7 +37,7 @@ template <typename T>
 inline
 void writeOutput(std::ostream& os, const T& data, const uint_t component)
 {
-   static_assert (std::is_arithmetic<T>::value, "this function only supports arithmetic data types" );
+   static_assert (std::is_arithmetic_v<T>, "this function only supports arithmetic data types" );
    WALBERLA_ASSERT_EQUAL(component, 0);
    WALBERLA_UNUSED(component);
    walberla::vtk::toStream(os, data);
@@ -71,7 +71,7 @@ template <typename T>
 inline
 void writeOutput(walberla::vtk::Base64Writer& b64, const T& data, const uint_t component)
 {
-   static_assert (std::is_arithmetic<T>::value, "this function only supports arithmetic data types" );
+   static_assert (std::is_arithmetic_v<T>, "this function only supports arithmetic data types" );
    WALBERLA_ASSERT_EQUAL(component, 0);
    WALBERLA_UNUSED(component);
    b64 << data;

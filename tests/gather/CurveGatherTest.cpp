@@ -34,10 +34,11 @@
 
 #include "timeloop/SweepTimeloop.h"
 
+#include <array>
 
 namespace walberla {
 
-typedef GhostLayerField<real_t,1> GlField;
+using GlField = GhostLayerField<real_t,1>;
 
 
 
@@ -65,7 +66,7 @@ int main( int argc, char ** argv )
 
    const real_t dx = real_c(0.1);
    const walberla::uint_t cells = uint_c( real_t(1) / dx );
-   const walberla::uint_t nrBlocks[] = { 2,2,1 };
+   const std::array<walberla::uint_t, 3> nrBlocks = { 2,2,1 };
 
    using blockforest::createUniformBlockGrid;
    shared_ptr<StructuredBlockForest>

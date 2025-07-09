@@ -53,7 +53,7 @@ waLBerla_execute_test( NAME RandomTest )
 waLBerla_compile_test( FILES math/SampleTest.cpp )
 waLBerla_execute_test( NAME SampleTest1Proc  COMMAND $<TARGET_FILE:SampleTest> )
 waLBerla_execute_test( NAME SampleTest4Proc  COMMAND $<TARGET_FILE:SampleTest> PROCESSES 4  )
-waLBerla_execute_test( NAME SampleTest10Proc COMMAND $<TARGET_FILE:SampleTest> PROCESSES 10 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_execute_test( NAME SampleTest10Proc COMMAND $<TARGET_FILE:SampleTest> PROCESSES 10 LABELS longrun )
 
 waLBerla_compile_test( FILES math/DistributedSampleTest.cpp )
 waLBerla_execute_test( NAME DistributedSampleTest1Proc  COMMAND $<TARGET_FILE:DistributedSampleTest> )
@@ -86,6 +86,15 @@ waLBerla_execute_test( NAME FastInvSqrtTest )
 
 waLBerla_compile_test( FILES mpi/BufferTest.cpp )
 waLBerla_execute_test( NAME BufferTest )
+
+waLBerla_compile_test( FILES mpi/BufferIOTest.cpp )
+waLBerla_execute_test( NAME BufferIOTest1 COMMAND $<TARGET_FILE:BufferIOTest> )
+waLBerla_execute_test( NAME BufferIOTest4 COMMAND $<TARGET_FILE:BufferIOTest> PROCESSES 4)
+waLBerla_execute_test( NAME BufferIOTest8 COMMAND $<TARGET_FILE:BufferIOTest> PROCESSES 8)
+if( WALBERLA_BUILD_WITH_MPI )
+set_property( TEST BufferIOTest4 PROPERTY DEPENDS BufferIOTest1 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+set_property( TEST BufferIOTest8 PROPERTY DEPENDS BufferIOTest4 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+endif()
 
 waLBerla_compile_test( FILES mpi/BufferSystemTest.cpp )
 waLBerla_execute_test( NAME BufferSystemTest PROCESSES 4 )
@@ -158,9 +167,9 @@ waLBerla_execute_test( NAME SweepTimeloopTimerReduction PROCESSES 9  )
 ########
 
 if ( WALBERLA_BUILD_WITH_PYTHON )
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling walberla::python_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::python_coupling )
 else()
-   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry walberla::pe walberla::pe_coupling )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS walberla::blockforest walberla::field walberla::geometry )
 endif()
 waLBerla_execute_test( NAME AllHeaderTest )
 

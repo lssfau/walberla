@@ -78,14 +78,14 @@ template< typename Filter_T, bool Pseudo2D >
 void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                                                          std::vector< const Block * > &, const BlockForest & )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+   for( auto &[block_ptr, level] : minTargetLevels )
    {
-      const Block * const block = it->first;
-      const VectorField_T * u = block->template getData< VectorField_T >( fieldID_ );
+      const Block &block = *block_ptr;
+      const VectorField_T * u = block.template getData< VectorField_T >( fieldID_ );
 
       if( u == nullptr )
       {
-         it->second = uint_t(0);
+         level = uint_t(0);
          continue;
       }
 
@@ -101,7 +101,7 @@ void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::ve
       bool refine( false );
       bool coarsen( true );
 
-      filter_( *block );
+      filter_( block );
 
       const cell_idx_t xSize = cell_idx_c( interval.xSize() );
       const cell_idx_t ySize = cell_idx_c( interval.ySize() );
@@ -143,15 +143,15 @@ void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::ve
          }
       }
 
-      if( refine && block->getLevel() < maxLevel_ )
+      if( refine && block.getLevel() < maxLevel_ )
       {
          WALBERLA_ASSERT( !coarsen );
-         it->second = block->getLevel() + uint_t(1);
+         level = block.getLevel() + uint_t(1);
       }
-      if( coarsen && block->getLevel() > uint_t(0) )
+      if( coarsen && block.getLevel() > uint_t(0) )
       {
          WALBERLA_ASSERT( !refine );
-         it->second = block->getLevel() - uint_t(1);
+         level = block.getLevel() - uint_t(1);
       }
    }
 }

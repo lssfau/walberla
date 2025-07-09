@@ -371,10 +371,10 @@ class NonuniformGeneratedGPUPdfPackInfo : public walberla::gpu::GeneratedNonUnif
    void communicateLocalFineToCoarse(const Block* fineSender, Block* coarseReceiver, stencil::Direction dir,
                                      GpuBuffer_T& buffer, gpuStream_t stream) override;
 
-   uint_t sizeEqualLevelSend(const Block* sender, stencil::Direction dir) override;
-   uint_t sizeCoarseToFineSend(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir) override;
-   uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) override;
-   uint_t sizeFineToCoarseSend(const Block* fineSender, stencil::Direction dir) override;
+   uint_t sizeEqualLevelSend(const Block* sender, stencil::Direction dir) const override;
+   uint_t sizeCoarseToFineSend(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir) const override;
+   uint_t sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) const override;
+   uint_t sizeFineToCoarseSend(const Block* fineSender, stencil::Direction dir) const override;
 
  protected:
    void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T& buffer, gpuStream_t stream) const override;

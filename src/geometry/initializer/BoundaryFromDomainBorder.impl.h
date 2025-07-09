@@ -76,8 +76,8 @@ void BoundaryFromDomainBorder<Handling>::init( const Config::BlockHandle & block
    for( auto dirIt = D3Q7::beginNoCenter(); dirIt != D3Q7::end(); ++dirIt )
    {
       const bool isAll = string_icompare( directionStr, "all" ) == 0;
-      const bool isInDirectionStrings = std::find( directionStrings.begin(), directionStrings.end(),
-                                             stencil::dirToString[*dirIt] ) != directionStrings.end();
+      const bool isInDirectionStrings = std::ranges::find(
+         directionStrings, stencil::dirToString[*dirIt] ) != directionStrings.end();
 
       if( isAll || isInDirectionStrings )
       {

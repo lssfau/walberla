@@ -315,7 +315,7 @@ public:
    std::vector<walberla::mesa_pd::Mat2> diag_to_inv_ {};
    std::vector<real_t> diag_n_inv_ {};
    std::unordered_map<id_t, size_t> uidToIdx_;
-   static_assert(std::is_same<decltype(uid_)::value_type, id_t>::value,
+   static_assert(std::is_same_v<decltype(uid_)::value_type, id_t>,
                  "Property uid of type id_t is missing. This property is required!");
 };
 using Contact = ContactStorage::Contact;

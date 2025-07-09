@@ -133,35 +133,36 @@ const FlagUID NoSlip_Flag( "no slip" );
 // OUTPUT HELPERS  //
 /////////////////////
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct StencilString< LatticeModel_T >
 {
    static const char * str() { return "D3Q19"; }
 };
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::SRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::SRT_tag >)
+struct CollisionModelString< LatticeModel_T>
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::TRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                          lbm::collision_model::MRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >)
+struct CollisionModelString< LatticeModel_T >
 {
    static const char * str() { return "MRT"; }
 };
@@ -286,7 +287,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
                                                              uint_c( 19 * sizeof(real_t) ) ) / numeric_cast< memory_t >( 1024 * 1024 );
 
    sforest.addRefinementSelectionFunction( refinementSelection );
-   sforest.addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadAndMemoryAssignment, std::placeholders::_1, memoryPerBlock ) );
+   sforest.addWorkloadMemorySUIDAssignmentFunction( [=] (auto &forest) { workloadAndMemoryAssignment( forest, memoryPerBlock ); } );
 
    sforest.init( AABB( real_t(0), real_t(0), real_t(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
                                                         real_c( numberOfYBlocks * numberOfYCellsPerBlock ),
@@ -612,7 +613,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor(ts), info );
 }
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct AddRefinementTimeStep
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
@@ -650,8 +651,8 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           lbm::collision_model::MRT_tag >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag > )
+struct AddRefinementTimeStep< LatticeModel_T >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,
@@ -712,12 +713,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync );
 
-   std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+   std::map< std::string, vtk::OutputFunction > vtkOutputFunctions;
    vtk::initializeVTKOutput( vtkOutputFunctions, myVTKOutput, blocks, config );
 
-   for( auto output = vtkOutputFunctions.begin(); output != vtkOutputFunctions.end(); ++output )
-      timeloop.addFuncBeforeTimeStep( output->second.outputFunction, std::string("VTK: ") + output->first,
-                                      output->second.requiredGlobalStates, output->second.incompatibleGlobalStates );
+   for( auto const &[identifier, function] : vtkOutputFunctions )
+      timeloop.addFuncBeforeTimeStep( function, std::string("VTK: ") + identifier );
                                       
    // add 'refinement' LB time step to time loop
 
@@ -914,12 +914,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          {
             double restTime( 0.0 );
             double refreshTime( 0.0 );
-            for( auto it = reducedTimeloopTiming->begin(); it != reducedTimeloopTiming->end(); ++it )
+            for( auto const &[name, loop_timer] : *reducedTimeloopTiming )
             {
-               if( it->first == refreshFunctorName )
-                  refreshTime += it->second.total();
+               if( name == refreshFunctorName )
+                  refreshTime += loop_timer.total();
                else
-                  restTime += it->second.total();
+                  restTime += loop_timer.total();
             }
             const double timeStepTime = restTime / double_c(innerTimeSteps);
             
@@ -928,18 +928,18 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             double loadBalanceTime( 0.0 );
             double phantomForestCreationTime( 0.0 );
             
-            for( auto it = reducedRefreshTiming->begin(); it != reducedRefreshTiming->end(); ++it )
+            for( auto const &[name, refresh_timer] : *reducedRefreshTiming )
             {
-               if( it->first == "block level determination" )
-                  blockLevelDeterminationTime += it->second.total();
-               else if( it->first == "block level determination (callback function)" )
-                  blockLevelDeterminationTime += it->second.total();
-               else if( it->first == "block structure update (includes data migration)" )
-                  dataMigrationTime += it->second.total();
-               else if( it->first == "phantom block redistribution (= load balancing)" )
-                  loadBalanceTime += it->second.total();
-               else if( it->first == "phantom forest creation" )
-                  phantomForestCreationTime += it->second.total();
+               if( name == "block level determination" )
+                  blockLevelDeterminationTime += refresh_timer.total();
+               else if( name == "block level determination (callback function)" )
+                  blockLevelDeterminationTime += refresh_timer.total();
+               else if( name == "block structure update (includes data migration)" )
+                  dataMigrationTime += refresh_timer.total();
+               else if( name == "phantom block redistribution (= load balancing)" )
+                  loadBalanceTime += refresh_timer.total();
+               else if( name == "phantom forest creation" )
+                  phantomForestCreationTime += refresh_timer.total();
             }
             
             refreshPerformance = refreshTime / timeStepTime;

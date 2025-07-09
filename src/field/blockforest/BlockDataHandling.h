@@ -51,8 +51,8 @@ public:
 
    Field_T * initialize( IBlock * const block ) override
    {
-      Field_T * field = allocate( block );
-      
+      auto * field = allocate( block );
+
       if( initFunction_ )
          initFunction_( field, block );
 
@@ -68,7 +68,7 @@ public:
 
    Field_T * deserializeCoarseToFine( Block * const block ) override { return reallocate( block ); }
    Field_T * deserializeFineToCoarse( Block * const block ) override { return reallocate( block ); }   
-   
+
    void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
 
    void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
@@ -99,7 +99,7 @@ protected:
       else
       { WALBERLA_CHECK( (zSize & uint_t(1)) == uint_t(0), "The z-size of your field must be divisible by 2." ) }
    }
-   
+
    InitializationFunction_T initFunction_;
 
 }; // class BlockDataHandling
@@ -109,7 +109,7 @@ protected:
 template< typename Field_T, bool Pseudo2D >
 inline void BlockDataHandling< Field_T, Pseudo2D >::serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
 {
-   Field_T * field = block->template getData< Field_T >(id);
+   auto * field = block->template getData< Field_T >(id);
    WALBERLA_ASSERT_NOT_NULLPTR( field )
 
 #ifndef NDEBUG
@@ -125,7 +125,7 @@ inline void BlockDataHandling< Field_T, Pseudo2D >::serialize( IBlock * const bl
 template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child )
 {
-   Field_T * field = block->template getData< Field_T >(id);
+   auto * field = block->template getData< Field_T >(id);
    WALBERLA_ASSERT_NOT_NULLPTR( field )
 
    const uint_t xSize = field->xSize();
@@ -148,7 +148,7 @@ void BlockDataHandling< Field_T, Pseudo2D >::serializeCoarseToFine( Block * cons
          const cell_idx_t xEnd = (child & uint_t(1)) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t(2) );
          for( cell_idx_t x = (child & uint_t(1)) ? ( cell_idx_c( xSize ) / cell_idx_t(2) ) : cell_idx_t(0); x < xEnd; ++x )
          {
-            for( uint_t f = uint_t(0); f < fSize; ++f )
+            for( uint_t f = 0; f < fSize; ++f )
                buffer << field->get(x,y,z,f);
          }
       }
@@ -160,7 +160,7 @@ void BlockDataHandling< Field_T, Pseudo2D >::serializeCoarseToFine( Block * cons
 template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
 {
-   Field_T * field = block->template getData< Field_T >(id);
+   auto * field = block->template getData< Field_T >(id);
    WALBERLA_ASSERT_NOT_NULLPTR( field )
 
    const uint_t xSize = field->xSize();
@@ -173,10 +173,10 @@ void BlockDataHandling< Field_T, Pseudo2D >::serializeFineToCoarse( Block * cons
    buffer << block->getId().getBranchId() << ( xSize / uint_t(2) ) << ( ySize / uint_t(2) ) << ( Pseudo2D ? zSize : ( zSize / uint_t(2) ) ) << fSize;
 #endif
 
-   for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
-      for( cell_idx_t y = cell_idx_t(0); y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
-         for( cell_idx_t x = cell_idx_t(0); x < cell_idx_c( xSize ); x += cell_idx_t(2) ) {
-            for( uint_t f = uint_t(0); f < fSize; ++f )
+   for( cell_idx_t z = 0; z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
+      for( cell_idx_t y = 0; y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
+         for( cell_idx_t x = 0; x < cell_idx_c( xSize ); x += cell_idx_t(2) ) {
+            for( uint_t f = 0; f < fSize; ++f )
             {
                Value_T result =                                  field->get( x,                 y,                 z,                 f );
                        result = static_cast< Value_T >( result + field->get( x + cell_idx_t(1), y                , z                , f ) );
@@ -202,13 +202,13 @@ void BlockDataHandling< Field_T, Pseudo2D >::serializeFineToCoarse( Block * cons
 template< typename Field_T, bool Pseudo2D >
 inline void BlockDataHandling< Field_T, Pseudo2D >::deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
 {
-   Field_T * field = block->template getData< Field_T >( id );
+   auto * field = block->template getData< Field_T >( id );
 
 #ifndef NDEBUG
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
-   uint_t fSender( uint_t(0) );
+   uint_t xSender( 0 );
+   uint_t ySender( 0 );
+   uint_t zSender( 0 );
+   uint_t fSender( 0 );
    buffer >> xSender >> ySender >> zSender >> fSender;
    WALBERLA_ASSERT_EQUAL( xSender, field->xSize() )
    WALBERLA_ASSERT_EQUAL( ySender, field->ySize() )
@@ -225,7 +225,7 @@ inline void BlockDataHandling< Field_T, Pseudo2D >::deserialize( IBlock * const 
 template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
 {
-   Field_T * field = block->template getData< Field_T >( id );
+   auto * field = block->template getData< Field_T >( id );
 
    const uint_t xSize = field->xSize();
    const uint_t ySize = field->ySize();
@@ -234,11 +234,11 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeCoarseToFine( Block * co
    sizeCheck( xSize, ySize, zSize );
 
 #ifndef NDEBUG
-   uint_t branchId( uint_t(0) );
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
-   uint_t fSender( uint_t(0) );
+   uint_t branchId( 0 );
+   uint_t xSender( 0 );
+   uint_t ySender( 0 );
+   uint_t zSender( 0 );
+   uint_t fSender( 0 );
    buffer >> branchId >> xSender >> ySender >> zSender >> fSender;
    WALBERLA_ASSERT_EQUAL( branchId, block->getId().getBranchId() )
    WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) )
@@ -250,10 +250,10 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeCoarseToFine( Block * co
    WALBERLA_ASSERT_EQUAL( fSender, fSize )
 #endif
 
-   for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
-      for( cell_idx_t y = cell_idx_t(0); y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
-         for( cell_idx_t x = cell_idx_t(0); x < cell_idx_c( xSize ); x += cell_idx_t(2) ) {
-            for( uint_t f = uint_t(0); f < fSize; ++f )
+   for( cell_idx_t z = 0; z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
+      for( cell_idx_t y = 0; y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
+         for( cell_idx_t x = 0; x < cell_idx_c( xSize ); x += cell_idx_t(2) ) {
+            for( uint_t f = 0; f < fSize; ++f )
             {
                Value_T value;
                buffer >> value;
@@ -280,7 +280,7 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeCoarseToFine( Block * co
 template< typename Field_T, bool Pseudo2D >
 void BlockDataHandling< Field_T, Pseudo2D >::deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child )
 {
-   Field_T * field = block->template getData< Field_T >( id );
+   auto * field = block->template getData< Field_T >( id );
 
    const uint_t xSize = field->xSize();
    const uint_t ySize = field->ySize();
@@ -289,11 +289,11 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeFineToCoarse( Block * co
    sizeCheck( xSize, ySize, zSize );
 
 #ifndef NDEBUG
-   uint_t branchId( uint_t(0) );
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
-   uint_t fSender( uint_t(0) );
+   uint_t branchId( 0 );
+   uint_t xSender( 0 );
+   uint_t ySender( 0 );
+   uint_t zSender( 0 );
+   uint_t fSender( 0 );
    buffer >> branchId >> xSender >> ySender >> zSender >> fSender;
    WALBERLA_ASSERT_EQUAL( branchId, child )
    WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) )
@@ -315,7 +315,7 @@ void BlockDataHandling< Field_T, Pseudo2D >::deserializeFineToCoarse( Block * co
          const cell_idx_t xEnd = (child & uint_t(1)) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t(2) );
          for( cell_idx_t x = (child & uint_t(1)) ? ( cell_idx_c( xSize ) / cell_idx_t(2) ) : cell_idx_t(0); x < xEnd; ++x )
          {
-            for( uint_t f = uint_t(0); f < fSize; ++f )
+            for( uint_t f = 0; f < fSize; ++f )
                buffer >> field->get(x,y,z,f);
          }
       }
@@ -438,7 +438,7 @@ protected:
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" )
-      const Vector3< uint_t > size = calculateSize_( blocks, block );
+      const auto size = calculateSize_( blocks, block );
       return internal::allocate< GhostLayerField_T >( size[0], size[1], size[2],
                                                       nrOfGhostLayers_, initValue_, layout_, alloc_ );
    }
@@ -447,7 +447,7 @@ protected:
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" )
-      const Vector3< uint_t > size = calculateSize_( blocks, block );
+      const auto size = calculateSize_( blocks, block );
       return internal::allocate< GhostLayerField_T >( size[0], size[1], size[2],
                                                       nrOfGhostLayers_, layout_, alloc_ );
    }
@@ -505,9 +505,9 @@ public:
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'AlwaysInitializeBlockDataHandling' for a block storage object that doesn't exist anymore" )
-      Vector3<uint_t> size = calculateSize_( blocks, block );
-      GhostLayerField_T * field = internal::allocate< GhostLayerField_T >( size[0], size[1], size[2],
-                                                                           nrOfGhostLayers_, initValue_, layout_, alloc_ );
+      const auto size = calculateSize_( blocks, block );
+      auto * field = internal::allocate< GhostLayerField_T >( size[0], size[1], size[2],
+                                                              nrOfGhostLayers_, initValue_, layout_, alloc_ );
       if( initFunction_ )
          initFunction_( field, block );
 
@@ -544,7 +544,7 @@ public:
 
    Field_T * initialize( IBlock * const block ) override
    {
-      const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
+      const auto * toClone = block->template getData< Field_T >( fieldToClone_ );
       return toClone->clone();
    }
 
@@ -570,7 +570,7 @@ public:
 
    typename Field_T::FlattenedField * initialize( IBlock * const block ) override
    {
-      const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
+      const auto * toClone = block->template getData< Field_T >( fieldToClone_ );
       return toClone->flattenedShallowCopy();
    }
 

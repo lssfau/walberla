@@ -31,7 +31,7 @@
 #   include "blockforest/StructuredBlockForest.h"
 
 #   include "core/StringUtility.h"
-#   include "core/mpi/MPIIO.h"
+#   include "core/mpi/BufferIO.h"
 
 #   include "stencil/D3Q19.h"
 
@@ -70,8 +70,6 @@ namespace py = pybind11;
 //
 //======================================================================================================================
 
-#ifdef WALBERLA_BUILD_WITH_PYTHON
-
 void NoSuchBlockData::translate(  const NoSuchBlockData & e ) {
    throw py::cast_error(e.what());
 }
@@ -79,13 +77,6 @@ void NoSuchBlockData::translate(  const NoSuchBlockData & e ) {
 void BlockDataNotConvertible::translate(  const BlockDataNotConvertible & e ) {
    throw py::cast_error(e.what());
 }
-#else
-
-void NoSuchBlockData::translate(  const NoSuchBlockData &  ) {}
-
-void BlockDataNotConvertible::translate(  const BlockDataNotConvertible &  ) {}
-
-#endif
 
 BlockDataID blockDataIDFromString(BlockStorage& bs, const std::string& stringID)
 {
@@ -116,9 +107,9 @@ py::iterator StructuredBlockForest_iter(const shared_ptr< StructuredBlockForest 
    std::vector<py::object> resultList;
    resultList.reserve(blocks.size());
 
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
+   for (auto &block : blocks)
    {
-      py::object theObject = py::cast(*it);
+      py::object theObject = py::cast(block);
       resultList.push_back(theObject);
    }
 
@@ -142,8 +133,9 @@ std::vector<py::object> StructuredBlockForest_blocksOverlappedByAABB(StructuredB
    s.getBlocksOverlappedByAABB(blocks, aabb);
 
    std::vector<py::object> resultList;
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
-      resultList.push_back(py::cast(*it));
+   resultList.reserve(blocks.size());
+   for (auto &block : blocks)
+      resultList.push_back(py::cast(block));
    return resultList;
 }
 
@@ -153,8 +145,9 @@ std::vector<py::object> StructuredBlockForest_blocksContainedWithinAABB(Structur
    s.getBlocksContainedWithinAABB(blocks, aabb);
 
    std::vector<py::object> resultList;
-   for (auto it = blocks.begin(); it != blocks.end(); ++it)
-      resultList.push_back(py::cast(*it));
+   resultList.reserve(blocks.size());
+   for (auto &block : blocks)
+      resultList.push_back(py::cast(block));
    return resultList;
 }
 
@@ -193,17 +186,17 @@ py::object SbF_transformLocalToGlobal(StructuredBlockForest& s, IBlock& block, c
    throw py::value_error("Only CellIntervals and cells can be transformed");
 }
 
-void SbF_writeBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file)
+void SbF_writeBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file, const bool forceSerialIO = true)
 {
    mpi::SendBuffer buffer;
    s.serializeBlockData(blockDataIDFromString(s, blockDataId), buffer);
-   mpi::writeMPIIO(file, buffer);
+   mpi::writeBuffer(file, buffer, forceSerialIO);
 }
 
-void SbF_readBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file)
+void SbF_readBlockData(StructuredBlockForest& s, const std::string& blockDataId, const std::string& file, const bool forceSerialIO = true)
 {
    mpi::RecvBuffer buffer;
-   mpi::readMPIIO(file, buffer);
+   mpi::readBuffer(file, buffer, forceSerialIO);
 
    s.deserializeBlockData(blockDataIDFromString(s, blockDataId), buffer);
    if (!buffer.isEmpty())
@@ -275,7 +268,7 @@ py::object * blockDataCreationHelper( IBlock * block,  py::object callable ) //N
 uint_t StructuredBlockForest_addBlockData( StructuredBlockForest & s, const std::string & name, py::object functionPtr ) //NOLINT
 {
     BlockDataID res = s.addBlockData(name)
-            << BlockDataCreator<py::object>( std::bind( &blockDataCreationHelper, std::placeholders::_1, functionPtr ) );
+            << BlockDataCreator<py::object>( [functionPtr](IBlock * block) { return blockDataCreationHelper(block, functionPtr); } );
     return res;
 }
 

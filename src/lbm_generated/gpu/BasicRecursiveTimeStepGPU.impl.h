@@ -25,8 +25,8 @@
 namespace walberla {
 namespace lbm_generated {
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::timestep(uint_t level)
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::timestep(uint_t level)
 {
    // 1.1 Collision
    for(auto b: blocks_[level]){
@@ -88,8 +88,8 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 }
 
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addRefinementToTimeLoop(SweepTimeloop & timeloop, uint_t level)
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::addRefinementToTimeLoop(TimeLoop_T & timeloop, uint_t level)
 {
    // 1.1 Collision
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level), "Refinement Cycle: streamCollide on level " + std::to_string(level));
@@ -143,8 +143,8 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 }
 
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation)
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation)
 {
    if(sweepCollection_.blockWise()){
       return [level, withGhostLayerPropagation, this](){
@@ -193,8 +193,8 @@ std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, 
    }
 }
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executeBoundaryHandlingOnLevel(uint_t level)
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executeBoundaryHandlingOnLevel(uint_t level)
 {
    return [this, level]() {
       for (uint_t i = 0; i < blocks_[level].size(); i++){
@@ -205,8 +205,8 @@ std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, 
 }
 
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::ghostLayerPropagation(
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::ghostLayerPropagation(
    Block * block, gpuStream_t gpuStream)
 {
    auto pdfField = block->getData<PdfField_T>(pdfFieldId_);
@@ -222,8 +222,8 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    }
 }
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostBoundaryBlockFunctions(uint_t level)
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executePostBoundaryBlockFunctions(uint_t level)
 {
    return [this, level]() {
       for( const auto& func : globalPostBoundaryHandlingBlockFunctions_ ){
@@ -233,8 +233,8 @@ std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, 
 }
 
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function )
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function )
 {
    globalPostBoundaryHandlingBlockFunctions_.emplace_back( function );
 }

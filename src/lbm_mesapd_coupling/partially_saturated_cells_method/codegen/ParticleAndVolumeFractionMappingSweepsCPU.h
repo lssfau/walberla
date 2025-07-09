@@ -160,7 +160,7 @@ class SphereFractionMappingSweep
       : blockStorage_(blockStorage), ac_(ac), mappingParticleSelector_(mappingParticleSelector),
         particleAndVolumeFractionSoA_(particleAndVolumeFractionSoA), subBlockSize_(subBlockSize)
    {
-      static_assert(std::is_base_of< mesa_pd::data::IAccessor, ParticleAccessor_T >::value,
+      static_assert(std::is_base_of_v< mesa_pd::data::IAccessor, ParticleAccessor_T >,
                     "Provide a valid accessor as template");
       for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
       {

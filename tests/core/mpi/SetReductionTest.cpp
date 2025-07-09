@@ -125,7 +125,7 @@ void testStrings()
 
    int numberOfProcesses = mpi::MPIManager::instance()->numProcesses();
    std::vector< std::string > expectedSet(FRUITS.data(), FRUITS.data() + std::min(numberOfProcesses, NUM_FRUITS));
-   std::sort( expectedSet.begin(), expectedSet.end() );
+   std::ranges::sort( expectedSet );
 
    WALBERLA_CHECK_EQUAL( reducedValuesUnion.size(), expectedSet.size() );
    for( size_t i = 0; i < expectedSet.size(); ++i )

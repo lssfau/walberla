@@ -429,7 +429,7 @@ inline Matrix3< real_t > getPressureTensor( const LatticeModel_T & latticeModel,
 
 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
-inline void getPressureTensor( Matrix3< real_t > & pressureTensor, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )
+inline void getPressureTensor( Matrix3< real_t > & pressureTensor, const LatticeModel_T & /*latticeModel*/, const FieldPtrOrIterator & it )
 {
    PressureTensor<LatticeModel_T>::get( pressureTensor, it );
 }

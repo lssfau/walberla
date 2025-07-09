@@ -1315,7 +1315,8 @@ inline bool operator!=( long double scalar, const Vector2<Type>& vec )
 // \return The scaled result vector.
 */
 template< typename Type, typename Other >
-inline std::enable_if_t< std::is_fundamental_v<Other>, Vector2<HIGH> >
+requires( std::is_fundamental_v<Other> )
+inline Vector2<HIGH>
    operator*( Other scalar, const Vector2<Type>& vec )
 {
    return vec * scalar;
@@ -1561,7 +1562,8 @@ struct Vector2LexicographicalyLess
 // \param   v The vector the hash is computed for.
 // \returns   A hash for the entire Vector2.
 */
-template< typename T, typename Enable = std::enable_if_t<std::is_integral_v<T>> >
+template< typename T >
+requires( std::is_integral_v<T> )
 std::size_t hash_value( const Vector2<T> & v )
 {
    std::size_t seed;

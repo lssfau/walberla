@@ -37,7 +37,7 @@
 namespace walberla {
 namespace lbm {
 
-template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T, class Enable = void >
+template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
 class AdvectionDiffusionSweep
 {
 	static_assert(never_true<LM_AdvDiff>::value, "Instantiating 'lbm::AdvectionDiffusionSweep' failed");
@@ -46,13 +46,12 @@ class AdvectionDiffusionSweep
 
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  LM_AdvDiff::CollisionModel::constant &&
-                                  LM_AdvDiff::compressible &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                  ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                               >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -79,14 +78,12 @@ protected:
 };
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void  AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  LM_AdvDiff::CollisionModel::constant &&
-                                  LM_AdvDiff::compressible &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                  ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                               >::type
-   > ::operator() ( IBlock * block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator() ( IBlock * block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -155,14 +152,13 @@ void  AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vecto
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -176,14 +172,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T   * src( NULL );
    const FlagField_T * flag( NULL );
@@ -243,13 +238,12 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  ! LM_AdvDiff::CollisionModel::constant &&
-                                  LM_AdvDiff::compressible &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                  ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                               >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -277,14 +271,12 @@ protected:
 
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 !( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::operator() ( IBlock * block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          !( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator() ( IBlock * block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -353,14 +345,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -374,14 +365,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T   * src( NULL );
    const FlagField_T * flag( NULL );
@@ -441,13 +431,12 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  LM_AdvDiff::CollisionModel::constant &&
-                                  LM_AdvDiff::compressible &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                  ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                               >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -475,14 +464,12 @@ protected:
 };
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1)
-                              >::type
-   > ::operator() ( IBlock * block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator() ( IBlock * block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -565,14 +552,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -586,14 +572,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 LM_AdvDiff::compressible &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
-                              >::type
-   > ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          LM_AdvDiff::compressible &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          ! ( std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 ) )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T   * src( NULL );
    const FlagField_T * flag( NULL );
@@ -674,14 +659,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  LM_AdvDiff::CollisionModel::constant &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                  std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19>::value &&
-                                  LM_AdvDiff::compressible &&
-                                  LM_AdvDiff::equilibriumAccuracyOrder == 1
-                               >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19> &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -710,15 +694,13 @@ protected:
 };
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19>::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type
-   > ::operator()( IBlock * const block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19> &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator()( IBlock * const block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -855,15 +837,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19>::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type
-> ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19> &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -875,15 +856,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19>::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type
-> ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19> &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    const FlagField_T * flagField( NULL );
@@ -1026,14 +1006,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                               typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                  ! LM_AdvDiff::CollisionModel::constant &&
-                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                  std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                  LM_AdvDiff::compressible &&
-                                  LM_AdvDiff::equilibriumAccuracyOrder == 1
-                               >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -1062,14 +1041,13 @@ protected:
 };
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::operator()( IBlock * const block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator()( IBlock * const block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -1205,14 +1183,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -1224,14 +1202,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 ! LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          ! LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    const FlagField_T * flagField( NULL );
@@ -1371,14 +1349,13 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 // - correction term         //
 ///////////////////////////////
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-   typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                            LM_AdvDiff::CollisionModel::constant &&
-                            std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                            std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                            LM_AdvDiff::compressible &&
-                            LM_AdvDiff::equilibriumAccuracyOrder == 1
-                            >::type > :
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T > :
    public FlagFieldSweepBase< LM_AdvDiff, FlagField_T >
 {
 public:
@@ -1409,14 +1386,13 @@ protected:
 };
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::operator()( IBlock * const block )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+         LM_AdvDiff::CollisionModel::constant &&
+         std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+         std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+         LM_AdvDiff::compressible &&
+         LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::operator()( IBlock * const block )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -1578,14 +1554,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    AdvDiffPdfField_T * dst( NULL );
@@ -1597,14 +1573,14 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 }
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
-void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
-                              typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
-                                 LM_AdvDiff::CollisionModel::constant &&
-                                 std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value &&
-                                 std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value &&
-                                 LM_AdvDiff::compressible &&
-                                 LM_AdvDiff::equilibriumAccuracyOrder == 1
-                              >::type > ::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag > &&
+          LM_AdvDiff::CollisionModel::constant &&
+          std::is_same_v< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag > &&
+          std::is_same_v< typename LM_AdvDiff::Stencil, stencil::D3Q19 > &&
+          LM_AdvDiff::compressible &&
+          LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T >::
+collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    AdvDiffPdfField_T * src( NULL );
    const FlagField_T * flagField( NULL );

@@ -58,8 +58,8 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 if( WALBERLA_BUILD_WITH_MPI )
    waLBerla_compile_test( FILES FieldMPIDatatypesTest.cpp DEPENDS walberla::blockforest )
-   waLBerla_execute_test( NAME FieldMPIDatatypesTestRelease  COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1                CONFIGURATIONS Release RelWithDbgInfo )
-   waLBerla_execute_test( NAME FieldMPIDatatypesTestDebug    COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1 LABELS longrun CONFIGURATIONS Debug DebugOptimized   )
+   waLBerla_execute_test( NAME FieldMPIDatatypesTestRelease  COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1                )
+   waLBerla_execute_test( NAME FieldMPIDatatypesTestDebug    COMMAND $<TARGET_FILE:FieldMPIDatatypesTest> PROCESSES 1 LABELS longrun )
 endif( WALBERLA_BUILD_WITH_MPI )
 
 
@@ -97,4 +97,9 @@ waLBerla_generate_target_from_python(NAME CodeGenEK FILE codegen/EK.py
         OUT_FILES EKFlux.cpp EKFlux.h EKContinuity.cpp EKContinuity.h )
 waLBerla_compile_test( FILES codegen/EK.cpp DEPENDS walberla::blockforest walberla::core walberla::field walberla::timeloop CodeGenEK )
 waLBerla_execute_test( NAME EK )
+
+waLBerla_generate_target_from_python(NAME CodegenGeneratedNonUniformPackInfoTest FILE codegen/GeneratedFieldNonUniformPackInfoTestCPU.py
+        OUT_FILES ScalarFieldNonUniformCommunicationCPU.cpp ScalarFieldNonUniformCommunicationCPU.h )
+waLBerla_compile_test( FILES codegen/GeneratedFieldNonUniformPackInfoTestCPU.cpp DEPENDS walberla::blockforest walberla::core walberla::field walberla::timeloop CodegenGeneratedNonUniformPackInfoTest )
+waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestCPU )
 endif()

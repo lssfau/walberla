@@ -147,7 +147,7 @@ bool FunctionParser::symbolExists(const std::string & symbol) const
    std::vector< std::string > variables;
    symbolTable_->get_variable_list( variables );
 
-   return std::find(variables.begin(), variables.end(), symbol) != variables.end();
+   return std::ranges::find(variables, symbol) != variables.end();
 
 }
 

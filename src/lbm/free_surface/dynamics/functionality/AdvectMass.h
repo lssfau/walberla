@@ -77,11 +77,11 @@ real_t advectMass(const FlagField_T* flagField, const ConstScalarIt_T& fillSrc, 
                   const ConstFlagIt_T& flagFieldIt, const ConstNeighIt_T& neighIt, const FlagInfo_T& flagInfo,
                   bool useSimpleMassExchange)
 {
-   using flag_c_t = typename std::remove_const< typename ConstFlagIt_T::value_type >::type;
-   using flag_n_t = typename std::remove_const< typename ConstNeighIt_T::value_type >::type;
-   using flag_i_t = typename std::remove_const< typename FlagField_T::value_type >::type;
+   using flag_c_t = typename std::remove_const_t< typename ConstFlagIt_T::value_type >;
+   using flag_n_t = typename std::remove_const_t< typename ConstNeighIt_T::value_type >;
+   using flag_i_t = typename std::remove_const_t< typename FlagField_T::value_type >;
 
-   static_assert(std::is_same< flag_i_t, flag_c_t >::value && std::is_same< flag_i_t, flag_n_t >::value,
+   static_assert(std::is_same_v< flag_i_t, flag_c_t > && std::is_same_v< flag_i_t, flag_n_t >,
                  "Flag types have to be equal.");
 
    WALBERLA_ASSERT(flagInfo.isInterface(flagFieldIt), "Function advectMass() must only be called for interface cell.");

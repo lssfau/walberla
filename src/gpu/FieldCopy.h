@@ -42,8 +42,8 @@ namespace gpu
    {
       for ( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
-               DstType * dst = blockIt->getData<DstType>( dstID );
-         const SrcType * src = blockIt->getData<SrcType>( srcID );
+               auto * dst = blockIt->getData<DstType>( dstID );
+         const auto * src = blockIt->getData<SrcType>( srcID );
          fieldCpy( *dst, *src );
       }
    }
@@ -60,15 +60,15 @@ namespace gpu
    template<typename DstType, typename SrcType>
    void fieldCpySweepFunction( BlockDataID dstID, ConstBlockDataID srcID, IBlock * block )
    {
-            DstType * dst = block->getData<DstType>( dstID );
-      const SrcType * src = block->getData<SrcType>( srcID );
+            auto * dst = block->getData<DstType>( dstID );
+      const auto * src = block->getData<SrcType>( srcID );
       fieldCpy( *dst, *src );
    }
 
    template<typename DstType, typename SrcType>
    std::function<void(IBlock*)> fieldCpyFunctor( BlockDataID dstID, ConstBlockDataID srcID )
    {
-      return std::bind( fieldCpySweepFunction<DstType,SrcType>, dstID, srcID, std::placeholders::_1 );
+      return [=] ( IBlock * block ) { fieldCpySweepFunction<DstType,SrcType>( dstID, srcID, block ); };
    }
 
 

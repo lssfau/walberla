@@ -40,7 +40,7 @@ struct NonCopyableWrap {};
 #define FunctionExporterClass( functionName, functionSignature ) \
    struct Exporter_##functionName \
    { \
-      typedef std::function<  functionSignature > FunctionType;\
+      using FunctionType = std::function<  functionSignature >;\
       Exporter_##functionName( const IBlock * block, ConstBlockDataID id )\
          : block_( block ), blockDataID_( id )\
       {}\
@@ -74,7 +74,7 @@ template<typename Exporter, typename... FieldTypes>
 class Dispatcher
 {
 public:
-   typedef typename Exporter::FunctionType FunctionType;
+   using FunctionType = typename Exporter::FunctionType;
 
    Dispatcher( const IBlock * block )
       : block_( block )

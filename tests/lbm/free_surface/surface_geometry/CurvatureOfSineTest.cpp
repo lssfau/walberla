@@ -114,7 +114,7 @@ class ComputeAnalyticalNormal
       // explicitly use either D2Q9 or D3Q27 here, as the geometry operations require (or are most accurate with) the
       // full neighborhood;
       using NeighborhoodStencil_T =
-         typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+         typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
 
       WALBERLA_FOR_ALL_CELLS(flagFieldIt, flagField, normalFieldIt, normalField, {
          // only treat interface cells

@@ -56,8 +56,8 @@ template< typename Stencil_T, typename FlagField_T, typename ScalarField_T, type
 class CurvatureSweepFiniteDifferences
 {
  protected:
-   using vector_t = typename std::remove_const< typename VectorField_T::value_type >::type;
-   using flag_t   = typename std::remove_const< typename FlagField_T::value_type >::type;
+   using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
+   using flag_t   = typename std::remove_const_t< typename FlagField_T::value_type >;
 
  public:
    CurvatureSweepFiniteDifferences(const BlockDataID& curvatureFieldID, const ConstBlockDataID& normalFieldID,
@@ -127,7 +127,7 @@ template< typename Stencil_T, typename FlagField_T, typename ScalarField_T, type
 class CurvatureSweepLocalTriangulation
 {
  protected:
-   using vector_t = typename std::remove_const< typename VectorField_T::value_type >::type;
+   using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
 
  public:
    CurvatureSweepLocalTriangulation(const std::weak_ptr< const StructuredBlockForest >& blockForest,
@@ -174,7 +174,7 @@ template< typename Stencil_T, typename FlagField_T, typename ScalarField_T, type
 class CurvatureSweepSimpleFiniteDifferences
 {
  protected:
-   using vector_t = typename std::remove_const< typename VectorField_T::value_type >::type;
+   using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
 
  public:
    CurvatureSweepSimpleFiniteDifferences(const BlockDataID& curvatureFieldID, const ConstBlockDataID& normalFieldID,

@@ -34,7 +34,7 @@ namespace data {
  *
  * Accessors passed via templated arguments might be checked like
  * \code
- * static_assert(std::is_base_of<IAccessor, X>::value, typeid(X).name() + " is not a accessor");
+ * static_assert(std::is_base_of_v<IAccessor, X>, typeid(X).name() + " is not a accessor");
  * \endcode
  */
 class IAccessor

@@ -112,8 +112,9 @@ std::shared_ptr< StructuredBlockForest >
 
    blockforest::GlobalLoadBalancing::MetisConfiguration< SetupBlock > const metisConfig(
       true, false,
-      std::bind(blockforest::cellWeightedCommunicationCost, std::placeholders::_1, std::placeholders::_2,
-                numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock));
+      [=] (const auto* const a, const auto* const b) {
+         return blockforest::cellWeightedCommunicationCost(a, b,
+                numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock); });
 
    sforest.calculateProcessDistribution_Default(uint_c(MPIManager::instance()->numProcesses()), memoryLimit, "hilbert",
                                                 10, false, metisConfig);

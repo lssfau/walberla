@@ -3,5 +3,6 @@ target_sources( walberla_mesh_common
     BranchNode.h
     LeafNode.h
     Node.h
-    DistanceOctree.h     
+    DistanceOctree.h
+    Ray.h
     )

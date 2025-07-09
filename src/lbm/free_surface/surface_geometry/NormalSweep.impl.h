@@ -56,7 +56,7 @@ void NormalSweep< Stencil_T, FlagField_T, ScalarField_T, VectorField_T >::operat
 
    // evaluate flags in D2Q19 neighborhood for 2D, and in D3Q27 neighborhood for 3D simulations
    using NeighborhoodStencil_T =
-      typename std::conditional< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+      typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
 
    // include ghost layer because solid cells might be located in the (outermost global) ghost layer
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(normalField, uint_c(1), {

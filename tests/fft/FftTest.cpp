@@ -9,7 +9,7 @@
 #include <random>
 
 using namespace walberla;
-typedef GhostLayerField< real_t, 1 > Field_T;
+using Field_T = GhostLayerField< real_t, 1 >;
 
 const real_t factor = real_t(2.745652);
 

@@ -19,6 +19,7 @@ if (WALBERLA_BUILD_WITH_PYTHON)
     waLBerla_execute_test( NAME FieldExportTest
                            COMMAND $<TARGET_FILE:FieldExportTest> ${CMAKE_CURRENT_SOURCE_DIR}/FieldExportTest.py )
 
+    add_dependencies( waLBerlaTestsuite pythonModule )
     add_test( NAME PythonWalberlaTest
           COMMAND ${Python_EXECUTABLE} -m unittest discover waLBerla_tests/ WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python/)
     SET_TESTS_PROPERTIES(PythonWalberlaTest

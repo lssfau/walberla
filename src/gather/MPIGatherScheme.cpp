@@ -211,8 +211,8 @@ void MPIGatherScheme::communicate()
    {
       internal::unpackData( packInfos_, recvBuffer );
 
-      for( size_t  s =0; s < packInfos_.size() ; ++s )
-         packInfos_[s]->gatherFinished( );
+      for( auto & packInfo : packInfos_ )
+         packInfo->gatherFinished( );
 
    }
 }

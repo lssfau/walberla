@@ -35,8 +35,8 @@ template< typename MeshType >
 class BoundaryUIDFaceDataSource : public VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >
 {
 public:
-   typedef typename VTKMeshWriter<MeshType>::Faces Faces;
-   typedef typename VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >::value_type value_type;
+   using Faces = typename VTKMeshWriter<MeshType>::Faces;
+   using value_type = typename VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >::value_type;
 
    BoundaryUIDFaceDataSource( const shared_ptr< BoundaryLocation< MeshType > > & boundaryLocation, const std::string & _name = "BoundaryUID" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >( _name ), boundaryLocation_( boundaryLocation )

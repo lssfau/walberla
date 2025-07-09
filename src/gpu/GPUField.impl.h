@@ -238,8 +238,8 @@ bool GPUField<T>::hasSameAllocSize( const GPUField<T> & other ) const
 template <typename T>
 GPUField<T> * GPUField<T>::cloneUninitialized() const
 {
-   GPUField<T> * res = new GPUField<T>( xSize(), ySize(), zSize(), fSize(),
-                                        nrOfGhostLayers(), layout(), isPitchedMem() );
+   auto * res = new GPUField<T>( xSize(), ySize(), zSize(), fSize(),
+                                 nrOfGhostLayers(), layout(), isPitchedMem() );
 
    WALBERLA_ASSERT( hasSameAllocSize( *res ) )
    WALBERLA_ASSERT( hasSameSize( *res ) )

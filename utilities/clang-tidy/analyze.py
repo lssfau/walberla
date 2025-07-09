@@ -15,14 +15,6 @@ from collections import Counter
 from textwrap import indent
 
 
-def removePrecompiler(x):
-    pos = x.find("clang++")
-    if pos != -1:
-        return x[pos:]
-    else:
-        return x
-
-
 def get_directory_filter(include_dirs: list[pathlib.Path]):
     absolute_dirs: list[pathlib.Path] = []
     for src_dir in include_dirs:
@@ -51,6 +43,9 @@ def remove_duplicate_commands(db: list):
 
 WARNING_PATTERN = re.compile(r"\[[a-z-]+,-warnings-as-errors\]\n")
 TRAILING = len(",-warnings-as-errors]\n")
+NOISE_PATTERN = re.compile(
+    r"(\[\s*\d+/\d+\]\[\d+\.\d+s\].*)|(\d+ warnings generated.)|(Suppressed \d+ warnings.*)|(Use -header-filter.*)"
+)
 
 
 def count_diagnostics(output_file: pathlib.Path) -> Counter:
@@ -66,6 +61,10 @@ def print_summary(counts: Counter):
     counts = sorted(list(counts.items()), key=lambda it: it[1], reverse=True)
     summary = "\n".join(f"{warning}: {count}" for warning, count in counts)
     return summary
+
+
+HTML_PRE = "<html><body><pre>\n"
+HTML_POST = "\n</pre></body></html>"
 
 
 def main():
@@ -86,7 +85,7 @@ def main():
         type=str,
         nargs="*",
         default=None,
-        help="Modules to be analyzed. Overrides modules listed in the parameter file."
+        help="Modules to be analyzed. Overrides modules listed in the parameter file.",
     )
     parser.add_argument(
         "-a",
@@ -95,7 +94,7 @@ def main():
         type=str,
         nargs="*",
         default=None,
-        help="Apps to be analyzed. Overrides apps listed in the parameter file."
+        help="Apps to be analyzed. Overrides apps listed in the parameter file.",
     )
     parser.add_argument(
         "-r",
@@ -127,13 +126,19 @@ def main():
         type=str,
         default=None,
         nargs="+",
-        help="clang-tidy checks filter. Forwarded to -checks argument of clang-tidy."
+        help="clang-tidy checks filter. Forwarded to -checks argument of clang-tidy.",
     )
     parser.add_argument(
         "--export-fixes",
         dest="export_fixes",
         action="store_true",
-        help="Export possible fixes detected by clang-tidy to a YAML file in the output directory"
+        help="Export possible fixes detected by clang-tidy to a YAML file in the output directory",
+    )
+    parser.add_argument(
+        "--html",
+        dest="html_output",
+        action="store_true",
+        help="Format output as HTML files for display in the browser",
     )
 
     args = parser.parse_args()
@@ -148,6 +153,13 @@ def main():
     database_fp = pathlib.Path(args.compile_database)
     database_backup = database_fp.parent / f"{database_fp.name}.bak"
     shutil.copy(str(database_fp), str(database_backup))
+
+    if args.html_output:
+        out_ext = ".out.html"
+        err_ext = ".err.html"
+    else:
+        out_ext = ".out"
+        err_ext = ".err"
 
     success: bool = True
     total_counts = Counter()
@@ -176,7 +188,7 @@ def main():
             database: list,
             include_dirs: list[pathlib.Path],
             header_filter: str | None,
-            output: pathlib.Path,
+            output_base: pathlib.Path,
             info: str,
         ):
             print(f"Analyzing {info}")
@@ -188,9 +200,6 @@ def main():
                 return False
 
             cc_filtered = list(filter(dir_filter, database))
-            for x in cc_filtered:
-                x["command"] = removePrecompiler(x["command"])
-
             cc_filtered = remove_duplicate_commands(cc_filtered)
 
             print(f"  -- Retained {len(cc_filtered)} compile commands")
@@ -205,20 +214,35 @@ def main():
                 checks_str = ",".join(args.checks)
                 clang_tidy_args += [f"-checks={checks_str}"]
             if args.export_fixes:
-                fixes_file = output.parent / "fixes.yaml"
+                fixes_file = output_base.parent / "fixes.yaml"
                 clang_tidy_args += [f"-export-fixes={str(fixes_file)}"]
-            output.parent.mkdir(exist_ok=True, parents=True)
+            output_base.parent.mkdir(exist_ok=True, parents=True)
 
-            errfile = output.with_name(output.name + ".err")
+            outfile = output_base.with_suffix(out_ext)
+            errfile = output_base.with_suffix(err_ext)
 
             print("  -- Running clang-tidy...")
-            with output.open("w") as ofile:
-                with errfile.open("w") as efile:
-                    subprocess.run(clang_tidy_args, stdout=ofile, stderr=efile)
 
-            print(f"  -- clang-tidy output written to {str(output)}")
+            result = subprocess.run(clang_tidy_args, capture_output=True, text=True)
 
-            counts = count_diagnostics(output)
+            with errfile.open("w") as efile:
+                err = HTML_PRE + result.stderr + HTML_POST if args.html_output else result.stderr
+                efile.write(err)
+
+            with outfile.open("w") as ofile:
+                if args.html_output:
+                    ofile.write(HTML_PRE)
+
+                for line in result.stdout.splitlines():
+                    if line and not NOISE_PATTERN.match(line):
+                        ofile.write(line + "\n")
+
+                if args.html_output:
+                    ofile.write(HTML_POST)
+
+            print(f"  -- clang-tidy output written to {str(outfile)}")
+
+            counts = count_diagnostics(outfile)
             total_counts.update(counts)
 
             if counts.total() == 0:
@@ -250,7 +274,7 @@ def main():
                 orig_db,
                 include_paths,
                 header_filter,
-                output_dir / "modules" / f"{module_name}.out",
+                output_dir / "modules" / f"{module_name}",
                 f"module {module_name}",
             )
             success = succ and success
@@ -274,7 +298,7 @@ def main():
                 orig_db,
                 include_paths,
                 None,
-                output_dir / "apps" / f"{app_name}.out",
+                output_dir / "apps" / f"{app_name}",
                 f"application {app_name}",
             )
 

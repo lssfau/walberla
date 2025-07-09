@@ -54,7 +54,7 @@ class FreeSurfaceBoundaryHandling
    using flag_t    = typename FlagField_T::value_type;
    using Stencil_T = typename LatticeModel_T::Stencil;
    using CommunicationStencil_T =
-      typename std::conditional< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
    using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    // boundary

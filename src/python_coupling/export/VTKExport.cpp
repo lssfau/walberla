@@ -54,6 +54,7 @@ void exportModuleToPython(py::module_& m)
    void ( VTKOutput::*p_setSamplingResolution1) ( const real_t  ) = &VTKOutput::setSamplingResolution;
    void ( VTKOutput::*p_setSamplingResolution2) ( const real_t, const real_t, const real_t ) = &VTKOutput::setSamplingResolution;
 
+   // NOLINTNEXTLINE(bugprone-unused-raii)
    py::class_<BlockCellDataWriterInterface, shared_ptr<BlockCellDataWriterInterface> > (m2, "BlockCellDataWriterInterface");
 
    m2.def(

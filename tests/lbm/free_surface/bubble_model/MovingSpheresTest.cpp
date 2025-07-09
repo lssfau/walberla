@@ -113,7 +113,7 @@ void BubbleModelTest< Stencil_T >::testMovingSpheres()
    // create timeloop
    SweepTimeloop timeloop(blockForest, uint_c(40));
    timeloop.addFuncBeforeTimeStep(bubbleSphereMover, "Move bubbles");
-   timeloop.addFuncAfterTimeStep(std::bind(&bubble_model::BubbleModel< Stencil_T >::update, bubbleModel));
+   timeloop.addFuncAfterTimeStep([bubbleModel] { bubbleModel->update(); });
 
    real_t singleBubbleVolume = real_c(523.346);
 

@@ -5,15 +5,15 @@ from typing import Dict, Optional, Sequence, Tuple
 
 from jinja2 import Environment, PackageLoader, StrictUndefined
 
-from pystencils import Assignment, AssignmentCollection, Field, FieldType, Target, create_kernel
+from pystencils import Assignment, AssignmentCollection, Field, FieldType, Target, create_kernel, fields
 from pystencils.backends.cbackend import get_headers
 from pystencils.stencil import inverse_direction, offset_to_direction_string
 
 from pystencils_walberla.cmake_integration import CodeGenerationContext
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.kernel_info import KernelInfo
+from pystencils_walberla.kernel_selection import KernelCallNode, KernelFamily
 from pystencils_walberla.utility import config_from_context
-
 
 def generate_pack_info_for_field(generation_context: CodeGenerationContext, class_name: str, field: Field,
                                  direction_subset: Optional[Tuple[Tuple[int, int, int]]] = None,
@@ -40,6 +40,7 @@ def generate_pack_info_for_field(generation_context: CodeGenerationContext, clas
         direction_subset = tuple((i, j, k) for i, j, k in product(*[(-1, 0, 1)] * 3))
 
     all_index_accesses = [field(*ind) for ind in product(*[range(s) for s in field.index_shape])]
+
     return generate_pack_info(generation_context, class_name, {direction_subset: all_index_accesses}, operator=operator,
                               gl_to_inner=gl_to_inner, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
                               **create_kernel_params)
@@ -203,7 +204,138 @@ def generate_pack_info(generation_context: CodeGenerationContext, class_name: st
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cu" if target == Target.GPU and generation_context.cuda else "cpp"
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
+    generation_context.write_file(f"{class_name}.h", header)
+    generation_context.write_file(f"{class_name}.{source_extension}", source)
+
+
+def get_pack_equal_kernel(config, field, buffer):
+
+    assignments = [Assignment(buffer(i), field.center(i)) for i in range(field.values_per_cell())]
+
+    config = replace(config, ghost_layers=0)
+    ast = create_kernel(assignments, config=config)
+    ast.function_name = 'packEqual'
+    return KernelFamily(KernelCallNode(ast), ast.function_name)
+
+
+def get_unpack_equal_kernel(config, field, buffer):
+
+    assignments = [Assignment(field.center(i), buffer(i)) for i in range(field.values_per_cell())]
+
+    config = replace(config, ghost_layers=0)
+    ast = create_kernel(assignments, config=config)
+    ast.function_name = 'unpackEqual'
+    return KernelFamily(KernelCallNode(ast), ast.function_name)
+
+
+def get_local_copy_equal_kernel(config, src_field, dst_field):
+
+    assignments = [Assignment(dst_field.center(i), src_field.center(i)) for i in range(src_field.values_per_cell())]
+    config = replace(config, ghost_layers=0)
+    ast = create_kernel(assignments, config=config)
+    ast.function_name = 'localCopyEqual'
+    return KernelFamily(KernelCallNode(ast), ast.function_name)
+
+
+def get_pack_fine_to_coarse_kernel(config, field, buffer):
+
+    assignments = []
+    offsets = list(product(*((0, 1) for _ in range(len(field.spatial_shape)))))
+    interpol_factor = 1. / 2**len(field.spatial_shape)
+    for d in range(field.values_per_cell()):
+        acc = 0
+        for o in offsets:
+            acc += interpol_factor * field.center(d).get_shifted(*o)
+        assignments.append(Assignment(buffer(d), acc))
+
+    iteration_slice = tuple(slice(None, None, 2) for _ in range(len(field.spatial_shape)))
+    config = replace(config, ghost_layers=0, iteration_slice=iteration_slice)
+    ast = create_kernel(assignments, config=config)
+    ast.function_name = 'packFineToCoarse'
+    return KernelFamily(KernelCallNode(ast), ast.function_name)
+
+
+def get_unpack_coarse_to_fine_kernel(config, field, buffer):
+
+    assignments = []
+    offsets = list(product(*((0, 1) for _ in range(len(field.spatial_shape)))))
+    for d in range(field.values_per_cell()):
+        for o in offsets:
+            assignments.append(Assignment(field.center(d).get_shifted(*o), buffer(d)))
+
+    iteration_slice = tuple(slice(None, None, 2) for _ in range(len(field.spatial_shape)))
+    config = replace(config, ghost_layers=0, iteration_slice=iteration_slice, allow_double_writes=True)
+    ast = create_kernel(assignments, config=config)
+    ast.function_name = 'unpackCoarseToFine'
+    return KernelFamily(KernelCallNode(ast), ast.function_name)
+
+
+def generate_nonuniform_pack_info_for_field(generation_context: CodeGenerationContext, class_name: str, field: Field,
+                                             namespace='pystencils', target=Target.CPU, data_type=None, **create_kernel_params):
+    """Generates a waLBerla GPU PackInfo
+
+    Args:
+        generation_context: see documentation of `generate_sweep`
+        class_name: name of the generated class
+        field: pystencils field for which to generate pack info
+        namespace: inner namespace of the generated class
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
+    """
+
+    data_type = field.dtype.numpy_dtype
+    config = config_from_context(generation_context, target=target, data_type=data_type,
+                                 **create_kernel_params)
+
+    # Vectorisation of the pack info is not implemented.
+    config = replace(config, cpu_vectorize_info=None)
+
+    template_name = "NonuniformFieldPackingKernels.tmpl"
+
+    buffer = Field.create_generic('buffer', spatial_dimensions=1, field_type=FieldType.BUFFER,
+                                  dtype=data_type, index_shape=(field.values_per_cell(),))
+
+    dst_field = fields(f'dst_field({field.values_per_cell()}):{data_type}[{len(field.spatial_shape)}D]', layout=field.layout)
+
+    kernels = OrderedDict()
+    kernels["packEqual"] = get_pack_equal_kernel(config, field, buffer)
+    kernels["unpackEqual"] = get_unpack_equal_kernel(config, dst_field, buffer)
+    kernels["localCopyEqual"] = get_local_copy_equal_kernel(config, field, dst_field)
+    kernels["packFineToCoarse"] = get_pack_fine_to_coarse_kernel(config, field, buffer)
+    kernels["unpackCoarseToFine"] = get_unpack_coarse_to_fine_kernel(config, dst_field, buffer)
+
+    jinja_context = {
+        'class_name': class_name,
+        'kernels': kernels,
+        'target': config.target.name.lower(),
+        'is_gpu': target == Target.GPU,
+        'src_field': field,
+        'dst_field': dst_field,
+        'dtype': field.dtype,
+        'field_name': field.name,
+        'namespace': namespace,
+    }
+
+    env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
+    add_pystencils_filters_to_jinja_env(env)
+    header = env.get_template(template_name + ".h").render(**jinja_context)
+    source = env.get_template(template_name + ".cpp").render(**jinja_context)
+
+    source_extension = (
+        "hip"
+        if target == Target.GPU and generation_context.hip
+        else "cu"
+        if target == Target.GPU and generation_context.cuda
+        else "cpp"
+    )
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 

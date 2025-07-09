@@ -77,13 +77,8 @@ public:
 
    void unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) { unregisteredCells_.push_back(x,y,z); }
 
-#ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
-#else
-   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
-#endif
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, [[maybe_unused]] const flag_t mask )
    {
       WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
       WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );
@@ -165,13 +160,8 @@ public:
 
    void unregisterCell( const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
 
-#ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
-#else
-   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
-#endif
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, [[maybe_unused]] const flag_t mask )
    {
       WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
       WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );
@@ -218,29 +208,25 @@ static void boundarySweep( FlagField_T& flagField, WorkField_T& workField, Facto
    flag_t add   = flagField.getFlag(  addBoundary );
    flag_t boundary = numeric_cast< flag_t >( copy1 | copy2 | add );
 
-   for( auto cell = flagField.begin(); cell != flagField.end(); ++cell )
-   {
-      const auto x = cell.x();
-      const auto y = cell.y();
-      const auto z = cell.z();
+   CellInterval ci { 0, 0, 0, cell_idx_c(flagField.xSize()) - 1, cell_idx_c(flagField.ySize()) - 1, cell_idx_c(flagField.zSize()) - 1 };
 
-      if( isFlagSet( cell, near ) )
+   for( Cell c: ci )
+   {
+      if( flagField.isFlagSet( c, near ) )
       {
          for( auto d = stencil::D3Q27::begin(); d != stencil::D3Q27::end(); ++d )
          {
-            const auto nx = cell_idx_c( x + d.cx() );
-            const auto ny = cell_idx_c( y + d.cy() );
-            const auto nz = cell_idx_c( z + d.cz() );
+            Cell neighbor = c + *d;
 
-            if( isPartOfMaskSet( cell.neighbor(*d), boundary ) )
+            if( flagField.isPartOfMaskSet( neighbor, boundary ) )
             {
-               if( flagField.isPartOfMaskSet( nx, ny, nz, numeric_cast<flag_t>( copy1 | copy2 ) ) ) // behavior identical to CopyBoundary
+               if( flagField.isPartOfMaskSet( neighbor, numeric_cast<flag_t>( copy1 | copy2 ) ) ) // behavior identical to CopyBoundary
                {
-                  workField.get( nx, ny, nz, d.toInvIdx() ) = workField.get( x, y, z, d.toIdx() );
+                  workField.get( neighbor, d.toInvIdx() ) = workField.get( c, d.toIdx() );
                }
-               else if( flagField.isFlagSet( nx, ny, nz, add ) ) // behavior identical to AddBoundary
+               else if( flagField.isFlagSet( neighbor, add ) ) // behavior identical to AddBoundary
                {
-                  workField.get( nx, ny, nz, d.toInvIdx() ) = workField.get( x, y, z, d.toIdx() ) + factorField.get( nx, ny, nz );
+                  workField.get( neighbor, d.toInvIdx() ) = workField.get( c, d.toIdx() ) + factorField.get( neighbor );
                }
             }
          }
@@ -350,12 +336,12 @@ static int main( int argc, char **argv )
    WorkField_T workField_Ref( xSize, ySize, zSize, gl );
    WorkField_T workField_BH( xSize, ySize, zSize, gl );
 
-   uint_t value = 0;
    for( cell_idx_t z = -cell_idx_c(gl); z != cell_idx_c(zSize+gl); ++z ) {
       for( cell_idx_t y = -cell_idx_c(gl); y != cell_idx_c(ySize+gl); ++y ) {
          for( cell_idx_t x = -cell_idx_c(gl); x != cell_idx_c(xSize+gl); ++x ) {
-            for( uint_t i = 0; i != stencil::D3Q27::Size; ++i, ++value )
+            for( uint_t i = 0; i != stencil::D3Q27::Size; ++i)
             {
+               uint_t value = uint_c(x * 1000000 + y * 10000 + z * 100 + cell_idx_c(i));
                workField_Ref(x,y,z,i) = value;
                workField_BH(x,y,z,i)  = value;
             }

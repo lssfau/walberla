@@ -148,9 +148,10 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
-   { return blockForest_->loadBlockData( file, dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
+   { return blockForest_->loadBlockData( file, dataHandling, identifier, forceSerialIO, requiredSelectors, incompatibleSelectors ); }
    
    inline void refresh() { blockForest_->refresh(); }
 
@@ -258,7 +259,7 @@ inline uint_t StructuredBlockForest::getNumberOfCells( const IBlock& block, cons
 
 inline bool StructuredBlockForest::equal( const StructuredBlockStorage* rhs ) const {
 
-   const StructuredBlockForest* forest = dynamic_cast< const StructuredBlockForest* >( rhs );
+   const auto* forest = dynamic_cast< const StructuredBlockForest* >( rhs );
 
    if( forest != rhs )
       return false;

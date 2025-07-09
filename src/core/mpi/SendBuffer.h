@@ -130,10 +130,11 @@ public:
    //**Get functions****************************************************************************************************
    /*!\name Get functions */
    //@{
-   inline size_t maxSize () const;
-   inline size_t size    () const;
-   inline size_t capacity() const;
-   inline bool   isEmpty () const;
+   inline size_t maxSize  () const;
+   inline size_t size     () const;
+   inline size_t dataSize () const;
+   inline size_t capacity () const;
+   inline bool   isEmpty  () const;
    //@}
    //*******************************************************************************************************************
 
@@ -141,8 +142,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-   GenericSendBuffer&  >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericSendBuffer&
    operator<<( V value );
 
    //@}
@@ -189,8 +190,8 @@ private:
    void extendMemory( size_t newCapacity );
 
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-   GenericSendBuffer&  >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericSendBuffer&
    put( V value );
 
    inline std::ptrdiff_t getOffset() const;
@@ -394,6 +395,20 @@ inline size_t GenericSendBuffer<T,G>::size() const
 
 
 //**********************************************************************************************************************
+/*!\brief Returns the current data size of the send buffer.
+//
+// \return The current data size.
+*/
+template< typename T    // Element type
+          , typename G >  // Growth policy
+inline size_t GenericSendBuffer<T,G>::dataSize() const
+{
+   return sizeof(T) * size();
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
 /*!\brief Returns the capacity of the send buffer.
 //
 // \return The capacity.
@@ -438,8 +453,8 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-GenericSendBuffer<T,G>& >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericSendBuffer<T,G>&
 GenericSendBuffer<T,G>::put( V value )
 {
    // Compile time check that V is built-in data type
@@ -449,8 +464,8 @@ GenericSendBuffer<T,G>::put( V value )
    static_assert( sizeof(V) >= sizeof(T), "Type that is stored has to be bigger than T" );
    static_assert( sizeof(V)  % sizeof(T) == 0, "V has to be divisible by T ");
 
-   size_t count =  sizeof(V) / sizeof(T); // NOLINT(bugprone-sizeof-expression)
-   const size_t rest = numeric_cast< size_t >( end_ - cur_ );
+   const size_t count =  sizeof(V) / sizeof(T); // NOLINT(bugprone-sizeof-expression)
+   const auto rest = numeric_cast< size_t >( end_ - cur_ );
 
    // Checking the size of the remaining memory
    if( rest < count ) {
@@ -483,8 +498,8 @@ GenericSendBuffer<T,G>::put( V value )
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-GenericSendBuffer<T,G>& >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericSendBuffer<T,G>&
 GenericSendBuffer<T,G>::operator<<( V value )
 {
    addDebugMarker( typeid(V).name() );
@@ -516,7 +531,7 @@ template< typename T    // Element type
         , typename G >  // Growth policy
 T * GenericSendBuffer<T,G>::forward( uint_t elements )
 {
-   const size_t rest = numeric_cast< size_t >( end_ - cur_ );
+   const auto rest = numeric_cast< size_t >( end_ - cur_ );
 
    // Checking the size of the remaining memory
    if( rest < elements ) {

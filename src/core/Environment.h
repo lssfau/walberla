@@ -53,12 +53,9 @@ public:
    *  - MPIManager ( via mpi::Environment )
    *  - reads configuration file
    *  - configures Logging
-   *  - configures GlobalState
    *
    * If no command line arguments are present only MPI subsystem is initialized and
-   *  - logging is configured to default state
-   *  - the global state is configured to a default state (the global state still can be configured
-   *    by manually calling GlobalState::instance()->configure())
+   * logging is configured to default state.
    *
    ********************************************************************************************************************/
    Environment( int & argc, char ** & argv, bool mpiAbortOnException = true );
@@ -78,21 +75,5 @@ protected:
    shared_ptr<Config> config_;
    mpi::Environment mpiEnv_;
 };
-
-
-
-//======================================================================================================================
-//
-//  Function for manual initialization, if possible use Environment
-//
-//======================================================================================================================
-
-//**********************************************************************************************************************
-/*! Configures the global state given a config object
-*/
-//**********************************************************************************************************************
-void configureGlobalState( const shared_ptr<Config> & config );
-
-
 
 } // namespace walberla

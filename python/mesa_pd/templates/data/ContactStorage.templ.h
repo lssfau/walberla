@@ -185,7 +185,7 @@ public:
    std::vector<{{prop.type}}> {{prop.name}}_ {};
    {%- endfor %}
    std::unordered_map<id_t, size_t> uidToIdx_;
-   static_assert(std::is_same<decltype(uid_)::value_type, id_t>::value,
+   static_assert(std::is_same_v<decltype(uid_)::value_type, id_t>,
                  "Property uid of type id_t is missing. This property is required!");
 };
 using Contact = ContactStorage::Contact;

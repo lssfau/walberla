@@ -39,37 +39,30 @@ namespace lbm {
 
 
 
-template< typename LatticeModel_T, typename FlagField_T, class Enable = void >
-struct Stream; // streaming (stream pull) performed only for cells marked as 'LBM' cells
-
-template< typename LatticeModel_T, class Enable = void >
-struct StreamEverything; // streaming performed for all cells
-
-
-
 ////////////
 // STREAM //
 ////////////
 
 template< typename LatticeModel_T, typename FlagField_T >
-struct Stream< LatticeModel_T, FlagField_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil,
-                                                                                                         stencil::D3Q19>::value >::type >
+struct Stream // streaming (stream pull) performed only for cells marked as 'LBM' cells
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
-
    using PdfField_T = PdfField<LatticeModel_T>;
    using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
                         const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+   static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
+                        const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> );
+
 };
 
 template< typename LatticeModel_T, typename FlagField_T >
-void Stream< LatticeModel_T, FlagField_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil,
-                                                                                                       stencil::D3Q19 >::value >::type
-   >::execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
-               const uint_t numberOfGhostLayersToInclude )
+void Stream< LatticeModel_T, FlagField_T >::execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField,
+                                                     const typename FlagField_T::flag_t lbm, const uint_t numberOfGhostLayersToInclude )
 {
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "There is a specialization for D3Q19!" );
+
    WALBERLA_ASSERT_NOT_NULLPTR( src );
    WALBERLA_ASSERT_NOT_NULLPTR( dst );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField );
@@ -91,27 +84,13 @@ void Stream< LatticeModel_T, FlagField_T, typename std::enable_if< ! std::is_sam
    src->swapDataPointers( dst );
 }
 
-
-
 template< typename LatticeModel_T, typename FlagField_T >
-struct Stream< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil,
-                                                                                       stencil::D3Q19 >::value >::type >
+void Stream< LatticeModel_T, FlagField_T >::execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField,
+                                                    const typename FlagField_T::flag_t lbm, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "Only works with D3Q19!" );
 
-   using PdfField_T = PdfField<LatticeModel_T>;
-   using Stencil = typename LatticeModel_T::Stencil;
-
-   static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
-                        const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-};
-
-template< typename LatticeModel_T, typename FlagField_T >
-void Stream< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil,
-                                                                                     stencil::D3Q19 >::value >::type
-   >::execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
-               const uint_t numberOfGhostLayersToInclude )
-{
    WALBERLA_ASSERT_NOT_NULLPTR( src );
    WALBERLA_ASSERT_NOT_NULLPTR( dst );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField );
@@ -159,22 +138,21 @@ void Stream< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_same<
 ///////////////////////
 
 template< typename LatticeModel_T >
-struct StreamEverything< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil,
-                                                                                                      stencil::D3Q19 >::value >::type >
+struct StreamEverything // streaming performed for all cells
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
-
    using PdfField_T = PdfField<LatticeModel_T>;
    using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> );
 };
 
 template< typename LatticeModel_T >
-void StreamEverything< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil,
-                                                                                                    stencil::D3Q19 >::value >::type
-   >::execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude )
+void StreamEverything< LatticeModel_T >::execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude )
 {
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "There is a specialization for D3Q19!" );
+
    WALBERLA_ASSERT_NOT_NULLPTR( src );
    WALBERLA_ASSERT_NOT_NULLPTR( dst );
 
@@ -208,25 +186,12 @@ void StreamEverything< LatticeModel_T, typename std::enable_if< ! std::is_same< 
    src->swapDataPointers( dst );
 }
 
-
-
 template< typename LatticeModel_T >
-struct StreamEverything< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil,
-                                                                                    stencil::D3Q19 >::value >::type >
+void StreamEverything< LatticeModel_T>::execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude )
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "Only works with D3Q19!" );
 
-   using PdfField_T = PdfField<LatticeModel_T>;
-   using Stencil = typename LatticeModel_T::Stencil;
-
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-};
-
-template< typename LatticeModel_T >
-void StreamEverything< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil,
-                                                                                  stencil::D3Q19 >::value >::type
-   >::execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude )
-{
    WALBERLA_ASSERT_NOT_NULLPTR( src );
    WALBERLA_ASSERT_NOT_NULLPTR( dst );
 

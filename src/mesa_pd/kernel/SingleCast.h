@@ -61,7 +61,7 @@ public:
 template <typename Accessor, typename func, typename... Args>
 auto SingleCast::operator()( size_t idx, Accessor& ac, func& f, Args&&... args )
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    using namespace mesa_pd::data;
    switch (ac.getShape(idx)->getShapeType())

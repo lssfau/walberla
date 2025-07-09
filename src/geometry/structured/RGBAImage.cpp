@@ -35,11 +35,11 @@ namespace geometry   {
 
 
    bool RGBAImage::pixel_t::operator< ( const pixel_t & o ) const {
-      return std::lexicographical_compare(   values.begin(),   values.end(), o.values.begin(), o.values.end() );
+      return std::ranges::lexicographical_compare( values, o.values );
    }
 
    bool RGBAImage::pixel_t::operator== ( const pixel_t & o ) const {
-      return std::equal(   values.begin(),   values.end(), o.values.begin() );
+      return std::ranges::equal( values, o.values );
    }
 
 

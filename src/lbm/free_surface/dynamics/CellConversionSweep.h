@@ -251,10 +251,8 @@ class CellConversionSweep
    void initializeFromInflow(const std::set< Cell >& cells, FlagField_T* flagField, PdfField_T* pdfField,
                              BoundaryHandling_T* handling)
    {
-      for (auto setIt = cells.begin(); setIt != cells.end(); ++setIt)
+      for (auto const &cell : cells)
       {
-         const Cell& cell = *setIt;
-
          Vector3< real_t > u(real_c(0.0));
          uint_t numNeighbors = uint_c(0);
 

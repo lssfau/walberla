@@ -1,5 +1,88 @@
 # Changelog
 
+## [7.1] - 2025-04-11
+
+### Build System
+
+ - Bump minimum required CMake version to 3.24
+ - Add support for clang-mode of the Fujitsu C++ compiler (`FCC -nclang`)
+ - Remove support for PGI and NEC SXI compilers
+ - Introduce qualified export targets (`walberla::<module>`) and deprecate unqualified waLBerla module targets
+
+### Modules
+
+#### Core
+
+ - Add `DeviceSynchronize` timing policy which synchronizes with GPUs before time measurements
+
+#### GPU
+
+ - Add support for AMD HIP / ROCm
+ - Add generic aliases for CUDA/HIP runtime API functions
+ - Minor improvements to `UniformGpuScheme`.
+
+#### Blockforest
+
+ - Allow blocks to be removed during the refinement process when a user-defined criterion is fulfilled,
+   for example, when blocks are entirely inside an object.
+
+#### Field
+
+ - Improve SIMD support, especially data alignment with SVE
+ - Change default data layout from AoS (zyxf) to SoA (fzyx) in all data creation functions
+
+#### LBM & Code Generation
+
+ - Introduce new `lbm_generated` module providing and supporting automatically generated implementations
+   of lattice Boltzmann methods on uniform and refined grids, for CPU and GPU targets
+   - Integration of a new mesh refinement procedure (described in [this bachelor's thesis](https://www10.cs.fau.de/publications/theses/2021/Bachelor_HennigFrederik.pdf))
+   - Adaptation of this mesh refinement procedure for GPUs
+ - Add code generation for the partially saturated cells method (published: [doi:10.1177/10943420241313385](https://doi.org/10.1177/10943420241313385))
+ - Stability checker now supports custom Functor as checking criterium
+
+#### Mesa-PD
+
+ - Refactor load balancing to remove interdependency with `pe` module
+
+#### Python-Bindings
+
+ - Replace `pycuda` with `cupy` for representing GPU arrays
+
+#### VTK
+
+ - Introduce OverlappingAMR format in VTKWriter
+ - Allow one file per process (instead of one file per block) for unstructured VTKWriter
+
+
+### Applications
+
+#### Showcases
+
+ - Add *Fluidized Bed* showcase using the PSM method
+ - Add *Antidunes* showcase (published: [doi:10.1017/jfm.2023.262](https://doi.org/10.1017/jfm.2023.262))
+ - Feature extensions to the *Particle Packing* showcase
+ - Add FlowAroundSphere showcase, which shows complex phenomenon of the drag crisis
+   (published in chapter 6 of [doi:10.25593/open-fau-1432](https://doi.org/10.25593/open-fau-1432))
+ - Added Thermocapillary showcase, which shows interaction of the Allen-Cahn phasefield model
+   under the influence of a temperature gradient.
+   The results are published at [doi:10.1016/j.jcp.2024.113337](https://doi.org/10.1016/j.jcp.2024.113337)
+   and in chapter 8 of [doi:10.25593/open-fau-1432](https://doi.org/10.25593/open-fau-1432)
+
+#### Benchmarks
+
+ - Add mass advection benchmarks for the free-surface LBM
+ - Add *Zalesak's Rotating Disk* benchmark for the free-surface LBM
+ - Add `NonUniformGridCPU` and `NonUniformGridGPU` benchmarks for new mesh refinement algorithms on GPU and CPU hardware
+ - Add adapted forms of the UniformGridGPU and UniformGridCPU benchmarks using code generation.
+   New results of these benchmarks in large scales are published in chapter 9 of [doi:10.25593/open-fau-1432](https://doi.org/10.25593/open-fau-1432)
+
+
+### Deprecations and Removals
+
+ - Deprecated `pe` module, slated for removal in the next release
+ - Removed `gui` module
+
+
 ## [6.1] - 2022-07-25
 ### Added
 - Free-surface LBM extension:

@@ -175,56 +175,56 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
 
    // fill temporary coarse field with values (only regions that are required for the interpolation!)
 
-   for( auto coarse = coarseIntervals.begin(); coarse != coarseIntervals.end(); ++coarse )
+   for( auto const &coarse : coarseIntervals )
    {
 #ifdef _OPENMP
 
-      if( coarse->zSize() >= coarse->ySize() )
+      if( coarse.zSize() >= coarse.ySize() )
       {
-         int zMin = int_c( coarse->zMin() );
-         int zMax = int_c( coarse->zMax() ) + 1;
+         int zMin = int_c( coarse.zMin() );
+         int zMax = int_c( coarse.zMax() ) + 1;
 
          #pragma omp parallel for schedule(static)
          for( int zi = zMin; zi < zMax; ++zi )
          {
             const cell_idx_t z = cell_idx_c(zi);
-            for( cell_idx_t y = coarse->yMin(); y <= coarse->yMax(); ++y )
-               internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, *coarse, pdfField, boundaryHandling, tmpField );
+            for( cell_idx_t y = coarse.yMin(); y <= coarse.yMax(); ++y )
+               internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, coarse, pdfField, boundaryHandling, tmpField );
          }
       }
       else
       {
-         int yMin = int_c( coarse->yMin() );
-         int yMax = int_c( coarse->yMax() ) + 1;
+         int yMin = int_c( coarse.yMin() );
+         int yMax = int_c( coarse.yMax() ) + 1;
 
          #pragma omp parallel for schedule(static)
          for( int yi = yMin; yi < yMax; ++yi )
          {
             const cell_idx_t y = cell_idx_c(yi);
-            for( cell_idx_t z = coarse->zMin(); z <= coarse->zMax(); ++z )
-               internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, *coarse, pdfField, boundaryHandling, tmpField );
+            for( cell_idx_t z = coarse.zMin(); z <= coarse.zMax(); ++z )
+               internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, coarse, pdfField, boundaryHandling, tmpField );
          }
       }
 #else
-      for( cell_idx_t z = coarse->zMin(); z <= coarse->zMax(); ++z ) {
-         for( cell_idx_t y = coarse->yMin(); y <= coarse->yMax(); ++y )
+      for( cell_idx_t z = coarse.zMin(); z <= coarse.zMax(); ++z ) {
+         for( cell_idx_t y = coarse.yMin(); y <= coarse.yMax(); ++y )
          {
-            internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, *coarse, pdfField, boundaryHandling, tmpField );
+            internal::fillTemporaryCoarseField< PdfField_T, BoundaryHandling_T, CoarseField >( y, z, coarse, pdfField, boundaryHandling, tmpField );
          }
       }
 #endif
 
-      CellInterval expanded( *coarse );
+      CellInterval expanded( coarse );
       expanded.expand( cell_idx_t(1) );
 
       for( auto cell = boolField->beginSliceXYZ( expanded ); cell != boolField->end(); ++cell )
          *cell = false;
    }
 
-   for( auto coarse = coarseIntervals.begin(); coarse != coarseIntervals.end(); ++coarse ) {
-      for( auto z = coarse->zMin(); z <= coarse->zMax(); ++z ) {
-         for( auto y = coarse->yMin(); y <= coarse->yMax(); ++y ) {
-            for( auto x = coarse->xMin(); x <= coarse->xMax(); ++x )
+   for( auto const &coarse : coarseIntervals ) {
+      for( auto z = coarse.zMin(); z <= coarse.zMax(); ++z ) {
+         for( auto y = coarse.yMin(); y <= coarse.yMax(); ++y ) {
+            for( auto x = coarse.xMin(); x <= coarse.xMax(); ++x )
             {
                if( boundaryHandling->isDomain( cell_idx_t(2) * x, cell_idx_t(2) * y, cell_idx_t(2) * z ) )
                {
@@ -261,43 +261,43 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
 
    // linear interpolation
 
-   for( auto fine = fineIntervals.begin(); fine != fineIntervals.end(); ++fine )
+   for( auto const &fine : fineIntervals )
    {
-      WALBERLA_ASSERT( (fine->xSize() & uint_t(1)) == uint_t(0) );
-      WALBERLA_ASSERT( (fine->ySize() & uint_t(1)) == uint_t(0) );
-      WALBERLA_ASSERT( ( Stencil::D == uint_t(2) && fine->zSize() == uint_t(1) ) || ( Stencil::D == uint_t(3) && (fine->zSize() & uint_t(1)) == uint_t(0) ) );
+      WALBERLA_ASSERT( (fine.xSize() & uint_t(1)) == uint_t(0) );
+      WALBERLA_ASSERT( (fine.ySize() & uint_t(1)) == uint_t(0) );
+      WALBERLA_ASSERT( ( Stencil::D == uint_t(2) && fine.zSize() == uint_t(1) ) || ( Stencil::D == uint_t(3) && (fine.zSize() & uint_t(1)) == uint_t(0) ) );
       
 #ifdef _OPENMP
 
-      if( fine->zSize() >= fine->ySize() )
+      if( fine.zSize() >= fine.ySize() )
       {
-         int zSize = (Stencil::D == uint_t(3)) ? ( int_c( fine->zSize() ) / 2 ) : 1;
+         int zSize = (Stencil::D == uint_t(3)) ? ( int_c( fine.zSize() ) / 2 ) : 1;
 
          #pragma omp parallel for schedule(static)
          for( int zi = 0; zi < zSize; ++zi )
          {
-            const cell_idx_t z = fine->zMin() + cell_idx_c(zi) * cell_idx_t(2);
-            for( cell_idx_t y = fine->yMin(); y <= fine->yMax(); y += cell_idx_t(2) )
-               internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, *fine, pdfField, boundaryHandling, tmpField, boolField );
+            const cell_idx_t z = fine.zMin() + cell_idx_c(zi) * cell_idx_t(2);
+            for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t(2) )
+               internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
       }
       else
       {
-         int ySize = int_c( fine->ySize() ) / 2;
+         int ySize = int_c( fine.ySize() ) / 2;
 
          #pragma omp parallel for schedule(static)
          for( int yi = 0; yi < ySize; ++yi )
          {
-            const cell_idx_t y = fine->yMin() + cell_idx_c(yi) * cell_idx_t(2);
-            for( cell_idx_t z = fine->zMin(); z <= fine->zMax(); z += cell_idx_t(2) )
-               internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, *fine, pdfField, boundaryHandling, tmpField, boolField );
+            const cell_idx_t y = fine.yMin() + cell_idx_c(yi) * cell_idx_t(2);
+            for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t(2) )
+               internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
       }
 #else
-      for( cell_idx_t z = fine->zMin(); z <= fine->zMax(); z += cell_idx_t(2) ) {
-         for( cell_idx_t y = fine->yMin(); y <= fine->yMax(); y += cell_idx_t(2) )
+      for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t(2) ) {
+         for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t(2) )
          {
-            internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, *fine, pdfField, boundaryHandling, tmpField, boolField );
+            internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
       }
 #endif

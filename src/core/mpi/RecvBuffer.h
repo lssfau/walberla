@@ -113,10 +113,11 @@ public:
    //**Get functions****************************************************************************************************
    /*!\name Get functions */
    //@{
-   inline size_t maxSize () const;
-   inline size_t size    () const;
-   inline size_t capacity() const;
-   inline bool   isEmpty () const;
+   inline size_t maxSize  () const;
+   inline size_t size     () const;
+   inline size_t dataSize () const;
+   inline size_t capacity () const;
+   inline bool   isEmpty  () const;
    //@}
    //*******************************************************************************************************************
 
@@ -124,8 +125,8 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                              GenericRecvBuffer& >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericRecvBuffer&
    operator>>( V& value );
    //@}
    //*******************************************************************************************************************
@@ -159,8 +160,8 @@ private:
    /*!\name Utility functions */
    //@{
    template< typename V >
-   std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                              GenericRecvBuffer& >
+   requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+   GenericRecvBuffer&
    get( V& value );
    //@}
    //*******************************************************************************************************************
@@ -346,6 +347,19 @@ inline size_t GenericRecvBuffer<T>::size() const
 
 
 //**********************************************************************************************************************
+/*!\brief Returns the current data size of the receive buffer.
+//
+// \return The current data size.
+*/
+template< typename T >  // Element type
+inline size_t GenericRecvBuffer<T>::dataSize() const
+{
+   return sizeof(T) * size();
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
 /*!\brief Returns the capacity of the receive buffer.
 //
 // \return The capacity.
@@ -385,8 +399,8 @@ inline bool GenericRecvBuffer<T>::isEmpty() const
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                           GenericRecvBuffer<T> & >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericRecvBuffer<T> &
 GenericRecvBuffer<T>::get( V& value )
 {
    // Compile time check that V is built-in data type
@@ -427,8 +441,8 @@ GenericRecvBuffer<T>::get( V& value )
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-std::enable_if_t< std::is_arithmetic_v<V> || std::is_enum_v<V>,
-                           GenericRecvBuffer<T> & >
+requires( std::is_arithmetic_v<V> || std::is_enum_v<V> )
+GenericRecvBuffer<T> &
 GenericRecvBuffer<T>::operator>>( V& value )
 {
    readDebugMarker( typeid(V).name() );

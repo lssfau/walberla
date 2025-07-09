@@ -42,7 +42,7 @@ namespace internal {
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 real_t getDensityAndMomentumDensity( Vector3< real_t > & momentumDensity, const FieldPtrOrIterator & it )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
                   "If you have the D3Q19 stencil, you should use the optimized function!" );
 
    auto d = LatticeModel_T::Stencil::begin();
@@ -75,7 +75,7 @@ template< typename LatticeModel_T, typename PdfField_T >
 real_t getDensityAndMomentumDensity( Vector3< real_t > & momentumDensity, const PdfField_T & pdf,
                                      const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
                   "If you have the D3Q19 stencil, you should use the optimized function!" );
 
    const auto & xyz0 = pdf(x,y,z,0);
@@ -109,7 +109,7 @@ real_t getDensityAndMomentumDensity( Vector3< real_t > & momentumDensity, const 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const FieldPtrOrIterator & it )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
    using Stencil = typename LatticeModel_T::Stencil;
@@ -135,7 +135,7 @@ template< typename LatticeModel_T, typename PdfField_T >
 real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const PdfField_T & pdf,
                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
    using Stencil = typename LatticeModel_T::Stencil;
@@ -167,7 +167,7 @@ real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, c
 
 
 
-template< typename LatticeModel_T, class Enable = void >
+template< typename LatticeModel_T >
 struct DensityAndMomentumDensity
 {
    static_assert( never_true<LatticeModel_T>::value, "This static error message is never supposed to be triggered!\n"
@@ -176,9 +176,10 @@ struct DensityAndMomentumDensity
 };
 
 template< typename LatticeModel_T >
-struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct DensityAndMomentumDensity< LatticeModel_T >
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "For D3Q19 there is an optimized version!" );
+   static_assert( ! std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "For D3Q19 there is an optimized version!" );
 
    template< typename FieldPtrOrIterator >
    static real_t getEquilibrium( Vector3< real_t > & momentumDensity, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )
@@ -216,9 +217,10 @@ struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< ! std
 };
 
 template< typename LatticeModel_T >
-struct DensityAndMomentumDensity< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
+struct DensityAndMomentumDensity< LatticeModel_T >
 {
-   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 >, "Only works with D3Q19!" );
 
    template< typename FieldPtrOrIterator >
    static real_t getEquilibrium( Vector3< real_t > & momentumDensity, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )

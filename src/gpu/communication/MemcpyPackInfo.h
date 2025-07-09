@@ -5,13 +5,14 @@
 
 #include "domain_decomposition/IBlock.h"
 
-#include "stencil/Directions.h"
-
 #include "gpu/GPUField.h"
 #include "gpu/GPUWrapper.h"
 #include "gpu/communication/GeneratedGPUPackInfo.h"
 
-namespace walberla::gpu::communication {
+#include "stencil/Directions.h"
+
+namespace walberla::gpu::communication
+{
 
 /**
  * \brief Data packing/unpacking for ghost layer based communication of a \ref GPUField.
@@ -34,24 +35,31 @@ namespace walberla::gpu::communication {
  * \ingroup gpu
  * \tparam GPUFieldType   A fully qualified \ref GPUField.
  */
-template<typename GPUFieldType>
+template< typename GPUFieldType >
 class MemcpyPackInfo : public ::walberla::gpu::GeneratedGPUPackInfo
 {
-public:
-    MemcpyPackInfo( BlockDataID pdfsID_ ) : pdfsID(pdfsID_) {};
-    ~MemcpyPackInfo() override = default;
+ public:
+   /**
+    * \param fieldId_ BlockDataID of the field to be communicated
+    * \param numGhostLayers Number of ghost layers to be communicated.
+    *  If left at zero, the number will be inferred from the field.
+    */
+   MemcpyPackInfo(BlockDataID fieldId, const uint_t numGhostLayers = 0)
+      : fieldId_(fieldId), numberOfGhostLayers_{ numGhostLayers } {};
 
-    void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
-    void communicateLocal  ( stencil::Direction dir, const IBlock *sender, IBlock *receiver, gpuStream_t stream ) override;
-    void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, gpuStream_t stream) override;
-    uint_t size(stencil::Direction dir, IBlock * block) override;
+   ~MemcpyPackInfo() override = default;
 
-private:
-    BlockDataID pdfsID;
-    uint_t numberOfGhostLayers_{0};
-    bool communicateAllGhostLayers_{true};
+   void pack(stencil::Direction dir, unsigned char* buffer, IBlock* block, gpuStream_t stream) override;
+   void communicateLocal(stencil::Direction dir, const IBlock* sender, IBlock* receiver, gpuStream_t stream) override;
+   void unpack(stencil::Direction dir, unsigned char* buffer, IBlock* block, gpuStream_t stream) override;
+   uint_t size(stencil::Direction dir, IBlock* block) override;
 
-    uint_t numberOfGhostLayersToCommunicate( const GPUFieldType * const field ) const;
+ private:
+   BlockDataID fieldId_;
+   uint_t numberOfGhostLayers_{ 0 };
+   bool communicateAllGhostLayers_{ true };
+
+   uint_t numberOfGhostLayersToCommunicate(const GPUFieldType* const field) const;
 };
 
 } // namespace walberla::gpu::communication

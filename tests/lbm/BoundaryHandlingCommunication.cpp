@@ -82,10 +82,10 @@ class MyBoundaryHandling
 {
 public:
 
-   typedef lbm::NoSlip< LatticeModel_T, flag_t >  NoSlip_T;
-   typedef lbm::UBB< LatticeModel_T, flag_t >     UBB_T;
+   using NoSlip_T = lbm::NoSlip< LatticeModel_T, flag_t >;
+   using UBB_T = lbm::UBB< LatticeModel_T, flag_t >;
 
-   typedef BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, NoSlip_T, UBB_T > BoundaryHandling_T;
+   using BoundaryHandling_T = BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, NoSlip_T, UBB_T >;
 
    MyBoundaryHandling( const std::string & id, const BlockDataID & flagField, const BlockDataID & pdfField, const real_t velocity ) :
       id_( id ), flagField_( flagField ), pdfField_( pdfField ), velocity_( velocity ) {}
@@ -173,9 +173,9 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
 template< typename LatticeModel_T >
 void removeFlagsInGhostLayer( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
 {
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   for( auto &block : *blocks )
    {
-      auto boundaryHandling = block->template getData< typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T >( boundaryHandlingId );
+      auto boundaryHandling = block.template getData< typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T >( boundaryHandlingId );
       auto flagField = boundaryHandling->getFlagField();
 
       const CellInterval & innerCells = flagField->xyzSize();
@@ -195,19 +195,19 @@ template< uint_t StencilSize >
 void check( const shared_ptr< StructuredBlockForest > & blocks, const ConstBlockDataID & flagFieldId,
             const ConstBlockDataID & pdf1, const ConstBlockDataID & pdf2 )
 {
-   typedef GhostLayerField< real_t, StencilSize > Field_T;
+   using Field_T = GhostLayerField< real_t, StencilSize >;
 
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   for( auto const &block : *blocks )
    {
-      const FlagField_T * flagField = block->template getData< FlagField_T >( flagFieldId );
+      const FlagField_T * flagField = block.template getData< FlagField_T >( flagFieldId );
       const flag_t fluid = flagField->getFlag( Fluid_Flag );
 
-      const Field_T * field1 = block->template getData< Field_T >( pdf1 );
-      const Field_T * field2 = block->template getData< Field_T >( pdf2 );
+      const Field_T * field1 = block.template getData< Field_T >( pdf1 );
+      const Field_T * field2 = block.template getData< Field_T >( pdf2 );
 
-      const cell_idx_t xSize = cell_idx_c( blocks->getNumberOfXCells( *block ) );
-      const cell_idx_t ySize = cell_idx_c( blocks->getNumberOfYCells( *block ) );
-      const cell_idx_t zSize = cell_idx_c( blocks->getNumberOfZCells( *block ) );
+      const cell_idx_t xSize = cell_idx_c( blocks->getNumberOfXCells( block ) );
+      const cell_idx_t ySize = cell_idx_c( blocks->getNumberOfYCells( block ) );
+      const cell_idx_t zSize = cell_idx_c( blocks->getNumberOfZCells( block ) );
 
       #ifdef DEVEL_OUTPUT
       math::Sample samples[StencilSize];

@@ -105,8 +105,8 @@ void Manager::triggerInitialization()
       if ( pPath )
          addPath( pPath );
 
-      for ( auto it = entriesForPythonPath_.begin(); it != entriesForPythonPath_.end(); ++it )
-         addPath( *it );
+      for ( auto &path : entriesForPythonPath_ )
+         addPath( path );
       entriesForPythonPath_.clear();
 
    }
@@ -126,25 +126,27 @@ void Manager::triggerInitialization()
 
 void Manager::exportAll(py::module_ &m)
 {
-   for( auto it = exporterFunctions_.begin(); it != exporterFunctions_.end(); ++it ) {
-      (*it)(m);
+   for( auto &function : exporterFunctions_ ) {
+      function(m);
    }
 }
 
 py::object Manager::pythonObjectFromBlockData( IBlock & block, BlockDataID id )
 {
-   if( block.isDataOfType< py::object > ( id )  ){
-      return *block.getData< py::object > ( id );}
-
-
-   for( auto it = blockDataToObjectFunctions_.begin(); it != blockDataToObjectFunctions_.end(); ++it )
-   {
-      auto res = (*it)( block, id );
-      if ( !res.is(py::object()) ){
-         return res;}
+   if( block.isDataOfType< py::object > ( id )  ) {
+      return *block.getData< py::object > ( id );
    }
 
-   return py::object();
+
+   for( auto &function : blockDataToObjectFunctions_ )
+   {
+      auto res = function( block, id );
+      if ( !res.is(py::object()) ) {
+         return res;
+      }
+   }
+
+   return {};
 }
 
 

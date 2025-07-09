@@ -82,8 +82,6 @@ int main(int argc, char** argv)
       auto blockForestSetup = config->getOneBlock("SetupBlockForest");
       const bool writeSetupForestAndReturn = blockForestSetup.getParameter< bool >("writeSetupForestAndReturn", true);
 
-      const std::string blockForestFilestem =
-         blockForestSetup.getParameter< std::string >("blockForestFilestem", "blockforest");
       const uint_t refinementDepth = blockForestSetup.getParameter< uint_t >("refinementDepth", uint_c(1));
 
       Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");

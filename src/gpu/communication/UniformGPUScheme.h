@@ -32,6 +32,7 @@
 #include <thread>
 
 #include "gpu/GPUWrapper.h"
+#include "gpu/GPURAII.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
 #include "gpu/communication/GeneratedGPUPackInfo.h"
 
@@ -88,11 +89,8 @@ namespace communication {
                                   const bool sendDirectlyFromGPU = false,
                                   const bool useLocalCommunication = true,
                                   const int tag = 5432 );
-       ~UniformGPUScheme()
-       {
-          for (uint_t i = 0; i < Stencil::Q; ++i)
-             WALBERLA_GPU_CHECK(gpuStreamDestroy(streams_[i]))
-       }
+
+       UniformGPUScheme(const UniformGPUScheme &) = delete;
 
        void addPackInfo( const shared_ptr<GeneratedGPUPackInfo> &pi );
 
@@ -135,7 +133,7 @@ namespace communication {
        Set<SUID> requiredBlockSelectors_;
        Set<SUID> incompatibleBlockSelectors_;
 
-       std::array<gpuStream_t, Stencil::Q> streams_;
+       std::array<StreamRAII, Stencil::Q> streams_;
    };
 
 

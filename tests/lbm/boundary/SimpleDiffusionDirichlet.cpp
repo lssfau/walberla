@@ -89,10 +89,10 @@
 
 namespace walberla {
 
-typedef GhostLayerField< real_t, 1 >          ScalarField;
-typedef GhostLayerField< Vector3<real_t>, 1 > VectorField;
+using ScalarField = GhostLayerField< real_t, 1 >;
+using VectorField = GhostLayerField< Vector3<real_t>, 1 >;
 
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >  LM;
+using LM = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >;
 
 using CommunicationStencil = LM::CommunicationStencil;
 using MyPdfField = lbm::PdfField<LM>;
@@ -100,7 +100,7 @@ using MyPdfField = lbm::PdfField<LM>;
 using flag_t = uint8_t;
 using MyFlagField = FlagField<flag_t>;
 
-typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField > MyBoundaryHandling;
+using MyBoundaryHandling = lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField >;
 
 /////////////////////
 // BLOCK STRUCTURE //
@@ -115,19 +115,19 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
    AABB left( domain.xMin(), domain.yMin(), domain.zMin(),
               domainxMax,    domain.yMax(), domain.zMax() );
 
-   for( auto block = forest.begin(); block != forest.end(); ++block )
-      if( block->getAABB().intersects( left ) )
-         if( block->getLevel() < ( levels - uint_t(1u) ) )
-            block->setMarker( true );
+   for( auto &block : forest )
+      if( block.getAABB().intersects( left ) )
+         if( block.getLevel() < ( levels - uint_t(1u) ) )
+            block.setMarker( true );
 
 }
 
 static void workloadAndMemoryAssignment( SetupBlockForest& forest ) {
 
-   for( auto block = forest.begin(); block != forest.end(); ++block )
+   for( auto &block : forest )
    {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( numeric_cast< memory_t >(1) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
 
@@ -139,7 +139,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
 
     uint_t cells[]  = { length, width, width  };
     uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
-    sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, refinement ) );
+    sforest.addRefinementSelectionFunction( [=] ( auto & forest ) { refinementSelection( forest, refinement ); } );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(

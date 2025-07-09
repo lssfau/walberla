@@ -148,7 +148,7 @@ private:
 };
 
 template <typename T>
-void reportOverRanks(const std::string& info, const T& value)
+void reportOverRanks([[maybe_unused]] const std::string& info, const T& value)
 {
    math::Sample sample;
    sample.insert(value);

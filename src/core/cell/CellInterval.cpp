@@ -34,12 +34,9 @@ bool CellInterval::overlaps( const CellSet& cellSet ) const {
    if( empty() )
       return false;
 
-   if (std::any_of(cellSet.begin(), cellSet.end(), [this](const auto& cell) { return this->contains(cell); }))
-   {
-      return true;
-   }
-
-   return false;
+   return std::ranges::any_of(cellSet,
+                              [this](const auto& cell)
+                              { return this->contains(cell); });
 }
 
 
@@ -49,10 +46,9 @@ bool CellInterval::overlaps( const CellVector& cellVector ) const
    if( empty() )
       return false;
 
-   return std::any_of(cellVector.begin(),
-                      cellVector.end(),
-                      [&](const Cell & cell)
-                      {return contains( cell );});
+   return std::ranges::any_of(cellVector,
+                              [&](const Cell & cell)
+                              {return contains( cell );});
 }
 
 

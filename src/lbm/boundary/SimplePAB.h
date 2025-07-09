@@ -53,9 +53,9 @@ namespace lbm {
 template< typename LatticeModel_T, typename FlagFieldT >
 class SimplePAB : public Boundary<typename FlagFieldT::flag_t>
 {
-   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >, "Only works with SRT!" );
+   static_assert( LatticeModel_T::compressible == false,                                                    "Only works with incompressible models!" );
+   static_assert( std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >,        "Only works without additional forces!" );
 
    using PDFField = PdfField<LatticeModel_T>;
    using Stencil = typename LatticeModel_T::Stencil;
@@ -131,13 +131,8 @@ public:
 
    void unregisterCell( const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
 
-#ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
-#else
-   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
-                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
-#endif
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, [[maybe_unused]] const flag_t mask )
    {
       WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
       WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );

@@ -13,7 +13,7 @@
 #include <random>
 
 using namespace walberla;
-typedef GhostLayerField< real_t, 1 > Field_T;
+using Field_T = GhostLayerField< real_t, 1 >;
 
 int main (int argc, char** argv)
 {

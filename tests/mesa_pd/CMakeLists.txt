@@ -21,7 +21,7 @@ waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EllipsoidSupport )
 waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_EPA FILES collision_detection/EPA.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EPA )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GeneralContactDetection FILES collision_detection/GeneralContactDetection.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GeneralContactDetection FILES collision_detection/GeneralContactDetection.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GeneralContactDetection )
 
 waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GJK FILES collision_detection/GJK.cpp DEPENDS walberla::core )
@@ -39,7 +39,7 @@ waLBerla_execute_test( NAME   MESA_PD_COMMON_IntersectionRatio )
 waLBerla_compile_test( NAME MESA_PD_COMMON_ContainsPoint FILES common/ContainsPoint.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_COMMON_ContainsPoint )
 
-waLBerla_compile_test( NAME MESA_PD_ContactDetection FILES ContactDetection.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_ContactDetection FILES ContactDetection.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_ContactDetection PROCESSES 8 )
 
 waLBerla_compile_test( NAME MESA_PD_Data_ContactHistory FILES data/ContactHistory.cpp DEPENDS walberla::core )
@@ -63,24 +63,24 @@ waLBerla_execute_test( NAME   MESA_PD_Data_SparseLinkedCells )
 waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestDomain FILES domain/BlockForestDomain.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestDomain )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSync FILES domain/BlockForestSync.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSync FILES domain/BlockForestSync.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync2 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 2 )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync4 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 4 )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync8 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSyncPeriodic FILES domain/BlockForestSyncPeriodic.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSyncPeriodic FILES domain/BlockForestSyncPeriodic.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSyncPeriodic PROCESSES 8 )
 
 waLBerla_compile_test( NAME MESA_PD_Domain_DistanceCalculation FILES domain/DistanceCalculation.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_DistanceCalculation )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_DynamicRefinement FILES domain/DynamicRefinement.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_Domain_DynamicRefinement FILES domain/DynamicRefinement.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_DynamicRefinement PROCESSES 8)
 
 waLBerla_compile_test( NAME MESA_PD_Domain_InfiniteDomain FILES domain/InfiniteDomain.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_InfiniteDomain )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS walberla::blockforest walberla::core walberla::pe )
+waLBerla_compile_test( NAME MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS walberla::blockforest walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_SerializeDeserialize PROCESSES 8 )
 
 waLBerla_compile_test( NAME MESA_PD_DropTestAnalytic FILES DropTestAnalytic.cpp DEPENDS walberla::core )
@@ -105,7 +105,7 @@ waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContact FILES kernel/cnt/VBo
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContact )
 
 waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS walberla::core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration )
+waLBerla_execute_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration )
 
 waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_ViscousDamping FILES kernel/cnt/ViscousDamping.test.cpp DEPENDS walberla::core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_ViscousDamping )

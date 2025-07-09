@@ -66,7 +66,7 @@ int main( int argc, char ** argv )
    if( args.size() < 3LU || args.size() > 4LU )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " [--vtk] MESH_FILE RESOLUTION" );
 
-   auto vtkArgIt = std::find( args.begin(), args.end(), "--vtk" );
+   auto vtkArgIt = std::ranges::find( args, "--vtk" );
    if( vtkArgIt != args.end() )
    {
       writeVtk = true;

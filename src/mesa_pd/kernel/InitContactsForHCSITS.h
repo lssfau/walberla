@@ -114,8 +114,8 @@ private:
 template<typename CAccessor, typename PAccessor>
 inline void InitContactsForHCSITS::operator()(size_t c, CAccessor &ca, PAccessor &pa) {
 
-      static_assert(std::is_base_of<data::IContactAccessor, CAccessor>::value, "please provide a valid contact accessor");
-      static_assert(std::is_base_of<data::IAccessor, PAccessor>::value, "please provide a valid particle accessor");
+      static_assert(std::is_base_of_v<data::IContactAccessor, CAccessor>, "please provide a valid contact accessor");
+      static_assert(std::is_base_of_v<data::IAccessor, PAccessor>, "please provide a valid particle accessor");
 
    size_t bId1 = ca.getId1(c);
    size_t bId2 = ca.getId2(c);

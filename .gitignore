@@ -71,6 +71,8 @@ logfile*.txt
 # CMake
 CMakeUserPresets.json
 /CMakeLists.txt.user
+CMakeUserPresets.json
+ci-workflows.json
 
 # CMake build files
 CMakeFiles
@@ -90,3 +92,6 @@ cmake-build-*
 env/
 venv/
 ENV/
+
+# Coverage
+coverage

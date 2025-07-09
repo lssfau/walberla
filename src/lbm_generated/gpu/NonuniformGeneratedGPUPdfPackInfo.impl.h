@@ -361,7 +361,7 @@ void NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::communicateLocalFineToCoar
 
 
 template< typename PdfField_T>
-uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeEqualLevelSend( const Block * sender, stencil::Direction dir)
+uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeEqualLevelSend( const Block * sender, stencil::Direction dir) const
 {
    auto field = const_cast< Block* >(sender)->getData< PdfField_T >(pdfFieldID_);
    CellInterval ci;
@@ -373,7 +373,7 @@ uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeEqualLevelSend( cons
 
 
 template< typename PdfField_T>
-uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineSend ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir)
+uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineSend ( const Block * coarseSender, const BlockID & fineReceiver, stencil::Direction dir) const
 {
    auto field = const_cast< Block* >(coarseSender)->getData< PdfField_T >(pdfFieldID_);
 
@@ -392,7 +392,7 @@ uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineSend ( c
 }
 
 template< typename PdfField_T>
-uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir)
+uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) const
 {
 
    auto field = fineReceiver->getData< PdfField_T >(pdfFieldID_);
@@ -412,7 +412,7 @@ uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeCoarseToFineReceive 
 
 
 template< typename PdfField_T>
-uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeFineToCoarseSend ( const Block * sender, stencil::Direction dir)
+uint_t NonuniformGeneratedGPUPdfPackInfo< PdfField_T >::sizeFineToCoarseSend ( const Block * sender, stencil::Direction dir) const
 {
     auto block      = const_cast< Block* >(sender);
     auto srcField   = block->getData< PdfField_T >(pdfFieldID_);

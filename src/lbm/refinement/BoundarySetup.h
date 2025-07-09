@@ -45,7 +45,7 @@ namespace refinement {
 namespace internal {
 inline shared_ptr< BoundaryConfiguration > defaultBoundaryConfiguration( const Cell &, const Vector3< real_t > & )
 {
-   return shared_ptr< BoundaryConfiguration >( new BoundaryConfiguration );
+   return std::make_shared< BoundaryConfiguration >();
 }
 }
 
@@ -134,35 +134,35 @@ void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, co
       }
    }
 
-   for( auto cell = cells.begin(); cell != cells.end(); ++cell )
+   for( auto const &&cell : cells )
    {
       bool inCoarseRegion( false );
       for( auto region = coarseRegions.begin(); region != coarseRegions.end() && !inCoarseRegion; ++region )
-         inCoarseRegion = region->contains( *cell );
+         inCoarseRegion = region->contains( cell );
 
       if( !inCoarseRegion )
       {
          Vector3< real_t > center;
-         blocks.getBlockLocalCellCenter( block, *cell, center );
+         blocks.getBlockLocalCellCenter( block, cell, center );
          blocks.mapToPeriodicDomain( center );
 
          if( isBoundary(center) )
          {
             if( ForceBoundary )
             {
-               auto p = parameter( *cell, center );
-               boundaryHandling->forceBoundary( flag, cell->x(), cell->y(), cell->z(), *p );
+               auto p = parameter( cell, center );
+               boundaryHandling->forceBoundary( flag, cell.x(), cell.y(), cell.z(), *p );
             }
             else
             {
-               auto p = parameter( *cell, center );
-               boundaryHandling->setBoundary( flag, cell->x(), cell->y(), cell->z(), *p );
+               auto p = parameter( cell, center );
+               boundaryHandling->setBoundary( flag, cell.x(), cell.y(), cell.z(), *p );
             }
          }
       }
       else
       {
-         Cell globalCell( *cell );
+         Cell globalCell( cell );
          blocks.transformBlockLocalToGlobalCell( globalCell, block );
 
          Cell coarseCell( globalCell );
@@ -186,13 +186,13 @@ void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, co
          {
             if( ForceBoundary )
             {
-               auto p = parameter( *cell, coarseCenter );            
-               boundaryHandling->forceBoundary( flag, cell->x(), cell->y(), cell->z(), *p );
+               auto p = parameter( cell, coarseCenter );
+               boundaryHandling->forceBoundary( flag, cell.x(), cell.y(), cell.z(), *p );
             }
             else
             {
-               auto p = parameter( *cell, coarseCenter );
-               boundaryHandling->setBoundary( flag, cell->x(), cell->y(), cell->z(), *p );
+               auto p = parameter( cell, coarseCenter );
+               boundaryHandling->setBoundary( flag, cell.x(), cell.y(), cell.z(), *p );
             }
          }
       }

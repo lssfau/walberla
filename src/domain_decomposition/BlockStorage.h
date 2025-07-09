@@ -31,7 +31,6 @@
 #include "core/math/Vector3.h"
 #include "core/mpi/MPIWrapper.h"
 #include "core/selectable/IsSetSelected.h"
-#include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
 #include <functional>
@@ -111,7 +110,7 @@ public:
       {
          if( it_ != end_ && !( requiredSelectors_.empty() && incompatibleSelectors_.empty() ) )
          {
-            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState() + uid::globalState(), requiredSelectors_, incompatibleSelectors_ ) )
+            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState(), requiredSelectors_, incompatibleSelectors_ ) )
             {
                ++it_;
             }
@@ -156,7 +155,7 @@ public:
       {
          if( it_ != end_ && !( requiredSelectors_.empty() && incompatibleSelectors_.empty() ) )
          {
-            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState() + uid::globalState(), requiredSelectors_, incompatibleSelectors_ ) )
+            while( it_ != end_ && !selectable::isSetSelected( it_->second->getState(), requiredSelectors_, incompatibleSelectors_ ) )
             {
                ++it_;
             }
@@ -485,13 +484,16 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
    BlockDataID loadBlockData( const std::string & file,
-                              const internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() );
+                              const internal::SelectableBlockDataHandlingWrapper & dataHandling,
+                              const std::string & identifier = std::string(),
+                              const bool forceSerialIO = true );
                               
-   void saveBlockData( const std::string & file, const BlockDataID & id );
+   void saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO = true);
 
    void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer );
    void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer );
@@ -661,7 +663,7 @@ template< typename T >
 inline BlockDataID BlockStorage::addBlockData( const shared_ptr< T > & dataHandling, const std::string & identifier,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   //static_assert( std::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
+   //static_assert( std::is_base_of_v< BlockDataHandling<typename T::value_type>, T > );
    internal::SelectableBlockDataHandlingWrapper sbdhw( walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
                                                        requiredSelectors, incompatibleSelectors, identifier );
 
@@ -701,12 +703,13 @@ inline BlockDataID BlockStorage::addBlockData( std::function< T* ( IBlock* const
 //**********************************************************************************************************************
 template< typename T >
 inline BlockDataID BlockStorage::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
+                                                const bool forceSerialIO,
                                                 const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
    internal::SelectableBlockDataHandlingWrapper sbdhw( walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
                                                        requiredSelectors, incompatibleSelectors, identifier );
 
-   return loadBlockData( file, sbdhw, identifier );
+   return loadBlockData( file, sbdhw, identifier, forceSerialIO );
 }
 
 
@@ -724,10 +727,8 @@ inline void BlockStorage::clearBlockData( const BlockDataID & id )
       block->deleteData( id );
 
    //also delete block data from data handling vector
-   auto elementToErase = std::remove_if(blockDataItem_.begin(), blockDataItem_.end(),
-                                 [id](const internal::BlockDataItem& dataItem)
+   std::erase_if(blockDataItem_, [id](const internal::BlockDataItem& dataItem)
                                  { return dataItem.getId() == id; });
-   blockDataItem_.erase(elementToErase, blockDataItem_.end());
 }
 
 

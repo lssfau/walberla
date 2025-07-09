@@ -162,7 +162,7 @@ int main(int argc, char** argv)
          PRINT_VER( "Split meshes and use biggest " << s << " meshes \n" )
          std::vector< walberla::geometry::TriangleMesh > meshes;
          mesh.split( meshes );
-         std::sort( meshes.begin(), meshes.end(), walberla::geometry::isGreaterMesh );
+         std::ranges::sort( meshes, walberla::geometry::isGreaterMesh );
          mesh.clear();
          for( size_t index = size_t(0u); index < s; ++index ){
             PRINT_VER( "Merge Mesh: " << index << "\n" )

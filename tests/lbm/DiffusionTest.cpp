@@ -85,12 +85,12 @@ namespace walberla {
 using flag_t = uint8_t;
 using vec3_t = Vector3<real_t>;
 
-typedef GhostLayerField< real_t, 1         >  ScalarField;
-typedef GhostLayerField< vec3_t, 1         >  VectorField;
+using ScalarField = GhostLayerField< real_t, 1 >;
+using VectorField = GhostLayerField< vec3_t, 1 >;
 using MyFlagField = FlagField<flag_t>;
 
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 > AdvDiffLatticeModel_Corr;
-typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 > AdvDiffLatticeModel_None;
+using AdvDiffLatticeModel_Corr = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 >;
+using AdvDiffLatticeModel_None = lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 >;
 
 const FlagUID& getFluidFlag(){ static FlagUID uid( "Fluid" ); return uid; }
 
@@ -278,16 +278,14 @@ int run( int argc, char **argv )
    scheme.addPackInfo( make_shared< field::communication::PackInfo<  AdvDiffPDFField > >( srcFieldID ) );
    timeloop.addFuncBeforeTimeStep( scheme, "Communication" );
 
-   using std::ref;
+   timeloop.add() << Sweep( [&] (IBlock* block) { hydroFunc(block, velFieldID, u, tperiod, timestep); }, "Hydro Func" );
 
-   timeloop.add() << Sweep( std::bind( hydroFunc, std::placeholders::_1, velFieldID, u, tperiod, ref(timestep) ), "Hydro Func" );
-   
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseAdvectionDiffusionSweep< AdvDiffLatticeModel, VectorField, MyFlagField >(
                                                 srcFieldID, velFieldID, flagFieldID, getFluidFlag() ) ), "LBM_SRT" );
-  
-   timeloop.add() << BeforeFunction( std::bind( prepFunc, u[dim], dv, D, cperiod, tperiod, ref(timestep), ref(cosi), ref(sisi), ref(sexp) ), "prepare test" )
-                  << Sweep         ( std::bind( testFunc<AdvDiffPDFField>, std::placeholders::_1, srcFieldID, dim, v, cperiod, ref(cosi), ref(sisi), ref(sexp), ref(E_mean_) ), "Test Func" ) 
-                  << AfterFunction ( std::bind( incTimeFunc, ref(timestep) ), "increment time" );
+
+   timeloop.add() << BeforeFunction( [&] { prepFunc(u[dim], dv, D, cperiod, tperiod, timestep, cosi, sisi, sexp); }, "prepare test" )
+                  << Sweep         ( [&] (IBlock* block) { testFunc<AdvDiffPDFField>(block, srcFieldID, dim, v, cperiod, cosi, sisi, sexp, E_mean_); }, "Test Func" )
+                  << AfterFunction ( [&] { incTimeFunc(timestep); }, "increment time" );
 
    // --- run timeloop --- //
 

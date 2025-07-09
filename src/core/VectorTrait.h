@@ -35,7 +35,7 @@ namespace walberla {
 */
 //**********************************************************************************************************************
 
-template< typename T, class Enable = void >
+template< typename T >
 struct VectorTrait
 {
    using OutputType = void;
@@ -44,7 +44,8 @@ struct VectorTrait
 };
 
 template< typename T >
-struct VectorTrait<T, std::enable_if_t<std::is_arithmetic_v<T>>>
+requires( std::is_arithmetic_v<T> )
+struct VectorTrait<T>
 {
    using OutputType = T;
 

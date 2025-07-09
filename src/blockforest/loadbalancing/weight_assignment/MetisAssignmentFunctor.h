@@ -53,31 +53,30 @@ public:
                   forest.getBlockForest().isPeriodic(2)}};
       const math::AABB domain     = forest.getBlockForest().getDomain();
 
-      for(auto & it : blockData)
+      for( auto &[block, data] : blockData )
       {
-         const PhantomBlock * block = it.first;
          //only change of one level is supported!
          WALBERLA_ASSERT_LESS( abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
          //all information is provided by info collection
-         auto infoIt         = ic_->find( block->getId() );
+         const auto infoIt = ic_->find( block->getId() );
          WALBERLA_CHECK_UNEQUAL( infoIt, ic_->end() );
-         const double weight = double_c( infoIt->second.computationalWeight ) + baseWeight_;
+         const auto weight = double_c( infoIt->second.computationalWeight ) + baseWeight_;
          blockforest::DynamicParMetisBlockInfo info( 0 );
          info.setVertexWeight( int64_c(weight) );
          info.setVertexSize( int64_c( weight ) );
-         info.setVertexCoords( it.first->getAABB().center() );
-         for( uint_t nb = uint_t(0); nb < it.first->getNeighborhoodSize(); ++nb )
+         info.setVertexCoords( block->getAABB().center() );
+         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
          {
             const real_t dx(1.0);
-            info.setEdgeWeight( it.first->getNeighborId(nb),
+            info.setEdgeWeight( block->getNeighborId(nb),
                                 static_cast<blockforest::DynamicParMetisBlockInfo::weight_t>(
                                 domain_decomposition::periodicIntersectionVolume( periodic,
                                                                                   domain,
-                                                                                  it.first->getAABB(),
-                                                                                  it.first->getNeighborAABB(nb).getExtended(dx))) );
+                                                                                  block->getAABB(),
+                                                                                  block->getNeighborAABB(nb).getExtended(dx))) );
          }
-         it.second = info;
+         data = info;
       }
    }
 

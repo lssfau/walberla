@@ -173,8 +173,8 @@ private:
 template <typename CAccessor, typename PAccessor>
 inline void HCSITSRelaxationStep::operator()(size_t cid, CAccessor &ca, PAccessor& pa,  real_t dt)
 {
-   static_assert(std::is_base_of<data::IContactAccessor, CAccessor>::value, "please provide a valid contact accessor");
-   static_assert(std::is_base_of<data::IAccessor, PAccessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IContactAccessor, CAccessor>, "please provide a valid contact accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, PAccessor>, "please provide a valid accessor");
 
    real_t dtinv(real_t(1.0)/dt);
    switch( getRelaxationModel() ) {

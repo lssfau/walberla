@@ -56,12 +56,12 @@ class SurfaceGeometryHandler
 {
  protected:
    using FreeSurfaceBoundaryHandling_T = FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >;
-   using vector_t                      = typename std::remove_const< typename VectorField_T::value_type >::type;
+   using vector_t                      = typename std::remove_const_t< typename VectorField_T::value_type >;
 
    // explicitly use either D2Q9 or D3Q27 here, as the geometry operations require (or are most accurate with) the full
    // neighborhood;
    using Stencil_T =
-      typename std::conditional< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >::type;
+      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
    using Communication_T = blockforest::SimpleCommunication< Stencil_T >;
    using StateSweep      = BlockStateDetectorSweep< FlagField_T >; // used in friend classes
 

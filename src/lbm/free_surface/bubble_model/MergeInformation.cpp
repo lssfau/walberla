@@ -182,10 +182,10 @@ void MergeInformation::mergeAndReorderBubbleVector(std::vector< Bubble >& bubble
 
    // update renameVec_ with exchanged bubble IDs with the highest unnecessary bubble IDs being dropped; this ensures
    // that bubble IDs are always numbered continuously from 0 upwards
-   for (size_t i = 0; i < renameVec_.size(); ++i)
+   for (auto &id : renameVec_)
    {
-      renameVec_[i] = exchangeVector[renameVec_[i]];
-      WALBERLA_ASSERT_LESS(renameVec_[i], newSize);
+      id = exchangeVector[id];
+      WALBERLA_ASSERT_LESS(id, newSize);
    }
 }
 
@@ -280,12 +280,12 @@ void MergeInformation::resolveTransitiveRenames()
 
 bool MergeInformation::transitiveRenamesResolved() const
 {
-   for (size_t i = 0; i < renameVec_.size(); ++i)
+   for (auto const &id : renameVec_)
    {
       // A = renameVec_[i]
       // B = renameVec_[A]
       // A must be equal to B after bubble renaming
-      if (renameVec_[i] != renameVec_[renameVec_[i]]) { return false; }
+      if (id != renameVec_[id]) { return false; }
    }
 
    // ensure that no entry points to an element that has been renamed

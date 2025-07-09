@@ -87,24 +87,25 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
       return;
    }
 
-   if( ( ++time_ - 1u ) % interval_ != 0 || time_ <= 1 )
+   ++time_;
+   if( ( time_ - 1u ) % interval_ != 0 || time_ <= 1 )
       return;
 
-	// holds required local quantities
-	std::vector<real_t> params( 6, 0.0 );
-	real_t & u   = params[0]; // flow velocity along flow axis
-	real_t & rho = params[1]; // fluid density
-	real_t & p0  = params[2]; // fluid pressure (density) in cross section 0
-	real_t & v0  = params[3]; // fluid velocity along flow axis in cross section 0
-	real_t & p1  = params[4]; // fluid pressure (density) in cross section 1
-	real_t & v1  = params[5]; // fluid velocity along flow axis in cross section 1
+   // holds required local quantities
+   std::vector<real_t> params( 6, 0.0 );
+   auto & u   = params[0]; // flow velocity along flow axis
+   auto & rho = params[1]; // fluid density
+   auto & p0  = params[2]; // fluid pressure (density) in cross section 0
+   auto & v0  = params[3]; // fluid velocity along flow axis in cross section 0
+   auto & p1  = params[4]; // fluid pressure (density) in cross section 1
+   auto & v1  = params[5]; // fluid velocity along flow axis in cross section 1
 
    // calculate required quantities on each block
-   for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
+   for( const auto &block : *blocks_ )
    {
-      const PdfField         * pdfField  = blockIt->template getData<PdfField>( pdfFieldId_ );
-      const BoundaryHandling * bHandling = blockIt->template getData<BoundaryHandling>( boundaryHandlingId_ );
-      const FlagField        * flagField = bHandling->getFlagField();
+      const auto * pdfField  = block.template getData<PdfField>( pdfFieldId_ );
+      const auto * bHandling = block.template getData<BoundaryHandling>( boundaryHandlingId_ );
+      const auto * flagField = bHandling->getFlagField();
 
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
       WALBERLA_ASSERT_NOT_NULLPTR( bHandling );
@@ -114,47 +115,47 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
 
       // fluid velocity and density in sample volume
       CellInterval sampleVolume;
-      blocks_->transformGlobalToBlockLocalCellInterval( sampleVolume, *blockIt, sampleVolume_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( sampleVolume, block, sampleVolume_ );
       sampleVolume.intersect( pdfField->xyzSize() );
 
-      for( auto it = sampleVolume.begin(); it != sampleVolume.end(); ++it )
+      for( const auto &cell : sampleVolume )
       {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+         if( flagField->isPartOfMaskSet( cell, domain ) )
          {
-            u   += pdfField->getVelocity( *it )[flowAxis_];
-            rho += pdfField->getDensity( *it );
+            u   += pdfField->getVelocity( cell )[flowAxis_];
+            rho += pdfField->getDensity( cell );
          }
       }
 
       // fluid velocity and density in cross section c0
       CellInterval c0;
-      blocks_->transformGlobalToBlockLocalCellInterval( c0, *blockIt, c0_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( c0, block, c0_ );
       c0.intersect( pdfField->xyzSize() );
 
-      for( auto it = c0.begin(); it != c0.end(); ++it )
+      for( const auto &cell : c0 )
       {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+         if( flagField->isPartOfMaskSet( cell, domain ) )
          {
-            const real_t d = pdfField->getDensity( *it );
+            const real_t d = pdfField->getDensity( cell );
             p0 += d;
-            v0 += pdfField->getVelocity( *it )[flowAxis_] * d;
+            v0 += pdfField->getVelocity( cell )[flowAxis_] * d;
          }
       }
 
       // fluid velocity and density in cross section c1
       CellInterval c1;
-      blocks_->transformGlobalToBlockLocalCellInterval( c1, *blockIt, c1_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( c1, block, c1_ );
       c1.intersect( pdfField->xyzSize() );
 
-      for( auto it = c1.begin(); it != c1.end(); ++it )
+      for( const auto &cell : c1 )
       {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+         if( flagField->isPartOfMaskSet( cell, domain ) )
          {
-            const real_t d = pdfField->getDensity( *it );
+            const real_t d = pdfField->getDensity( cell );
             p1 += d;
-            v1 += pdfField->getVelocity( *it )[flowAxis_] * d;
+            v1 += pdfField->getVelocity( cell )[flowAxis_] * d;
          }
-      }       
+      }
    }
 
    // sum up parameters on root process
@@ -198,7 +199,7 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
         WALBERLA_LOG_DETAIL( "# sample nodes   = " << numSampleFluidNodes_ );
         WALBERLA_LOG_DETAIL( "nu               = " << nu_ );
         WALBERLA_LOG_DETAIL( "conv. crit.      = " << delta_ );
-        
+
         WALBERLA_LOG_RESULT( "Permeability K   = " << k_ );
 
         lastU_ = u;
@@ -253,10 +254,10 @@ void Permeability<PdfField_T, BoundaryHandling_T>::initSampleVolume()
    numC0FluidNodes_     = 0;
    numC1FluidNodes_     = 0;
 
-   for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
+   for( const auto &block : *blocks_ )
    {
-      const BoundaryHandling * bHandling = blockIt->template getData<BoundaryHandling>( boundaryHandlingId_ );
-      const FlagField * flagField = bHandling->getFlagField();
+      const auto * bHandling = block.template getData<BoundaryHandling>( boundaryHandlingId_ );
+      const auto * flagField = bHandling->getFlagField();
 
       WALBERLA_ASSERT_NOT_NULLPTR( bHandling );
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );
@@ -264,31 +265,31 @@ void Permeability<PdfField_T, BoundaryHandling_T>::initSampleVolume()
       const flag_t domain = flagField->getFlag( fluid_ );
 
       CellInterval sampleVolume;
-      blocks_->transformGlobalToBlockLocalCellInterval( sampleVolume, *blockIt, sampleVolume_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( sampleVolume, block, sampleVolume_ );
       sampleVolume.intersect( flagField->xyzSize() );
 
       CellInterval c0;
-      blocks_->transformGlobalToBlockLocalCellInterval( c0, *blockIt, c0_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( c0, block, c0_ );
       c0.intersect( flagField->xyzSize() );
 
       CellInterval c1;
-      blocks_->transformGlobalToBlockLocalCellInterval( c1, *blockIt, c1_ );
+      blocks_->transformGlobalToBlockLocalCellInterval( c1, block, c1_ );
       c1.intersect( flagField->xyzSize() );
 
-      for( auto it = sampleVolume.begin(); it != sampleVolume.end(); ++it ) {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+      for( const auto &cell : sampleVolume ) {
+         if( flagField->isPartOfMaskSet( cell, domain ) )
             numSampleFluidNodes_++;
       }
 
-      for( auto it = c0.begin(); it != c0.end(); ++it ) {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+      for( const auto &cell : c0 ) {
+         if( flagField->isPartOfMaskSet( cell, domain ) )
             numC0FluidNodes_++;
       }
 
-      for( auto it = c1.begin(); it != c1.end(); ++it ) {
-         if( flagField->isPartOfMaskSet( *it, domain ) )
+      for( const auto &cell : c1 ) {
+         if( flagField->isPartOfMaskSet( cell, domain ) )
             numC1FluidNodes_++;
-      }       
+      }
    }
 
    mpi::allReduceInplace( numSampleFluidNodes_, mpi::SUM );

@@ -42,9 +42,9 @@ namespace py = pybind11;
 namespace walberla {
 namespace python_coupling {
 
-   typedef std::vector<int64_t>      IntStdVector;
-   typedef std::vector<real_t>       RealStdVector;
-   typedef std::vector<std::string>  StringStdVector;
+   using IntStdVector = std::vector<int64_t>;
+   using RealStdVector = std::vector<real_t>;
+   using StringStdVector = std::vector<std::string>;
 
 
    //===================================================================================================================

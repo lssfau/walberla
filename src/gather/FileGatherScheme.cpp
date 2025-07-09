@@ -163,15 +163,15 @@ void FileGatherScheme::collectFromFiles()
       }
 
       // Notify all packInfos that this timestep is finished
-      for( size_t  s =0; s < packInfos_.size() ; ++s )
-         packInfos_[s]->gatherFinished( );
+      for( auto & packInfo : packInfos_ )
+         packInfo->gatherFinished( );
 
    }
 
 
 
-   for(size_t i=0; i<inputStreams.size(); ++i)
-      delete inputStreams[i];
+   for(auto & inputStream : inputStreams)
+      delete inputStream;
 
    deleteTemporaryFiles();
 }

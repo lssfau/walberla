@@ -33,8 +33,8 @@ namespace mesa_pd {
 inline math::AABB getAABBFromInteractionRadius(const Vector3<real_t> & pos, const real_t interactionRadius )
 {
    WALBERLA_ASSERT_GREATER(interactionRadius, 0_r, "Did you forget to set the interaction radius?");
-   return math::AABB( pos[0]-interactionRadius, pos[1]-interactionRadius, pos[2]-interactionRadius,
-                      pos[0]+interactionRadius, pos[1]+interactionRadius, pos[2]+interactionRadius );
+   return { pos[0]-interactionRadius, pos[1]-interactionRadius, pos[2]-interactionRadius,
+            pos[0]+interactionRadius, pos[1]+interactionRadius, pos[2]+interactionRadius };
 }
 
 
@@ -43,13 +43,13 @@ inline math::AABB getAABBFromInteractionRadius(const Vector3<real_t> & pos, cons
 template<typename ParticleAccessor_T>
 math::AABB getParticleAABB(const size_t particleIdx, const ParticleAccessor_T& ac)
 {
-   static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+   static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
    if( mesa_pd::data::particle_flags::isSet( ac.getFlags(particleIdx), mesa_pd::data::particle_flags::INFINITE) )
    {
       auto inf = std::numeric_limits<real_t>::infinity();
-      return math::AABB( -inf, -inf, -inf,
-                          inf,  inf,  inf);
+      return { -inf, -inf, -inf,
+                inf,  inf,  inf};
    }
    else
    {

@@ -163,16 +163,16 @@ void BubbleModelTest< Stencil_T >::testComplexMerge()
    timeloop.addFuncBeforeTimeStep(imageMover, "UpdateDomainFromImage");
 
    // update bubble model in timeloop
-   timeloop.addFuncAfterTimeStep(std::bind(&bubble_model::BubbleModel< Stencil_T >::update, bubbleModel));
+   timeloop.addFuncAfterTimeStep([bubbleModel] { bubbleModel->update(); });
 
    // ensure correctness of initialization (number of bubbles)
    WALBERLA_CHECK_EQUAL(bubbleModel->getBubbles().size(), 12);
 
    // compute total volume of all bubbles
    real_t volumeBefore = real_c(0);
-   for (auto b = bubbleModel->getBubbles().begin(); b != bubbleModel->getBubbles().end(); ++b)
+   for (auto const &b : bubbleModel->getBubbles())
    {
-      volumeBefore += b->getCurrentVolume();
+      volumeBefore += b.getCurrentVolume();
    }
 
    // ensure correctness of initialization (total volume of all bubbles)
@@ -196,9 +196,9 @@ void BubbleModelTest< Stencil_T >::testComplexMerge()
 
    // compute total volume of all bubbles
    real_t volumeAfterSplit = real_c(0);
-   for (auto b = bubbleModel->getBubbles().begin(); b != bubbleModel->getBubbles().end(); ++b)
+   for (auto const &b : bubbleModel->getBubbles())
    {
-      volumeAfterSplit += b->getCurrentVolume();
+      volumeAfterSplit += b.getCurrentVolume();
    }
 
    // the total volume of all bubbles must be as before merging

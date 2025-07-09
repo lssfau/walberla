@@ -365,12 +365,15 @@ public:
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
                                      const std::string & identifier          = std::string(),
+                                     const bool forceSerialIO = true,
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
    BlockDataID loadBlockData( const std::string & file,
-                              const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() )
-   { return BlockStorage::loadBlockData( file, dataHandling, identifier ); }
+                              const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling,
+                              const std::string & identifier = std::string(),
+                              const bool forceSerialIO = true )
+   { return BlockStorage::loadBlockData( file, dataHandling, identifier, forceSerialIO ); }
 
 
    // AMR Pipeline
@@ -853,7 +856,7 @@ template< typename T >
 inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandling, const std::string & identifier,
                                               const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   //static_assert( std::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
+   //static_assert( std::is_base_of_v< BlockDataHandling<typename T::value_type>, T > );
 
    auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
@@ -877,6 +880,7 @@ inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandli
 
 template< typename T >
 inline BlockDataID BlockForest::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
+                                               const bool forceSerialIO,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
    auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
@@ -887,14 +891,14 @@ inline BlockDataID BlockForest::loadBlockData( const std::string & file, const s
                walberla::make_shared< internal::BlockDataHandlingHelper<typename T::value_type> >( downcast ),
                requiredSelectors, incompatibleSelectors, identifier );
 
-      return loadBlockData( file, sbdhw, identifier );
+      return loadBlockData( file, sbdhw, identifier, forceSerialIO );
    }
 
    domain_decomposition::internal::SelectableBlockDataHandlingWrapper sbdhw(
             walberla::make_shared< domain_decomposition::internal::BlockDataHandlingHelper<typename T::value_type> >( dataHandling ),
             requiredSelectors, incompatibleSelectors, identifier );
 
-   return loadBlockData( file, sbdhw, identifier );
+   return loadBlockData( file, sbdhw, identifier, forceSerialIO );
 }
 
 
@@ -994,7 +998,7 @@ public:
 
    using MinTargetLevelDeterminationFunction = blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction;
 
-   CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::max_element(t.begin(), t.end());})
+   CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::ranges::max_element(t);})
    : targetLevelReductionFct_( targetLevelReductionFct )
    {
 

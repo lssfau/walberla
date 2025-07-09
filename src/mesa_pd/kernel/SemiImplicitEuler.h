@@ -86,7 +86,7 @@ template <typename Accessor>
 inline void SemiImplicitEuler::operator()(const size_t idx,
                                           Accessor& ac) const
 {
-   static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
+   static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
    if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {

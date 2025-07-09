@@ -90,7 +90,7 @@ public:
 
 
 protected:
-   static_assert( std::is_fundamental<typename Field_T::value_type >::value,
+   static_assert( std::is_fundamental_v<typename Field_T::value_type >,
                   "CellGatherPackInfo supports fields of build in datatypes"  );
 
 

@@ -19,9 +19,9 @@ void MemcpyPackInfo< GPUFieldType >::pack(stencil::Direction dir, unsigned char 
                                           IBlock * block, gpuStream_t stream)
 {
    // Extract field data pointer from the block
-   const GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
+   const auto * fieldPtr = block->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR( fieldPtr )
-   // 
+   //
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
    CellInterval fieldCi = field::getSliceBeforeGhostLayer( *fieldPtr, dir, nrOfGhostLayers, false );
 
@@ -42,9 +42,9 @@ void MemcpyPackInfo< GPUFieldType >::pack(stencil::Direction dir, unsigned char 
       const uint_t srcAllocSizeZ = fieldPtr->zAllocSize();
 
       gpuPitchedPtr byteBufferPitchedPtr = make_gpuPitchedPtr( byte_buffer,
-                                                                 fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.ySize() );
+                                                      fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.ySize() );
 
       copyDevToDevFZYX( byteBufferPitchedPtr, fieldPtr->pitchedPtr(), dstOffset, srcOffset,
                         dstAllocSizeZ, srcAllocSizeZ, sizeof(typename GPUFieldType::value_type),
@@ -56,9 +56,9 @@ void MemcpyPackInfo< GPUFieldType >::pack(stencil::Direction dir, unsigned char 
       const uint_t srcAllocSizeZ = fieldPtr->yAllocSize();
 
       gpuPitchedPtr byteBufferPitchedPtr = make_gpuPitchedPtr( byte_buffer,
-                                                                 fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.xSize() );
+                                                      fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.xSize() );
       copyDevToDevZYXF( byteBufferPitchedPtr, fieldPtr->pitchedPtr(), dstOffset, srcOffset,
                         dstAllocSizeZ, srcAllocSizeZ, sizeof(typename GPUFieldType::value_type),
                         intervalSize, stream );
@@ -72,13 +72,13 @@ void MemcpyPackInfo< GPUFieldType >::communicateLocal( stencil::Direction dir, c
 
 
    // Extract field data pointer from the block
-   const GPUFieldType * senderFieldPtr = sender->getData< GPUFieldType >( pdfsID );
-   const GPUFieldType * receiverFieldPtr = receiver->getData< GPUFieldType >( pdfsID );
+   const auto * senderFieldPtr = sender->getData< GPUFieldType >( fieldId_ );
+   const auto * receiverFieldPtr = receiver->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR( senderFieldPtr )
    WALBERLA_ASSERT_NOT_NULLPTR( receiverFieldPtr )
 
    //
-   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( senderFieldPtr ) );
+   auto nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( senderFieldPtr ) );
    WALBERLA_ASSERT_EQUAL(nrOfGhostLayers, cell_idx_c( numberOfGhostLayersToCommunicate( receiverFieldPtr )))
    WALBERLA_ASSERT_EQUAL(senderFieldPtr->layout(), receiverFieldPtr->layout() )
    WALBERLA_ASSERT_EQUAL(senderFieldPtr->fSize(), receiverFieldPtr->fSize() )
@@ -128,10 +128,10 @@ template<typename GPUFieldType>
 void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned char * byte_buffer,
                                             IBlock * block, gpuStream_t stream)
 {
-   GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
+   auto * fieldPtr = block->getData< GPUFieldType >( fieldId_ );
    WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr)
 
-   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
+   auto nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
 
    CellInterval fieldCi = field::getGhostRegion( *fieldPtr, dir, nrOfGhostLayers, false );
    auto dstOffset = std::make_tuple( uint_c(fieldCi.xMin() + nrOfGhostLayers),
@@ -148,9 +148,9 @@ void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned cha
       const uint_t srcAllocSizeZ = fieldCi.zSize();
 
       gpuPitchedPtr byteBufferPitchedPtr = make_gpuPitchedPtr( byte_buffer,
-                                                                 fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.ySize() );
+                                                      fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.xSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.ySize() );
 
       copyDevToDevFZYX( fieldPtr->pitchedPtr(), byteBufferPitchedPtr, dstOffset, srcOffset,
                         dstAllocSizeZ, srcAllocSizeZ, sizeof(typename GPUFieldType::value_type),
@@ -161,9 +161,9 @@ void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned cha
       const uint_t dstAllocSizeY = fieldPtr->yAllocSize();
       const uint_t srcAllocSizeY = fieldCi.ySize();
       gpuPitchedPtr byteBufferPitchedPtr = make_gpuPitchedPtr( byte_buffer,
-                                                                 fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
-                                                                 fieldCi.xSize() );
+                                                      fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldPtr->fSize() * sizeof(typename GPUFieldType::value_type),
+                                                      fieldCi.xSize() );
       copyDevToDevZYXF( fieldPtr->pitchedPtr(), byteBufferPitchedPtr, dstOffset, srcOffset,
                         dstAllocSizeY, srcAllocSizeY, sizeof(typename GPUFieldType::value_type),
                         intervalSize, stream );
@@ -173,10 +173,10 @@ void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned cha
 template<typename GPUFieldType>
 uint_t MemcpyPackInfo< GPUFieldType >::size(stencil::Direction dir, IBlock * block)
 {
-    auto pdfs = block->getData< GPUFieldType >(pdfsID);
+    auto pdfs = block->getData< GPUFieldType >(fieldId_);
 
     CellInterval ci;
-    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( pdfs ) );
+    auto nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( pdfs ) );
     pdfs->getGhostRegion(dir, ci, nrOfGhostLayers, false);
 
     /*

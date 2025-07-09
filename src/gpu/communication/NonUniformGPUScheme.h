@@ -32,6 +32,7 @@
 
 #include "gpu/ErrorChecking.h"
 #include "gpu/GPUWrapper.h"
+#include "gpu/GPURAII.h"
 #include "gpu/communication/CustomMemoryBuffer.h"
 #include "gpu/communication/GeneratedNonUniformGPUPackInfo.h"
 
@@ -58,6 +59,8 @@ class NonUniformGPUScheme
    explicit NonUniformGPUScheme(const weak_ptr< StructuredBlockForest >& bf, const Set< SUID >& requiredBlockSelectors,
                                 const Set< SUID >& incompatibleBlockSelectors, bool sendDirectlyFromGPU = false,
                                 int tag = 5432);
+
+   NonUniformGPUScheme(const NonUniformGPUScheme &) = delete;
 
    ~NonUniformGPUScheme();
 
@@ -129,7 +132,7 @@ class NonUniformGPUScheme
    Set< SUID > requiredBlockSelectors_;
    Set< SUID > incompatibleBlockSelectors_;
 
-   std::array<gpuStream_t, Stencil::Q> streams_;
+   std::array<StreamRAII, Stencil::Q> streams_;
    std::vector< uint8_t > timestepPerLevel_;
 };
 
@@ -186,7 +189,7 @@ void NonUniformGPUScheme< Stencil >::init()
 
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamCreate(&streams_[i]))
+      streams_[i] = StreamRAII::newStream();
    }
 }
 
@@ -350,7 +353,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
             auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
             for (auto& pi : packInfos_)
             {
-               pi->communicateLocalEqualLevel(senderBlock, receiverBlock, *dir, streams_[*dir]);
+               pi->communicateLocalEqualLevel(senderBlock, receiverBlock, *dir, streams_[Stencil::idx[*dir]]);
             }
          }
          else
@@ -364,17 +367,17 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
                WALBERLA_ASSERT_GREATER_EQUAL(gpuDataBuffer.remainingSize(), pi->sizeEqualLevelSend(senderBlock, *dir))
                if(sendFromGPU_)
                {
-                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[Stencil::idx[*dir]]);
                }
                else
                {
                   auto gpuDataPtr = gpuDataBuffer.cur();
                   // packDataEqualLevel moves the pointer with advanceNoResize
-                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[*dir]);
+                  pi->packDataEqualLevel(senderBlock, *dir, gpuDataBuffer, streams_[Stencil::idx[*dir]]);
                   auto size = pi->sizeEqualLevelSend(senderBlock, *dir);
                   auto cpuDataPtr = bufferSystemCPU_[EQUAL_LEVEL][index].sendBuffer(nProcess).advanceNoResize(size);
                   WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
-                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[*dir]))
+                  WALBERLA_GPU_CHECK(gpuMemcpyAsync(cpuDataPtr, gpuDataPtr, size, gpuMemcpyDeviceToHost, streams_[Stencil::idx[*dir]]))
                }
             }
          }
@@ -383,7 +386,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
 
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i){
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -486,7 +489,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -586,7 +589,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
    // wait for packing to finish
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
 
    if (sendFromGPU_)
@@ -622,7 +625,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateEqualLevel(const uint_t leve
             {
                GpuBuffer_T& gpuDataBuffer = recvInfo.buffer();
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataBuffer.cur())
-               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[stencil::inverseDir[header.dir]]);
+               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuDataBuffer, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]);
             }
          }
       }
@@ -648,15 +651,15 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateEqualLevel(const uint_t leve
                WALBERLA_ASSERT_NOT_NULLPTR(cpuDataPtr)
                WALBERLA_ASSERT_NOT_NULLPTR(gpuDataPtr)
 
-               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[stencil::inverseDir[header.dir]]))
-               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuBuffer, streams_[stencil::inverseDir[header.dir]]);
+               WALBERLA_GPU_CHECK(gpuMemcpyAsync(gpuDataPtr, cpuDataPtr, size, gpuMemcpyHostToDevice, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]))
+               pi->unpackDataEqualLevel(block, stencil::inverseDir[header.dir], gpuBuffer, streams_[Stencil::idx[stencil::inverseDir[header.dir]]]);
             }
          }
       }
    }
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[EQUAL_LEVEL][level] = false;
 }
@@ -716,7 +719,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateCoarseToFine(const uint_t fi
 
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[COARSE_TO_FINE][fineLevel] = false;
 }
@@ -778,7 +781,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateFineToCoarse(const uint_t fi
    }
    for (uint_t i = 0; i < Stencil::Q; ++i)
    {
-      WALBERLA_GPU_CHECK(gpuStreamSynchronize(streams_[i]))
+      streams_[i].synchronize();
    }
    communicationInProgress_[FINE_TO_COARSE][fineLevel] = false;
 }
@@ -985,11 +988,6 @@ NonUniformGPUScheme< Stencil >::~NonUniformGPUScheme()
       waitCommunicateEqualLevel(i);
       waitCommunicateCoarseToFine(i);
       waitCommunicateFineToCoarse(i);
-   }
-
-   for (uint_t i = 0; i < Stencil::Q; ++i)
-   {
-      WALBERLA_GPU_CHECK(gpuStreamDestroy(streams_[i]))
    }
 }
 

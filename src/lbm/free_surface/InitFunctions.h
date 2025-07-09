@@ -148,11 +148,11 @@ void initHydrostaticPressure(const std::weak_ptr< StructuredBlockForest >& block
 
       CellInterval local = pdfField->xyzSizeWithGhostLayer(); // block-, i.e., process-local cell interval
 
-      for (auto cellIt = local.begin(); cellIt != local.end(); ++cellIt)
+      for (auto const &cell : local)
       {
          // transform the block-local coordinate to global coordinates
          Cell global;
-         blockForest->transformBlockLocalToGlobalCell(global, *blockIt, *cellIt);
+         blockForest->transformBlockLocalToGlobalCell(global, *blockIt, cell);
 
          // get the current global coordinate, i.e., height of the fluid in the relevant direction
          cell_idx_t coordinate = cell_idx_c(0);
@@ -193,9 +193,9 @@ void initHydrostaticPressure(const std::weak_ptr< StructuredBlockForest >& block
          const real_t rho =
             real_c(1) + real_c(3) * forceComponent * (real_c(coordinate) + real_c(0.5) - std::ceil(fluidHeight));
 
-         const Vector3< real_t > velocity = pdfField->getVelocity(*cellIt);
+         const Vector3< real_t > velocity = pdfField->getVelocity(cell);
 
-         pdfField->setDensityAndVelocity(*cellIt, velocity, rho);
+         pdfField->setDensityAndVelocity(cell, velocity, rho);
       }
    }
 }

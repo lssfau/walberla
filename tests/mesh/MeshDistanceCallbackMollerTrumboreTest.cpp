@@ -77,7 +77,7 @@ namespace mesh {
    {
    public:
 
-      TestMeshDistance( std::function<double(const Cell &, const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)>&wallDistanceFct ):
+      TestMeshDistance( std::function<real_t(const Cell &, const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)>&wallDistanceFct ):
                         elementInitialiser(wallDistanceFct){}
 
       template<typename FlagField_T>
@@ -122,7 +122,7 @@ namespace mesh {
          }
       }
    private:
-      const std::function<double(const Cell &, const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)> elementInitialiser; 
+      const std::function<real_t(const Cell &, const Cell &, const shared_ptr<StructuredBlockForest>&, IBlock&)> elementInitialiser;
    };
 
 
@@ -139,8 +139,8 @@ namespace mesh {
       auto triDist = make_shared< mesh::TriangleDistance<MeshType> >( mesh );
       auto distanceOctree = make_shared< mesh::DistanceOctree< MeshType > >( triDist );
 
-      std::vector< real_t > test_dx = { 0.33, 1.0, 1.5 };
-      std::vector< real_t > mesh_shift = { 0.0, 0.33, 0.5, 1.0 };
+      std::vector< real_t > test_dx = { real_t(0.33), real_t(1.0), real_t(1.5) };
+      std::vector< real_t > mesh_shift = { real_t(0.0), real_t(0.33), real_t(0.5), real_t(1.0) };
 
       for (const auto dx : test_dx )
       {
@@ -148,7 +148,7 @@ namespace mesh {
          {
             const Vector3<real_t> translation_shift { shift * dx };
             AABB aabb = computeAABB( *mesh );
-            aabb.scale( 1.2 ); // AABB containing the test points
+            aabb.scale( real_t(1.2) ); // AABB containing the test points
             aabb.translate(translation_shift); // Shift test points relative to mesh to get arbitrary distances.
 
             // build blockforest
@@ -179,7 +179,7 @@ namespace mesh {
    }
 
 
-   int main( int argc, char * argv[] )
+   int main( int argc, char ** argv )
    {
       debug::enterTestMode();
       mpi::Environment mpiEnv( argc, argv );
@@ -192,7 +192,7 @@ namespace mesh {
       const std::string & meshFile = args[1];
 
       test<mesh::TriangleMesh>( meshFile );
-      test<mesh::PythonTriangleMesh>( meshFile );
+      //test<mesh::PythonTriangleMesh>( meshFile );
       
 
       return EXIT_SUCCESS;
