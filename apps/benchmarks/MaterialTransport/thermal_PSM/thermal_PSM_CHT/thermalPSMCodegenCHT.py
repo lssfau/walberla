@@ -140,7 +140,7 @@ with CodeGeneration() as ctx:
 
     # Energy LBM optimisation
     lbm_energy_opt = LBMOptimisation(
-        cse_global=True,
+        cse_global=False,
         symbolic_field=pdfs_energy,
         symbolic_temporary_field=pdfs_energy_tmp,
         field_layout=layout,
