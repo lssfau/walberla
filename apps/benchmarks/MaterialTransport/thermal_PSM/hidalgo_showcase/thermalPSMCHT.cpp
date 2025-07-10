@@ -361,6 +361,7 @@ int main(int argc, char** argv)
    const uint_t numberOfParticleSubCycles = uint_c(1);
    const bool useIntegrators              = true;
    const bool particleBarriers            = true;
+   const bool sendDirectlyFromGPU         = false;
    const Vector3< uint_t > particleSubBlockSize(10, 10, 1);
    const real_t linkedCellWidthRation = real_c(1.01);
    const Vector3< real_t > generationDomainFraction(0.8, 0.8, 0.8);
@@ -476,7 +477,7 @@ int main(int argc, char** argv)
    const real_t Tcold = Tcold_SI/T_conversion;
    const real_t Tref = Tref_SI/T_conversion;
    const real_t Cp_f = real_t(1);
-   const real_t Cp_s = real_t(1);
+   const real_t Cp_s = real_c(densityFluid*Cp_f/densityParticle);
    real_t Cp_S_SI = (Cp_s * dx_SI*dx_SI)/(dt_SI*dt_SI);
    WALBERLA_LOG_INFO_ON_ROOT("si cp solid is  " << Cp_S_SI);
    real_t omega_f = 1/(0.6);
@@ -587,6 +588,12 @@ int main(int argc, char** argv)
    BlockDataID pdfFieldConcentrationCPUGPUID = gpu::addGPUFieldToStorage< PdfField_concentration_T >(
       blocks, pdfFieldConcentrationID, "pdf concentration field GPU");
 
+   // Energy PDFs on GPU
+   BlockDataID pdfFieldEnergyID = field::addToStorage< PdfField_energy_T >(
+      blocks, "pdf energy field (fzyx)", real_c(std::nan("")), field::fzyx);
+   BlockDataID pdfFieldEnergyCPUGPUID = gpu::addGPUFieldToStorage< PdfField_energy_T >(
+      blocks, pdfFieldEnergyID, "pdf concentration field GPU");
+
    // Fluid velocity field on GPU
    velFieldFluidID =
       field::addToStorage< VelocityField_fluid_T >(blocks, "velocity fluid field", real_t(0), field::fzyx);
@@ -599,9 +606,17 @@ int main(int argc, char** argv)
    BlockDataID densityConcentrationFieldCPUGPUID = gpu::addGPUFieldToStorage< DensityField_concentration_T >(
       blocks, densityConcentrationFieldID, "density concentration field GPU");
 
+   // Energy Density on GPU
+   energyFieldID = field::addToStorage< DensityField_energy_T >(
+      blocks, "energy field", real_t(0), field::fzyx);
+   BlockDataID energyFieldCPUGPUID = gpu::addGPUFieldToStorage< DensityField_energy_T >(
+      blocks, energyFieldID, "energy field GPU");
+
 
    // fraction field on GPU
    BlockDataID BFieldID = field::addToStorage< GhostLayerField< real_t, 1 > >(blocks, "B field GPU", 0, field::fzyx, 1);
+
+   BlockDataID particleTempFieldID = field::addToStorage< GhostLayerField< real_t, 2 > >(blocks, "B field GPU", 0, field::fzyx, 1);
 #else
 
    // Fluid PDFs on CPU
@@ -803,25 +818,37 @@ int main(int argc, char** argv)
    lbm::BC_energy_DiffusionDirichlet_static energy_static_bc_hot(blocks,pdfFieldEnergyCPUGPUID,real_t(Cp_f*Thot));
    energy_static_bc_hot.fillFromFlagField< FlagField_T >(blocks, flagFieldEnergyID,
                                                           Density_Energy_Flag_static_hot, Energy_Flag);
+
 ///////////////
 // TIME LOOP //
 ///////////////
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   initConcentrationField(blocks, densityConcentrationFieldID, simulationDomain, domainSizeLB);
-   initFluidField(blocks, velFieldFluidID, Uinitialize,domainSizeLB);
+   initConcentrationField(blocks, densityConcentrationFieldID, simulationDomain, domainSize,false,Tref);
+   initFluidField(blocks, velFieldFluidID, Uinitialize, domainSize);
 
    // Map particles into the fluid domain
-   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omega_f);
+   ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, omegaT_s);
    PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
-                                         particleAndVolumeFractionSoA, particleSubBlockSize);
+                                         particleAndVolumeFractionSoA,densityConcentrationFieldID, particleSubBlockSize,true);
 
    gpu::fieldCpy< gpu::GPUField< real_t >, DensityField_concentration_T >(blocks, densityConcentrationFieldCPUGPUID,
                                                                           densityConcentrationFieldID);
 
    gpu::fieldCpy< gpu::GPUField< real_t >, VelocityField_fluid_T >(blocks, velFieldFluidCPUGPUID, velFieldFluidID);
-   pystencils::InitializeFluidDomain pdfSetterFluid(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,particleAndVolumeFractionSoA.particleVelocitiesFieldID,pdfFieldFluidCPUGPUID,T0,alphaLB,gravitationalAcceleration,real_t(1),real_t(0),real_t(1));
+
+   pystencils::InitializeFluidDomain pdfSetterFluid(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, Tref,
+      alphaLB, gravitationalAcceleration, real_t(1), rho_0);
+
    pystencils::InitializeConcentrationDomain pdfSetterConcentration(
-      densityConcentrationFieldCPUGPUID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleTemperaturesFieldID, pdfFieldConcentrationCPUGPUID, velFieldFluidCPUGPUID);
+
+   pystencils::InitializeEnergyDomain pdfSetterEnergy(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityConcentrationFieldCPUGPUID,
+      particleAndVolumeFractionSoA.particleTemperaturesFieldID, pdfFieldEnergyCPUGPUID, velFieldFluidCPUGPUID,
+      Cp_f, Cp_s, omegaT_f, omegaT_s, densityFluid, densityParticle);
 
 #else
 
@@ -862,8 +889,19 @@ int main(int argc, char** argv)
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       psmSweepCollection.setParticleVelocitiesSweep(&(*blockIt));
-      psmSweepCollectionUniformTemperatures.setParticleTemperaturesSweep(&(*blockIt)); // the initial temperatures of particles are always uniform
+
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+      WALBERLA_LOG_INFO_ON_ROOT("GPU simulation reached till here 2");
+      psmSweepCollection.setParticleTemperaturesSweep(&(*blockIt));
+      WALBERLA_LOG_INFO_ON_ROOT("GPU simulation reached till here 2");
+#else
+      psmSweepCollectionUniformTemperatures.setParticleTemperaturesSweep(
+         &(*blockIt)); // the initial temperatures of particles are always uniform
+
+#endif
+      WALBERLA_LOG_INFO_ON_ROOT("GPU simulation reached till here 2");
       pdfSetterFluid(&(*blockIt));
+      WALBERLA_LOG_INFO_ON_ROOT("GPU simulation reached till here 2");
       pdfSetterEnergy(&(*blockIt));
    }
 
@@ -912,8 +950,15 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils::FluidMacroGetter getterSweep_fluid(BFieldID,densityConcentrationFieldID, densityFluidFieldID,
-                                                  pdfFieldFluidID, velFieldFluidID, T0, alphaLB, gravitationalAcceleration,
+                                                  pdfFieldFluidID, velFieldFluidID, Tref, alphaLB, gravitationalAcceleration,
                                                   rho_0);
+   pystencils::EnergyMacroGetter getterSweep_energy(energyFieldID,
+                                                    pdfFieldEnergyID);
+
+
+   pystencils::compute_temperature_field compute_temperature_field(BFieldID,densityConcentrationFieldID,energyFieldID,Cp_f,Cp_s,omegaT_f,omegaT_s,densityFluid,densityParticle);
+
+   pystencils::compute_temperature_field_particle compute_temperature_field_particle(particleAndVolumeFractionSoA.particleTemperaturesFieldID,pdfFieldEnergyID);
 #else
    pystencils::FluidMacroGetter getterSweep_fluid(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID, densityFluidFieldID,
                                                   pdfFieldFluidCPUGPUID, velFieldFluidCPUGPUID, Tref, alphaLB, gravitationalAcceleration,
@@ -968,8 +1013,17 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
                                                                          velFieldFluidCPUGPUID);
          gpu::fieldCpy< DensityField_concentration_T, gpu::GPUField< real_t > >(blocks, densityConcentrationFieldID,
                                                                                 densityConcentrationFieldCPUGPUID);
+         gpu::fieldCpy< PdfField_energy_T, gpu::GPUField< real_t > >(blocks, pdfFieldEnergyID,
+                                                                            pdfFieldEnergyCPUGPUID);
+         gpu::fieldCpy< DensityField_energy_T, gpu::GPUField< real_t > >(blocks, energyFieldID,
+                                                                                energyFieldCPUGPUID);
+
          gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BFieldID,
                                                                     particleAndVolumeFractionSoA.BFieldID);
+
+         gpu::fieldCpy< GhostLayerField< real_t, 2 >, particleVelocitiesFieldGPU_T >(blocks, particleTempFieldID,
+                                                                    particleAndVolumeFractionSoA.particleTemperaturesFieldID);
+
 #endif
          for (auto& block : *blocks)
          {
@@ -992,22 +1046,26 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< BField_T > >(BFieldID, "OverlapFraction"));
 #else
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID, "OverlapFraction"));
 #endif
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
       vtkOutput_Fluid->addCellDataWriter(
-         make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID, "OverlapFraction"));
-      vtkOutput_Fluid->addCellDataWriter(
-         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleAndVolumeFractionSoA.particleTemperaturesFieldID, "particle temp filed"));
+         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleTempFieldID, "particle temp filed"));
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Energy->addCellDataWriter(
-         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "Concentration"));
+         make_shared< field::VTKWriter< DensityField_concentration_T > >(densityConcentrationFieldID, "temperature"));
+      vtkOutput_Energy->addCellDataWriter(
+         make_shared< field::VTKWriter< DensityField_energy_T > >(energyFieldID,"energy"));
 #else
       vtkOutput_Energy->addCellDataWriter(
          make_shared< field::VTKWriter< DensityField_energy_T > >(energyFieldCPUGPUID,"energy"));
@@ -1265,7 +1323,7 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
 
          auto particleInfo = evaluateParticleInfo(*accessor);
          WALBERLA_LOG_INFO_ON_ROOT(particleInfo);
-         auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidCPUGPUID);
+         auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidID);
          WALBERLA_LOG_INFO_ON_ROOT(fluidInfo);
          if (particleBarriers) WALBERLA_MPI_BARRIER();
          timeloopTiming["Evaluate infos"].end();
