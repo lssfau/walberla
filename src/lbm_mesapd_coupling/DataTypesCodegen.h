@@ -64,6 +64,7 @@ using idxFieldGPU_T                   = walberla::gpu::GPUField< size_t >;
 using BFieldGPU_T                     = walberla::gpu::GPUField< real_t >;
 using particleVelocitiesFieldGPU_T    = walberla::gpu::GPUField< real_t >;
 using particleForcesFieldGPU_T        = walberla::gpu::GPUField< real_t >;
+using particleTemperaturesFieldGPU_T  = walberla::gpu::GPUField< real_t>;
 #endif
 
 // The ParticleAndVolumeFractionSoA encapsulates the data needed by the routines involved in the coupling
@@ -101,6 +102,8 @@ struct ParticleAndVolumeFractionSoA_T
          bs, "particle velocities field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
       particleForcesFieldID = walberla::gpu::addGPUFieldToStorage< particleForcesFieldGPU_T >(
          bs, "particle forces field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
+      particleTemperaturesFieldID = walberla::gpu::addGPUFieldToStorage< particleTemperaturesFieldGPU_T >(bs, "particle temperatures field CPU", real_t(0),
+                                                                                       field::fzyx, uint_t(1), true);
 #else
       nOverlappingParticlesFieldID = field::addToStorage< nOverlappingParticlesField_T >(
          bs, "number of overlapping particles field CPU", uint_t(0), field::fzyx, uint_t(1), true);
