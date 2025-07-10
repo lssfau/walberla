@@ -31,6 +31,11 @@ namespace psm
 {
 namespace gpu
 {
+__global__ void SetParticleTemperatures(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
+                                        walberla::gpu::FieldAccessor< uint_t > idxField,
+                                        walberla::gpu::FieldAccessor< real_t > particleTemperaturesField,
+                                        const real_t* __restrict__ temperatures
+                                        );
 
 __global__ void SetParticleVelocities(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
                                       walberla::gpu::FieldAccessor< uint_t > idxField,

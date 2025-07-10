@@ -102,7 +102,7 @@ struct ParticleAndVolumeFractionSoA_T
          bs, "particle velocities field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
       particleForcesFieldID = walberla::gpu::addGPUFieldToStorage< particleForcesFieldGPU_T >(
          bs, "particle forces field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
-      particleTemperaturesFieldID = walberla::gpu::addGPUFieldToStorage< particleTemperaturesFieldGPU_T >(bs, "particle temperatures field CPU", real_t(0),
+      particleTemperaturesFieldID = walberla::gpu::addGPUFieldToStorage< particleTemperaturesFieldGPU_T >(bs, "particle temperatures field CPU", MaxParticlesPerCell,
                                                                                        field::fzyx, uint_t(1), true);
 #else
       nOverlappingParticlesFieldID = field::addToStorage< nOverlappingParticlesField_T >(

@@ -31,6 +31,25 @@ namespace psm
 {
 namespace gpu
 {
+__global__ void SetParticleTemperatures(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
+                                      walberla::gpu::FieldAccessor< uint_t > idxField,
+                                      walberla::gpu::FieldAccessor< real_t > particleTemperaturesField,
+                                      const real_t* __restrict__ temperatures
+                                      )
+{
+   const uint3 blockIdx_uint3  = make_uint3(blockIdx.x, blockIdx.y, blockIdx.z);
+   const uint3 threadIdx_uint3 = make_uint3(threadIdx.x, threadIdx.y, threadIdx.z);
+
+   nOverlappingParticlesField.set(blockIdx_uint3, threadIdx_uint3);
+   idxField.set(blockIdx_uint3, threadIdx_uint3);
+   particleTemperaturesField.set(blockIdx_uint3, threadIdx_uint3);
+
+   // Compute the particle velocity at the cell center for all overlapping particles
+   for (uint_t p = 0; p < nOverlappingParticlesField.get(); p++)
+   {
+      particleTemperaturesField.get(p) = temperatures[idxField.get( p)];
+   }
+}
 
 __global__ void SetParticleVelocities(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
                                       walberla::gpu::FieldAccessor< uint_t > idxField,
