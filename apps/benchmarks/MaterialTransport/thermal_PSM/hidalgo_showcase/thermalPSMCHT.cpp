@@ -313,35 +313,36 @@ int main(int argc, char** argv)
    const real_t particleDiameter_SI          = physicalSetup.getParameter< real_t >("particleDiameter");
    real_t densityParticle_SI           = physicalSetup.getParameter< real_t >("densityParticle");
    const real_t particleGenerationSpacing_SI = physicalSetup.getParameter< real_t >("particleGenerationSpacing");
-   const real_t numOfParticles = physicalSetup.getParameter< real_t >("numOfParticles");
+   const real_t numOfParticles               = physicalSetup.getParameter< real_t >("numOfParticles");
+   bool showcase                             = physicalSetup.getParameter< bool >("showcase");
 
    Config::BlockHandle numericalSetup = cfgFile->getBlock("NumericalSetup");
    const real_t dx_SI                 = numericalSetup.getParameter< real_t >("dx");
    const real_t uInflow               = numericalSetup.getParameter< real_t >("uInflow");
-   const real_t timeStepSize               = numericalSetup.getParameter< real_t >("dt");
+   const real_t timeStepSize          = numericalSetup.getParameter< real_t >("dt");
    const uint_t numXBlocks            = numericalSetup.getParameter< uint_t >("numXBlocks");
    const uint_t numYBlocks            = numericalSetup.getParameter< uint_t >("numYBlocks");
    const uint_t numZBlocks            = numericalSetup.getParameter< uint_t >("numZBlocks");
 
+   Config::BlockHandle TemperatureSetup = cfgFile->getBlock("TemperatureSetup");
+   const real_t Thot_SI                 = TemperatureSetup.getParameter< real_t >("Thot");
+   const real_t Tcold_SI                = TemperatureSetup.getParameter< real_t >("Tcold");
+   const real_t Tref_SI                 = TemperatureSetup.getParameter< real_t >("Tref");
+   const real_t Pr                      = TemperatureSetup.getParameter< real_t >("PrandtlNumber");
+   const real_t particleTemperature     = TemperatureSetup.getParameter< real_t >("particleTemperature");
+   real_t thermal_expansion_coeff_SI    = TemperatureSetup.getParameter< real_t >("thermal_expansion_coeff");
+   real_t Cp_f_SI                       = TemperatureSetup.getParameter< real_t >("Cpf");
+   real_t Cp_s_SI                       = TemperatureSetup.getParameter< real_t >("Cps");
+   real_t Kf_SI                         = TemperatureSetup.getParameter< real_t >("Kf");
+   real_t Ks_SI                         = TemperatureSetup.getParameter< real_t >("Ks");
+   real_t Ra                            = TemperatureSetup.getParameter< real_t >("Ra");
+   real_t ratio                         = TemperatureSetup.getParameter< real_t >("ratio");
 
-   Config::BlockHandle TemperatureSetup         = cfgFile->getBlock("TemperatureSetup");
-   const real_t Thot_SI           = TemperatureSetup.getParameter< real_t >("Thot");
-   const real_t Tcold_SI          = TemperatureSetup.getParameter< real_t >("Tcold");
-   const real_t Tref_SI          = TemperatureSetup.getParameter< real_t >("Tref");
-   const real_t Pr             = TemperatureSetup.getParameter< real_t >("PrandtlNumber");
-   const real_t particleTemperature             = TemperatureSetup.getParameter< real_t >("particleTemperature");
-   real_t thermal_expansion_coeff_SI = TemperatureSetup.getParameter< real_t >("thermal_expansion_coeff");
-   real_t Cp_f_SI                    = TemperatureSetup.getParameter<real_t>("Cpf");
-   real_t Cp_s_SI                    = TemperatureSetup.getParameter<real_t>("Cps");
-   real_t Kf_SI                    = TemperatureSetup.getParameter<real_t>("Kf");
-   real_t Ks_SI                    = TemperatureSetup.getParameter<real_t>("Ks");
-   real_t Ra                    = TemperatureSetup.getParameter<real_t>("Ra");
-
-   Config::BlockHandle outputSetup      = cfgFile->getBlock("Output");
-   const real_t infoSpacing_SI          = outputSetup.getParameter< real_t >("infoSpacing");
-   const real_t vtkSpacingParticles_SI  = outputSetup.getParameter< real_t >("vtkSpacingParticles");
-   const real_t vtkSpacingFluid_SI      = outputSetup.getParameter< real_t >("vtkSpacingFluid");
-   const std::string vtkFolder          = outputSetup.getParameter< std::string >("vtkFolderName");
+   Config::BlockHandle outputSetup     = cfgFile->getBlock("Output");
+   const real_t infoSpacing_SI         = outputSetup.getParameter< real_t >("infoSpacing");
+   const real_t vtkSpacingParticles_SI = outputSetup.getParameter< real_t >("vtkSpacingParticles");
+   const real_t vtkSpacingFluid_SI     = outputSetup.getParameter< real_t >("vtkSpacingFluid");
+   const std::string vtkFolder         = outputSetup.getParameter< std::string >("vtkFolderName");
 
    WALBERLA_CHECK_EQUAL(numXBlocks * numYBlocks * numZBlocks, uint_t(MPIManager::instance()->numProcesses()),
                         "When using GPUs, the number of blocks ("
@@ -352,14 +353,17 @@ int main(int argc, char** argv)
    const bool periodicInY                    = false;
    const bool periodicInZ                    = false;
    const real_t gravitationalAcceleration_SI = real_c(9.81);
-   const real_t particleRe           = real_c(50.0);
+   const real_t particleRe                   = real_c(50.0);
    const real_t dynamicFrictionCoefficient   = real_c(0.15);
    const real_t coefficientOfRestitution     = real_c(0.6);
    const real_t collisionTimeFactor          = real_c(1.0);
 
    const bool useLubricationForces        = false;
    const uint_t numberOfParticleSubCycles = uint_c(1);
-   const bool useIntegrators              = true;
+   bool useIntegrators;
+   if (showcase) { useIntegrators = true; }
+   else { useIntegrators = false; }
+
    const bool particleBarriers            = true;
    const bool sendDirectlyFromGPU         = false;
    const Vector3< uint_t > particleSubBlockSize(10, 10, 1);
@@ -404,15 +408,15 @@ int main(int argc, char** argv)
 
    // in simulation units: dt = 1, dx = 1, densityFluid = 1
 
-   real_t dt_SI                     = timeStepSize;
-   const real_t particleDiameter                  = particleDiameter_SI / dx_SI;
+   real_t dt_SI                           = timeStepSize;
+   const real_t particleDiameter          = particleDiameter_SI / dx_SI;
    const real_t particleGenerationSpacing = particleGenerationSpacing_SI / dx_SI;
    const real_t gravitationalAcceleration = gravitationalAcceleration_SI * dt_SI * dt_SI / dx_SI;
    const real_t particleVolume            = math::pi / 6_r * particleDiameter * particleDiameter * particleDiameter;
 
-   const real_t densityFluid    = real_t(1);
-   real_t densityParticle = densityRatio;
-   const real_t dx              = real_t(1);
+   const real_t densityFluid = real_t(1);
+   real_t densityParticle    = densityRatio;
+   const real_t dx           = real_t(1);
 
    const uint_t numTimeSteps        = uint_c(std::ceil(runtime_SI / dt_SI));
    const uint_t infoSpacing         = uint_c(std::ceil(infoSpacing_SI / dt_SI));
@@ -426,13 +430,11 @@ int main(int argc, char** argv)
    const real_t particleCollisionTime = collisionTimeFactor * particleDiameter;
 
    Vector3< uint_t > domainSizeLB;
-   Vector3< real_t > Uinitialize(0, 0,0);
+   Vector3< real_t > Uinitialize(0, 0, 0);
 
-
-
-   const real_t T_conversion = real_t(1);
-   const real_t rho_0_SI = densityFluid_SI;  // just for understanding not used anywhere
-   const real_t thermalDiffusivityFluid_SI = Kf_SI/(densityFluid_SI*Cp_f_SI);
+   const real_t T_conversion               = real_t(1);
+   const real_t rho_0_SI                   = densityFluid_SI; // just for understanding not used anywhere
+   const real_t thermalDiffusivityFluid_SI = Kf_SI / (densityFluid_SI * Cp_f_SI);
 
 
    // conversion for the various temperature quantities:
@@ -480,17 +482,19 @@ int main(int argc, char** argv)
    const real_t Cp_s = real_c(densityFluid*Cp_f/densityParticle);
    real_t Cp_S_SI = (Cp_s * dx_SI*dx_SI)/(dt_SI*dt_SI);
    WALBERLA_LOG_INFO_ON_ROOT("si cp solid is  " << Cp_S_SI);
-   real_t omega_f = 1/(0.6);
-   const real_t kinematicViscosityLB = lbm::collision_model::viscosityFromOmega(omega_f);
-   const real_t thermalDiffusivityFluid_LB = kinematicViscosityLB/Pr;
-   const real_t thermalDiffusivityParticle_SI = Ks_SI/(densityParticle_SI*Cp_S_SI);
-   const real_t thermalDiffusivityParticle_LB = 1*thermalDiffusivityFluid_LB;//(thermalDiffusivityParticle_SI * dt_SI) / (dx_SI * dx_SI);
+   real_t omega_f                             = 1 / (0.6);
+   const real_t kinematicViscosityLB          = lbm::collision_model::viscosityFromOmega(omega_f);
+   const real_t thermalDiffusivityFluid_LB    = kinematicViscosityLB / Pr;
+   const real_t thermalDiffusivityParticle_SI = Ks_SI / (densityParticle_SI * Cp_S_SI);
+   const real_t thermalDiffusivityParticle_LB =
+      ratio * thermalDiffusivityFluid_LB; //(thermalDiffusivityParticle_SI * dt_SI) / (dx_SI * dx_SI);
    const real_t omegaT_f = lbm::collision_model::omegaFromViscosity(thermalDiffusivityFluid_LB);
    const real_t omegaT_s = lbm::collision_model::omegaFromViscosity(thermalDiffusivityParticle_LB);
 
-   const real_t alphaLB = (Ra*kinematicViscosityLB*thermalDiffusivityFluid_LB)/(gravitationalAcceleration * (Thot-Tcold)* domainSize[0] * domainSize[0] * domainSize[0]);
+   const real_t alphaLB = (Ra * kinematicViscosityLB * thermalDiffusivityFluid_LB) /
+                          (gravitationalAcceleration * (Thot - Tcold) * domainSize[0] * domainSize[0] * domainSize[0]);
    const real_t RayleighNumber =
-      (gravitationalAcceleration * alphaLB * (Thot - Tcold) * domainSize[0] * domainSize[0] * domainSize[0])/
+      (gravitationalAcceleration * alphaLB * (Thot - Tcold) * domainSize[0] * domainSize[0] * domainSize[0]) /
       (kinematicViscosityLB * thermalDiffusivityFluid_LB);
 
    WALBERLA_LOG_INFO_ON_ROOT("density particle LB is " << densityParticle);
@@ -499,16 +503,18 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT("Cp particle is " << Cp_s << " Cp fluid is  " << Cp_f);
    WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  fluid is " << omegaT_f);
    WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  particle is " << omegaT_s);
-   WALBERLA_LOG_INFO_ON_ROOT("check equal " << kinematicViscosityFluid_SI/Pr <<" and  " << Kf_SI/(densityFluid_SI*Cp_f_SI);)
-   //WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number for 2D case is " << RayleighNumber);
+   WALBERLA_LOG_INFO_ON_ROOT("check equal " << kinematicViscosityFluid_SI / Pr << " and  "
+                                            << Kf_SI / (densityFluid_SI * Cp_f_SI);)
+   // WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number for 2D case is " << RayleighNumber);
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
-      numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], real_t(1), uint_t(0),
-      false, false, periodicInX, periodicInY, periodicInZ, // periodicity
-      false);
+   shared_ptr< StructuredBlockForest > blocks =
+      blockforest::createUniformBlockGrid(numXBlocks, numYBlocks, numZBlocks, cellsPerBlockPerDirection[0],
+                                          cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], real_t(1),
+                                          uint_t(0), false, false, periodicInX, periodicInY, periodicInZ, // periodicity
+                                          false);
 
    auto simulationDomain = blocks->getDomain();
    /////////////
@@ -528,14 +534,15 @@ int main(int argc, char** argv)
    // prevent particles from interfering with inflow and outflow by putting the bounding planes slightly in front
    const real_t planeOffsetFromInflow  = dx;
    const real_t planeOffsetFromOutflow = dx;
-   createPlaneSetup(ps, ss, simulationDomain, periodicInX, periodicInY,periodicInZ, planeOffsetFromInflow, planeOffsetFromOutflow);
+   createPlaneSetup(ps, ss, simulationDomain, periodicInX, periodicInY, periodicInZ, planeOffsetFromInflow,
+                    planeOffsetFromOutflow);
    // Create spheres
 
-      // Ensure that generation domain is computed correctly
+   // Ensure that generation domain is computed correctly
    WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.xMin(), real_t(0));
    WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.yMin(), real_t(0));
    WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.zMin(), real_t(0));
-
+   if(showcase){
    auto generationDomain = math::AABB::createFromMinMaxCorner(
       math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) - generationDomainFraction[0]) / real_t(2),
                               simulationDomain.yMax() * (real_t(1) - generationDomainFraction[1]) / real_t(2),
@@ -559,11 +566,24 @@ int main(int argc, char** argv)
          p.setShapeID(sphereShape);
          p.setType(1);
          real_t randomTemp = dist(gen);
-         // p.setTemperature(randomTemp);
-         p.setTemperature(particleTemperature);
+         p.setTemperature(randomTemp);
       }
       numparticles += 1;
       if (numparticles == 500) { break; }
+   }
+}
+   else{
+         Vector3< real_t > pt(domainSize[0]/2, domainSize[1]/2, domainSize[2]/2);
+         if (rpdDomain->isContainedInProcessSubdomain(uint_c(mpi::MPIManager::instance()->rank()), pt))
+         {
+            mesa_pd::data::Particle&& p = *ps->create();
+            p.setPosition(pt);
+            p.setInteractionRadius(particleDiameter * real_t(0.5));
+            p.setOwner(mpi::MPIManager::instance()->rank());
+            p.setShapeID(sphereShape);
+            p.setType(1);
+            p.setTemperature(particleTemperature);
+         }
    }
 
 ////////////////////////
@@ -687,10 +707,18 @@ int main(int argc, char** argv)
    lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(
       kinematicViscosityLB, [](real_t r) { return (real_t(0.001 + real_t(0.00007) * r)) * r; });
    // Assemble boundary block string
-   std::string boundariesBlockString = " BoundariesFluid"
-                                       "{"
-                                       "Border { direction W;    walldistance -1;  flag Inflow_Fluid; }"
-                                       "Border { direction E;    walldistance -1;  flag Density_Fluid; }";
+   std::string boundariesBlockString = " BoundariesFluid";
+   if (showcase)
+   {
+      boundariesBlockString += "{"
+                               "Border { direction W;    walldistance -1;  flag Inflow_Fluid; }"
+                               "Border { direction E;    walldistance -1;  flag Density_Fluid; }";
+   }
+   else{
+      boundariesBlockString += "{"
+                               "Border { direction W;    walldistance -1;  flag NoSlip_Fluid; }"
+                               "Border { direction E;    walldistance -1;  flag NoSlip_Fluid; }";
+   }
 
    if (!periodicInY)
    {
@@ -725,25 +753,45 @@ int main(int argc, char** argv)
       }
       boundariesBlockString += "}";
 
-       boundariesBlockString += "\n BoundariesEnergy";
-       boundariesBlockString += "{"
-                                "Border { direction W;    walldistance -1;  flag Neumann_Energy; }"
-                                "Border { direction E;    walldistance -1;  flag Neumann_Energy; }";
+      if(showcase)
+      {
+         boundariesBlockString += "\n BoundariesEnergy";
+         boundariesBlockString += "{"
+                                  "Border { direction W;    walldistance -1;  flag Neumann_Energy; }"
+                                  "Border { direction E;    walldistance -1;  flag Neumann_Energy; }";
 
-       if (!periodicInY)
-       {
-          boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Energy; }"
-                                   "Border { direction N;    walldistance -1;  flag Neumann_Energy; }";
-       }
+         if (!periodicInY)
+         {
+            boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Energy; }"
+                                     "Border { direction N;    walldistance -1;  flag Neumann_Energy; }";
+         }
 
-       if (!periodicInZ)
-       {
-          boundariesBlockString +=
-             "Border { direction T;    walldistance -1;  flag Density_Energy_static_hot; }"
-             "Border { direction B;    walldistance -1;  flag Density_Energy_static_cold; }";
-       }
-       boundariesBlockString += "}";
+         if (!periodicInZ)
+         {
+            boundariesBlockString += "Border { direction T;    walldistance -1;  flag Density_Energy_static_hot; }"
+                                     "Border { direction B;    walldistance -1;  flag Density_Energy_static_cold; }";
+         }
+         boundariesBlockString += "}";
+      }
+      else{
+         boundariesBlockString += "\n BoundariesEnergy";
+         boundariesBlockString += "{"
+                                  "Border { direction W;    walldistance -1;  flag Density_Energy_static_hot; }"
+                                  "Border { direction E;    walldistance -1;  flag Density_Energy_static_cold; }";
 
+         if (!periodicInY)
+         {
+            boundariesBlockString += "Border { direction S;    walldistance -1;  flag Neumann_Energy; }"
+                                     "Border { direction N;    walldistance -1;  flag Neumann_Energy; }";
+         }
+
+         if (!periodicInZ)
+         {
+            boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Energy; }"
+                                     "Border { direction B;    walldistance -1;  flag Neumann_Energy; }";
+         }
+         boundariesBlockString += "}";
+      }
 
    WALBERLA_ROOT_SECTION()
    {
@@ -969,7 +1017,7 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
    //pystencils::compute_temperature_field compute_temperature_field(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID,pdfFieldFluidCPUGPUID,Tref,alphaLB,gravitationalAcceleration,rho_0);
    pystencils::compute_temperature_field compute_temperature_field(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID,Cp_f,Cp_s,omegaT_f,omegaT_s,densityFluid,densityParticle);
    //pystencils::compute_temperature_field compute_temperature_field(densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID);
-   pystencils::compute_temperature_field_particle compute_temperature_field_particle(particleAndVolumeFractionSoA.particleTemperaturesFieldID,pdfFieldEnergyCPUGPUID);
+   pystencils::compute_temperature_field_particle compute_temperature_field_particle(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.particleTemperaturesFieldID,pdfFieldEnergyCPUGPUID, Cp_s,densityParticle);
 
 #endif
 
@@ -1048,18 +1096,21 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
          make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidID, "Fluid Velocity"));
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< BField_T > >(BFieldID, "OverlapFraction"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleTempFieldID, "particle temp filed"));
 #else
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< VelocityField_fluid_T > >(velFieldFluidCPUGPUID, "Fluid Velocity"));
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID, "OverlapFraction"));
+      vtkOutput_Fluid->addCellDataWriter(
+         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleAndVolumeFractionSoA.particleTemperaturesFieldID, "particle temp filed"));
 #endif
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< DensityField_fluid_T > >(densityFluidFieldID, "Fluid Density"));
       vtkOutput_Fluid->addCellDataWriter(
          make_shared< field::VTKWriter< FlagField_T > >(flagFieldFluidID, "FluidFlagField"));
-      vtkOutput_Fluid->addCellDataWriter(
-         make_shared< field::VTKWriter< particleTemperaturesField_T > >(particleTempFieldID, "particle temp filed"));
+
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       vtkOutput_Energy->addCellDataWriter(
@@ -1108,10 +1159,6 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
                      << Sweep(deviceSyncWrapper(neumann_energy_bc.getSweep()),
                               "Boundary Handling (Energy Neumann)");
 
-      /*timeloop.add() << Sweep(deviceSyncWrapper(energy_dynamic_bc.getSweep()),
-                              "Boundary Handling (Energy dynamic bc)");*/
-
-
       timeloop.add() << Sweep(deviceSyncWrapper(energy_static_bc_hot.getSweep()),
                               "Boundary Handling (Energy static bc hot)");
 
@@ -1119,9 +1166,7 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
                               "Boundary Handling (Energy static bc cold)");
 
 
-
-
-      addCHTPSMSweepToTimeloop(timeloop, psmSweepCollection, psmFluidSweep,psmEnergySweep,compute_temperature_field);
+      addCHTPSMSweepToTimeloop(timeloop, psmSweepCollection, psmFluidSweep,psmEnergySweep,compute_temperature_field,compute_temperature_field_particle);
 
 
    ////////////////////////
@@ -1323,8 +1368,17 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
 
          auto particleInfo = evaluateParticleInfo(*accessor);
          WALBERLA_LOG_INFO_ON_ROOT(particleInfo);
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+
+         gpu::fieldCpy< VelocityField_fluid_T, gpu::GPUField< real_t > >(blocks, velFieldFluidID,
+                                                                         velFieldFluidCPUGPUID);
          auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidID);
          WALBERLA_LOG_INFO_ON_ROOT(fluidInfo);
+#else
+
+         auto fluidInfo = evaluateFluidInfo(blocks, densityFluidFieldID, velFieldFluidCPUGPUID);
+         WALBERLA_LOG_INFO_ON_ROOT(fluidInfo);
+#endif
          if (particleBarriers) WALBERLA_MPI_BARRIER();
          timeloopTiming["Evaluate infos"].end();
       }
