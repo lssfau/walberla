@@ -368,7 +368,7 @@ int main(int argc, char** argv)
    const bool sendDirectlyFromGPU         = false;
    const Vector3< uint_t > particleSubBlockSize(10, 10, 1);
    const real_t linkedCellWidthRation = real_c(1.01);
-   const Vector3< real_t > generationDomainFraction(0.8, 0.8, 0.8);
+   const Vector3< real_t > generationDomainFraction(0.95, 0.95, 0.95);
 
    if ((periodicInX && numXBlocks == 1) || (periodicInY && numYBlocks == 1) || (periodicInZ && numZBlocks == 1))
    {
@@ -566,10 +566,10 @@ int main(int argc, char** argv)
          p.setShapeID(sphereShape);
          p.setType(1);
          real_t randomTemp = dist(gen);
-         p.setTemperature(randomTemp);
+         p.setTemperature(particleTemperature);
       }
       numparticles += 1;
-      if (numparticles == 500) { break; }
+      if (numparticles == numOfParticles ) { break; }
    }
 }
    else{
@@ -757,7 +757,7 @@ int main(int argc, char** argv)
       {
          boundariesBlockString += "\n BoundariesEnergy";
          boundariesBlockString += "{"
-                                  "Border { direction W;    walldistance -1;  flag Neumann_Energy; }"
+                                  "Border { direction W;    walldistance -1;  flag Density_Energy_static_hot; }"
                                   "Border { direction E;    walldistance -1;  flag Neumann_Energy; }";
 
          if (!periodicInY)
@@ -776,8 +776,8 @@ int main(int argc, char** argv)
       else{
          boundariesBlockString += "\n BoundariesEnergy";
          boundariesBlockString += "{"
-                                  "Border { direction W;    walldistance -1;  flag Density_Energy_static_hot; }"
-                                  "Border { direction E;    walldistance -1;  flag Density_Energy_static_cold; }";
+                                  "Border { direction W;    walldistance -1;  flag Neumann_Energy; }"
+                                  "Border { direction E;    walldistance -1;  flag Neumann_Energy; }";
 
          if (!periodicInY)
          {
@@ -787,8 +787,8 @@ int main(int argc, char** argv)
 
          if (!periodicInZ)
          {
-            boundariesBlockString += "Border { direction T;    walldistance -1;  flag Neumann_Energy; }"
-                                     "Border { direction B;    walldistance -1;  flag Neumann_Energy; }";
+            boundariesBlockString += "Border { direction T;    walldistance -1;  flag Density_Energy_static_hot; }"
+                                     "Border { direction B;    walldistance -1;  flag Density_Energy_static_cold; }";
          }
          boundariesBlockString += "}";
       }
@@ -1017,7 +1017,7 @@ auto communication_concentration = std::function< void() >([&]() { com_concentra
    //pystencils::compute_temperature_field compute_temperature_field(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID,pdfFieldFluidCPUGPUID,Tref,alphaLB,gravitationalAcceleration,rho_0);
    pystencils::compute_temperature_field compute_temperature_field(particleAndVolumeFractionSoA.BFieldID,densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID,Cp_f,Cp_s,omegaT_f,omegaT_s,densityFluid,densityParticle);
    //pystencils::compute_temperature_field compute_temperature_field(densityConcentrationFieldCPUGPUID,energyFieldCPUGPUID);
-   pystencils::compute_temperature_field_particle compute_temperature_field_particle(particleAndVolumeFractionSoA.BsFieldID,particleAndVolumeFractionSoA.particleTemperaturesFieldID,pdfFieldEnergyCPUGPUID, Cp_s,densityParticle);
+   pystencils::compute_temperature_field_particle compute_temperature_field_particle(particleAndVolumeFractionSoA.BFieldID,particleAndVolumeFractionSoA.particleTemperaturesFieldID,pdfFieldEnergyCPUGPUID, Cp_f,Cp_s,omegaT_f,omegaT_s,densityFluid,densityParticle);
 
 #endif
 

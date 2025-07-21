@@ -3,17 +3,17 @@
 PhysicalSetup                         // To be specified in SI units!
 {
     showcase true;
-    xSize 0.05; // = width  // 4dp
-    ySize 0.05; // = depth  // 4dp
-    zSize 0.05; // = height  // 20dp
+    xSize 0.1; // = width  // 4dp
+    ySize 0.1; // = depth  // 4dp
+    zSize 0.1; // = height  // 20dp
     runtime 40;
     uInflow 0.005;
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
-    particleDiameter 0.01;                         // diameter of the particle
-    densityParticle 1000.;                         // density of the particle
-    particleGenerationSpacing 0.01;                // spacing between particles
-    numOfParticles 500;
+    particleDiameter 0.010;                         // diameter of the particle
+    densityParticle 1100.;                         // density of the particle
+    particleGenerationSpacing 0.010;                // spacing between particles
+    numOfParticles 5000;
 }
 
 NumericalSetup
@@ -47,8 +47,8 @@ TemperatureSetup
 
 Output
 {
-    infoSpacing 0.1;             // in s
-    vtkSpacingParticles 0.1;     // in s
-    vtkSpacingFluid 0.1;         // in s
-    vtkFolderName vtk_out;
+    infoSpacing 0.01;             // in s
+    vtkSpacingParticles 0.01;     // in s
+    vtkSpacingFluid 0.01;         // in s
+    vtkFolderName vtk_out_showcase;
 }

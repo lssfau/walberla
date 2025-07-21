@@ -174,7 +174,7 @@ with CodeGeneration() as ctx:
         output={"velocity": velocity_field},
         force= force_concentration_on_fluid,
         force_model=ForceModel.LUO,
-        compressible=True,
+        compressible=False,
         psm_config=psm_config_F,
     )
 
@@ -344,8 +344,9 @@ with CodeGeneration() as ctx:
     assignments = []
     assignments.append(method_energy.conserved_quantity_computation.equilibrium_input_equations_from_pdfs(pdfs_energy.center_vector))
     for k in range(MaxParticlesPerCell):
+        rho_cp_eff = ((1.0 - B.center)* method_fluid.conserved_quantity_computation.density_symbol *Cp_f*omegaT_f + B.center*rho_s*Cp_s*omegaT_s)/((1-B.center)*omegaT_f + B.center*omegaT_s)
         condition = sp.Piecewise(
-            (method_energy.conserved_quantity_computation.density_symbol/rho_s*Cp_s , Bs.center(k) > 0),
+            (method_energy.conserved_quantity_computation.density_symbol/rho_cp_eff , B.center > 0),
             (0, True)
         )
         assignments.append(ps.Assignment(particle_temperatures.center(k), condition))

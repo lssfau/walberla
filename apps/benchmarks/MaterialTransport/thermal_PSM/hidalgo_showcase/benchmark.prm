@@ -50,5 +50,5 @@ Output
 
     vtkSpacingParticles 0.01; // in s
     vtkSpacingFluid 0.01; // in s
-    vtkFolderName vtk_out_30;
+    vtkFolderName vtk_out_benchmark;
 }
