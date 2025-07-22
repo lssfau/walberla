@@ -366,7 +366,7 @@ int main(int argc, char** argv)
       LBMMeshRefinement(blocks, ids.pdfFieldGPU, sweepCollection, boundaryCollection, nonUniformCommunication, nonUniformPackInfo);
 
    LBMMeshRefinement.addRefinementToTimeLoop(timeloop, uint_c(0));
-   LBMMeshRefinement.addPostBoundaryHandlingBlockFunction(evaluation->forceCalculationFunctor());
+   LBMMeshRefinement.addPostBoundaryHandlingFunction(evaluation->forceCalculationFunctor());
 #else
    std::shared_ptr< lbm_generated::BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T > >
       LBMRefinement;
@@ -374,7 +374,7 @@ int main(int argc, char** argv)
    LBMRefinement = std::make_shared<
    lbm_generated::BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T > >(
    blocks, ids.pdfField, sweepCollection, boundaryCollection, nonUniformCommunication, nonUniformPackInfo);
-   LBMRefinement->addPostBoundaryHandlingBlockFunction(evaluation->forceCalculationFunctor());
+   LBMRefinement->addPostBoundaryHandlingFunction(evaluation->forceCalculationFunctor());
    LBMRefinement->addRefinementToTimeLoop(timeloop);
 #endif
    //////////////////

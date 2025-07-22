@@ -33,7 +33,7 @@ namespace walberla
 {
 
 using gpu::communication::NonUniformGPUScheme;
-using BlockFunction = std::function<void (const uint_t)>; // parameters: level
+using LevelFunction = std::function<void (const uint_t)>; // parameters: level
 
 namespace lbm_generated
 {
@@ -108,13 +108,15 @@ class BasicRecursiveTimeStepGPU
 
    void operator()() { timestep(0); };
    void addRefinementToTimeLoop(TimeLoop_T & timeloop, uint_t level = 0);
-   void addPostBoundaryHandlingBlockFunction( const BlockFunction & function );
+   void addPostBoundaryHandlingFunction( const LevelFunction& function );
+   void addPostCollisionFunction( const LevelFunction& function );
 
  private:
    void timestep(uint_t level);
    void ghostLayerPropagation(Block* block, gpuStream_t gpuStream);
    std::function< void() > executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation = false);
-   std::function< void() > executePostBoundaryBlockFunctions(uint_t level);
+   std::function< void() > executePostBoundaryFunctions(uint_t level);
+   std::function< void() > executePostCollisionFunctions(uint_t level);
 
    std::function< void() > executeBoundaryHandlingOnLevel(uint_t level);
 
@@ -128,7 +130,8 @@ class BasicRecursiveTimeStepGPU
 
    SweepCollection_T& sweepCollection_;
    BoundaryCollection_T& boundaryCollection_;
-   std::vector< BlockFunction >  globalPostBoundaryHandlingBlockFunctions_;
+   std::vector< LevelFunction > globalPostBoundaryHandlingFunctions_;
+   std::vector< LevelFunction > globalPostCollisionFunctions_;
 
    std::vector< std::vector< gpuStream_t >> streams_;
    uint_t nStreams_{uint_c(6)};
