@@ -33,6 +33,9 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
    for(auto b: blocks_[level]){
       sweepCollection_.streamCollide(b);
    }
+   for( const auto& func : globalPostCollisionFunctions_){
+      func(level);
+   }
 
    // 1.2 Recursive Descent
    if(level < maxLevel_){
@@ -52,6 +55,9 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       boundaryCollection_(b);
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
+   for( const auto& func : globalPostBoundaryHandlingFunctions_){
+      func(level);
+   }
 
    // 1.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -67,6 +73,9 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       ghostLayerPropagation(b);  // GL-Propagation first without swapping arrays...
       sweepCollection_.streamCollide(b);                // then Stream-Collide on interior, and swap arrays
    }
+   for( const auto& func : globalPostCollisionFunctions_){
+      func(level);
+   }
 
    // 2.2 Recursive Descent
    if(level < maxLevel_){
@@ -81,6 +90,9 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       boundaryCollection_(b);
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
+   for( const auto& func : globalPostBoundaryHandlingFunctions_){
+      func(level);
+   }
 
    // 2.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -94,6 +106,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 {
    // 1.1 Collision
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level), "Refinement Cycle: streamCollide on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
 
    // 1.2 Recursive Descent
    if(level < maxLevel_){
@@ -111,7 +124,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 
    // 1.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
 
    // 1.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -124,6 +137,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 
    // 2.1 Collision and Ghost-Layer Propagation
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level, true), "Refinement Cycle: streamCollide with ghost layer propagation on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
 
    // 2.2 Recursive Descent
    if(level < maxLevel_)
@@ -135,7 +149,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 
    // 2.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
 
    // 2.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -180,10 +194,20 @@ std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, Bo
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostBoundaryBlockFunctions(uint_t level)
+std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostBoundaryFunctions(uint_t level)
 {
    return [level, this]() {
-      for( const auto& func : globalPostBoundaryHandlingBlockFunctions_ ){
+      for( const auto& func : globalPostBoundaryHandlingFunctions_){
+         func(level);
+      }
+   };
+}
+
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
+std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostCollisionFunctions(uint_t level)
+{
+   return [level, this]() {
+      for( const auto& func : globalPostCollisionFunctions_){
          func(level);
       }
    };
@@ -207,9 +231,15 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function )
+inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingFunction( const LevelFunction& function )
 {
-   globalPostBoundaryHandlingBlockFunctions_.emplace_back( function );
+   globalPostBoundaryHandlingFunctions_.emplace_back( function );
+}
+
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
+inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostCollisionFunction( const LevelFunction& function )
+{
+   globalPostCollisionFunctions_.emplace_back( function );
 }
 
 } // namespace lbm_generated

@@ -32,6 +32,9 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
    for(auto b: blocks_[level]){
       sweepCollection_.streamCollide(b);
    }
+   for( const auto& func : globalPostCollisionFunctions_){
+      func(level);
+   }
 
    // 1.2 Recursive Descent
    if(level < maxLevel_){
@@ -51,6 +54,9 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
       boundaryCollection_(b, nullptr);
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
+   for( const auto& func : globalPostBoundaryHandlingFunctions_){
+      func(level);
+   }
 
    // 1.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -66,6 +72,9 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
       ghostLayerPropagation(b);  // GL-Propagation first without swapping arrays...
       sweepCollection_.streamCollide(b);                // then Stream-Collide on interior, and swap arrays
    }
+   for( const auto& func : globalPostCollisionFunctions_){
+      func(level);
+   }
 
    // 2.2 Recursive Descent
    if(level < maxLevel_){
@@ -80,6 +89,9 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
       boundaryCollection_(b, nullptr);
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
+   for( const auto& func : globalPostBoundaryHandlingFunctions_){
+      func(level);
+   }
 
    // 2.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -93,6 +105,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 {
    // 1.1 Collision
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level), "Refinement Cycle: streamCollide on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
 
    // 1.2 Recursive Descent
    if(level < maxLevel_){
@@ -110,7 +123,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
    // 1.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
 
    // 1.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_){
@@ -123,6 +136,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
    // 2.1 Collision and Ghost-Layer Propagation
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level, true), "Refinement Cycle: streamCollide with ghost layer propagation on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
 
    // 2.2 Recursive Descent
    if(level < maxLevel_)
@@ -134,7 +148,7 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 
    // 2.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryBlockFunctions(level), "Refinement Cycle: post boundary handling block functions on level " + std::to_string(level));
+   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
 
    // 2.6 Fine to Coarse Communication, receiving end
    if(level < maxLevel_)
@@ -223,20 +237,35 @@ void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollectio
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
-std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executePostBoundaryBlockFunctions(uint_t level)
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executePostBoundaryFunctions(uint_t level)
 {
    return [this, level]() {
-      for( const auto& func : globalPostBoundaryHandlingBlockFunctions_ ){
+      for( const auto& func : globalPostBoundaryHandlingFunctions_){
          func(level);
       }
    };
 }
 
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+std::function<void()> BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::executePostCollisionFunctions(uint_t level)
+{
+   return [this, level]() {
+      for( const auto& func : globalPostCollisionFunctions_){
+         func(level);
+      }
+   };
+}
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
-inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function )
+inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::addPostBoundaryHandlingFunction( const LevelFunction& function )
 {
-   globalPostBoundaryHandlingBlockFunctions_.emplace_back( function );
+   globalPostBoundaryHandlingFunctions_.emplace_back( function );
+}
+
+template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T, typename TimeLoop_T >
+inline void BasicRecursiveTimeStepGPU< PdfField_T, SweepCollection_T, BoundaryCollection_T, TimeLoop_T >::addPostCollisionFunction( const LevelFunction& function )
+{
+   globalPostCollisionFunctions_.emplace_back( function );
 }
 
 
