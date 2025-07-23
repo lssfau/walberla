@@ -350,11 +350,21 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
 
     set(PYBIND11_FINDPYTHON ON)  # Force FindPython mode
 
-    FetchContent_Declare(
-            pybind11
-            GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG        v2.13.6
-    )
+    if( DEFINED WALBERLA_PYBIND11_SOURCE_DIR )
+        message(STATUS "Using local pybind11 from: ${WALBERLA_PYBIND11_SOURCE_DIR}. The version has to be pybind11 v2.13.6!")
+        FetchContent_Declare(
+                pybind11
+                SOURCE_DIR ${WALBERLA_PYBIND11_SOURCE_DIR}
+        )
+
+    else()
+        message(STATUS "Fetching pybind11 from GitHub")
+        FetchContent_Declare(
+                pybind11
+                GIT_REPOSITORY https://github.com/pybind/pybind11.git
+                GIT_TAG        v2.13.6
+        )
+    endif()
 
     FetchContent_MakeAvailable(pybind11)
 
@@ -537,13 +547,25 @@ endif()
 
 if( WALBERLA_BUILD_WITH_OPENMESH )
 
-    FetchContent_Declare(
-            OpenMesh
-            GIT_REPOSITORY https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git
-            GIT_TAG        OpenMesh-11.0
-            EXCLUDE_FROM_ALL
-            SYSTEM
-    )
+    if ( DEFINED WALBERLA_OPENMESH_SOURCE_DIR )
+        message(STATUS "Using local OpenMesh from: ${WALBERLA_OPENMESH_SOURCE_DIR}")
+        FetchContent_Declare(
+                OpenMesh
+                SOURCE_DIR ${WALBERLA_OPENMESH_SOURCE_DIR}
+                EXCLUDE_FROM_ALL
+                SYSTEM
+        )
+    else()
+        message(STATUS "Fetching OpenMesh from GitLab")
+        FetchContent_Declare(
+                OpenMesh
+                GIT_REPOSITORY https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git
+                GIT_TAG        OpenMesh-11.0
+                EXCLUDE_FROM_ALL
+                SYSTEM
+        )
+    endif()
+
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "Suppress dev warnings")
     FetchContent_MakeAvailable(OpenMesh)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 0 CACHE INTERNAL "Suppress dev warnings")
