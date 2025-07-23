@@ -7,5 +7,46 @@
   },
   "include": [
     "utilities/workflows/cmake-fragments.json"
-  ]
+    ],
+    "configurePresets": [
+        {
+            "name": "Custom configure preset",
+            "displayName": "Custom configure preset",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build_temp_del_cpu",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build_temp_del_cpu",
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": "OFF",
+                "WALBERLA_BUILD_WITH_CODEGEN": "ON",
+                "Python_ROOT_DIR": "/local/dy94rovu/miniconda3/envs/custom_lbmpy/bin",
+                "Python_EXECUTABLE": "/local/dy94rovu/miniconda3/envs/custom_lbmpy/bin/python",
+                "WALBERLA_BUILD_BENCHMARKS": "ON",
+                "WALBERLA_BUILD_SHOWCASES": "ON",
+                "WALBERLA_BUILD_TESTS": "ON",
+                "WALBERLA_BUILD_TUTORIALS": "ON",
+                "WALBERLA_BUILD_WITH_PYTHON": "ON",
+                "WALBERLA_LOGLEVEL": "INFO",
+                "WALBERLA_BUILD_WITH_FASTMATH": "OFF",
+                "WALBERLA_BUILD_WITH_CUDA": "OFF",
+                "CMAKE_CUDA_ARCHITECTURES": "60",
+                "use_2D": "ON",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        }
+    ],
+
+"buildPresets": [
+  {
+    "name": "custom-build",
+    "displayName": "Custom Build",
+    "configurePreset": "Custom configure preset",
+    "description": "Build using the custom config preset",
+    "jobs": 12
+  }
+]
+
 }
