@@ -286,6 +286,13 @@ This requires that both CPython >= 3.10 and the Python development headers are i
 When this is the case, you may activate the Python coupling by setting the `WALBERLA_BUILD_WITH_PYTHON`
 build option to `true`.
 
+To use the embedded Python interpreter, waLBerla needs the Python package pybind11, which is usually fetched automatically.
+
+But there are systems, on which pybind11 can not be fetched automatically, because no network connection is possible.
+In this case, download the version 2.13.6 of the pybind11 source from https://github.com/pybind/pybind11/tree/v2.13,
+copy it to the system without internet connection and set the CMake option ’CMAKE_PYBIND11_SOURCE_DIR’ to your local pybind11 source directory.
+
+
 ## CUDA Support {#cuda-support}
 
 ### Prerequisites
@@ -367,6 +374,10 @@ an open-source tool developed at RWTH Aachen,
 to import and handle surface meshes of geometric objects.
 
 The OpenMesh tool is fetched automatically by CMake, when setting `WALBERLA_BUILD_WITH_OPENMESH=ON`.
+
+There are systems, on which OpenMesh can not be fetched automatically, because no network connection is possible.
+In this case, download the newest OpenMesh source from https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git, 
+copy it to the system without internet connection and set the CMake option option ’CMAKE_OPEN_SOURCE_DIR’ to your local OpenMesh source directory.
 
 ## Metis and ParMetis for Load Balancing
 
