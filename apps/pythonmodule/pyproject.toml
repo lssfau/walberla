@@ -1,0 +1,30 @@
+[project]
+name="waLBerla"
+authors=[
+   {name="Markus Holzer", email="markus.holzer@fau.de"}
+]
+version="${WALBERLA_VERSION}"
+dependencies = [ "numpy>=1.8.0" , "sympy>=1.9,<=1.12.1" ]
+
+[project.urls]
+Homepage = "https://www.walberla.net"
+Repository = "https://i10git.cs.fau.de/walberla/walberla"
+Issues = "https://i10git.cs.fau.de/walberla/walberla/-/issues/"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ['waLBerla',
+            'waLBerla.evaluation',
+            'waLBerla.tools',
+            'waLBerla.tools.source_checker',
+            'waLBerla.tools.report',
+            'waLBerla.tools.sqlitedb',
+            'waLBerla.tools.lbm_unitconversion',
+            'waLBerla.tools.jobscripts',
+            'waLBerla.tools.config']
+
+[tool.setuptools.package-data]
+"*"=["${WALBERLA_MODULE_FILE_NAME}"]
