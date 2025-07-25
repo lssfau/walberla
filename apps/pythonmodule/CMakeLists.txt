@@ -27,9 +27,23 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
     )
     set_target_properties( walberla_cpp PROPERTIES MACOSX_RPATH TRUE )
 
-    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/setup.py  ${CMAKE_CURRENT_BINARY_DIR}/setup.py )
+    set(WALBERLA_MODULE_FILE_NAME "${PYTHON_MODULE_PREFIX}walberla_cpp${PYTHON_MODULE_EXTENSION}")
+    if (WIN32)
+          set(_configuration "Release/")
+    else()
+          set(_configuration "")
+    endif()
 
-    add_custom_target( pythonModule        ALL ${Python_EXECUTABLE} setup.py build   DEPENDS walberla_cpp )
-    add_custom_target( pythonModuleInstall     ${Python_EXECUTABLE} setup.py install --user DEPENDS walberla_cpp )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml  ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml )
+    add_custom_target( pythonModule ALL
+                       COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+                               "${walberla_SOURCE_DIR}/python/waLBerla/"
+                               "${CMAKE_CURRENT_BINARY_DIR}/waLBerla/"
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                "${CMAKE_CURRENT_BINARY_DIR}/${_configuration}${WALBERLA_MODULE_FILE_NAME}"
+                                "${CMAKE_CURRENT_BINARY_DIR}/waLBerla/${WALBERLA_MODULE_FILE_NAME}"
+                       DEPENDS walberla_cpp)
+
+    add_custom_target( pythonModuleInstall ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_BINARY_DIR} DEPENDS pythonModule )
 endif()
 endif()
