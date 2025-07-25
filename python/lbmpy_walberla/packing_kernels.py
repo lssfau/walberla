@@ -43,7 +43,7 @@ def generate_packing_kernels(generation_context: CodeGenerationContext, class_na
     default_dtype = config.data_type.default_factory()
     is_float = True if issubclass(default_dtype.numpy_dtype.type, np.float32) else False
 
-    cg = PackingKernelsCodegen(stencil, streaming_pattern, class_name, config)
+    cg = PackingKernelsCodegen(stencil, streaming_pattern, class_name, config, nonuniform)
 
     kernels = cg.create_uniform_kernel_families()
 
@@ -92,7 +92,7 @@ def generate_packing_kernels(generation_context: CodeGenerationContext, class_na
 class PackingKernelsCodegen:
 
     def __init__(self, stencil, streaming_pattern, class_name, config: CreateKernelConfig,
-                 src_field=None, dst_field=None):
+                 nonuniform, src_field=None, dst_field=None):
         self.stencil = stencil
         self.dim = stencil.D
         self.values_per_cell = stencil.Q
@@ -109,8 +109,9 @@ class PackingKernelsCodegen:
         self.accessors = [get_accessor(streaming_pattern, t) for t in get_timesteps(streaming_pattern)]
         self.mask_field = fields(f'mask : uint32 [{self.dim}D]', layout=src_field.layout)
 
+        self.nonuniform = nonuniform
         self.block_wise = True
-        if not self.inplace or not self.config.target == Target.GPU:
+        if not self.inplace or not self.config.target == Target.GPU or not nonuniform:
             self.block_wise = False
 
         self.index = TypedSymbol("index", dtype=BasicType(np.int64))
