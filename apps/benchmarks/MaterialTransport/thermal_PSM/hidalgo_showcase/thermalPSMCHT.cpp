@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 
    const bool particleBarriers    = true;
    const bool sendDirectlyFromGPU = false;
-   const Vector3< uint_t > particleSubBlockSize(10, 10, 1);
+   const Vector3< uint_t > particleSubBlockSize(5, 5, 1);
    const real_t linkedCellWidthRation = real_c(1.01);
    const Vector3< real_t > generationDomainFraction(0.95, 0.95, 0.95);
 
@@ -756,7 +756,7 @@ int main(int argc, char** argv)
       {
          boundariesBlockString += "\n BoundariesEnergy";
          boundariesBlockString += "{"
-                                  "Border { direction W;    walldistance -1;  flag Density_Energy_static_hot; }"
+                                  "Border { direction W;    walldistance -1;  flag Neumann_Energy; }"
                                   "Border { direction E;    walldistance -1;  flag Neumann_Energy; }";
 
          if (!periodicInY)

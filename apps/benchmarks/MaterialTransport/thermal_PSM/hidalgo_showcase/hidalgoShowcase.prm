@@ -4,8 +4,8 @@ PhysicalSetup                         // To be specified in SI units!
 {
     showcase true;
     xSize 0.1; // = width  // 4dp
-    ySize 0.1; // = depth  // 4dp
-    zSize 0.1; // = height  // 20dp
+    ySize 0.05; // = depth  // 4dp
+    zSize 0.05; // = height  // 20dp
     runtime 40;
     uInflow 0.005;
     kinematicViscosityFluid 1e-5;
@@ -13,7 +13,7 @@ PhysicalSetup                         // To be specified in SI units!
     particleDiameter 0.010;                         // diameter of the particle
     densityParticle 1100.;                         // density of the particle
     particleGenerationSpacing 0.010;                // spacing between particles
-    numOfParticles 5000;
+    numOfParticles 200;
 }
 
 NumericalSetup
@@ -23,9 +23,9 @@ NumericalSetup
     dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
 
     // product of number of blocks should be equal to number of used processes
-    numXBlocks 1;
+    numXBlocks 2;
     numYBlocks 1;
-    numZBlocks 1;
+    numZBlocks 2;
 
 }
 
@@ -35,14 +35,14 @@ TemperatureSetup
     Tcold 0;
     Tref  0;
     PrandtlNumber 1;
-    particleTemperature 1;
+    particleTemperature 0;
     thermal_expansion_coeff 1.04e-4;
     Cpf 1;
     Cps 1;
     Kf  0.01;
     Ks  0.15;  // 15 times Kf
     Ra 100000;
-    ratio 15;
+    ratio 1;
 }
 
 Output
