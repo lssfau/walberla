@@ -43,7 +43,7 @@ if (WALBERLA_BUILD_WITH_CODEGEN)
                     ConcentrationMacroGetter.h ConcentrationMacroGetter.cpp
                     EnergyMacroSetter.h EnergyMacroSetter.cpp
                     EnergyMacroGetter.h EnergyMacroGetter.cpp
-                    compute_temperature_field.h compute_temperature_field.cpp
+                    compute_temperature_field.h compute_temperature_field.${CODEGEN_FILE_SUFFIX}
                     compute_temperature_field_particle.h compute_temperature_field_particle.cpp
                     GeneralInfoHeader.h
         )

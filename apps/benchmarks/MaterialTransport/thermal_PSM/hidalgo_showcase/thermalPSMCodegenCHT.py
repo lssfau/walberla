@@ -338,7 +338,7 @@ with CodeGeneration() as ctx:
     compute_temperature_field_ac = ps.AssignmentCollection(
             compute_temperature_field
     )
-    generate_sweep(ctx, "compute_temperature_field", compute_temperature_field_ac)
+    generate_sweep(ctx, "compute_temperature_field", compute_temperature_field_ac,target=target)
 
 
     assignments = []
