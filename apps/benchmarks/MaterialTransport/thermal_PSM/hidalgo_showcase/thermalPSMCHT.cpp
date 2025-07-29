@@ -319,7 +319,7 @@ int main(int argc, char** argv)
    Config::BlockHandle numericalSetup = cfgFile->getBlock("NumericalSetup");
    const real_t dx_SI                 = numericalSetup.getParameter< real_t >("dx");
    const real_t uInflow               = numericalSetup.getParameter< real_t >("uInflow");
-   const real_t timeStepSize          = numericalSetup.getParameter< real_t >("dt");
+   //const real_t timeStepSize          = numericalSetup.getParameter< real_t >("dt");
    const uint_t numXBlocks            = numericalSetup.getParameter< uint_t >("numXBlocks");
    const uint_t numYBlocks            = numericalSetup.getParameter< uint_t >("numYBlocks");
    const uint_t numZBlocks            = numericalSetup.getParameter< uint_t >("numZBlocks");
@@ -330,13 +330,8 @@ int main(int argc, char** argv)
    const real_t Tref_SI                 = TemperatureSetup.getParameter< real_t >("Tref");
    const real_t Pr                      = TemperatureSetup.getParameter< real_t >("PrandtlNumber");
    const real_t particleTemperature     = TemperatureSetup.getParameter< real_t >("particleTemperature");
-   real_t thermal_expansion_coeff_SI    = TemperatureSetup.getParameter< real_t >("thermal_expansion_coeff");
-   real_t Cp_f_SI                       = TemperatureSetup.getParameter< real_t >("Cpf");
-   real_t Cp_s_SI                       = TemperatureSetup.getParameter< real_t >("Cps");
-   real_t Kf_SI                         = TemperatureSetup.getParameter< real_t >("Kf");
-   real_t Ks_SI                         = TemperatureSetup.getParameter< real_t >("Ks");
-   real_t Ra                            = TemperatureSetup.getParameter< real_t >("Ra");
-   real_t ratio                         = TemperatureSetup.getParameter< real_t >("ratio");
+   const real_t Ra                      = TemperatureSetup.getParameter< real_t >("RayleighNumber");
+   real_t diffusivityRatio                         = TemperatureSetup.getParameter< real_t >("diffusivityRatio");
 
    Config::BlockHandle outputSetup     = cfgFile->getBlock("Output");
    const real_t infoSpacing_SI         = outputSetup.getParameter< real_t >("infoSpacing");
@@ -407,7 +402,8 @@ int main(int argc, char** argv)
 
    // in simulation units: dt = 1, dx = 1, densityFluid = 1
 
-   real_t dt_SI                           = timeStepSize;
+   //real_t dt_SI                           = timeStepSize;
+   const real_t dt_SI                       = uInflow / uInflow_SI * dx_SI;
    const real_t particleDiameter          = particleDiameter_SI / dx_SI;
    const real_t particleGenerationSpacing = particleGenerationSpacing_SI / dx_SI;
    const real_t gravitationalAcceleration = gravitationalAcceleration_SI * dt_SI * dt_SI / dx_SI;
@@ -433,43 +429,6 @@ int main(int argc, char** argv)
 
    const real_t T_conversion               = real_t(1);
    const real_t rho_0_SI                   = densityFluid_SI; // just for understanding not used anywhere
-   const real_t thermalDiffusivityFluid_SI = Kf_SI / (densityFluid_SI * Cp_f_SI);
-
-   // conversion for the various temperature quantities:
-   /*const real_t rho_0 = densityFluid;
-   const real_t Thot = Thot_SI/T_conversion;
-   const real_t Tcold = Tcold_SI/T_conversion;
-   const real_t Cp_f =  Cp_f_SI * (dt_SI * dt_SI * T_conversion)/(dx_SI * dx_SI);
-   const real_t Cp_s =  Cp_s_SI * (dt_SI * dt_SI * T_conversion)/(dx_SI * dx_SI);
-   const real_t Tref = Tref_SI/T_conversion;
-   const real_t kinematicViscosityLB = (kinematicViscosityFluid_SI * dt_SI) / (dx_SI * dx_SI);
-   const real_t thermalDiffusivityFluid_LB = kinematicViscosityLB/Pr;
-   const real_t alphaLB = thermal_expansion_coeff_SI * T_conversion;
-
-   const real_t Wref = (particleRe * kinematicViscosityLB)/particleDiameter;
-   densityParticle = (Wref*Wref*3)/(4*particleDiameter*gravitationalAcceleration) + 1;
-   const real_t Gr                     = (gravitationalAcceleration * alphaLB * std::pow(particleDiameter, 3) *
-   (particleTemperature - Tref)) / (kinematicViscosityLB * kinematicViscosityLB); densityRatio =
-   densityParticle/densityFluid; densityParticle_SI = (densityParticle * densityFluid_SI)/(densityFluid);
-
-   const real_t thermalDiffusivityParticle_SI = Ks_SI/(densityParticle_SI*Cp_s_SI);
-   const real_t thermalDiffusivityParticle_LB = (thermalDiffusivityParticle_SI * dt_SI) / (dx_SI * dx_SI);
-   const real_t omega_f = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
-   const real_t omegaT_f = lbm::collision_model::omegaFromViscosity(thermalDiffusivityFluid_LB);
-   const real_t omegaT_s = lbm::collision_model::omegaFromViscosity(thermalDiffusivityParticle_LB);
-
-   WALBERLA_LOG_INFO_ON_ROOT("density particle LB is " << densityParticle);
-   WALBERLA_LOG_INFO_ON_ROOT("density fluid LB is " << densityFluid);
-   WALBERLA_LOG_INFO_ON_ROOT("Cp particle is " << Cp_s << " Cp fluid is  " << Cp_f);
-   WALBERLA_LOG_INFO_ON_ROOT("Cp particle is " << Cp_s << " Cp fluid is  " << Cp_f);
-   WALBERLA_LOG_INFO_ON_ROOT("Reference velocity Wref = " << Wref);
-   WALBERLA_LOG_INFO_ON_ROOT("Particle Reynolds Number Re_ref = " << particleRe);
-   WALBERLA_LOG_INFO_ON_ROOT("Grashof Number Gr = " << Gr);
-   WALBERLA_LOG_INFO_ON_ROOT("particle density is " << densityParticle_SI);
-   WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  fluid is " << omegaT_f);
-   WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  particle is " << omegaT_s);
-   WALBERLA_LOG_INFO_ON_ROOT("check equal " << kinematicViscosityFluid_SI/Pr <<" and  " <<
-   Kf_SI/(densityFluid_SI*Cp_f_SI);)*/
 
    // for non-dimensional simulations
    const real_t rho_0 = densityFluid;
@@ -479,13 +438,14 @@ int main(int argc, char** argv)
    const real_t Cp_f = real_t(1);
    const real_t Cp_s = real_c(densityFluid*Cp_f/densityParticle);
    real_t Cp_S_SI = (Cp_s * dx_SI*dx_SI)/(dt_SI*dt_SI);
+
    WALBERLA_LOG_INFO_ON_ROOT("si cp solid is  " << Cp_S_SI);
-   real_t omega_f                             = 1 / (0.6);
-   const real_t kinematicViscosityLB          = lbm::collision_model::viscosityFromOmega(omega_f);
+   //real_t omega_f                             = 1 / (0.6);
+   //const real_t kinematicViscosityLB          = lbm::collision_model::viscosityFromOmega(omega_f);
+   const real_t kinematicViscosityLB =         (kinematicViscosityFluid_SI * dt_SI)/(dx_SI*dx_SI);
+   real_t omega_f                             = lbm::collision_model::omegaFromViscosity(kinematicViscosityLB);
    const real_t thermalDiffusivityFluid_LB    = kinematicViscosityLB / Pr;
-   const real_t thermalDiffusivityParticle_SI = Ks_SI / (densityParticle_SI * Cp_S_SI);
-   const real_t thermalDiffusivityParticle_LB =
-      ratio * thermalDiffusivityFluid_LB; //(thermalDiffusivityParticle_SI * dt_SI) / (dx_SI * dx_SI);
+   const real_t thermalDiffusivityParticle_LB = diffusivityRatio * thermalDiffusivityFluid_LB;
    const real_t omegaT_f = lbm::collision_model::omegaFromViscosity(thermalDiffusivityFluid_LB);
    const real_t omegaT_s = lbm::collision_model::omegaFromViscosity(thermalDiffusivityParticle_LB);
 
@@ -499,11 +459,9 @@ int main(int argc, char** argv)
    WALBERLA_LOG_INFO_ON_ROOT("density fluid LB is " << densityFluid);
    WALBERLA_LOG_INFO_ON_ROOT("Cp particle is " << Cp_s << " Cp fluid is  " << Cp_f);
    WALBERLA_LOG_INFO_ON_ROOT("Cp particle is " << Cp_s << " Cp fluid is  " << Cp_f);
+   WALBERLA_LOG_INFO_ON_ROOT("hydrodynamic relaxation LB is " << omega_f);
    WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  fluid is " << omegaT_f);
    WALBERLA_LOG_INFO_ON_ROOT("Energy Relaxation rate  particle is " << omegaT_s);
-   WALBERLA_LOG_INFO_ON_ROOT("check equal " << kinematicViscosityFluid_SI / Pr << " and  "
-                                            << Kf_SI / (densityFluid_SI * Cp_f_SI);)
-   // WALBERLA_LOG_INFO_ON_ROOT("Rayleigh number for 2D case is " << RayleighNumber);
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
