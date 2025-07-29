@@ -31,7 +31,7 @@ from pystencils_walberla import (
 from lbmpy_walberla import generate_boundary
 from lbmpy_walberla.additional_data_handler import DiffusionDirichletAdditionalDataHandler
 from pystencils.cache import clear_cache
-clear_cache()
+#clear_cache()
 
 
 
