@@ -3,15 +3,15 @@
 PhysicalSetup                         // To be specified in SI units!
 {
     showcase true;
-    xSize 0.1;
-    ySize 0.05;
-    zSize 0.05;
+    xSize 0.1;                                      // width in SI units
+    ySize 0.05;                                     // depth in SI units
+    zSize 0.05;                                     // height in SI units
     runtime 40;
     uInflow 0.01;
     kinematicViscosityFluid 1e-5;
     densityFluid 1000.;
     particleDiameter 0.010;                         // diameter of the particle
-    densityParticle 1100.;                         // density of the particle
+    densityParticle 1100.;                          // density of the particle
     particleGenerationSpacing 0.010;                // spacing between particles
     numOfParticles 200;
 }
@@ -19,10 +19,8 @@ PhysicalSetup                         // To be specified in SI units!
 NumericalSetup
 {
     dx 0.001; // in m
-    uInflow 0.01; // in LBM units, should be smaller than 0.1, this then determines dt if not equal to 0
-    //dt 1e-3;      // this is the dt_SI if at all uInflow is set to 0.
-
-    // product of number of blocks should be equal to number of used processes
+    uInflow 0.01;                                   // in LBM units, should be smaller than 0.1, this then determines dt if not equal to 0
+                                                    // product of number of blocks should be equal to number of used processes
     numXBlocks 2;
     numYBlocks 1;
     numZBlocks 2;
@@ -31,9 +29,9 @@ NumericalSetup
 
 TemperatureSetup
 {
-    Thot 1;   // ThotSI = ThotLB   (concentration conversion from SI to LB)
-    Tcold 0;
-    Tref  0;
+    Thot 1;                                         // Temperature of hot wall
+    Tcold 0;                                        // Temperature of cold wall
+    Tref  0;                                        // Temperature of ambient
     PrandtlNumber 1;
     particleTemperature 1;
     RayleighNumber 100000;
@@ -42,8 +40,9 @@ TemperatureSetup
 
 Output
 {
-    infoSpacing 0.01;             // in s
-    vtkSpacingParticles 0.01;     // in s
-    vtkSpacingFluid 0.01;         // in s
+    infoSpacing 0.01;                                // in s
+    writeSlice  false;                               // boolean whether you want slice visualization or not. Suggested for large domain sizes
+    vtkSpacingParticles 0.01;                        // in s
+    vtkSpacingFluid 0.01;                            // in s
     vtkFolderName vtk_out_showcase;
 }
