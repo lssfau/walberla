@@ -126,19 +126,21 @@ public:
 
     struct ForceStruct {
        {% if dim == 3 -%}
-       double F_0;
-       double F_1;
-       double F_2;
-       ForceStruct() : F_0(double_c(0.0)), F_1(double_c(0.0)), F_2(double_c(0.0)) {}
+       real_t F_0;
+       real_t F_1;
+       real_t F_2;
+       bool cellOnGL;
+       ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), F_2(real_c(0.0)), cellOnGL(cellOnGL_) {}
        bool operator==(const ForceStruct & o) const {
-          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && floatIsEqual(F_2, o.F_2);
+          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && floatIsEqual(F_2, o.F_2) && cellOnGL == o.cellOnGL;
        }
        {%- else -%}
-       double F_0;
-       double F_1;
-       ForceStruct() : F_0(double_c(0.0)), F_1(double_c(0.0)) {}
+       real_t F_0;
+       real_t F_1;
+       bool cellOnGL;
+       ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), cellOnGL(cellOnGL_) {}
        bool operator==(const ForceStruct & o) const {
-          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1);
+          return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && cellOnGL == o.cellOnGL;
        }
        {%- endif -%}
 
@@ -162,18 +164,19 @@ public:
        ForceStruct * pointerGpu()  { return gpuVector_[0]; }
        {% endif -%}
 
-       Vector3<double> getForce()
+       Vector3<real_t> getForce()
        {
           syncCPU();
-          Vector3<double> result(double_c(0.0));
+          Vector3<real_t> result(real_c(0.0));
           for(std::vector<ForceStruct>::iterator it = cpuVector_.begin(); it != cpuVector_.end(); ++it)
           {
-             result[0] += it->F_0;
-             result[1] += it->F_1;
-             {% if dim == 3 -%}
-             result[2] += it->F_2;
-             {% endif -%}
-
+             if (!it->cellOnGL) {
+                result[0] += it->F_0;
+                result[1] += it->F_1;
+                {% if dim == 3 -%}
+                result[2] += it->F_2;
+                {% endif -%}
+             }
           }
           return result;
        }
@@ -240,16 +243,16 @@ public:
         {{- ["IBlock * block", kernel.kernel_selection_parameters, ["gpuStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}}
     );
 
-    Vector3<double> getForce(IBlock * {% if calculate_force -%}block{%else%}/*block*/{%- endif %})
+    Vector3<real_t> getForce(IBlock * {% if calculate_force -%}block{%else%}/*block*/{%- endif %})
     {
        {% if calculate_force -%}
        auto * forceVector = block->getData<ForceVector>(forceVectorID);
        if(forceVector->empty())
-          return Vector3<double>(double_c(0.0));
+          return Vector3<real_t>(real_c(0.0));
        return forceVector->getForce();
        {% else %}
        WALBERLA_ABORT("Boundary condition was not generated including force calculation.")
-       return Vector3<double>(double_c(0.0));
+       return Vector3<real_t>(real_c(0.0));
        {%- endif %}
     }
 
@@ -328,6 +331,11 @@ public:
                  indexVectorInner.push_back( element );
               else
                  indexVectorOuter.push_back( element );
+
+              {% if calculate_force -%}
+              bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
+              forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+              {%endif%}
            }
         }
         {% endfor %}
@@ -347,6 +355,10 @@ public:
                 else
                     indexVectorOuter.push_back( element );
             }
+            {% if calculate_force -%}
+            bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
+            forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+            {%endif%}
             {% endfor %}
         }
         {%endif%}
@@ -378,6 +390,11 @@ public:
                     indexVectorInner.push_back( element );
                 else
                     indexVectorOuter.push_back( element );
+
+                {% if calculate_force -%}
+                bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
+                forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+                {%endif%}
                 {% endif %}
             }
             {% endfor %}
@@ -401,6 +418,11 @@ public:
                 indexVectorInner.push_back( element );
                 else
                 indexVectorOuter.push_back( element );
+
+                {% if calculate_force -%}
+                bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
+                forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+                {%endif%}
             }
         {% endif -%}
 
@@ -409,7 +431,6 @@ public:
 
         indexVectors->syncGPU();
         {% if calculate_force -%}
-        forceVector->forceVector().resize(indexVectorAll.size());
         forceVector->syncGPU();
         {%- endif %}
     }
