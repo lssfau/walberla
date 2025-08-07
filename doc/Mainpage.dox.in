@@ -1,15 +1,14 @@
 /**
 \mainpage waLBerla - widely applicable lattice Boltzmann from Erlangen
 
-\image html waLBerla.png
+<div style="margin: 3em 0; text-align: center;">
+  <img src="walberla_logo.svg" alt="" class="inline">
+</div>
 
 Welcome to the waLBerla Framework, a widely applicable lattice Boltzmann simulation code from Erlangen.
 These are the documentation pages for the project's C++ code base.
 
-\note
-This is the documentation for waLBerla version \doxyconfig PROJECT_NUMBER.
-To find the documentation for the current development revision,
-please refer to our Git repository at https://i10git.cs.fau.de/walberla/walberla.
+@RELEASE_NOTE@
 
 \section getting-started Setup Instructions
 
@@ -37,11 +36,6 @@ all the basic data strcutures and concepts of the framework.
 \subsection mesapd Modular and Extensible Software Architecture for Particle Dynamics
 
 - \ref tutorial_mesapd_01 \n
-
-\subsection pe Rigid Body Dynamics (pe)
-
-- \ref tutorial_pe_01 \n
-- \ref tutorial_pe_02 \n
 
 \subsection pdes Solving Partial Differential Equations
 
@@ -88,6 +82,16 @@ To get further information have a look at the modules pages.
 Also, the test cases provided in the tests directory are a good starting point for your own developments.
 Additionally, there is a folder for full-fledged application codes to be found under <tt>apps/benchmarks</tt> where also codes of walBerla publications are found.
 
+\section contact Contact Us
+
+To get in touch with the waLBerla team, you can:
+
+- For bug reports and code-related issues:
+  Create an issue at https://i10git.cs.fau.de/walberla/walberla and describe the bug
+  as accurately as possible.
+- For feature requests, collaboration inquiries, etc.:
+  write to our developer's mailing list (mailto:cs10-walberla@fau.de).
+
 \section cite Please cite us
 
 If you use waLBerla in the preparation of a publication, please cite
@@ -99,24 +103,5 @@ which you should cite in addition if you use them.
 - Python interface: \cite bauer2016python
 - pystencils code generation: \cite bauer2019code
 - lbmpy LB model generation: \cite bauer2021lbmpy
-
-\htmlonly
-<!--
-<div>
-<canvas id="viewport" width="800" height="600"></canvas>
-
-<div id="dependencies" style="visibility:hidden">
-\endhtmlonly
-	\htmlinclude moduleStatistics.json
- \htmlonly
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-<script src="./arbor.js"></script>
-<script src="./arbor-graphics.js"></script>
-<script src="./module-graph.js"></script>
-</div>
--->
-\endhtmlonly
 
 */

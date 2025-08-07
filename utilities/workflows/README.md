@@ -1,6 +1,6 @@
 # waLBerla Continuous Integration Workflows
 
-This directory holds the infrastructure and utilities that power
+The directory `utilities/workflows` holds the infrastructure and utilities that power
 waLBerla's continuous integration and testing (CI) workflows.
 
 ## Ressources

@@ -13,9 +13,9 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \\file TimestepTracker.h
-//! \\ingroup lbm
-//! \\author Frederik Hennig <frederik.hennig@fau.de>
+//! \file TimestepTracker.h
+//! \ingroup lbm
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //======================================================================================================================
 
 #pragma once

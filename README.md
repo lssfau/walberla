@@ -1,76 +1,33 @@
 # waLBerla
 
-waLBerla (widely applicable Lattice Boltzmann from Erlangen) is a massively
-parallel framework for multi physics applications. Besides its original
-objective, Lattice Boltzmann solvers for hydrodynamics, it now contains
-modules for other applications like Multigrid and rigid body dynamics
-as well. Great emphasis is placed on the interoperability between the modules
-in particular the fluid-particle coupling.
+waLBerla (widely applicable Lattice Boltzmann from Erlangen) is a massively parallel framework for multiphysics simulation applications.
+Beyond computational fluid dynamics with the lattice Boltzmann method, the framework now features multiphase and free-surface flows,
+rigid body and particle dynamics as well as fluid-structure coupling with moving geometries.
 It scales from laptops to current and future supercomputers while maintaining
 near-perfect efficiency.
 
-See <https://www.walberla.net> for more information and a showcase of applications.
+## Getting Started with waLBerla
+
+Refer to our [Setup Guide](https://walberla.pages.i10git.cs.fau.de/walberla/setup-instructions.html) for instructions
+on setting up and building waLBerla.
 
 ## Documentation and Tutorials
 
-Documentation for the C++ framework is available in
-[Doxygen](https://walberla.net/doxygen/index.html), while the Python interface
-is documented in [Sphinx](https://walberla.net/sphinx/index.html).
+You can find our framework documentation, guides, tutorials, and examples on the following pages:
 
-## Getting started
-
-The minimum requirements are a C++20-compliant compiler (e.g. GCC or Clang)
-and the [CMake](https://www.cmake.org)
-build system. Furthermore, you need an MPI library (like
-[Open MPI](https://www.open-mpi.org)) if you want to make use of parallel
-processing capabilities. All of these dependencies are typically available in
-your operating system's package manager.
-
-### CMake
-
-The typical steps, assuming your are in the waLBerla source directory, are:
-
-- `mkdir build; cd build` create a build directory and change into it
-- `cmake ..` call CMake with the waLBerla source directory as an argument
-- `make` build waLBerla
-
-To specify a CMake option you need to use `-D(Option)=(Value)`. For example to set the C++ compiler one can use:
-`cmake -DCMAKE_CXX_COMPILER=clang++`
-
-To list and modify the CMake options the `ccmake` tool can be used. Just call `ccmake .` in your **build** directory to see and change the
-CMake options and variables.
-
-Some important CMake variables:
-
-- `WALBERLA_BUILD_WITH_CODEGEN` Enable pystencils code generation"
-- `Python_ROOT_DIR` Specify the directory of the `python` executable. e.g. `~/miniconda/bin/`
-- `MPI_HOME` Specify the base directory of the MPI installation.
-- `WALBERLA_BUILD_WITH_PYTHON` Support for embedding Python
-- `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support (not compatible with ROCm HIP support)
-- `WALBERLA_BUILD_WITH_HIP` Enable ROCm HIP support (not compatible with CUDA support)
-
-For a full list of CMake options see the [CMakeLists.txt](CMakeLists.txt) file or use `ccmake` as described above.
-
-### Codegen and Python
-
-To use the `lbmpy`/`pystencils` code generation please install the packages with e.g. `python -m pip install lbmpy` and specify the correct python
-environment when calling CMake.
-
-In previous versions of CMake one could use `PYTHON_EXECUTABLE` or `PYTHON_ROOT_DIR` (all upper case) to specify the python executable or
-the directory. This does **NOT** work anymore. Please use `Python_ROOT_DIR`.
+ - Latest Release: [C++ Framework](http://walberla.net/doxygen/index.html), [Python Interface](http://walberla.net/sphinx/index.html)
+ - Current Development Revision: [C++ Framework](walberla.pages.i10git.cs.fau.de/walberla/)
 
 ## Get involved
 
 ### Contributing
 
-Please submit all code contributions on our
-[GitLab](https://i10git.cs.fau.de/walberla/walberla). To get an account, please
-sign and submit the [contributor license agreement](CONTRIBUTING.txt).
+Please refer to the [contribution guide](CONTRIBUTING.md) for guidance on contributing to waLBerla.
 
 ### Support
 
-While we currently do not have a mailing list, any questions can be asked via
-the [Issue Tracker](https://i10git.cs.fau.de/walberla/walberla/issues).
+To get in touch with the waLBerla developers, use our [Issue Tracker](https://i10git.cs.fau.de/walberla/walberla/issues)
+or the waLBerla mailing list ([cs10-walberla@fau.de](mailto:cs10-walberla@fau.de)).
 
 ## Authors
 
