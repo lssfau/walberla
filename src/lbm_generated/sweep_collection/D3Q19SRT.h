@@ -13,8 +13,8 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \\file D3Q19SRT.h
-//! \\author pystencils
+//! \file D3Q19SRT.h
+//! \author pystencils
 //======================================================================================================================
 
 #pragma once

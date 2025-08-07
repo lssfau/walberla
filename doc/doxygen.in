@@ -44,14 +44,14 @@ PROJECT_NUMBER         = @WALBERLA_VERSION@
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = " widely applicate Lattice Boltzmann code from Erlangen "
+PROJECT_BRIEF          =
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is included in
 # the documentation. The maximum height of the logo should not exceed 55 pixels
 # and the maximum width should not exceed 200 pixels. Doxygen will copy the logo
 # to the output directory.
 
-PROJECT_LOGO           = "@walberla_SOURCE_DIR@/doc/pics/waLBerla_logo.png"
+PROJECT_LOGO           = "@walberla_SOURCE_DIR@/doc/_static/walberla_wave.svg"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -755,6 +755,7 @@ WARN_LOGFILE           = "@CMAKE_CURRENT_BINARY_DIR@/DoxygenWarnings.txt"
 
 INPUT                  = "@walberla_SOURCE_DIR@/src" \
                          "@walberla_SOURCE_DIR@/doc" \
+                         "@walberla_BINARY_DIR@/doc" \
                          "@walberla_SOURCE_DIR@/apps/tutorials" \
                          "@walberla_SOURCE_DIR@/utilities" \
                          @DOCUMENTATION_INPUT_FROM_APP@
@@ -861,6 +862,7 @@ EXAMPLE_RECURSIVE      = NO
 
 IMAGE_PATH             = "@walberla_SOURCE_DIR@/src" \
                          "@walberla_SOURCE_DIR@/doc/pics" \
+                         "@walberla_SOURCE_DIR@/doc/_static" \
                          @DOCUMENTATION_INPUT_FROM_APP@
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
@@ -1100,7 +1102,9 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_STYLESHEET  = @AWESOME_CSS_DIR@/doxygen-awesome.css \
+                         @AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only.css \
+                         @AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only-darkmode-toggle.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1110,13 +1114,18 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = @walberla_SOURCE_DIR@/utilities/module_graph/arbor.js \
+HTML_EXTRA_FILES       = @walberla_SOURCE_DIR@/doc/_static/walberla_logo.svg \
+                         @walberla_SOURCE_DIR@/doc/_static/walberla_logo_dark.svg \
+                         @walberla_SOURCE_DIR@/utilities/module_graph/arbor.js \
                          @walberla_SOURCE_DIR@/utilities/module_graph/arbor-graphics.js \
                          @walberla_SOURCE_DIR@/utilities/module_graph/module-graph.js \
-                         @walberla_SOURCE_DIR@/doc/assets/bootstrap.min.css \
-                         @walberla_SOURCE_DIR@/doc/assets/style.css \
-                         @walberla_SOURCE_DIR@/doc/assets/doxygen.css \
-                         @walberla_SOURCE_DIR@/doc/assets/doxygen_extra.css
+                         @walberla_SOURCE_DIR@/utilities/module_graph/module-graph.js \
+                         @AWESOME_CSS_DIR@/doxygen-awesome.css \
+                         @AWESOME_CSS_DIR@/doxygen-awesome-darkmode-toggle.js \
+                         @AWESOME_CSS_DIR@/doxygen-awesome-interactive-toc.js \
+                         @AWESOME_CSS_DIR@/doxygen-awesome-fragment-copy-button.js
+
+HTML_COPY_CLIPBOARD    = NO
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the stylesheet and background images according to
@@ -1376,6 +1385,31 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 
 DISABLE_INDEX          = NO
 
+# The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
+# should be rendered with a dark or light theme.
+# Possible values are: LIGHT always generates light mode output, DARK always
+# generates dark mode output, AUTO_LIGHT automatically sets the mode according
+# to the user preference, uses light mode if no preference is set (the default),
+# AUTO_DARK automatically sets the mode according to the user preference, uses
+# dark mode if no preference is set and TOGGLE allows a user to switch between
+# light and dark mode via a button.
+# The default value is: AUTO_LIGHT.
+# This tag requires that the tag GENERATE_HTML is set to YES.
+
+HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
+
+# When both GENERATE_TREEVIEW and DISABLE_INDEX are set to YES, then the
+# FULL_SIDEBAR option determines if the side bar is limited to only the treeview
+# area (value NO) or if it should extend to the full height of the window (value
+# YES). Setting this to YES gives a layout similar to
+# https://docs.readthedocs.io with more room for contents, but less room for the
+# project logo, title, and description. If either GENERATE_TREEVIEW or
+# DISABLE_INDEX is set to NO, this option has no effect.
+# The default value is: NO.
+# This tag requires that the tag GENERATE_HTML is set to YES.
+
+FULL_SIDEBAR           = NO
+
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information. If the tag
 # value is set to YES, a side panel will be generated containing a tree-like
@@ -1391,7 +1425,7 @@ DISABLE_INDEX          = NO
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values that
 # doxygen will group on one line in the generated HTML documentation.

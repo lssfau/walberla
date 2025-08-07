@@ -804,10 +804,40 @@ if (WALBERLA_BUILD_DOC)
   endif ( )
 
   if ( DOXYGEN_FOUND )
+
+     include(FetchContent)
+     FetchContent_Declare(
+         doxygen-awesome-css
+         URL https://github.com/jothepro/doxygen-awesome-css/archive/refs/heads/main.zip
+     )
+     FetchContent_MakeAvailable(doxygen-awesome-css)
+
+     # Save the location the files were cloned into
+     # This allows us to get the path to doxygen-awesome.css
+     FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+
      set ( DOXYGEN_HTML_HEADER ${walberla_SOURCE_DIR}/doc/header.html )
      set ( DOXYGEN_HTML_FOOTER ${walberla_SOURCE_DIR}/doc/footer.html )
      set ( DOXYGEN_HTML_OUTPUT "html" )
 
+     # Find out if the current revision is a release or not
+     execute_process(
+      COMMAND git describe --tags --exact-match
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_TAG
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+      RESULT_VARIABLE TAG_RESULT
+     )
+
+   message(STATUS "Found ${GIT_TAG} ${TAG_RESULT} ${WALBERLA_VERSION}")
+     if(TAG_RESULT EQUAL 0 AND GIT_TAG STREQUAL "v${WALBERLA_VERSION}")
+       set(RELEASE_NOTE "\\include{doc} release.dox")
+     else()
+       set(RELEASE_NOTE "\\include{doc} development.dox")
+     endif()
+
+     configure_file ( ${walberla_SOURCE_DIR}/doc/Mainpage.dox.in ${walberla_BINARY_DIR}/doc/Mainpage.dox @ONLY )
      configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
 
      add_custom_target ( walberla_doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg

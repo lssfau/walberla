@@ -156,6 +156,9 @@ doxygen:
   image: i10git.cs.fau.de:5005/ci/images/spack:gcc-14
   stage: Documentation
   needs: []
+  before_script:
+    - apt-get update
+    - apt-get install -y texlive-base  # for bibtex
   script:
     - cmake --version
     - doxygen --version
