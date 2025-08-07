@@ -1,5 +1,45 @@
 # Changelog
 
+## [7.2] - 2025-08-07
+
+### CMake & C++
+
+ - Bump minimum CMake version to 3.24
+ - Bump minimum CUDA version to CUDA 12 (!739)
+ - Bump C++ standard to C++20 and modernize the code base to use C++20 features (!736, !731, !743, !744, !750)
+ - Introduce native CMake support for `HIP` and update code generators accordingly (!729)
+ - Use modern CMake idioms for discovering and linking against CUDA/HIP libraries (!748)
+ - Remove `GlobalState` (!730)
+ - Use `FetchContent` to retrieve OpenMesh on demand (!749)
+ - Introduce FetchContent fallbacks for systems without internet access (!765)
+ - Refactor installation of the waLBerla Python module to latest standards (!769)
+
+### Infrastructure
+
+ - Completely overhaul the continuous integration and testing system (!737)
+ - Introduce a brand-new logo (!764)
+ - Introduce the Doxygen Awesome CSS theme (!764)
+
+### Feature Updates
+
+ - Refactored parallel IO interface (!742)
+ - Patches for mesh refinement in 2D (!752, !753)
+
+### Apps & Showcases
+
+ - Add new Kelvin-Helmholtz-Instability showcase (!741)
+
+### Bugfixes
+
+ - Fix index-out-of-bounds errors in communication schemes with sparse stencils (!734)
+ - Modernize `StreamRAII` and make GPU communication schemes safe to copy (!758)
+
+### Removals
+
+ - Remove the `pe` module (!719, !740)
+ - Remove deployment to conda-forge (!733)
+
+
 ## [7.1] - 2025-04-11
 
 ### Build System
