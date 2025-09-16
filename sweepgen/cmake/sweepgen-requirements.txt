@@ -1,0 +1,10 @@
+#   Requirements list for waLBerla build-time code generation
+
+#   pystencils
+git+https://i10git.cs.fau.de/pycodegen/pystencils.git@v2.0-dev
+
+#   lbmpy
+git+https://i10git.cs.fau.de/pycodegen/lbmpy.git@master
+
+#   pystencils-sfg
+git+https://i10git.cs.fau.de/pycodegen/pystencils-sfg.git

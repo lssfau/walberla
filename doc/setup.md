@@ -129,7 +129,7 @@ of your CMake configure preset (see [above](#cmake-preset)), e.g.:
 ```json
 "cacheVariables": {
   "CMAKE_BUILD_TYPE": "Debug",
-  "WALBERLA_BUILD_WITH_OPENMP": true,
+  "WALBERLA_BUILD_WITH_OPENMP": true
 }
 ```
 
@@ -180,14 +180,49 @@ Most recent benchmark and showcase applications built with waLBerla are making h
 automatic code generation using [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils/)
 and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy/).
 Code generation takes place during the build process.
-To enable it, you need to manually install the required packages into your local Python environment
+
+There are currently two separate code generation systems in place within waLBerla:
+ - The legacy code generators, implemented in the `pystencils_walberla` and `lbmpy_walberla`
+   Python modules, based on the pystencils and lbmpy 1.3 version line
+ - The brand-new `SweepGen` code generator, based on pystencils 2.0 and meant to fully
+   replace the former in the near future.
+
+The two systems are implemented separately from one another and can coexists peacefully within a
+build. However, you are encouraged to rely fully on `SweepGen` when building new applications,
+as far as possible.
+
+### SweepGen
+
+SweepGen is the novel code generation system for numerical kernels in waLBerla.
+To enable SweepGen in your build, set the `WALBERLA_ENABLE_SWEEPGEN` CMake option to `ON`;
+e.g. in a preset:
+
+```json
+"cacheVariables": {
+  "WALBERLA_ENABLE_SWEEPGEN": true
+}
+```
+
+SweepGen requires an installation of Python >= 3.10.
+Make sure that one is available, e.g. by setting the `Python_ROOT_DIR` variable to point
+at the root of your Python installation (see also [FindPython](https://cmake.org/cmake/help/latest/module/FindPython.html)).
+
+WaLBerla's build system will now automatically set up a virtual Python environment inside its build tree
+and install all required packages.
+
+For guidance on using SweepGen, refer to our [example apps](#example-apps) and the [SweepGen user manual](./sweepgen/index.html).
+
+### Legacy Code Generation System
+
+To enable the legacy code generators,
+you need to manually install the required packages into your local Python environment
 and point waLBerla's build system at the correct Python interpreter.
 
 You are going to need at least Python 3.10.
 If in doubt, run the query `python3 --version`
 to find out the version of your Python installation.
 
-### Set Up the Python Environment
+#### Set Up the Python Environment
 
 There are multiple providers for virtual Python environments out there.
 We recommend using either the built-in [venv](https://docs.python.org/3/library/venv.html)
@@ -197,7 +232,7 @@ which might not be the case on certain HPC clusters, or on outdated Linux distri
 In that case, you could use [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install)
 to manage your Python environment.
 
-#### Using venv or virtualenv
+##### Using venv or virtualenv
 
 Create and activate a new [virtual environment](https://docs.python.org/3/library/venv.html)
 inside your project directory (replace `-m venv` by `-m virtualenv` if using `virtualenv`):
@@ -213,7 +248,7 @@ Next, install pystencils and lbmpy (version 1.3), as well as jinja2 into that en
 pip install pystencils~=1.3 lbmpy~=1.3 jinja2
 ```
 
-#### Using Conda
+##### Using Conda
 
 Create a new Conda environment, using Python 3.10 and `pip`, located in the `conda-envs` subfolder of
 your project directory. Then, activate the environment:
@@ -235,7 +270,7 @@ pip install pystencils~=1.3 lbmpy~=1.3 jinja2
 > For an overview of pitfalls when using `pip` inside conda environment, refer to
 > [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#using-pip-in-an-environment).
 
-### Configure CMake for Code Generation
+#### Configure CMake for Code Generation
 
 There are two cache variables you need to set in order to activate build-time code generation
 in CMake:

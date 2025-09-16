@@ -1,0 +1,18 @@
+DomainSetup
+{
+    blocks < 1, 1, 1 >;
+    cellsPerBlock < 100, 50, 50 >;
+    periodic < 0, 0, 0 >;
+}
+
+Parameters
+{
+    re          100;
+    u_max       0.05;
+    timesteps   2001;
+}
+
+Output
+{
+    vtkWriteFrequency   100;
+}

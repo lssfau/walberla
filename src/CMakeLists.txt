@@ -52,6 +52,8 @@ add_subdirectory( stencil )
 add_subdirectory( timeloop )
 add_subdirectory( vtk )
 
+add_subdirectory( walberla )
+
 #### TODO: Remove with waLBerla 7.2.
 list( APPEND MODULES blockforest boundary communication core gpu domain_decomposition executiontree field gather geometry lbm lbm_generated
       lbm_mesapd_coupling mesa_pd pde pe_coupling postprocessing simd sqlite stencil timeloop vtk )

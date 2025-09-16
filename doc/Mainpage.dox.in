@@ -1,6 +1,8 @@
 /**
 \mainpage waLBerla - widely applicable lattice Boltzmann from Erlangen
 
+\tableofcontents
+
 <div style="margin: 3em 0; text-align: center;">
   <img src="walberla_logo.svg" alt="" class="inline">
 </div>
@@ -10,7 +12,7 @@ These are the documentation pages for the project's C++ code base.
 
 @RELEASE_NOTE@
 
-\section getting-started Setup Instructions
+\section getting-started Getting Started
 
 On the following pages, you can find instructions on downloading and
 setting up waLBerla both as a standalone project and as a library:
@@ -19,68 +21,15 @@ setting up waLBerla both as a standalone project and as a library:
 - \ref using-as-library
 - \ref faq
 
-\section tutorials Tutorials
+After setting up waLBerla,
+you can browse our @ref tutorials and @ref example-apps
+to learn how to use the framework.
 
-\subsection basics Basics
+\section further-ressources Further Ressources
 
-The following tutorials show you how to get and build waLBerla and describe
-all the basic data strcutures and concepts of the framework.
+Here are additional documentation, reference, and learning ressources related to waLBerla:
 
-- \ref tutorial_basics_01 \n
-  The first tutorial explains the basic data structures of waLBerla and how to setup a simple domain.
-- \ref tutorial_basics_02 \n
-  The second tutorial shows how to write algorithms that operate on block data.
-- \ref tutorial_basics_03 \n
-  The third tutorial deals with communication, iterating field/grid/lattice data, and geometry setup.
-
-\subsection mesapd Modular and Extensible Software Architecture for Particle Dynamics
-
-- \ref tutorial_mesapd_01 \n
-
-\subsection pdes Solving Partial Differential Equations
-
-- \ref tutorial_pde01 \n
-  Implementation of an iterative solver for the solution of a partial differential equation.
-- \ref tutorial_pde02 \n
-  Extending the previous tutorial to be able to solve the heat equation.
-
-\subsection lbm Simulations with the Lattice Boltzmann Method
-
-- \ref tutorial_lbm01 \n
-  A full LBM simulation is built.
-- \ref tutorial_lbm04 \n
-  A LBM simulation with complex geometries is built.
-- \ref tutorial_lbm05 \n
-  A LBM simulation with a backward-facing step is set up.
-- \ref tutorial_lbm06 \n
-  This tutorial deals with the usage of different LBM boundary conditions.
-
-\subsection advanced_topics Advanced Topics
-
-\subsection gpu GPU
-
-- \ref tutorial_gpu01 \n
-  A simple tutorial for Game of Life on GPU
-
-
-\subsection codegen Code Generation
-
-- \ref tutorial_codegen01 \n
-  This tutorial shows how to use pystencils to generate waLBerla sweeps from symbolic descriptions.
-- \ref tutorial_codegen02 \n
-  This tutorial demonstrates how to use lbmpy to generate an efficient lattice model for a waLBerla sweep.
-- \ref tutorial_codegen03 \n
-  This tutorial describes how to use lbmpy to generate a full LBM sweep for waLBerla.
-
-
-
-\section further_info Further information
-
-Not all features of the framework are covered in the tutorials.
-To get further information have a look at the modules pages.
-
-Also, the test cases provided in the tests directory are a good starting point for your own developments.
-Additionally, there is a folder for full-fledged application codes to be found under <tt>apps/benchmarks</tt> where also codes of walBerla publications are found.
+- <a href="./sweepgen/index.html">SweepGen User Manual</a>
 
 \section contact Contact Us
 
@@ -102,6 +51,6 @@ which you should cite in addition if you use them.
 - PE coupling: \cite rettinger2017comparative
 - Python interface: \cite bauer2016python
 - pystencils code generation: \cite bauer2019code
-- lbmpy LB model generation: \cite bauer2021lbmpy
+- lbmpy LB model generation: \cite bauer2021lbmpy and \cite Hennig2023
 
 */

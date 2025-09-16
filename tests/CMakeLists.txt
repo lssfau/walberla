@@ -23,3 +23,7 @@ add_subdirectory( python_coupling )
 add_subdirectory( simd )
 add_subdirectory( stencil )
 add_subdirectory( timeloop )
+
+if( WALBERLA_ENABLE_SWEEPGEN )
+    add_subdirectory( sweepgen )
+endif()

@@ -112,6 +112,16 @@ clang-tidy:
   tags:
     - docker
 
+python-static-checks:
+  image: i10git.cs.fau.de:5005/pycodegen/pycodegen/nox:alpine
+  stage: "Code Quality"
+  needs: []
+  tags:
+    - docker
+  script:
+    - cd sweepgen
+    - nox -s lint typecheck
+
 ####################################################################################################
 #       Test Matrix
 ####################################################################################################
@@ -152,33 +162,33 @@ trigger-test-matrix:
 ####################################################################################################
 
 
-doxygen:
+documentation:
   image: i10git.cs.fau.de:5005/ci/images/spack:gcc-14
   stage: Documentation
   needs: []
   before_script:
     - apt-get update
-    - apt-get install -y texlive-base  # for bibtex
+    - apt-get install -y texlive-base nox # for bibtex and sweepgen manual
   script:
     - cmake --version
     - doxygen --version
     - mkdir $CI_PROJECT_DIR/build
-    - cmake -S . -B build/doxygen
-    - cd build/doxygen
+    - cmake -S . -B build/documentation
+    - cd build/documentation
     - cmake --build . --target walberla_doc
   tags:
     - docker
   artifacts:
     paths:
-      - build/doxygen/doc
+      - build/documentation/doc
     expire_in: 1 weeks
 
 pages:
   image: alpine:latest
   stage: deploy
-  needs: ["doxygen"]
+  needs: ["documentation"]
   script:
-    - mv build/doxygen/doc/html public
+    - mv build/documentation/doc/html public
   artifacts:
     paths:
       - public
@@ -186,7 +196,6 @@ pages:
     - docker
   rules:
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
 
 ###############################################################################
 ##                                                                           ##
