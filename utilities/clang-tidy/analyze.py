@@ -259,15 +259,25 @@ def main():
         for module_spec in params.get("modules", []):
             include_paths: list[pathlib.Path] = []
             module_name: str
+            exclude_tests: bool = False
+
             match module_spec:
                 case str():
                     module_name = module_spec
-                    include_paths = [src_dir / module_name, tests_dir / module_name]
                 case dict():
                     module_name, settings = next(iter(module_spec.items()))
-                    include_paths = [src_dir / module_name]
-                    if not settings.get("exclude-tests", False):
+                    exclude_tests = settings.get("exclude-tests", False)
+                case _:
+                    assert False
+
+            include_paths = [src_dir / module_name]
+            if not exclude_tests:
+                match module_name.split("/"):
+                    case ["walberla", mod]:
+                        include_paths.append(tests_dir / mod)
+                    case _:
                         include_paths.append(tests_dir / module_name)
+
             header_filter = rf".*/src/{module_name}/.*"
 
             succ = run_clang_tidy(

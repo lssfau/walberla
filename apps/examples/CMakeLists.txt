@@ -1,0 +1,5 @@
+if( WALBERLA_ENABLE_SWEEPGEN )
+add_subdirectory( DoubleShearLayer )
+add_subdirectory( FlowAroundSphere )
+add_subdirectory( ParallelPlates )
+endif()

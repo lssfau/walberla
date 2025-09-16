@@ -16,6 +16,11 @@ if ( WALBERLA_BUILD_TUTORIALS )
     add_subdirectory ( tutorials )
 endif()
 
+# Examples
+if ( WALBERLA_BUILD_EXAMPLES )
+    add_subdirectory (examples )
+endif()
+
 # Showcases
 if ( WALBERLA_BUILD_SHOWCASES )
     add_subdirectory ( showcases )

@@ -19,8 +19,15 @@ modules:
   - timeloop
   - vtk:
       exclude-tests: true
+  - walberla/sweepgen:
+      exclude-tests: true
+  - walberla/experimental:
+      exclude-tests: true
 
 apps:
+  - "examples/DoubleShearLayer"
+  - "examples/ParallelPlates"
+  - "examples/FlowAroundSphere"
   - "benchmarks/ComplexGeometry"
   - "benchmarks/CouetteFlow"
   - "benchmarks/FieldCommunication"

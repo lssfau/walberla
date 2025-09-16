@@ -1,4 +1,4 @@
-# Using clang-tidy on waLBerla
+# Using clang-tidy on waLBerla {#clang-tidy}
 
 See also the [Clang-Tidy Documentation](https://clang.llvm.org/extra/clang-tidy/).
 

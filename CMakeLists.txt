@@ -63,6 +63,7 @@ option ( WALBERLA_BUILD_TESTS               "Build Testcases"                   
 option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                                ON )
 option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                     ON )
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
+option ( WALBERLA_BUILD_EXAMPLES            "Build Example Apps"                              ON )
 option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                 ON )
 option ( WALBERLA_BUILD_DOC                 "Build Documentation"                             ON )
 
@@ -78,6 +79,7 @@ option ( WALBERLA_BUILD_WITH_LTO            "Enable link time optimizations"    
 option ( WALBERLA_BUILD_WITH_OPENMP         "Enable OpenMP support"                              )
 option ( WALBERLA_BUILD_WITH_PYTHON         "Support for embedding Python"                       )
 option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation"              OFF )
+option ( WALBERLA_ENABLE_SWEEPGEN           "Enable the SweepGen metaprogramming system"     OFF )
 
 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
@@ -309,7 +311,7 @@ endif ()
 
 ############################################################################################################################
 ##
-## Code Generation (pystencils)
+## Legacy Code Generation (pystencils 1.3)
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
@@ -339,6 +341,17 @@ endif()
 ############################################################################################################################
 
 
+############################################################################################################################
+##
+## SweepGen Metaprogramming
+##
+#############################################################################################################################
+
+
+if( WALBERLA_ENABLE_SWEEPGEN )
+    list (APPEND CMAKE_MODULE_PATH ${walberla_SOURCE_DIR}/sweepgen/cmake )
+    include( SweepGen )
+endif()
 
 
 ############################################################################################################################
@@ -792,6 +805,9 @@ endif () # Check if WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT is set
 # Documentation Generation
 #
 if (WALBERLA_BUILD_DOC)
+
+  add_custom_target( walberla_doc )
+
   # Build documentation using Doxygen (www.doxygen.org)
   ############################################################################################################################
   find_package ( Doxygen  )
@@ -837,13 +853,32 @@ if (WALBERLA_BUILD_DOC)
        set(RELEASE_NOTE "\\include{doc} development.dox")
      endif()
 
-     configure_file ( ${walberla_SOURCE_DIR}/doc/Mainpage.dox.in ${walberla_BINARY_DIR}/doc/Mainpage.dox @ONLY )
+     configure_file ( ${walberla_SOURCE_DIR}/doc/Mainpage.dox.in ${walberla_BINARY_DIR}/doc/input/Mainpage.dox @ONLY )
      configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
 
-     add_custom_target ( walberla_doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
+     add_custom_target ( walberla_doxygen   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
                             COMMENT "Generating API documentation with Doxygen" VERBATIM )
-
+     add_dependencies( walberla_doc walberla_doxygen )
   endif ( )
+
+  # Build SweepGen user manual
+  
+  execute_process( COMMAND nox --version RESULT_VARIABLE _noxResult OUTPUT_QUIET ERROR_QUIET )
+  if( ${_noxResult} )
+    message(STATUS "Could not find nox - will not build SweepGen user manual")
+  else()
+    set( _sweepgen_dir ${walberla_SOURCE_DIR}/sweepgen )
+    add_custom_target( 
+        walberla_sweepgen_manual
+        COMMAND nox -f ${_sweepgen_dir}/noxfile.py -s user_manual -- --fail-on-warnings
+        COMMAND
+            ${CMAKE_COMMAND} -E copy_directory_if_different
+            ${_sweepgen_dir}/user_manual/_build/html
+            ${walberla_BINARY_DIR}/doc/html/sweepgen
+    )
+    add_dependencies( walberla_doc walberla_sweepgen_manual )
+  endif()
+  
 endif()
 
 ############################################################################################################################

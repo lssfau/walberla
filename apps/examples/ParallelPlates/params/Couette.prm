@@ -1,0 +1,20 @@
+DomainSetup
+{
+    blocks < 1, 1, 1 >;
+    cellsPerBlock < 32, 32, 32 >;
+    periodic < 1, 1, 0 >;
+}
+
+Parameters
+{
+    channelType couette;
+    nu          1.0 / 6.0;
+    u_max       0.025;
+    timesteps   1000;
+    errorThreshold 1e-15;
+}
+
+Output
+{
+    vtkWriteFrequency   100;
+}

@@ -1,0 +1,20 @@
+Domain
+{
+    blocks < 1, 1, 1 >;
+    cellsPerBlock < 256, 256, 8 >;
+}
+
+Parameters
+{
+    Reynolds 30000;
+    kappa   80;
+    u_0     0.04;
+    delta   0.05;
+
+    timesteps     7001;
+}
+
+Output
+{
+    vtkWriteFrequency   1000;
+}

@@ -27,6 +27,7 @@
                 "WALBERLA_BUILD_WITH_PARMETIS": true,
                 "WALBERLA_BUILD_WITH_FFTW": true,
                 "WALBERLA_BUILD_WITH_OPENMESH": true,
+                "WALBERLA_BUILD_WITH_PYTHON": true,
                 "WARNING_ERROR": true,
                 "WALBERLA_LOGLEVEL": "DETAIL",
                 "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}"
@@ -149,12 +150,28 @@
             }
         },
         {
-            "displayName": "Enable embedded Python and Codegen",
+            "displayName": "Enable embedded Python",
             "name": ".python",
             "hidden": true,
             "cacheVariables": {
-                "WALBERLA_BUILD_WITH_PYTHON": true,
+                "WALBERLA_BUILD_WITH_PYTHON": true
+            }
+        },
+        {
+            "displayName": "Enable legacy code generation",
+            "name": ".codegen",
+            "hidden": true,
+            "cacheVariables": {
                 "WALBERLA_BUILD_WITH_CODEGEN": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/"
+            }
+        },
+        {
+            "displayName": "Enable SweepGen metaprogramming",
+            "name": ".sweepgen",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_ENABLE_SWEEPGEN": true,
                 "Python_ROOT_DIR": "${sourceDir}/.venv/"
             }
         },

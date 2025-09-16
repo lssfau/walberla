@@ -67,7 +67,7 @@ class ConfigurePreset:
             name = ".ci-" + "-".join(frags)
         return ConfigurePreset(
             name,
-            inherits=[f".{frag}" for frag in frags] + [".python", ".ci-base"],
+            inherits=[f".{frag}" for frag in frags] + [".codegen", ".sweepgen", ".ci-base"],
             displayName="-".join(frags),
             **kwargs,
         )
@@ -237,7 +237,6 @@ def get_cmake_presets() -> CMakePresets:
         "clang",
         "debug",
         "hybrid",
-        "python",
         name=".ci-clang-tidy",
         cacheVariables={
             "CMAKE_EXPORT_COMPILE_COMMANDS": True,
