@@ -42,6 +42,8 @@
    #include "gpu/HostFieldAllocator.h"
    #include "gpu/ParallelStreams.h"
    #include "gpu/communication/UniformGPUScheme.h"
+   #include "gpu/timing/DeviceTimingPool.h"
+   #include "gpu/timeloop/DeviceSweepTimeloop.h"
 #endif
 
 #include <lbm/all.h>

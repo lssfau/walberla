@@ -25,7 +25,7 @@
 #include "gpu/DeviceWrapper.h"
 #include "gpu/ErrorChecking.h"
 
-#include "Time.h"
+#include "core/timing/Time.h"
 
 namespace walberla
 {
@@ -75,7 +75,7 @@ internally.
 inline double DeviceSynchronizePolicy::getTimestamp()
 {
    // synchronize device before getting timestamp
-   WALBERLA_DEVICE_SECTION() {WALBERLA_GPU_CHECK(gpuDeviceSynchronize()) }
+   WALBERLA_DEVICE_SECTION() { WALBERLA_GPU_CHECK(gpuDeviceSynchronize()) }
 
    return getWcTime();
 }
@@ -83,3 +83,4 @@ inline double DeviceSynchronizePolicy::getTimestamp()
 
 } // namespace timing
 } // namespace walberla
+

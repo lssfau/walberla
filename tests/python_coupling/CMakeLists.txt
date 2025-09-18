@@ -7,15 +7,18 @@
 waLBerla_link_files_to_builddir( *.py )
 
 if (WALBERLA_BUILD_WITH_PYTHON)
-    waLBerla_compile_test( FILES ConfigFromPythonTest.cpp DEPENDS walberla::blockforest walberla::field )
+    waLBerla_add_test_executable ( ConfigFromPythonTest ConfigFromPythonTest.cpp )
+    target_link_libraries ( ConfigFromPythonTest walberla::blockforest walberla::field walberla::python_coupling )
     waLBerla_execute_test( NAME ConfigFromPythonTest 
                            COMMAND $<TARGET_FILE:ConfigFromPythonTest> ${CMAKE_CURRENT_SOURCE_DIR}/ConfigFromPythonTest.py )
 
-    waLBerla_compile_test( FILES CallbackTest.cpp DEPENDS walberla::blockforest walberla::field )
+    waLBerla_add_test_executable ( CallbackTest CallbackTest.cpp )
+    target_link_libraries ( CallbackTest walberla::blockforest walberla::field walberla::python_coupling )
     waLBerla_execute_test( NAME CallbackTest
                           COMMAND $<TARGET_FILE:CallbackTest> ${CMAKE_CURRENT_SOURCE_DIR}/CallbackTest.py )
 
-    waLBerla_compile_test( FILES FieldExportTest.cpp DEPENDS walberla::blockforest walberla::field )
+    waLBerla_add_test_executable ( FieldExportTest FieldExportTest.cpp )
+    target_link_libraries ( FieldExportTest walberla::blockforest walberla::field walberla::python_coupling )
     waLBerla_execute_test( NAME FieldExportTest
                            COMMAND $<TARGET_FILE:FieldExportTest> ${CMAKE_CURRENT_SOURCE_DIR}/FieldExportTest.py )
 

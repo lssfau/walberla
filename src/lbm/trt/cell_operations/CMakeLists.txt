@@ -1,4 +1,4 @@
 target_sources( walberla_lbm
-    PRIVATE
-    DefaultCellOperation.impl.h     
-    )
+        PUBLIC
+        DefaultCellOperation.impl.h
+)

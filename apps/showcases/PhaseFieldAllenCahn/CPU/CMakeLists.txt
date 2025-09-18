@@ -16,6 +16,6 @@ waLBerla_generate_target_from_python(NAME PhaseFieldCodeGenCPU
         ContactAngle.cpp ContactAngle.h
         GenDefines.h)
 
-waLBerla_add_executable(NAME multiphaseCPU
-        FILES multiphase.cpp PythonExports.cpp InitializerFunctions.cpp multiphase_codegen.py
-      DEPENDS walberla::blockforest walberla::core walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop PhaseFieldCodeGenCPU )
+add_executable ( multiphaseCPU multiphase.cpp PythonExports.cpp InitializerFunctions.cpp multiphase_codegen.py )
+target_link_libraries ( multiphaseCPU walberla::blockforest walberla::core walberla::field walberla::postprocessing
+        walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop PhaseFieldCodeGenCPU )

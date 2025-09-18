@@ -1,5 +1,5 @@
 target_sources( walberla_lbm
-        PRIVATE
+        PUBLIC
         SimpleCommunication.h
         UpdateSecondGhostLayer.h
-        )
+)

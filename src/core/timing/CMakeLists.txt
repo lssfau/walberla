@@ -1,20 +1,23 @@
 target_sources( walberla_core
-      PRIVATE
-         CpuPolicy.h
-         ReduceType.h
-         RemainingTimeLogger.h
-         StaticPolicy.cpp
-         StaticPolicy.h
-         Time.cpp
-         Time.h
-         Timer.h
-         TimingJSON.h
-         TimingNode.cpp
-         TimingNode.h
-         TimingPool.cpp
-         TimingPool.h
-         TimingTree.cpp
-         TimingTree.h
-         WcPolicy.h
-         DeviceSynchronizePolicy.h
-      )
+        PUBLIC
+        CpuPolicy.h
+        ReduceType.h
+        RemainingTimeLogger.h
+        StaticPolicy.h
+        Time.h
+        Timer.h
+        TimingJSON.h
+        TimingNode.h
+        TimingPool.h
+        TimingTree.h
+        WcPolicy.h
+)
+
+target_sources( walberla_core
+        PRIVATE
+        StaticPolicy.cpp
+        Time.cpp
+        TimingNode.cpp
+        TimingPool.cpp
+        TimingTree.cpp
+)

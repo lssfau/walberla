@@ -19,7 +19,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
 
     add_library( walberla_cpp SHARED PythonModule.cpp )
 
-    target_link_libraries( walberla_cpp ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${pythonModules} ${SERVICE_LIBS} )
+    target_link_libraries( walberla_cpp ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${pythonModules} ${CORE_SERVICE_LIBS} )
 
     set_target_properties(
             walberla_cpp PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"

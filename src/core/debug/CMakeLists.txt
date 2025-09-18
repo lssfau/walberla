@@ -1,18 +1,22 @@
 target_sources( walberla_core
-      PRIVATE
-      CMakeLists.txt
-      CheckFunctions.cpp
-      CheckFunctions.h
-      CheckFunctions.impl.h
-      Debug.cpp
-      Debug.h
-      OperatorCheck.h
-      PrintStacktrace.cpp
-      PrintStacktrace.h
-      TestSubsystem.cpp
-      TestSubsystem.h
-      all.h
-      demangle.h
-      extern/StackWalker.cpp
-      extern/StackWalker.h
-      )
+        PUBLIC
+        CheckFunctions.h
+        CheckFunctions.impl.h
+        Debug.h
+        OperatorCheck.h
+        PrintStacktrace.h
+        TestSubsystem.h
+        all.h
+        demangle.h
+        extern/StackWalker.h
+)
+
+target_sources( walberla_core
+        PRIVATE
+        CMakeLists.txt
+        CheckFunctions.cpp
+        Debug.cpp
+        PrintStacktrace.cpp
+        TestSubsystem.cpp
+        extern/StackWalker.cpp
+)

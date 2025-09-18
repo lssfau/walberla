@@ -20,12 +20,13 @@ waLBerla_generate_target_from_python(NAME FlowAroundSphereCodeGen
         FlowAroundSphereStaticDefines.h)
 
 if (WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP)
-    waLBerla_add_executable ( NAME FlowAroundSphere
-            FILES FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h
-          DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::gpu walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk FlowAroundSphereCodeGen )
+    add_executable ( FlowAroundSphere FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h )
+    target_link_libraries ( FlowAroundSphere walberla::blockforest walberla::boundary walberla::core walberla::field
+            walberla::gpu walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk
+            FlowAroundSphereCodeGen )
 else()
-    waLBerla_add_executable ( NAME FlowAroundSphere
-            FILES FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h
-          DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk FlowAroundSphereCodeGen )
+    add_executable ( FlowAroundSphere FlowAroundSphere.cpp Sphere.cpp Evaluation.cpp GridGeneration.h Types.h )
+    target_link_libraries ( FlowAroundSphere walberla::blockforest walberla::boundary walberla::core walberla::field
+            walberla::lbm_generated walberla::stencil walberla::timeloop walberla::vtk FlowAroundSphereCodeGen )
 
 endif(WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP)

@@ -24,9 +24,9 @@
 #include "DeviceWrapper.h"
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-  #include <nvToolsExt.h>
-  #include <nvToolsExtCuda.h>
-  #include <nvToolsExtCudaRt.h>
+  #include <nvtx3/nvToolsExt.h>
+  #include <nvtx3/nvToolsExtCuda.h>
+  #include <nvtx3/nvToolsExtCudaRt.h>
   #include <string>
 #endif
 

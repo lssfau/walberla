@@ -146,12 +146,12 @@ When running `make` again at a later time, the code will only be regenerated if 
 
 \section walberla_app Including the generated kernel in a waLBerla application
 
-Finally, we can use the generated sweep in an actual waLBerla application. In the application folder, create the source file *01_CodegenHeatEquation.cpp*. Open *CMakeLists.txt* and register the source file as an executable using the macro `walberla_add_executable`. Add all required waLBerla modules as dependencies, as well as the generated target.
+Finally, we can use the generated sweep in an actual waLBerla application. In the application folder, create the source file *01_CodegenHeatEquation.cpp*. Open *CMakeLists.txt* and register the source file as an executable using the `add_executable` command.
+You can link the required libraries as dependencies to the target `01_CodegenHeatEquation` using `target_link_libraries`.
 
 \code{.unparsed}
-walberla_add_executable (   NAME 01_CodegenHeatEquation
-                            FILES 01_CodegenHeatEquation.cpp
-                            DEPENDS blockforest core field stencil timeloop vtk pde CodegenHeatEquationKernel )
+add_executable ( 01_CodegenHeatEquation 01_CodegenHeatEquation.cpp )
+target_link_libraries ( 01_CodegenHeatEquation blockforest core field stencil timeloop vtk pde CodegenHeatEquationKernel )
 \endcode
 
 Open the source file and include the generated header using `#include "HeatEquationKernel.h"`. The remainder of the application is similar to previous tutorials. We set up a two-dimensional domain by setting the physical size, number of cells and blocks for each direction. The pystencils-generated kernel expects a uniform grid with equal cell sizes in all directions. Therefore, the ratio between side length and the number of cells in each coordinate direction need to be equal. We also set the time step `dt` and the diffusivity coefficient `kappa`. Then, we create the block storage using an axis-aligned bounding box.

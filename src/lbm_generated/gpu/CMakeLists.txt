@@ -1,5 +1,5 @@
 target_sources( walberla_lbm_generated
-        PRIVATE
+        PUBLIC
         AddToStorage.h
         BasicRecursiveTimeStepGPU.h
         BasicRecursiveTimeStepGPU.impl.h

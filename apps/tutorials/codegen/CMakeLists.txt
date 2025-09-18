@@ -7,10 +7,9 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
         FILE HeatEquationKernel.py
         OUT_FILES HeatEquationKernel.cpp HeatEquationKernel.h )
 
-    walberla_add_executable( NAME 01_CodegenHeatEquation
-          FILES 01_CodegenHeatEquation.cpp
-          DEPENDS walberla::blockforest walberla::core walberla::field walberla::stencil walberla::timeloop
-          walberla::vtk walberla::pde CodegenHeatEquationKernel )
+    add_executable( 01_CodegenHeatEquation 01_CodegenHeatEquation.cpp )
+    target_link_libraries ( 01_CodegenHeatEquation walberla::blockforest walberla::core walberla::field
+            walberla::stencil walberla::timeloop walberla::vtk walberla::pde CodegenHeatEquationKernel )
 
     #   Tutorial 2: lbmpy Lattice Model Generation
     waLBerla_link_files_to_builddir( *.prm )
@@ -20,10 +19,10 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
         OUT_FILES   SRTLatticeModel.cpp SRTLatticeModel.h 
                     SRTPackInfo.cpp SRTPackInfo.h )
 
-    walberla_add_executable( NAME 02_LBMLatticeModelGenerationApp
-          FILES 02_LBMLatticeModelGeneration.cpp
-          DEPENDS walberla::blockforest walberla::core walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop
-          walberla::lbm walberla::stencil walberla::vtk 02_LBMLatticeModelGenerationPython )
+    add_executable ( 02_LBMLatticeModelGenerationApp 02_LBMLatticeModelGeneration.cpp )
+    target_link_libraries( 02_LBMLatticeModelGenerationApp walberla::blockforest walberla::core
+            walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop
+            walberla::lbm walberla::stencil walberla::vtk 02_LBMLatticeModelGenerationPython )
 
     #   Tutorial 3: Advanced lbmpy Code Generation
     walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
@@ -34,13 +33,15 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                     CumulantMRTNoSlip.${CODEGEN_FILE_SUFFIX} CumulantMRTNoSlip.h)
 
     if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
-        walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
-                FILES 03_AdvancedLBMCodegen.cpp
-              DEPENDS walberla::blockforest walberla::gpu walberla::core walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop walberla::lbm walberla::stencil walberla::vtk 03_AdvancedLBMCodegenPython )
+        add_executable ( 03_AdvancedLBMCodegenApp 03_AdvancedLBMCodegen.cpp )
+        target_link_libraries ( 03_AdvancedLBMCodegenApp walberla::blockforest walberla::gpu walberla::core
+                walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop walberla::lbm
+                walberla::stencil walberla::vtk 03_AdvancedLBMCodegenPython )
     else()
-        walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp
-                FILES 03_AdvancedLBMCodegen.cpp
-              DEPENDS walberla::blockforest walberla::core walberla::domain_decomposition walberla::field walberla::geometry walberla::timeloop walberla::lbm walberla::stencil walberla::vtk 03_AdvancedLBMCodegenPython )
+        add_executable ( 03_AdvancedLBMCodegenApp 03_AdvancedLBMCodegen.cpp )
+        target_link_libraries ( 03_AdvancedLBMCodegenApp walberla::blockforest walberla::core
+                walberla::domain_decomposition walberla::field walberla::geometry
+                walberla::timeloop walberla::lbm walberla::stencil walberla::vtk 03_AdvancedLBMCodegenPython )
     endif()
 
     #   Tutorial 4: Advanced lbmpy Code Generation with Complex geometry
@@ -66,7 +67,9 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
             InfoHeader.h
         )
 
-        set( TUT4_DEPENDENCIES walberla::blockforest walberla::boundary walberla::core walberla::field walberla::geometry walberla::lbm walberla::lbm_generated walberla::mesh walberla::python_coupling walberla::stencil walberla::timeloop walberla::vtk 04_LBComplexGeometryPython )
+        set( TUT4_DEPENDENCIES walberla::blockforest walberla::boundary walberla::core walberla::field
+                walberla::geometry walberla::lbm walberla::lbm_generated walberla::mesh walberla::python_coupling
+                walberla::stencil walberla::timeloop walberla::vtk 04_LBComplexGeometryPython )
         
         if(WALBERLA_BUILD_WITH_GPU_SUPPORT)
             list(APPEND TUT4_DEPENDENCIES walberla::gpu)
@@ -79,9 +82,8 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                 OUT_FILES  ${TUT4_OUT_FILES}
             )
 
-        walberla_add_executable ( NAME 04_LBComplexGeometryCodeGen
-            FILES 04_LBComplexGeometry.cpp
-            DEPENDS ${TUT4_DEPENDENCIES} )
+        add_executable ( 04_LBComplexGeometryCodeGen 04_LBComplexGeometry.cpp )
+        target_link_libraries( 04_LBComplexGeometryCodeGen ${TUT4_DEPENDENCIES} )
     endif()
 
 endif()

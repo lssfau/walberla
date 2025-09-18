@@ -15,35 +15,35 @@ add_library( walberla_field )
 add_library( walberla::field ALIAS walberla_field )
 target_link_libraries( walberla_field PUBLIC walberla::blockforest walberla::core walberla::communication walberla::domain_decomposition walberla::stencil walberla::vtk )
 target_sources( walberla_field
-      PRIVATE
-      SwapableCompare.h
-      AccuracyEvaluation.h
-      FlagFunctions.h
-      AccuracyEvaluationLinePlot.h
-      VolumetricFlowRateEvaluation.h
-      GhostLayerField.h
-      GhostRegions.h
-      AddToStorage.h
-      EvaluationFilter.h
-      FlagField.h
-      Gather.h
-      Layout.h
-      SymmetryCheck.h
-      FileIO.impl.h
-      Field.impl.h
-      Field.h
-      FileIO.h
-      FlagField.impl.h
-      CMakeDefs.in.h
-      CellCounter.h
-      Printers.impl.h
-      MassEvaluation.h
-      GhostLayerField.impl.h
-      Printers.h
-      FieldClone.h
-      StabilityChecker.h
-      FlagUID.h
-      )
+        PUBLIC
+        SwapableCompare.h
+        AccuracyEvaluation.h
+        FlagFunctions.h
+        AccuracyEvaluationLinePlot.h
+        VolumetricFlowRateEvaluation.h
+        GhostLayerField.h
+        GhostRegions.h
+        AddToStorage.h
+        EvaluationFilter.h
+        FlagField.h
+        Gather.h
+        Layout.h
+        SymmetryCheck.h
+        Field.h
+        FileIO.h
+        CMakeDefs.in.h
+        CellCounter.h
+        MassEvaluation.h
+        Printers.h
+        FieldClone.h
+        StabilityChecker.h
+        FlagUID.h
+        FileIO.impl.h
+        Field.impl.h
+        FlagField.impl.h
+        Printers.impl.h
+        GhostLayerField.impl.h
+)
 
 add_subdirectory( adaptors )
 add_subdirectory( allocation )

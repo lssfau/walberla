@@ -1,7 +1,11 @@
 target_sources( walberla_mesa_pd
-    PRIVATE
-    LinearizedCompareFunctor.h
-    HilbertCompareFunctor.h
-    LinearizedCompareFunctor.cpp
-    HilbertCompareFunctor.cpp     
-    )
+        PUBLIC
+        LinearizedCompareFunctor.h
+        HilbertCompareFunctor.h
+)
+
+target_sources( walberla_mesa_pd
+        PRIVATE
+        LinearizedCompareFunctor.cpp
+        HilbertCompareFunctor.cpp
+)

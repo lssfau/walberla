@@ -4,16 +4,20 @@
 #
 ###################################################################################################
 
-waLBerla_compile_test( FILES MultipleSweepFailTest.cpp DEPENDS walberla::blockforest )
+waLBerla_add_test_executable ( MultipleSweepFailTest MultipleSweepFailTest.cpp )
+target_link_libraries ( MultipleSweepFailTest walberla::blockforest walberla::timeloop )
 waLBerla_execute_test( NAME MultipleSweepFailTest )
 set_property( TEST MultipleSweepFailTest
       PROPERTY WILL_FAIL TRUE )
 
-waLBerla_compile_test( FILES MultipleSweepTest.cpp DEPENDS walberla::blockforest )
+waLBerla_add_test_executable ( MultipleSweepTest MultipleSweepTest.cpp )
+target_link_libraries ( MultipleSweepTest walberla::blockforest walberla::timeloop )
 waLBerla_execute_test( NAME MultipleSweepTest )
 
-waLBerla_compile_test( FILES TimeloopSweepManagementTest.cpp DEPENDS walberla::blockforest )
+waLBerla_add_test_executable ( TimeloopSweepManagementTest TimeloopSweepManagementTest.cpp )
+target_link_libraries ( TimeloopSweepManagementTest walberla::blockforest walberla::timeloop )
 waLBerla_execute_test( NAME TimeloopSweepManagementTest )
 
-waLBerla_compile_test( FILES TimeloopAndSweepRegisterTest.cpp DEPENDS walberla::blockforest walberla::field )
+waLBerla_add_test_executable ( TimeloopAndSweepRegisterTest TimeloopAndSweepRegisterTest.cpp )
+target_link_libraries ( TimeloopAndSweepRegisterTest walberla::blockforest walberla::timeloop walberla::field )
 waLBerla_execute_test( NAME TimeloopAndSweepRegisterTest )

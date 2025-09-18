@@ -1,5 +1,5 @@
 target_sources( walberla_lbm
-    PRIVATE
-    DefaultCellOperation.h
-    AdvectionDiffusionCellOperation.h     
-    )
+        PUBLIC
+        DefaultCellOperation.h
+        AdvectionDiffusionCellOperation.h
+)

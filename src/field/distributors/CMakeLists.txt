@@ -1,6 +1,6 @@
 target_sources( walberla_field
-    PRIVATE
-    NearestNeighborDistributor.h
-    KernelDistributor.h
-    DistributorCreators.h     
-    )
+        PUBLIC
+        NearestNeighborDistributor.h
+        KernelDistributor.h
+        DistributorCreators.h
+)

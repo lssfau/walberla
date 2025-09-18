@@ -1,24 +1,28 @@
 target_sources( walberla_lbm
-        PRIVATE
+        PUBLIC
         Bubble.h
+        BubbleModel.impl.h
         BubbleDefinitions.h
         BubbleDistanceAdaptor.h
         BubbleIDFieldPackInfo.h
         BubbleModel.h
-        BubbleModel.impl.h
         BubbleModelFromConfig.h
         BubbleModelFromConfig.impl.h
         DisjoiningPressureBubbleModel.h
         DisjoiningPressureBubbleModel.impl.h
-        DistanceInfo.cpp
         DistanceInfo.h
         FloodFill.h
         FloodFill.impl.h
         Geometry.h
         Geometry.impl.h
-        MergeInformation.cpp
         MergeInformation.h
-        NewBubbleCommunication.cpp
         NewBubbleCommunication.h
         RegionalFloodFill.h
-        )
+)
+
+target_sources( walberla_lbm
+        PRIVATE
+        DistanceInfo.cpp
+        MergeInformation.cpp
+        NewBubbleCommunication.cpp
+)

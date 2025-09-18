@@ -4,5 +4,6 @@
 #
 ###################################################################################################
 
-waLBerla_compile_test( NAME ExecutionTreeTest FILES ExecutionTreeTest.cpp )
+waLBerla_add_test_executable( ExecutionTreeTest ExecutionTreeTest.cpp )
+target_link_libraries ( ExecutionTreeTest walberla::executiontree )
 waLBerla_execute_test( NAME ExecutionTreeTest )

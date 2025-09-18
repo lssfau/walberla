@@ -7,26 +7,27 @@
 add_library( walberla_lbm )
 add_library( walberla::lbm ALIAS walberla_lbm )
 target_link_libraries( walberla_lbm
-      PUBLIC
-      walberla::blockforest
-      walberla::boundary
-      walberla::communication
-      walberla::core
-      walberla::domain_decomposition
-      walberla::field
-      walberla::geometry
-      walberla::stencil
-      walberla::timeloop
-      walberla::vtk
-      )
+        PUBLIC
+        walberla::blockforest
+        walberla::boundary
+        walberla::communication
+        walberla::core
+        walberla::domain_decomposition
+        walberla::field
+        walberla::geometry
+        walberla::stencil
+        walberla::timeloop
+        walberla::vtk
+)
+
 target_sources( walberla_lbm
-      PRIVATE
-      PerformanceEvaluation.h
-      BlockForestEvaluation.h
-      IntelCompilerOptimization.h
-      PerformanceLogger.h
-      MassEvaluation.h
-      )
+        PUBLIC
+        PerformanceEvaluation.h
+        BlockForestEvaluation.h
+        IntelCompilerOptimization.h
+        PerformanceLogger.h
+        MassEvaluation.h
+)
 
 add_subdirectory( vtk )
 add_subdirectory( blockforest )

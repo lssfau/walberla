@@ -1,5 +1,5 @@
 target_sources( walberla_lbm
-    PRIVATE
-    Permeability.impl.h
-    Permeability.h     
-    )
+        PUBLIC
+        Permeability.h
+        Permeability.impl.h
+)

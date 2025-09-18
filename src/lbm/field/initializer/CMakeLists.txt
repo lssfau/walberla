@@ -1,7 +1,11 @@
 target_sources( walberla_lbm
-    PRIVATE
-    PdfFieldInitializer.h
-    ExprSystemInitFunction.h
-    PdfFieldInitializer.impl.h
-    ExprSystemInitFunction.cpp     
-    )
+        PUBLIC
+        PdfFieldInitializer.h
+        PdfFieldInitializer.impl.h
+        ExprSystemInitFunction.h
+)
+
+target_sources( walberla_lbm
+        PRIVATE
+        ExprSystemInitFunction.cpp
+)

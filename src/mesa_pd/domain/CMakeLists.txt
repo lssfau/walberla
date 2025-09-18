@@ -1,10 +1,14 @@
 target_sources( walberla_mesa_pd
-    PRIVATE
-    BlockForestDomain.cpp
-    IDomain.h
-    InfiniteDomain.h
-    BlockForestDataHandling.h
-    InfoCollection.h
-    BlockForestDataHandling.cpp
-      BlockForestDomain.h
-    )
+        PUBLIC
+        IDomain.h
+        InfiniteDomain.h
+        BlockForestDataHandling.h
+        InfoCollection.h
+        BlockForestDomain.h
+)
+
+target_sources( walberla_mesa_pd
+        PRIVATE
+        BlockForestDomain.cpp
+        BlockForestDataHandling.cpp
+)

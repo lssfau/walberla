@@ -1,5 +1,4 @@
 waLBerla_link_files_to_builddir( *.cfg )
 
-waLBerla_add_executable ( NAME 01_MESA_PD
-   FILES 01_MESAPD.cpp
-      DEPENDS walberla::blockforest walberla::core walberla::mesa_pd )
+add_executable ( 01_MESA_PD 01_MESAPD.cpp )
+target_link_libraries( 01_MESA_PD walberla::blockforest walberla::core walberla::mesa_pd )

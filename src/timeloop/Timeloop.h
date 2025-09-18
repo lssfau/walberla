@@ -226,6 +226,5 @@ protected:
 
 namespace walberla {
    using Timeloop = typename timeloop::Timeloop < >;
-   using DeviceSynchronizeTimeloop = typename timeloop::Timeloop < timing::DeviceSynchronizePolicy >;
 }
 

@@ -10,6 +10,8 @@ waLBerla_generate_target_from_python(NAME NonUniformGridGPUGenerated
         UBB.h UBB.${CODEGEN_FILE_SUFFIX}
         NonUniformGridGPUBoundaryCollection.h
         NonUniformGridGPUInfoHeader.h)
-waLBerla_add_executable( NAME NonUniformGridGPU
-                         FILES NonUniformGridGPU.cpp LdcSetup.h GridGeneration.h
-      DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::gpu walberla::domain_decomposition walberla::field walberla::geometry walberla::lbm_generated walberla::python_coupling walberla::timeloop walberla::vtk NonUniformGridGPUGenerated )
+
+add_executable( NonUniformGridGPU NonUniformGridGPU.cpp LdcSetup.h GridGeneration.h )
+target_link_libraries ( NonUniformGridGPU walberla::blockforest walberla::boundary walberla::core walberla::gpu
+        walberla::domain_decomposition walberla::field walberla::geometry walberla::lbm_generated
+        walberla::python_coupling walberla::timeloop walberla::vtk NonUniformGridGPUGenerated )

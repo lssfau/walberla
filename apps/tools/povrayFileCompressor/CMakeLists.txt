@@ -1,3 +1,2 @@
-waLBerla_add_executable ( NAME PovrayFileCompressor 
-                          FILES main.cpp
-      DEPENDS walberla::postprocessing )
+add_executable ( PovrayFileCompressor main.cpp )
+target_link_libraries ( PovrayFileCompressor walberla::postprocessing )
