@@ -6,241 +6,318 @@
 
 waLBerla_link_files_to_builddir(*.prm)
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions FILES collision_detection/AnalyticCollisionFunctions.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions collision_detection/AnalyticCollisionFunctions.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_AnalyticContactDetection FILES collision_detection/AnalyticContactDetection.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_AnalyticContactDetection collision_detection/AnalyticContactDetection.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_AnalyticContactDetection walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticContactDetection )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_BoxSupport FILES collision_detection/BoxSupport.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_BoxSupport collision_detection/BoxSupport.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_BoxSupport walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_BoxSupport )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_EllipsoidSupport FILES collision_detection/EllipsoidSupport.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_EllipsoidSupport collision_detection/EllipsoidSupport.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_EllipsoidSupport walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EllipsoidSupport )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_EPA FILES collision_detection/EPA.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_EPA collision_detection/EPA.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_EPA walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EPA )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GeneralContactDetection FILES collision_detection/GeneralContactDetection.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_GeneralContactDetection collision_detection/GeneralContactDetection.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_GeneralContactDetection walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GeneralContactDetection )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GJK FILES collision_detection/GJK.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_GJK collision_detection/GJK.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_GJK walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GJK )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_GJKEPA FILES collision_detection/GJK_EPA.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_GJKEPA collision_detection/GJK_EPA.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_GJKEPA walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GJKEPA )
 
-waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_SphereSupport FILES collision_detection/SphereSupport.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_SphereSupport collision_detection/SphereSupport.cpp )
+target_link_libraries ( MESA_PD_COLLISIONDETECTION_SphereSupport walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_SphereSupport )
 
-waLBerla_compile_test( NAME MESA_PD_COMMON_IntersectionRatio FILES common/IntersectionRatio.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COMMON_IntersectionRatio common/IntersectionRatio.cpp )
+target_link_libraries ( MESA_PD_COMMON_IntersectionRatio walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COMMON_IntersectionRatio )
 
-waLBerla_compile_test( NAME MESA_PD_COMMON_ContainsPoint FILES common/ContainsPoint.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_COMMON_ContainsPoint common/ContainsPoint.cpp )
+target_link_libraries ( MESA_PD_COMMON_ContainsPoint walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_COMMON_ContainsPoint )
 
-waLBerla_compile_test( NAME MESA_PD_ContactDetection FILES ContactDetection.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_ContactDetection ContactDetection.cpp )
+target_link_libraries ( MESA_PD_ContactDetection walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_ContactDetection PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_Data_ContactHistory FILES data/ContactHistory.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_ContactHistory data/ContactHistory.cpp )
+target_link_libraries ( MESA_PD_Data_ContactHistory walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_ContactHistory )
 
-waLBerla_compile_test( NAME MESA_PD_Data_Flags FILES data/Flags.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_Flags data/Flags.cpp )
+target_link_libraries ( MESA_PD_Data_Flags walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_Flags )
 
-waLBerla_compile_test( NAME MESA_PD_Data_HashGridsVsBruteForce FILES data/HashGridsVsBruteForce.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_HashGridsVsBruteForce data/HashGridsVsBruteForce.cpp )
+target_link_libraries ( MESA_PD_Data_HashGridsVsBruteForce walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_HashGridsVsBruteForce PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Data_LinkedCells FILES data/LinkedCells.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_LinkedCells data/LinkedCells.cpp )
+target_link_libraries ( MESA_PD_Data_LinkedCells walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_LinkedCells )
 
-waLBerla_compile_test( NAME MESA_PD_Data_ParticleStorage FILES data/ParticleStorage.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_ParticleStorage data/ParticleStorage.cpp )
+target_link_libraries ( MESA_PD_Data_ParticleStorage walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_ParticleStorage )
 
-waLBerla_compile_test( NAME MESA_PD_Data_SparseLinkedCells FILES data/SparseLinkedCells.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Data_SparseLinkedCells data/SparseLinkedCells.cpp )
+target_link_libraries ( MESA_PD_Data_SparseLinkedCells walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Data_SparseLinkedCells )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestDomain FILES domain/BlockForestDomain.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_BlockForestDomain domain/BlockForestDomain.cpp )
+target_link_libraries ( MESA_PD_Domain_BlockForestDomain walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestDomain )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSync FILES domain/BlockForestSync.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_BlockForestSync domain/BlockForestSync.cpp )
+target_link_libraries ( MESA_PD_Domain_BlockForestSync walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync2 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 2 )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync4 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 4 )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSync8 COMMAND $<TARGET_FILE:MESA_PD_Domain_BlockForestSync> PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_BlockForestSyncPeriodic FILES domain/BlockForestSyncPeriodic.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_BlockForestSyncPeriodic domain/BlockForestSyncPeriodic.cpp )
+target_link_libraries ( MESA_PD_Domain_BlockForestSyncPeriodic walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestSyncPeriodic PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_DistanceCalculation FILES domain/DistanceCalculation.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_DistanceCalculation domain/DistanceCalculation.cpp )
+target_link_libraries ( MESA_PD_Domain_DistanceCalculation walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_DistanceCalculation )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_DynamicRefinement FILES domain/DynamicRefinement.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_DynamicRefinement domain/DynamicRefinement.cpp )
+target_link_libraries ( MESA_PD_Domain_DynamicRefinement walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_DynamicRefinement PROCESSES 8)
 
-waLBerla_compile_test( NAME MESA_PD_Domain_InfiniteDomain FILES domain/InfiniteDomain.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_InfiniteDomain domain/InfiniteDomain.cpp )
+target_link_libraries ( MESA_PD_Domain_InfiniteDomain walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_InfiniteDomain )
 
-waLBerla_compile_test( NAME MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Domain_SerializeDeserialize domain/SerializeDeserialize.cpp )
+target_link_libraries ( MESA_PD_Domain_SerializeDeserialize walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Domain_SerializeDeserialize PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_DropTestAnalytic FILES DropTestAnalytic.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_DropTestAnalytic DropTestAnalytic.cpp )
+target_link_libraries ( MESA_PD_DropTestAnalytic walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_DropTestAnalytic )
 
-waLBerla_compile_test( NAME MESA_PD_DropTestGeneral FILES DropTestGeneral.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_DropTestGeneral DropTestGeneral.cpp )
+target_link_libraries ( MESA_PD_DropTestGeneral walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_DropTestGeneral )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_ClearNextNeighborSync FILES kernel/ClearNextNeighborSync.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_ClearNextNeighborSync kernel/ClearNextNeighborSync.cpp )
+target_link_libraries ( MESA_PD_Kernel_ClearNextNeighborSync walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync PROCESSES 2 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_AnisotropicVDWContact FILES kernel/cnt/AnisotropicVDWContact.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_AnisotropicVDWContact kernel/cnt/AnisotropicVDWContact.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_AnisotropicVDWContact walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_AnisotropicVDWContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_IntegratedVDWContact FILES kernel/cnt/IntegratedVDWContact.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_IntegratedVDWContact kernel/cnt/IntegratedVDWContact.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_IntegratedVDWContact walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_IntegratedVDWContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_IsotropicVDWContact FILES kernel/cnt/IsotropicVDWContact.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_IsotropicVDWContact kernel/cnt/IsotropicVDWContact.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_IsotropicVDWContact walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_IsotropicVDWContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContact FILES kernel/cnt/VBondContact.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_VBondContact kernel/cnt/VBondContact.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_VBondContact walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_VBondContactIntegration kernel/cnt/VBondContactIntegration.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_VBondContactIntegration walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME MESA_PD_Kernel_CNT_VBondContactIntegration )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_ViscousDamping FILES kernel/cnt/ViscousDamping.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_ViscousDamping kernel/cnt/ViscousDamping.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_ViscousDamping walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_ViscousDamping )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CNT_WallContact FILES kernel/cnt/WallContact.test.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CNT_WallContact kernel/cnt/WallContact.test.cpp )
+target_link_libraries ( MESA_PD_Kernel_CNT_WallContact walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_WallContact )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CoefficientOfRestitutionSD FILES kernel/CoefficientOfRestitutionSD.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CoefficientOfRestitutionSD kernel/CoefficientOfRestitutionSD.cpp )
+target_link_libraries ( MESA_PD_Kernel_CoefficientOfRestitutionSD walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> --useVV )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CoefficientOfRestitutionLSD FILES kernel/CoefficientOfRestitutionLSD.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CoefficientOfRestitutionLSD kernel/CoefficientOfRestitutionLSD.cpp )
+target_link_libraries ( MESA_PD_Kernel_CoefficientOfRestitutionLSD walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionLSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionLSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionLSDVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionLSD> --useVV )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_CoefficientOfRestitutionNLSD FILES kernel/CoefficientOfRestitutionNLSD.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_CoefficientOfRestitutionNLSD kernel/CoefficientOfRestitutionNLSD.cpp )
+target_link_libraries ( MESA_PD_Kernel_CoefficientOfRestitutionNLSD walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionNLSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionNLSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionNLSD> --useVV )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_DetectAndStoreContacts FILES kernel/DetectAndStoreContacts.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_DetectAndStoreContacts kernel/DetectAndStoreContacts.cpp )
+target_link_libraries ( MESA_PD_Kernel_DetectAndStoreContacts walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_DetectAndStoreContacts )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_DoubleCast FILES kernel/DoubleCast.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_DoubleCast kernel/DoubleCast.cpp )
+target_link_libraries ( MESA_PD_Kernel_DoubleCast walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_DoubleCast )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_ExplicitEuler FILES kernel/ExplicitEuler.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_ExplicitEuler kernel/ExplicitEuler.cpp )
+target_link_libraries ( MESA_PD_Kernel_ExplicitEuler walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ExplicitEuler )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_ForceLJ FILES kernel/ForceLJ.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_ForceLJ kernel/ForceLJ.cpp )
+target_link_libraries ( MESA_PD_Kernel_ForceLJ walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ForceLJ )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_GenerateAnalyticContacts FILES kernel/GenerateAnalyticContacts.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_GenerateAnalyticContacts kernel/GenerateAnalyticContacts.cpp )
+target_link_libraries ( MESA_PD_Kernel_GenerateAnalyticContacts walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_GenerateAnalyticContacts PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_GenerateLinkedCells FILES kernel/GenerateLinkedCells.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_GenerateLinkedCells kernel/GenerateLinkedCells.cpp )
+target_link_libraries ( MESA_PD_Kernel_GenerateLinkedCells walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_GenerateLinkedCells )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_HCSITSKernels FILES kernel/HCSITSKernels.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_HCSITSKernels kernel/HCSITSKernels.cpp )
+target_link_libraries ( MESA_PD_Kernel_HCSITSKernels walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_HCSITSKernels )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_HeatConduction FILES kernel/HeatConduction.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_HeatConduction kernel/HeatConduction.cpp )
+target_link_libraries ( MESA_PD_Kernel_HeatConduction walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_HeatConduction )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_IntegratorAccuracy FILES kernel/IntegratorAccuracy.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_IntegratorAccuracy kernel/IntegratorAccuracy.cpp )
+target_link_libraries ( MESA_PD_Kernel_IntegratorAccuracy walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_IntegratorAccuracyEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_IntegratorAccuracy> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_IntegratorAccuracyVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_IntegratorAccuracy> --useVV )
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/kernel/interfaces MESA_PD_INTERFACE_CHECKS)
-waLBerla_compile_test( NAME MESA_PD_Kernel_Interfaces FILES kernel/Interfaces.cpp ${MESA_PD_INTERFACE_CHECKS} DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_Interfaces kernel/Interfaces.cpp ${MESA_PD_INTERFACE_CHECKS} )
+target_link_libraries ( MESA_PD_Kernel_Interfaces walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_Interfaces )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_LinearSpringDashpot FILES kernel/LinearSpringDashpot.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_LinearSpringDashpot kernel/LinearSpringDashpot.cpp )
+target_link_libraries ( MESA_PD_Kernel_LinearSpringDashpot walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_LinearSpringDashpot )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_LinkedCellsVsBruteForce FILES kernel/LinkedCellsVsBruteForce.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_LinkedCellsVsBruteForce kernel/LinkedCellsVsBruteForce.cpp )
+target_link_libraries ( MESA_PD_Kernel_LinkedCellsVsBruteForce walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_LinkedCellsVsBruteForce PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_PFCDamping FILES kernel/PFCDamping.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_PFCDamping kernel/PFCDamping.cpp )
+target_link_libraries ( MESA_PD_Kernel_PFCDamping walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_PFCDamping )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SemiImplicitEuler FILES kernel/SemiImplicitEuler.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SemiImplicitEuler kernel/SemiImplicitEuler.cpp )
+target_link_libraries ( MESA_PD_Kernel_SemiImplicitEuler walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SemiImplicitEuler )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SingleCast FILES kernel/SingleCast.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SingleCast kernel/SingleCast.cpp )
+target_link_libraries ( MESA_PD_Kernel_SingleCast walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SingleCast )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SpherePile FILES kernel/SpherePile.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SpherePile kernel/SpherePile.cpp )
+target_link_libraries ( MESA_PD_Kernel_SpherePile walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SpherePile )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SpringDashpot FILES kernel/SpringDashpot.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SpringDashpot kernel/SpringDashpot.cpp )
+target_link_libraries ( MESA_PD_Kernel_SpringDashpot walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SpringDashpot )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SyncGhostOwners FILES kernel/SyncGhostOwners.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SyncGhostOwners kernel/SyncGhostOwners.cpp )
+target_link_libraries ( MESA_PD_Kernel_SyncGhostOwners walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwners PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SyncGhostOwnersLarge FILES kernel/SyncGhostOwnersLarge.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SyncGhostOwnersLarge kernel/SyncGhostOwnersLarge.cpp )
+target_link_libraries ( MESA_PD_Kernel_SyncGhostOwnersLarge walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SyncNextNeighbors FILES kernel/SyncNextNeighbors.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SyncNextNeighbors kernel/SyncNextNeighbors.cpp )
+target_link_libraries ( MESA_PD_Kernel_SyncNextNeighbors walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighbors PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_SyncNextNeighborsBlockForest FILES kernel/SyncNextNeighborsBlockForest.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_SyncNextNeighborsBlockForest kernel/SyncNextNeighborsBlockForest.cpp )
+target_link_libraries ( MESA_PD_Kernel_SyncNextNeighborsBlockForest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighborsBlockForest PROCESSES 27 )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_TemperatureIntegration FILES kernel/TemperatureIntegration.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_TemperatureIntegration kernel/TemperatureIntegration.cpp )
+target_link_libraries ( MESA_PD_Kernel_TemperatureIntegration walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_TemperatureIntegration )
 
-waLBerla_compile_test( NAME MESA_PD_Kernel_VelocityVerlet FILES kernel/VelocityVerlet.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Kernel_VelocityVerlet kernel/VelocityVerlet.cpp )
+target_link_libraries ( MESA_PD_Kernel_VelocityVerlet walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerlet )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_BroadcastProperty FILES mpi/BroadcastProperty.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_BroadcastProperty mpi/BroadcastProperty.cpp )
+target_link_libraries ( MESA_PD_MPI_BroadcastProperty walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_BroadcastProperty PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_ClearGhostOwnerSync FILES mpi/ClearGhostOwnerSync.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_ClearGhostOwnerSync mpi/ClearGhostOwnerSync.cpp )
+target_link_libraries ( MESA_PD_MPI_ClearGhostOwnerSync walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ClearGhostOwnerSync PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_ClearNextNeighborSync FILES mpi/ClearNextNeighborSync.cpp DEPENDS walberla::blockforest walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_ClearNextNeighborSync mpi/ClearNextNeighborSync.cpp )
+target_link_libraries ( MESA_PD_MPI_ClearNextNeighborSync walberla::blockforest walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ClearNextNeighborSync PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_Notifications FILES mpi/Notifications.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_Notifications mpi/Notifications.cpp )
+target_link_libraries ( MESA_PD_MPI_Notifications walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_Notifications )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_ReduceContactHistory FILES mpi/ReduceContactHistory.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_ReduceContactHistory mpi/ReduceContactHistory.cpp )
+target_link_libraries ( MESA_PD_MPI_ReduceContactHistory walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceContactHistory PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_ReduceProperty FILES mpi/ReduceProperty.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_ReduceProperty mpi/ReduceProperty.cpp )
+target_link_libraries ( MESA_PD_MPI_ReduceProperty walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceProperty PROCESSES 8 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_ShapePackUnpack FILES mpi/ShapePackUnpack.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_ShapePackUnpack mpi/ShapePackUnpack.cpp )
+target_link_libraries ( MESA_PD_MPI_ShapePackUnpack walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ShapePackUnpack )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_SyncNextNeighborsNoGhosts FILES mpi/SyncNextNeighborsNoGhosts.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_SyncNextNeighborsNoGhosts mpi/SyncNextNeighborsNoGhosts.cpp )
+target_link_libraries ( MESA_PD_MPI_SyncNextNeighborsNoGhosts walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_SyncNextNeighborsNoGhosts PROCESSES 2 )
 
-waLBerla_compile_test( NAME MESA_PD_MPI_VelocityCorrectionNotification FILES mpi/VelocityCorrectionNotification.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_MPI_VelocityCorrectionNotification mpi/VelocityCorrectionNotification.cpp )
+target_link_libraries ( MESA_PD_MPI_VelocityCorrectionNotification walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification PROCESSES 8)
 
-waLBerla_compile_test( NAME MESA_PD_Sorting FILES Sorting.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MESA_PD_Sorting Sorting.cpp )
+target_link_libraries ( MESA_PD_Sorting walberla::core walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_Sorting )
 
-waLBerla_compile_test( NAME MESA_PD_Stiffness FILES Stiffness.cpp DEPENDS walberla::blockforest walberla::core walberla::mesa_pd )
+waLBerla_add_test_executable ( MESA_PD_Stiffness Stiffness.cpp )
+target_link_libraries ( MESA_PD_Stiffness walberla::blockforest walberla::core walberla::mesa_pd walberla::mesa_pd )
 
-waLBerla_compile_test( NAME MESA_PD_VTK_Outputs FILES vtk/VTKOutputs.cpp DEPENDS walberla::blockforest walberla::core walberla::vtk )
+waLBerla_add_test_executable ( MESA_PD_VTK_Outputs vtk/VTKOutputs.cpp )
+target_link_libraries ( MESA_PD_VTK_Outputs walberla::blockforest walberla::core walberla::vtk walberla::mesa_pd )
 waLBerla_execute_test( NAME   MESA_PD_VTK_Outputs PROCESSES 8 )
 
 if (WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE)
-    waLBerla_compile_test( NAME MESA_PD_VTK_ConvexPolyhedron FILES vtk/ConvexPolyhedronVTKOutput.cpp DEPENDS walberla::core walberla::mesa_pd walberla::mesh_common walberla::vtk )
+    waLBerla_add_test_executable ( MESA_PD_VTK_ConvexPolyhedron vtk/ConvexPolyhedronVTKOutput.cpp )
+    target_link_libraries ( MESA_PD_VTK_ConvexPolyhedron walberla::core walberla::mesa_pd walberla::mesh_common walberla::vtk walberla::mesa_pd )
     waLBerla_execute_test( NAME   MESA_PD_VTK_ConvexPolyhedron )
 
-    waLBerla_compile_test( NAME MESA_PD_Common_ContainsPointConvexPolyhedron FILES common/ContainsPointConvexPolyhedron.cpp DEPENDS walberla::core walberla::mesa_pd walberla::mesh_common )
+    waLBerla_add_test_executable ( MESA_PD_Common_ContainsPointConvexPolyhedron common/ContainsPointConvexPolyhedron.cpp )
+    target_link_libraries ( MESA_PD_Common_ContainsPointConvexPolyhedron walberla::core walberla::mesa_pd walberla::mesh_common walberla::mesa_pd )
     waLBerla_execute_test( NAME   MESA_PD_Common_ContainsPointConvexPolyhedron )
 
-    waLBerla_compile_test( NAME MESA_PD_Data_ConvexPolyhedron FILES data/ConvexPolyhedron.cpp DEPENDS walberla::core walberla::mesa_pd walberla::mesh_common )
+    waLBerla_add_test_executable ( MESA_PD_Data_ConvexPolyhedron data/ConvexPolyhedron.cpp )
+    target_link_libraries ( MESA_PD_Data_ConvexPolyhedron walberla::core walberla::mesa_pd walberla::mesh_common walberla::mesa_pd )
     waLBerla_execute_test( NAME   MESA_PD_Data_ConvexPolyhedron )
 
-    waLBerla_compile_test( NAME MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA FILES collision_detection/ConvexPolyhedron_GJK_EPA.cpp DEPENDS walberla::core walberla::mesa_pd walberla::mesh_common )
+    waLBerla_add_test_executable ( MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA collision_detection/ConvexPolyhedron_GJK_EPA.cpp )
+    target_link_libraries ( MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA walberla::core walberla::mesa_pd walberla::mesh_common walberla::mesa_pd )
     waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA )
 endif()

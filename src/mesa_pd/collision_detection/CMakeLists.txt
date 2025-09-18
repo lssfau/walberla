@@ -1,12 +1,16 @@
 target_sources( walberla_mesa_pd
-    PRIVATE
-    AnalyticCollisionFunctions.h
-    GJK.h
-    GJK.cpp
-    GeneralContactDetection.h
-    Support.h
-    EPA.h
-    BroadPhase.h
-    EPA.cpp
-    AnalyticContactDetection.h     
-    )
+        PUBLIC
+        AnalyticCollisionFunctions.h
+        GJK.h
+        GeneralContactDetection.h
+        Support.h
+        EPA.h
+        BroadPhase.h
+        AnalyticContactDetection.h
+)
+
+target_sources( walberla_mesa_pd
+        PRIVATE
+        GJK.cpp
+        EPA.cpp
+)

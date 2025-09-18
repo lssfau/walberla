@@ -171,7 +171,7 @@ function ( waLBerla_export )
     endforeach()
 
     # Export service libs
-    set ( WALBERLA_SERVICE_LIBS ${SERVICE_LIBS} CACHE INTERNAL "External Libraries necessary for waLBerla" )
+    set ( WALBERLA_CORE_SERVICE_LIBS ${CORE_SERVICE_LIBS} CACHE INTERNAL "Ext. libraries necessary for waLBerla core" )
 
     # Export compile definitions
     get_directory_property( WALBERLA_COMPILE_DEFINITIONS DIRECTORY ${walberla_SOURCE_DIR} COMPILE_DEFINITIONS )
@@ -243,7 +243,7 @@ function ( waLBerla_import )
         endforeach()
     endif()
 
-    set( SERVICE_LIBS ${WALBERLA_SERVICE_LIBS} PARENT_SCOPE )
+    set( CORE_SERVICE_LIBS ${WALBERLA_CORE_SERVICE_LIBS} PARENT_SCOPE )
 
     set( CMAKE_CXX_STANDARD ${WALBERLA_CXX_STANDARD}  PARENT_SCOPE)
     set( CMAKE_CXX_STANDARD_REQUIRED ${WALBERLA_STANDARD_REQUIRED} PARENT_SCOPE)

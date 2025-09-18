@@ -1,4 +1,4 @@
 target_sources( walberla_gpu
-    PRIVATE
-    CombinedInPlaceGpuPackInfo.h     
-    )
+        PUBLIC
+        CombinedInPlaceGpuPackInfo.h
+)

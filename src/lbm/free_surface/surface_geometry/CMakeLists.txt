@@ -1,5 +1,5 @@
 target_sources( walberla_lbm
-        PRIVATE
+        PUBLIC
         ContactAngle.h
         CurvatureModel.h
         CurvatureModel.impl.h
@@ -17,6 +17,10 @@ target_sources( walberla_lbm
         SmoothingSweep.h
         SmoothingSweep.impl.h
         SurfaceGeometryHandler.h
-        Utility.cpp
         Utility.h
-        )
+)
+
+target_sources( walberla_lbm
+        PRIVATE
+        Utility.cpp
+)

@@ -1,9 +1,13 @@
 target_sources( walberla_core
-      PRIVATE
-      Initialization.cpp
-      Initialization.h
-      Logging.cpp
-      Logging.h
-      Tracing.h
-      )
+        PUBLIC
+        Initialization.h
+        Logging.h
+        Tracing.h
+)
+
+target_sources( walberla_core
+        PRIVATE
+        Initialization.cpp
+        Logging.cpp
+)
 

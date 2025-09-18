@@ -262,6 +262,5 @@ TimingTree< TP > TimingTree< TP >::getCopyWithRemainder() const
 }
 
 using WcTimingTree = timing::TimingTree<timing::WcPolicy>;
-using DeviceSynchronizeTimingTree = timing::TimingTree<timing::DeviceSynchronizePolicy>;
 using CpuTimingTree = timing::TimingTree<timing::CpuPolicy>;
 }

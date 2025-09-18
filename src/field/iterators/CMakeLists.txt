@@ -1,8 +1,8 @@
 target_sources( walberla_field
-    PRIVATE
-    FieldIterator.h
-    IteratorMacros.h
-    FieldNeighborPointer.h
-    FieldPointer.h
-    FieldIterator.impl.h     
-    )
+        PUBLIC
+        FieldIterator.h
+        FieldIterator.impl.h
+        IteratorMacros.h
+        FieldNeighborPointer.h
+        FieldPointer.h
+)

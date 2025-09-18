@@ -190,7 +190,6 @@ namespace timeloop {
 
 namespace walberla {
    using SweepTimeloop = typename timeloop::SweepTimeloop < >;
-   using DeviceSynchronizeSweepTimeloop = typename timeloop::SweepTimeloop < timing::DeviceSynchronizePolicy >;
 
    using timeloop::Sweep;
    using timeloop::SweepOnBlock;

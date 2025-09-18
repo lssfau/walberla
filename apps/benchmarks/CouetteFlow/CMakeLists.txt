@@ -1,7 +1,8 @@
 
 waLBerla_link_files_to_builddir( "*.dat" )                 
 
-waLBerla_add_executable( NAME CouetteFlow DEPENDS walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::postprocessing walberla::stencil walberla::timeloop walberla::vtk walberla::sqlite )
+add_executable ( CouetteFlow CouetteFlow.cpp)
+target_link_libraries ( CouetteFlow walberla::blockforest walberla::boundary walberla::core walberla::field walberla::lbm walberla::postprocessing walberla::stencil walberla::timeloop walberla::vtk walberla::sqlite )
 
 ##############
 # Some tests #

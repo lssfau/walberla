@@ -1,5 +1,5 @@
 target_sources( walberla_blockforest
-      PRIVATE
+      PUBLIC
       BlockInfo.h
       Cartesian.h
       DynamicCurve.h
@@ -10,11 +10,15 @@ target_sources( walberla_blockforest
       PODPhantomData.h
       StaticCurve.h
       StaticParMetis.h
-      Cartesian.cpp
-      DynamicParMetis.cpp
-      StaticCurve.cpp
-      StaticParMetis.cpp
-      )
+)
+
+target_sources( walberla_blockforest
+        PRIVATE
+        Cartesian.cpp
+        DynamicParMetis.cpp
+        StaticCurve.cpp
+        StaticParMetis.cpp
+)
 
 
 add_subdirectory( weight_assignment )

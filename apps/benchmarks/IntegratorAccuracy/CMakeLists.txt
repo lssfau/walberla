@@ -1,4 +1,4 @@
 waLBerla_link_files_to_builddir( "*.ipynb" )
 
-waLBerla_add_executable ( NAME IntegratorAccuracy
-      DEPENDS walberla::core walberla::mesa_pd )
+add_executable ( IntegratorAccuracy IntegratorAccuracy.cpp )
+target_link_libraries ( IntegratorAccuracy walberla::core walberla::mesa_pd )

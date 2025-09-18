@@ -1,5 +1,5 @@
 target_sources( walberla_field
-    PRIVATE
-    PackInfo.h
-    PackInfoHelper.h
-    )
+        PUBLIC
+        PackInfo.h
+        PackInfoHelper.h
+)

@@ -1,17 +1,17 @@
 target_sources( walberla_lbm
-        PRIVATE
+        PUBLIC
         CellConversionSweep.h
         ConversionFlagsResetSweep.h
         ExcessMassDistributionModel.h
         ExcessMassDistributionSweep.h
-        ExcessMassDistributionSweep.impl.h
         ForceDensitySweep.h
         PdfReconstructionModel.h
         PdfRefillingModel.h
         PdfRefillingSweep.h
-        PdfRefillingSweep.impl.h
         StreamReconstructAdvectSweep.h
         SurfaceDynamicsHandler.h
-        )
+        ExcessMassDistributionSweep.impl.h
+        PdfRefillingSweep.impl.h
+)
 
 add_subdirectory( functionality )

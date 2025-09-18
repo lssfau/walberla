@@ -5,12 +5,9 @@
 ## Contents:
 ##   - definition of build options
 ##   - compiler variables ( c++ standard, warnings etc. )
-##   - Finding of service libraries. Required: none, Optional: MPI, FFTW3, METIS, OpenMesh, Python
-##     the include paths are set, and the libraries are added to variable SERVICE_LIBS
 ##   - Subdirectory cmake lists are called
 ##       -> src/   this folder contains all modules, each module (that contains c or cpp files) is linked to a
-##                 static library.  Dependencies between these shared libraries are tracked manually,
-##                 for more information see waLBerlaModuleDependencySystem.cmake
+##                 static library
 ##       -> tests/ Same subdirectories as src/ folder. Contains tests for each module
 ##   - Export of variables into internal cache variables, for usage in applications or projects that use walberla as
 ##     subdirectory. Variables containing the service-libs,
@@ -25,7 +22,7 @@
 ##
 ############################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.24)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.26)
 
 
 PROJECT ( walberla )
@@ -457,11 +454,7 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
    if ( MPI_FOUND )
      include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
-     foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-         if ( LIB )
-            list ( APPEND SERVICE_LIBS ${LIB} )
-         endif ( )
-     endforeach ( )
+
      add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
      add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
 
@@ -495,15 +488,12 @@ if ( WALBERLA_BUILD_WITH_METIS )
    find_package( Metis REQUIRED )
 
    include_directories( ${METIS_INCLUDE_DIRS} )
-   list( APPEND SERVICE_LIBS ${METIS_LIBRARIES} )
-
 endif()
 
 if ( WALBERLA_BUILD_WITH_PARMETIS )
    find_package( Parmetis REQUIRED )
 
    include_directories( ${PARMETIS_INCLUDE_DIR} )
-   list( APPEND SERVICE_LIBS ${PARMETIS_LIBRARY} )
 endif()
 
 ############################################################################################################################
@@ -524,7 +514,6 @@ if ( WALBERLA_BUILD_WITH_FFTW )
       if( PFFT_FOUND AND FFTW3_MPI_FOUND )
          set( WALBERLA_BUILD_WITH_FFT TRUE CACHE INTERNAL "Build with FFT" )
          include_directories( SYSTEM ${PFFT_INCLUDE_DIR} ${FFTW3_MPI_INCLUDE_DIR} )
-         list( APPEND SERVICE_LIBS ${PFFT_LIBRARIES} ${FFTW3_LIBRARIES} ${FFTW3_MPI_LIBRARIES} )
       endif()
    else()
       find_package( FFTW3 )
@@ -532,7 +521,6 @@ if ( WALBERLA_BUILD_WITH_FFTW )
       if ( FFTW3_FOUND )
          set( WALBERLA_BUILD_WITH_FFT TRUE CACHE INTERNAL "Build with FFT" )
          include_directories( SYSTEM ${FFTW3_INCLUDE_DIR} )
-         list( APPEND SERVICE_LIBS ${FFTW3_LIBRARIES} )
       endif()
    endif()
 endif()
@@ -571,7 +559,6 @@ if( WALBERLA_BUILD_WITH_OPENMESH )
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 0 CACHE INTERNAL "Suppress dev warnings")
     target_compile_options(OpenMeshCore PRIVATE -w)
     target_compile_options(OpenMeshTools PRIVATE -w)
-    list( APPEND SERVICE_LIBS ${OPENMESH_LIBRARIES} )
 endif()
 
 ############################################################################################################################
@@ -657,15 +644,6 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         set(CMAKE_CUDA_ARCHITECTURES OFF)
         message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
     endif()
-
-    #include directories and cudart lib is needed for cpp files that use cuda headers/libs
-    list ( APPEND SERVICE_LIBS CUDA::cudart )
-    if (${CUDAToolkit_VERSION} VERSION_LESS "10")
-     list ( APPEND SERVICE_LIBS CUDA::nvToolsExt )
-    else()
-       # nvtx3 was introduced in cuda 10 and replaces nvToolsExt in cuda 12.9
-     list ( APPEND SERVICE_LIBS CUDA::nvtx3)
-    endif()
 endif ( )
 
 # Can be used in CMake files containing generated files where the file suffix is dependent on the target
@@ -693,7 +671,6 @@ if ( WALBERLA_BUILD_WITH_HIP )
     # since waLBerla also supports CUDA we only use HIP on an AMD platform
     add_compile_definitions(__HIP_PLATFORM_AMD__)
     # include_directories(${HSA_HEADER})
-    list (APPEND SERVICE_LIBS hip::host)
 endif ( )
 
 if (WALBERLA_BUILD_WITH_HIP)
@@ -720,11 +697,10 @@ if ( WALBERLA_BUILD_WITH_LIKWID_MARKERS AND NOT LIKWID_FOUND )
     find_library( LIKWID_LIB likwid HINTS $ENV{LIKWID_LIBDIR} $ENV{LIKWID_ROOT}/lib )
     find_path( LIKWID_INCLUDE_DIR likwid.h HINTS $ENV{LIKWID_INCDIR} $ENV{LIKWID_ROOT}/include )
 
-    if ( LIKWID_LIB AND LIKWID_INCLUDE_DIR)
+    if ( LIKWID_INCLUDE_DIR )
         set( LIKWID_FOUND 1)
         include_directories( ${LIKWID_INCLUDE_DIR})
         add_definitions ( "-DLIKWID_PERFMON" )
-        list ( APPEND SERVICE_LIBS ${LIKWID_LIB} )
     else()
         message(WARNING "likwid marker library not found. Set environment variable LIKWID_ROOT")
         set ( WALBERLA_BUILD_WITH_LIKWID_MARKERS OFF CACHE BOOL "Compile in markers for likwid-perfctr" FORCE )

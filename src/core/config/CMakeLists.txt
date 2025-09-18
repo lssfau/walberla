@@ -1,8 +1,12 @@
 target_sources( walberla_core
-      PRIVATE
-      Config.cpp
-      Config.h
-      Create.cpp
-      Create.h
-      Iterator.h
-      )
+        PUBLIC
+        Config.h
+        Create.h
+        Iterator.h
+)
+
+target_sources( walberla_core
+        PRIVATE
+        Config.cpp
+        Create.cpp
+)

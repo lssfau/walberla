@@ -18,7 +18,7 @@ site_name( WALBERLA_BUILD_MACHINE )
 
 # Generate file with compile options, and add install rule for it
 configure_file( waLBerlaBuildInfo.in.cpp
-      waLBerlaBuildInfo.cpp )
+        waLBerlaBuildInfo.cpp )
 
 ############################################################################################################################
 
@@ -27,71 +27,92 @@ include( logging/logging.cmake )
 
 add_library( walberla_core )
 add_library( walberla::core ALIAS walberla_core )
+
+# MPI
+
 if ( MPI_FOUND )
-   target_link_libraries( walberla_core PUBLIC MPI::MPI_CXX )
+    foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+        if ( LIB )
+            target_link_libraries ( walberla_core PUBLIC ${LIB} )
+        endif ( )
+    endforeach ( )
 endif ()
+
+# OpenMP
 
 if ( OpenMP_CXX_FOUND )
-   target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
+    target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
 endif ()
+
+# half-precision
 
 if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
-   # Actual support for float16 is available only since C++23
-   #   before is_arithmetic and is_floating_point evaluated to false,
-   #   also many STL functions are compatible with float16 only since C++23.
-   # Which features are actually supported depend on the compiler
-   target_compile_features( walberla_core PUBLIC cxx_std_23 )
+    # Actual support for float16 is available only since C++23
+    #   before is_arithmetic and is_floating_point evaluated to false,
+    #   also many STL functions are compatible with float16 only since C++23.
+    # Which features are actually supported depend on the compiler
+    target_compile_features( walberla_core PUBLIC cxx_std_23 )
 endif ()
 
-target_link_libraries( walberla_core PUBLIC ${SERVICE_LIBS} )
+# likwid
+
+if ( LIKWID_FOUND AND LIKWID_LIB )
+    target_link_libraries ( walberla_core PUBLIC ${LIKWID_LIB} )
+endif()
+
+target_link_libraries( walberla_core PUBLIC ${CORE_SERVICE_LIBS} )
 target_include_directories( walberla_core PUBLIC ${walberla_SOURCE_DIR}/src/ ${walberla_BINARY_DIR}/src/ )
 target_sources( walberla_core
-      PRIVATE
-      Abort.cpp
-      Conversion.cpp
-      DataTypes.cpp
-      Environment.cpp
-      GetPID.cpp
-      Hostname.cpp
-      MemoryUsage.cpp
-      RandomUUID.cpp
-      Sleep.cpp
-      waLBerlaBuildInfo.cpp
-      Abort.h
-      AllSet.h
-      Any.h
-      Array.h
-      ConcatIterator.h
-      Conversion.h
-      DataTypes.h
-      EndianIndependentSerialization.h
-      Environment.h
-      Filesystem.h
-      Format.hpp
-      FunctionTraits.h
-      GetPID.h
-      Hostname.h
-      Macros.h
-      MemoryUsage.h
-      NonCopyable.h
-      NonCreateable.h
-      OpenMP.h
-      Optional.h
-      RandomUUID.h
-      Regex.h
-      Sanitizer.h
-      Set.h
-      SharedFunctor.h
-      Sleep.h
-      STLIO.h
-      stringToNum.h
-      StringUtility.h
-      StringUtility.impl.h
-      typeToString.h
-      UniqueID.h
-      Variant.h
-      VectorTrait.h
-      waLBerlaBuildInfo.h
+        PUBLIC
+        Abort.h
+        AllSet.h
+        Any.h
+        Array.h
+        ConcatIterator.h
+        Conversion.h
+        DataTypes.h
+        EndianIndependentSerialization.h
+        Environment.h
+        Filesystem.h
+        Format.hpp
+        FunctionTraits.h
+        GetPID.h
+        Hostname.h
+        Macros.h
+        MemoryUsage.h
+        NonCopyable.h
+        NonCreateable.h
+        OpenMP.h
+        Optional.h
+        RandomUUID.h
+        Regex.h
+        Sanitizer.h
+        Set.h
+        SharedFunctor.h
+        Sleep.h
+        STLIO.h
+        stringToNum.h
+        StringUtility.h
+        StringUtility.impl.h
+        typeToString.h
+        UniqueID.h
+        Variant.h
+        VectorTrait.h
+        waLBerlaBuildInfo.h
+)
+
+target_sources( walberla_core
+        PRIVATE
+        Abort.cpp
+        Conversion.cpp
+        DataTypes.cpp
+        Environment.cpp
+        GetPID.cpp
+        Hostname.cpp
+        MemoryUsage.cpp
+        RandomUUID.cpp
+        Sleep.cpp
+        waLBerlaBuildInfo.cpp
 )
 
 add_subdirectory( cell )

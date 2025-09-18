@@ -1,6 +1,10 @@
 target_sources( walberla_field
-    PRIVATE
-    AlignedMalloc.cpp
-    AlignedMalloc.h
-    FieldAllocator.h     
-    )
+        PUBLIC
+        AlignedMalloc.h
+        FieldAllocator.h
+)
+
+target_sources( walberla_field
+        PRIVATE
+        AlignedMalloc.cpp
+)

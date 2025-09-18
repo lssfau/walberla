@@ -32,12 +32,15 @@ waLBerla_generate_target_from_python(NAME ThermocapillaryGen
         ContactAngle.${CODEGEN_FILE_SUFFIX} ContactAngle.h
         GenDefines.h)
 
+
+set ( ThermoCapillary_DEPENDENCIES walberla::blockforest walberla::core walberla::field
+        walberla::postprocessing walberla::lbm walberla::geometry walberla::timeloop
+        walberla::python_coupling ThermocapillaryGen )
+
 if ( WALBERLA_BUILD_WITH_GPU_SUPPORT )
-    waLBerla_add_executable(NAME thermocapillary
-            FILES thermocapillary.cpp PythonExports.cpp InitializerFunctions.cpp thermocapillary_codegen.py
-          DEPENDS walberla::blockforest walberla::core walberla::gpu walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop ThermocapillaryGen )
-else ()
-    waLBerla_add_executable(NAME thermocapillary
-            FILES thermocapillary.cpp PythonExports.cpp InitializerFunctions.cpp thermocapillary_codegen.py
-          DEPENDS walberla::blockforest walberla::core walberla::field walberla::postprocessing walberla::python_coupling walberla::lbm walberla::geometry walberla::timeloop ThermocapillaryGen )
-endif ( WALBERLA_BUILD_WITH_GPU_SUPPORT )
+    list ( APPEND ThermoCapillary_DEPENDENCIES walberla::gpu )
+endif ()
+
+add_executable ( thermocapillary thermocapillary.cpp PythonExports.cpp InitializerFunctions.cpp
+        thermocapillary_codegen.py )
+target_link_libraries ( thermocapillary ${ThermoCapillary_DEPENDENCIES} )

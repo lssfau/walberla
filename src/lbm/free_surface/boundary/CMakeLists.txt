@@ -1,6 +1,6 @@
 target_sources( walberla_lbm
-        PRIVATE
+        PUBLIC
         FreeSurfaceBoundaryHandling.h
         FreeSurfaceBoundaryHandling.impl.h
         SimplePressureWithFreeSurface.h
-        )
+)

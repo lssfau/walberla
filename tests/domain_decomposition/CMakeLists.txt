@@ -4,11 +4,14 @@
 #
 ###################################################################################################
 
-waLBerla_compile_test( NAME MapPointToPeriodicDomain FILES MapPointToPeriodicDomain.cpp DEPENDS walberla::core )
+waLBerla_add_test_executable ( MapPointToPeriodicDomain MapPointToPeriodicDomain.cpp )
+target_link_libraries( MapPointToPeriodicDomain walberla::domain_decomposition walberla::core )
 waLBerla_execute_test( NAME MapPointToPeriodicDomain )
 
-waLBerla_compile_test( NAME PeriodicIntersect FILES PeriodicIntersect.cpp DEPENDS walberla::core walberla::blockforest )
+waLBerla_add_test_executable ( PeriodicIntersect PeriodicIntersect.cpp )
+target_link_libraries ( PeriodicIntersect walberla::core walberla::blockforest walberla::domain_decomposition )
 waLBerla_execute_test( NAME PeriodicIntersect )
 
-waLBerla_compile_test( NAME PeriodicIntersectionVolume FILES PeriodicIntersectionVolume.cpp DEPENDS walberla::core walberla::blockforest )
+waLBerla_add_test_executable ( PeriodicIntersectionVolume PeriodicIntersectionVolume.cpp )
+target_link_libraries ( PeriodicIntersectionVolume walberla::domain_decomposition walberla::core walberla::blockforest )
 waLBerla_execute_test( NAME PeriodicIntersectionVolume )

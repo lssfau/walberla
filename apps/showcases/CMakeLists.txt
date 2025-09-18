@@ -10,14 +10,15 @@ if ( WALBERLA_BUILD_WITH_CODEGEN)
 
    add_subdirectory( Antidunes )
    add_subdirectory( FlowAroundSphere )
-   add_subdirectory( KelvinHelmholtzInstability )
    
    if (WALBERLA_BUILD_WITH_PYTHON)
       add_subdirectory( PhaseFieldAllenCahn )
-   endif ()
 
-   if (WALBERLA_DOUBLE_ACCURACY)
-      add_subdirectory( Thermocapillary )
+      add_subdirectory( KelvinHelmholtzInstability )
+
+      if (WALBERLA_DOUBLE_ACCURACY)
+         add_subdirectory( Thermocapillary )
+      endif ()
    endif ()
 
 endif()

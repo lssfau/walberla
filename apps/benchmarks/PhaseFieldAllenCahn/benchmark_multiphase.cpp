@@ -233,8 +233,10 @@ int main(int argc, char** argv)
             init_h(&block);
             init_g(&block);
          }
+#if defined(WALBERLA_BUILD_WITH_CUDA)
          WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
          WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+#endif
          WALBERLA_MPI_BARRIER()
          WALBERLA_LOG_INFO_ON_ROOT("initialization of the distributions done")
       }
@@ -290,8 +292,10 @@ int main(int argc, char** argv)
       for (uint_t i = 0; i < warmupSteps; ++i)
          timeloop.singleStep();
 
+#if defined(WALBERLA_BUILD_WITH_CUDA)
       WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
       WALBERLA_GPU_CHECK(gpuPeekAtLastError())
+#endif
       WALBERLA_MPI_BARRIER()
       WALBERLA_LOG_INFO_ON_ROOT("Warmup timesteps done")
 
