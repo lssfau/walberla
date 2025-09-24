@@ -34,7 +34,8 @@
 #include "field/FlagField.h"
 #include "core/debug/Debug.h"
 
-#include <set>
+#include <functional>
+#include <memory>
 #include <vector>
 
 {% for header in interface_spec.headers %}
@@ -81,12 +82,18 @@ public:
         {% if target == 'gpu' -%}
         ~IndexVectors() {
             for( auto & gpuVec: gpuVectors_)
-               WALBERLA_GPU_CHECK(gpuFree( gpuVec ));
+            {
+                if ( gpuVec )
+                {
+                    WALBERLA_GPU_CHECK(gpuFree( gpuVec ));
+                }
+            }
         }
         {% endif -%}
 
-        CpuIndexVector & indexVector(Type t) { return cpuVectors_[t]; }
-        {{StructName}} * pointerCpu(Type t)  { return cpuVectors_[t].data(); }
+        auto & indexVector(Type t) { return cpuVectors_[t]; }
+        auto const & indexVector(Type t) const { return cpuVectors_[t]; }
+        {{StructName}} * pointerCpu(Type t)  { return cpuVectors_[t].empty() ? nullptr : cpuVectors_[t].data(); }
 
         {% if target == 'gpu' -%}
         {{StructName}} * pointerGpu(Type t)  { return gpuVectors_[t]; }
@@ -104,14 +111,15 @@ public:
             {
                 auto & gpuVec = gpuVectors_[i];
                 auto & cpuVec = cpuVectors_[i];
+                if ( cpuVec.empty() )
+                {
+                    continue;
+                }
                 WALBERLA_GPU_CHECK(gpuMalloc( &gpuVec, sizeof({{StructName}}) * cpuVec.size() ));
-                WALBERLA_GPU_CHECK(gpuMemcpy( gpuVec, &cpuVec[0], sizeof({{StructName}}) * cpuVec.size(), gpuMemcpyHostToDevice ));
+                WALBERLA_GPU_CHECK(gpuMemcpy( gpuVec, cpuVec.data(), sizeof({{StructName}}) * cpuVec.size(), gpuMemcpyHostToDevice ));
             }
             {%- endif %}
         }
-
-
-
 
     private:
         std::vector<CpuIndexVector> cpuVectors_{NUM_TYPES};
@@ -130,7 +138,7 @@ public:
        real_t F_1;
        real_t F_2;
        bool cellOnGL;
-       ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), F_2(real_c(0.0)), cellOnGL(cellOnGL_) {}
+       explicit ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), F_2(real_c(0.0)), cellOnGL(cellOnGL_) {}
        bool operator==(const ForceStruct & o) const {
           return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && floatIsEqual(F_2, o.F_2) && cellOnGL == o.cellOnGL;
        }
@@ -138,7 +146,7 @@ public:
        real_t F_0;
        real_t F_1;
        bool cellOnGL;
-       ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), cellOnGL(cellOnGL_) {}
+       explicit ForceStruct(bool cellOnGL_) : F_0(real_c(0.0)), F_1(real_c(0.0)), cellOnGL(cellOnGL_) {}
        bool operator==(const ForceStruct & o) const {
           return floatIsEqual(F_0, o.F_0) && floatIsEqual(F_1, o.F_1) && cellOnGL == o.cellOnGL;
        }
@@ -156,9 +164,10 @@ public:
        ~ForceVector() {if(!gpuVector_.empty()){WALBERLA_GPU_CHECK(gpuFree( gpuVector_[0] ))}}
        {% endif -%}
 
-       std::vector<ForceStruct> & forceVector() { return cpuVector_; }
-       ForceStruct * pointerCpu()  { return cpuVector_.data(); }
-       bool empty() {return cpuVector_.empty();}
+       auto & forceVector() { return cpuVector_; }
+       auto const & forceVector() const { return cpuVector_; }
+       ForceStruct * pointerCpu()  { return cpuVector_.empty() ? nullptr : cpuVector_.data(); }
+       bool empty() const { return cpuVector_.empty(); }
 
        {% if target == 'gpu' -%}
        ForceStruct * pointerGpu()  { return gpuVector_[0]; }
@@ -168,13 +177,13 @@ public:
        {
           syncCPU();
           Vector3<real_t> result(real_c(0.0));
-          for(std::vector<ForceStruct>::iterator it = cpuVector_.begin(); it != cpuVector_.end(); ++it)
+          for(auto const &force : cpuVector_)
           {
-             if (!it->cellOnGL) {
-                result[0] += it->F_0;
-                result[1] += it->F_1;
+             if (!force.cellOnGL) {
+                result[0] += force.F_0;
+                result[1] += force.F_1;
                 {% if dim == 3 -%}
-                result[2] += it->F_2;
+                result[2] += force.F_2;
                 {% endif -%}
              }
           }
@@ -210,9 +219,9 @@ public:
 
     {%- endif %}
 
-    {{class_name}}( const shared_ptr<StructuredBlockForest> & blocks,
+    {{class_name}}( const std::shared_ptr<StructuredBlockForest> & blocks,
                    {{kernel|generate_constructor_parameters(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize'])}}{{additional_data_handler.constructor_arguments}})
-        :{{additional_data_handler.initialiser_list}} {{ kernel|generate_constructor_initializer_list(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize']) }}
+        : {{additional_data_handler.initialiser_list}} {{ kernel|generate_constructor_initializer_list(['indexVector', 'indexVectorSize', 'forceVector', 'forceVectorSize']) }}
     {
         auto createIdxVector = []( IBlock * const , StructuredBlockStorage * const ) { return new IndexVectors(); };
         indexVectorID = blocks->addStructuredBlockData< IndexVectors >( createIdxVector, "IndexField_{{class_name}}");
@@ -278,7 +287,7 @@ public:
     }
 
     template<typename FlagField_T>
-    void fillFromFlagField( const shared_ptr<StructuredBlockForest> & blocks, ConstBlockDataID flagFieldID,
+    void fillFromFlagField( const std::shared_ptr<StructuredBlockForest> & blocks, ConstBlockDataID flagFieldID,
                             FlagUID boundaryFlagUID, FlagUID domainFlagUID)
     {
         for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
@@ -326,15 +335,15 @@ public:
            {
               auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
               {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
-              indexVectorAll.push_back( element );
+              indexVectorAll.emplace_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
-                 indexVectorInner.push_back( element );
+                 indexVectorInner.emplace_back( element );
               else
-                 indexVectorOuter.push_back( element );
+                 indexVectorOuter.emplace_back( element );
 
               {% if calculate_force -%}
               bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
-              forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+              forceVector->forceVector().emplace_back( cellOnGL );
               {%endif%}
            }
         }
@@ -349,15 +358,15 @@ public:
             {
                 auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
                 {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
-                indexVectorAll.push_back( element );
+                indexVectorAll.emplace_back( element );
                 if( inner.contains( it.x(), it.y(), it.z() ) )
-                    indexVectorInner.push_back( element );
+                    indexVectorInner.emplace_back( element );
                 else
-                    indexVectorOuter.push_back( element );
+                    indexVectorOuter.emplace_back( element );
             }
             {% if calculate_force -%}
             bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
-            forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+            forceVector->forceVector().emplace_back( cellOnGL );
             {%endif%}
             {% endfor %}
         }
@@ -385,15 +394,15 @@ public:
                 {% else %}
                 auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
                 {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
-                indexVectorAll.push_back( element );
+                indexVectorAll.emplace_back( element );
                 if( inner.contains( it.x(), it.y(), it.z() ) )
-                    indexVectorInner.push_back( element );
+                    indexVectorInner.emplace_back( element );
                 else
-                    indexVectorOuter.push_back( element );
+                    indexVectorOuter.emplace_back( element );
 
                 {% if calculate_force -%}
                 bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
-                forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+                forceVector->forceVector().emplace_back( cellOnGL );
                 {%endif%}
                 {% endif %}
             }
@@ -413,15 +422,15 @@ public:
                 }
             {% endfor %}
                 auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} calculated_idx );
-                indexVectorAll.push_back( element );
+                indexVectorAll.emplace_back( element );
                 if( inner.contains( it.x(), it.y(), it.z() ) )
-                indexVectorInner.push_back( element );
+                indexVectorInner.emplace_back( element );
                 else
-                indexVectorOuter.push_back( element );
+                indexVectorOuter.emplace_back( element );
 
                 {% if calculate_force -%}
                 bool cellOnGL = !flagField->xyzSize().contains( it.x(), it.y(), it.z() );
-                forceVector->forceVector().push_back(ForceStruct(cellOnGL));
+                forceVector->forceVector().emplace_back( cellOnGL );
                 {%endif%}
             }
         {% endif -%}
