@@ -7,8 +7,9 @@
 
 #include "vtk/all.h"
 
-#include <array>
 #include <iostream>
+#include <limits>
+#include <random>
 #include <map>
 
 #include "SimDomain.hpp"
@@ -21,6 +22,8 @@ using namespace walberla;
 using namespace walberla::experimental;
 
 using TestFunction = std::function< void(mpi::Environment&) >;
+
+std::string vtk_folder{"vtk_out"};
 
 /**
  * Fully periodic force-driven flow.
@@ -119,7 +122,7 @@ void mirroredHalfChannel(mpi::Environment&)
    auto streamCollide  = dom.streamCollideSweep(omega, force);
    auto noSlipTop      = dom.noSlipTop();
    auto freeSlipBottom = dom.freeSlipBottom();
-   auto velOutput      = field::createVTKOutput< VectorField_T >(dom.cpuFields.uId, *dom.blocks, "vel");
+   auto velOutput      = field::createVTKOutput< VectorField_T >(dom.cpuFields.uId, *dom.blocks, "vel", uint_t{1u}, uint_t{0u}, false, vtk_folder);
 
    for (uint_t t = 0; t < 50; ++t)
    {
@@ -213,7 +216,7 @@ void freeSlipPipe(mpi::Environment&)
 
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*dom.blocks, dom.cpuFields.flagFieldId, fluidFlagUid);
 
-   auto flagsOutput = field::createVTKOutput< FlagField_T >(dom.cpuFields.flagFieldId, *dom.blocks, "flags");
+   auto flagsOutput = field::createVTKOutput< FlagField_T >(dom.cpuFields.flagFieldId, *dom.blocks, "flags", uint_t{1u}, uint_t{0u}, false, vtk_folder);
    flagsOutput();
 
    dom.fields2device();
@@ -224,7 +227,7 @@ void freeSlipPipe(mpi::Environment&)
 
    auto streamCollide = dom.streamCollideSweep(1.0, force);
 
-   auto velOutput = field::createVTKOutput< VectorField_T >(dom.cpuFields.uId, *dom.blocks, "vel");
+   auto velOutput = field::createVTKOutput< VectorField_T >(dom.cpuFields.uId, *dom.blocks, "vel", uint_t{1u}, uint_t{0u}, false, vtk_folder);
 
    sweep::SerialSweeper sweeper{ dom.blocks };
 
@@ -280,10 +283,15 @@ int main(int argc, char** argv)
    }
 
    std::string testId{ argv[1] };
-
-   if (auto entry = BasicLbmScenarios::TESTS.find(testId); entry != BasicLbmScenarios::TESTS.end())
+   if (BasicLbmScenarios::TESTS.contains(testId))
    {
-      std::get< BasicLbmScenarios::TestFunction > (*entry)(env);
+      std::random_device rd;
+      std::uniform_int_distribution<std::size_t> generator(std::size_t{0u}, std::numeric_limits<std::size_t>::max() / 1024ul);
+      auto unique_id = generator(rd) * 1024ul;
+      unique_id += walberla::uint_c(walberla::mpi::MPIManager::instance()->numProcesses());
+      walberla::mpi::broadcastObject(unique_id);
+      BasicLbmScenarios::vtk_folder += "_" + testId + "_" + std::to_string(unique_id);
+      BasicLbmScenarios::TESTS.at(testId)(env);
       return EXIT_SUCCESS;
    }
 

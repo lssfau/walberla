@@ -477,10 +477,12 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
    endif ( )
 endif ( )
 
+# MPIEXEC_PREFLAGS overrides
+set(WALBERLA_MPIEXEC_PREFLAGS "")
 # OpenMPI 3.0 and higher checks the number of processes against the number of CPUs
 execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result OUTPUT_VARIABLE mpi_version_output)
 if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
-    set ( MPIEXEC_PREFLAGS "${MPIEXEC_PREFLAGS}" "-oversubscribe" CACHE STRING "" FORCE)
+    list ( APPEND WALBERLA_MPIEXEC_PREFLAGS "-oversubscribe")
 endif()
 ############################################################################################################################
 
@@ -653,7 +655,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
     enable_language(CUDA)
     find_package(CUDAToolkit REQUIRED)
 
-    if(${CMAKE_VERSION} VERSION_GREATER "3.18.0" AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
         set(CMAKE_CUDA_ARCHITECTURES OFF)
         message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
     endif()

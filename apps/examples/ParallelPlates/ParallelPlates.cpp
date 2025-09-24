@@ -73,8 +73,9 @@ namespace ParallelPlates
         BlockDataID uId = field::addToStorage<VectorField_T>(blocks, "u", real_c(0.0), field::fzyx, 0);
         
         Config::BlockHandle simParams = config->getBlock("Parameters");
-        ChannelType::Type channelType = ChannelType::fromStr(simParams.getParameter< std::string >("channelType"));
-        const real_t latticeViscosity{ simParams.getParameter< real_t >("nu") };
+        std::string channelTypeStr = simParams.getParameter< std::string >("channelType");
+        ChannelType::Type channelType = ChannelType::fromStr(channelTypeStr);
+        const real_t latticeViscosity = simParams.getParameter< real_t >("nu");
         const real_t channelVelocity = simParams.getParameter< real_t >("u_max");
         const real_t errorThreshold = simParams.getParameter< real_t >("errorThreshold");
 
@@ -152,7 +153,7 @@ namespace ParallelPlates
         const uint_t vtkWriteFrequency = outputParams.getParameter<uint_t>("vtkWriteFrequency", 0);
         if (vtkWriteFrequency > 0)
         {
-            auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
+            auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out_" + channelTypeStr,
                                                             "simulation_step", false, true, true, false, 0);
 
             auto densityWriter = make_shared<field::VTKWriter<ScalarField_T, float32>>(rhoId, "density");
@@ -179,11 +180,9 @@ namespace ParallelPlates
         switch(channelType) {
             case ChannelType::COUETTE: {
                 computeVelocityError = gen::Couette::VelocityErrorLmax{ blocks, uId, velocityErrorLmax.get(), channelVelocity };
-                
             } break;
             case ChannelType::POISEUILLE: {
                 computeVelocityError = gen::Poiseuille::VelocityErrorLmax{ blocks, uId, velocityErrorLmax.get(), channelVelocity };
-                
             } break;
         }
 

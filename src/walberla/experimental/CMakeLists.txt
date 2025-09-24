@@ -17,6 +17,6 @@ target_link_libraries(
     walberla_field
 )
 
-if( WALBERLA_BUILD_WITH_GPU )
+if( WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP )
     target_link_libraries( walberla_experimental INTERFACE walberla_gpu )
 endif()
