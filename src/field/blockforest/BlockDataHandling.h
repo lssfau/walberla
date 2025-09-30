@@ -109,15 +109,15 @@ protected:
 template< typename Field_T, bool Pseudo2D >
 inline void BlockDataHandling< Field_T, Pseudo2D >::serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
 {
-   auto * field = block->template getData< Field_T >(id);
+   const auto * field = block->template getData< Field_T >(id);
    WALBERLA_ASSERT_NOT_NULLPTR( field )
 
 #ifndef NDEBUG
    buffer << field->xSize() << field->ySize() << field->zSize() << field->fSize();
 #endif
 
-   for( auto it = field->begin(); it != field->end(); ++it )
-      buffer << *it;
+   for( const auto &value : *field )
+      buffer << value;
 }
 
 
@@ -216,8 +216,8 @@ inline void BlockDataHandling< Field_T, Pseudo2D >::deserialize( IBlock * const 
    WALBERLA_ASSERT_EQUAL( fSender, field->fSize() )
 #endif
 
-   for( auto it = field->begin(); it != field->end(); ++it )
-      buffer >> *it;
+   for( auto &value : *field )
+      buffer >> value;
 }
 
 

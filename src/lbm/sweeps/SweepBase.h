@@ -65,7 +65,7 @@ public:
       src_( src ), dstFromBlockData_( true ), dst_( dst ), filter_( _filter ),
       densityVelocityIn_( _densityVelocityIn ), densityVelocityOut_( _densityVelocityOut ) {}
 
-   virtual ~SweepBase() { for( auto field = dstFields_.begin(); field != dstFields_.end(); ++field ) delete *field; }
+   virtual ~SweepBase() { for( auto *field : dstFields_ ) delete field; }
 
    void filter( IBlock & block ) { filter_( block ); }
    bool filter( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const { return filter_(x,y,z); }

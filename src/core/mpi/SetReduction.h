@@ -56,8 +56,8 @@ template< typename T >
 std::vector<T> allReduceSet( std::vector<T> values, SetOperation op, MPI_Comm mpiCommunicator = MPI_COMM_WORLD, int mpiTag = 0 )
 {
    // create a sorted set from the vector
-   std::sort( values.begin(), values.end() );
-   values.erase( std::unique( values.begin(), values.end() ), values.end() );
+   std::ranges::sort( values );
+   values.erase(std::ranges::unique(values).begin(), values.end());
 
    WALBERLA_NON_MPI_SECTION()
    {
@@ -108,10 +108,10 @@ std::vector<T> allReduceSet( std::vector<T> values, SetOperation op, MPI_Comm mp
       switch( op )
       {
       case INTERSECTION:
-         std::set_intersection( values.begin(), values.end(), tmp0.begin(), tmp0.end(), std::back_inserter( tmp1 ) );
+         std::ranges::set_intersection( values, tmp0, std::back_inserter( tmp1 ) );
          break;
       case UNION:
-         std::set_union( values.begin(), values.end(), tmp0.begin(), tmp0.end(), std::back_inserter( tmp1 ) );
+         std::ranges::set_union( values, tmp0, std::back_inserter( tmp1 ) );
          break;
       }
       swap( values, tmp1 );
@@ -127,10 +127,10 @@ std::vector<T> allReduceSet( std::vector<T> values, SetOperation op, MPI_Comm mp
          switch( op )
          {
          case INTERSECTION:
-            std::set_intersection( values.begin(), values.end(), tmp0.begin(), tmp0.end(), std::back_inserter( tmp1 ) );
+            std::ranges::set_intersection( values, tmp0, std::back_inserter( tmp1 ) );
             break;
          case UNION:
-            std::set_union( values.begin(), values.end(), tmp0.begin(), tmp0.end(), std::back_inserter( tmp1 ) );
+            std::ranges::set_union( values, tmp0, std::back_inserter( tmp1 ) );
             break;
          }
          swap( values, tmp1 );

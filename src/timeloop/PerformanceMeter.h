@@ -166,7 +166,7 @@ namespace timeloop {
       uint_t cellCounter = 0;
 
       const FlagField_T * ffield = block.template getData<FlagField_T>( flagFieldID );
-      for( auto cell = ffield->begin(); cell != ffield->end(); ++cell )
+      for( const auto &cell : *ffield )
          if ( isPartOfMaskSet( cell,mask ) )
             ++cellCounter;
 

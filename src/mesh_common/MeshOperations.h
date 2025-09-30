@@ -467,8 +467,8 @@ std::vector< typename MeshType::VertexHandle > findConnectedVertices( const Mesh
    for( auto it = facesBegin; it != facesEnd; ++it )
       findConnectedVertices( mesh, *it, vertexHandles );
 
-   std::sort( vertexHandles.begin(), vertexHandles.end() );
-   vertexHandles.erase( std::unique( vertexHandles.begin(), vertexHandles.end() ), vertexHandles.end() );
+   std::ranges::sort( vertexHandles, std::less{} );
+   vertexHandles.erase( std::ranges::unique( vertexHandles ).begin(), vertexHandles.end() );
 
    return vertexHandles;
 }

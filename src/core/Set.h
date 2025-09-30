@@ -44,8 +44,8 @@ template< typename T > inline bool setIsEqual( const Set<T>& a, const Set<T>& b 
 
 /// \cond internal
 namespace set {
-template< class InputIterator1, class InputIterator2 >
-bool setsIntersect( InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2 );
+template< std::ranges::input_range R1, std::ranges::input_range R2 >
+bool setsIntersect( R1&& r1, R2&& r2 );
 } // namespace set
 /// \endcond
 
@@ -120,10 +120,10 @@ public:
    inline bool operator>=( const Set<T>& set ) const { return !(operator<( set )); }            ///< compares the size (not the content!) of two sets
    inline bool equalSize ( const Set<T>& set ) const { return set_.size() == set.set_.size(); } ///< compares the size (not the content!) of two sets
 
-   bool intersects( const Set<T>& set ) const { return set::setsIntersect( begin(), end(), set.begin(), set.end() ); } ///< true if both sets intersect
-   bool contains  ( const Set<T>& set ) const { return std::includes( begin(), end(), set.begin(), set.end() ); }      ///< true if "set" is completely contained within this set
-   bool contains  ( const T&  element ) const { return set_.find( element ) != set_.end(); }                           ///< true if "element" is contained within this set
-   bool isEqual   ( const Set<T>& set ) const { return set_ == set.set_; }                                             ///< true if both sets contain the same elements
+   bool intersects( const Set<T>& set ) const { return set::setsIntersect( set_, set ); }       ///< true if both sets intersect
+   bool contains  ( const Set<T>& set ) const { return std::ranges::includes( set_, set ); }    ///< true if "set" is completely contained within this set
+   bool contains  ( const T&  element ) const { return set_.find( element ) != set_.end(); }    ///< true if "element" is contained within this set
+   bool isEqual   ( const Set<T>& set ) const { return set_ == set.set_; }                      ///< true if both sets contain the same elements
 
    inline bool   empty() const { return set_.empty(); } ///< true if this set is empty
    inline bool isEmpty() const { return empty(); }      ///< true if this set is empty
@@ -161,7 +161,7 @@ template< typename T >
 inline const Set<T>& Set<T>::operator&=( const Set<T>& set ) {  // intersection
 
    std::set<T> result;
-   std::set_intersection( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+   std::ranges::set_intersection( *this, set, std::inserter( result, result.end() ), std::less{} );
    set_ = result;
 
    return *this;
@@ -193,7 +193,7 @@ template< typename T >
 inline const Set<T>& Set<T>::operator-=( const Set<T>& set ) { // difference / relative complement
 
    std::set<T> result;
-   std::set_difference( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+   std::ranges::set_difference( *this, set, std::inserter( result, result.end() ) );
    set_ = result;
 
    return *this;
@@ -282,9 +282,13 @@ inline std::ostream& operator<<( std::ostream& os, const Set<T>& set ) {
 /// \cond internal
 namespace set {
 
-template< class InputIterator1, class InputIterator2 >
-bool setsIntersect( InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2 ) {
+template< std::ranges::input_range R1, std::ranges::input_range R2 >
+bool setsIntersect( R1&& r1, R2&& r2 )  {
 
+   auto first1 = std::ranges::cbegin(r1);
+   auto first2 = std::ranges::cbegin(r2);
+   auto last1 = std::ranges::cend(r1);
+   auto last2 = std::ranges::cend(r2);
    while( first1 != last1 && first2 != last2) {
      if( *first1 < *first2 ) ++first1;
      else if( *first2 < *first1 ) ++first2;

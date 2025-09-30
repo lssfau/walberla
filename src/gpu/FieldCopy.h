@@ -40,10 +40,10 @@ namespace gpu
    template<typename DstType, typename SrcType>
    void fieldCpy( const shared_ptr< StructuredBlockStorage > & blocks,  BlockDataID dstID, ConstBlockDataID srcID )
    {
-      for ( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
+      for ( auto &block : *blocks )
       {
-               auto * dst = blockIt->getData<DstType>( dstID );
-         const auto * src = blockIt->getData<SrcType>( srcID );
+               auto * dst = block.getData<DstType>( dstID );
+         const auto * src = block.getData<SrcType>( srcID );
          fieldCpy( *dst, *src );
       }
    }

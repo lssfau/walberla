@@ -3007,9 +3007,9 @@ inline std::map< std::string, typename BoundaryHandling< FlagField_T, Stencil, B
 BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getFlagMapping() const
 {
    std::map< std::string, flag_t > mapping;
-   const auto uidMapping = flagField_->getMapping();
-   for( auto it = uidMapping.begin(); it != uidMapping.end(); ++it )
-      mapping[ it->first.getIdentifier() ] = it->second;
+   const auto &uidMapping = flagField_->getMapping();
+   for( const auto &[uid, flag] : uidMapping )
+      mapping[ uid.getIdentifier() ] = flag;
    return mapping;
 }
 
@@ -3036,23 +3036,23 @@ BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getNeighborFlagMapping(
       if( assumeIdenticalFlagMapping )
       {
          WALBERLA_ASSERT_EQUAL( myMapping.size(), neighborMapping.size() );
-         WALBERLA_ASSERT( std::equal( myMapping.begin(), myMapping.end(), neighborMapping.begin() ) );
+         WALBERLA_ASSERT( std::ranges::equal( myMapping, neighborMapping ) );
       }
       else {
 #endif
 
-      if( myMapping.size() == neighborMapping.size() && std::equal( myMapping.begin(), myMapping.end(), neighborMapping.begin() ) )
+      if( myMapping.size() == neighborMapping.size() && std::ranges::equal( myMapping, neighborMapping ) )
          identicalFlagMapping = true;
       else
       {
-         for( auto neighbor = neighborMapping.begin(); neighbor != neighborMapping.end(); ++neighbor )
+         for( const auto &[name, flag] : neighborMapping )
          {
-            WALBERLA_ASSERT( field::isFlag(neighbor->second) );
-            if( !flagField_->flagExists( neighbor->first ) )
-               WALBERLA_ABORT( "There exists no flag with identifier \"" << neighbor->first << "\"!" );
+            WALBERLA_ASSERT( field::isFlag(flag) );
+            if( !flagField_->flagExists( name ) )
+               WALBERLA_ABORT( "There exists no flag with identifier \"" << name << "\"!" );
 
-            flagMapping.push_back( neighbor->second );
-            flagMapping.push_back( flagField_->getFlag( neighbor->first ) );
+            flagMapping.push_back( flag );
+            flagMapping.push_back( flagField_->getFlag( name ) );
          }
       }
    }

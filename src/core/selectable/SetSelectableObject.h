@@ -108,7 +108,7 @@ void SetSelectableObject<T,U>::select( std::vector< size_t >& index, const Set<U
 
       Compare compare( this->attributes_ );
 
-      std::sort( candidates.begin(), candidates.end(), compare );
+      std::ranges::sort( candidates, compare );
 
       index.push_back( candidates[0] );
       for( size_t i = 1; i != candidates.size() &&

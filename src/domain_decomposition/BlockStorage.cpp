@@ -102,13 +102,13 @@ BlockDataID BlockStorage::addBlockData( const internal::SelectableBlockDataHandl
    internal::BlockDataItem item( id, identifier, dataHandling );
    blockDataItem_.push_back( item );
 
-   for( auto block = begin(); block != end(); ++block )
+   for( auto &block : *this )
    {
-      auto dh = item.getDataHandling( block.get() );
+      auto dh = item.getDataHandling( &block );
       if( dh )
-         block->addData( id, dh->initialize( block.get() ) );
+         block.addData( id, dh->initialize( &block ) );
       else
-         block->addData( id, nullptr );
+         block.addData( id, nullptr );
    }
 
    return id;
@@ -142,11 +142,11 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
    mpi::readBuffer(file, buffer, forceSerialIO);
 
    std::vector< IBlock * > blocks;
-   for( auto block = begin(); block != end(); ++block )
-      blocks.push_back( block.get() );
+   for( auto &block : *this )
+      blocks.push_back( &block );
    std::ranges::sort( blocks, internal::sortBlocksByID );
    
-   for(auto block : blocks)
+   for(auto *block : blocks)
    {
       auto dh = item.getDataHandling( block );
       if( dh )
@@ -189,13 +189,13 @@ void BlockStorage::serializeBlockData( const BlockDataID & id, mpi::SendBuffer &
    WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
 
    std::vector< IBlock * > blocks;
-   for( auto block = begin(); block != end(); ++block )
-      blocks.push_back( block.get() );
+   for( auto &block : *this )
+      blocks.push_back( &block );
    std::ranges::sort( blocks, internal::sortBlocksByID );
 
    auto & item = blockDataItem_[ uint_t(id) ];
 
-   for(auto block : blocks)
+   for(auto *block : blocks)
    {
       auto dh = item.getDataHandling( block );
       if( dh )
@@ -215,8 +215,8 @@ void BlockStorage::deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer
    WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
 
    std::vector< IBlock * > blocks;
-   for( auto block = begin(); block != end(); ++block )
-      blocks.push_back( block.get() );
+   for( auto &block : *this )
+      blocks.push_back( &block );
    std::ranges::sort( blocks, internal::sortBlocksByID );
 
    auto & item = blockDataItem_[ uint_t(id) ];

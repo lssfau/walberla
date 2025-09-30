@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -178,8 +179,8 @@ shared_ptr<TimingPool<TP> > TimingPool<TP>::getReduced( ReduceType rt, int targe
    switch (rt)
    {
    case REDUCE_MIN  :
-      for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i ) {
-         const double val = i->second.min();
+      for ( const auto &timer : timerMap_ | std::views::values ) {
+         const double val = timer.min();
          vals  .push_back( val     );
          valsSq.push_back( val*val );
          count .push_back( 1 );
@@ -187,8 +188,8 @@ shared_ptr<TimingPool<TP> > TimingPool<TP>::getReduced( ReduceType rt, int targe
       mpiReduce ( vals, vals, vals, valsSq, count, targetRank, ret );
       break;
    case REDUCE_AVG  :
-      for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i ) {
-         const double val = i->second.average();
+      for ( const auto &timer : timerMap_ | std::views::values ) {
+         const double val = timer.average();
          vals  .push_back( val     );
          valsSq.push_back( val*val );
          count .push_back( 1 );
@@ -197,8 +198,8 @@ shared_ptr<TimingPool<TP> > TimingPool<TP>::getReduced( ReduceType rt, int targe
       break;
 
    case REDUCE_MAX  :
-      for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i ) {
-         const double val = i->second.max();
+      for ( const auto &timer : timerMap_ | std::views::values ) {
+         const double val = timer.max();
          vals  .push_back( val     );
          valsSq.push_back( val*val );
          count .push_back( 1 );
@@ -210,12 +211,12 @@ shared_ptr<TimingPool<TP> > TimingPool<TP>::getReduced( ReduceType rt, int targe
       min.reserve ( timerMap_.size() );
       max.reserve ( timerMap_.size() );
 
-      for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i ) {
-         vals  .push_back( i->second.total() );
-         valsSq.push_back( i->second.sumOfSquares() );
-         min   .push_back( i->second.min() );
-         max   .push_back( i->second.max() );
-         count .push_back( uint32_c(i->second.getCounter()) );
+      for ( const auto &timer : timerMap_ | std::views::values ) {
+         vals  .push_back( timer.total() );
+         valsSq.push_back( timer.sumOfSquares() );
+         min   .push_back( timer.min() );
+         max   .push_back( timer.max() );
+         count .push_back( uint32_c(timer.getCounter()) );
       }
       mpiReduce ( min, max, vals, valsSq, count, targetRank, ret );
       break;
@@ -315,13 +316,13 @@ void TimingPool<TP>::mpiReduce( std::vector<double> & min,
       out = make_shared<TimingPool<TP> > ();
 
       uint_t idx = 0;
-      for( auto i = timerMap_.begin(); i != timerMap_.end(); ++i )
+      for( const auto &name : timerMap_ | std::views::keys )
       {
-         (*out)[i->first] = Timer<TP>( countRed[idx],
-                                        minRed[idx],
-                                        maxRed[idx],
-                                        sumRed[idx],
-                                        sumSqRed[idx] );
+         (*out)[name] = Timer<TP>( countRed[idx],
+                                   minRed[idx],
+                                   maxRed[idx],
+                                   sumRed[idx],
+                                   sumSqRed[idx] );
          idx++;
       }
    }
@@ -361,12 +362,12 @@ void TimingPool<TP>::print( std::ostream & os ) const
 
    int firstColumn = 0;
    double totalTime = 0.0;
-   for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i )
+   for ( const auto &[name, timer] : timerMap_ )
    {
-      if ( int_c(i->first.size()) > firstColumn)
-         firstColumn = int_c( i->first.size() );
+      if ( int_c(name.size()) > firstColumn)
+         firstColumn = int_c( name.size() );
 
-      totalTime += i->second.total();
+      totalTime += timer.total();
    }
 
    firstColumn += 3;
@@ -392,19 +393,19 @@ void TimingPool<TP>::print( std::ostream & os ) const
 
    os << endl;
 
-   for ( auto i = timerMap_.begin(); i != timerMap_.end(); ++i )
+   for ( const auto &[name, timer] : timerMap_ )
    {
-      const uint_t count = i->second.getCounter();
-      const double percentage = ( count == uint_t(0) ) ? 0.0 : ( i->second.total() / totalTime * 100.0 );
+      const uint_t count = timer.getCounter();
+      const double percentage = ( count == uint_t(0) ) ? 0.0 : ( timer.total() / totalTime * 100.0 );
 
-      os << setw(firstColumn-1) << std::left  << i->first  << " "       << "|";
+      os << setw(firstColumn-1) << std::left  << name  << " "       << "|";
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentage << "% |";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.total() )    << "|";
-      os << setw(OTHER_COLUMNS) << std::right << std::setprecision(3) << ( ( count == uint_t(0) ) ? 0.0 : i->second.average() )  << "|";
-      os << setw(OTHER_COLUMNS) << std::right << i->second.getCounter() << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.min() )      << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.max() )      << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.variance() ) << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.total() )    << "|";
+      os << setw(OTHER_COLUMNS) << std::right << std::setprecision(3) << ( ( count == uint_t(0) ) ? 0.0 : timer.average() )  << "|";
+      os << setw(OTHER_COLUMNS) << std::right << timer.getCounter() << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.min() )      << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.max() )      << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.variance() ) << "|";
       os << endl;
    }
 }
@@ -541,9 +542,8 @@ void TimingPool<TP>::merge ( const TimingPool<TP> & tpToMerge, bool mergeDuplica
 {
    if ( mergeDuplicates )
    {
-      for( auto i = tpToMerge.begin(); i != tpToMerge.end(); ++i )
+      for( const auto &timerName : timerMap_ | std::views::keys )
       {
-         const std::string & timerName = i->first;
          if ( timerExists( timerName ) )
          {
             // Merge the timer to the existing
@@ -571,8 +571,8 @@ void TimingPool<TP>::merge ( const TimingPool<TP> & tpToMerge, bool mergeDuplica
 template< typename TP >
 void TimingPool<TP>::clear ()
 {
-   for( auto i = timerMap_.begin(); i != timerMap_.end(); ++i ) {
-      i->second.reset();
+   for( auto &timer : timerMap_ | std::views::values ) {
+      timer.reset();
    }
 }
 

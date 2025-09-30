@@ -216,7 +216,7 @@ template< typename GlF, typename IP>
 void CurveGatherPackInfo<GlF,IP>::sortReceivedData()
 {
    //sort according to "t" value, which is the first entry of the inner vector
-   std::sort(receivedData.begin(), receivedData.end(), Compare() );
+   std::ranges::sort(receivedData, Compare() );
 
 #ifndef NDEBUG
    // check that we have collected everything,

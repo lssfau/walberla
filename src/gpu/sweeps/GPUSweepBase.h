@@ -42,9 +42,9 @@ public:
    GPUSweepBase() = default;
    virtual ~GPUSweepBase()
    {
-      for( auto field = dstFields_.begin(); field != dstFields_.end(); ++field )
+      for( auto *field : dstFields_ )
       {
-         delete *field;
+         delete field;
       }
    }
 
