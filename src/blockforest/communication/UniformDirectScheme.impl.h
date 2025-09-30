@@ -110,9 +110,9 @@ void UniformDirectScheme<Stencil>::setup()
    recvInfos_.clear();
 
    auto forest = blockForest_.lock();
-   for( auto it = forest->begin(); it != forest->end(); ++it )
+   for( auto &fblock : *forest )
    {
-      Block * block = dynamic_cast< Block * >( it.get() );
+      Block * block = dynamic_cast< Block * >( &fblock );
 
       if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
          continue;
@@ -151,21 +151,21 @@ void UniformDirectScheme<Stencil>::setup()
    // Assume two processes P1 and P2 with two blocks each P1_A, P1_B and P2_A and P2_B
    // to make sure that on both processes the Send/Recvs for block A are scheduled first
    // this sorting has to be done.
-   std::sort( sendInfos_.begin(), sendInfos_.end(), CommInfo::sortByLocal );
-   std::sort( recvInfos_.begin(), recvInfos_.end(), CommInfo::sortByRemote );
+   std::ranges::sort( sendInfos_, CommInfo::sortByLocal );
+   std::ranges::sort( recvInfos_, CommInfo::sortByRemote );
 
-   for( auto it = sendInfos_.begin(); it != sendInfos_.end(); ++it )
+   for( const auto &sendInfo : sendInfos_ )
    {
-      auto block = forest->getBlock( it->localBlockId );
+      auto block = forest->getBlock( sendInfo.localBlockId );
       WALBERLA_ASSERT_NOT_NULLPTR( block );
-      mpiDatatypes_.push_back( dataInfos_[ it->dataIdx ]->getSendDatatype( block, it->dir )  );
+      mpiDatatypes_.push_back( dataInfos_[ sendInfo.dataIdx ]->getSendDatatype( block, sendInfo.dir )  );
    }
 
-   for( auto it = recvInfos_.begin(); it != recvInfos_.end(); ++it )
+   for( const auto &recvInfo : recvInfos_ )
    {
-      auto block = forest->getBlock( it->localBlockId );
+      auto block = forest->getBlock( recvInfo.localBlockId );
       WALBERLA_ASSERT_NOT_NULLPTR( block );
-      mpiDatatypes_.push_back( dataInfos_[ it->dataIdx ]->getRecvDatatype( block, it->dir )  );
+      mpiDatatypes_.push_back( dataInfos_[ recvInfo.dataIdx ]->getRecvDatatype( block, recvInfo.dir )  );
    }
 
    mpiRequests_.resize( sendInfos_.size() + recvInfos_.size(), MPI_REQUEST_NULL );

@@ -54,9 +54,9 @@ public:
    {
       static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
+      for( auto &block : *blockStorage_ )
       {
-         mapParticleOnBlock( particleIdx, ac, *blockIt, obstacle );
+         mapParticleOnBlock( particleIdx, ac, block, obstacle );
       }
    }
 

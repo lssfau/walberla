@@ -731,7 +731,7 @@ void DynamicCurveBalance< PhantomData_T >::mortonOrderWeighted( const std::vecto
    {
       std::vector< std::pair< pid_t, idx_t > > & blocks = blocksPerLevel[uint_c(i)];
       internal::BlockIDSorter< PhantomData_T, std::pair< pid_t, idx_t >, true > sorter( allBlocks );
-      std::sort( blocks.begin(), blocks.end(), sorter );
+      std::ranges::sort( blocks, sorter );
    }
 }
 
@@ -761,7 +761,7 @@ void DynamicCurveBalance< PhantomData_T >::mortonOrderNoWeight( const std::vecto
    {
       std::vector< std::pair< pid_t, idx_t > > & blocks = blocksPerLevel[uint_c(i)];
       internal::BlockIDSorter< PhantomData_T, std::pair< pid_t, idx_t >, false > sorter( allBlocks );
-      std::sort( blocks.begin(), blocks.end(), sorter );
+      std::ranges::sort( blocks, sorter );
    }
 }
 
@@ -862,18 +862,18 @@ void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<p
 #ifndef NDEBUG
    for( uint_t p = uint_t(0); p != targets.size(); ++p )
    {
-      for( auto t = targets[p].begin(); t != targets[p].end(); ++t )
+      for( auto &t : targets[p] )
       {
-         WALBERLA_ASSERT_LESS( *t, sender.size() );
-         WALBERLA_ASSERT( sender[uint_c(*t)].find( int_c(p) ) != sender[uint_c(*t)].end() );
+         WALBERLA_ASSERT_LESS( t, sender.size() );
+         WALBERLA_ASSERT( sender[uint_c(t)].find( int_c(p) ) != sender[uint_c(t)].end() );
       }
    }
    for( uint_t p = uint_t(0); p != sender.size(); ++p )
    {
-      for( auto s = sender[p].begin(); s != sender[p].end(); ++s )
+      for( auto &s : sender[p] )
       {
-         WALBERLA_ASSERT_LESS( *s, targets.size() );
-         WALBERLA_ASSERT( std::find( targets[uint_c(*s)].begin(), targets[uint_c(*s)].end(), int_c(p) ) != targets[uint_c(*s)].end() );
+         WALBERLA_ASSERT_LESS( s, targets.size() );
+         WALBERLA_ASSERT( std::ranges::find( targets[uint_c(s)], int_c(p) ) != targets[uint_c(s)].end() );
       }
    }
 #endif

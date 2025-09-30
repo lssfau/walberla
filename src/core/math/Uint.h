@@ -132,7 +132,7 @@ inline UINT uintPow16( UINT exp ) {
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-static const std::array< uint8_t, 256 > msbLookupTable =
+inline constexpr std::array< uint8_t, 256 > msbLookupTable =
 {
 #define msbLT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
       0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -223,8 +223,8 @@ struct leastUnsignedInteger
 };
 
 /// \cond internal
-static constexpr uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
-static constexpr uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;
+inline constexpr uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
+inline constexpr uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;
 
 static_assert( !(UINT_BITS & (UINT_BITS - 1)), "Type \"uint_t\" must consist of 2^x Bits!" ); // power of two
 
@@ -242,7 +242,7 @@ struct int_ld<1>
    static constexpr uint_t exp = 0;
 };
 
-static constexpr uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits >::exp;
+inline constexpr uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits >::exp;
 /// \endcond
 
 } // namespace math

@@ -625,10 +625,10 @@ BoundaryHandlingCollection< FlagField_T, Handlers... >::BoundaryHandlingCollecti
 
    // check for unique boundaries
    std::vector< BoundaryUID > uids = getBoundaryUIDs();
-   for( auto uid = uids.begin(); uid != uids.end(); ++uid )
-      if( std::count( uids.begin(), uids.end(), *uid ) != 1 )
+   for( const auto &uid : uids )
+      if( std::ranges::count( uids, uid ) != 1 )
          WALBERLA_ABORT( "Every boundary condition registered at a boundary handler at the same boundary handling collection must have a unique boundary UID!\n"
-                         "The boundary UID \"" << *uid << "\" is not unique for boundary handling collection \"" << uid_.getIdentifier() << "\"." );
+                         "The boundary UID \"" << uid << "\" is not unique for boundary handling collection \"" << uid_.getIdentifier() << "\"." );
 }
 
 

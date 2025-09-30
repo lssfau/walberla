@@ -42,7 +42,7 @@ namespace internal {
                           mpi::SendBuffer & sendBuffer )
    {
       // Loop over all blocks and pack data
-      for ( auto blockIter = blocks.begin(); blockIter != blocks.end(); ++ blockIter )
+      for ( auto &block : blocks )
          for( size_t  s =0; s < packInfos.size() ; ++s )
          {
             // Packed Message Example:
@@ -55,7 +55,7 @@ namespace internal {
             sendBuffer << s;
 
             size_t bufferSizeBefore = sendBuffer.size();
-            packInfos[s]->packData( &( *blockIter ), sendBuffer );
+            packInfos[s]->packData( &block, sendBuffer );
             if( sendBuffer.size() == bufferSizeBefore )
                sendBuffer.rewind( bufferPos ); // undo the "buffer<<s"
          }

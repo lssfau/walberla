@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <list>
 #include <map>
+#include <ranges>
 #include <set>
 #include <string>
 #include <vector>
@@ -638,9 +639,7 @@ void GlobalLoadBalancing::prepareProcessReordering( const std::vector< BLOCK* > 
 
       std::set< uint_t > neighbors;
 
-      for( typename std::map< BlockID, BLOCK* >::iterator it = processBlocks[ uint_c(p) ].begin(); it != processBlocks[ uint_c(p) ].end(); ++it ) {
-         const BLOCK* const block = (*it).second;
-
+      for( const BLOCK *block : processBlocks[ uint_c(p) ] | std::views::values ) {
          for( uint_t i = 0; i != block->getNeighborhoodSize(); ++i )
             if( neighbors.insert( block->getNeighborTargetProcess(i) ).second )
                processNeighbors[ uint_c(p) ].push_back( block->getNeighborTargetProcess(i) );

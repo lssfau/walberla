@@ -141,7 +141,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(walberla::mpi::BufferSys
       {
          if( domain.intersectsWithProcessSubdomain( nbProcessRank, pIt->getPosition(), pIt->getInteractionRadius() + dx ) )
          {
-            auto ghostOwnerIt = std::find( pIt->getGhostOwners().begin(), pIt->getGhostOwners().end(), nbProcessRank );
+            auto ghostOwnerIt = std::ranges::find( pIt->getGhostOwners(), nbProcessRank );
             if( ghostOwnerIt != pIt->getGhostOwners().end() )
             {
                // already a ghost there -> update
@@ -160,7 +160,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(walberla::mpi::BufferSys
          else
          {
             //no overlap with neighboring process -> delete if ghost is there
-            auto ghostOwnerIt = std::find( pIt->getGhostOwners().begin(), pIt->getGhostOwners().end(), nbProcessRank );
+            auto ghostOwnerIt = std::ranges::find( pIt->getGhostOwners(), nbProcessRank );
             if( ghostOwnerIt != pIt->getGhostOwners().end() )
             {
                // In case the rigid particle no longer intersects the remote process nor interacts with it but is registered,
@@ -205,7 +205,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(walberla::mpi::BufferSys
 
          // Correct registration list (exclude new owner and us - the old owner) and
          // notify registered processes (except for new owner) of (remote) migration since they possess a ghost particle.
-         auto ownerIt = std::find( pIt->getGhostOwners().begin(), pIt->getGhostOwners().end(), ownerRank );
+         auto ownerIt = std::ranges::find( pIt->getGhostOwners(), ownerRank );
          WALBERLA_CHECK_UNEQUAL(ownerIt, pIt->getGhostOwners().end(), "New owner has to be former ghost owner!" );
 
          pIt->getGhostOwnersRef().erase( ownerIt );

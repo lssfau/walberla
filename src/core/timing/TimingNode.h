@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <map>
+#include <ranges>
 #include <string>
 
 
@@ -88,9 +89,9 @@ TimingNode<TP>::TimingNode(const TimingNode<TP>& tn)
    , tree_(tn.tree_)
 {
    // reconstruct hierarchy
-   for (auto it = tree_.begin(); it != tree_.end(); ++it)
+   for (auto &node : tree_ | std::views::values)
    {
-      it->second.last_ = this;
+      node.last_ = this;
    }
 }
 
@@ -110,9 +111,9 @@ void TimingNode<TP>::swap(TimingNode<TP>& tt)
 {
     std::swap(tree_, tt.tree_);
     // reconstruct hierarchy
-    for (auto it = tree_.begin(); it != tree_.end(); ++it)
+    for (auto &node : tree_ | std::views::values)
     {
-       it->second.last_ = this;
+       node.last_ = this;
     }
 }
 
@@ -167,9 +168,9 @@ void reset( TimingNode<TP>& tn)
 {
    tn.timer_.reset();
 
-   for (auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it)
+   for (auto &node : tn.tree_ | std::views::values)
    {
-      reset(it->second);
+      reset(node);
    }
 }
 
@@ -179,10 +180,10 @@ template< typename TP >  // Timing policy
 size_t getLongestTimerNameLength(const TimingNode<TP>& tn)
 {
    size_t max = 0;
-   for ( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it )
+   for ( const auto &[name, node] : tn.tree_ )
    {
-      max = std::max( max, it->first.length() );
-      max = std::max( max + 1, getLongestTimerNameLength(it->second) );
+      max = std::max( max, name.length() );
+      max = std::max( max + 1, getLongestTimerNameLength(node) );
    }
    return max;
 }
@@ -194,9 +195,9 @@ size_t getHierarchyDepth(const TimingNode<TP>& tn)
 {
    size_t depth = 1;
    size_t maxDepth = 0;
-   for ( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it )
+   for ( const auto &node : tn.tree_ | std::views::values )
    {
-      maxDepth = std::max( maxDepth, getHierarchyDepth(it->second) );
+      maxDepth = std::max( maxDepth, getHierarchyDepth(node) );
    }
    return depth + maxDepth;
 }
@@ -221,8 +222,8 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
    switch (rt)
    {
       case REDUCE_MIN  :
-         for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i ) {
-            const double val = i->second.timer_.min();
+         for ( const auto &node : tn.tree_ | std::views::values ) {
+            const double val = node.timer_.min();
             vals  .push_back( val     );
             valsSq.push_back( val*val );
             count .push_back( 1 );
@@ -231,8 +232,8 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
          max = vals;
          break;
       case REDUCE_AVG  :
-         for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i ) {
-            const double val = i->second.timer_.average();
+         for ( const auto &node : tn.tree_ | std::views::values ) {
+            const double val = node.timer_.average();
             vals  .push_back( val     );
             valsSq.push_back( val*val );
             count .push_back( 1 );
@@ -242,8 +243,8 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
          break;
 
       case REDUCE_MAX  :
-         for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i ) {
-            const double val = i->second.timer_.max();
+         for ( const auto &node : tn.tree_ | std::views::values ) {
+            const double val = node.timer_.max();
             vals  .push_back( val     );
             valsSq.push_back( val*val );
             count .push_back( 1 );
@@ -256,12 +257,12 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
          min.reserve ( tn.tree_.size() );
          max.reserve ( tn.tree_.size() );
 
-         for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i ) {
-            vals  .push_back( i->second.timer_.total() );
-            valsSq.push_back( i->second.timer_.sumOfSquares() );
-            min   .push_back( i->second.timer_.min() );
-            max   .push_back( i->second.timer_.max() );
-            count .push_back( uint32_c(i->second.timer_.getCounter()) );
+         for ( const auto &node : tn.tree_ | std::views::values ) {
+            vals  .push_back( node.timer_.total() );
+            valsSq.push_back( node.timer_.sumOfSquares() );
+            min   .push_back( node.timer_.min() );
+            max   .push_back( node.timer_.max() );
+            count .push_back( uint32_c(node.timer_.getCounter()) );
          }
          break;
 
@@ -346,13 +347,13 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
    // On root the timing map is replaced by reduced timers
 
    uint_t idx = 0;
-   for( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it )
+   for( auto &node : tn.tree_ | std::views::values )
    {
       if ( targetRank < 0 || targetRank == MPIManager::instance()->worldRank() )
       {
-         it->second.timer_ = Timer<TP>( countRed[idx], minRed[idx], maxRed[idx], sumRed[idx], sumSqRed[idx] );
+         node.timer_ = Timer<TP>( countRed[idx], minRed[idx], maxRed[idx], sumRed[idx], sumSqRed[idx] );
       }
-      reduceInplace( it->second, rt, targetRank );
+      reduceInplace( node, rt, targetRank );
       idx++;
    }
 }
@@ -365,9 +366,9 @@ template< typename TP >  // Timing policy
 void synchronizeEntries( TimingNode<TP>& tn )
 {
    std::vector<std::string> childNames;
-   for( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i )
+   for( const auto &name : tn.tree_ | std::views::keys )
    {
-      childNames.push_back( i->first );
+      childNames.push_back( name );
    }
 
    std::vector<std::string> globalChildNames = mpi::allReduceSet( childNames, mpi::UNION );
@@ -382,9 +383,9 @@ void synchronizeEntries( TimingNode<TP>& tn )
    }
 
    // recurse into children
-   for( auto it = tn.tree_.begin(); it != tn.tree_.end(); ++it )
+   for( auto &node : tn.tree_ | std::views::values )
    {
-      synchronizeEntries( it->second );
+      synchronizeEntries( node );
    }
 }
 
@@ -402,26 +403,26 @@ void TimingNode<TP>::printImpl(std::ostream & os, const std::string& prefix, con
 //   const int NR_OF_COLUMNS  = 6;
 //   const int LINE_WIDTH     = firstColumn +  PERCENT_COLUMN + NR_OF_COLUMNS * OTHER_COLUMNS + NR_OF_COLUMNS + 2;
 
-   for ( auto i = tree_.begin(); i != tree_.end(); ++i )
+   for ( const auto &[name, node] : tree_ )
    {
-      const uint_t count = i->second.timer_.getCounter();
-      const double percentageTotal  = ( count == uint_t(0) ) ? 0.0 : ( i->second.timer_.total() / totalTime * 100.0 );
-      const double percentageParent = ( count == uint_t(0) ) ? 0.0 : ( i->second.timer_.total() / parentTime * 100.0 );
+      const uint_t count = node.timer_.getCounter();
+      const double percentageTotal  = ( count == uint_t(0) ) ? 0.0 : ( node.timer_.total() / totalTime * 100.0 );
+      const double percentageParent = ( count == uint_t(0) ) ? 0.0 : ( node.timer_.total() / parentTime * 100.0 );
 
-      os << setw(firstColumn-1)    << std::left  << prefix + i->first  << " "       << "|";
+      os << setw(firstColumn-1)    << std::left  << prefix + name  << " "       << "|";
 
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentageTotal << "% |";
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentageParent << "% |";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.timer_.total() )    << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.total() )    << "|";
 
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.timer_.average() )  << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << i->second.timer_.getCounter() << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.timer_.min() )      << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.timer_.max() )      << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.timer_.variance() ) << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.average() )  << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << node.timer_.getCounter() << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.min() )      << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.max() )      << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.variance() ) << "|";
       os << endl;
 
-      i->second.printImpl(os, " " + prefix, totalTime, i->second.timer_.total(), firstColumn);
+      node.printImpl(os, " " + prefix, totalTime, node.timer_.total(), firstColumn);
    }
 }
 
@@ -438,9 +439,9 @@ std::ostream& operator<<(std::ostream& os, const TimingNode<TP>& tn)
    int firstColumn = 5;
    firstColumn = std::max( firstColumn, static_cast<int> (getLongestTimerNameLength(tn)) );
    double totalTime = 0.0;
-   for ( auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i )
+   for ( const auto &node : tn.tree_ | std::views::values )
    {
-      totalTime += i->second.timer_.total();
+      totalTime += node.timer_.total();
    }
 
    firstColumn += 3;
@@ -483,9 +484,9 @@ void addRemainderNodes(timing::TimingNode<TP> &tn) {
       return;
    }
    double remainder = tn.timer_.total();
-   for (auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i) {
-      remainder -= i->second.timer_.total();
-      addRemainderNodes(i->second);
+   for (auto &node : tn.tree_ | std::views::values) {
+      remainder -= node.timer_.total();
+      addRemainderNodes(node);
    }
    if (tn.last_ != nullptr) {
       WALBERLA_ASSERT( tn.tree_.find("Remainder") == tn.tree_.end());

@@ -159,7 +159,7 @@ const AllSet<T>& AllSet<T>::operator&=( const AllSet<T>& set ) {  // intersectio
       }
       else {
          std::set<T> result;
-         std::set_difference( set.begin(), set.end(), begin(), end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( set, *this, std::inserter( result, result.end() ) );
          set_ = result;
          all_ = false;
       }
@@ -167,12 +167,12 @@ const AllSet<T>& AllSet<T>::operator&=( const AllSet<T>& set ) {  // intersectio
    else {
       if( set.isAll() ) {
          std::set<T> result;
-         std::set_difference( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
       else {
          std::set<T> result;
-         std::set_intersection( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_intersection( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
    }
@@ -193,19 +193,19 @@ const AllSet<T>&  AllSet<T>::operator+=( const AllSet<T>& set ) { // union
    if( isAll() ) {
       if( set.isAll() ) {
          std::set<T> result;
-         std::set_intersection( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_intersection( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
       else {
          std::set<T> result;
-         std::set_difference( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
    }
    else {
       if( set.isAll() ) {
          std::set<T> result;
-         std::set_difference( set.begin(), set.end(), begin(), end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( set, *this, std::inserter( result, result.end() ) );
          set_ = result;
          all_ = true;
       }
@@ -230,7 +230,7 @@ const AllSet<T>& AllSet<T>::operator-=( const AllSet<T>& set ) { // difference /
    if( isAll() ) {
       if( set.isAll() ) {
          std::set<T> result;
-         std::set_difference( set.begin(), set.end(), begin(), end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( set, *this, std::inserter( result, result.end() ) );
          set_ = result;
          all_ = false;
       }
@@ -241,12 +241,12 @@ const AllSet<T>& AllSet<T>::operator-=( const AllSet<T>& set ) { // difference /
    else {
       if( set.isAll() ) {
          std::set<T> result;
-         std::set_intersection( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_intersection( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
       else {
          std::set<T> result;
-         std::set_difference( begin(), end(), set.begin(), set.end(), std::inserter( result, result.end() ) );
+         std::ranges::set_difference( *this, set, std::inserter( result, result.end() ) );
          set_ = result;
       }
    }
@@ -314,8 +314,8 @@ inline bool AllSet<T>::equalSize( const AllSet<T>& set ) const {
 
 /// \cond internal
 namespace allset {
-template< class InputIterator1, class InputIterator2 >
-bool setsIntersect( InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2 );
+template< std::ranges::input_range R1, std::ranges::input_range R2 >
+bool setsIntersect( R1&& r1, R2&& r2 );
 } // namespace allset
 /// \endcond
 
@@ -332,14 +332,14 @@ bool AllSet<T>::intersects( const AllSet<T>& set ) const {
          return true;
       }
       else {
-         return !std::includes( begin(), end(), set.begin(), set.end() );
+         return !std::ranges::includes( *this, set );
       }
    }
    else if( set.isAll() ) {
-      return !std::includes( set.begin(), set.end(), begin(), end() );
+      return !std::ranges::includes( set, *this );
    }
 
-   return allset::setsIntersect( begin(), end(), set.begin(), set.end() );
+   return allset::setsIntersect( *this, set );
 }
 
 
@@ -354,17 +354,17 @@ bool AllSet<T>::contains( const AllSet<T>& set ) const {
 
    if( isAll() ) {
       if( set.isAll() ) {
-         return std::includes( set.begin(), set.end(), begin(), end() );
+         return std::ranges::includes( set, *this );
       }
       else {
-         return !allset::setsIntersect( begin(), end(), set.begin(), set.end() );
+         return !allset::setsIntersect( *this, set );
       }
    }
    else if( set.isAll() ) {
       return false;
    }
 
-   return std::includes( begin(), end(), set.begin(), set.end() );
+   return std::ranges::includes( *this, set );
 }
 
 
@@ -471,9 +471,13 @@ inline std::ostream& operator<<( std::ostream& os, const AllSet<T>& set ) {
 /// \cond internal
 namespace allset {
 
-template< class InputIterator1, class InputIterator2 >
-bool setsIntersect( InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2 ) {
+template< std::ranges::input_range R1, std::ranges::input_range R2 >
+bool setsIntersect( R1&& r1, R2&& r2 ) {
 
+   auto first1 = std::ranges::cbegin(r1);
+   auto first2 = std::ranges::cbegin(r2);
+   auto last1 = std::ranges::cend(r1);
+   auto last2 = std::ranges::cend(r2);
    while( first1 != last1 && first2 != last2) {
      if( *first1 < *first2 ) ++first1;
      else if( *first2 < *first1 ) ++first2;

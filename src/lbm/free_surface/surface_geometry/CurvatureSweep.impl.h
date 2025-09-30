@@ -375,8 +375,7 @@ void CurvatureSweepLocalTriangulation< Stencil_T, FlagField_T, ScalarField_T, Ve
             n.sort = std::atan2(cosAngY, cosAngX);
          }
 
-         std::sort(neighbors.begin(), neighbors.end(),
-                   [](const Neighbor& a, const Neighbor& b) { return a.sort < b.sort; });
+         std::ranges::sort(neighbors, std::less{}, [](const Neighbor& n){ return n.sort; });
 
          Vector3< real_t > meanTriangleNormal(real_c(0));
          for (auto nIt1 = neighbors.begin(); neighbors.size() > uint_c(1) && nIt1 != neighbors.end(); ++nIt1)

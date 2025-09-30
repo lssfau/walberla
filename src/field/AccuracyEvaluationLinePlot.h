@@ -376,7 +376,7 @@ void AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, Filter_T >::operat
 
       internal::AccuracyEvaluationPlotDataSorter<Value_T> plotDataSorter;
       plotDataSorter.checkYAxis = yAxis_;
-      std::sort( points.begin(), points.end(), plotDataSorter );
+      std::ranges::sort( points, plotDataSorter );
 
       std::ofstream file( filename.c_str() );
       file << "# accuracy evaluation of data '" << blocks->getBlockDataIdentifier( fieldId_ ) << "'\n";

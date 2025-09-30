@@ -119,7 +119,7 @@ template< typename Field_T, typename CC>
 void CellGatherPackInfo<Field_T,CC>::gatherFinished()
 {
    //sort according to "t" value, which is the first entry of the inner vector
-   std::sort(receivedData.begin(), receivedData.end(), Compare() );
+   std::ranges::sort(receivedData, Compare() );
    dataProcessor_->process( receivedData );
    receivedData.clear();
 }

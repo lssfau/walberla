@@ -90,7 +90,7 @@ void AllSetSelectableObject<T,U>::select( std::vector< size_t >& index, const Al
 
       Compare compare( this->attributes_ );
 
-      std::sort( candidates.begin(), candidates.end(), compare );
+      std::ranges::sort( candidates, compare );
 
       index.push_back( candidates[0] );
       for( size_t i = 1; i != candidates.size() && ( this->attributes_[ candidates[i] ] >= selector ||

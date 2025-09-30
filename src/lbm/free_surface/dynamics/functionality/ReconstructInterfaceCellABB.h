@@ -33,6 +33,8 @@
 
 #include "GetLaplacePressure.h"
 
+#include <functional>
+
 namespace walberla
 {
 namespace free_surface
@@ -287,7 +289,7 @@ void reconstructInterfaceCellLegacy(const FlagField_T* flagField, const ConstPdf
 
       // count the number of neighboring cells that are interface or liquid (and not obstacle or gas)
       const uint_t numLiquidNeighbors =
-         uint_c(std::count_if(isInterfaceOrLiquid.begin(), isInterfaceOrLiquid.end(), [](bool a) { return a; }));
+         uint_c(std::ranges::count_if(isInterfaceOrLiquid, std::identity{}));
 
       // // REMARK: this was commented because it regularly occurred in practical simulations (e.g. BreakingDam)
       //    if (numRemainingReconstruct > int_c(0) && numRemainingReconstruct < int_c(numLiquidNeighbors))

@@ -61,10 +61,9 @@ namespace field {
 
       // -- Packing --
       mpi::SendBuffer sendBuffer;
-      for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
+      for( const auto &block : *blocks )
       {
-         IBlock const & block = *blockIt;
-         auto field = blockIt->template getData<Field_T>( fieldID );
+         auto field = block.template getData<Field_T>( fieldID );
 
          // intersection between block cell bounding box and the interval to collect - in global coordinates
          CellInterval intersection = blocks->getBlockCellBB( block );

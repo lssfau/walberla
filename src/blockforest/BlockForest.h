@@ -710,8 +710,8 @@ inline void BlockForest::getAllBlocks( std::vector< shared_ptr< IBlockID > >& bl
    if( blockInformation_->active() )
       return blockInformation_->getAllBlocks( blocks );
 
-   for( auto block = begin(); block != end(); ++block ) {
-      const IBlockID& id = block->getId();
+   for( const auto &block : *this ) {
+      const IBlockID& id = block.getId();
       WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &id ), &id )
       blocks.push_back( walberla::make_shared< BlockID >( *static_cast< const BlockID* >( &id ) ) );
    }

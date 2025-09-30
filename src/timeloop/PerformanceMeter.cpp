@@ -87,8 +87,8 @@ namespace timeloop {
    {
       measurements_.emplace_back( countFunction, name, scaling, countFreq );
       uint_t cells = 0;
-      for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )
-         cells += countFunction( *block );
+      for( const auto &block : blockStorage_ )
+         cells += countFunction( block );
 
       measurements_.back().avgCellsPerTimeStep = real_c ( cells );
    }
@@ -108,11 +108,11 @@ namespace timeloop {
       measurements_.emplace_back( CountFunction(), name, scaling, uint_t(0) );
 
       uint_t cellsOnProcess = 0;
-      for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )
+      for( const auto &block : blockStorage_ )
       {
-        cellsOnProcess += blockStorage_.getNumberOfXCells( *block ) *
-                          blockStorage_.getNumberOfYCells( *block ) *
-                          blockStorage_.getNumberOfZCells( *block );
+        cellsOnProcess += blockStorage_.getNumberOfXCells( block ) *
+                          blockStorage_.getNumberOfYCells( block ) *
+                          blockStorage_.getNumberOfZCells( block );
       }
 
       measurements_.back().avgCellsPerTimeStep = real_c ( cellsOnProcess );
@@ -271,8 +271,8 @@ namespace timeloop {
          if( measurement.countingFreq > 0 &&  ts % measurement.countingFreq == 0 )
          {
             uint_t cells = 0;
-            for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )
-               cells += measurement.countFunction( *block );
+            for( const auto &block : blockStorage_ )
+               cells += measurement.countFunction( block );
 
             real_t cellsLastTimeStep = real_c ( cells );
 

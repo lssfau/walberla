@@ -973,20 +973,20 @@ void TriangleDistance<MeshType>::filterTrianglesForAABB( const BoundingBox & aab
 
    std::vector<TringleDistance> td;
    for( auto it = fhInBegin; it != fhInEnd; ++it )
-      td.push_back( TringleDistance( *it, aabb, getAabb( *it ) ) );
+      td.emplace_back( *it, aabb, getAabb( *it ) );
 
-   std::sort( td.begin(), td.end() );
+   std::ranges::sort( td, std::less{} );
 
    Scalar sqMaxDist = std::numeric_limits<Scalar>::max();
 
-   for( auto it = td.begin(); it != td.end(); ++it )
-      sqMaxDist = std::min( sqMaxDist, it->maxSqDistance );
+   for( const auto &dist : td )
+      sqMaxDist = std::min( sqMaxDist, dist.maxSqDistance );
 
 
-   for( auto it = td.begin(); it != td.end(); ++it )
-      if( it->minSqDistance <= sqMaxDist )
+   for( const auto &dist : td )
+      if( dist.minSqDistance <= sqMaxDist )
       {
-         *fhOut++ = it->fh;
+         *fhOut++ = dist.fh;
       }
       else
          break;
@@ -1066,7 +1066,7 @@ typename MeshType::Scalar TriangleDistance< MeshType >::getRayDistanceToMeshObje
 
    if(!intersection_distance.empty())
    {
-      q = *std::min_element(intersection_distance.begin(), intersection_distance.end());
+      q = *std::ranges::min_element(intersection_distance);
    }
 
    // for (auto val: intersection_distance)

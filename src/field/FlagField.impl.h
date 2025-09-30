@@ -20,6 +20,7 @@
 //
 //======================================================================================================================
 
+#include <ranges>
 #include <type_traits>
 
 namespace walberla {
@@ -148,7 +149,7 @@ namespace field {
       //check that mask contains only registered bits
       WALBERLA_ASSERT( ! ( mask & (~ data_->usedMask) ));
 
-      for( auto &it : *this)
+      for( const auto &it : *this)
          if( it & mask )
             cv.push_back(Cell(it.x(),it.y(), it.z() ));
    }
@@ -405,8 +406,8 @@ namespace field {
    template<typename T>
    inline void FlagField<T>::getAllRegisteredFlags(std::vector<FlagUID> & out) const
    {
-      for ( const auto &it : data_->uidToFlag) {
-         out.push_back( it->first );
+      for ( const auto &uid : data_->uidToFlag | std::views::keys ) {
+         out.emplace_back( uid );
       }
    }
 

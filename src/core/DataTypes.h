@@ -37,6 +37,7 @@ namespace walberla {
 #define WALBERLA_STATIC_ASSERT(x) static_assert(x, "Assertion failed")
 
 
+/// workaround to implement <tt>static_assert(false)</tt> (CWG 2518 / P2593R1)
 template <typename> struct never_true : std::false_type {};
 
 template< typename T > bool isIdentical( const T a, const T b );
@@ -106,7 +107,7 @@ using uint16_t = std::uint16_t;   ///< 16 bit unsigned integer
 using uint32_t = std::uint32_t;   ///< 32 bit unsigned integer
 using uint64_t = std::uint64_t;   ///< 64 bit unsigned integer
 using byte_t = uint8_t;
-using id_t = uint64_t;            //sid datatype for pe
+using id_t = uint64_t;            //sid datatype
 
 template< typename T > inline uint8_t   uint8_c( T t ) { return numeric_cast< uint8_t  >(t); } ///< cast to type uint8_t  using "uint8_c(x)"
 template< typename T > inline uint16_t uint16_c( T t ) { return numeric_cast< uint16_t >(t); } ///< cast to type uint16_t using "uint16_c(x)"
@@ -152,8 +153,8 @@ using cell_idx_t = int;
 //typedef int64_t cell_idx_t;
 
 WALBERLA_STATIC_ASSERT( std::numeric_limits<cell_idx_t>::is_specialized &&
-                     std::numeric_limits<cell_idx_t>::is_integer &&
-                     std::numeric_limits<cell_idx_t>::is_signed );
+                        std::numeric_limits<cell_idx_t>::is_integer &&
+                        std::numeric_limits<cell_idx_t>::is_signed );
 
 template< typename T > inline cell_idx_t cell_idx_c( T t ) { return numeric_cast< cell_idx_t >(t); } ///< cast to type cell_idx_t using "cell_idx_c(x)"
 
@@ -206,15 +207,13 @@ using float16 = half;
 using float32 = float;
 using float64 = double;
 
-inline constexpr real_t operator"" _r( long double t ) { return static_cast< real_t >(t); }
-inline constexpr real_t operator"" _r( unsigned long long int t ) { return static_cast< real_t >(t); }
+inline constexpr real_t operator""_r( long double t ) { return static_cast< real_t >(t); }
+inline constexpr real_t operator""_r( unsigned long long int t ) { return static_cast< real_t >(t); }
 template< typename T > inline real_t real_c  ( T t ) { return numeric_cast< real_t >(t); } ///< cast to type real_t using "real_c(x)"
 template< typename T > inline double double_c( T t ) { return numeric_cast< double >(t); } ///< cast to type double
 template< typename T > inline float  float_c ( T t ) { return numeric_cast< float > (t); } ///< cast to type float
 
 /// If you want to compare two reals using operator == and you really know what you are doing, you can use the following function:
-
-
 template <typename T>
 inline bool isIdentical( const T a, const T b )
 {

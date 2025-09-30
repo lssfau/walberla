@@ -41,11 +41,11 @@ struct SubsetFaceFilter
    template<typename InputIterator>
    SubsetFaceFilter( InputIterator facesBegin, InputIterator facesEnd ) : includedFaces_( facesBegin, facesEnd )
    {
-      std::sort( includedFaces_.begin(), includedFaces_.end() );
-      includedFaces_.erase( std::unique( includedFaces_.begin(), includedFaces_.end() ), includedFaces_.end() );
+      std::ranges::sort( includedFaces_ );
+      includedFaces_.erase( std::ranges::unique( includedFaces_ ).begin(), includedFaces_.end() );
    }
 
-   bool operator()( const MeshType & /*mesh*/, const typename MeshType::FaceHandle & fh ) { return std::binary_search( includedFaces_.begin(), includedFaces_.end(), fh ); }
+   bool operator()( const MeshType & /*mesh*/, const typename MeshType::FaceHandle & fh ) { return std::ranges::binary_search( includedFaces_, fh ); }
 
 private:
    std::vector< typename MeshType::FaceHandle > includedFaces_;

@@ -119,9 +119,9 @@ void initBoundaryHandling( StructuredBlockStorage & blocks, BlockDataID boundary
 template<typename BoundaryHandling>
 void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID boundaryHandlingId )
 {
-   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+   for( auto &block : blocks )
    {
-      auto handling = blockIt->template getData<BoundaryHandling>( boundaryHandlingId );
+      auto handling = block.template getData<BoundaryHandling>( boundaryHandlingId );
       auto flagField = handling->getFlagField();
       handling->fillWithDomain( flagField->nrOfGhostLayers() );
    }
@@ -131,9 +131,9 @@ template<typename FlagField_T>
 void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID flagFieldID,
                                   field::FlagUID fluidFlagID)
 {
-   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+   for( auto &block : blocks )
    {
-      auto flagField = blockIt->template getData<FlagField_T>( flagFieldID );
+      auto flagField = block.template getData<FlagField_T>( flagFieldID );
       auto fluidFlag = flagField->getOrRegisterFlag(fluidFlagID);
       for( auto it = flagField->beginWithGhostLayerXYZ(); it != flagField->end(); ++it )
          if ( *it == 0 )
@@ -145,9 +145,9 @@ template<typename FlagField_T>
 void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID flagFieldID,
                                  field::FlagUID fluidFlagID, cell_idx_t numGhostLayers)
 {
-   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+   for( auto &block : blocks )
    {
-      auto flagField = blockIt->template getData<FlagField_T>( flagFieldID );
+      auto flagField = block.template getData<FlagField_T>( flagFieldID );
       auto fluidFlag = flagField->getOrRegisterFlag(fluidFlagID);
       for( auto it = flagField->beginWithGhostLayerXYZ(numGhostLayers); it != flagField->end(); ++it )
          if ( *it == 0 )

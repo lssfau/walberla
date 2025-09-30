@@ -723,8 +723,8 @@ inline BlockDataID BlockStorage::loadBlockData( const std::string & file, const 
 //**********************************************************************************************************************
 inline void BlockStorage::clearBlockData( const BlockDataID & id )
 {
-   for( auto block = begin(); block != end(); ++block )
-      block->deleteData( id );
+   for( auto &block : *this )
+      block.deleteData( id );
 
    //also delete block data from data handling vector
    std::erase_if(blockDataItem_, [id](const internal::BlockDataItem& dataItem)
