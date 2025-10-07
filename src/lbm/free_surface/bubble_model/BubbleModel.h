@@ -75,9 +75,9 @@ class BubbleModelConstantPressure : public BubbleModelBase
    void setDensity(IBlock*, const Cell&, real_t) override {}
    void setDensityOfAllBubbles(real_t val) override { constantLatticeDensity_ = val; }
 
-   void reportFillLevelChange(IBlock*, const Cell&, real_t) override{};
-   void reportLiquidToInterfaceConversion(IBlock*, const Cell&) override{};
-   void reportInterfaceToLiquidConversion(IBlock*, const Cell&) override{};
+   void reportFillLevelChange(IBlock*, const Cell&, real_t) override{}
+   void reportLiquidToInterfaceConversion(IBlock*, const Cell&) override{}
+   void reportInterfaceToLiquidConversion(IBlock*, const Cell&) override{}
 
    void update() override {}
 
@@ -170,7 +170,7 @@ class BubbleModel : public BubbleModelBase
    const Bubble* getBubble(IBlock* block, const Cell& cell) const;
    Bubble* getBubble(IBlock* block, const Cell& cell);
 
-   const std::vector< Bubble >& getBubbles() const { return bubbles_; };
+   const std::vector< Bubble >& getBubbles() const { return bubbles_; }
 
    // check a 3x3x3 neighborhood whether a bubble could have split; calling is function is relatively inexpensive and
    // can be used as indicator whether the more expensive extendedSplitCheck() makes sense

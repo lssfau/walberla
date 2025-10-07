@@ -271,7 +271,7 @@ namespace field {
       cell_idx_t zOff() const { return zOff_; }
 
       bool coordinatesValid( cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f = 0 ) const;
-      bool coordinatesValid( const Cell & c, cell_idx_t f = 0 ) const { return coordinatesValid(c[0], c[1], c[2], f); };
+      bool coordinatesValid( const Cell & c, cell_idx_t f = 0 ) const { return coordinatesValid(c[0], c[1], c[2], f); }
       //@}
       //****************************************************************************************************************
 

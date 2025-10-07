@@ -74,7 +74,7 @@ class D3Q27SRT
          if (int_c(blocks->getNumberOfXCells(iBlock)) <= outerWidth_[0] * 2 || int_c(blocks->getNumberOfYCells(iBlock)) <= outerWidth_[1] * 2 || int_c(blocks->getNumberOfZCells(iBlock)) <= outerWidth_[2] * 2)
             validInnerOuterSplit_ = false;
       }
-   };
+   }
 
    
     ~D3Q27SRT() {  

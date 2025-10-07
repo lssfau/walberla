@@ -102,7 +102,7 @@ public:
     {
         auto createIdxVector = []( IBlock * const , StructuredBlockStorage * const ) { return new IndexVectors(); };
         indexVectorID = blocks->addStructuredBlockData< IndexVectors >( createIdxVector, "IndexField_OutflowD3Q27");
-    };
+    }
 
     void run (IBlock * block);
 

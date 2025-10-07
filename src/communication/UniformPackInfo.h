@@ -125,22 +125,22 @@ public:
    /**
    * This function is called once before the communication is started by the UniformBufferedScheme
    */
-   virtual void beforeStartCommunication() { };
+   virtual void beforeStartCommunication() { }
 
    /**
    * This function is called once after the communication has been started by the UniformBufferedScheme
    */
-   virtual void  afterStartCommunication() { };
+   virtual void  afterStartCommunication() { }
 
    /**
    * This function is called once before the UniformBufferedScheme waits for the communication to finish
    */
-   virtual void beforeWait() { };
+   virtual void beforeWait() { }
 
    /**
    * This function is called once after the communication has been finished by the UniformBufferedScheme
    */
-   virtual void afterWait() { };
+   virtual void afterWait() { }
 
 protected:
 

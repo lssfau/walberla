@@ -45,7 +45,7 @@ class MemcpyPackInfo : public ::walberla::gpu::GeneratedGPUPackInfo
     *  If left at zero, the number will be inferred from the field.
     */
    MemcpyPackInfo(BlockDataID fieldId, const uint_t numGhostLayers = 0)
-      : fieldId_(fieldId), numberOfGhostLayers_{ numGhostLayers } {};
+      : fieldId_(fieldId), numberOfGhostLayers_{ numGhostLayers } {}
 
    ~MemcpyPackInfo() override = default;
 

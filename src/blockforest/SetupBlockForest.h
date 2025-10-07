@@ -101,7 +101,7 @@ public:
       iterator( const iterator& it )  = default;
 
       iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
-      iterator  operator++(int) { iterator it( *this ); operator++(); return it; };                                             // postfix X++
+      iterator  operator++(int) { iterator it( *this ); operator++(); return it; }                                             // postfix X++
 
       bool operator==( const iterator& rhs ) const { return block_ == rhs.block_; }
       bool operator!=( const iterator& rhs ) const { return block_ != rhs.block_; }
@@ -130,7 +130,7 @@ public:
       const_iterator( const const_iterator& it )  = default;
 
       const_iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
-      const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; };                                       // postfix X++
+      const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; }                                       // postfix X++
 
       bool operator==( const const_iterator& rhs ) const { return block_ == rhs.block_; }
       bool operator!=( const const_iterator& rhs ) const { return block_ != rhs.block_; }

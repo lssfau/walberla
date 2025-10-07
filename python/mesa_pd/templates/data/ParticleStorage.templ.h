@@ -454,7 +454,7 @@ void ParticleStorage::sort(Compare comp)
       oldIdx[idx] = idx;
       weight[idx] = std::make_pair(idx, comp.getWeight(operator[](idx)));
    }
-   std::ranges::sort(weight, [](const WeightPair& lhs, const WeightPair& rhs){return lhs.second < rhs.second;});
+   std::ranges::sort(weight, std::less{}, [](const WeightPair& p){return p.second;});
    for (size_t idx = 0; idx < length; ++idx)
    {
       using std::swap;

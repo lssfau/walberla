@@ -122,7 +122,7 @@ public:
            const std::string &name,
            const TimingTreePtr & timingTree );
 
-   std::string getName() const override { return !name_.empty() ? name_ : "Functor"; };
+   std::string getName() const override { return !name_.empty() ? name_ : "Functor"; }
    void operator() () override;
 
 private:
@@ -158,8 +158,8 @@ public:
 
    void push_back( const IFunctionNodePtr &fct ) { children_.push_back( fct ); }
    void push_front( const IFunctionNodePtr &fct ) { children_.push_front( fct ); }
-   std::string getName() const override { return !name_.empty() ? name_ : "Sequence"; };
-   std::deque< IFunctionNodePtr > getChildren() const override { return children_; };
+   std::string getName() const override { return !name_.empty() ? name_ : "Sequence"; }
+   std::deque< IFunctionNodePtr > getChildren() const override { return children_; }
 
 private:
    std::string name_;
@@ -181,7 +181,7 @@ public:
    void synchronizedStop( bool stopVal ) override;
    void stop() override { stop_ = true; }
    void setBody( const IFunctionNodePtr &body ) { body_ = body; }
-   void setCurrentTimeStep( uint_t ts ) override { currentIteration_ = ts; };
+   void setCurrentTimeStep( uint_t ts ) override { currentIteration_ = ts; }
    uint_t getCurrentTimeStep() const override { return currentIteration_; }
    uint_t getNrOfTimeSteps() const override { return iterations_; }
 

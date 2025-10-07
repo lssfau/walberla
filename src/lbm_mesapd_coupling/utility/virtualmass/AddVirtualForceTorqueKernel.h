@@ -46,7 +46,7 @@ namespace lbm_mesapd_coupling {
 class AddVirtualForceTorqueKernel
 {
 public:
-   explicit AddVirtualForceTorqueKernel(shared_ptr<mesa_pd::data::ParticleStorage> ps) : ps_(std::move(ps)){};
+   explicit AddVirtualForceTorqueKernel(shared_ptr<mesa_pd::data::ParticleStorage> ps) : ps_(std::move(ps)) {}
 
    template <typename Accessor_T>
    void operator()(const size_t idx, Accessor_T& ac) {

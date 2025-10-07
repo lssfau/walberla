@@ -84,17 +84,17 @@ class TotalMassComputer
       real_t mass       = real_c(0);
       real_t excessMass = real_c(0);
 
-      for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+      for (const auto &block : *blockForest)
       {
-         const FlagField_T* const flagField   = blockIt->template getData< const FlagField_T >(flagFieldID);
-         const PdfField_T* const pdfField     = blockIt->template getData< const PdfField_T >(pdfFieldID_);
-         const ScalarField_T* const fillField = blockIt->template getData< const ScalarField_T >(fillFieldID_);
+         const FlagField_T* const flagField   = block.template getData< const FlagField_T >(flagFieldID);
+         const PdfField_T* const pdfField     = block.template getData< const PdfField_T >(pdfFieldID_);
+         const ScalarField_T* const fillField = block.template getData< const ScalarField_T >(fillFieldID_);
 
          // if provided, also consider mass stored in excessMassField
          if (excessMassFieldID_ != ConstBlockDataID())
          {
             const ScalarField_T* const excessMassField =
-               blockIt->template getData< const ScalarField_T >(excessMassFieldID_);
+               block.template getData< const ScalarField_T >(excessMassFieldID_);
 
             WALBERLA_FOR_ALL_CELLS_OMP(flagFieldIt, flagField, pdfFieldIt, pdfField, fillFieldIt, fillField,
                                        excessMassFieldIt, excessMassField,
@@ -131,7 +131,7 @@ class TotalMassComputer
          mpi::allReduceInplace< real_t >(excessMass, mpi::SUM);
          *excessMass_ = excessMass;
       }
-   };
+   }
 
  private:
    std::weak_ptr< const StructuredBlockForest > blockForest_;

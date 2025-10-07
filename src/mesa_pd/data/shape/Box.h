@@ -38,7 +38,7 @@ public:
 
    const Vec3&   getEdgeLength() const   { return edgeLength_; }
 
-   real_t getVolume() const override { return edgeLength_[0] * edgeLength_[1] * edgeLength_[2]; };
+   real_t getVolume() const override { return edgeLength_[0] * edgeLength_[1] * edgeLength_[2]; }
    void   updateMassAndInertia(const real_t density) override;
 
    Vec3 support( const Vec3& bfD ) const override;

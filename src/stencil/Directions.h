@@ -198,11 +198,7 @@ namespace stencil {
    } };
 
    /// String representation for each direction \ingroup stencil
-   #if __cpp_lib_constexpr_string && !(defined(__clang__) && defined(__apple_build_version__))
-   inline constexpr std::array< std::string, NR_OF_DIRECTIONS > dirToString {
-   #else
    const std::array< std::string, NR_OF_DIRECTIONS > dirToString {
-   #endif
       "C", "N", "S", "W", "E", "T", "B",
       "NW", "NE", "SW", "SE", "TN", "TS", "TW", "TE", "BN", "BS", "BW","BE",
       "TNE", "TNW", "TSE", "TSW", "BNE", "BNW", "BSE", "BSW",

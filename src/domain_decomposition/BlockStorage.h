@@ -89,7 +89,7 @@ public:
       iterator( const iterator & it )  = default;
 
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
-      iterator   operator++(int) { const iterator it( *this ); operator++(); return it; }; // postfix X++
+      iterator   operator++(int) { const iterator it( *this ); operator++(); return it; }  // postfix X++
 
       bool operator==( const iterator & rhs ) const { return it_ == rhs.it_; }
       bool operator!=( const iterator & rhs ) const { return it_ != rhs.it_; }
@@ -134,7 +134,7 @@ public:
       const_iterator( const const_iterator & it )  = default;
 
       const_iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }            // prefix ++X
-      const_iterator   operator++(int) { const const_iterator it( *this ); operator++(); return it; }; // postfix X++
+      const_iterator   operator++(int) { const const_iterator it( *this ); operator++(); return it; }  // postfix X++
 
       bool operator==( const const_iterator & rhs ) const { return it_ == rhs.it_; }
       bool operator!=( const const_iterator & rhs ) const { return it_ != rhs.it_; }

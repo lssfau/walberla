@@ -149,7 +149,7 @@ public:
    //*******************************************************************************************************************
    virtual std::string typeString() const = 0;
 
-   const std::string & identifier() const { return identifier_; };
+   const std::string & identifier() const { return identifier_; }
 
 protected:
 

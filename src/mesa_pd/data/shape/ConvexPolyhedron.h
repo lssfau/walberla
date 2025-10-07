@@ -332,7 +332,7 @@ public:
 
    void updateMassAndInertia(const real_t /*density*/) override {
       WALBERLA_ABORT("Shape ConvexPolyhedron is not available! Ensure waLBerla is configured with OpenMesh support.");
-   };
+   }
 
    real_t getVolume() const override {
       WALBERLA_ABORT("Shape ConvexPolyhedron is not available! Ensure waLBerla is configured with OpenMesh support.");
@@ -344,11 +344,11 @@ public:
 
    void pack(walberla::mpi::SendBuffer& /*buf*/) override {
       WALBERLA_ABORT("Shape ConvexPolyhedron is not available! Ensure waLBerla is configured with OpenMesh support.");
-   };
+   }
 
    void unpack(walberla::mpi::RecvBuffer& /*buf*/) override {
       WALBERLA_ABORT("Shape ConvexPolyhedron is not available! Ensure waLBerla is configured with OpenMesh support.");
-   };
+   }
 };
 
 }
