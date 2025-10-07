@@ -103,7 +103,13 @@ public:
         {
             {% if target == 'gpu' -%}
             for( auto & gpuVec: gpuVectors_)
-               WALBERLA_GPU_CHECK(gpuFree( gpuVec ));
+            {
+                if ( gpuVec )
+                {
+                    WALBERLA_GPU_CHECK(gpuFree( gpuVec ));
+                    gpuVec = nullptr;
+                }
+            }
             gpuVectors_.resize( cpuVectors_.size() );
 
             WALBERLA_ASSERT_EQUAL(cpuVectors_.size(), NUM_TYPES);
@@ -193,7 +199,11 @@ public:
        void syncGPU()
        {
           {% if target == 'gpu' -%}
-          if(!gpuVector_.empty()){WALBERLA_GPU_CHECK(gpuFree( gpuVector_[0] ))}
+          if(!gpuVector_.empty())
+          {
+             WALBERLA_GPU_CHECK(gpuFree( gpuVector_[0] ))
+             gpuVector_[0] = nullptr;
+          }
           if(!cpuVector_.empty())
           {
              gpuVector_.resize(cpuVector_.size());
@@ -290,8 +300,8 @@ public:
     void fillFromFlagField( const std::shared_ptr<StructuredBlockForest> & blocks, ConstBlockDataID flagFieldID,
                             FlagUID boundaryFlagUID, FlagUID domainFlagUID)
     {
-        for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
-            fillFromFlagField<FlagField_T>({{additional_data_handler.additional_arguments_for_fill_function}}&*blockIt, flagFieldID, boundaryFlagUID, domainFlagUID );
+        for( auto &block : *blocks )
+            fillFromFlagField<FlagField_T>({{additional_data_handler.additional_arguments_for_fill_function}}&block, flagFieldID, boundaryFlagUID, domainFlagUID );
     }
 
 

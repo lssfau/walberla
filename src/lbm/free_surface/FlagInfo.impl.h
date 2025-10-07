@@ -167,9 +167,9 @@ bool FlagInfo< FlagField_T >::isConsistentAcrossBlocksAndProcesses(
    WALBERLA_CHECK_NOT_NULLPTR(blockStorage);
 
    // check consistency across blocks
-   for (auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt)
+   for (const auto &block : *blockStorage)
    {
-      const FlagField_T* const flagField = blockIt->getData< const FlagField_T >(flagFieldID);
+      const FlagField_T* const flagField = block.getData< const FlagField_T >(flagFieldID);
       FlagInfo fi(flagField, obstacleIDs_, outflowIDs_, inflowIDs_, freeSlipIDs_);
       if (fi != *this) { return false; }
    }

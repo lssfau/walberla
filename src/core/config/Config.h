@@ -288,7 +288,7 @@ public:
 
       inline size_type getNumBlocks() const;
       inline size_type getNumBlocks( const std::string& key ) const;
-      BlockHandle getOneBlock( const std::string& key ) const { return block_->getOneBlock( key ); };
+      BlockHandle getOneBlock( const std::string& key ) const { return block_->getOneBlock( key ); }
       BlockHandle getBlock( const std::string& key ) const { return block_->getBlock( key ); }
       inline void getBlocks( const std::string& key, Blocks& blocks,
                              size_t min = 0, size_t max = std::numeric_limits< size_t >::max() ) const;

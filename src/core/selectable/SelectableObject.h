@@ -86,7 +86,7 @@ public:
       iterator( const iterator& it ) : selectable_( it.selectable_ ), index_( it.index_ ) {}
 
       iterator& operator++() { ++index_; return *this; }                            // prefix ++X
-      iterator  operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
+      iterator  operator++(int) { iterator it( *this ); operator++(); return it; }  // postfix X++
 
       bool operator==( const iterator& rhs ) const { return selectable_ == rhs.selectable_ && index_ == rhs.index_; }
       bool operator!=( const iterator& rhs ) const { return !operator==(rhs); }
@@ -115,7 +115,7 @@ public:
       const_iterator( const const_iterator& it ) : selectable_( it.selectable_ ), index_( it.index_ ) {}
 
       const_iterator& operator++() { ++index_; return *this; }                                  // prefix ++X
-      const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; }; // postfix X++
+      const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; }  // postfix X++
 
       bool operator==( const const_iterator& rhs ) const { return selectable_ == rhs.selectable_ && index_ == rhs.index_; }
       bool operator!=( const const_iterator& rhs ) const { return !operator==(rhs); }

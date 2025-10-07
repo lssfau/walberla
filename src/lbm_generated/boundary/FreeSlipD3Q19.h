@@ -104,7 +104,7 @@ public:
     {
         auto createIdxVector = []( IBlock * const , StructuredBlockStorage * const ) { return new IndexVectors(); };
         indexVectorID = blocks->addStructuredBlockData< IndexVectors >( createIdxVector, "IndexField_FreeSlipD3Q19");
-    };
+    }
 
     void run (IBlock * block);
 

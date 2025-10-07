@@ -46,9 +46,9 @@ class UpdateSecondGhostLayer
       const auto blockForest = blockForest_.lock();
       WALBERLA_CHECK_NOT_NULLPTR(blockForest);
 
-      for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+      for (auto &block : *blockForest)
       {
-         Field_T* const field = blockIt->template getData< Field_T >(fieldID_);
+         Field_T* const field = block.template getData< Field_T >(fieldID_);
 
          // this function is only necessary if the flag field has at least two ghost layers
          if (field->nrOfGhostLayers() < uint_c(2)) { isNecessary_ = false; }
@@ -69,9 +69,9 @@ class UpdateSecondGhostLayer
       const auto blockForest = blockForest_.lock();
       WALBERLA_CHECK_NOT_NULLPTR(blockForest);
 
-      for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+      for (auto &block : *blockForest)
       {
-         Field_T* const field = blockIt->template getData< Field_T >(fieldID_);
+         Field_T* const field = block.template getData< Field_T >(fieldID_);
 
          if (field->xSize() == uint_c(1) && blockForest->isXPeriodic())
          {

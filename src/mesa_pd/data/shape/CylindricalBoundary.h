@@ -43,7 +43,7 @@ public:
    const real_t& getRadius() const { return radius_; }
    const Vec3&   getAxis() const   { return axis_; }
 
-   real_t getVolume() const override { return std::numeric_limits<real_t>::infinity(); };
+   real_t getVolume() const override { return std::numeric_limits<real_t>::infinity(); }
    void   updateMassAndInertia(const real_t density) override;
 
    void pack(walberla::mpi::SendBuffer& buf) override;

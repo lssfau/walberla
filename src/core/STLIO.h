@@ -29,7 +29,7 @@ namespace walberla {
 template<typename T>
 class ParameterList: public std::vector<T> {
 public:
-	ParameterList(): std::vector<T>() {};
+	ParameterList(): std::vector<T>() {}
 	template<typename C> ParameterList(C v): std::vector<T>(v.begin(), v.end()) {}
 	template<typename C> operator C() { return C(std::vector<T>::begin(), std::vector<T>::end()); }
 };

@@ -66,19 +66,19 @@ namespace geometry {
    class BodyLogicalAND : public BodyLogicalOperationBinary<A,B>
    {
    public:
-      explicit BodyLogicalAND( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {};
+      explicit BodyLogicalAND( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {}
    };
    template<typename A, typename B>
    class BodyLogicalOR : public BodyLogicalOperationBinary<A,B>
    {
    public:
-      explicit BodyLogicalOR ( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {};
+      explicit BodyLogicalOR ( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {}
    };
    template<typename A, typename B>
    class BodyLogicalXOR : public BodyLogicalOperationBinary<A,B>
    {
    public:
-      explicit BodyLogicalXOR( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {};
+      explicit BodyLogicalXOR( const shared_ptr<A> &a, const shared_ptr<B> &b ): BodyLogicalOperationBinary<A,B>(a,b) {}
    };
    
    template<typename A>
