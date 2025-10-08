@@ -35,7 +35,7 @@ testsuite-full (clang-19-hybrid-cuda):
     CC: clang
     CXX: clang++
 
-  
+
 testsuite-full (icx-2025-hybrid-cuda):
   image: i10git.cs.fau.de:5005/ci/images/spack:icx-2025
   stage: Testsuite
@@ -60,7 +60,7 @@ testsuite+coverage (gcc14-hybrid-cuda):
     - source .venv/bin/activate
     - >
       gcovr
-      -r $CI_PROJECT_DIR 
+      -r $CI_PROJECT_DIR
       -f "src"
       --print-summary
       --html coverage/coverage.html --html-details
@@ -79,6 +79,7 @@ testsuite+coverage (gcc14-hybrid-cuda):
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
+    expire_in: 2 days
 
 
 ####################################################################################################
@@ -109,6 +110,7 @@ clang-tidy:
     when: always
     paths:
       - $CI_PROJECT_DIR/artifacts/clang-tidy-output
+    expire_in: 2 days
   tags:
     - docker
 
@@ -142,6 +144,7 @@ generate-test-matrix:
    artifacts:
      paths:
        - utilities/workflows/ci-matrix.yaml
+     expire_in: 1 day
 
 trigger-test-matrix:
   stage: Test Matrix
@@ -189,6 +192,7 @@ pages:
   needs: ["documentation"]
   script:
     - mv build/documentation/doc/html public
+    - mv coverage public/coverage
   artifacts:
     paths:
       - public
