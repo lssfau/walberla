@@ -68,6 +68,7 @@ testsuite+coverage (gcc14-hybrid-cuda):
       --gcov-ignore-parse-errors all
       build/${cmakePresetName}
   variables:
+    RUNNER_AFTER_SCRIPT_TIMEOUT: 20m
     cmakePresetName: .ci-coverage
     CC: gcc
     CXX: g++
@@ -189,7 +190,7 @@ documentation:
 pages:
   image: alpine:latest
   stage: deploy
-  needs: ["documentation"]
+  needs: ["documentation", "testsuite+coverage (gcc14-hybrid-cuda)"]
   script:
     - mv build/documentation/doc/html public
     - mv coverage public/coverage
