@@ -183,7 +183,8 @@ namespace initializer {
       }
 
       Image_T img ( file );
-      if ( block.isDefined( "rescaleToDomain") )
+      const bool rescaleToDomain = block.getParameter<bool>( "rescaleToDomain", false);
+      if ( rescaleToDomain )
          img = resizeImageToDomain( img, extrusionCoordinate );
 
       init( img, extrusionCoordinate, mapping,  xOffset, yOffset, lowerExtrusionLimit, upperExtrusionLimit );
