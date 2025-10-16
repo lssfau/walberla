@@ -11,40 +11,27 @@
 # You should have received a copy of the GNU General Public License along
 # with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 
-from functools import cache
 from abc import abstractmethod
 
 from pystencils import Field, FieldType, TypedSymbol, Assignment
-from pystencils.types import PsStructType, create_type
+from pystencils.types import PsStructType, create_type, PsCustomType
+from pystencilssfg import SfgComposer
+from pystencilssfg.lang import SfgVar
 
 from lbmpy.methods import AbstractLbMethod
 from lbmpy.boundaries.boundaryconditions import LbBoundary
 from lbmpy.advanced_streaming import Timestep
 
-
 BoundaryIndexType = create_type("int32")
-
-HbbLinkType = PsStructType(
-    [
-        ("x", BoundaryIndexType),
-        ("y", BoundaryIndexType),
-        ("z", BoundaryIndexType),
-        ("dir", BoundaryIndexType),
-    ],
-    "walberla::sweepgen::HbbLink",
-)
 
 
 class WalberlaLbmBoundary:
-    idx_struct_type: PsStructType
 
-    @classmethod
-    @cache
-    def get_index_field(cls):
+    def get_index_field(self):
         return Field(
             "indexVector",
             FieldType.INDEXED,
-            cls.idx_struct_type,
+            self.idx_struct_type(),
             (0,),
             (TypedSymbol("indexVectorLength", BoundaryIndexType), 1),
             (1, 1),
@@ -102,11 +89,69 @@ class WalberlaLbmBoundary:
         return elements
 
 
-class GenericHbbWrapper(WalberlaLbmBoundary):
-    idx_struct_type = HbbLinkType
+class GenericBoundaryWrapper(WalberlaLbmBoundary):
 
-    def __init__(self, hbb: LbBoundary):
-        self._hbb = hbb
+    def __init__(self, boundary: LbBoundary):
+        self._boundary = boundary
+
+        self.struct_data = [
+            ("x", BoundaryIndexType),
+            ("y", BoundaryIndexType),
+            ("z", BoundaryIndexType),
+            ("dir", BoundaryIndexType),
+        ]
+        self._idx_struct_type = PsStructType(
+            self.struct_data + self._boundary.additional_data,
+            self._boundary.name+"Link")
+        self._generate_add_data = bool(self._boundary.additional_data)
+
+    def generate_add_data(self):
+        return self._generate_add_data
+
+    def idx_struct_type(self) -> PsStructType:
+        return self._idx_struct_type
 
     def boundary_obj(self) -> LbBoundary:
-        return self._hbb
+        return self._boundary
+
+    def index_struct_name(self):
+        return f"{self._boundary.name}Link"
+
+    def data_struct_name(self):
+        return f"{self._boundary.name}Data"
+
+    def render_link_struct(self, sfg: SfgComposer):
+        ctor = sfg.constructor()
+
+        for d_name, d_type in self.struct_data:
+            var = SfgVar(d_name, d_type)
+            var_ = SfgVar(d_name+"_", d_type)
+            ctor.add_param(var_)
+            ctor.init(var)(var_)
+
+        if self.generate_add_data():
+            data_prop = SfgVar("addData_", PsCustomType(self.data_struct_name()))
+            ctor.add_param(data_prop)
+
+            for d_name, d_type in self._boundary.additional_data:
+                var = SfgVar(d_name, d_type)
+                ctor.init(var)(sfg.expr("{}.{}", data_prop, d_name))
+
+        sfg.struct(self.index_struct_name())(
+            *(SfgVar(d_name, d_type) for d_name, d_type in self.struct_data + self._boundary.additional_data),
+            ctor,
+        )
+
+    def render_data_struct(self, sfg: SfgComposer):
+        if self.generate_add_data():
+            ctor = sfg.constructor()
+            for d_name, d_type in self._boundary.additional_data:
+                var = SfgVar(d_name, d_type)
+                var_ = SfgVar(d_name+"_", d_type)
+                ctor.add_param(var_)
+                ctor.init(var)(var_)
+
+            sfg.struct(self.data_struct_name())(
+                *(SfgVar(d_name, d_type) for d_name, d_type in self._boundary.additional_data),
+                ctor,
+            )

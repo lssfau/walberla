@@ -11,6 +11,6 @@
 # You should have received a copy of the GNU General Public License along
 # with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 
-from .linkwise import NoSlip, FreeSlip, GenericHBB
+from .linkwise import NoSlip, FreeSlip, GenericBoundary
 
-__all__ = ["NoSlip", "FreeSlip", "GenericHBB"]
+__all__ = ["NoSlip", "FreeSlip", "GenericBoundary"]

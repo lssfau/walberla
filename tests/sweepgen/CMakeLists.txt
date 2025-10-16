@@ -15,3 +15,4 @@ waLBerla_execute_test( NAME TestBlockforestGeometry COMMAND TestBlockforestGeome
 
 
 add_subdirectory( BasicLbmScenarios )
+add_subdirectory( boundaries )

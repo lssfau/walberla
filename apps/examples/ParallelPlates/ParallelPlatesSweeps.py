@@ -29,7 +29,7 @@ import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
 from sweepgen import Sweep, get_build_config
-from sweepgen.boundaries import GenericHBB
+from sweepgen.boundaries import GenericBoundary
 from sweepgen.symbolic import cell, domain
 from sweepgen.prefabs import LbmBulk
 
@@ -118,9 +118,9 @@ with SourceFileGenerator(keep_unknown_argv=True) as sfg:
 
     #   Boundary Conditions
 
-    noSlip = GenericHBB(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    noSlip = GenericBoundary(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(noSlip)
 
     wall_velocity = (u_max, 0, 0)
-    ubb = GenericHBB(UBB(wall_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    ubb = GenericBoundary(UBB(wall_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(ubb)

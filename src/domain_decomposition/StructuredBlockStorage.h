@@ -307,6 +307,7 @@ public:
    inline void getCell( Cell & cell, const Vector3< real_t > & p,  const uint_t level = 0 ) const { getCell( cell, p[0], p[1], p[2], level ); }
 
    inline Vector3<real_t> getCellCenter( const Cell & cell, const uint_t level = 0 ) const;
+   inline Vector3<real_t> getGlobalCellCenterFromBlockLocalCell( const Cell & cell, const IBlock& block ) const;
    inline void getCellCenter( real_t & x, real_t & y, real_t & z, const Cell & cell, const uint_t level = 0 ) const;
    inline void getCellCenter( Vector3< real_t > & p, const Cell & cell, const uint_t level = 0 ) const { getCellCenter( p[0], p[1], p[2], cell, level ); }
 
@@ -582,6 +583,23 @@ inline Vector3<real_t> StructuredBlockStorage::getCellCenter( const Cell & cell,
 {
    Vector3<real_t> center;
    getCellCenter( center[0], center[1], center[2], cell, level );
+   return center;
+}
+
+
+
+//**********************************************************************************************************************
+/*!
+*   For documentation see member function
+*   "void getCellCenter( real_t & x, real_t & y, real_t & z, const Cell & cell, const uint_t level ) const"
+ */
+//**********************************************************************************************************************
+inline Vector3<real_t> StructuredBlockStorage::getGlobalCellCenterFromBlockLocalCell( const Cell & cell, const IBlock& block ) const
+{
+   Cell globalCell;
+   transformBlockLocalToGlobalCell( globalCell, block, cell );
+   Vector3<real_t> center;
+   getCellCenter( center[0], center[1], center[2], cell, getLevel(block) );
    return center;
 }
 

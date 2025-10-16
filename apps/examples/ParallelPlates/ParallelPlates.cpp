@@ -127,11 +127,11 @@ namespace ParallelPlates
             return link.wallCell.z() < blocks->getDomainCellBB().zMin();
         };
 
-        auto noSlip = gen::NoSlipFactory{ blocks, pdfsId }.selectLinks([&](auto link) {
+        auto noSlip = gen::NoSlipFactory{ blocks, pdfsId }.fromLinks([&](auto link) {
             return intersectsLowerWall(link) || (channelType == ChannelType::POISEUILLE && intersectsUpperWall(link));
         });
 
-        auto ubb = gen::UBBFactory{ blocks, pdfsId, channelVelocity }.selectLinks([&](auto link){
+        auto ubb = gen::UBBFactory{ blocks, pdfsId, channelVelocity }.fromLinks([&](auto link){
             return channelType == ChannelType::COUETTE && intersectsUpperWall(link);
         });
         

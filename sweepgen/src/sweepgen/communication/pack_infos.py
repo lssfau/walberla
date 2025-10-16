@@ -123,7 +123,7 @@ class GpuPdfFieldPackInfo(CustomGenerator):
         )
 
     def generate(self, sfg: SfgComposer) -> None:
-        base_class = f"walberla::sweepgen::UniformGpuFieldPackInfoBase< {self._name } >"
+        base_class = f"walberla::sweepgen::UniformGpuFieldPackInfoBase< {self._name} >"
         sfg.include(
             "walberla/sweepgen/communication/UniformGpuFieldPackInfoBase.hpp"
         )

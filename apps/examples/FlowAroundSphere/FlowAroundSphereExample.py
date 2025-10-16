@@ -21,7 +21,7 @@ from lbmpy import (
     Method,
     ForceModel,
 )
-from lbmpy.boundaries import NoSlip, UBB, FixedDensity, SimpleExtrapolationOutflow
+from lbmpy.boundaries import NoSlip, UBB, FixedDensity, SimpleExtrapolationOutflow, QuadraticBounceBack
 from lbmpy import relaxation_rate_from_lattice_viscosity
 
 import sympy as sp
@@ -29,7 +29,7 @@ import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
 from sweepgen import Sweep, get_build_config
-from sweepgen.boundaries import GenericHBB
+from sweepgen.boundaries import GenericBoundary
 from sweepgen.symbolic import cell, domain
 from sweepgen.prefabs import LbmBulk
 
@@ -70,14 +70,15 @@ with SourceFileGenerator(keep_unknown_argv=True) as sfg:
     init_fields = Sweep("IntializeMacroFields", initial_state_assignments)
     sfg.generate(init_fields)
 
-    noSlip = GenericHBB(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    noSlip = GenericBoundary(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(noSlip)
 
+    qbb = GenericBoundary(QuadraticBounceBack(omega, name="QBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    sfg.generate(qbb)
+
     inflow_velocity = (inflow_vel, 0, 0)
-    ubb = GenericHBB(UBB(inflow_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    ubb = GenericBoundary(UBB(inflow_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(ubb)
 
-    outflow = GenericHBB(SimpleExtrapolationOutflow((1, 0, 0), stencil, name="Outflow"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    outflow = GenericBoundary(SimpleExtrapolationOutflow((1, 0, 0), stencil, name="Outflow"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(outflow)
-
-
