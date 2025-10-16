@@ -26,6 +26,8 @@ from pystencils_walberla import (
     generate_pack_info_from_kernel,
 )
 
+from pystencils_walberla.utility import get_vectorize_instruction_set
+
 from lbmpy_walberla import generate_boundary
 
 # Based on the following paper: https://doi.org/10.1016/j.compfluid.2017.05.033
@@ -39,6 +41,11 @@ const bool infoCsePdfs = {cse_pdfs};
 """
 
 with CodeGeneration() as ctx:
+    if ctx.optimize_for_localhost:
+        isa = get_vectorize_instruction_set(ctx)
+        if isa in ("neon", "sve", "sve2", "sme"):
+            ctx.optimize_for_localhost = False
+
     data_type = "float64" if ctx.double_accuracy else "float32"
     stencil = LBStencil(Stencil.D3Q27)
     omega = sp.Symbol("omega")

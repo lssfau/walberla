@@ -38,17 +38,21 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
 
     waLBerla_add_test_executable ( MeshDistanceMollerTrumboreTest MeshDistanceMollerTrumboreTest.cpp )
     target_link_libraries ( MeshDistanceMollerTrumboreTest walberla::mesh walberla::mesh )
-    waLBerla_execute_test( NAME  MeshDistanceMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceMollerTrumboreTest>  cube.obj )
 
     waLBerla_add_test_executable ( MeshDistanceCallbackMollerTrumboreTest MeshDistanceCallbackMollerTrumboreTest.cpp )
     target_link_libraries ( MeshDistanceCallbackMollerTrumboreTest walberla::mesh walberla::mesh )
-    waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  cube.obj )
-    if ( WALBERLA_DOUBLE_ACCURACY )
-        waLBerla_execute_test(
-         NAME  MeshDistanceCallbackMollerTrumboreTestSphere
-         COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  sphere.obj
-         LABELS longrun
-        )
+
+    if( NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST )
+        waLBerla_execute_test( NAME  MeshDistanceMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceMollerTrumboreTest>  cube.obj )
+
+        waLBerla_execute_test( NAME  MeshDistanceCallbackMollerTrumboreTestCube COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  cube.obj )
+        if ( WALBERLA_DOUBLE_ACCURACY )
+            waLBerla_execute_test(
+            NAME  MeshDistanceCallbackMollerTrumboreTestSphere
+            COMMAND $<TARGET_FILE:MeshDistanceCallbackMollerTrumboreTest>  sphere.obj
+            LABELS longrun
+            )
+        endif ()
     endif ()
 
     waLBerla_add_test_executable ( MeshDistancePlausibilityTest MeshDistancePlausibilityTest.cpp )

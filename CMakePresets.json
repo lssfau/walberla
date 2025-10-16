@@ -7,5 +7,65 @@
   },
   "include": [
     "utilities/workflows/cmake-fragments.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "ParallelPlates",
+      "displayName": "ParallelPlates Config",
+      "inherits": [
+        ".serial",
+        ".sweepgen",
+        ".make",
+        ".debugOptimized",
+        ".gcc",
+        ".user-base"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ParallelPlates",
+      "displayName": "ParallelPlates Build",
+      "configurePreset": "ParallelPlates",
+      "targets": [
+        "ParallelPlates"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ParallelPlates",
+      "displayName": "ParallelPlates Tests",
+      "configurePreset": "ParallelPlates",
+      "output": {
+        "outputOnFailure": true,
+        "outputJUnitFile": "junit-report.xml"
+      },
+      "filter": {
+        "include": {
+          "name": "ParallelPlates"
+        }
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ParallelPlates",
+      "displayName": "ParallelPlates Workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ParallelPlates"
+        },
+        {
+          "type": "build",
+          "name": "ParallelPlates"
+        },
+        {
+          "type": "test",
+          "name": "ParallelPlates"
+        }
+      ]
+    }
   ]
 }
