@@ -44,8 +44,12 @@ namespace FlowAroundSphere
     using LbStencil = stencil::D3Q19;
     using PdfField_T = field::GhostLayerField<real_t, LbStencil::Q>;
 
-    using CommScheme = blockforest::communication::UniformBufferedScheme<LbStencil>;
-    using PdfsPackInfo = field::communication::StencilRestrictedPackInfo<PdfField_T, LbStencil>;
+
+    FlowAroundSphereExample::gen::QBBData sqSignedDistanceToSphere(geometry::Sphere sphere, Vector3<real_t> point) {
+       real_t distance = sqrt(pow(sphere.midpoint()[0] - point[0], 2) + pow(sphere.midpoint()[1] - point[1], 2) + pow(sphere.midpoint()[2] - point[2], 2)) - sphere.radius();
+       real_t sign = 1.0 ? distance >= 0 : -1.0;
+       return FlowAroundSphereExample::gen::QBBData(sign * distance * distance);
+    }
 
     void run(int argc, char **argv)
     {
@@ -81,8 +85,8 @@ namespace FlowAroundSphere
         auto streamCollide = std::make_shared< FlowAroundSphereExample::gen::LBM::StreamCollide >(pdfsId, rhoId, uId, omega);
 
         //  Set up ghost layer communication
-        CommScheme comm{blocks};
-        comm.addPackInfo(std::make_shared<PdfsPackInfo>(pdfsId));
+        blockforest::communication::UniformBufferedScheme<LbStencil> comm{blocks};
+        comm.addPackInfo(std::make_shared<field::communication::StencilRestrictedPackInfo<PdfField_T, LbStencil>>(pdfsId));
 
         //  Set up boundary conditions
         geometry::Sphere sphere(Vector3<real_t> (domainAABB.xSize()*0.35,domainAABB.ySize()*0.5,domainAABB.zSize()*0.5), refLen*0.5);
@@ -103,25 +107,22 @@ namespace FlowAroundSphere
                   link.wallCell.z() < blocks->getDomainCellBB().zMin() || link.wallCell.z() > blocks->getDomainCellBB().zMax();
         };
 
-        auto sphereLinks = [&](auto link) -> bool {
+        auto sphereLinks = [&](auto link) -> std::optional< FlowAroundSphereExample::gen::QBBData >  {
            blocks->transformBlockLocalToGlobalCell(link.wallCell, link.block);
            blocks->transformBlockLocalToGlobalCell(link.fluidCell, link.block);
            auto cellCenterSolid = blocks->getCellCenter(link.wallCell);
            auto cellCenterFluid = blocks->getCellCenter(link.fluidCell);
-           return contains(sphere, cellCenterSolid) && !contains(sphere, cellCenterFluid);
+           if (contains(sphere, cellCenterSolid) && !contains(sphere, cellCenterFluid))
+              return sqSignedDistanceToSphere(sphere, cellCenterFluid);
+           else
+              return std::nullopt;
         };
 
-        auto noSlip = FlowAroundSphereExample::gen::NoSlipFactory{ blocks, pdfsId }.selectLinks([&](auto link) {
-            return sideWallLinks(link) || sphereLinks(link);
-        });
 
-        auto inflow = FlowAroundSphereExample::gen::UBBFactory{ blocks, pdfsId, vel_inflow }.selectLinks([&](auto link){
-            return inflowLinks(link);
-        });
-
-        auto outflow = FlowAroundSphereExample::gen::OutflowFactory{ blocks, pdfsId }.selectLinks([&](auto link){
-           return outflowLinks(link);
-        });
+        auto qbb = FlowAroundSphereExample::gen::QBBFactory{ blocks, pdfsId, omega }.fromLinks(sphereLinks);
+        auto noSlip = FlowAroundSphereExample::gen::NoSlipFactory{ blocks, pdfsId }.fromLinks(sideWallLinks);
+        auto inflow = FlowAroundSphereExample::gen::UBBFactory{ blocks, pdfsId, vel_inflow }.fromLinks(inflowLinks);
+        auto outflow = FlowAroundSphereExample::gen::OutflowFactory{ blocks, pdfsId }.fromLinks(outflowLinks);
         
         //  Timeloop
         const uint_t numTimesteps{simParams.getParameter<uint_t>("timesteps")};
@@ -131,6 +132,8 @@ namespace FlowAroundSphere
         loop.add() << Sweep(noSlip);
         loop.add() << Sweep(inflow);
         loop.add() << Sweep(outflow);
+        loop.add() << Sweep(qbb);
+
 
         RemainingTimeLogger logger{numTimesteps};
         loop.addFuncAfterTimeStep(logger);

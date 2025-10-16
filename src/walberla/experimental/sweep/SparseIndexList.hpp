@@ -47,7 +47,7 @@ class IndexListBuffer
    using Vector_T = std::vector< IndexStruct, Allocator_T >;
 
    IndexListBuffer() = default;
-   bool operator==(const IndexListBuffer& other) const { return other.vec_ == vec_; }
+   bool operator==(const IndexListBuffer& other ) const { return &other.vec_ == &vec_; }
 
    Vector_T& vector() { return vec_; }
 

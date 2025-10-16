@@ -23,8 +23,7 @@ from lbmpy.boundaries.boundaryconditions import LbBoundary
 
 from pystencilssfg import SfgComposer
 from pystencilssfg.composer.custom import CustomGenerator
-
-from .boundary_utils import BoundaryIndexType, GenericHbbWrapper
+from .boundary_utils import BoundaryIndexType, GenericBoundaryWrapper
 from .boundary_utils import WalberlaLbmBoundary
 from ..sweep import Sweep
 from ..api import SparseIndexList, MemTags
@@ -44,83 +43,14 @@ class GenericLinkwiseBoundary(CustomGenerator):
     IRREGULAR = _IrregularSentinel()
 
 
-class NoSlip(GenericLinkwiseBoundary):
-    """Zero-velocity half-way bounce back boundary condition.
-
-    Args:
-        name: Name of the generated sweep class
-        lb_method: lbmpy Method description
-        pdf_field: Symbolic LBM PDF field
-        wall_orientation: Vector :math:`\\vec{n} \\in \\{ -1, 0, 1 \\}^d` pointing from the fluid to the wall,
-            or `NoSlip.IRREGULAR` to indicate a non-grid-aligned boundary
-    """
-
-    def __init__(
-        self,
-        name: str,
-        lb_method: AbstractLbMethod,
-        pdf_field: Field,
-        wall_orientation: tuple[int, int, int] | _IrregularSentinel,
-    ):
-        self._name = name
-        self._lb_method = lb_method
-        self._pdf_field = pdf_field
-        self._wall_normal = wall_orientation
-
-    def generate(self, sfg: SfgComposer) -> None:
-        if self._wall_normal == self.IRREGULAR:
-            self._generate_irregular(sfg)
-        else:
-            self._generate_regular(sfg)
-
-    def _generate_irregular(self, sfg: SfgComposer):
-        raise NotImplementedError()
-
-    def _generate_regular(self, sfg: SfgComposer):
-        bc_asm = self._grid_aligned_assignments()
-        bc_sweep = Sweep(self._name, bc_asm)
-        sfg.generate(bc_sweep)
-
-    def _grid_aligned_assignments(self):
-        stencil = self._lb_method.stencil
-
-        assert isinstance(self._wall_normal, tuple)
-        wall_normal = self._wall_normal
-        x_b = (0,) * stencil.D
-
-        f = self._pdf_field
-
-        def wall_aligned(vec):
-            """Test if v1 is aligned with v2, i.e. v1 has the same nonzero entries as v2"""
-            for x_v, x_n in zip(vec, wall_normal):
-                if x_n != 0 and x_v != x_n:
-                    return False
-            return True
-
-        asms = []
-
-        for i_out, x_w in enumerate(stencil):
-            if wall_aligned(x_w):
-                i_inverse = stencil.inverse_index(x_w)
-                asms.append(Assignment(f[x_w](i_inverse), f[x_b](i_out)))
-
-        return AssignmentCollection(asms)
-
-
-class GenericHBB(GenericLinkwiseBoundary):
+class GenericBoundary(GenericLinkwiseBoundary):
     def __init__(
         self,
         bc: LbBoundary,
         lb_method: AbstractLbMethod,
         pdf_field: Field,
     ):
-        if bc.additional_data:
-            raise ValueError(
-                "The SimpleHbbBoundary generator only supports boundary conditions without "
-                "additional per-link data."
-            )
-
-        self._bc = GenericHbbWrapper(bc)
+        self._bc = GenericBoundaryWrapper(bc)
         self._name = bc.name
         self._lb_method = lb_method
         self._pdf_field = pdf_field
@@ -130,7 +60,7 @@ class GenericHBB(GenericLinkwiseBoundary):
         return self._generate_irregular(sfg)
 
     def _generate_irregular(self, sfg: SfgComposer):
-        sfg.include("walberla/sweepgen/boundaries/GenericHbbBoundary.hpp")
+        sfg.include("walberla/sweepgen/boundaries/GenericBoundary.hpp")
 
         #   Get assignments for bc
         bc_obj = self._bc
@@ -142,6 +72,9 @@ class GenericHBB(GenericLinkwiseBoundary):
         index_field = bc_obj.get_index_field()
         bc_cfg.index_field = index_field
 
+        self._bc.render_data_struct(sfg)
+        self._bc.render_link_struct(sfg)
+
         #   Prepare sweep
         bc_sweep = Sweep(self._name, bc_asm, bc_cfg)
 
@@ -150,12 +83,12 @@ class GenericHBB(GenericLinkwiseBoundary):
 
         #   Build factory
         factory_name = f"{self._name}Factory"
-        factory_crtp_base = f"walberla::sweepgen::GenericHbbFactory< {factory_name} >"
+        factory_crtp_base = f"walberla::sweepgen::GenericBoundaryFactory< {factory_name} >"
         memtag_t = MemTags.unified if bc_cfg.get_target().is_gpu() else MemTags.host
 
         index_vector_name = "indexVector"
         index_vector = SparseIndexList(
-            GenericHbbWrapper.idx_struct_type, memtag_t=memtag_t, ref=True
+            bc_obj.idx_struct_type(), memtag_t=memtag_t, ref=True
         ).var(index_vector_name)
 
         #   Create a property cache for forwarding all sweep parameters
@@ -206,6 +139,8 @@ class GenericHBB(GenericLinkwiseBoundary):
                 f"using Stencil = walberla::stencil::{stencil_name};",
                 f"using Sweep = {sweep_type.get_dtype().c_string()};",
                 f"using memtag_t = {memtag_t.c_string()};",
+                f"using IdxStruct = {bc_obj.index_struct_name()};",
+                f"using DataStruct = {bc_obj.data_struct_name() if bc_obj.generate_add_data() else 'void'};",
                 factory_ctor
             ),
             sfg.private(
@@ -220,6 +155,69 @@ class GenericHBB(GenericLinkwiseBoundary):
 
     def _generate_regular(self, sfg: SfgComposer):
         assert False
+
+
+class NoSlip(GenericLinkwiseBoundary):
+    """Zero-velocity half-way bounce back boundary condition.
+
+    Args:
+        name: Name of the generated sweep class
+        lb_method: lbmpy Method description
+        pdf_field: Symbolic LBM PDF field
+        wall_orientation: Vector :math:`\\vec{n} \\in \\{ -1, 0, 1 \\}^d` pointing from the fluid to the wall,
+            or `NoSlip.IRREGULAR` to indicate a non-grid-aligned boundary
+    """
+
+    def __init__(
+            self,
+            name: str,
+            lb_method: AbstractLbMethod,
+            pdf_field: Field,
+            wall_orientation: tuple[int, int, int] | _IrregularSentinel,
+    ):
+        self._name = name
+        self._lb_method = lb_method
+        self._pdf_field = pdf_field
+        self._wall_normal = wall_orientation
+
+    def generate(self, sfg: SfgComposer) -> None:
+        if self._wall_normal == self.IRREGULAR:
+            self._generate_irregular(sfg)
+        else:
+            self._generate_regular(sfg)
+
+    def _generate_irregular(self, sfg: SfgComposer):
+        raise NotImplementedError()
+
+    def _generate_regular(self, sfg: SfgComposer):
+        bc_asm = self._grid_aligned_assignments()
+        bc_sweep = Sweep(self._name, bc_asm)
+        sfg.generate(bc_sweep)
+
+    def _grid_aligned_assignments(self):
+        stencil = self._lb_method.stencil
+
+        assert isinstance(self._wall_normal, tuple)
+        wall_normal = self._wall_normal
+        x_b = (0,) * stencil.D
+
+        f = self._pdf_field
+
+        def wall_aligned(vec):
+            """Test if v1 is aligned with v2, i.e. v1 has the same nonzero entries as v2"""
+            for x_v, x_n in zip(vec, wall_normal):
+                if x_n != 0 and x_v != x_n:
+                    return False
+            return True
+
+        asms = []
+
+        for i_out, x_w in enumerate(stencil):
+            if wall_aligned(x_w):
+                i_inverse = stencil.inverse_index(x_w)
+                asms.append(Assignment(f[x_w](i_inverse), f[x_b](i_out)))
+
+        return AssignmentCollection(asms)
 
 
 class FreeSlip(GenericLinkwiseBoundary):
@@ -281,7 +279,7 @@ class FreeSlip(GenericLinkwiseBoundary):
         )
         memtag_t = MemTags.unified if bc_cfg.get_target().is_gpu() else MemTags.host
         index_vector = SparseIndexList(
-            WalberlaIrregularFreeSlip.idx_struct_type, memtag_t=memtag_t, ref=True
+            bc_obj.idx_struct_type(), memtag_t=memtag_t, ref=True
         ).var("indexVector")
 
         sweep_type = bc_sweep.generated_class()
@@ -351,19 +349,24 @@ class FreeSlip(GenericLinkwiseBoundary):
 
 
 class WalberlaIrregularFreeSlip(LbBoundary, WalberlaLbmBoundary):
-    idx_struct_type = PsStructType(
-        (
-            ("x", BoundaryIndexType),
-            ("y", BoundaryIndexType),
-            ("z", BoundaryIndexType),
-            ("dir", BoundaryIndexType),
-            ("source_offset_x", BoundaryIndexType),
-            ("source_offset_y", BoundaryIndexType),
-            ("source_offset_z", BoundaryIndexType),
-            ("source_dir", BoundaryIndexType),
-        ),
-        "walberla::sweepgen::IrregularFreeSlipLinkInfo",
-    )
+
+    def __init__(self):
+        self._idx_struct_type = PsStructType(
+            (
+                ("x", BoundaryIndexType),
+                ("y", BoundaryIndexType),
+                ("z", BoundaryIndexType),
+                ("dir", BoundaryIndexType),
+                ("source_offset_x", BoundaryIndexType),
+                ("source_offset_y", BoundaryIndexType),
+                ("source_offset_z", BoundaryIndexType),
+                ("source_dir", BoundaryIndexType),
+            ),
+            "walberla::sweepgen::IrregularFreeSlipLinkInfo",
+        )
+
+    def idx_struct_type(self):
+        return self._idx_struct_type
 
     def boundary_obj(self) -> LbBoundary:
         return self

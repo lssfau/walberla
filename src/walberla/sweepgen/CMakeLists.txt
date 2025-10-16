@@ -3,7 +3,7 @@ add_library( walberla::sweepgen ALIAS walberla_sweepgen )
 
 target_sources( walberla_experimental
     INTERFACE
-    boundaries/GenericHbbBoundary.hpp
+    boundaries/GenericBoundary.hpp
     boundaries/IrregularFreeSlip.hpp
     communication/UniformGpuFieldPackInfoBase.hpp
 )
