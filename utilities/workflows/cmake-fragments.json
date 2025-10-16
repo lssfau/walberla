@@ -29,9 +29,39 @@
                 "WALBERLA_BUILD_WITH_OPENMESH": true,
                 "WALBERLA_BUILD_WITH_PYTHON": true,
                 "WARNING_ERROR": true,
-                "WALBERLA_LOGLEVEL": "DETAIL",
-                "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}"
+                "WALBERLA_LOGLEVEL": "INFO",
+                "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}",
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
             }
+        },
+        {
+            "displayName": "Default user setup.",
+            "name": ".user-base",
+            "hidden": true,
+            "binaryDir": "build/${presetName}",
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "WALBERLA_BUILD_WITH_MPI": "ON",
+                "WALBERLA_BUILD_WITH_OPENMP": "OFF",
+                "WALBERLA_BUILD_WITH_METIS": false,
+                "WALBERLA_BUILD_WITH_PARMETIS": false,
+                "WALBERLA_BUILD_WITH_FFTW": false,
+                "WALBERLA_BUILD_WITH_OPENMESH": false,
+                "WARNING_ERROR": true,
+                "WALBERLA_LOGLEVEL": "INFO",
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
+            }
+        },
+        {
+            "name": ".ninja",
+            "hidden": true,
+            "generator": "Ninja"
+        },
+        {
+            "name": ".make",
+            "hidden": true,
+            "generator": "Unix Makefiles"
         },
         {
             "name": ".gcc",
@@ -64,7 +94,8 @@
                 "WALBERLA_BUILD_WITH_METIS": false,
                 "WALBERLA_BUILD_WITH_PARMETIS": false,
                 "WALBERLA_BUILD_WITH_FFTW": false,
-                "WALBERLA_BUILD_WITH_OPENMESH": false
+                "WALBERLA_BUILD_WITH_OPENMESH": false,
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": false
             }
         },
         {
@@ -214,6 +245,14 @@
             "hidden": true,
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_GCOV": true
+            }
+        },
+        {
+            "displayName": "Create `compile_commands.json`",
+            "name": ".compile_commands",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         }
     ],

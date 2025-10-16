@@ -29,6 +29,7 @@ Markus Holzer
 Martin Bauer
 Matthias Markl
 Michael Kuron
+Michael Zikeli
 Nils Kohl
 Paulo Carvalho
 Philipp Suffa

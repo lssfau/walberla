@@ -3,10 +3,10 @@
 The directory `utilities/workflows` holds the infrastructure and utilities that power
 waLBerla's continuous integration and testing (CI) workflows.
 
-## Ressources
+## Resources
 
- - [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
- - [GitLab CI/CD](https://docs.gitlab.com/topics/build_your_application/)
+-  [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
+-  [GitLab CI/CD](https://docs.gitlab.com/topics/build_your_application/)
 
 ## CMake Presets
 
@@ -20,7 +20,7 @@ python utilities/workflows/generateWorkflows.py cmake-presets ci-workflows.json 
 ```
 
 This will generate the file `ci-workflows.json` and include it into your user presets file.
-*Do not check the generated file into version control*, as it is specific to your local machine.
+_Do not check the generated file into version control_, as it is specific to your local machine.
 
 The generated presets defined therein are built as combinations of predefined fragments through inheritance.
 These fragments are defined in `cmake-fragments.json`.
@@ -46,8 +46,10 @@ for example:
 
 This preset definition uses LLVM/Clang as a compiler, enables hybrid parallelization,
 Python and code generation, and HIP for AMD GPUs.
-The fragment `.ci-base` holds the base configuration and must always be listed last,
-since presets override each other bottom-to-top.
+The fragment `.ci-base` holds the base configuration and must always be listed last.
+
+> [!note]
+> Parent presets listed in `inherits` do **not** override each other. The first one listed is the valid one in case of a conflict.
 
 ### CUDA Compute Capabilities
 
@@ -81,7 +83,7 @@ To generate the matrix file, run
 python generateWorkflows.py ci-matrix matrix.yaml
 ```
 
-*Do not check the generated matrix definition into version control.*
+_Do not check the generated matrix definition into version control._
 It is automatically generated during each CI run.
 
 ### Docker Images

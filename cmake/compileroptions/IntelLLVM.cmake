@@ -5,6 +5,12 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${_intel_llvm_minimal_version})
   message(FATAL_ERROR "IBM compiler version must be at least ${_intel_llvm_minimal_version}!")
 endif()
 
+# architecture optimization
+if(WALBERLA_OPTIMIZE_FOR_LOCALHOST)
+  add_flag(CMAKE_CXX_FLAGS "-march=native")
+  add_flag(CMAKE_C_FLAGS "-march=native")
+endif()
+
 # fastmath
 if(NOT WALBERLA_BUILD_WITH_FASTMATH)
   add_flag(CMAKE_CXX_FLAGS "-fp-model=precise")

@@ -59,6 +59,7 @@ def check_axis(flow_axis, wall_axis):
 
 
 with CodeGeneration() as ctx:
+    ctx.optimize_for_localhost = False
 
     flow_axis = 0
     wall_axis = 1

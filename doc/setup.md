@@ -1,31 +1,30 @@
-# Get and Build waLBerla  {#setup-instructions}
+# Get and Build waLBerla {#setup-instructions}
 
 \tableofcontents
 
 This guide describes the necessary steps to download and compile the waLBerla project sources.
 
-## Prerequesites
+## Prerequisites
 
 To build waLBerla, you are going to need at least:
 
- - A recent C++20 compiler
- - CMake >= 3.24
- - An up-to-date MPI library for shared-memory parallel computing
+-  A recent C++20 compiler
+-  CMake >= 3.26
+-  An up-to-date MPI library for shared-memory parallel computing
 
 WaLBerla also has numerous optional dependencies:
 
-  - Nvidia CUDA for GPU computing on compatible GPUs
-  - [Metis](https://github.com/KarypisLab/METIS) and [ParMetis](https://github.com/KarypisLab/ParMETIS)
-    for static and dynamic load balancing
-  - [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/) for handling of complex geometry meshes
+-  Nvidia CUDA for GPU computing on compatible GPUs
+-  [Metis](https://github.com/KarypisLab/METIS) and [ParMetis](https://github.com/KarypisLab/ParMETIS)
+   for static and dynamic load balancing
+-  [OpenMesh](https://www.graphics.rwth-aachen.de/software/openmesh/) for handling of complex geometry meshes
 
 > [!note]
 > Many HPC clusters offer only outdated versions of CMake through their module system.
 > For ways to install the latest CMake version in such a case, please take a look at
 > [our FAQ](#faq-outdated-cmake).
 
-
-## Download waLBerla's Source Code  {#get-sources}
+## Download waLBerla's Source Code {#get-sources}
 
 ### Clone the Repository
 
@@ -45,15 +44,90 @@ To build a specific released version of waLBerla, you need to download its sourc
 as a Zip archive or tarball from [our GitLab](https://i10git.cs.fau.de/walberla/walberla/-/releases)
 and extract that archive into your filesystem.
 
-## Set Up the Build System
+## Run your first waLBerla app {#run-your-first-app}
 
-### Generate the Build System from a CMake Preset  {#cmake-preset}
+To check if your system can run waLBerla out of the box,
+we recommend to run a simple example application like the [Parallel Plates](#example-ParallelPlates) showcase,
+which comes with two example `ctest`s.
+The easiest way run waLBerla applications from build to test is to use
+[CMake Workflows](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-workflow-preset).
 
-WaLBerla's CMake build system exposes a large number of configuration options.
-Also, depending on which of its modules you are using,
+```bash
+cmake --workflow --preset ParallelPlates
+```
+
+Using the pre-configured example workflow-preset,
+cmake will apply a standard configuration of waLBerla,
+build the Parallel Plates application executable,
+and run the provided `ctest`s for for this application for you.
+
+If the build succeeds and the tests execute successfully, you are ready to start using waLBerla.
+
+## Configure your waLBerla Build System
+
+WaLBerla's CMake build system exposes a large number of configuration options which are mostly defined through CMake cache variables.
+Depending on which modules you want to use on which computer system,
 you may have to populate numerous additional build parameters with values specific to your local machine.
-In order to document a build setup and to make builds reproducible,
-we recommend to use [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html).
+
+If you are working on the main waLBerla's distribution supported by LSS directly,
+you have three options to configure your build:
+
+1. Passing cache variables via `-D` flag to the CMake command line:
+
+   ```bash
+   cmake -G ninja -DWALBERLA_BUILD_WITH_OPENMESH=true -B build/ .
+   ```
+
+1. Toggling cache variables with CMake's GUI `ccmake`:
+
+   ```bash
+   ccmake -G ninja -B build/ .
+   ```
+
+1. Utilizing CMake Presets.
+
+   In order to document a build setup and to make builds reproducible,
+   we recommend to use [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html).
+
+### Define your Build System with CMake Preset {#cmake-preset}
+
+Similar to the showcase preset used to [Execute your First waLBerla app](#run-your-first-walberla-app),
+you can define your own user specific presets and workflows as `CMakeUserPresets.json`.
+
+```json
+{
+   "version": 6,
+   "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 25,
+      "patch": 0
+   },
+   "include": ["utilities/workflows/cmake-fragments.json"],
+   "configurePresets": [],
+   "buildPresets": [],
+   "testPresets": [],
+   "workflowPresets": []
+}
+```
+
+The `Parallel Plates` example workflow can be find in [CMakePresets.json](../CMakePresets.json).
+
+#### CMake Fragments {#cmake-fragments}
+
+To keep the final presets compact and reduce code duplications, waLBerla provides a set of predefined fragments that can be included in your `CMakeUserPresets.json`.
+This fragments provide the necessary cmake configurations for tasks like:
+
+-  Convenient overrides of waLBerla's default Build Setup.
+-  Enabling external libraries like `OpenMesh`, `Metis`, etc.
+-  Setting the build type {`Release`, `Debug`, `DebugOptimized`}.
+-  Choosing your build tool {`Ninja`, `Unix Make`}.
+-  Enabling support for GPU, Python, MPI, OpenMP, and many more ...
+
+For more details, please refer to the [Workflow Documentation](#ci-workflows).
+You can find all of waLBerla's predefined fragments in [`cmake-fragments.json`](../utilities/workflows/cmake-fragments.json).
+An example of how to extend the predefined fragments is given [below](#manage-own-fork).
+
+#### CMake Presets Example
 
 Create a `CMakeUserPresets.json` file in the waLBerla project folder and populate it with the following
 content:
@@ -62,32 +136,32 @@ content:
 
 ```json
 {
-  "version": 6,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 24,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-          "CC": "gcc",
-          "CXX": "g++"
+   "version": 6,
+   "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 24,
+      "patch": 0
+   },
+   "configurePresets": [
+      {
+         "name": "debug",
+         "generator": "Ninja",
+         "binaryDir": "${sourceDir}/build/${presetName}",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug"
+         },
+         "environment": {
+            "CC": "gcc",
+            "CXX": "g++"
+         }
       }
-    }
-  ]
+   ]
 }
 ```
 
 </div>
 
-This defines a CMake *configure preset* called *debug*, using the `Ninja` generator
+This defines a CMake _configure preset_ called _debug_, using the `Ninja` generator
 (swap this for `Unix Makefiles` if you don't have Ninja installed).
 The CMake build type is set to `Debug`, and `gcc/g++` are used as compilers.
 
@@ -107,7 +181,7 @@ This will set up the CMake build tree at the `build/debug` subfolder.
 > After modifying a preset you will have to regenerate the build system for changes to take effect.
 > Either run `cmake --preset <preset-name>` again,
 > or execute a regeneration task in your IDE
-> (*Delete Cache and Reconfigure* in VS Code, *Reset Cache and Reload Project* in CLion).
+> (_Delete Cache and Reconfigure_ in VS Code, _Reset Cache and Reload Project_ in CLion).
 
 ### Validate the Build
 
@@ -118,33 +192,7 @@ There, run the following command to build the `UniformGridBenchmark` target to c
 cmake --build . --target UniformGridBenchmark
 ```
 
-## Configure waLBerla's Build System
-
-### Setting waLBerla Build Options
-
-The build system of waLBerla is mostly configured through CMake cache variables.
-If you are working on waLBerla directly, you should set these variables using the `cacheVariables` dictionary
-of your CMake configure preset (see [above](#cmake-preset)), e.g.:
-
-```json
-"cacheVariables": {
-  "CMAKE_BUILD_TYPE": "Debug",
-  "WALBERLA_BUILD_WITH_OPENMP": true
-}
-```
-
-Alternatively, cache variables can be set using the `-D` flag of the CMake command line.
-
-If you are embedding waLBerla into another project, you can also use a preset or command line flags if
-you wish to selectively enable certain features.
-However, if your project needs to *always* enable or disable some feature, use the `option()` CMake function;
-for instance, to always enable OpenMP in the waLBerla build, add the following to your CMakeLists:
-
-```CMake
-option( WALBERLA_BUILD_WITH_OPENMP "" ON )
-```
-
-## MPI
+### MPI
 
 Support for MPI is enabled by default in waLBerla.
 You may however disable it by setting the `WALBERLA_BUILD_WITH_MPI` build option to `false`.
@@ -161,20 +209,21 @@ To enable it, set the `WALBERLA_BUILD_WITH_OPENMP` build option to `true`.
 > or [likwid-mpirun](https://github.com/RRZE-HPC/likwid/wiki/Likwid-Mpirun) to control
 > thread behavior in hybrid OpenMP/MPI applications.
 
-## Build Tutorial, Benchmark and Showcase Apps
+### Build Tutorial, Benchmark and Showcase Apps
 
-The waLBerla repository comes with a family of tutorials, benchmarks, and showcase applications, located in the `apps` directory.
+The waLBerla repository comes with a family of tutorials, examples, benchmarks, and showcase applications, located in the `apps` directory.
 These can be enabled in the build by setting the respective build options:
 
- - `WALBERLA_BUILD_TUTORIALS` for tutorials;
- - `WALBERLA_BUILD_BENCHMARKS` for benchmarks;
- - `WALBERLA_BUILD_SHOWCASES` for showcases.
+-  `WALBERLA_BUILD_TUTORIALS` for tutorials;
+-  `WALBERLA_BUILD_EXAMPLES` for tutorials;
+-  `WALBERLA_BUILD_BENCHMARKS` for benchmarks;
+-  `WALBERLA_BUILD_SHOWCASES` for showcases.
 
 Several tutorials, and most of the latest benchmark and showcase apps, require at least [code generation](#codegen-setup)
 and the [embedded Python interpreter](#embedded-python) to be active in the build.
 Also, [CUDA](#cuda-support) needs to be active for GPU applications.
 
-## Automatic Code Generation  {#codegen-setup}
+## Automatic Code Generation {#codegen-setup}
 
 Most recent benchmark and showcase applications built with waLBerla are making heavy use of
 automatic code generation using [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils/)
@@ -182,9 +231,10 @@ and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy/).
 Code generation takes place during the build process.
 
 There are currently two separate code generation systems in place within waLBerla:
- - The legacy code generators, implemented in the `pystencils_walberla` and `lbmpy_walberla`
+
+-  The legacy code generators, implemented in the `pystencils_waLBerla` and `lbmpy_waLBerla`
    Python modules, based on the pystencils and lbmpy 1.3 version line
- - The brand-new `SweepGen` code generator, based on pystencils 2.0 and meant to fully
+-  The brand-new `SweepGen` code generator, based on pystencils 2.0 and meant to fully
    replace the former in the near future.
 
 The two systems are implemented separately from one another and can coexists peacefully within a
@@ -275,8 +325,8 @@ pip install pystencils~=1.3 lbmpy~=1.3 jinja2
 There are two cache variables you need to set in order to activate build-time code generation
 in CMake:
 
- - Set `WALBERLA_BUILD_WITH_CODEGEN` to `true`
- - Set `Python_ROOT_DIR` to the `bin` folder of your Python environment.
+-  Set `WALBERLA_BUILD_WITH_CODEGEN` to `true`
+-  Set `Python_ROOT_DIR` to the `bin` folder of your Python environment.
 
 When using `venv` or `virtualenv` according to the above instructions, `Python_ROOT_DIR`
 will be `<project-dir>/.venv/bin`.
@@ -301,19 +351,19 @@ Here is a minimal working CMake preset for code generation, using `venv`:
 
 ```json
 {
-  "name": "minimal-codegen",
-  "generator": "Ninja",
-  "binaryDir": "${sourceDir}/build/${presetName}",
-  "cacheVariables": {
-    "WALBERLA_BUILD_WITH_CODEGEN": true,
-    "Python_ROOT_DIR": "${sourceDir}/.venv/bin"
-  }
+   "name": "minimal-codegen",
+   "generator": "Ninja",
+   "binaryDir": "${sourceDir}/build/${presetName}",
+   "cacheVariables": {
+      "WALBERLA_BUILD_WITH_CODEGEN": true,
+      "Python_ROOT_DIR": "${sourceDir}/.venv/bin"
+   }
 }
 ```
 
 </div>
 
-## Embedded Python Interpreter  {#embedded-python}
+## Embedded Python Interpreter {#embedded-python}
 
 WaLBerla offers the option to run Python scripts in an embedded Python interpreter to configure and
 parametrize simulations.
@@ -326,7 +376,6 @@ To use the embedded Python interpreter, waLBerla needs the Python package pybind
 But there are systems, on which pybind11 can not be fetched automatically, because no network connection is possible.
 In this case, download the version 2.13.6 of the pybind11 source from https://github.com/pybind/pybind11/tree/v2.13,
 copy it to the system without internet connection and set the CMake option ’CMAKE_PYBIND11_SOURCE_DIR’ to your local pybind11 source directory.
-
 
 ## CUDA Support {#cuda-support}
 
@@ -411,7 +460,7 @@ to import and handle surface meshes of geometric objects.
 The OpenMesh tool is fetched automatically by CMake, when setting `WALBERLA_BUILD_WITH_OPENMESH=ON`.
 
 There are systems, on which OpenMesh can not be fetched automatically, because no network connection is possible.
-In this case, download the newest OpenMesh source from https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git, 
+In this case, download the newest OpenMesh source from https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh.git,
 copy it to the system without internet connection and set the CMake option option ’CMAKE_OPEN_SOURCE_DIR’ to your local OpenMesh source directory.
 
 ## Metis and ParMetis for Load Balancing
@@ -420,13 +469,11 @@ WaLBerla optionally links against the popular graph partitioning libraries [Meti
 and [ParMetis](https://github.com/KarypisLab/ParMETIS).
 To activate Metis and ParMetis support, set the respective build options to `true`:
 
- - `WALBERLA_BUILD_WITH_METIS` for Metis
- - `WALBERLA_BUILD_WITH_PARMETIS` for ParMetis
+-  `WALBERLA_BUILD_WITH_METIS` for Metis
+-  `WALBERLA_BUILD_WITH_PARMETIS` for ParMetis
 
 The build system will then attempt to find a local installation of either library.
 
 > [!note]
 > To use (Par)Metis with waLBerla, Metis must have been built with 64-bit integers and floats enabled
 > (see [Metis Build Configuration Options](https://github.com/KarypisLab/METIS?tab=readme-ov-file#common-configuration-options-are)).
-
-
