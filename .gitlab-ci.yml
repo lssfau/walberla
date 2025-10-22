@@ -170,6 +170,8 @@ documentation:
   image: i10git.cs.fau.de:5005/ci/images/spack:gcc-14
   stage: Documentation
   needs: []
+  variables:
+    WALBERLA_DOXYGEN_HTTP_ROOT: /walberla
   before_script:
     - apt-get update
     - apt-get install -y texlive-base nox # for bibtex and sweepgen manual

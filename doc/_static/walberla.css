@@ -1,0 +1,16 @@
+a.viewOnGitlab, a.viewOnGitlab:visited {
+    padding: 0.5em 1em;
+    border: 1px solid gray;
+    border-radius: 0.3em;
+    color: var(--page-foreground-color) !important;
+}
+
+a.viewOnGitlab:hover {
+    background-color: var(--primary-light-color);
+}
+
+a.viewOnGitlab img {
+	height: 1.5em;
+    margin-right: 1em;
+    vertical-align: text-bottom;
+}

@@ -1,8 +1,11 @@
 # Fully Periodic Double Shear Layer {#example-DoubleShearLayer}
 
+\viewOnGitlab{apps/examples/DoubleShearLayer}
+
 \tableofcontents
 
 Inspired by \cite Jonnalagadda2021.
+
 
 ## Domain Setup and Initial State
 
@@ -91,7 +94,7 @@ and namespace declarations:
 
 \dontinclude[strip] DoubleShearLayer/DoubleShearLayer.cpp
 \skip #include
-\until namespace we
+\until namespace
 
 Next, we define a few type aliases.
 We set up field types for the scalar and vector fields,

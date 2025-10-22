@@ -1,5 +1,7 @@
 # Parallel Plates {#example-ParallelPlates}
 
+\viewOnGitlab{apps/examples/ParallelPlates}
+
 This example implements the Couette and Poiseuille laminar flow scenarios
 between two infinite parallel plates.
 

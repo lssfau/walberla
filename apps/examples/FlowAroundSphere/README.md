@@ -1,5 +1,7 @@
 # Flow Around A Sphere (Uniform Grid Version) {#example-FlowAroundSphere}
 
+\viewOnGitlab{apps/examples/FlowAroundSphere}
+
 This example appplication simulates the flow behavior around a spherical obstacle
 in a channel.
 
