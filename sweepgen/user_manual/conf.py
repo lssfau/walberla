@@ -1,3 +1,5 @@
+import os
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -52,11 +54,13 @@ intersphinx_mapping = {
     "pystencils": ("https://pycodegen.pages.i10git.cs.fau.de/docs/pystencils/2.0dev/", None),
 }
 
-BRANCH = "codegen-update"  # FIXME
+#   Set this variable in the environment to point at the HTTP URL
+#   where the doxygen HTML pages will be served
+WALBERLA_DOXYGEN_HTTP_ROOT = os.environ.get("WALBERLA_DOXYGEN_HTTP_ROOT", "")
 
 extlinks = {
     "walberla-example-app": (
-        f"https://i10git.cs.fau.de/walberla/walberla/-/tree/{BRANCH}/apps/examples/%s",
+        f"{WALBERLA_DOXYGEN_HTTP_ROOT}/example-%s.html",
         "%s"
     )
 }
