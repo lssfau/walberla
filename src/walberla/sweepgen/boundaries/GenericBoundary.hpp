@@ -121,7 +121,7 @@ class GenericBoundaryFactory
             {
                stencil::Direction dir{ *dIt };
                Cell neighbor{ fluidCell + dir };
-               if (flagField->isFlagSet(neighbor, boundaryFlag)) { idxVector.emplace_back(fluidCell, dir); }
+               if (flagField->isFlagSet(neighbor, boundaryFlag)) { idxVector.emplace_back(fluidCell.x(), fluidCell.y(), fluidCell.z(), dir); }
             }
          }
       }

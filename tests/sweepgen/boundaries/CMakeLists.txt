@@ -1,7 +1,7 @@
 walberla_link_files_to_builddir( *.prm )
 waLBerla_link_geometry_to_builddir(cube.obj)
 
-set( AppName BoundaryLinks )
+set( AppName TestBoundaryLinks )
 
 waLBerla_add_test_executable( ${AppName} )
 target_sources( ${AppName} PRIVATE ${AppName}.cpp )

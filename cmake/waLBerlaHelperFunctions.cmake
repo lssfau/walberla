@@ -85,6 +85,7 @@ function( waLBerla_generate_target_from_python )
     # cmake might not be able to determine linker language since file extension is "hidden" in variable
     set_target_properties(${PYGEN_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(${PYGEN_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg})
+    target_link_libraries( ${PYGEN_NAME} PUBLIC walberla::core )
     if ( OpenMP_CXX_FOUND )
         target_link_libraries( ${PYGEN_NAME} PUBLIC OpenMP::OpenMP_CXX )
     endif ()

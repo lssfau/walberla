@@ -26,7 +26,7 @@ from sweepgen.build_config import DEBUG
 DEBUG.use_cpu_default()
 
 with SourceFileGenerator(keep_unknown_argv=True) as sfg:
-    sfg.namespace("BoundaryLinks::gen")
+    sfg.namespace("TestBoundaryLinks::gen")
     build_cfg = get_build_config(sfg)
     build_cfg.target = ps.Target.GenericCPU
 
