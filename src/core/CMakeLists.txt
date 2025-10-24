@@ -36,6 +36,7 @@ if ( MPI_FOUND )
             target_link_libraries ( walberla_core PUBLIC ${LIB} )
         endif ( )
     endforeach ( )
+    target_include_directories( walberla_core SYSTEM PUBLIC ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
 endif ()
 
 # OpenMP

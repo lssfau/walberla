@@ -466,8 +466,6 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
    endif ( )
 
    if ( MPI_FOUND )
-     include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
-
      add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
      add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
 
