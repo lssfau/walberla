@@ -107,7 +107,7 @@ private:
    {%- endfor %}
 };
 
-SpringDashpotSpring::SpringDashpotSpring(const uint_t numParticleTypes)
+inline SpringDashpotSpring::SpringDashpotSpring(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}

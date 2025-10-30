@@ -56,17 +56,17 @@ public:
 };
 
 template <>
-void reset<NumContactNotification>(data::Particle& p)
+inline void reset<NumContactNotification>(data::Particle& p)
 {
    p.setNumContacts( 0 );
 }
 
-void reduce(data::Particle&& p, const NumContactNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const NumContactNotification::Parameters& objparam)
 {
    p.getNumContactsRef() += objparam.numContacts_;
 }
 
-void update(data::Particle&& p, const NumContactNotification::Parameters& objparam)
+inline void update(data::Particle&& p, const NumContactNotification::Parameters& objparam)
 {
    p.setNumContacts( objparam.numContacts_ );
 }

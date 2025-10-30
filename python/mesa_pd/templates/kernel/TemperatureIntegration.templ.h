@@ -86,7 +86,7 @@ private:
    {%- endfor %}
 };
 
-TemperatureIntegration::TemperatureIntegration(const real_t dt, const uint_t numParticleTypes)
+inline TemperatureIntegration::TemperatureIntegration(const real_t dt, const uint_t numParticleTypes)
    : dt_(dt)
 {
    numParticleTypes_ = numParticleTypes;
