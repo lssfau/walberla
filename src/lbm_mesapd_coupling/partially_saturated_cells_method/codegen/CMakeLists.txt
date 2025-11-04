@@ -7,17 +7,29 @@ target_sources( walberla_lbm_mesapd_coupling
 if (WALBERLA_BUILD_WITH_CODEGEN)
     foreach (collision_setup srt trt mrt cumulant srt-smagorinsky trt-smagorinsky)
         foreach (solid_collision 1 2 3)
-            set(config ${collision_setup}_sc${solid_collision})
-            walberla_generate_target_from_python(NAME PSMCodegenPython_${config}
-                    FILE PSMCodegen.py
-                    CODEGEN_CFG ${config}_${MAX_PARTICLES_PER_CELL}
-                    OUT_FILES LBMSweep.${CODEGEN_FILE_SUFFIX} LBMSweep.h LBMSplitSweep.${CODEGEN_FILE_SUFFIX} LBMSplitSweep.h
-                    PSMSweep.${CODEGEN_FILE_SUFFIX} PSMSweep.h PSMSweepSplit.${CODEGEN_FILE_SUFFIX} PSMSweepSplit.h
-                    PSMPackInfo.${CODEGEN_FILE_SUFFIX} PSMPackInfo.h InitializeDomainForPSM.${CODEGEN_FILE_SUFFIX} InitializeDomainForPSM.h
-                    PSM_NoSlip.${CODEGEN_FILE_SUFFIX} PSM_NoSlip.h PSM_UBB.${CODEGEN_FILE_SUFFIX} PSM_UBB.h PSM_Density.${CODEGEN_FILE_SUFFIX} PSM_Density.h
-                    PSM_FreeSlip.${CODEGEN_FILE_SUFFIX} PSM_FreeSlip.h PSM_InfoHeader.h PSM_MacroGetter.cpp PSM_MacroGetter.h
-                    PSM_MacroSetter.cpp PSM_MacroSetter.h)
-            add_dependencies(PSMCodegenPython_${config} MAX_PARTICLES_PER_CELL)
+            foreach (force 0 1)
+                set(config ${collision_setup}_sc${solid_collision})
+                if (force EQUAL 1)
+                    set(config "${config}_force")
+                endif ()
+                walberla_generate_target_from_python(NAME PSMCodegenPython_${config}
+                        FILE PSMCodegen.py
+                        CODEGEN_CFG ${config}_${MAX_PARTICLES_PER_CELL}
+                        OUT_FILES PSMSweep.${CODEGEN_FILE_SUFFIX} PSMSweep.h
+                        PSM_MacroSetter.${CODEGEN_FILE_SUFFIX} PSM_MacroSetter.h PSM_MacroGetter.h PSM_MacroGetter.${CODEGEN_FILE_SUFFIX}
+                        LBM_MacroSetter.${CODEGEN_FILE_SUFFIX} LBM_MacroSetter.h
+                        LBMSweepCollection.h LBMSweepCollection.${CODEGEN_FILE_SUFFIX}
+                        LBMStorageSpecification.h LBMStorageSpecification.${CODEGEN_FILE_SUFFIX}
+                        LBMBoundaryCollection.h
+                        LBM_UBB.h LBM_UBB.${CODEGEN_FILE_SUFFIX}
+                        LBM_FreeSlip.h LBM_FreeSlip.${CODEGEN_FILE_SUFFIX}
+                        LBM_NoSlip.h LBM_NoSlip.${CODEGEN_FILE_SUFFIX}
+                        LBM_FixedDensity.h LBM_FixedDensity.${CODEGEN_FILE_SUFFIX}
+                        LBM_FixedDensity_2.h LBM_FixedDensity_2.${CODEGEN_FILE_SUFFIX}
+                        LBM_InfoHeader.h
+                )
+                add_dependencies(PSMCodegenPython_${config} MAX_PARTICLES_PER_CELL)
+            endforeach ()
         endforeach ()
     endforeach ()
 endif ()

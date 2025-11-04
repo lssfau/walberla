@@ -218,6 +218,38 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
 
     waLBerla_execute_test( NAME     StreamInCellIntervalCodegenTest )
 
+    # wall function bounce (WFB) tests -> use different setups of WFB
+    foreach (stencil d3q19 d3q27)
+        foreach (weights none lattice geometric)
+            foreach (velocity filtered mean)
+                if (${stencil} STREQUAL "d3q19" AND ( NOT ${weights} STREQUAL "none" ))
+                    # D3Q19 stencil does not need a closure for the weights as it is complete
+                    continue ()
+                endif ()
+
+                if (${stencil} STREQUAL "d3q27" AND ${weights} STREQUAL "none" )
+                    # D3Q27 stencil needs a closure for the weights as it is incomplete
+                    continue ()
+                endif ()
+
+                set (config ${stencil}_${weights}_${velocity})
+
+                waLBerla_generate_target_from_python( NAME WallFunctionBounceTestCodegen_${config}
+                        CODEGEN_CFG ${config}
+                        FILE codegen/WallFunctionBounceTest.py
+                        OUT_FILES WFB.h WFB.cpp
+                                  WFBHeader.h
+                )
+                waLBerla_add_test_executable ( WallFunctionBounceTest_${config} codegen/WallFunctionBounceTest.cpp)
+                target_link_libraries ( WallFunctionBounceTest_${config} walberla::blockforest walberla::field walberla::lbm
+                        walberla::timeloop walberla::core WallFunctionBounceTestCodegen_${config} )
+
+                waLBerla_execute_test( NAME WallFunctionBounceTest_${config} )
+
+            endforeach ()
+        endforeach ()
+    endforeach ()
+
 endif()
 
 # Free Surface

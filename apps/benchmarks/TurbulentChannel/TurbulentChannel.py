@@ -15,6 +15,7 @@ from lbmpy.utils import frobenius_norm, second_order_moment_tensor
 
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_from_kernel
 from lbmpy_walberla import generate_boundary
+from lbmpy_walberla.additional_data_handler import WFBAdditionalDataHandler
 
 #   =====================
 #      Code Generation
@@ -37,6 +38,8 @@ info_header = """
 #include "TurbulentChannel_FreeSlip_top.h"
 #include "TurbulentChannel_WFB_top.h"
 #include "TurbulentChannel_WFB_bottom.h"
+
+{config_definitions}
 
 namespace walberla {{
     namespace codegen {{
@@ -69,10 +72,24 @@ with CodeGeneration() as ctx:
     #   ========================
     #      General Parameters
     #   ========================
+
+    config_tokens = ctx.config.split('_')
+
+    assert len(config_tokens) >= 4
+    stencil_str = config_tokens[0]
+    wfb_weights_str = config_tokens[1]
+    velocity_str = config_tokens[2]
+    sgs_str = config_tokens[3]
+
     target = ps.Target.CPU
 
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil = LBStencil(Stencil.D3Q19)
+    if stencil_str == 'd3q19':
+        stencil = LBStencil(Stencil.D3Q19)
+    elif stencil_str == 'd3q27':
+        stencil = LBStencil(Stencil.D3Q27)
+    else:
+        raise ValueError("Only D3Q27 and D3Q19 stencil are supported at the moment")
     omega = sp.Symbol('omega')
 
     F_x = sp.Symbol('F_x')
@@ -115,11 +132,20 @@ with CodeGeneration() as ctx:
                            force_model=ForceModel.GUO,
                            force=tuple(force_vector),
                            relaxation_rate=omega,
-                           subgrid_scale_model=SubgridScaleModel.QR,
-                           # galilean_correction=True,
                            compressible=True,
-                           omega_output_field=omega_field,
                            output={'velocity': velocity})
+
+    if stencil_str == 'd3q27':
+        lbm_config.galilean_correction = True
+        lbm_config.fourth_order_correction = True
+
+    if sgs_str == 'smago':
+        lbm_config.subgrid_scale_model = SubgridScaleModel.SMAGORINSKY
+    elif sgs_str == 'qr':
+        lbm_config.subgrid_scale_model = SubgridScaleModel.QR
+
+    if not sgs_str == 'none':
+        lbm_config.omega_output_field = omega_field
 
     update_rule = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
     lbm_method = update_rule.method
@@ -145,7 +171,6 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, "TurbulentChannel_Setter", pdfs_setter, target=target, ghost_layers_to_include=1)
 
     #   Welford update
-    # welford_update = welford_assignments(vector_field=velocity, mean_vector_field=mean_velocity)
     welford_update = welford_assignments(field=velocity, mean_field=mean_velocity,
                                          sum_of_squares_field=sum_of_squares_field)
     generate_sweep(ctx, "TurbulentChannel_Welford", welford_update, target=target)
@@ -175,28 +200,64 @@ with CodeGeneration() as ctx:
 
     noslip = NoSlip()
     freeslip_top = FreeSlip(stencil, normal_direction=normal_direction_top)
-    wfb_top = WallFunctionBounce(lbm_method, pdfs, normal_direction=normal_direction_top,
-                                 wall_function_model=SpaldingsLaw(viscosity=nu,
-                                                                  kappa=0.41, b=5.5, newton_steps=5),
-                                 mean_velocity=mean_velocity, data_type=data_type,
-                                 target_friction_velocity=u_tau_target)
-    wfb_bottom = WallFunctionBounce(lbm_method, pdfs, normal_direction=normal_direction_bottom,
-                                    wall_function_model=SpaldingsLaw(viscosity=nu,
-                                                                     kappa=0.41, b=5.5, newton_steps=5),
-                                    mean_velocity=mean_velocity, data_type=data_type,
-                                    target_friction_velocity=u_tau_target)
 
+    wall_function_model = SpaldingsLaw(viscosity=nu, kappa=0.41, b=5.5, newton_steps=5)
+    wfb_common_params = {
+        'lb_method': lbm_method,
+        'velocity_field': velocity,
+        'wall_function_model': wall_function_model,
+        'use_maronga_correction': False,
+        'sampling_shift': 0,
+        'filter_width': sp.Symbol("filter_width"),
+        'data_type': data_type,
+        'target_friction_velocity': u_tau_target
+    }
+
+    if wfb_weights_str == 'lattice':
+        wfb_common_params['weight_method'] = WallFunctionBounce.WeightMethod.LATTICE_WEIGHT
+    elif wfb_weights_str == 'geometric':
+        wfb_common_params['weight_method'] = WallFunctionBounce.WeightMethod.GEOMETRIC_WEIGHT
+    elif wfb_weights_str == 'none':
+        pass
+    else:
+        raise ValueError("Invalid weight method")
+
+    if velocity_str == 'mean':
+        wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.MEAN_VELOCITY
+    elif velocity_str == 'filtered':
+        wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.FILTERED_VELOCITY
+    else:
+        raise ValueError("Invalid reference velocity")
+
+    wfb_top = WallFunctionBounce(**wfb_common_params, normal_direction=normal_direction_top)
+    wfb_bottom = WallFunctionBounce(**wfb_common_params, normal_direction=normal_direction_bottom)
+
+    additional_data_handler_top = WFBAdditionalDataHandler(stencil, wfb_top, velocity, target=target)
+    additional_data_handler_bottom = WFBAdditionalDataHandler(stencil, wfb_bottom, velocity, target=target)
     generate_boundary(ctx, "TurbulentChannel_NoSlip", noslip, lbm_method, target=target)
     generate_boundary(ctx, "TurbulentChannel_FreeSlip_top", freeslip_top, lbm_method, target=target)
-    generate_boundary(ctx, "TurbulentChannel_WFB_bottom", wfb_bottom, lbm_method, target=target)
-    generate_boundary(ctx, "TurbulentChannel_WFB_top", wfb_top, lbm_method, target=target)
+    generate_boundary(ctx, "TurbulentChannel_WFB_bottom", wfb_bottom, lbm_method, target=target,
+                      additional_data_handler=additional_data_handler_bottom)
+    generate_boundary(ctx, "TurbulentChannel_WFB_top", wfb_top, lbm_method, target=target,
+                      additional_data_handler=additional_data_handler_top)
+
+    config_definitions = []
+    if wfb_common_params['use_maronga_correction']:
+        config_definitions.append("#define RUN_WITH_MARONGA_CORRECTION")
+    if lbm_config.subgrid_scale_model is not None:
+        config_definitions.append("#define RUN_WITH_SGS")
+    if velocity_str == 'mean':
+        config_definitions.append("#define MEAN_VELOCITY")
+    elif velocity_str == 'filtered':
+        config_definitions.append("#define FILTERED_VELOCITY")
 
     info_header_params = {
         'layout': layout,
         'd': stencil.D,
         'q': stencil.Q,
         'flow_axis': flow_axis,
-        'wall_axis': wall_axis
+        'wall_axis': wall_axis,
+        'config_definitions': "\n".join(config_definitions)
     }
 
     ctx.write_file("CodegenIncludes.h", info_header.format(**info_header_params))

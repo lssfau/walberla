@@ -1,3 +1,7 @@
+import copy
+
+import sympy as sp
+
 from pystencils import Target
 from pystencils.stencil import inverse_direction
 from pystencils.typing import BasicType
@@ -10,7 +14,7 @@ except ImportError:
     from lbmpy.custom_code_nodes import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
 from lbmpy.boundaries import (ExtrapolationOutflow, FreeSlip, UBB, DiffusionDirichlet,
-                              NoSlipLinearBouzidi, QuadraticBounceBack)
+                              NoSlipLinearBouzidi, QuadraticBounceBack, WallFunctionBounce)
 
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
@@ -247,6 +251,104 @@ class QuadraticBounceBackAdditionalDataHandler(AdditionalDataHandler):
     @property
     def additional_member_variable(self):
         return f"std::function<{self._dtype}(const Cell &, const Cell &, {self._blocks} elementInitialiser; "
+
+
+class WFBAdditionalDataHandler(AdditionalDataHandler):
+    def __init__(self, stencil, boundary_object, velocity_field, target=Target.CPU,
+                 velocity_data_type=None):
+        assert isinstance(boundary_object, WallFunctionBounce)
+        self._stencil = stencil
+        self._use_maronga_correction = boundary_object.use_maronga_correction
+        self._reference_velocity = boundary_object.reference_velocity
+        self._normal_direction = boundary_object.normal_direction
+        self._sampling_offset = [boundary_object.sampling_shift * n for n in boundary_object.normal_direction]
+        self._tangential_axis = boundary_object.tangential_axis
+        self._field_name = velocity_field.name
+        self._target = target
+        self._dtype = BasicType(boundary_object.data_type).c_name
+        if velocity_data_type is None:
+            self._velocity_data_type = "real_t"
+        else:
+            velocity_data_type = BasicType(velocity_data_type)
+            self._velocity_data_type = velocity_data_type.c_name
+
+        super(WFBAdditionalDataHandler, self).__init__(stencil=stencil)
+
+        assert sum([a != 0 for a in self._normal_direction]) == 1, \
+            "The WFB boundary is only implemented for straight walls at the moment."
+
+    @property
+    def constructor_argument_name(self):
+        return f"{self._field_name}CPUID_" if self._target == Target.GPU else ""
+
+    @property
+    def constructor_arguments(self):
+        return f", BlockDataID {self._field_name}CPUID_" if self._target == Target.GPU else ""
+
+    @property
+    def initialiser_list(self):
+        return f"{self._field_name}CPUID({self._field_name}CPUID_)," if self._target == Target.GPU else ""
+
+    @property
+    def additional_field_data(self):
+        identifier = "CPU" if self._target == Target.GPU else ""
+        return f"auto {self._field_name} = block->getData< field::GhostLayerField<{self._velocity_data_type}, " \
+               f"{self._stencil.D}> >({self._field_name}{identifier}ID); "
+
+    def data_initialisation(self, direction_index):
+
+        init_list = []
+        for key, value in self.get_init_dict().items():
+            init_list.append(f"element.{key} = {self._dtype}( {self._field_name}->get({value}) );")
+
+        if self._reference_velocity == WallFunctionBounce.ReferenceVelocity.MEAN_VELOCITY:
+            init_list.append(f"element.wfb_welford_counter = {BasicType('uint32').c_name}( 1 );")
+
+        return "\n".join(init_list)
+
+    @property
+    def additional_member_variable(self):
+        return f"BlockDataID {self._field_name}CPUID;"
+
+    @property
+    def stencil_info(self):
+        stencil_info = []
+        for i, d in enumerate(self._stencil):
+            if any([a != 0 and b != 0 and a == b for a, b in zip(self._normal_direction, d)]):
+                direction = d if self._dim == 3 else d + (0,)
+                stencil_info.append((i, direction, ", ".join([str(e) for e in direction])))
+        return stencil_info
+
+    def get_init_dict(self):
+        """Initialise reference velocity with instantaneous velocity. Return a dict with the reference velocity
+        symbol and the field access for the instantaneous velocity."""
+        position = ["it.x()", "it.y()", "it.z()"]
+
+        result = {}
+        for idx in self._tangential_axis:
+            pos = []
+            for p, o in zip(position, self._sampling_offset):
+                # necessary if offset is a sympy expression and not a number or a sympy symbol
+                # ('-shift' already counts as an expression)
+                off = copy.deepcopy(o)
+                if not isinstance(off, int):
+                    for arg in off.args:
+                        if isinstance(arg, sp.Symbol) and not arg.name[-1] == '_':
+                            arg.name = arg.name + "_"
+                    offset = str(off) + '_' if isinstance(off, sp.Symbol) else str(off)
+                else:
+                    offset = off
+                pos.append(p + f" + cell_idx_c({offset})")
+            pos.append(str(idx))
+            result[f'ref_vel_{idx}'] = ', '.join(pos)
+
+        if self._use_maronga_correction:
+            for idx in self._tangential_axis:
+                pos = copy.deepcopy(position)
+                pos.append(str(idx))
+                result[f'ref_vel_{idx}_first_cell'] = ', '.join(pos)
+
+        return result
 
 
 class OutflowAdditionalDataHandler(AdditionalDataHandler):

@@ -201,15 +201,16 @@ namespace walberla {
          periodicity[wallAxis] = false;
 
          boundaryCondition = config.getParameter<std::string>("wall_boundary_condition", "WFB");
+         velocityFilterWidth = targetFrictionVelocity / real_t(channelHalfWidth);
+         WALBERLA_LOG_INFO_ON_ROOT("velocity filter width = " << velocityFilterWidth)
+         samplingShift = config.getParameter<uint_t>("sampling_shift", 0);
 
          /// OUTPUT
 
          auto tsPerPeriod = uint_c((real_c(channelHalfWidth) / targetFrictionVelocity));
 
          vtkFrequency = config.getParameter<uint_t>("vtk_frequency", 0);
-         vtkStart = config.getParameter<uint_t>("vtk_start", 0);
          plotFrequency = config.getParameter<uint_t>("plot_frequency", 0);
-         plotStart = config.getParameter<uint_t>("plot_start", 0);
 
          // vtk start
          vtkStart = config.getParameter<uint_t>("vtk_start_timesteps", 0);
@@ -266,7 +267,7 @@ namespace walberla {
                             "Sampling start must be given in timesteps OR periods, not both.")
          }
 
-         if(samplingStartPeriods != 0) {
+         if(samplingIntervalPeriods != 0) {
             // turnover period defined by T = delta / u_tau
             samplingInterval = samplingIntervalPeriods * tsPerPeriod;
          }
@@ -291,6 +292,8 @@ namespace walberla {
       uint_t timesteps{};
 
       std::string boundaryCondition{};
+      real_t velocityFilterWidth{};
+      uint_t samplingShift{};
 
       uint_t wallAxis{};
       uint_t flowAxis{};
@@ -456,7 +459,7 @@ namespace walberla {
                filesystem::create_directories(path);
             } else {
                for (const auto& entry : filesystem::directory_iterator(path))
-                  std::filesystem::remove_all(entry.path());
+                  filesystem::remove_all(entry.path());
             }
          }
 
@@ -523,8 +526,10 @@ namespace walberla {
             const auto * const meanVelocity = block->template getData<VectorField_T>(meanVelocityFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(meanVelocity)
 
+#if defined RUN_WITH_SGS
             const auto * const tkeSGS = block->template getData<ScalarField_T>(meanTkeSGSFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(tkeSGS)
+#endif
 
             const auto * const sos = block->template getData<TensorField_T>(sosFieldId_);
             WALBERLA_CHECK_NOT_NULLPTR(sos)
@@ -539,7 +544,9 @@ namespace walberla {
                if(velocity->xyzSize().contains(localCell)){
                   instantaneousVelocityVector[idx] = velocity->get(localCell, flowAxis);
                   meanVelocityVector[idx] = meanVelocity->get(localCell, flowAxis);
+#if defined RUN_WITH_SGS
                   tkeSGSVector[idx] = tkeSGS->get(localCell);
+#endif
                   for(uint_t i = 0; i < TensorField_T::F_SIZE; ++i) {
                      reynoldsStressVector[idx*TensorField_T::F_SIZE+i] = sos->get(localCell,i) / velocityWelford_->getCounter();
                   }
@@ -642,6 +649,7 @@ namespace walberla {
       Environment walberlaEnv(argc, argv);
 
       if (!walberlaEnv.config()) { WALBERLA_ABORT("No configuration file specified!") }
+      logging::Logging::instance()->setLogLevel(logging::Logging::INFO);
 
       ///////////////////////////////////////////////////////
       /// Block Storage Creation and Simulation Parameter ///
@@ -715,10 +723,14 @@ namespace walberla {
       const BlockDataID meanVelocityFieldId = field::addToStorage< VectorField_T >(blocks, "mean velocity", real_c(0.0), codegen::layout);
       const BlockDataID sosFieldId = field::addToStorage< TensorField_T >(blocks, "sum of squares", real_c(0.0), codegen::layout);
 
+#if defined RUN_WITH_SGS
       const BlockDataID tkeSgsFieldId = field::addToStorage< ScalarField_T >(blocks, "tke_SGS", real_c(0.0), codegen::layout);
       const BlockDataID meanTkeSgsFieldId = field::addToStorage< ScalarField_T >(blocks, "mean_tke_SGS", real_c(0.0), codegen::layout);
-
       const BlockDataID omegaFieldId = field::addToStorage< ScalarField_T >(blocks, "omega_out", real_c(0.0), codegen::layout);
+#else
+      // dummy needed for TurbulentChannelPlotter
+      const BlockDataID meanTkeSgsFieldId;
+#endif
 
       const BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -760,12 +772,15 @@ namespace walberla {
       WALBERLA_LOG_INFO_ON_ROOT("Creating sweeps...")
 
       const auto omega = lbm::collision_model::omegaFromViscosity(simulationParameters.viscosity);
+#if defined RUN_WITH_SGS
       StreamCollideSweep_T streamCollideSweep(omegaFieldId, pdfFieldId, velocityFieldId, initialForce, omega);
+      TKEWelfordSweep_T welfordTKESweep(meanTkeSgsFieldId, tkeSgsFieldId, 0_r);
+      TkeSgsWriter_T tkeSgsWriter(omegaFieldId, pdfFieldId, tkeSgsFieldId, initialForce, omega);
+#else
+      StreamCollideSweep_T streamCollideSweep(pdfFieldId, velocityFieldId, initialForce, omega);
+#endif
 
       WelfordSweep_T welfordSweep(meanVelocityFieldId, sosFieldId, velocityFieldId, 0_r);
-      TKEWelfordSweep_T welfordTKESweep(meanTkeSgsFieldId, tkeSgsFieldId, 0_r);
-
-      TkeSgsWriter_T tkeSgsWriter(omegaFieldId, pdfFieldId, tkeSgsFieldId, initialForce, omega);
 
       /////////////////////////
       /// Boundary Handling ///
@@ -778,8 +793,13 @@ namespace walberla {
       Config::Block boundaryBlock;
       boundaries::createBoundaryConfig(simulationParameters, boundaryBlock);
 
-      std::unique_ptr<WFB_bottom_T> wfb_bottom_ptr = std::make_unique<WFB_bottom_T>(blocks, meanVelocityFieldId, pdfFieldId, omega, simulationParameters.targetFrictionVelocity);
-      std::unique_ptr<WFB_top_T > wfb_top_ptr = std::make_unique<WFB_top_T>(blocks, meanVelocityFieldId, pdfFieldId, omega, simulationParameters.targetFrictionVelocity);
+#if defined FILTERED_VELOCITY
+      std::unique_ptr<WFB_bottom_T> wfb_bottom_ptr = std::make_unique<WFB_bottom_T>(blocks, pdfFieldId, velocityFieldId, simulationParameters.velocityFilterWidth, omega, simulationParameters.targetFrictionVelocity);
+      std::unique_ptr<WFB_top_T > wfb_top_ptr = std::make_unique<WFB_top_T>(blocks, pdfFieldId, velocityFieldId, simulationParameters.velocityFilterWidth, omega, simulationParameters.targetFrictionVelocity);
+#else
+      std::unique_ptr<WFB_bottom_T> wfb_bottom_ptr = std::make_unique<WFB_bottom_T>(blocks, pdfFieldId, velocityFieldId, omega, simulationParameters.targetFrictionVelocity);
+      std::unique_ptr<WFB_top_T > wfb_top_ptr = std::make_unique<WFB_top_T>(blocks, pdfFieldId, velocityFieldId, omega, simulationParameters.targetFrictionVelocity);
+#endif
 
       NoSlip_T noSlip(blocks, pdfFieldId);
       FreeSlip_top_T freeSlip_top(blocks, pdfFieldId);
@@ -838,7 +858,9 @@ namespace walberla {
 
       auto setNewForce = [&](const real_t newForce) {
          streamCollideSweep.setF_x(newForce);
+#if defined RUN_WITH_SGS
          tkeSgsWriter.setF_x(newForce);
+#endif
       };
 
       // plotting
@@ -849,10 +871,16 @@ namespace walberla {
                                                              outputSeparateFiles);
 
       //NOTE must convert sweeps that are altered to lambdas, otherwise copy and counter will stay 0
+#if defined RUN_WITH_SGS
       auto welfordLambda = [&welfordSweep, &welfordTKESweep](IBlock * block) {
          welfordSweep(block);
          welfordTKESweep(block);
       };
+#else
+      auto welfordLambda = [&welfordSweep](IBlock * block) {
+         welfordSweep(block);
+      };
+#endif
 
       auto wfbLambda = [&wfb_bottom_ptr, &wfb_top_ptr](IBlock * block) {
          wfb_bottom_ptr->operator()(block);
@@ -880,21 +908,29 @@ namespace walberla {
                            if((timeloop.getCurrentTimeStep() == simulationParameters.samplingStart) ||
                               (timeloop.getCurrentTimeStep() > simulationParameters.samplingStart && simulationParameters.samplingInterval && (velCtr % simulationParameters.samplingInterval == 0))) {
                               welfordSweep.setCounter(real_c(0.0));
+#if defined RUN_WITH_SGS
                               welfordTKESweep.setCounter(real_c(0.0));
+#endif
                                for(auto & block : *blocks) {
                                   auto * sopField = block.template getData<TensorField_T >(sosFieldId);
                                   sopField->setWithGhostLayer(0.0);
 
+#if defined RUN_WITH_SGS
                                   auto * tkeField = block.template getData<ScalarField_T>(tkeSgsFieldId);
                                   tkeField->setWithGhostLayer(0.0);
+#endif
                                }
                            }
 
                            welfordSweep.setCounter(welfordSweep.getCounter() + real_c(1.0));
+#if defined RUN_WITH_SGS
                            welfordTKESweep.setCounter(welfordTKESweep.getCounter() + real_c(1.0));
+#endif
                         }, "welford sweep")
                      << Sweep(welfordLambda, "welford sweep");
+#if defined RUN_WITH_SGS
       timeloop.add() << Sweep(tkeSgsWriter, "TKE_SGS writer");
+#endif
 
       timeloop.addFuncAfterTimeStep(vtk::writeFiles(vtkWriter), "VTK field output");
       timeloop.addFuncAfterTimeStep(plotter, "Turbulent quantity plotting");

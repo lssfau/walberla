@@ -1,36 +1,31 @@
-import copy
 import sympy as sp
 import pystencils as ps
-from sympy.core.add import Add
-from sympy.codegen.ast import Assignment
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, ForceModel
 from lbmpy.partially_saturated_cells import PSMConfig
 
 from lbmpy.boundaries import NoSlip, UBB, FixedDensity, FreeSlip
 from lbmpy.creationfunctions import (
-    create_lb_update_rule,
+    create_lb_collision_rule,
     create_lb_method,
     create_psm_update_rule,
 )
 
 from lbmpy.macroscopic_value_kernels import (
-    macroscopic_values_getter,
     macroscopic_values_setter,
+    macroscopic_values_getter,
 )
 
 from pystencils_walberla import (
     CodeGeneration,
     generate_info_header,
     generate_sweep,
-    generate_pack_info_from_kernel,
 )
 
-from pystencils_walberla.utility import get_vectorize_instruction_set
-
-from lbmpy_walberla import generate_boundary
-
-# Based on the following paper: https://doi.org/10.1016/j.compfluid.2017.05.033
+from lbmpy_walberla import (
+    generate_lbm_package,
+    lbm_boundary_generator,
+)
 
 info_header = """
 const char * infoStencil = "{stencil}";
@@ -41,211 +36,188 @@ const bool infoCsePdfs = {cse_pdfs};
 """
 
 with CodeGeneration() as ctx:
-    if ctx.optimize_for_localhost:
-        isa = get_vectorize_instruction_set(ctx)
-        if isa in ("neon", "sve", "sve2", "sme"):
-            ctx.optimize_for_localhost = False
-
+    # =====================
+    # Parameters
+    # =====================
+    if ctx.gpu:
+        target = ps.Target.GPU
+    else:
+        target = ps.Target.CPU
     data_type = "float64" if ctx.double_accuracy else "float32"
     stencil = LBStencil(Stencil.D3Q27)
+    assert stencil.D == 3
     omega = sp.Symbol("omega")
     init_density = sp.Symbol("init_density")
     init_velocity = sp.symbols("init_velocity_:3")
     pdfs_inter = sp.symbols("pdfs_inter:" + str(stencil.Q))
     layout = "fzyx"
     config_tokens = ctx.config.split("_")
-    MaxParticlesPerCell = int(config_tokens[2])
     methods = {
         "srt": Method.SRT,
         "trt": Method.TRT,
         "mrt": Method.MRT,
-        "cumulant": Method.MONOMIAL_CUMULANT,
+        "cumulant": Method.CUMULANT,
         "srt-smagorinsky": Method.SRT,
         "trt-smagorinsky": Method.TRT,
     }
     # Solid collision variant
     SC = int(config_tokens[1][2])
+    # Force model
+    kwargs = {}
+    if len(config_tokens) == 3:
+        MaxParticlesPerCell = int(config_tokens[2])
+    elif len(config_tokens) == 4 and config_tokens[2] == "force":
+        kwargs["force"] = sp.symbols("F_:3")
+        kwargs["force_model"] = ForceModel.LUO
+        MaxParticlesPerCell = int(config_tokens[3])
+    else:
+        raise ValueError("Wrong configuration!")
 
+    # =====================
+    # Fields
+    # =====================
     pdfs, pdfs_tmp, velocity_field, density_field = ps.fields(
         f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}), velocity_field({stencil.D}), density_field({1}): {data_type}[3D]",
         layout=layout,
     )
-
     particle_velocities, particle_forces, Bs = ps.fields(
         f"particle_v({MaxParticlesPerCell * stencil.D}), particle_f({MaxParticlesPerCell * stencil.D}), Bs({MaxParticlesPerCell}): {data_type}[3D]",
         layout=layout,
     )
-
     # Solid fraction field
     B = ps.fields(f"b({1}): {data_type}[3D]", layout=layout)
 
-    psm_opt = LBMOptimisation(
-        cse_global=True,
-        symbolic_field=pdfs,
-        symbolic_temporary_field=pdfs_tmp,
-        field_layout=layout,
-    )
-
+    # =====================
+    # Lbmpy settings
+    # =====================
     psm_config = PSMConfig(
         fraction_field=B,
         object_velocity_field=particle_velocities,
-        SC=SC,
-        MaxParticlesPerCell=MaxParticlesPerCell,
+        solid_collision=SC,
+        max_particles_per_cell=MaxParticlesPerCell,
         individual_fraction_field=Bs,
-        particle_force_field=particle_forces,
+        object_force_field=particle_forces,
     )
 
     lbm_config = LBMConfig(
         stencil=stencil,
         method=methods[config_tokens[0]],
         relaxation_rate=omega,
-        force=sp.symbols("F_:3"),
-        force_model=ForceModel.LUO,
         compressible=True,
+        psm_config=psm_config,
+        **kwargs,
+    )
+
+    lbm_opt = LBMOptimisation(
+        symbolic_field=pdfs,
+        symbolic_temporary_field=pdfs_tmp,
+        field_layout=layout,
+        cse_global=True,
+    )
+    if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
+        lbm_config.smagorinsky = 0.1
+
+    # =====================
+    # Generate PSM update sweep
+    # =====================
+    method = create_lb_method(lbm_config=lbm_config)
+    node_collection = create_psm_update_rule(lbm_config, lbm_opt)
+    setter_assignments = macroscopic_values_setter(
+        method, init_density, init_velocity, pdfs.center_vector, psm_config=psm_config
+    )
+
+    getter_assignments = macroscopic_values_getter(
+        method,
+        density=density_field,
+        velocity=velocity_field.center_vector,
+        pdfs=pdfs.center_vector,
         psm_config=psm_config,
     )
 
-    if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
-        lbm_config.smagorinsky = True
+    # Getter & setter to compute moments from pdfs
+    generate_sweep(ctx, "PSM_MacroGetter", getter_assignments, target=target)
+    generate_sweep(ctx, "PSM_MacroSetter", setter_assignments, target=target)
 
-    # =====================
-    # Generate method
-    # =====================
-
-    method = create_lb_method(lbm_config=lbm_config)
-
-    node_collection = create_psm_update_rule(lbm_config, psm_opt)
-
-    pdfs_setter = macroscopic_values_setter(
-        method, init_density, init_velocity, pdfs.center_vector
-    )
-
-    # Use average velocity of all intersecting particles when setting PDFs (mandatory for SC=3)
-    for i, sub_exp in enumerate(pdfs_setter.subexpressions[-3:]):
-        rhs = []
-        for summand in sub_exp.rhs.args:
-            rhs.append(summand * (1.0 - B.center))
-        for p in range(MaxParticlesPerCell):
-            rhs.append(particle_velocities(p * stencil.D + i) * Bs.center(p))
-        pdfs_setter.subexpressions.remove(sub_exp)
-        pdfs_setter.subexpressions.append(Assignment(sub_exp.lhs, Add(*rhs)))
-
-    # =====================
-    # Write method to files
-    # =====================
-
-    if ctx.gpu:
-        target = ps.Target.GPU
-    else:
-        target = ps.Target.CPU
-
-    # Generate files
     generate_sweep(
         ctx,
         "PSMSweep",
         node_collection,
         field_swaps=[(pdfs, pdfs_tmp)],
         target=target,
-    )
-
-    generate_sweep(
-        ctx,
-        "PSMSweepSplit",
-        node_collection,
-        field_swaps=[(pdfs, pdfs_tmp)],
-        target=target,
         inner_outer_split=True,
     )
 
-    config_without_psm = LBMConfig(
+    # =====================
+    # Generate LBM package
+    # =====================
+    # Reinitialize the LBM config without PSM
+    lbm_config = LBMConfig(
         stencil=stencil,
         method=methods[config_tokens[0]],
         relaxation_rate=omega,
-        force=sp.symbols("F_:3"),
-        force_model=ForceModel.LUO,
         compressible=True,
+        **kwargs,
     )
-
     if config_tokens[0] == "srt-smagorinsky" or config_tokens[0] == "trt-smagorinsky":
-        config_without_psm.smagorinsky = True
+        lbm_config.smagorinsky = 0.1
 
-    generate_sweep(
-        ctx,
-        "LBMSweep",
-        create_lb_update_rule(lbm_config=config_without_psm, lbm_optimisation=psm_opt),
-        field_swaps=[(pdfs, pdfs_tmp)],
-        target=target,
-    )
-
-    generate_sweep(
-        ctx,
-        "LBMSplitSweep",
-        create_lb_update_rule(lbm_config=config_without_psm, lbm_optimisation=psm_opt),
-        field_swaps=[(pdfs, pdfs_tmp)],
-        target=target,
-        inner_outer_split=True,
-    )
-
-    generate_pack_info_from_kernel(
-        ctx,
-        "PSMPackInfo",
-        create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=psm_opt),
-        target=target,
-    )
-
-    generate_sweep(ctx, "InitializeDomainForPSM", pdfs_setter, target=target)
-
-    # Boundary conditions
-    generate_boundary(
-        ctx,
-        "PSM_NoSlip",
-        NoSlip(),
+    # Used for setting PDFs according to the velocity field
+    method = create_lb_method(lbm_config=lbm_config)
+    setter_assignments_vel_field = macroscopic_values_setter(
         method,
-        field_name=pdfs.name,
-        streaming_pattern="pull",
-        target=target,
+        density=1.0,
+        velocity=velocity_field.center_vector,
+        pdfs=pdfs.center_vector,
     )
 
+    no_slip = lbm_boundary_generator(
+        class_name="LBM_NoSlip", flag_uid="NoSlip", boundary_object=NoSlip()
+    )
+    free_slip = lbm_boundary_generator(
+        class_name="LBM_FreeSlip",
+        flag_uid="FreeSlip",
+        boundary_object=FreeSlip(stencil=stencil),
+    )
     bc_velocity = sp.symbols("bc_velocity_:3")
-    generate_boundary(
-        ctx,
-        "PSM_UBB",
-        UBB(bc_velocity),
-        method,
-        field_name=pdfs.name,
-        streaming_pattern="pull",
-        target=target,
+    ubb = lbm_boundary_generator(
+        class_name="LBM_UBB",
+        flag_uid="UBB",
+        boundary_object=UBB(bc_velocity, data_type=data_type),
     )
-
     bc_density = sp.Symbol("bc_density")
-    generate_boundary(
-        ctx,
-        "PSM_Density",
-        FixedDensity(bc_density),
-        method,
-        field_name=pdfs.name,
-        streaming_pattern="pull",
-        target=target,
+    bc_density_2 = sp.Symbol("bc_density_2")
+    fixed_density = lbm_boundary_generator(
+        class_name="LBM_FixedDensity",
+        flag_uid="FixedDensity",
+        boundary_object=FixedDensity(bc_density),
+    )
+    fixed_density_2 = lbm_boundary_generator(
+        class_name="LBM_FixedDensity_2",
+        flag_uid="FixedDensity2",
+        boundary_object=FixedDensity(bc_density_2),
     )
 
-    generate_boundary(
+    macroscopic_fields = {"density": density_field, "velocity": velocity_field}
+
+    generate_lbm_package(
         ctx,
-        "PSM_FreeSlip",
-        FreeSlip(stencil),
-        method,
-        field_name=pdfs.name,
-        streaming_pattern="pull",
+        name="LBM",
+        collision_rule=create_lb_collision_rule(
+            lbm_config=lbm_config, lbm_optimisation=lbm_opt
+        ),
+        lbm_config=lbm_config,
+        lbm_optimisation=lbm_opt,
+        boundaries=[
+            no_slip,
+            free_slip,
+            ubb,
+            fixed_density,
+            fixed_density_2,
+        ],
+        macroscopic_fields=macroscopic_fields,
         target=target,
     )
-
-    # Info header containing correct template definitions for stencil and fields
-    infoHeaderParams = {
-        "stencil": stencil.name,
-        "streaming_pattern": lbm_config.streaming_pattern,
-        "collision_setup": config_tokens[0],
-        "cse_global": int(psm_opt.cse_global),
-        "cse_pdfs": int(psm_opt.cse_pdfs),
-    }
+    generate_sweep(ctx, "LBM_MacroSetter", setter_assignments_vel_field, target=target)
 
     stencil_typedefs = {"Stencil_T": stencil, "CommunicationStencil_T": stencil}
     field_typedefs = {
@@ -254,26 +226,18 @@ with CodeGeneration() as ctx:
         "VelocityField_T": velocity_field,
     }
 
+    infoHeaderParams = {
+        "stencil": stencil.name,
+        "streaming_pattern": lbm_config.streaming_pattern,
+        "collision_setup": config_tokens[0],
+        "cse_global": int(lbm_opt.cse_global),
+        "cse_pdfs": int(lbm_opt.cse_pdfs),
+    }
+
     generate_info_header(
         ctx,
-        "PSM_InfoHeader",
+        "LBM_InfoHeader",
         stencil_typedefs=stencil_typedefs,
         field_typedefs=field_typedefs,
         additional_code=info_header.format(**infoHeaderParams),
     )
-
-    # Getter & setter to compute moments from pdfs
-    setter_assignments = macroscopic_values_setter(
-        method,
-        velocity=velocity_field.center_vector,
-        pdfs=pdfs.center_vector,
-        density=1.0,
-    )
-    getter_assignments = macroscopic_values_getter(
-        method,
-        density=density_field,
-        velocity=velocity_field.center_vector,
-        pdfs=pdfs.center_vector,
-    )
-    generate_sweep(ctx, "PSM_MacroSetter", setter_assignments)
-    generate_sweep(ctx, "PSM_MacroGetter", getter_assignments)

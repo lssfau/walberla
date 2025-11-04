@@ -32,14 +32,19 @@
 #include "core/mpi/Reduce.h"
 #include "core/timing/RemainingTimeLogger.h"
 
-#include "field/AddToStorage.h"
-
 #include "gpu/AddGPUFieldToStorage.h"
-#include "gpu/DeviceSelectMPI.h"
 #include "gpu/communication/UniformGPUScheme.h"
+
+#include "lbm_generated/communication/UniformGeneratedPdfPackInfo.h"
+#include "lbm_generated/field/AddToStorage.h"
+#include "lbm_generated/field/PdfField.h"
+#include "lbm_generated/gpu/AddToStorage.h"
+#include "lbm_generated/gpu/GPUPdfField.h"
+#include "lbm_generated/gpu/UniformGeneratedGPUPdfPackInfo.h"
 
 #include "lbm_mesapd_coupling/DataTypesCodegen.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
+#include "lbm_mesapd_coupling/utility/ParticleSelector.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 
 #include "mesa_pd/data/ParticleAccessorWithShape.h"
@@ -50,10 +55,8 @@
 
 #include <iostream>
 // codegen
-#include "InitializeDomainForPSM.h"
-#include "PSMPackInfo.h"
+#include "LBM_InfoHeader.h"
 #include "PSMSweep.h"
-#include "PSM_InfoHeader.h"
 
 namespace torque_sphere_psm
 {
@@ -66,16 +69,9 @@ using namespace walberla;
 using walberla::uint_t;
 using namespace lbm_mesapd_coupling::psm::gpu;
 
-using flag_t      = walberla::uint8_t;
-using FlagField_T = FlagField< flag_t >;
-
-using PackInfo_T = pystencils::PSMPackInfo;
-
-///////////
-// FLAGS //
-///////////
-
-const FlagUID Fluid_Flag("fluid");
+using StorageSpecification_T = lbm::LBMStorageSpecification;
+using PdfField_T             = lbm_generated::PdfField< StorageSpecification_T >;
+using GPUPdfField_T          = lbm_generated::GPUPdfField< StorageSpecification_T >;
 
 ////////////////
 // PARAMETERS //
@@ -228,8 +224,6 @@ int main(int argc, char** argv)
 
    mpi::Environment env(argc, argv);
 
-   logging::Logging::instance()->setLogLevel(logging::Logging::INFO);
-
    auto processes = MPIManager::instance()->numProcesses();
 
    if (processes != 1 && processes != 2 && processes != 4 && processes != 8)
@@ -353,13 +347,13 @@ int main(int argc, char** argv)
    ////////////////////////
 
    // add fields ( uInit = <0,0,0>, rhoInit = 1 )
+   const StorageSpecification_T StorageSpec = StorageSpecification_T();
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   BlockDataID pdfFieldID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field (fzyx)", real_c(std::nan("")), field::fzyx);
-   BlockDataID pdfFieldCPUGPUID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "pdf field GPU", true);
-#else
+   BlockDataID pdfFieldID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, uint_t(1));
    BlockDataID pdfFieldCPUGPUID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field CPU", real_c(std::nan("")), field::fzyx);
+      lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
+#else
+   BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field CPU", StorageSpec, uint_t(1));
 #endif
 
    // add particle and volume fraction data structures
@@ -372,10 +366,9 @@ int main(int argc, char** argv)
       psmSweepCollection.particleMappingSweep(&(*blockIt));
    }
 
-   pystencils::InitializeDomainForPSM pdfSetter(
-      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
-      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0), real_t(0), real_t(0),
-      real_t(1.0), real_t(0), real_t(0), real_t(0));
+   pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+                                         particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
+                                         real_t(1.0), real_t(0), real_t(0), real_t(0));
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -393,37 +386,28 @@ int main(int argc, char** argv)
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, false, false);
+   gpu::communication::UniformGPUScheme< Stencil_T > communication(blocks, false, false);
+   communication.addPackInfo(
+      make_shared< lbm_generated::UniformGeneratedGPUPdfPackInfo< GPUPdfField_T > >(pdfFieldCPUGPUID));
 #else
-   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
+   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
+   communication.addPackInfo(
+      std::make_shared< lbm_generated::UniformGeneratedPdfPackInfo< PdfField_T > >(pdfFieldCPUGPUID));
 #endif
-   com.addPackInfo(make_shared< PackInfo_T >(pdfFieldCPUGPUID));
-   auto communication = std::function< void() >([&]() { com.communicate(); });
 
    using TorqueEval_T                    = TorqueEval< ParticleAccessor_T >;
    shared_ptr< TorqueEval_T > torqueEval = make_shared< TorqueEval_T >(&timeloop, &setup, blocks, accessor, fileIO);
 
    pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                  particleAndVolumeFractionSoA.particleForcesFieldID,
-                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0.0),
-                                 real_t(0.0), real_t(0.0), omega);
+                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, omega);
 
    // communication, streaming and force evaluation
-   timeloop.add() << BeforeFunction(communication, "LBM Communication")
+   timeloop.add() << BeforeFunction(communication.getCommunicateFunctor(), "LBM Communication")
                   << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
                            "setParticleVelocitiesSweep");
-   timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep), "cell-wise LB sweep");
-   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep), "Reduce particle forces");
-#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   timeloop.add() << Sweep(gpu::fieldCpyFunctor< PdfField_T, gpu::GPUField< real_t > >(pdfFieldID, pdfFieldCPUGPUID),
-                           "copy pdf from GPU to CPU")
-#else
-   struct emptySweep
-   {
-      void operator()(IBlock*) {}
-   };
-   timeloop.add() << Sweep(emptySweep(), "emptySweep")
-#endif
+   timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep.getSweep()), "cell-wise LB sweep");
+   timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep), "Reduce particle forces")
                   << AfterFunction(SharedFunctor< TorqueEval_T >(torqueEval), "torque evaluation");
 
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;

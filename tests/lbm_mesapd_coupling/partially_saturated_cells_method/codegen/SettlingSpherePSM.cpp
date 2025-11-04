@@ -30,17 +30,19 @@
 #include "core/math/all.h"
 #include "core/timing/RemainingTimeLogger.h"
 
-#include "field/AddToStorage.h"
-#include "field/vtk/all.h"
-
 #include "geometry/InitBoundaryHandling.h"
 
 #include "gpu/AddGPUFieldToStorage.h"
-#include "gpu/DeviceSelectMPI.h"
 #include "gpu/communication/UniformGPUScheme.h"
 
-#include "lbm/field/AddToStorage.h"
 #include "lbm/vtk/all.h"
+
+#include "lbm_generated/communication/UniformGeneratedPdfPackInfo.h"
+#include "lbm_generated/field/AddToStorage.h"
+#include "lbm_generated/field/PdfField.h"
+#include "lbm_generated/gpu/AddToStorage.h"
+#include "lbm_generated/gpu/GPUPdfField.h"
+#include "lbm_generated/gpu/UniformGeneratedGPUPdfPackInfo.h"
 
 #include "lbm_mesapd_coupling/DataTypesCodegen.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
@@ -76,12 +78,8 @@
 
 #include <functional>
 
-#include "InitializeDomainForPSM.h"
-#include "PSMPackInfo.h"
+#include "LBM_InfoHeader.h"
 #include "PSMSweep.h"
-#include "PSM_InfoHeader.h"
-#include "PSM_MacroGetter.h"
-#include "PSM_NoSlip.h"
 
 namespace settling_sphere
 {
@@ -91,20 +89,21 @@ namespace settling_sphere
 ///////////
 
 using namespace walberla;
-using walberla::uint_t;
 using namespace lbm_mesapd_coupling::psm::gpu;
 
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
-using PackInfo_T = pystencils::PSMPackInfo;
+using StorageSpecification_T = lbm::LBMStorageSpecification;
+using PdfField_T             = lbm_generated::PdfField< StorageSpecification_T >;
+using GPUPdfField_T          = lbm_generated::GPUPdfField< StorageSpecification_T >;
+using BoundaryCollection_T   = lbm::LBMBoundaryCollection< FlagField_T >;
 
 ///////////
 // FLAGS //
 ///////////
 
 const FlagUID Fluid_Flag("Fluid");
-const FlagUID NoSlip_Flag("NoSlip");
 
 //*******************************************************************************************************************
 /*!\brief Evaluating the position and velocity of the sphere
@@ -283,8 +282,6 @@ int main(int argc, char** argv)
    debug::enterTestMode();
 
    mpi::Environment env(argc, argv);
-
-   logging::Logging::instance()->setLogLevel(logging::Logging::INFO);
 
    ///////////////////
    // Customization //
@@ -541,19 +538,21 @@ int main(int argc, char** argv)
    ////////////////////////
 
    // add PDF field
+   const StorageSpecification_T StorageSpec = StorageSpecification_T();
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   BlockDataID pdfFieldID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field (fzyx)", real_c(std::nan("")), field::fzyx);
-   BlockDataID BFieldID         = field::addToStorage< BField_T >(blocks, "B field CPU", 0, field::fzyx, 1);
-   BlockDataID BsFieldID        = field::addToStorage< BsField_T >(blocks, "Bs field CPU", 0, field::fzyx, 1);
-   BlockDataID pdfFieldCPUGPUID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "pdf field GPU");
-#else
+   BlockDataID pdfFieldID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, uint_t(1));
    BlockDataID pdfFieldCPUGPUID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field CPU", real_c(std::nan("")), field::fzyx);
+      lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
+   BlockDataID densityFieldGPUID =
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t(1));
+   BlockDataID velFieldGPUID =
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t(3));
+#else
+   BlockDataID densityFieldID   = field::addToStorage< DensityField_T >(blocks, "Density", real_t(0), field::fzyx);
+   BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field CPU", StorageSpec, uint_t(1));
 #endif
 
-   BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "Density", real_t(0), field::fzyx);
-   BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t(0), field::fzyx);
+   BlockDataID velFieldID = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t(0), field::fzyx);
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -583,7 +582,6 @@ int main(int argc, char** argv)
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
    lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(
       viscosity, [](real_t r) { return real_t(0.0016) * r; });
-   lbm::PSM_NoSlip noSlip(blocks, pdfFieldCPUGPUID);
 
    ///////////////
    // TIME LOOP //
@@ -613,7 +611,8 @@ int main(int argc, char** argv)
    auto boundariesConfig = boundariesCfgFile.getBlock("Boundaries");
    geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, Fluid_Flag);
-   noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, NoSlip_Flag, Fluid_Flag);
+   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, real_t(0), real_t(0),
+                                           real_t(0), real_t(1), real_t(1));
 
    // add particle and volume fraction data structures
    ParticleAndVolumeFractionSoA_T< 1 > particleAndVolumeFractionSoA(
@@ -625,10 +624,9 @@ int main(int argc, char** argv)
       psmSweepCollection.particleMappingSweep(&(*blockIt));
    }
 
-   pystencils::InitializeDomainForPSM pdfSetter(
-      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
-      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0), real_t(0), real_t(0),
-      real_t(1.0), real_t(0), real_t(0), real_t(0));
+   pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+                                         particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
+                                         real_t(1.0), real_t(0), real_t(0), real_t(0));
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -639,30 +637,33 @@ int main(int argc, char** argv)
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, false, false);
+   gpu::communication::UniformGPUScheme< Stencil_T > communication(blocks, false, false);
+   communication.addPackInfo(
+      make_shared< lbm_generated::UniformGeneratedGPUPdfPackInfo< GPUPdfField_T > >(pdfFieldCPUGPUID));
 #else
-   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
+   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
+   communication.addPackInfo(
+      std::make_shared< lbm_generated::UniformGeneratedPdfPackInfo< PdfField_T > >(pdfFieldCPUGPUID));
 #endif
-
-   com.addPackInfo(make_shared< PackInfo_T >(pdfFieldCPUGPUID));
-   auto communication = std::function< void() >([&]() { com.communicate(); });
 
    // create the timeloop
    SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
    pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                  particleAndVolumeFractionSoA.particleForcesFieldID,
-                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0.0),
-                                 real_t(0.0), real_t(0.0), lbm::collision_model::omegaFromViscosity(viscosity));
+                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
+                                 lbm::collision_model::omegaFromViscosity(viscosity));
 
    timeloop.addFuncBeforeTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils::PSM_MacroGetter getterSweep(BFieldID, densityFieldID, pdfFieldID, velFieldID, real_t(0.0), real_t(0.0),
-                                           real_t(0.0));
+   pystencils::PSM_MacroGetter getterSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityFieldGPUID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldGPUID);
 #else
-   pystencils::PSM_MacroGetter getterSweep(particleAndVolumeFractionSoA.BFieldID, densityFieldID, pdfFieldCPUGPUID,
-                                           velFieldID, real_t(0.0), real_t(0.0), real_t(0.0));
+   pystencils::PSM_MacroGetter getterSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityFieldID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldID);
 #endif
    // vtk output
    if (vtkIOFreq != uint_t(0))
@@ -686,16 +687,14 @@ int main(int argc, char** argv)
       // pdf field
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field", vtkIOFreq, 0, false, baseFolder);
 
-      pdfFieldVTK->addBeforeFunction(communication);
+      pdfFieldVTK->addBeforeFunction(communication.getCommunicateFunctor());
 
       pdfFieldVTK->addBeforeFunction([&]() {
-#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-         gpu::fieldCpy< PdfField_T, gpu::GPUField< real_t > >(blocks, pdfFieldID, pdfFieldCPUGPUID);
-         gpu::fieldCpy< BField_T, BFieldGPU_T >(blocks, BFieldID, particleAndVolumeFractionSoA.BFieldID);
-         gpu::fieldCpy< BsField_T, BsFieldGPU_T >(blocks, BsFieldID, particleAndVolumeFractionSoA.BsFieldID);
-#endif
          for (auto& block : *blocks)
             getterSweep(&block);
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+         gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldID, velFieldGPUID);
+#endif
       });
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
@@ -703,25 +702,14 @@ int main(int argc, char** argv)
       pdfFieldVTK->addCellInclusionFilter(fluidFilter);
 
       pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_T > >(velFieldID, "Velocity"));
-      pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< DensityField_T > >(densityFieldID, "Density"));
-#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-      pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< BField_T > >(BFieldID, "Fraction mapping field B"));
-      pdfFieldVTK->addCellDataWriter(
-         make_shared< field::VTKWriter< BsField_T > >(BsFieldID, "Fraction mapping field Bs"));
-#else
-      pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< BField_T > >(particleAndVolumeFractionSoA.BFieldID,
-                                                                                 "Fraction mapping field B"));
-      pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< BsField_T > >(
-         particleAndVolumeFractionSoA.BsFieldID, "Fraction mapping field Bs"));
-#endif
 
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
    }
 
    // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip
    // treatment)
-   timeloop.add() << BeforeFunction(communication, "LBM Communication")
-                  << Sweep(noSlip.getSweep(), "Boundary Handling");
+   timeloop.add() << BeforeFunction(communication.getCommunicateFunctor(), "LBM Communication")
+                  << Sweep(boundaryCollection.getSweep(), "Boundary Handling");
 
    // stream + collide LBM step
    addPSMSweepsToTimeloop(timeloop, psmSweepCollection, PSMSweep);
