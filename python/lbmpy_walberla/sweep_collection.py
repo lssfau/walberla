@@ -85,14 +85,14 @@ def generate_lbm_sweep_collection(ctx, class_name: str, collision_rule: LbmColli
 
     config_unoptimized = replace(config, cpu_vectorize_info=None, cpu_prepend_optimizations=[], cpu_blocking=None)
 
-    setter_family = get_setter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields,
-                                      config_unoptimized, set_pre_collision_pdfs)
+    setter_family = get_setter_family(class_name, lb_method, src_field, lbm_config.psm_config, streaming_pattern,
+                                      macroscopic_fields, config_unoptimized, set_pre_collision_pdfs)
     setter_generator = kernel_family_function_generator('initialise', setter_family,
                                                         namespace='lbm', max_threads=max_threads)
     function_generators.append(setter_generator)
 
-    getter_family = get_getter_family(class_name, lb_method, src_field, streaming_pattern, macroscopic_fields,
-                                      config_unoptimized)
+    getter_family = get_getter_family(class_name, lb_method, src_field, lbm_config.psm_config, streaming_pattern,
+                                      macroscopic_fields, config_unoptimized)
     getter_generator = kernel_family_function_generator('calculateMacroscopicParameters', getter_family,
                                                         namespace='lbm', max_threads=max_threads)
     function_generators.append(getter_generator)
@@ -241,7 +241,7 @@ def lbm_kernel_family(class_name, kernel_name,
     return family
 
 
-def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopic_fields,
+def get_setter_family(class_name, lb_method, pdfs, psm_config, streaming_pattern, macroscopic_fields,
                       config: CreateKernelConfig, set_pre_collision_pdfs: bool):
     dim = lb_method.stencil.D
     density = macroscopic_fields.get('density', 1.0)
@@ -259,6 +259,7 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
             timestep_suffix = str(timestep)
             setter = macroscopic_values_setter(lb_method,
                                                density=density, velocity=velocity, pdfs=pdfs,
+                                               psm_config=psm_config,
                                                streaming_pattern=streaming_pattern, previous_timestep=timestep,
                                                set_pre_collision_pdfs=set_pre_collision_pdfs)
 
@@ -274,6 +275,7 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
         timestep = Timestep.BOTH
         setter = macroscopic_values_setter(lb_method,
                                            density=density, velocity=velocity, pdfs=pdfs,
+                                           psm_config=psm_config,
                                            streaming_pattern=streaming_pattern, previous_timestep=timestep,
                                            set_pre_collision_pdfs=set_pre_collision_pdfs)
 
@@ -285,7 +287,8 @@ def get_setter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
     return family
 
 
-def get_getter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopic_fields, config: CreateKernelConfig):
+def get_getter_family(class_name, lb_method, pdfs, psm_config, streaming_pattern, macroscopic_fields,
+                      config: CreateKernelConfig):
     density = macroscopic_fields.get('density', None)
     velocity = macroscopic_fields.get('velocity', None)
 
@@ -304,6 +307,7 @@ def get_getter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
             timestep_suffix = str(timestep)
             getter = macroscopic_values_getter(lb_method,
                                                density=density, velocity=velocity, pdfs=pdfs,
+                                               psm_config=psm_config,
                                                streaming_pattern=streaming_pattern, previous_timestep=timestep)
 
             if default_dtype != pdfs.dtype:
@@ -318,6 +322,7 @@ def get_getter_family(class_name, lb_method, pdfs, streaming_pattern, macroscopi
         timestep = Timestep.BOTH
         getter = macroscopic_values_getter(lb_method,
                                            density=density, velocity=velocity, pdfs=pdfs,
+                                           psm_config=psm_config,
                                            streaming_pattern=streaming_pattern, previous_timestep=timestep)
 
         getter_ast = create_kernel(getter, config=config)

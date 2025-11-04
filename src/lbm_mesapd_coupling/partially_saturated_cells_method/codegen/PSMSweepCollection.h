@@ -77,7 +77,7 @@ void addPSMSweepsToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCo
       timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
       timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
                               "Set particle velocities");
-      timeloop.add() << Sweep(deviceSyncWrapper(psmSweep), "PSM sweep");
+      timeloop.add() << Sweep(deviceSyncWrapper(psmSweep.getSweep()), "PSM sweep");
       timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
                               "Reduce particle forces");
    }
@@ -85,34 +85,34 @@ void addPSMSweepsToTimeloop(SweepTimeloop& timeloop, SweepCollection& psmSweepCo
    {
       timeloop.add() << Sweep(psmSweepCollection.particleMappingSweep, "Particle mapping");
       timeloop.add() << Sweep(psmSweepCollection.setParticleVelocitiesSweep, "Set particle velocities");
-      timeloop.add() << Sweep(psmSweep, "PSM sweep");
+      timeloop.add() << Sweep(psmSweep.getSweep(), "PSM sweep");
       timeloop.add() << Sweep(psmSweepCollection.reduceParticleForcesSweep, "Reduce particle forces");
    };
 }
 
 template< typename SweepCollection, typename PSMSweep, typename Communication >
-void addPSMSweepsToTimeloops(SweepTimeloop& commTimeloop, SweepTimeloop& timeloop, Communication& comm,
-                             SweepCollection& psmSweepCollection, PSMSweep& psmSweep, bool synchronize = true)
+void addPSMSweepsToTimeloopCommHide(SweepTimeloop& timeloop, Communication& communication,
+                                    SweepCollection& psmSweepCollection, PSMSweep& psmSweep, bool synchronize = true)
 {
    if (synchronize)
    {
-      commTimeloop.add() << BeforeFunction([&]() { comm.startCommunication(); })
-                         << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
-      commTimeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
-                                  "Set particle velocities");
-      commTimeloop.add() << Sweep(deviceSyncWrapper(psmSweep.getInnerSweep()), "PSM inner sweep")
-                         << AfterFunction([&]() { comm.wait(); }, "LBM Communication (wait)");
+      timeloop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "LBM Communication (start)")
+                     << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+      timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                              "Set particle velocities");
+      timeloop.add() << Sweep(deviceSyncWrapper(psmSweep.getInnerSweep()), "PSM inner sweep")
+                     << AfterFunction(communication.getWaitFunctor(), "LBM Communication (wait)");
       timeloop.add() << Sweep(deviceSyncWrapper(psmSweep.getOuterSweep()), "PSM outer sweep");
       timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
                               "Reduce particle forces");
    }
    else
    {
-      commTimeloop.add() << BeforeFunction([&]() { comm.startCommunication(); })
-                         << Sweep(psmSweepCollection.particleMappingSweep, "Particle mapping");
-      commTimeloop.add() << Sweep(psmSweepCollection.setParticleVelocitiesSweep, "Set particle velocities");
-      commTimeloop.add() << Sweep(psmSweep.getInnerSweep(), "PSM inner sweep")
-                         << AfterFunction([&]() { comm.wait(); }, "LBM Communication (wait)");
+      timeloop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "LBM Communication (start)")
+                     << Sweep(psmSweepCollection.particleMappingSweep, "Particle mapping");
+      timeloop.add() << Sweep(psmSweepCollection.setParticleVelocitiesSweep, "Set particle velocities");
+      timeloop.add() << Sweep(psmSweep.getInnerSweep(), "PSM inner sweep")
+                     << AfterFunction(communication.getWaitFunctor(), "LBM Communication (wait)");
       timeloop.add() << Sweep(psmSweep.getOuterSweep(), "PSM outer sweep");
       timeloop.add() << Sweep(psmSweepCollection.reduceParticleForcesSweep, "Reduce particle forces");
    };

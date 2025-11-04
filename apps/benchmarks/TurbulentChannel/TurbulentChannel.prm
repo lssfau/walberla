@@ -9,6 +9,9 @@ TurbulentChannel {
     target_friction_Reynolds    395;
     target_bulk_velocity        0.1;
 
+    sampling_shift              0;
+    velocity_filter_width       1e-3;
+
     // turnover_periods              50;
     timesteps                   100;
 

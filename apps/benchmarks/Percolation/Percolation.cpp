@@ -28,17 +28,22 @@
 #include "core/logging/all.h"
 #include "core/timing/RemainingTimeLogger.h"
 
-#include "field/AddToStorage.h"
 #include "field/vtk/all.h"
 
 #include "geometry/InitBoundaryHandling.h"
 
-#include "gpu/AddGPUFieldToStorage.h"
 #include "gpu/DeviceSelectMPI.h"
 #include "gpu/communication/UniformGPUScheme.h"
 
 #include "lbm/PerformanceLogger.h"
 #include "lbm/vtk/all.h"
+
+#include "lbm_generated/communication/UniformGeneratedPdfPackInfo.h"
+#include "lbm_generated/field/AddToStorage.h"
+#include "lbm_generated/field/PdfField.h"
+#include "lbm_generated/gpu/AddToStorage.h"
+#include "lbm_generated/gpu/GPUPdfField.h"
+#include "lbm_generated/gpu/UniformGeneratedGPUPdfPackInfo.h"
 
 #include "lbm_mesapd_coupling/DataTypesCodegen.h"
 #include "lbm_mesapd_coupling/partially_saturated_cells_method/codegen/PSMSweepCollection.h"
@@ -57,12 +62,8 @@
 
 #include "vtk/all.h"
 
-#include "LBMSweep.h"
-#include "PSMPackInfo.h"
+#include "LBM_InfoHeader.h"
 #include "PSMSweep.h"
-#include "PSM_Density.h"
-#include "PSM_InfoHeader.h"
-#include "PSM_MacroGetter.h"
 
 namespace percolation
 {
@@ -73,19 +74,21 @@ namespace percolation
 
 using namespace walberla;
 using namespace lbm_mesapd_coupling::psm::gpu;
-using PackInfo_T = pystencils::PSMPackInfo;
 
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
+
+using StorageSpecification_T = lbm::LBMStorageSpecification;
+using PdfField_T             = lbm_generated::PdfField< StorageSpecification_T >;
+using GPUPdfField_T          = lbm_generated::GPUPdfField< StorageSpecification_T >;
+using BoundaryCollection_T   = lbm::LBMBoundaryCollection< FlagField_T >;
+using SweepCollection_T      = lbm::LBMSweepCollection;
 
 ///////////
 // FLAGS //
 ///////////
 
 const FlagUID Fluid_Flag("Fluid");
-const FlagUID Density_Flag("Density");
-const FlagUID NoSlip_Flag("NoSlip");
-const FlagUID Inflow_Flag("Inflow");
 
 //////////
 // MAIN //
@@ -140,6 +143,7 @@ int main(int argc, char** argv)
    const uint_t numZCellsPerBlock         = numericalSetup.getParameter< uint_t >("numZCellsPerBlock");
    const bool sendDirectlyFromGPU         = numericalSetup.getParameter< bool >("sendDirectlyFromGPU");
    const bool useCommunicationHiding      = numericalSetup.getParameter< bool >("useCommunicationHiding");
+   const bool syncBarriers                = numericalSetup.getParameter< bool >("syncBarriers");
    const Vector3< uint_t > frameWidth     = numericalSetup.getParameter< Vector3< uint_t > >("frameWidth");
    const uint_t timeSteps                 = numericalSetup.getParameter< uint_t >("timeSteps");
    const bool useParticles                = numericalSetup.getParameter< bool >("useParticles");
@@ -147,6 +151,8 @@ int main(int argc, char** argv)
    const real_t particleGenerationSpacing = numericalSetup.getParameter< real_t >("particleGenerationSpacing");
    const Vector3< real_t > generationDomainFraction =
       numericalSetup.getParameter< Vector3< real_t > >("generationDomainFraction");
+   const Vector3< real_t > generationDomainOffset =
+      numericalSetup.getParameter< Vector3< real_t > >("generationDomainOffset");
    const Vector3< uint_t > generationPointOfReferenceOffset =
       numericalSetup.getParameter< Vector3< uint_t > >("generationPointOfReferenceOffset");
    const bool useParticleOffset = numericalSetup.getParameter< bool >("useParticleOffset");
@@ -192,7 +198,7 @@ int main(int argc, char** argv)
    auto sphereShape         = ss->create< mesa_pd::data::Sphere >(particleDiameter * real_t(0.5));
 
    // Create spheres
-   if (useParticles)
+   if (useParticles && particleGenerationSpacing > real_t(0))
    {
       // Ensure that generation domain is computed correctly
       WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.xMin(), real_t(0));
@@ -202,10 +208,12 @@ int main(int argc, char** argv)
       auto generationDomain = math::AABB::createFromMinMaxCorner(
          math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) - generationDomainFraction[0]) / real_t(2),
                                  simulationDomain.yMax() * (real_t(1) - generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) - generationDomainFraction[2]) / real_t(2)),
+                                 simulationDomain.zMax() * (real_t(1) - generationDomainFraction[2]) / real_t(2)) +
+            generationDomainOffset,
          math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) + generationDomainFraction[0]) / real_t(2),
                                  simulationDomain.yMax() * (real_t(1) + generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) + generationDomainFraction[2]) / real_t(2)));
+                                 simulationDomain.zMax() * (real_t(1) + generationDomainFraction[2]) / real_t(2)) +
+            generationDomainOffset);
       real_t particleOffset = particleGenerationSpacing / real_t(2);
       for (auto pt :
            grid_generator::SCGrid(generationDomain, generationDomain.center() + generationPointOfReferenceOffset,
@@ -236,14 +244,18 @@ int main(int argc, char** argv)
 
    // Setting initial PDFs to nan helps to detect bugs in the initialization/BC handling
    // Depending on WALBERLA_BUILD_WITH_GPU_SUPPORT, pdfFieldCPUGPUID is either a CPU or a CPU field
+   const StorageSpecification_T StorageSpec = StorageSpecification_T();
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   BlockDataID pdfFieldID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field (fzyx)", real_c(std::nan("")), field::fzyx);
-   BlockDataID BFieldID         = field::addToStorage< BField_T >(blocks, "B field", 0, field::fzyx, 1);
-   BlockDataID pdfFieldCPUGPUID = gpu::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "pdf field GPU");
-#else
+   BlockDataID pdfFieldID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, 1);
+   BlockDataID BFieldID   = field::addToStorage< BField_T >(blocks, "B field");
    BlockDataID pdfFieldCPUGPUID =
-      field::addToStorage< PdfField_T >(blocks, "pdf field CPU", real_c(std::nan("")), field::fzyx);
+      lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
+   BlockDataID densityFieldGPUID =
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t(1));
+   BlockDataID velFieldGPUID =
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t(3));
+#else
+   BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, 1);
 #endif
    BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "density field", real_t(0), field::fzyx);
    BlockDataID velFieldID  = field::addToStorage< VelocityField_T >(blocks, "velocity field", real_t(0), field::fzyx);
@@ -256,8 +268,8 @@ int main(int argc, char** argv)
    // Assemble boundary block string
    std::string boundariesBlockString = " Boundaries"
                                        "{"
-                                       "Border { direction W;    walldistance -1;  flag Inflow; }"
-                                       "Border { direction E;    walldistance -1;  flag Density; }";
+                                       "Border { direction W;    walldistance -1;  flag UBB; }"
+                                       "Border { direction E;    walldistance -1;  flag FixedDensity; }";
 
    if (!periodicInY)
    {
@@ -283,25 +295,28 @@ int main(int argc, char** argv)
    auto boundariesCfgFile = Config();
    boundariesCfgFile.readParameterFile("boundaries.prm");
    auto boundariesConfig = boundariesCfgFile.getBlock("Boundaries");
-
-   // map boundaries into the LBM simulation
    geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, Fluid_Flag);
-   lbm::PSM_Density density_bc(blocks, pdfFieldCPUGPUID, real_t(1.0));
-   density_bc.fillFromFlagField< FlagField_T >(blocks, flagFieldID, Density_Flag, Fluid_Flag);
-   lbm::PSM_NoSlip noSlip(blocks, pdfFieldCPUGPUID);
-   noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, NoSlip_Flag, Fluid_Flag);
-   lbm::PSM_UBB ubb(blocks, pdfFieldCPUGPUID, uInflow, real_t(0), real_t(0));
-   ubb.fillFromFlagField< FlagField_T >(blocks, flagFieldID, Inflow_Flag, Fluid_Flag);
+   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, uInflow, real_t(0),
+                                           real_t(0), real_t(1), real_t(1));
 
    ///////////////
    // TIME LOOP //
    ///////////////
 
    // Map particles into the fluid domain
+   SweepCollection_T sweepCollection(blocks, pdfFieldCPUGPUID, densityFieldID, velFieldID, relaxationRate, frameWidth);
    ParticleAndVolumeFractionSoA_T< Weighting > particleAndVolumeFractionSoA(blocks, relaxationRate);
    PSMSweepCollection psmSweepCollection(blocks, accessor, lbm_mesapd_coupling::RegularParticlesSelector(),
                                          particleAndVolumeFractionSoA, particleSubBlockSize);
+   pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+                                 particleAndVolumeFractionSoA.particleForcesFieldID,
+                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
+                                 relaxationRate, frameWidth);
+   pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
+                                         particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
+                                         real_t(1.0), real_t(0), real_t(0), real_t(0));
+
    if (useParticles)
    {
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
@@ -311,11 +326,6 @@ int main(int argc, char** argv)
    }
 
    // Initialize PDFs
-   pystencils::InitializeDomainForPSM pdfSetter(
-      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
-      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0), real_t(0), real_t(0),
-      real_t(1.0), real_t(0), real_t(0), real_t(0));
-
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       // pdfSetter requires particle velocities at cell centers
@@ -323,26 +333,31 @@ int main(int argc, char** argv)
       pdfSetter(&(*blockIt));
    }
 
+   WcTimingPool timeloopTiming;
+
    // Setup of the LBM communication for synchronizing the pdf field between neighboring blocks
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   gpu::communication::UniformGPUScheme< Stencil_T > com(blocks, sendDirectlyFromGPU, false);
+   gpu::communication::UniformGPUScheme< Stencil_T > communication(blocks, 0, false);
+   communication.addPackInfo(
+      make_shared< lbm_generated::UniformGeneratedGPUPdfPackInfo< GPUPdfField_T > >(pdfFieldCPUGPUID));
 #else
-   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > com(blocks);
+   walberla::blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
+   communication.addPackInfo(
+      std::make_shared< lbm_generated::UniformGeneratedPdfPackInfo< PdfField_T > >(pdfFieldCPUGPUID));
 #endif
-   com.addPackInfo(make_shared< PackInfo_T >(pdfFieldCPUGPUID));
-   auto communication = std::function< void() >([&]() { com.communicate(); });
 
-   SweepTimeloop commTimeloop(blocks->getBlockStorage(), timeSteps);
    SweepTimeloop timeloop(blocks->getBlockStorage(), timeSteps);
 
    timeloop.addFuncBeforeTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   pystencils::PSM_MacroGetter getterSweep(BFieldID, densityFieldID, pdfFieldID, velFieldID, real_t(0.0), real_t(0.0),
-                                           real_t(0.0));
+   pystencils::PSM_MacroGetter getterSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityFieldGPUID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldGPUID);
 #else
-   pystencils::PSM_MacroGetter getterSweep(particleAndVolumeFractionSoA.BFieldID, densityFieldID, pdfFieldCPUGPUID,
-                                           velFieldID, real_t(0.0), real_t(0.0), real_t(0.0));
+   pystencils::PSM_MacroGetter getterSweep(
+      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID, densityFieldID,
+      particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldID);
 #endif
    // VTK output
    if (vtkSpacing != uint_t(0))
@@ -363,16 +378,16 @@ int main(int argc, char** argv)
       // Fields
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid", vtkSpacing, 0, false, vtkFolder);
 
-      pdfFieldVTK->addBeforeFunction(communication);
+      pdfFieldVTK->addBeforeFunction(communication.getCommunicateFunctor());
 
       pdfFieldVTK->addBeforeFunction([&]() {
-#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-         gpu::fieldCpy< PdfField_T, gpu::GPUField< real_t > >(blocks, pdfFieldID, pdfFieldCPUGPUID);
-         gpu::fieldCpy< GhostLayerField< real_t, 1 >, BFieldGPU_T >(blocks, BFieldID,
-                                                                    particleAndVolumeFractionSoA.BFieldID);
-#endif
          for (auto& block : *blocks)
             getterSweep(&block);
+#ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
+         gpu::fieldCpy< DensityField_T, gpu::GPUField< real_t > >(blocks, densityFieldID, densityFieldGPUID);
+         gpu::fieldCpy< VelocityField_T, gpu::GPUField< real_t > >(blocks, velFieldID, velFieldGPUID);
+         gpu::fieldCpy< BField_T, BFieldGPU_T >(blocks, BFieldID, particleAndVolumeFractionSoA.BFieldID);
+#endif
       });
 
       pdfFieldVTK->addCellDataWriter(make_shared< field::VTKWriter< VelocityField_T > >(velFieldID, "Velocity"));
@@ -397,60 +412,88 @@ int main(int argc, char** argv)
       timeloop.addFuncAfterTimeStep(performanceLogger, "Evaluate performance logging");
    }
 
-   // Add LBM communication function and boundary handling sweep
+   // If syncBarriers is true, MPI_BARRIERs are used before communication to prevent load imbalances being included in
+   // the measurements. If useCommunicationHiding is false as well, MPI_BARRIERs are used before the LBM/PSM sweeps.
    if (useCommunicationHiding)
    {
-      timeloop.add() << Sweep(deviceSyncWrapper(density_bc.getSweep()), "Boundary Handling (Density)");
+      timeloop.add() << BeforeFunction(communication.getStartCommunicateFunctor(), "LBM Communication (start)")
+                     << Sweep(deviceSyncWrapper(boundaryCollection.getSweep()), "Boundary Handling");
    }
    else
    {
-      timeloop.add() << BeforeFunction(communication, "LBM Communication")
-                     << Sweep(deviceSyncWrapper(density_bc.getSweep()), "Boundary Handling (Density)");
+      if (syncBarriers)
+      {
+         timeloop.addFuncBeforeTimeStep([&]() { WALBERLA_MPI_BARRIER(); }, "MPI_BARRIER for load imbalances 0");
+      }
+      timeloop.add() << BeforeFunction(communication.getCommunicateFunctor(), "LBM Communication")
+                     << Sweep(deviceSyncWrapper(boundaryCollection.getSweep()), "Boundary Handling");
    }
-   timeloop.add() << Sweep(deviceSyncWrapper(ubb.getSweep()), "Boundary Handling (UBB)");
-   if (!periodicInY || !periodicInZ)
-   {
-      timeloop.add() << Sweep(deviceSyncWrapper(noSlip.getSweep()), "Boundary Handling (NoSlip)");
-   }
-
-   // PSM kernel
-   pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
-                                 particleAndVolumeFractionSoA.particleForcesFieldID,
-                                 particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, real_t(0.0),
-                                 real_t(0.0), real_t(0.0), relaxationRate);
-   pystencils::PSMSweepSplit PSMSplitSweep(
-      particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
-      particleAndVolumeFractionSoA.particleForcesFieldID, particleAndVolumeFractionSoA.particleVelocitiesFieldID,
-      pdfFieldCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate, frameWidth);
-   pystencils::LBMSweep LBMSweep(pdfFieldCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate);
-   pystencils::LBMSplitSweep LBMSplitSweep(pdfFieldCPUGPUID, real_t(0.0), real_t(0.0), real_t(0.0), relaxationRate,
-                                           frameWidth);
 
    if (useParticles)
    {
       if (useCommunicationHiding)
       {
-         addPSMSweepsToTimeloops(commTimeloop, timeloop, com, psmSweepCollection, PSMSplitSweep);
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                                 "Set particle velocities");
+         if (syncBarriers)
+         {
+            timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep.getInnerSweep()), "PSM inner sweep")
+                           << AfterFunction([&]() { WALBERLA_MPI_BARRIER(); }, "MPI_BARRIER for load imbalances 0");
+         }
+         else { timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep.getInnerSweep()), "PSM inner sweep"); }
+         timeloop.add() << BeforeFunction(communication.getWaitFunctor(), "LBM Communication (wait)")
+                        << Sweep(deviceSyncWrapper(PSMSweep.getOuterSweep()), "PSM outer sweep");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                                 "Reduce particle forces");
       }
-      else { addPSMSweepsToTimeloop(timeloop, psmSweepCollection, PSMSweep); }
+      else
+      {
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.particleMappingSweep), "Particle mapping");
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.setParticleVelocitiesSweep),
+                                 "Set particle velocities");
+         if (syncBarriers)
+         {
+            timeloop.add() << BeforeFunction([&]() { WALBERLA_MPI_BARRIER(); }, "MPI_BARRIER for load imbalances 1")
+                           << Sweep(deviceSyncWrapper(PSMSweep.getSweep()), "PSM sweep");
+         }
+         else { timeloop.add() << Sweep(deviceSyncWrapper(PSMSweep.getSweep()), "PSM sweep"); }
+         timeloop.add() << Sweep(deviceSyncWrapper(psmSweepCollection.reduceParticleForcesSweep),
+                                 "Reduce particle forces");
+      }
    }
    else
    {
       if (useCommunicationHiding)
       {
-         commTimeloop.add() << BeforeFunction([&]() { com.startCommunication(); }, "LBM Communication (start)")
-                            << Sweep(deviceSyncWrapper(LBMSplitSweep.getInnerSweep()), "LBM inner sweep")
-                            << AfterFunction([&]() { com.wait(); }, "LBM Communication (wait)");
-         timeloop.add() << Sweep(deviceSyncWrapper(LBMSplitSweep.getOuterSweep()), "LBM outer sweep");
+         if (syncBarriers)
+         {
+            timeloop.add() << Sweep(deviceSyncWrapper(sweepCollection.streamCollide(SweepCollection_T::INNER)),
+                                    "LBM inner sweep")
+                           << AfterFunction([&]() { WALBERLA_MPI_BARRIER(); }, "MPI_BARRIER for load imbalances 0");
+         }
+         else
+         {
+            timeloop.add() << Sweep(deviceSyncWrapper(sweepCollection.streamCollide(SweepCollection_T::INNER)),
+                                    "LBM inner sweep");
+         }
+         timeloop.add() << BeforeFunction(communication.getWaitFunctor(), "LBM Communication (wait)")
+                        << Sweep(deviceSyncWrapper(sweepCollection.streamCollide(SweepCollection_T::OUTER)),
+                                 "LBM outer sweep");
       }
-      else { timeloop.add() << Sweep(deviceSyncWrapper(LBMSweep), "LBM sweep"); }
+      else
+      {
+         if (syncBarriers)
+         {
+            timeloop.add() << BeforeFunction([&]() { WALBERLA_MPI_BARRIER(); }, "MPI_BARRIER for load imbalances 1")
+                           << Sweep(deviceSyncWrapper(sweepCollection.streamCollide()), "LBM sweep");
+         }
+         else { timeloop.add() << Sweep(deviceSyncWrapper(sweepCollection.streamCollide()), "LBM sweep"); }
+      }
    }
 
-   WcTimingPool timeloopTiming;
-   // TODO: maybe add warmup phase
    for (uint_t timeStep = 0; timeStep < timeSteps; ++timeStep)
    {
-      if (useCommunicationHiding) { commTimeloop.singleStep(timeloopTiming); }
       timeloop.singleStep(timeloopTiming);
    }
    timeloopTiming.logResultOnRoot();
