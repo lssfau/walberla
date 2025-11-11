@@ -51,12 +51,8 @@ struct aligned_allocator
         pointer allocate(size_type n, const_pointer /* hint */)
         {
                 void *p;
-#ifndef _WIN32
                 if (posix_memalign(&p, Alignment, n*sizeof(T)) != 0)
                         p = NULL;
-#else
-                p = _aligned_malloc(n*sizeof(T), Alignment);
-#endif
                 if (!p)
                         throw std::bad_alloc();
                 return static_cast<pointer>(p);
@@ -65,11 +61,7 @@ struct aligned_allocator
         /// Frees the memory previously allocated by an aligned allocator.
         void deallocate(pointer p, size_type /* n */)
         {
-#ifndef _WIN32
                 free(p);
-#else
-                _aligned_free(p);
-#endif
         }
 };
 
@@ -97,4 +89,3 @@ bool operator != (const aligned_allocator<T1,A1> &, const aligned_allocator<T2,A
 
 } // namespace simd
 } // namespace walberla
-

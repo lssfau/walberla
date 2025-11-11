@@ -23,39 +23,10 @@
 
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
 
-#ifdef _MSC_VER
-#  pragma push_macro( "INT32_MIN" )
-#  pragma push_macro( "INT32_MAX" )
-#  pragma push_macro( "INT64_MIN" )
-#  pragma push_macro( "INT64_MAX" )
-
-#  ifdef INT32_MIN
-#     undef INT32_MIN
-#  endif
-
-#  ifdef INT32_MAX
-#     undef INT32_MAX
-#  endif
-
-#  ifdef INT64_MIN
-#     undef INT64_MIN
-#  endif
-
-#  ifdef INT64_MAX
-#     undef INT64_MAX
-#  endif
-#endif
-
 #ifdef WALBERLA_BUILD_WITH_METIS
 #  include "metis.h"
 #endif
 
-#ifdef _MSC_VER
-#  pragma pop_macro( "INT64_MAX" )
-#  pragma pop_macro( "INT64_MIN" )
-#  pragma pop_macro( "INT32_MAX" )
-#  pragma pop_macro( "INT32_MIN" )
-#endif
 
 #include <parmetis.h>
 #endif

@@ -50,7 +50,6 @@
 #cmakedefine WALBERLA_CXX_COMPILER_IS_GNU
 #cmakedefine WALBERLA_CXX_COMPILER_IS_INTEL
 #cmakedefine WALBERLA_CXX_COMPILER_IS_IBM
-#cmakedefine WALBERLA_CXX_COMPILER_IS_MSVC
 #cmakedefine WALBERLA_CXX_COMPILER_IS_CLANG
 
 #cmakedefine WALBERLA_BUILD_WITH_BACKTRACE
@@ -74,20 +73,14 @@
     (WALBERLA_VERSION OP WALBERLA_VERSION_CALC(MAJOR,PATCH))
 
 // Generic helper definitions for shared library support
-#if defined _WIN32 || defined __CYGWIN__
-  #define WALBERLA_SHARED_LIB_IMPORT __declspec(dllimport)
-  #define WALBERLA_SHARED_LIB_EXPORT __declspec(dllexport)
-  #define WALBERLA_SHARED_LIB_LOCAL
+#if __GNUC__ >= 4
+ #define WALBERLA_SHARED_LIB_IMPORT __attribute__ ((visibility ("default")))
+ #define WALBERLA_SHARED_LIB_EXPORT __attribute__ ((visibility ("default")))
+ #define WALBERLA_SHARED_LIB_LOCAL  __attribute__ ((visibility ("hidden")))
 #else
-  #if __GNUC__ >= 4
-    #define WALBERLA_SHARED_LIB_IMPORT __attribute__ ((visibility ("default")))
-    #define WALBERLA_SHARED_LIB_EXPORT __attribute__ ((visibility ("default")))
-    #define WALBERLA_SHARED_LIB_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define WALBERLA_SHARED_LIB_IMPORT
-    #define WALBERLA_SHARED_LIB_EXPORT
-    #define WALBERLA_SHARED_LIB_LOCAL
-  #endif
+ #define WALBERLA_SHARED_LIB_IMPORT
+ #define WALBERLA_SHARED_LIB_EXPORT
+ #define WALBERLA_SHARED_LIB_LOCAL
 #endif
 
 // Now we use the generic helper definitions above to define WALBERLA_PUBLIC, WALBERLA_PROTECTED

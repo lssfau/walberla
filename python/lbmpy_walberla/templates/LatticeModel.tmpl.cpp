@@ -25,9 +25,6 @@
 #include "lbm/sweeps/Streaming.h"
 #include "{{class_name}}.h"
 
-#ifdef _MSC_VER
-#  pragma warning( disable : 4458 )
-#endif
 
 {% if target is equalto 'cpu' -%}
 #define FUNC_PREFIX

@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,10 +26,7 @@
 #include "core/debug/Debug.h"
 #include "core/Abort.h"
 
-#if defined WALBERLA_CXX_COMPILER_IS_MSVC
-#   pragma warning( push, 1 )
-#   pragma warning( disable : 4706 )
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wpragmas"
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -49,9 +46,7 @@
 #include <algorithm>
 
 
-#if defined WALBERLA_CXX_COMPILER_IS_MSVC
-#   pragma warning( pop )
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic pop
 #elif defined WALBERLA_CXX_COMPILER_IS_INTEL
 //#   pragma warning pop // disabled because this leads to spilled warnings
@@ -63,7 +58,7 @@ namespace math {
 
 FunctionParser::FunctionParser() = default;
 
-FunctionParser::~FunctionParser() 
+FunctionParser::~FunctionParser()
 {
    delete expression_;
    delete symbolTable_;
@@ -169,7 +164,7 @@ FunctionParser::FunctionParser()
    : alwaysFalse_( false )
 {}
 
-FunctionParser::~FunctionParser() 
+FunctionParser::~FunctionParser()
 {}
 
 void FunctionParser::parse( const std::string & )

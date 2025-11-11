@@ -35,8 +35,6 @@
 
 #ifdef __GNUC__
 #define RESTRICT __restrict__
-#elif _MSC_VER
-#define RESTRICT __restrict
 #else
 #define RESTRICT
 #endif
@@ -52,7 +50,7 @@ namespace lbm {
 class NoSlipD3Q19
 {
 public:
-    struct IndexInfo { 
+    struct IndexInfo {
         int32_t x;
         int32_t y;
         int32_t z;
@@ -85,13 +83,13 @@ public:
 
         void syncGPU()
         {
-            
+
         }
 
     private:
         std::vector<CpuIndexVector> cpuVectors_{NUM_TYPES};
 
-        
+
     };
 
     NoSlipD3Q19( const shared_ptr<StructuredBlockForest> & blocks,
@@ -153,7 +151,7 @@ public:
         auto & indexVectorOuter = indexVectors->indexVector(IndexVectors::OUTER);
 
         auto * flagField = block->getData< FlagField_T > ( flagFieldID );
-        
+
 
         if( !(flagField->flagExists(boundaryFlagUID) && flagField->flagExists(domainFlagUID) ))
             return;
@@ -168,7 +166,7 @@ public:
         indexVectorInner.clear();
         indexVectorOuter.clear();
 
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -177,7 +175,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 0, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  0 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -185,7 +183,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -194,7 +192,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  1 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -202,7 +200,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -211,7 +209,7 @@ public:
            if ( isFlagSet( it.neighbor(0, -1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  2 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -219,7 +217,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -228,7 +226,7 @@ public:
            if ( isFlagSet( it.neighbor(-1, 0, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  3 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -236,7 +234,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -245,7 +243,7 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  4 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -253,7 +251,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -262,7 +260,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 0, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  5 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -270,7 +268,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -279,7 +277,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 0, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  6 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -287,7 +285,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -296,7 +294,7 @@ public:
            if ( isFlagSet( it.neighbor(-1, 1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  7 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -304,7 +302,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -313,7 +311,7 @@ public:
            if ( isFlagSet( it.neighbor(1, 1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  8 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -321,7 +319,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -330,7 +328,7 @@ public:
            if ( isFlagSet( it.neighbor(-1, -1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  9 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -338,7 +336,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -347,7 +345,7 @@ public:
            if ( isFlagSet( it.neighbor(1, -1, 0 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  10 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -355,7 +353,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -364,7 +362,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 1, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  11 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -372,7 +370,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -381,7 +379,7 @@ public:
            if ( isFlagSet( it.neighbor(0, -1, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  12 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -389,7 +387,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -398,7 +396,7 @@ public:
            if ( isFlagSet( it.neighbor(-1, 0, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  13 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -406,7 +404,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -415,7 +413,7 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, 1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  14 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -423,7 +421,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -432,7 +430,7 @@ public:
            if ( isFlagSet( it.neighbor(0, 1, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  15 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -440,7 +438,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -449,7 +447,7 @@ public:
            if ( isFlagSet( it.neighbor(0, -1, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  16 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -457,7 +455,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -466,7 +464,7 @@ public:
            if ( isFlagSet( it.neighbor(-1, 0, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  17 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -474,7 +472,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -483,7 +481,7 @@ public:
            if ( isFlagSet( it.neighbor(1, 0, -1 , 0 ), boundaryFlag ) )
            {
               auto element = IndexInfo(it.x(), it.y(),  it.z(),  18 );
-              
+
               indexVectorAll.push_back( element );
               if( inner.contains( it.x(), it.y(), it.z() ) )
                  indexVectorInner.push_back( element );
@@ -491,9 +489,9 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
-        
-        
+
+
+
 
         indexVectors->syncGPU();
     }
@@ -502,7 +500,7 @@ private:
     void run_impl(IBlock * block, IndexVectors::Type type);
 
     BlockDataID indexVectorID;
-    
+
 public:
     BlockDataID pdfsID;
 };

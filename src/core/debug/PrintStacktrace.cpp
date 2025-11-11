@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -117,42 +117,6 @@ namespace debug {
 
 } // namespace debug
 } // namespace walberla
-
-#elif defined(WALBERLA_CXX_COMPILER_IS_MSVC)
-
-#pragma warning( push )
-#pragma warning( disable : 4091 )
-#include "extern/StackWalker.h"
-
-namespace walberla {
-namespace debug {
-
-class WalberlaStackWalker : public stack_walker::StackWalker
-{
-public:
-   WalberlaStackWalker( std::ostream & os ) : StackWalker(), os_( os ) { }
-
-protected:
-   virtual void OnOutput( LPCSTR szText ) { os_ << szText; }
-
-   virtual void OnSymInit ( LPCSTR /*szSearchPath*/, DWORD /*symOptions*/, LPCSTR /*szUserName*/ ) { }
-   virtual void OnLoadModule ( LPCSTR /*img*/, LPCSTR /*mod*/, DWORD64 /*baseAddr*/, DWORD /*size*/, DWORD /*result*/,
-                               LPCSTR /*symType*/, LPCSTR /*pdbName*/, ULONGLONG /*fileVersion*/ ) { }
-   virtual void OnDbgHelpErr ( LPCSTR /*szFuncName*/, DWORD /*gle*/, DWORD64 /*addr*/ ) { }
-
-   std::ostream & os_;
-};
-
-void printStacktrace( std::ostream & os )
-{
-   WalberlaStackWalker sw( os );
-   sw.ShowCallstack();
-}
-
-} // namespace debug
-} // namespace walberla
-
-#pragma warning( pop )
 
 #else
 

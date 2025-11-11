@@ -9,9 +9,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
         set( PYTHON_MODULE_DEPENDENCIES walberla::blockforest walberla::boundary walberla::domain_decomposition walberla::core walberla::field walberla::python_coupling walberla::timeloop walberla::vtk )
     endif()
 
-    if( WALBERLA_CXX_COMPILER_IS_MSVC )
-        set ( pythonModules ${PYTHON_MODULE_DEPENDENCIES})
-    elseif( APPLE )
+    if( APPLE )
         set ( pythonModules "-Wl,-force_load" ${PYTHON_MODULE_DEPENDENCIES})
     else()
         set ( pythonModules "-Wl,-whole-archive" ${PYTHON_MODULE_DEPENDENCIES}  "-Wl,-no-whole-archive" )
@@ -28,11 +26,6 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
     set_target_properties( walberla_cpp PROPERTIES MACOSX_RPATH TRUE )
 
     set(WALBERLA_MODULE_FILE_NAME "${PYTHON_MODULE_PREFIX}walberla_cpp${PYTHON_MODULE_EXTENSION}")
-    if (WIN32)
-          set(_configuration "Release/")
-    else()
-          set(_configuration "")
-    endif()
 
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml  ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml )
     add_custom_target( pythonModule ALL
@@ -40,7 +33,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
                                "${walberla_SOURCE_DIR}/python/waLBerla/"
                                "${CMAKE_CURRENT_BINARY_DIR}/waLBerla/"
                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                "${CMAKE_CURRENT_BINARY_DIR}/${_configuration}${WALBERLA_MODULE_FILE_NAME}"
+                                "${CMAKE_CURRENT_BINARY_DIR}/${WALBERLA_MODULE_FILE_NAME}"
                                 "${CMAKE_CURRENT_BINARY_DIR}/waLBerla/${WALBERLA_MODULE_FILE_NAME}"
                        DEPENDS walberla_cpp)
 

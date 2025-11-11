@@ -41,8 +41,6 @@ using namespace std::placeholders;
 
 #ifdef __GNUC__
 #define RESTRICT __restrict__
-#elif _MSC_VER
-#define RESTRICT __restrict
 #else
 #define RESTRICT
 #endif
@@ -65,7 +63,7 @@ class D3Q19SRT
    D3Q19SRT(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID pdfsID_, BlockDataID densityID_, BlockDataID velocityID_, double omega, const Cell & outerWidth=Cell(1, 1, 1))
       : blocks_(blocks), pdfsID(pdfsID_), densityID(densityID_), velocityID(velocityID_), omega_(omega), outerWidth_(outerWidth)
    {
-      
+
 
       validInnerOuterSplit_= true;
 
@@ -76,8 +74,8 @@ class D3Q19SRT
       }
    }
 
-   
-    ~D3Q19SRT() {  
+
+    ~D3Q19SRT() {
         for(auto p: cache_pdfs_) {
             delete p;
         }
@@ -89,22 +87,22 @@ class D3Q19SRT
    *************************************************************************************/
    static void streamCollide (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, double omega, const cell_idx_t ghost_layers = 0);
    static void streamCollideCellInterval (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, double omega, const CellInterval & ci);
-   
+
    static void collide (field::GhostLayerField<double, 19> * pdfs, double omega, const cell_idx_t ghost_layers = 0);
    static void collideCellInterval (field::GhostLayerField<double, 19> * pdfs, double omega, const CellInterval & ci);
-   
+
    static void stream (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, const cell_idx_t ghost_layers = 0);
    static void streamCellInterval (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, const CellInterval & ci);
-   
+
    static void streamOnlyNoAdvancement (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, const cell_idx_t ghost_layers = 0);
    static void streamOnlyNoAdvancementCellInterval (field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 19> * pdfs_tmp, const CellInterval & ci);
-   
+
    static void initialise (field::GhostLayerField<double, 1> * density, field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 3> * velocity, const cell_idx_t ghost_layers = 0);
    static void initialiseCellInterval (field::GhostLayerField<double, 1> * density, field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 3> * velocity, const CellInterval & ci);
-   
+
    static void calculateMacroscopicParameters (field::GhostLayerField<double, 1> * density, field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 3> * velocity, const cell_idx_t ghost_layers = 0);
    static void calculateMacroscopicParametersCellInterval (field::GhostLayerField<double, 1> * density, field::GhostLayerField<double, 19> * pdfs, field::GhostLayerField<double, 3> * velocity, const CellInterval & ci);
-   
+
 
    /*************************************************************************************
    *                Function Definitions for external Usage
@@ -147,12 +145,12 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void streamCollide(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -171,7 +169,7 @@ class D3Q19SRT
       }
 
       auto & omega = this->omega_;
-      
+
       streamCollide(pdfs, pdfs_tmp, omega, ghost_layers);
       pdfs->swapDataPointers(pdfs_tmp);
 
@@ -179,7 +177,7 @@ class D3Q19SRT
 
    void streamCollide(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -198,13 +196,13 @@ class D3Q19SRT
       }
 
       auto & omega = this->omega_;
-      
+
       streamCollide(pdfs, pdfs_tmp, omega, ghost_layers);
       pdfs->swapDataPointers(pdfs_tmp);
 
    }
 
-   
+
 
    void streamCollideCellInterval(IBlock * block, const CellInterval & ci)
    {
@@ -225,7 +223,7 @@ class D3Q19SRT
       }
 
       auto & omega = this->omega_;
-      
+
       streamCollideCellInterval(pdfs, pdfs_tmp, omega, ci);
       pdfs->swapDataPointers(pdfs_tmp);
 
@@ -250,7 +248,7 @@ class D3Q19SRT
       }
 
       auto & omega = this->omega_;
-      
+
 
       CellInterval inner = pdfs->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -278,7 +276,7 @@ class D3Q19SRT
       }
 
       auto & omega = this->omega_;
-      
+
 
       if( layers_.empty() )
       {
@@ -304,17 +302,17 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          streamCollideCellInterval(pdfs, pdfs_tmp, omega, ci);
       }
-      
+
 
       pdfs->swapDataPointers(pdfs_tmp);
 
    }
-   
+
 
    std::function<void (IBlock *)> collide()
    {
@@ -353,43 +351,43 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void collide(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
       auto & omega = this->omega_;
-      
+
       collide(pdfs, omega, ghost_layers);
-      
+
    }
 
    void collide(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
       auto & omega = this->omega_;
-      
+
       collide(pdfs, omega, ghost_layers);
-      
+
    }
 
-   
+
 
    void collideCellInterval(IBlock * block, const CellInterval & ci)
    {
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
       auto & omega = this->omega_;
-      
+
       collideCellInterval(pdfs, omega, ci);
-      
+
    }
 
    void collideInner(IBlock * block)
@@ -397,7 +395,7 @@ class D3Q19SRT
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
       auto & omega = this->omega_;
-      
+
 
       CellInterval inner = pdfs->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -411,7 +409,7 @@ class D3Q19SRT
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
       auto & omega = this->omega_;
-      
+
 
       if( layers_.empty() )
       {
@@ -437,16 +435,16 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          collideCellInterval(pdfs, omega, ci);
       }
-      
 
-      
+
+
    }
-   
+
 
    std::function<void (IBlock *)> stream()
    {
@@ -485,12 +483,12 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void stream(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -508,8 +506,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       stream(pdfs, pdfs_tmp, ghost_layers);
       pdfs->swapDataPointers(pdfs_tmp);
 
@@ -517,7 +515,7 @@ class D3Q19SRT
 
    void stream(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -535,14 +533,14 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       stream(pdfs, pdfs_tmp, ghost_layers);
       pdfs->swapDataPointers(pdfs_tmp);
 
    }
 
-   
+
 
    void streamCellInterval(IBlock * block, const CellInterval & ci)
    {
@@ -562,8 +560,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       streamCellInterval(pdfs, pdfs_tmp, ci);
       pdfs->swapDataPointers(pdfs_tmp);
 
@@ -587,8 +585,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
 
       CellInterval inner = pdfs->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -615,8 +613,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
 
       if( layers_.empty() )
       {
@@ -642,17 +640,17 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          streamCellInterval(pdfs, pdfs_tmp, ci);
       }
-      
+
 
       pdfs->swapDataPointers(pdfs_tmp);
 
    }
-   
+
 
    std::function<void (IBlock *)> streamOnlyNoAdvancement()
    {
@@ -691,12 +689,12 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void streamOnlyNoAdvancement(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -714,15 +712,15 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       streamOnlyNoAdvancement(pdfs, pdfs_tmp, ghost_layers);
-      
+
    }
 
    void streamOnlyNoAdvancement(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
       field::GhostLayerField<double, 19> * pdfs_tmp;
@@ -740,13 +738,13 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       streamOnlyNoAdvancement(pdfs, pdfs_tmp, ghost_layers);
-      
+
    }
 
-   
+
 
    void streamOnlyNoAdvancementCellInterval(IBlock * block, const CellInterval & ci)
    {
@@ -766,10 +764,10 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
       streamOnlyNoAdvancementCellInterval(pdfs, pdfs_tmp, ci);
-      
+
    }
 
    void streamOnlyNoAdvancementInner(IBlock * block)
@@ -790,8 +788,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
 
       CellInterval inner = pdfs->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -818,8 +816,8 @@ class D3Q19SRT
           }
       }
 
-      
-      
+
+
 
       if( layers_.empty() )
       {
@@ -845,16 +843,16 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          streamOnlyNoAdvancementCellInterval(pdfs, pdfs_tmp, ci);
       }
-      
 
-      
+
+
    }
-   
+
 
    std::function<void (IBlock *)> initialise()
    {
@@ -893,38 +891,38 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void initialise(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       initialise(density, pdfs, velocity, ghost_layers);
-      
+
    }
 
    void initialise(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       initialise(density, pdfs, velocity, ghost_layers);
-      
+
    }
 
-   
+
 
    void initialiseCellInterval(IBlock * block, const CellInterval & ci)
    {
@@ -932,10 +930,10 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       initialiseCellInterval(density, pdfs, velocity, ci);
-      
+
    }
 
    void initialiseInner(IBlock * block)
@@ -944,8 +942,8 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
 
       CellInterval inner = density->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -960,8 +958,8 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
 
       if( layers_.empty() )
       {
@@ -987,16 +985,16 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          initialiseCellInterval(density, pdfs, velocity, ci);
       }
-      
 
-      
+
+
    }
-   
+
 
    std::function<void (IBlock *)> calculateMacroscopicParameters()
    {
@@ -1035,38 +1033,38 @@ class D3Q19SRT
       }
    }
 
-   
+
 
    void calculateMacroscopicParameters(IBlock * block)
    {
       const cell_idx_t ghost_layers = 0;
-      
+
 
       auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       calculateMacroscopicParameters(density, pdfs, velocity, ghost_layers);
-      
+
    }
 
    void calculateMacroscopicParameters(IBlock * block, const cell_idx_t ghost_layers)
    {
-      
+
 
       auto density = block->getData< field::GhostLayerField<double, 1> >(densityID);
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       calculateMacroscopicParameters(density, pdfs, velocity, ghost_layers);
-      
+
    }
 
-   
+
 
    void calculateMacroscopicParametersCellInterval(IBlock * block, const CellInterval & ci)
    {
@@ -1074,10 +1072,10 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
       calculateMacroscopicParametersCellInterval(density, pdfs, velocity, ci);
-      
+
    }
 
    void calculateMacroscopicParametersInner(IBlock * block)
@@ -1086,8 +1084,8 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
 
       CellInterval inner = density->xyzSize();
       inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
@@ -1102,8 +1100,8 @@ class D3Q19SRT
       auto velocity = block->getData< field::GhostLayerField<double, 3> >(velocityID);
       auto pdfs = block->getData< field::GhostLayerField<double, 19> >(pdfsID);
 
-      
-      
+
+
 
       if( layers_.empty() )
       {
@@ -1129,18 +1127,18 @@ class D3Q19SRT
          layers_.push_back(ci);
       }
 
-      
+
       for( auto & ci: layers_ )
       {
          calculateMacroscopicParametersCellInterval(density, pdfs, velocity, ci);
       }
-      
 
-      
+
+
    }
-   
 
-   
+
+
 
  private:
    shared_ptr< StructuredBlockStorage > blocks_;
@@ -1155,7 +1153,7 @@ class D3Q19SRT
    std::vector<CellInterval> layers_;
    bool validInnerOuterSplit_;
 
-   
+
 };
 
 

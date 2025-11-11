@@ -35,8 +35,6 @@
 
 #ifdef __GNUC__
 #define RESTRICT __restrict__
-#elif _MSC_VER
-#define RESTRICT __restrict
 #else
 #define RESTRICT
 #endif
@@ -52,7 +50,7 @@ namespace lbm {
 class OutflowD3Q19
 {
 public:
-    struct IndexInfo { 
+    struct IndexInfo {
         int32_t x;
         int32_t y;
         int32_t z;
@@ -87,13 +85,13 @@ public:
 
         void syncGPU()
         {
-            
+
         }
 
     private:
         std::vector<CpuIndexVector> cpuVectors_{NUM_TYPES};
 
-        
+
     };
 
     OutflowD3Q19( const shared_ptr<StructuredBlockForest> & blocks,
@@ -155,7 +153,7 @@ public:
         auto & indexVectorOuter = indexVectors->indexVector(IndexVectors::OUTER);
 
         auto * flagField = block->getData< FlagField_T > ( flagFieldID );
-        auto pdfs = block->getData< field::GhostLayerField<real_t, 19> >(pdfsID); 
+        auto pdfs = block->getData< field::GhostLayerField<real_t, 19> >(pdfsID);
 
         if( !(flagField->flagExists(boundaryFlagUID) && flagField->flagExists(domainFlagUID) ))
             return;
@@ -170,7 +168,7 @@ public:
         indexVectorInner.clear();
         indexVectorOuter.clear();
 
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -188,7 +186,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -206,7 +204,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -224,7 +222,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -242,7 +240,7 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
+
         for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
            if( ! isFlagSet(it, domainFlag) )
@@ -260,9 +258,9 @@ public:
                  indexVectorOuter.push_back( element );
            }
         }
-        
-        
-        
+
+
+
 
         indexVectors->syncGPU();
     }
