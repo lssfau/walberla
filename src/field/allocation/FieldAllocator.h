@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -102,7 +102,7 @@ namespace field {
          {
             T * mem = allocateMemory( allocSize );
             auto * bmem = reinterpret_cast<BaseType *>(mem);
-            
+
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
             #pragma omp critical( walberla_field_allocator_refcount )
@@ -153,7 +153,7 @@ namespace field {
          {
             auto * bmem = reinterpret_cast<BaseType *>(mem);
             bool memoryFreed = false;
-            
+
             uint_t refCount = 0;
 
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
@@ -172,7 +172,7 @@ namespace field {
                deallocate( mem );
                memoryFreed = true;
             }
-            
+
             return memoryFreed;
          }
 
@@ -190,7 +190,7 @@ namespace field {
                WALBERLA_ASSERT( referenceCounts_.find(bmem) != referenceCounts_.end()  );
                refCount = referenceCounts_[bmem];
             }
-            
+
             return refCount;
          }
 
@@ -362,7 +362,7 @@ constexpr uint_t SIMDAlignment() {
    return 64u;
 #elif defined(__AVX__)
    return 32u;
-#elif defined(__SSE__) || defined(_MSC_VER)
+#elif defined(__SSE__)
    return 16u;
 #elif defined(__BIGGEST_ALIGNMENT__)
    return uint_c(__BIGGEST_ALIGNMENT__);
@@ -373,5 +373,4 @@ constexpr uint_t SIMDAlignment() {
 
 } // namespace field
 } // namespace walberla
-
 

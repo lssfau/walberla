@@ -196,13 +196,9 @@ endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_GNU )
 
 # Check for Visual Studio
-if ( MSVC )
-     option ( WALBERLA_CXX_COMPILER_IS_MSVC "Use Visual Studio compiler" ON  )
-     include( MSVC )
-else()
-     option ( WALBERLA_CXX_COMPILER_IS_MSVC "Use Visual Studio compiler" OFF  )
+if ( MSVC OR WIN32 )
+     message(FATAL_ERROR "Support for MSVC has been removed with waLBerla version 7.2")
 endif()
-mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MSVC )
 
 # Check for IBM compiler
 if( CMAKE_CXX_COMPILER MATCHES "xlc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "xlc" )
@@ -418,61 +414,13 @@ endif()
 ############################################################################################################################
 
 if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
-   find_package ( MPI )
+   find_package ( MPI REQUIRED )
+   add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
+   add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
 
-   # FindMPI does not really work under windows, because it expects linux formatted strings from the mpi compiler.
-   # Nevertheless for Microsoft MPI and MPICH there are workarounds included, but not for OpenMPI.
-   # Here is a workaround for windows with OpenMPI (use configure twice to see correct output).
-   # The workaround bases on the elseif(try_libs) case in the interrogate_* function of FindMPI.
-   # For this workaround we assume, that the compiler was found in any PATH or ENV variable
-   # but FindMPI was not able to interpret the command line outputs.
-   if ( MPI_CXX_COMPILER AND NOT MPI_CXX_LIBRARIES )
-      if ( WIN32 )
-         message ( STATUS "Enter Workaround Routine for Windows and OpenMPI: PRESS CONFIGURE ONE MORE TIME!" )
-         string ( REGEX REPLACE "(.*)/bin/.*" "\\1" MPI_PATH ${MPI_CXX_COMPILER} )
-         find_path ( MPI_C_INCLUDE_PATH mpi.h
-            HINTS ${MPI_PATH}
-            PATH_SUFFIXES include Inc)
-         set ( MPI_CXX_INCLUDE_PATH ${MPI_C_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
-
-         set ( MPI_CXX_LIBRARIES "MPI_CXX_LIBRARIES-NOTFOUND" CACHE FILEPATH "Cleared" FORCE )
-         find_library ( MPI_CXX_LIBRARIES
-            NAMES         mpi++ mpicxx cxx mpi_cxx libmpi++ libmpicxx libcxx libmpi_cxx
-            HINTS         ${MPI_PATH}
-            PATH_SUFFIXES lib )
-
-         if ( NOT MPI_CXX_LIBRARIES STREQUAL "MPI_CXX_LIBRARIES-NOTFOUND" )
-            set ( MPI_CXX_FOUND ON FORCE )
-         endif ( )
-
-         set ( MPI_C_LIBRARIES "MPI_C_LIBRARIES-NOTFOUND" CACHE FILEPATH "Cleared" FORCE )
-         find_library ( MPI_C_LIBRARIES
-           NAMES         mpi mpich mpich2 msmpi libmpi libmpich libmpich2 libmsmpi
-           HINTS         ${MPI_PATH}
-           PATH_SUFFIXES lib )
-
-         if ( NOT MPI_C_LIBRARIES STREQUAL "MPI_C_LIBRARIES-NOTFOUND" )
-            set ( MPI_C_FOUND ON FORCE )
-         endif ( )
-
-         if ( MPI_PATH MATCHES ".*OpenMPI.*" )
-            set ( MPI_CXX_COMPILE_FLAGS "/DOMPI_IMPORTS" CACHE STRING "" FORCE )
-            set ( MPI_C_COMPILE_FLAGS   "/DOMPI_IMPORTS" CACHE STRING "" FORCE )
-         endif ( )
-      elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
-      else ( )
-         message ( WARNING "Found MPI Compiler but no Libraries -> invent a new workaround" )
-      endif ( )
-   endif ( )
-
-   if ( MPI_FOUND )
-     add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
-     add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
-
-     add_flag ( CMAKE_MODULE_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
-     add_flag ( CMAKE_EXE_LINKER_FLAGS    "${MPI_CXX_LINK_FLAGS}" )
-     add_flag ( CMAKE_SHARED_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
-   endif ( )
+   add_flag ( CMAKE_MODULE_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
+   add_flag ( CMAKE_EXE_LINKER_FLAGS    "${MPI_CXX_LINK_FLAGS}" )
+   add_flag ( CMAKE_SHARED_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
 endif ( )
 
 # MPIEXEC_PREFLAGS overrides
@@ -823,7 +771,6 @@ if (WALBERLA_BUILD_DOC)
       RESULT_VARIABLE TAG_RESULT
      )
 
-   message(STATUS "Found ${GIT_TAG} ${TAG_RESULT} ${WALBERLA_VERSION}")
      if(TAG_RESULT EQUAL 0 AND GIT_TAG STREQUAL "v${WALBERLA_VERSION}")
        set(RELEASE_NOTE "\\include{doc} release.dox")
      else()
@@ -839,13 +786,13 @@ if (WALBERLA_BUILD_DOC)
   endif ( )
 
   # Build SweepGen user manual
-  
+
   execute_process( COMMAND nox --version RESULT_VARIABLE _noxResult OUTPUT_QUIET ERROR_QUIET )
   if( ${_noxResult} )
     message(STATUS "Could not find nox - will not build SweepGen user manual")
   else()
     set( _sweepgen_dir ${walberla_SOURCE_DIR}/sweepgen )
-    add_custom_target( 
+    add_custom_target(
         walberla_sweepgen_manual
         COMMAND nox -f ${_sweepgen_dir}/noxfile.py -s user_manual -- --fail-on-warnings
         COMMAND
@@ -855,7 +802,7 @@ if (WALBERLA_BUILD_DOC)
     )
     add_dependencies( walberla_doc walberla_sweepgen_manual )
   endif()
-  
+
 endif()
 
 ############################################################################################################################

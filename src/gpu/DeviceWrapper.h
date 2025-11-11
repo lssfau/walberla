@@ -281,11 +281,7 @@ typedef struct dim3 dim3;
 
 inline gpuError_t gpuLaunchKernel(const void* /*func*/, dim3 /*gridDim*/, dim3 /*blockDim*/, void** /*args*/, size_t /*sharedMem*/, gpuStream_t /*stream*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 
-#ifdef _WIN32
-#define GPURT_CB __stdcall
-#else
 #define GPURT_CB
-#endif
 
 typedef void(GPURT_CB* gpuHostFn_t)(void* /*userData*/);
 inline gpuError_t gpuLaunchHostFunc(gpuStream_t /*stream*/, gpuHostFn_t /*fn*/, void* /*userData*/) { WALBERLA_DEVICE_FUNCTION_ERROR }

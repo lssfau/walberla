@@ -24,14 +24,7 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 
-#ifdef _MSC_VER
-#  pragma warning(push)
-#  pragma warning( disable : 4456 )
-#endif //_MSC_VER
 #include <OpenMesh/Core/IO/MeshIO.hh>
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif //_MSC_VER
 
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 #include <OpenMesh/Core/Mesh/Traits.hh>

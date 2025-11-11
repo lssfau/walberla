@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -22,10 +22,7 @@
 #include "ExprSystemInitFunction.h"
 
 
-#if defined WALBERLA_CXX_COMPILER_IS_MSVC
-#   pragma warning( push, 1 )
-#   pragma warning( disable : 4706 )
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wpragmas"
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -42,9 +39,7 @@
 
 #include "core/math/extern/exprtk.h"
 
-#if defined WALBERLA_CXX_COMPILER_IS_MSVC
-#   pragma warning( pop )
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic pop
 #elif defined WALBERLA_CXX_COMPILER_IS_INTEL
 //#   pragma warning pop // disabled because this leads to spilled warnings
@@ -63,7 +58,7 @@ ExprSystemInitFunction::ExprSystemInitFunction( const shared_ptr<StructuredBlock
    symbolTable_->add_constant( "n_x", real_c( blocks_->getNumberOfXCells() ) );
    symbolTable_->add_constant( "n_y", real_c( blocks_->getNumberOfYCells() ) );
    symbolTable_->add_constant( "n_z", real_c( blocks_->getNumberOfZCells() ) );
-         
+
    // add variables
    symbolTable_->add_variable( "x" , cell_[0] );
    symbolTable_->add_variable( "y" , cell_[1] );
@@ -93,7 +88,7 @@ bool ExprSystemInitFunction::parse( const Config::BlockHandle & config )
    exprtk::parser<real_t> parser;
 
    bool valid = true;
-         
+
    const std::string ux_expr_str = config.getParameter<std::string>( "u_x" , "0.0" );
    if( !parser.compile( ux_expr_str, (*expr_)[ "u_x" ] ) )
    {

@@ -57,9 +57,6 @@ namespace mpistubs {
 
 
 
-#ifdef _MSC_VER
-#pragma warning ( push, 1 )
-#endif
 
 #if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic push
@@ -71,10 +68,6 @@ namespace mpistubs {
 #endif
 #if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic pop
-#endif
-
-#ifdef _MSC_VER
-#pragma warning ( pop )
 #endif
 
 #else // WALBERLA_BUILD_WITH_MPI
@@ -425,4 +418,3 @@ int MPITrait< T >::size()
 
 } // namespace walberla
 /// \endcond
-

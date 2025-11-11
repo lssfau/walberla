@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -20,40 +20,20 @@
 //======================================================================================================================
 
 #include "GetPID.h"
+
 #include "waLBerlaDefinitions.h"
 
-#ifdef WALBERLA_CXX_COMPILER_IS_MSVC
-
-#include <process.h>
-
-namespace walberla {
-
-   uint_t getpid()
-   {
-      return uint_c( ::_getpid() );
-   }
-
-}
-
-
-#else
-
 #ifdef WALBERLA_CXX_COMPILER_IS_IBM
-#ifndef _POSIX_SOURCE
-#define _POSIX_SOURCE
-#endif
+#   ifndef _POSIX_SOURCE
+#      define _POSIX_SOURCE
+#   endif
 #endif
 
 #include <unistd.h>
 
-namespace walberla {
+namespace walberla
+{
 
-   uint_t getpid()
-   {
-      return uint_c( ::getpid() );
-   }
+uint_t getpid() { return uint_c(::getpid()); }
 
-}
-
-#endif
-
+} // namespace walberla

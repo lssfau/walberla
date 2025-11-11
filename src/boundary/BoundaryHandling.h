@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -766,7 +766,7 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isDomain( c
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isEmpty( const Cell & cell ) const
 {
-   return !flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), boundary_ ) && 
+   return !flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), boundary_ ) &&
           !flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), domain_ );
 }
 
@@ -2251,7 +2251,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()(
 
    WALBERLA_ASSERT( checkConsistency( localCells ) );
 
-   #if defined(_OPENMP) && !(defined(_MSC_VER) && _MSC_VER < 1925)
+   #if defined(_OPENMP)
    const int zMin = int_c( localCells.zMin() );
    const int zMax = int_c( localCells.zMax() );
    #pragma omp parallel for schedule(static) if(threadSafeBCs_)
@@ -2667,7 +2667,7 @@ inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil,
 {
    using BoundaryType = typename std::tuple_element_t<N, BoundariesTuple>;
    const BoundaryType & boundaryCondition = std::get<N>( boundaryConditions );
-   
+
    if( boundaryCondition.getUID() == uid )
       return BoundaryType::createConfiguration( config );
 

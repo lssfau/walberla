@@ -34,8 +34,6 @@
 
 #ifdef __GNUC__
 #define RESTRICT __restrict__
-#elif _MSC_VER
-#define RESTRICT __restrict
 #else
 #define RESTRICT
 #endif
@@ -105,7 +103,7 @@ class D3Q19StorageSpecification
       using PdfField_T = field::GhostLayerField<double, 19>;
       using value_type = typename PdfField_T::value_type;
 
-      
+
 
       static const bool inplace = false;
 
@@ -163,7 +161,7 @@ class D3Q19StorageSpecification
          return ci.numCells() * 19 * uint_c(sizeof(value_type));
       }
 
-      
+
 
     private:
       const uint_t sizes[27] { 0, 5, 5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };

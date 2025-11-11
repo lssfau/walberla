@@ -8,7 +8,6 @@ target_sources( walberla_core
         TestSubsystem.h
         all.h
         demangle.h
-        extern/StackWalker.h
 )
 
 target_sources( walberla_core
@@ -18,5 +17,4 @@ target_sources( walberla_core
         Debug.cpp
         PrintStacktrace.cpp
         TestSubsystem.cpp
-        extern/StackWalker.cpp
 )
