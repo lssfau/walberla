@@ -408,7 +408,7 @@ nvidia-smi
 
 </div>
 
-### Configure CMake for CUDA
+### Configure CMake for CUDA {#cuda-cmake-support}
 
 The CUDA support in CMake is enabled via `WALBERLA_BUILD_WITH_CUDA`.
 When this flag is set to `ON`, waLBerla automates several steps for using CUDA in the CMake project.
@@ -450,6 +450,71 @@ cmake \
     -DCMAKE_CUDA_ARCHITECTURES=61 \
     ...
 ```
+
+## HIP Support {#hip-support}
+
+### Prerequisites
+
+For a HIP support in CMake, installing the AMDGPU drivers and the ROCm package is required.
+You can find installation instructions [here](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html).
+You can verify your installation by running
+
+```bash
+rocminfo
+```
+
+<div class="tex2jax_ignore">
+
+> [!note]
+> In case `rocminfo` is not found, adding it to `PATH` may resolve the issue.
+> The necessary steps are described in ROCms [post-installation instructions](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/post-install.html).
+
+</div>
+
+### Configure CMake for HIP
+
+Analoguous to CUDA, the HIP support in CMake is enabled via `WALBERLA_BUILD_WITH_HIP`.
+When this flag is set to `ON`, waLBerla employs automated steps for setting up the CMake support (analoguous to the [CUDA CMake support](#cuda-cmake-support) chapter).
+
+The `CMAKE_HIP_ARCHITECTURES` specifies the AMD ROCm target architectures,
+which are then used by ROCm's `clang++` to generate hardware-specific code.
+If you are not sure which architecture level your GPU has,
+refer to [the ROCm references](https://rocm.docs.amd.com/en/latest/reference/gpu-arch-specs.html).
+If no device architecture is provided, CMake will select a sensible default.
+It is, however, advised to specify the architecture if it is known.
+
+`CMAKE_PREFIX_PATH` might be needed in case the dependencies are not found in standard system locations. 
+It is used to instruct CMake to search for package config files that are used to enable usage of `find_package(hip)` 
+within waLBerla's CMake pipeline and should point to the root directory of your ROCm installation 
+(mostly found in `/opt/rocm`).
+
+To use HIP in waLBerla, set at least `WALBERLA_BUILD_WITH_HIP` e.g. in the CMake presets file:
+
+<div class="tex2jax_ignore">
+
+```json
+"cacheVariables": {
+  "WALBERLA_BUILD_WITH_HIP": true,
+  "CMAKE_HIP_ARCHITECTURES": "\"gfx1032;gfx1035\"",
+  "CMAKE_PREFIX_PATH=": "/opt/rocm",
+}
+```
+
+</div>
+
+Or on the command line:
+
+```
+cmake \
+    -DWALBERLA_BUILD_WITH_HIP=ON \
+    -DCMAKE_HIP_ARCHITECTURES="gfx1032;gfx1035" \
+    -DCMAKE_PREFIX_PATH=/opt/rocm \
+    ...
+```
+
+> [!note]
+> In case the HIP compiler is not able to compile a simple test program due to linking errors to C++ libraries,
+> please refer to the [ROCM troubleshooting page](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/install-faq.html#issue-4-c-libraries).
 
 ## OpenMesh for Geometry Processing
 
