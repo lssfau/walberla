@@ -58,12 +58,12 @@ public:
 };
 
 template <>
-void reset<ContactHistoryNotification>(data::Particle& p)
+inline void reset<ContactHistoryNotification>(data::Particle& p)
 {
    p.setNewContactHistory(std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>());
 }
 
-void reduce(data::Particle&& p, const ContactHistoryNotification::Parameters& objparam)
+inline void reduce(data::Particle&& p, const ContactHistoryNotification::Parameters& objparam)
 {
    auto& ch = p.getNewContactHistoryRef();
    for (auto& entry : objparam.contactHistory_)

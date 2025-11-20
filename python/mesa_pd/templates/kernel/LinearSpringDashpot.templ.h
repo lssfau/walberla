@@ -111,7 +111,7 @@ private:
    {%- endfor %}
 };
 
-LinearSpringDashpot::LinearSpringDashpot(const uint_t numParticleTypes)
+inline LinearSpringDashpot::LinearSpringDashpot(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}

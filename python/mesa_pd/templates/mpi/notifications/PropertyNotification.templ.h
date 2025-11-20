@@ -58,21 +58,21 @@ public:
 };
 
 template <>
-void reset<{{name}}>(data::Particle& p)
+inline void reset<{{name}}>(data::Particle& p)
 {
    {%- for prop in properties %}
    p.set{{prop.name | capFirst}}( {{prop.resetValue}} );
    {%- endfor %}
 }
 
-void reduce(data::Particle&& p, const {{name}}::Parameters& objparam)
+inline void reduce(data::Particle&& p, const {{name}}::Parameters& objparam)
 {
    {%- for prop in properties %}
    p.get{{prop.name | capFirst}}Ref() += objparam.{{prop.name}}_;
    {%- endfor %}
 }
 
-void update(data::Particle&& p, const {{name}}::Parameters& objparam)
+inline void update(data::Particle&& p, const {{name}}::Parameters& objparam)
 {
    {%- for prop in properties %}
    p.set{{prop.name | capFirst}}( objparam.{{prop.name}}_ );

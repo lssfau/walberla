@@ -98,7 +98,7 @@ private:
    {%- endfor %}
 };
 
-NonLinearSpringDashpot::NonLinearSpringDashpot(const uint_t numParticleTypes, const real_t collisionTime)
+inline NonLinearSpringDashpot::NonLinearSpringDashpot(const uint_t numParticleTypes, const real_t collisionTime)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}

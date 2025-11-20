@@ -85,7 +85,7 @@ private:
    {%- endfor %}
 };
 
-ForceLJ::ForceLJ(const uint_t numParticleTypes)
+inline ForceLJ::ForceLJ(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
