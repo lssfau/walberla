@@ -25,7 +25,6 @@
 #include "IBlock.h"
 
 #include "core/DataTypes.h"
-#include "core/NonCopyable.h"
 #include "core/Set.h"
 #include "core/debug/Debug.h"
 #include "core/math/Vector3.h"
@@ -65,7 +64,7 @@ namespace domain_decomposition {
 */
 //**********************************************************************************************************************
 
-class BlockStorage : private NonCopyable {
+class BlockStorage {
 
    friend class IBlock;
    friend class StructuredBlockStorage;
@@ -171,6 +170,12 @@ public:
 
    /// Deleted default constructor
    BlockStorage() = delete;
+
+   /// Deleted copy constructor 
+   BlockStorage( const BlockStorage& ) = delete;
+
+   /// Deleted copy assignment operator 
+   BlockStorage& operator=( const BlockStorage& ) = delete;
 
    const AABB& getDomain() const { return domain_; } ///< returns an axis-aligned bounding box that covers the entire simulation space/domain
 

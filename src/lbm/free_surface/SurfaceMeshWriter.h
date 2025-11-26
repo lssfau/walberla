@@ -22,8 +22,6 @@
 
 #include "blockforest/StructuredBlockForest.h"
 
-#include "core/Filesystem.h"
-
 #include "field/AddToStorage.h"
 
 #include "geometry/mesh/TriangleMeshIO.h"
@@ -31,6 +29,8 @@
 #include "postprocessing/FieldToSurfaceMesh.h"
 
 #include "timeloop/SweepTimeloop.h"
+
+#include <filesystem>
 
 namespace walberla
 {
@@ -101,9 +101,9 @@ class SurfaceMeshWriter
    {
       WALBERLA_ROOT_SECTION()
       {
-         const filesystem::path basePath(baseFolder_);
-         if (filesystem::exists(basePath)) { filesystem::remove_all(basePath); }
-         filesystem::create_directories(basePath);
+         const std::filesystem::path basePath(baseFolder_);
+         if (std::filesystem::exists(basePath)) { std::filesystem::remove_all(basePath); }
+         std::filesystem::create_directories(basePath);
       }
       WALBERLA_MPI_BARRIER();
    }

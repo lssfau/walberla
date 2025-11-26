@@ -29,7 +29,6 @@
 #include <stdexcept>
 #include <core/mpi/MPIManager.h>
 #include <core/debug/Debug.h>
-#include <core/NonCreateable.h>
 #include <core/DataTypes.h>
 
 
@@ -50,9 +49,16 @@ namespace walberla {
  * of type \a T and the rank of the local MPI process.
  */
 template< typename T >
-class UniqueID : private NonCreateable
+class UniqueID 
 {
 public:
+   //**Constructor***************************************************************************
+   /*!\name Deleted constructor. */
+   //@{
+   UniqueID() = delete;
+   //@}
+   //**********************************************************************************************
+
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{

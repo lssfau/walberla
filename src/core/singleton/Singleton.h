@@ -23,7 +23,6 @@
 #pragma once
 
 #include "core/DataTypes.h"
-#include "core/NonCopyable.h"
 
 #include <mutex>
 
@@ -61,7 +60,7 @@ namespace singleton {
 
 //**********************************************************************************************************************
 template< typename T >  // Type of the singleton
-class Singleton : private NonCopyable
+class Singleton
 {
 protected:
    //**Constructor******************************************************************************************************
@@ -69,18 +68,28 @@ protected:
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
     */
-   explicit Singleton()
-   = default;
+   explicit Singleton() = default;
    //*******************************************************************************************************************
 
    //**Destructor*******************************************************************************************************
    /*!\brief Destructor for the Singleton class.
     */
-   ~Singleton()
-   = default;
+   ~Singleton() = default;
    //*******************************************************************************************************************
 
 public:
+   //**Copy Constructor*************************************************************************************************
+   /*!\brief Deleted copy constructor prevents copying.
+    */
+   Singleton( const Singleton& ) = delete;
+   //*******************************************************************************************************************
+
+   //**Copy assignment operator*****************************************************************************************
+   /*!\brief Deleted copy assignment operator prevents assignment.
+    */
+   Singleton& operator=( const Singleton& ) = delete;
+   //*******************************************************************************************************************
+
    //**Instance function***************************************************************************
    /*!\name Instance function */
    //@{

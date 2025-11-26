@@ -26,10 +26,9 @@
 #include "core/mpi/Broadcast.h"
 #include "core/mpi/BufferDataTypeExtensions.h"
 
+#include <filesystem>
 #include <fstream>
 #include <string>
-
-#include "core/Filesystem.h"
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
 
@@ -75,10 +74,10 @@ bool readFromStream( std::istream & inputStream, MeshType & mesh, const std::str
 template< typename MeshType >
 void readAndBroadcast( const std::string & filename, MeshType & mesh, bool binaryFile = false )
 {
-   if( !filesystem::exists( filename ) )
+   if( !std::filesystem::exists( filename ) )
       WALBERLA_ABORT( "The mesh file \"" << filename << "\" does not exist!" );
 
-   std::string extension = filesystem::path( filename ).extension().string();
+   std::string extension = std::filesystem::path( filename ).extension().string();
 
    std::string str;
 
@@ -121,11 +120,11 @@ void readAndBroadcast( const std::string & filename, MeshType & mesh, bool binar
 template< typename MeshType >
 void readFromFile( const std::string & filename, MeshType & mesh, bool binaryFile = false )
 {
-   if (!filesystem::exists(filename)) {
+   if (!std::filesystem::exists(filename)) {
       WALBERLA_ABORT( "The mesh file \"" << filename << "\" does not exist!" );
    }
 
-   std::string extension = filesystem::path(filename).extension().string();
+   std::string extension = std::filesystem::path(filename).extension().string();
 
    std::ios_base::openmode openMode = std::ifstream::in;
    if (binaryFile) {

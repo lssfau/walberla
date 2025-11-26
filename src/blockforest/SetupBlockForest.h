@@ -25,7 +25,6 @@
 #include "SetupBlock.h"
 #include "Types.h"
 
-#include "core/NonCopyable.h"
 #include "core/debug/Debug.h"
 #include "core/selectable/SetSelectableObject.h"
 #include "core/math/AABB.h"
@@ -41,7 +40,7 @@ namespace walberla {
 namespace blockforest {
 
 
-class SetupBlockForest : private NonCopyable {
+class SetupBlockForest {
 
 public:
 
@@ -152,6 +151,8 @@ public:
 
    inline  SetupBlockForest();
    inline ~SetupBlockForest();
+   SetupBlockForest( const SetupBlockForest& ) = delete;
+   SetupBlockForest& operator=( const SetupBlockForest& ) = delete;
 
    const AABB& getDomain() const { return domain_; }
 

@@ -39,6 +39,7 @@
 #include <random>
 #include <cstring>
 #include <iostream>
+#include <optional>
 
 
 using namespace walberla;
@@ -279,7 +280,7 @@ void bufferTestUInt8()
 {
    std::string stdString("Hello World!"), stdStringEmpty;
 
-   walberla::optional<int> optional0, optional1, optional2, optional3;
+   std::optional<int> optional0, optional1, optional2, optional3;
    optional2 = 23;
    optional3 = 42;
 
@@ -293,10 +294,10 @@ void bufferTestUInt8()
 
    std::string recvStdString, recvStdStringEmpty;
 
-   walberla::optional<int> recvOptional0 = 123;
-   walberla::optional<int> recvOptional1 = 123;
-   walberla::optional<int> recvOptional2 = 456;
-   walberla::optional<int> recvOptional3 = 456;
+   std::optional<int> recvOptional0 = 123;
+   std::optional<int> recvOptional1 = 123;
+   std::optional<int> recvOptional2 = 456;
+   std::optional<int> recvOptional3 = 456;
 
    rb >> recvStdString >> recvStdStringEmpty;
    rb >> recvOptional0 >> recvOptional1;

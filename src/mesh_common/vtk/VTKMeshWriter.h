@@ -29,8 +29,7 @@
 #include "vtk/Base64Writer.h"
 #include "vtk/UtilityFunctions.h"
 
-#include "core/Filesystem.h"
-
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -201,15 +200,15 @@ VTKMeshWriter<MeshType>::VTKMeshWriter( const shared_ptr<const MeshType> & mesh,
    {
       std::ostringstream folder;
       folder << baseFolder_ << '/' << identifier_;
-      if( filesystem::exists( folder.str() ) )
-         filesystem::remove_all( folder.str() );
+      if( std::filesystem::exists( folder.str() ) )
+         std::filesystem::remove_all( folder.str() );
 
       std::ostringstream pvdFile;
       pvdFile << baseFolder_ << '/' << identifier_ << ".pvd";
-      if( filesystem::exists( pvdFile.str() ) )
-         filesystem::remove( pvdFile.str() );
+      if( std::filesystem::exists( pvdFile.str() ) )
+         std::filesystem::remove( pvdFile.str() );
 
-      filesystem::create_directories( folder.str() );
+      std::filesystem::create_directories( folder.str() );
    }
    WALBERLA_MPI_BARRIER();
 }

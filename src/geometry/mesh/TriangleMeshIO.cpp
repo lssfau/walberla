@@ -28,13 +28,13 @@
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"
 #include "core/mpi/Broadcast.h"
-#include "core/Regex.h"
 #include "core/StringUtility.h"
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -351,8 +351,8 @@ namespace geometry {
       // replace multiline comments: /\\*.*?\\*/
       // replace single line comments //.*?\n
       // replace chars: < > , \ n \t
-      walberla::regex const r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
-      std::string const stripped = walberla::regex_replace( source , r , " " ) ;
+      std::regex const r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
+      std::string const stripped = std::regex_replace( source , r , " " ) ;
 
       TriangleMesh::index_t faceOffset = 0u;
       if( clear )

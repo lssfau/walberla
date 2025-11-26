@@ -27,7 +27,7 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include "core/Filesystem.h"
+#include <filesystem>
 
 
 namespace walberla {
@@ -55,15 +55,13 @@ FileGatherScheme::~FileGatherScheme()
 
 void FileGatherScheme::deleteTemporaryFiles()
 {
-   using namespace filesystem;
-
    for(int rank=0; rank < MPIManager::instance()->numProcesses(); ++rank)
    {
       std::string fileName = "tmp_collection_" + std::to_string(myId_) + "_"
                                                + std::to_string(rank);
 
-      if( exists(fileName) )
-         remove(fileName);
+      if( std::filesystem::exists(fileName) )
+         std::filesystem::remove(fileName);
    }
 }
 
@@ -104,9 +102,6 @@ void FileGatherScheme::writeToFile()
 
 void FileGatherScheme::collectFromFiles()
 {
-   using namespace filesystem;
-   using namespace std;
-
    if ( fileStream_.is_open() )
       fileStream_.close();
 
@@ -117,16 +112,16 @@ void FileGatherScheme::collectFromFiles()
    if(MPIManager::instance()->worldRank() != 0)
       return;
 
-   vector< std::ifstream* > inputStreams;
+   std::vector< std::ifstream* > inputStreams;
 
    //look for files from all processes
    for(int rank=0; rank < MPIManager::instance()->numProcesses(); ++rank)
    {
-      string fileName = "tmp_collection_" + to_string(myId_) + "_"
-                                          + to_string(rank);
+      std::string fileName = "tmp_collection_" + std::to_string(myId_) + "_"
+                                          + std::to_string(rank);
 
-      if(exists(fileName)) {
-		  std::ifstream * str = new std::ifstream(fileName.c_str(),ios::in|ios::binary);
+      if(std::filesystem::exists(fileName)) {
+		  std::ifstream * str = new std::ifstream(fileName.c_str(), std::ios::in | std::ios::binary);
          inputStreams.push_back(str);
       }
    }

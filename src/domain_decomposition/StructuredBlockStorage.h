@@ -24,7 +24,6 @@
 #include "BlockStorage.h"
 
 #include "core/DataTypes.h"
-#include "core/NonCopyable.h"
 #include "core/cell/Cell.h"
 #include "core/cell/CellInterval.h"
 #include "core/debug/Debug.h"
@@ -97,11 +96,13 @@ struct StructuredBlockDataCreator {
 */
 //**********************************************************************************************************************
 
-class StructuredBlockStorage : private NonCopyable {
+class StructuredBlockStorage {
 
 public:
 
    StructuredBlockStorage() = delete;
+   StructuredBlockStorage( const StructuredBlockStorage& ) = delete;
+   StructuredBlockStorage& operator=( const StructuredBlockStorage& ) = delete;
 
    /// helper class for adding multiple block data initialization functions
    class StructuredBlockDataAdder {

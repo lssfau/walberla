@@ -28,7 +28,6 @@
 #include "core/mpi/MPIManager.h"
 #include "core/singleton/Singleton.h"
 #include "core/timing/WcPolicy.h"
-#include "core/Regex.h"
 #include "core/StringUtility.h"
 
 #include <functional>
@@ -37,6 +36,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -113,12 +113,12 @@ public:
    void logCallerPath( bool log ) { logCallerPath_ = log; }
    bool logCallerPath() const { return logCallerPath_; }
 
-   void                                addIgnoreRegex( const walberla::regex & regex ) { ignoreRegexes_.push_back( regex ); }
-   const std::vector< walberla::regex > & getIgnoreRegexes() const { return ignoreRegexes_; }
+   void                                addIgnoreRegex( const std::regex & regex ) { ignoreRegexes_.push_back( regex ); }
+   const std::vector< std::regex > & getIgnoreRegexes() const { return ignoreRegexes_; }
    void                              clearIgnoreRegexes() { ignoreRegexes_.clear(); }
 
-   void                                addIgnoreWarningRegex( const walberla::regex & regex ) { ignoreWarningRegexes_.push_back( regex ); }
-   const std::vector< walberla::regex > & getIgnoreWarningRegexes() const { return ignoreWarningRegexes_; }
+   void                                addIgnoreWarningRegex( const std::regex & regex ) { ignoreWarningRegexes_.push_back( regex ); }
+   const std::vector< std::regex > & getIgnoreWarningRegexes() const { return ignoreWarningRegexes_; }
    void                              clearIgnoreWarningRegexes() { ignoreWarningRegexes_.clear(); }
 
 
@@ -140,7 +140,7 @@ private:
 
    inline Logging();
 
-   bool isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
+   bool isInIgnoreCallerPaths( const std::vector< std::regex > & regexes,
                                const std::string & callerPath, const int line ) const;
 
    inline void logError   ( const std::string & message, const std::string & callerPath, const int line );
@@ -179,8 +179,8 @@ private:
 
    bool logCallerPath_{ false };
 
-   std::vector< walberla::regex > ignoreRegexes_;
-   std::vector< walberla::regex > ignoreWarningRegexes_;
+   std::vector< std::regex > ignoreRegexes_;
+   std::vector< std::regex > ignoreWarningRegexes_;
 };
 
 

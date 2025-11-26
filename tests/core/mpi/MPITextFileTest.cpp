@@ -24,11 +24,11 @@
 
 #include "core/Abort.h"
 #include "core/DataTypes.h"
-#include "core/Filesystem.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/mpi/MPIManager.h"
 #include "core/stringToNum.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -60,7 +60,7 @@ void testSameSizeFile(const std::string& filename, const size_t chunkSize)
    WALBERLA_MPI_BARRIER();
    WALBERLA_ROOT_SECTION()
    {
-      if (filesystem::exists(filename)) filesystem::remove(filename);
+      if (std::filesystem::exists(filename)) std::filesystem::remove(filename);
    }
    WALBERLA_MPI_BARRIER();
 }
@@ -95,7 +95,7 @@ void testDifferentSizeFile(const std::string& filename, const size_t minChunkSiz
    WALBERLA_MPI_BARRIER();
    WALBERLA_ROOT_SECTION()
    {
-      if (filesystem::exists(filename)) filesystem::remove(filename);
+      if (std::filesystem::exists(filename)) std::filesystem::remove(filename);
    }
    WALBERLA_MPI_BARRIER();
 }

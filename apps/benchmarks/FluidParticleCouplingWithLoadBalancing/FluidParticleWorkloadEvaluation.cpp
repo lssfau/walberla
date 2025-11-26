@@ -383,9 +383,9 @@ int main( int argc, char **argv )
    // create folder to store logging files
    WALBERLA_ROOT_SECTION()
    {
-      walberla::filesystem::path path1( baseFolder );
-      if( !walberla::filesystem::exists( path1 ) )
-         walberla::filesystem::create_directory( path1 );
+      std::filesystem::path path1( baseFolder );
+      if( !std::filesystem::exists( path1 ) )
+         std::filesystem::create_directory( path1 );
    }
 
 

@@ -209,17 +209,17 @@ class LoadBalancer
    std::function< void(mpi::SendBuffer& buffer, const PhantomBlock& block) > phantomWeightsPack =
       [](mpi::SendBuffer& buffer, const PhantomBlock& block) { buffer << block.getData< PhantomWeight >().weight(); };
 
-   std::function< void(mpi::RecvBuffer& buffer, const PhantomBlock&, walberla::any& data) > phantomWeightsUnpack =
-      [](mpi::RecvBuffer& buffer, const PhantomBlock&, walberla::any& data) {
+   std::function< void(mpi::RecvBuffer& buffer, const PhantomBlock&, std::any& data) > phantomWeightsUnpack =
+      [](mpi::RecvBuffer& buffer, const PhantomBlock&, std::any& data) {
          typename PhantomWeight::weight_t w;
          buffer >> w;
          data = PhantomWeight(w);
       };
 
-   std::function< void(std::vector< std::pair< const PhantomBlock*, walberla::any > >& blockData,
+   std::function< void(std::vector< std::pair< const PhantomBlock*, std::any > >& blockData,
                        const PhantomBlockForest&) >
       blockWeightAssignment =
-         [this](std::vector< std::pair< const PhantomBlock*, walberla::any > >& blockData, const PhantomBlockForest&) {
+         [this](std::vector< std::pair< const PhantomBlock*, std::any > >& blockData, const PhantomBlockForest&) {
             for (auto &[block, data] : blockData)
             {
                if (block->getState().contains(BlockStateDetectorSweep< FlagField_T >::fullFreeSurface))

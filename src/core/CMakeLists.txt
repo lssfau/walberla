@@ -67,37 +67,26 @@ target_sources( walberla_core
         PUBLIC
         Abort.h
         AllSet.h
-        Any.h
-        Array.h
         ConcatIterator.h
         Conversion.h
         DataTypes.h
         EndianIndependentSerialization.h
         Environment.h
-        Filesystem.h
-        Format.hpp
         FunctionTraits.h
-        GetPID.h
         Hostname.h
         Macros.h
         MemoryUsage.h
-        NonCopyable.h
-        NonCreateable.h
         OpenMP.h
-        Optional.h
         RandomUUID.h
-        Regex.h
         Sanitizer.h
         Set.h
         SharedFunctor.h
-        Sleep.h
         STLIO.h
         stringToNum.h
         StringUtility.h
         StringUtility.impl.h
         typeToString.h
         UniqueID.h
-        Variant.h
         VectorTrait.h
         waLBerlaBuildInfo.h
 )
@@ -108,11 +97,9 @@ target_sources( walberla_core
         Conversion.cpp
         DataTypes.cpp
         Environment.cpp
-        GetPID.cpp
         Hostname.cpp
         MemoryUsage.cpp
         RandomUUID.cpp
-        Sleep.cpp
         waLBerlaBuildInfo.cpp
 )
 

@@ -26,7 +26,6 @@
 #include "BlockReconstruction.h"
 #include "Types.h"
 
-#include "core/NonCopyable.h"
 #include "core/debug/Debug.h"
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
@@ -40,7 +39,7 @@ namespace blockforest {
 
 
 
-class SetupBlock : private NonCopyable {
+class SetupBlock {
 
 public:
 
@@ -50,6 +49,8 @@ public:
                       const uint_t level );
 
    ~SetupBlock() { for(auto & child : children_) delete child; }
+   SetupBlock( const SetupBlock& ) = delete;
+   SetupBlock& operator=( const SetupBlock& ) = delete;
 
    const BlockID& getId()            const { return Id_; }
          uint_t   getProcess()       const { return process_; }

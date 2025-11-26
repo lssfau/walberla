@@ -28,8 +28,8 @@
 #include "core/debug/Debug.h"
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
-#include "core/Any.h"
 
+#include <any>
 #include <vector>
 
 
@@ -85,7 +85,7 @@ public:
    void addData( const T & data ) { data_ = data; }
    
    template< typename T >
-   T getData() const { return walberla::any_cast<T>( data_ ); }
+   T getData() const { return std::any_cast<T>( data_ ); }
    
    bool hasData() const {
       return data_.has_value();
@@ -144,7 +144,7 @@ private:
    uint_t level_;
 
    // set by the user/application via callback
-   walberla::any data_;
+   std::any data_;
 
    std::array< std::vector< NeighborBlock* >, 26 > neighborhoodSection_; // the 26 neighborhood sections (can be restored from 'neighborhood_')
    std::vector< NeighborBlock  > neighborhood_;            // all neighbor blocks

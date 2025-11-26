@@ -43,7 +43,7 @@ public:
    explicit MetisAssignmentFunctor( const std::vector< WeightEvaluationFct > & weightEvaluationFctVector )
          : weightEvaluationFctVector_(weightEvaluationFctVector) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & phantomBlockForest);
+   void operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData, const PhantomBlockForest & phantomBlockForest);
 
    uint_t getNumberOfConstrains() const { return weightEvaluationFctVector_.size(); }
 

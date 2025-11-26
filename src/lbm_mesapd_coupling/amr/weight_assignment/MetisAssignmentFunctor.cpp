@@ -24,7 +24,7 @@ namespace walberla {
 namespace lbm_mesapd_coupling {
 namespace amr {
 
-void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData,
+void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData,
       const PhantomBlockForest & /*phantomBlockForest*/)
 {
    for (auto &it : blockData) {

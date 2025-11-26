@@ -30,8 +30,8 @@
 #include "core/cell/CellInterval.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
-#include "core/Optional.h"
 
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -102,7 +102,7 @@ inline void walberla::mesh::RefinementSelection<DistanceObject>::operator()( blo
       if( blockLevel >= level_ )
          continue;
 
-      walberla::optional< bool > intersects = intersectsSurface( *distanceObject_, blocks[ shuffle[ii] ]->getAABB(), maxError_, distance_ );
+      std::optional< bool > intersects = intersectsSurface( *distanceObject_, blocks[ shuffle[ii] ]->getAABB(), maxError_, distance_ );
       if( !intersects || intersects.value() )
          refine[ shuffle[ ii ] ] = uint8_t( 1 );
    }

@@ -259,13 +259,13 @@ void PhantomBlockForest::assignBlockData( const PhantomBlockDataAssignmentFuncti
 {
    if( function )
    {
-      std::vector< std::pair< const PhantomBlock *, walberla::any > > blockData;
+      std::vector< std::pair< const PhantomBlock *, std::any > > blockData;
 
       for(auto & it : blocks_)
       {
          auto & block = it.second;
          WALBERLA_ASSERT_NOT_NULLPTR( block.get() );
-         blockData.emplace_back( block.get(), walberla::any() );
+         blockData.emplace_back( block.get(), std::any() );
       }
 
       function( blockData, *this );
@@ -492,7 +492,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
          if( unpackBlockData )
          {
             WALBERLA_ASSERT( static_cast<bool>(packBlockData) );
-            walberla::any data;
+            std::any data;
             unpackBlockData( buffer, *phantom, data );
             phantom->addData( data );
          }

@@ -259,12 +259,6 @@ waLBerla_add_test_executable( VersionTest VersionTest.cpp )
 target_link_libraries ( VersionTest walberla::core )
 waLBerla_execute_test( NAME VersionTest )
 
-if ( WALBERLA_CXX_COMPILER_IS_INTEL AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0" )
-   waLBerla_add_test_executable( VariantTest VariantTest.cpp )
-   target_link_libraries ( VariantTest walberla::core )
-   waLBerla_execute_test( NAME VariantTest )
-endif()
-
 ##################
 # load_balancing #
 ##################
