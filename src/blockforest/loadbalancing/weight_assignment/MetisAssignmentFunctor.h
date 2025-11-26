@@ -45,7 +45,7 @@ public:
 
    MetisAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData,
+   void operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData,
                     const PhantomBlockForest & forest )
    {
       const std::array< bool, 3 > periodic {{forest.getBlockForest().isPeriodic(0),

@@ -626,9 +626,9 @@ int main( int argc, char **argv )
       if( fileIO )
       {
          // create base directory if it does not yet exist
-         filesystem::path tpath( baseFolder );
-         if( !filesystem::exists( tpath ) )
-            filesystem::create_directory( tpath );
+         std::filesystem::path tpath( baseFolder );
+         if( !std::filesystem::exists( tpath ) )
+            std::filesystem::create_directory( tpath );
       }
    }
 
@@ -778,7 +778,7 @@ int main( int argc, char **argv )
    if(readFromCheckPointFile && writeCheckPointFile )
    {
       // decide which option to choose
-      if(filesystem::exists( checkPointFileName+"_lbm.txt"))
+      if(std::filesystem::exists( checkPointFileName+"_lbm.txt"))
       {
          WALBERLA_LOG_INFO_ON_ROOT("Checkpoint file already exists! Will skip writing check point file and start from this check point!");
          writeCheckPointFile = false;

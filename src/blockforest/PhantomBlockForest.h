@@ -44,14 +44,14 @@ public:
 
    using BlockStateDeterminationFunction = std::function<Set<SUID> (const std::vector<std::pair<BlockID, Set<SUID>>> &, const BlockID &)>;
 
-   using PhantomBlockDataAssignmentFunction = std::function<void (std::vector<std::pair<const PhantomBlock *, walberla::any>> &, const PhantomBlockForest &)>;
+   using PhantomBlockDataAssignmentFunction = std::function<void (std::vector<std::pair<const PhantomBlock *, std::any>> &, const PhantomBlockForest &)>;
 
    /// \param iteration execution counter of this callback
    /// \return should the callback rerun after phantom block migration?
    using MigrationPreparationFunction = std::function<bool (std::vector<std::pair<const PhantomBlock *, uint_t>> &, std::set<uint_t> &, const PhantomBlockForest &, const uint_t)>; // = load balancing
 
    using PhantomBlockDataPackFunction = std::function<void (mpi::SendBuffer &, const PhantomBlock &)>;
-   using PhantomBlockDataUnpackFunction = std::function<void (mpi::RecvBuffer &, const PhantomBlock &, walberla::any &)>;
+   using PhantomBlockDataUnpackFunction = std::function<void (mpi::RecvBuffer &, const PhantomBlock &, std::any &)>;
 
 
 

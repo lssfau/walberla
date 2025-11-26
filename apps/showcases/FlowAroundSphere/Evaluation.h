@@ -21,7 +21,6 @@
 
 #include "core/config/Config.h"
 #include "core/math/Constants.h"
-#include "core/Filesystem.h"
 #include "core/math/Sample.h"
 
 #include "lbm_generated/field/PdfField.h"
@@ -31,6 +30,7 @@
 #include "FlowAroundSphereInfoHeader.h"
 
 #include <deque>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -84,8 +84,8 @@ class Evaluation
 
       WALBERLA_ROOT_SECTION(){
          if (logToFile_){
-            filesystem::path dataFile( dragFilename_.c_str() );
-            if( filesystem::exists( dataFile ) )
+            std::filesystem::path dataFile( dragFilename_.c_str() );
+            if( std::filesystem::exists( dataFile ) )
                std::remove( dataFile.string().c_str() );
 
             std::ofstream outfile( dragFilename_.c_str() );

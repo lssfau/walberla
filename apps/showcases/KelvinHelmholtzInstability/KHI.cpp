@@ -133,8 +133,8 @@ namespace walberla {
                             codegen::configID + "/nCells_" + std::to_string(int(cellsPerLength));
 
          WALBERLA_ROOT_SECTION() {
-            if( !filesystem::exists(outputBaseFolder) ) {
-               filesystem::create_directories(outputBaseFolder);
+            if( !std::filesystem::exists(outputBaseFolder) ) {
+               std::filesystem::create_directories(outputBaseFolder);
             }
          }
 
@@ -387,13 +387,13 @@ namespace walberla {
          if(!plotFrequency_)
             return;
 
-         const filesystem::path path(baseFolder_);
+         const std::filesystem::path path(baseFolder_);
          momentumThicknessFilePath_ = path / ("momentum_thickness.txt");
          tkeFilePath_ = path / ("tke.txt");
 
          WALBERLA_ROOT_SECTION() {
-            filesystem::remove(momentumThicknessFilePath_);
-            filesystem::remove(tkeFilePath_);
+            std::filesystem::remove(momentumThicknessFilePath_);
+            std::filesystem::remove(tkeFilePath_);
          }
 
          WALBERLA_MPI_WORLD_BARRIER();
@@ -570,8 +570,8 @@ namespace walberla {
       const uint_t plotStart_{};
 
       const std::string baseFolder_{};
-      filesystem::path momentumThicknessFilePath_;
-      filesystem::path tkeFilePath_;
+      std::filesystem::path momentumThicknessFilePath_;
+      std::filesystem::path tkeFilePath_;
 
       std::vector< BeforeFunction > beforeFunctions_;
    };

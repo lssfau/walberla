@@ -41,7 +41,7 @@ public:
    explicit WeightAssignmentFunctor( const WeightEvaluationFct & weightEvaluationFct ) :
          weightEvaluationFct_(weightEvaluationFct) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
+   void operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData, const PhantomBlockForest & )
    {
       for (auto &it : blockData) {
          const PhantomBlock * block = it.first;

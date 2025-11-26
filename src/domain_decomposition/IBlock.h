@@ -26,7 +26,6 @@
 
 #include "core/Abort.h"
 #include "core/debug/demangle.h"
-#include "core/NonCopyable.h"
 #include "core/debug/Debug.h"
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
@@ -44,7 +43,7 @@ namespace internal {
 
 /// wrapper class for any kind of block data (used only internally, never to be seen in the interface of public member functions)
 /// see: http://www.drdobbs.com/cpp/twisting-the-rtti-system-for-safe-dynami/229401004#
-class BlockData : private NonCopyable
+class BlockData
 {
 private:
 
@@ -83,6 +82,8 @@ public:
    }
 
    ~BlockData() { delete data_; }
+   BlockData( const BlockData& ) = delete;
+   BlockData& operator=( const BlockData& ) = delete;
 
    bool operator==( const BlockData& rhs ) const { return *data_ == *rhs.data_; } // every object that is registered as block data
    bool operator!=( const BlockData& rhs ) const { return !operator==( rhs ); }   // must be comparable with "==" !
@@ -184,10 +185,12 @@ class StructuredBlockStorage; // forward declaration
 */
 //**********************************************************************************************************************
 
-class IBlock : private NonCopyable
+class IBlock
 {
 public:
    IBlock() = delete;
+   IBlock( const IBlock& ) = delete;
+   IBlock& operator=( const IBlock& ) = delete;
 
    using BlockData = internal::BlockData;
 

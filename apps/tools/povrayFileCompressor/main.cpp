@@ -20,16 +20,14 @@
 
 #include "geometry/mesh/TriangleMesh.h"
 #include "geometry/mesh/TriangleMeshIO.h"
-#include "core/Regex.h"
-#include "core/Filesystem.h"
 
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <regex>
 #include <string>
 
-
-namespace filesystem = walberla::filesystem;
 
 bool verbose;
 bool quiet;
@@ -88,32 +86,32 @@ int main(int argc, char** argv)
    if( quiet && verbose )
       PRINT_ERR( "PovrayFileCompressor can't be quiet (-q) and verbose (-v) at the same time\n" )
 
-   filesystem::path inPath(argv[argc-2]);
-   if( !filesystem::exists(inPath) || !filesystem::is_directory(inPath) )
+   std::filesystem::path inPath(argv[argc-2]);
+   if( !std::filesystem::exists(inPath) || !std::filesystem::is_directory(inPath) )
       PRINT_ERR( "Path " << inPath << " does not exist or is not a directory!\n" );
 
-   filesystem::path outPath(argv[argc-1]);
-   if( !filesystem::exists(outPath) )
-      filesystem::create_directories(outPath);
+   std::filesystem::path outPath(argv[argc-1]);
+   if( !std::filesystem::exists(outPath) )
+      std::filesystem::create_directories(outPath);
 
    PRINT_DEF( "Input Path: " << inPath << "\nOutput Path: " << outPath << "\n" )
 
 
-   std::vector< std::vector<filesystem::path> > infiles;
+   std::vector< std::vector<std::filesystem::path> > infiles;
 
    PRINT_DEF( "Collecting files to compress ..." )
 
-   for(auto pit = filesystem::directory_iterator(inPath); pit != filesystem::directory_iterator(); ++pit)
+   for(auto pit = std::filesystem::directory_iterator(inPath); pit != std::filesystem::directory_iterator(); ++pit)
    {
-      if( !filesystem::is_directory( pit->status() ) )
+      if( !std::filesystem::is_directory( pit->status() ) )
          continue;
 
       PRINT_VER( "\nCollecting files to compress in: " << pit->path())
-      std::vector<filesystem::path> pfiles;
-      for(auto tit = filesystem::directory_iterator(pit->path()); tit != filesystem::directory_iterator(); ++tit)
+      std::vector<std::filesystem::path> pfiles;
+      for(auto tit = std::filesystem::directory_iterator(pit->path()); tit != std::filesystem::directory_iterator(); ++tit)
       {
-         static const walberla::regex extensionExpression("\\.dat");
-         if( walberla::regex_match( tit->path().extension().string(), extensionExpression ) )
+         static const std::regex extensionExpression("\\.dat");
+         if( std::regex_match( tit->path().extension().string(), extensionExpression ) )
             pfiles.push_back(tit->path());
       }
       if( !pfiles.empty() )
@@ -138,14 +136,14 @@ int main(int argc, char** argv)
    {
       PRINT_VER( "Compress timestep " << t << "\n" )
       PRINT_VER( "Merge Splitted Meshes: \n" )
-      PRINT_VER( "Merge Mesh: " << filesystem::absolute(infiles[0][t]).string().c_str() << "\n" )
-      std::ifstream is( filesystem::absolute(infiles[0][t]).string().c_str() );
+      PRINT_VER( "Merge Mesh: " << std::filesystem::absolute(infiles[0][t]).string().c_str() << "\n" )
+      std::ifstream is( std::filesystem::absolute(infiles[0][t]).string().c_str() );
       walberla::geometry::readMeshPov(is, mesh, true);
       is.close();
 
       for( size_t p = 1u; p < processes; ++p ){
-         PRINT_VER( "Merge Mesh: " << filesystem::absolute(infiles[p][t]).string().c_str() << "\n" )
-         std::ifstream tis( filesystem::absolute(infiles[p][t]).string().c_str() );
+         PRINT_VER( "Merge Mesh: " << std::filesystem::absolute(infiles[p][t]).string().c_str() << "\n" )
+         std::ifstream tis( std::filesystem::absolute(infiles[p][t]).string().c_str() );
          walberla::geometry::readMeshPov(tis, mesh, false);
          tis.close();
       }
@@ -170,7 +168,7 @@ int main(int argc, char** argv)
          }
       }
 
-      filesystem::path oPath = filesystem::absolute(outPath) / infiles[0][t].filename();
+      std::filesystem::path oPath = std::filesystem::absolute(outPath) / infiles[0][t].filename();
       PRINT_VER( "Write New Mesh File: " << (oPath.string().c_str()) << "\n" )
       std::ofstream os( oPath.string().c_str() );
       walberla::geometry::writeMeshPov( os, mesh, 0u, n );

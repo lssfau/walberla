@@ -27,9 +27,10 @@
 
 #include "Manager.h"
 #include "core/Abort.h"
-#include "core/Filesystem.h"
 
 #include "pybind11/eval.h"
+
+#include <filesystem>
 
 namespace walberla {
 namespace python_coupling {
@@ -50,14 +51,14 @@ namespace python_coupling {
          code << "'" << argStr  << "',";
       code << "] \n";
 
-      filesystem::path path ( fileOrModuleName );
-      path = filesystem::absolute( path );
+      std::filesystem::path path ( fileOrModuleName );
+      path = std::filesystem::absolute( path );
 
       if ( path.extension() == ".py" )
       {
          moduleName = path.stem().string();
          if ( ! path.parent_path().empty() ) {
-            std::string p = filesystem::canonical(path.parent_path()).string();
+            std::string p = std::filesystem::canonical(path.parent_path()).string();
             code << "sys.path.append( r'" << p << "')" << "\n";
          }
       }

@@ -25,8 +25,8 @@
 #include "mesh_common/TriangleMeshes.h"
 
 #include "core/math/GenericAABB.h"
-#include "core/Optional.h"
 
+#include <optional>
 #include <set>
 #include <iterator>
 #include <queue>
@@ -77,13 +77,13 @@ template< typename MeshType >
 void findConnectedVertices( const MeshType & mesh, const typename MeshType::FaceHandle & face, std::vector< typename MeshType::VertexHandle > & outVertices );
 
 template< typename DistanceObject, typename T, typename U >
-walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
+std::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
 
 template< typename DistanceObject, typename T, typename U >
-walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
+std::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
 
 template< typename DistanceObject, typename T, typename U, typename V >
-walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance );
+std::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance );
 
 template< typename MeshType, typename InputIterator >
 typename MeshType::Point principalComponent( const MeshType & mesh, InputIterator beginFh, InputIterator endFh, const uint_t iterations = uint_t(10) );
@@ -483,7 +483,7 @@ void findConnectedVertices( const MeshType & mesh, const typename MeshType::Face
 
 
 template< typename DistanceObject, typename T, typename U >
-walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
+std::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -530,7 +530,7 @@ walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject
 
       if( error < maxErrorScalar )
       {
-         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
+         return std::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();
@@ -555,7 +555,7 @@ walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject
 
 
 template< typename DistanceObject, typename T, typename U >
-walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
+std::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -601,7 +601,7 @@ walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObjec
 
       if( error < maxErrorScalar )
       {
-         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
+         return std::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();
@@ -626,7 +626,7 @@ walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObjec
 
 
 template< typename DistanceObject, typename T, typename U, typename V >
-walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance )
+std::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -674,7 +674,7 @@ walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObj
 
       if(error < maxErrorScalar)
       {
-         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
+         return std::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();

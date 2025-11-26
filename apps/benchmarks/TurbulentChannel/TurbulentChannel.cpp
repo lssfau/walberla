@@ -438,7 +438,7 @@ namespace walberla {
             return;
 
          // prepare output folder
-         const filesystem::path path(baseFolder_);
+         const std::filesystem::path path(baseFolder_);
          std::string fileSuffix = parameters->boundaryCondition + "_";
 
          if(parameters->fullChannel)
@@ -455,11 +455,11 @@ namespace walberla {
 
          WALBERLA_ROOT_SECTION() {
             // create directory if not existent; empty if existent
-            if( !filesystem::exists(path) ) {
-               filesystem::create_directories(path);
+            if( !std::filesystem::exists(path) ) {
+               std::filesystem::create_directories(path);
             } else {
-               for (const auto& entry : filesystem::directory_iterator(path))
-                  filesystem::remove_all(entry.path());
+               for (const auto& entry : std::filesystem::directory_iterator(path))
+                  std::filesystem::remove_all(entry.path());
             }
          }
 
@@ -569,7 +569,7 @@ namespace walberla {
          WALBERLA_ROOT_SECTION()
          {
             std::ofstream velocityOS;
-            filesystem::path path = velocityProfilesFilePath_;
+            std::filesystem::path path = velocityProfilesFilePath_;
             if (separateFiles_) {
                path.concat("_t" + std::to_string(timeloop_->getCurrentTimeStep()) + ".txt");
                velocityOS.open(path, std::ios::out | std::ios::trunc);
@@ -636,8 +636,8 @@ namespace walberla {
 
       const bool separateFiles_{false};
       const std::string baseFolder_{"output"};
-      filesystem::path velocityProfilesFilePath_;
-      filesystem::path forcingDataFilePath_;
+      std::filesystem::path velocityProfilesFilePath_;
+      std::filesystem::path forcingDataFilePath_;
    };
 
    /////////////////////

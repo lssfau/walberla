@@ -1,7 +1,6 @@
 target_sources( walberla_core
         PUBLIC
         Cell.h
-        CellArray.h
         CellInterval.h
         CellSet.h
         CellVector.h

@@ -23,7 +23,6 @@
 #pragma once
 
 #include "Cell.h"
-#include "CellArray.h"
 #include "CellInterval.h"
 #include "CellSet.h"
 #include "CellVector.h"

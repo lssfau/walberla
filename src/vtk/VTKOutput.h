@@ -33,12 +33,11 @@
 
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include "core/Filesystem.h"
-#include <functional>
-#include <tuple>
-
+#include <filesystem>
 #include <fstream>
+#include <functional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -47,7 +46,7 @@ namespace vtk {
 
 
 
-class VTKOutput : public NonCopyable {
+class VTKOutput {
 
 private:
 
@@ -145,6 +144,8 @@ public:
    using CellFilter = std::function<void (CellSet &, const IBlock &, const StructuredBlockStorage &, const uint_t)>;
 
    ~VTKOutput();
+   VTKOutput( const VTKOutput& ) = delete;
+   VTKOutput& operator=( const VTKOutput& ) = delete;
 
    inline void setInitialWriteCallsToSkip( const uint_t initialWriteCallsToSkip );
 
@@ -270,8 +271,8 @@ private:
    bool writeCombinedVTI_sampled( std::string localPart, const uint_t collector ) const;
    bool writeCombinedVTU(std::string localPart, const uint_t collector) const;
 
-   void getFilenames( std::vector< filesystem::path >& blocks, const uint_t collector ) const;
-   void getFilenamesSortedByLevel( std::vector< std::vector< filesystem::path >>& blocks, const uint_t collector ) const;
+   void getFilenames( std::vector< std::filesystem::path >& blocks, const uint_t collector ) const;
+   void getFilenamesSortedByLevel( std::vector< std::vector< std::filesystem::path >>& blocks, const uint_t collector ) const;
    void writePPointData( std::ofstream& ofs ) const;
    void writePCellData( std::ofstream& ofs ) const;
 

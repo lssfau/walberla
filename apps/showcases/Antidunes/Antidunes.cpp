@@ -639,11 +639,11 @@ int main(int argc, char** argv)
    WALBERLA_ROOT_SECTION()
    {
       // create base directories if they do not yet exist
-      filesystem::path tpath(baseFolderName);
-      if (!filesystem::exists(tpath)) filesystem::create_directory(tpath);
+      std::filesystem::path tpath(baseFolderName);
+      if (!std::filesystem::exists(tpath)) std::filesystem::create_directory(tpath);
 
-      filesystem::path snapshotPath(snapshotBaseFolder);
-      if (!filesystem::exists(snapshotPath)) filesystem::create_directory(snapshotPath);
+      std::filesystem::path snapshotPath(snapshotBaseFolder);
+      if (!std::filesystem::exists(snapshotPath)) std::filesystem::create_directory(snapshotPath);
    }
 
    std::shared_ptr< StructuredBlockForest > blockForest(nullptr);

@@ -548,9 +548,9 @@ int main( int argc, char **argv )
    if( fileIO )
    {
       // create base directory if it does not yet exist
-      filesystem::path tpath( baseFolder );
-      if( !filesystem::exists( tpath ) )
-         filesystem::create_directory( tpath );
+      std::filesystem::path tpath( baseFolder );
+      if( !std::filesystem::exists( tpath ) )
+         std::filesystem::create_directory( tpath );
    }
 
    //////////////////////////

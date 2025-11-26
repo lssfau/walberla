@@ -445,9 +445,9 @@ void createCheckpointFiles(const std::string& checkPointFileName, std::vector<st
    WALBERLA_ROOT_SECTION() {
       if (!oldCheckpointFiles.empty()) {
          for (const std::string& file: oldCheckpointFiles) {
-            filesystem::path path(file);
-            if (filesystem::exists(path)) {
-               filesystem::remove(path);
+            std::filesystem::path path(file);
+            if (std::filesystem::exists(path)) {
+               std::filesystem::remove(path);
             }
          }
          oldCheckpointFiles.clear();
@@ -584,13 +584,13 @@ int main(int argc, char** argv) {
          "Using curl and vorticity criterion together makes no sense.");
 
    // create base dir if it doesn't already exist
-   filesystem::path bpath(baseFolder);
-   if (!filesystem::exists(bpath)) {
-      filesystem::create_directory(bpath);
+   std::filesystem::path bpath(baseFolder);
+   if (!std::filesystem::exists(bpath)) {
+      std::filesystem::create_directory(bpath);
    }
-   filesystem::path qpath(baseFolder + "/q_criterion_mesh");
-   if (filesystem::exists(qpath)) {
-      filesystem::remove_all(qpath);
+   std::filesystem::path qpath(baseFolder + "/q_criterion_mesh");
+   if (std::filesystem::exists(qpath)) {
+      std::filesystem::remove_all(qpath);
    }
 
    //// numerical parameters
@@ -693,7 +693,7 @@ int main(int argc, char** argv) {
 
    if (readFromCheckPointFile && writeCheckPointFile) {
       // decide which option to choose
-      if (filesystem::exists(readCheckPointFileName+"_lbm.txt")) {
+      if (std::filesystem::exists(readCheckPointFileName+"_lbm.txt")) {
          WALBERLA_LOG_INFO_ON_ROOT("Checkpoint file already exists! Will skip writing check point file and start from this check point!");
          writeCheckPointFile = false;
       } else {

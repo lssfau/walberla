@@ -21,7 +21,6 @@
 #pragma once
 
 #include "core/config/Config.h"
-#include "core/Filesystem.h"
 
 #include "mesa_pd/data/ParticleStorage.h"
 #include "mesa_pd/data/shape/Sphere.h"
@@ -35,6 +34,7 @@
 
 #include "Utility.h"
 
+#include <filesystem>
 #include <random>
 
 namespace walberla {
@@ -76,10 +76,10 @@ std::vector<std::string> getMeshFilesFromPath(const std::string & meshPath)
 {
    std::vector<std::string> meshNames;
 
-   if(filesystem::is_directory(filesystem::path(meshPath)))
+   if(std::filesystem::is_directory(std::filesystem::path(meshPath)))
    {
       // assuming this folder contains the mesh files
-      for(const auto& entry : filesystem::directory_iterator(meshPath)) {
+      for(const auto& entry : std::filesystem::directory_iterator(meshPath)) {
          std::string meshFileName = entry.path();
          if(meshFileName.find(".obj") == std::string::npos)
          {
@@ -475,19 +475,19 @@ public:
       maxDiameterScalingFactor_ = 1_r;
       generatesSingleShape_ = true;
 
-      auto meshesTopFolderPath = filesystem::path(meshesTopFolder);
+      auto meshesTopFolderPath = std::filesystem::path(meshesTopFolder);
       for(uint_t fractionIdx = 0; fractionIdx < massFractions.size(); ++fractionIdx)
       {
          auto meshesFolder = meshesTopFolderPath / std::to_string(fractionIdx);
 
-         if(!filesystem::exists(meshesFolder))
+         if(!std::filesystem::exists(meshesFolder))
          {
             WALBERLA_ABORT("Path " << meshesFolder.string() << " expected but does not exist.");
          }
 
          std::vector<mesh::TriangleMesh> meshesVector;
 
-         for (const auto &entry : filesystem::directory_iterator(meshesFolder)) {
+         for (const auto &entry : std::filesystem::directory_iterator(meshesFolder)) {
             std::string meshFileName = entry.path();
             if (meshFileName.find(".obj") == std::string::npos) {
                // open mesh seemingly can only read .obj files reliably, so skip all others

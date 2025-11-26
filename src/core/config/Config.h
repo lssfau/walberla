@@ -22,11 +22,11 @@
 #pragma once
 
 #include "core/Abort.h"
-#include "core/Filesystem.h"
 #include "core/debug/CheckFunctions.h"
 #include "core/StringUtility.h"
 
 #include <cctype>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <list>
@@ -683,7 +683,7 @@ inline void Config::convertToLowerCase( std::string& s )
  */
 inline std::string Config::getDirectory( const std::string& path )
 {
-   filesystem::path p( path );
+   std::filesystem::path p( path );
    return p.parent_path().string();
 }
 //**********************************************************************************************************************
@@ -698,7 +698,7 @@ inline std::string Config::getDirectory( const std::string& path )
  */
 inline std::string Config::getFilename( const std::string& path )
 {
-   filesystem::path p( path );
+   std::filesystem::path p( path );
    return p.filename().string();
 }
 //**********************************************************************************************************************

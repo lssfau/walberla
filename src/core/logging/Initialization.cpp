@@ -33,7 +33,7 @@ namespace logging {
 
 
 
-static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector< walberla::regex > & regexes )
+static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector< std::regex > & regexes )
 {
    for(auto ignoreBlock : ignoreBlocks)
    {
@@ -44,10 +44,10 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
          string_replace_all( regexString, "/", "(\\\\|/)" );
          try
          {
-            walberla::regex regex( regexString );
+            std::regex regex( regexString );
             regexes.push_back( regex );
          }
-         catch( const walberla::regex_error & e )
+         catch( const std::regex_error & e )
          {
             std::ostringstream oss;
             oss << __FILE__ << ":" << __LINE__ << " - Error parsing regular Expression \"" << regexString
@@ -215,7 +215,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    Config::Blocks ignoreWarningBlocks;
 
    loggingBlock.getBlocks( "ignore", ignoreBlocks );
-   std::vector< walberla::regex > regexes;
+   std::vector< std::regex > regexes;
    parseIgnoreBlocks( ignoreBlocks, regexes );
    for(auto & regexe : regexes)
       logging::Logging::instance()->addIgnoreRegex( regexe );

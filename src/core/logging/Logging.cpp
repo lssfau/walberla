@@ -21,9 +21,9 @@
 
 #include "Logging.h"
 
-#include "core/Filesystem.h"
-#include "core/Regex.h"
+#include <filesystem>
 #include <ctime>
+#include <regex>
 
 
 namespace walberla {
@@ -127,9 +127,9 @@ void Logging::includeLoggingToFile( const std::string & file, bool append )
    std::ostringstream filename;
    if( file.empty() )
    {
-      filesystem::path logDir( "logging" );
-      if( !filesystem::exists( logDir ) )
-         filesystem::create_directory( logDir );
+      std::filesystem::path logDir( "logging" );
+      if( !std::filesystem::exists( logDir ) )
+         std::filesystem::create_directory( logDir );
 
       if( numberOfProcesses_ == 1 )
          filename << "logging/logfile.txt";
@@ -142,7 +142,7 @@ void Logging::includeLoggingToFile( const std::string & file, bool append )
          filename << file;
       else
       {
-         filesystem::path filePath( file );
+         std::filesystem::path filePath( file );
          const std::string stem      = filePath.stem().string();
          const std::string extension = filePath.extension().string();
          const std::string modifiedFilename = stem + std::string("_") + rank.str() + extension;
@@ -218,7 +218,7 @@ std::string Logging::createLog( const std::string & type, const std::string & me
 }
 
 
-bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
+bool Logging::isInIgnoreCallerPaths( const std::vector< std::regex > & regexes,
                                             const std::string & callerPath, const int line ) const
 {
    if( !regexes.empty() )
@@ -227,7 +227,7 @@ bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & rege
       callerPathAndLine << callerPath << ":" << line;
 
       for(const auto & regexe : regexes)
-         if( walberla::regex_search( callerPathAndLine.str(), regexe ) )
+         if( std::regex_search( callerPathAndLine.str(), regexe ) )
             return true;
    }
 

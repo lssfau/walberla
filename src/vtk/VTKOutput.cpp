@@ -158,24 +158,24 @@ void VTKOutput::init( const std::string & identifier )
 
    WALBERLA_ROOT_SECTION()
    {
-      filesystem::path path( baseFolder_ + "/" + identifier_ );
-      if( filesystem::exists( path ) && executionCounter_ == 0 )
-         filesystem::remove_all( path );
+      std::filesystem::path path( baseFolder_ + "/" + identifier_ );
+      if( std::filesystem::exists( path ) && executionCounter_ == 0 )
+         std::filesystem::remove_all( path );
 
-      filesystem::path pvd( baseFolder_ + "/" + identifier_ + ".pvd" );
-      if( filesystem::exists( pvd ) && executionCounter_ == 0 )
+      std::filesystem::path pvd( baseFolder_ + "/" + identifier_ + ".pvd" );
+      if( std::filesystem::exists( pvd ) && executionCounter_ == 0 )
          std::remove( pvd.string().c_str() );
 
-      filesystem::path vthbSeries( baseFolder_ + "/" + identifier_ + ".vthb.series" );
-      if( filesystem::exists( vthbSeries ) && executionCounter_ == 0 )
+      std::filesystem::path vthbSeries( baseFolder_ + "/" + identifier_ + ".vthb.series" );
+      if( std::filesystem::exists( vthbSeries ) && executionCounter_ == 0 )
          std::remove( vthbSeries.string().c_str() );
 
-      filesystem::path basePath( baseFolder_ );
-      if( !filesystem::exists( basePath ) )
-         filesystem::create_directories( basePath );
+      std::filesystem::path basePath( baseFolder_ );
+      if( !std::filesystem::exists( basePath ) )
+         std::filesystem::create_directories( basePath );
 
-      if ( !filesystem::exists( path ) )
-         filesystem::create_directories( path );
+      if ( !std::filesystem::exists( path ) )
+         std::filesystem::create_directories( path );
    }
 
    WALBERLA_MPI_WORLD_BARRIER();
@@ -205,9 +205,9 @@ void VTKOutput::forceWrite( uint_t number, const bool immediatelyWriteCollectors
    {
       if( !useMPIIO_ )
       {
-         filesystem::path tpath( path.str() );
-         if( !filesystem::exists( tpath ) )
-            filesystem::create_directory( tpath );
+         std::filesystem::path tpath( path.str() );
+         if( !std::filesystem::exists( tpath ) )
+            std::filesystem::create_directory( tpath );
       }
    }
    WALBERLA_MPI_WORLD_BARRIER();
@@ -1942,7 +1942,7 @@ void VTKOutput::writePVTI( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< filesystem::path > files;
+   std::vector< std::filesystem::path > files;
    getFilenames( files, collector );
 
    for(auto & file : files)
@@ -1978,7 +1978,7 @@ void VTKOutput::writeVTHB( const uint_t collector ) const
        << "<VTKFile type=\"vtkNonOverlappingAMR\" version=\"1.1\" byte_order=\"" << endianness_ << "\"" << " header_type=\"UInt32\" compressor=\"vtkZLibDataCompressor\">\n"
        << " <vtkNonOverlappingAMR>" << "\n";
 
-   std::vector< std::vector< filesystem::path >> files;
+   std::vector< std::vector< std::filesystem::path >> files;
    uint_t levels = blockStorage_->getNumberOfLevels();
    files.resize(levels);
    getFilenamesSortedByLevel( files, collector );
@@ -2026,7 +2026,7 @@ void VTKOutput::writePVTI_sampled( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< filesystem::path > files;
+   std::vector< std::filesystem::path > files;
    getFilenames( files, collector );
 
    for(auto & file : files)
@@ -2174,7 +2174,7 @@ void VTKOutput::writePVTU( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< filesystem::path > files;
+   std::vector< std::filesystem::path > files;
    getFilenames( files, collector );
 
    for(auto & file : files)
@@ -2226,34 +2226,34 @@ bool VTKOutput::writeCombinedVTU( std::string localPart, const uint_t collector 
 
 
 
-void VTKOutput::getFilenames( std::vector< filesystem::path >& files, const uint_t collector ) const
+void VTKOutput::getFilenames( std::vector< std::filesystem::path >& files, const uint_t collector ) const
 {
    std::ostringstream path;
    path << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << collector;
-   filesystem::path directory( path.str() );
+   std::filesystem::path directory( path.str() );
 
-   WALBERLA_ASSERT( filesystem::exists( directory ) );
+   WALBERLA_ASSERT( std::filesystem::exists( directory ) );
 
-   for( filesystem::directory_iterator file( directory ); file != filesystem::directory_iterator(); ++file )
+   for( std::filesystem::directory_iterator file( directory ); file != std::filesystem::directory_iterator(); ++file )
    {
-      WALBERLA_ASSERT( filesystem::is_regular_file( file->path() ) && !filesystem::is_directory( file->path() ) );
+      WALBERLA_ASSERT( std::filesystem::is_regular_file( file->path() ) && !std::filesystem::is_directory( file->path() ) );
       files.push_back( file->path() );
    }
 }
 
 
-void VTKOutput::getFilenamesSortedByLevel( std::vector< std::vector< filesystem::path >>& blocks, const uint_t collector ) const
+void VTKOutput::getFilenamesSortedByLevel( std::vector< std::vector< std::filesystem::path >>& blocks, const uint_t collector ) const
 {
    std::ostringstream path;
    path << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << collector;
-   filesystem::path directory( path.str() );
+   std::filesystem::path directory( path.str() );
 
-   WALBERLA_ASSERT( filesystem::exists( directory ) );
+   WALBERLA_ASSERT( std::filesystem::exists( directory ) );
 
-   for( filesystem::directory_iterator file( directory ); file != filesystem::directory_iterator(); ++file )
+   for( std::filesystem::directory_iterator file( directory ); file != std::filesystem::directory_iterator(); ++file )
    {
       std::string fileName = file->path().string();
-      WALBERLA_ASSERT( filesystem::is_regular_file( file->path() ) && !filesystem::is_directory( file->path() ) );
+      WALBERLA_ASSERT( std::filesystem::is_regular_file( file->path() ) && !std::filesystem::is_directory( file->path() ) );
 
       std::size_t pos1 = fileName.find("level[");
       WALBERLA_ASSERT_UNEQUAL(pos1, std::string::npos, "file names of the block data must contain the block level for AMR data files")

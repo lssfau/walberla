@@ -23,7 +23,6 @@
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"
 #include "core/mpi/Environment.h"
-#include "core/Optional.h"
 #include "core/stringToNum.h"
 
 #include "mesh_common/MeshIO.h"
@@ -31,10 +30,10 @@
 #include "mesh_common/DistanceComputations.h"
 #include "mesh_common/TriangleMeshes.h"
 
+#include <optional>
 #include <random>
-
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace walberla {
 namespace mesh {
@@ -62,7 +61,7 @@ void runTests( const uint_t numAABBs )
 
       const real_t maxErr = real_t(1e-2);
 
-      walberla::optional< bool > result = isIntersecting( triDist, testAABB, maxErr );
+      std::optional< bool > result = isIntersecting( triDist, testAABB, maxErr );
 
       if ( result )
       {

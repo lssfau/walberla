@@ -660,9 +660,9 @@ int main( int argc, char **argv )
    {
       WALBERLA_ROOT_SECTION(){
          // create base directory if it does not yet exist
-         filesystem::path tpath( baseFolder );
-         if( !filesystem::exists( tpath ) )
-            filesystem::create_directory( tpath );
+         std::filesystem::path tpath( baseFolder );
+         if( !std::filesystem::exists( tpath ) )
+            std::filesystem::create_directory( tpath );
       }
       WALBERLA_MPI_BARRIER();
    }
@@ -1328,9 +1328,9 @@ int main( int argc, char **argv )
    std::string processLocalFiles(baseFolder + "/processLocalFiles");
    WALBERLA_ROOT_SECTION()
    {
-      filesystem::path tpath( processLocalFiles );
-      if( !filesystem::exists( tpath ) )
-         filesystem::create_directory( tpath );
+      std::filesystem::path tpath( processLocalFiles );
+      if( !std::filesystem::exists( tpath ) )
+         std::filesystem::create_directory( tpath );
    }
    std::string measurementFileProcessName(processLocalFiles + "/measurements_" + std::to_string(MPIManager::instance()->rank()) + ".txt");
    {
