@@ -424,12 +424,15 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 endif ( )
 
 # MPIEXEC_PREFLAGS overrides
-set(WALBERLA_MPIEXEC_PREFLAGS "")
-# OpenMPI 3.0 and higher checks the number of processes against the number of CPUs
-execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result OUTPUT_VARIABLE mpi_version_output)
-if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
-    list ( APPEND WALBERLA_MPIEXEC_PREFLAGS "-oversubscribe")
-endif()
+if ( NOT DEFINED CACHE{WALBERLA_MPIEXEC_PREFLAGS} )
+   set(_INIT_WALBERLA_MPIEXEC_PREFLAGS "")
+   # OpenMPI 3.0 and higher checks the number of processes against the number of CPUs
+   execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result OUTPUT_VARIABLE mpi_version_output)
+   if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
+       list ( APPEND _INIT_WALBERLA_MPIEXEC_PREFLAGS "-oversubscribe")
+   endif()
+   set(WALBERLA_MPIEXEC_PREFLAGS "${_INIT_WALBERLA_MPIEXEC_PREFLAGS}" CACHE STRING "")
+endif ()
 ############################################################################################################################
 
 
