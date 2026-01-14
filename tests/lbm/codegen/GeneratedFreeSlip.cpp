@@ -58,13 +58,13 @@ class AlternatingBeforeFunction
    typedef std::function< void() > BeforeFunction;
 
    AlternatingBeforeFunction(BeforeFunction evenFunc, BeforeFunction oddFunc,
-                             std::shared_ptr< lbm::TimestepTracker >& tracker)
+                             std::shared_ptr< TimestepTracker >& tracker)
       : tracker_(tracker), funcs_{ evenFunc, oddFunc } {};
 
    void operator()() { funcs_[tracker_->getCounter()](); }
 
  private:
-   std::shared_ptr< lbm::TimestepTracker > tracker_;
+   std::shared_ptr< TimestepTracker > tracker_;
    std::vector< BeforeFunction > funcs_;
 };
 
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
    oddComm.addPackInfo(make_shared< PackInfoOdd_T >(pdfFieldID));
 
    // Timestep Tracking and Sweeps
-   auto tracker = make_shared< lbm::TimestepTracker >(0);
+   auto tracker = make_shared< TimestepTracker >(0);
 
    AlternatingBeforeFunction communication(evenComm, oddComm, tracker);
 

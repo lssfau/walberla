@@ -48,7 +48,7 @@ class OddIntegerCondition(AbstractConditionNode):
 class TimestepTrackerMapping(AbstractInterfaceArgumentMapping):
 
     def __init__(self, low_level_arg: TypedSymbol, tracker_identifier='tracker'):
-        self.tracker_symbol = TypedSymbol(tracker_identifier, 'std::shared_ptr<lbm::TimestepTracker> &')
+        self.tracker_symbol = TypedSymbol(tracker_identifier, 'std::shared_ptr<TimestepTracker> &')
         super(TimestepTrackerMapping, self).__init__(high_level_args=(self.tracker_symbol,),
                                                      low_level_arg=low_level_arg)
 
@@ -58,7 +58,7 @@ class TimestepTrackerMapping(AbstractInterfaceArgumentMapping):
 
     @property
     def headers(self) -> Set:
-        return {'"lbm/inplace_streaming/TimestepTracker.h"'}
+        return {'"core/inplace_streaming/TimestepTracker.h"'}
 
 
 def generate_alternating_lbm_sweep(generation_context, class_name, collision_rule,
@@ -73,7 +73,7 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
     in-place streaming patterns, but can of course also be used with two-fields patterns (why make it
     simple if you can make it complicated?). From a collision rule, two kernel implementations are
     generated; one for even, and one for odd timesteps. At run time, the correct one is selected
-    according to a time step counter. This counter can be managed by the `walberla::lbm::TimestepTracker`
+    according to a time step counter. This counter can be managed by the `walberla::TimestepTracker`
     class.
 
     Args:

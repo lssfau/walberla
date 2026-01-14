@@ -63,6 +63,7 @@ option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                   
 option ( WALBERLA_BUILD_EXAMPLES            "Build Example Apps"                              ON )
 option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                 ON )
 option ( WALBERLA_BUILD_DOC                 "Build Documentation"                             ON )
+option ( WALBERLA_BUILD_LEGACY_LBM          "Build legacy LBM modules"                        ON )
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )

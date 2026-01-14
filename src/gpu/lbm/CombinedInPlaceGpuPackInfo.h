@@ -22,7 +22,7 @@
 
 #define IS_EVEN(x) ((x & 1) ^ 1)
 
-#include "lbm/inplace_streaming/TimestepTracker.h"
+#include "core/inplace_streaming/TimestepTracker.h"
 
 #include "gpu/GPUWrapper.h"
 #include "gpu/communication/GeneratedGPUPackInfo.h"
@@ -35,7 +35,7 @@ class CombinedInPlaceGpuPackInfo : public gpu::GeneratedGPUPackInfo
 {
  public:
    template< typename... Args >
-   CombinedInPlaceGpuPackInfo(std::shared_ptr< lbm::TimestepTracker >& tracker, Args&&... args)
+   CombinedInPlaceGpuPackInfo(std::shared_ptr< TimestepTracker >& tracker, Args&&... args)
       : tracker_(tracker), evenPackInfo_(std::forward< Args >(args)...), oddPackInfo_(std::forward< Args >(args)...)
    {}
 
@@ -76,7 +76,7 @@ class CombinedInPlaceGpuPackInfo : public gpu::GeneratedGPUPackInfo
    }
 
  private:
-   const std::shared_ptr< lbm::TimestepTracker >& tracker_;
+   const std::shared_ptr< TimestepTracker >& tracker_;
    EvenPackInfo evenPackInfo_;
    OddPackInfo oddPackInfo_;
 };

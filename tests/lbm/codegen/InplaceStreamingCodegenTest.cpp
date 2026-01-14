@@ -28,7 +28,7 @@
 
 #include "geometry/InitBoundaryHandling.h"
 
-#include "lbm/inplace_streaming/TimestepTracker.h"
+#include "core/inplace_streaming/TimestepTracker.h"
 
 #include "timeloop/SweepTimeloop.h"
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
    PullSweep pullLbmSweep(pullPdfFieldID, pullVelocityFieldID);
    InPlaceSweep inplaceLbmSweep(inplacePdfFieldID, inplaceVelocityFieldID);
 
-   auto tracker = make_shared< lbm::TimestepTracker >(1);
+   auto tracker = make_shared< TimestepTracker >(1);
 
    // Pull Timeloop
 

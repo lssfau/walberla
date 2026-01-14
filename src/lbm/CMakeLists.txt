@@ -44,7 +44,6 @@ add_subdirectory( geometry )
 add_subdirectory( trt )
 add_subdirectory( cumulant )
 add_subdirectory( lattice_model )
-add_subdirectory( inplace_streaming )
 
 ###################################################################################################
 
