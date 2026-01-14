@@ -48,9 +48,11 @@ waLBerla_add_test_executable ( FieldInterpolationTest interpolators/FieldInterpo
 target_link_libraries ( FieldInterpolationTest walberla::core walberla::field )
 waLBerla_execute_test( NAME FieldInterpolationTest )
 
-waLBerla_add_test_executable ( AdaptorTest adaptors/AdaptorTest.cpp )
-target_link_libraries ( AdaptorTest walberla::blockforest walberla::lbm walberla::core walberla::field )
-waLBerla_execute_test( NAME AdaptorTest )
+if( WALBERLA_BUILD_LEGACY_LBM )
+   waLBerla_add_test_executable ( AdaptorTest adaptors/AdaptorTest.cpp )
+   target_link_libraries ( AdaptorTest walberla::blockforest walberla::lbm walberla::core walberla::field )
+   waLBerla_execute_test( NAME AdaptorTest )
+endif( WALBERLA_BUILD_LEGACY_LBM )
 
 waLBerla_add_test_executable ( FieldGatherTest FieldGatherTest.cpp )
 target_link_libraries ( FieldGatherTest walberla::blockforest walberla::core walberla::field )

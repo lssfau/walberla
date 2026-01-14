@@ -1,6 +1,6 @@
 # Code Generation Tutorials
 
-if( WALBERLA_BUILD_WITH_CODEGEN )
+if( WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_LEGACY_LBM )
 
     #   Tutorial 1: Heat Equation with pystencils
     walberla_generate_target_from_python( NAME CodegenHeatEquationKernel

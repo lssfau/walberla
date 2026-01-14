@@ -22,9 +22,9 @@
 
 #include "core/DataTypes.h"
 
+#include <functional>
+
 namespace walberla
-{
-namespace lbm
 {
 class TimestepTracker
 {
@@ -47,5 +47,4 @@ class TimestepTracker
 
 }; // class TimestepTracker
 
-} // namespace lbm
 } // namespace walberla

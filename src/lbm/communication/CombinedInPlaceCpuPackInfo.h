@@ -23,7 +23,7 @@
 
 #include "communication/UniformPackInfo.h"
 
-#include "lbm/inplace_streaming/TimestepTracker.h"
+#include "core/inplace_streaming/TimestepTracker.h"
 
 namespace walberla
 {
@@ -34,7 +34,7 @@ class CombinedInPlaceCpuPackInfo : public ::walberla::communication::UniformPack
 {
  public:
    template< typename... Args >
-   CombinedInPlaceCpuPackInfo(std::shared_ptr< lbm::TimestepTracker >& tracker, Args&&... args)
+   CombinedInPlaceCpuPackInfo(std::shared_ptr< TimestepTracker >& tracker, Args&&... args)
       : tracker_(tracker), evenPackInfo_(std::forward< Args >(args)...), oddPackInfo_(std::forward< Args >(args)...)
    {}
 
@@ -115,7 +115,7 @@ class CombinedInPlaceCpuPackInfo : public ::walberla::communication::UniformPack
    }
 
  private:
-   const std::shared_ptr< lbm::TimestepTracker >& tracker_;
+   const std::shared_ptr< TimestepTracker >& tracker_;
    EvenPackInfo evenPackInfo_;
    OddPackInfo oddPackInfo_;
 };

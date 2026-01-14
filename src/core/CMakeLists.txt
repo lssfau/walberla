@@ -106,6 +106,7 @@ target_sources( walberla_core
 add_subdirectory( cell )
 add_subdirectory( debug )
 add_subdirectory( mpi )
+add_subdirectory( inplace_streaming )
 add_subdirectory( logging )
 add_subdirectory( load_balancing )
 add_subdirectory( config )
