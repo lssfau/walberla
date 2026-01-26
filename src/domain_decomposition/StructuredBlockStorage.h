@@ -600,7 +600,7 @@ inline Vector3<real_t> StructuredBlockStorage::getGlobalCellCenterFromBlockLocal
    Cell globalCell;
    transformBlockLocalToGlobalCell( globalCell, block, cell );
    Vector3<real_t> center;
-   getCellCenter( center[0], center[1], center[2], cell, getLevel(block) );
+   getCellCenter( center[0], center[1], center[2], globalCell, getLevel(block) );
    return center;
 }
 
