@@ -1,0 +1,18 @@
+Parameters
+{
+    timesteps           301;
+    cellsPerBlock       < 10, 10, 10 >;
+    rootBlocks          < 5, 5, 5 >;
+    refinementLevels    2;
+    sphereCenter        < 0.4, 0.5, 0.5 >;
+    sphereRadius        0.05;
+    omega               1.95;
+    vtkWriteFrequency   100;
+}
+
+Boundaries
+{
+	Border { direction W;           walldistance -1;  flag UBB; }
+	Border { direction E;           walldistance -1;  flag Outflow; }
+	Border { direction N,S,T,B;     walldistance -1;  flag FreeSlip; }
+}

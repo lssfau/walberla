@@ -2,7 +2,7 @@
 
 \viewOnGitlab{apps/examples/FlowAroundSphere}
 
-This example appplication simulates the flow behavior around a spherical obstacle
+This example application simulates the flow behavior around a spherical obstacle
 in a channel.
 
 ## Code Generation
