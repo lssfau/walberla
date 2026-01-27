@@ -34,7 +34,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       sweepCollection_.streamCollide(b);
    }
    for( const auto& func : globalPostCollisionFunctions_){
-      func(level);
+      func.first(level);
    }
 
    // 1.2 Recursive Descent
@@ -56,7 +56,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
    for( const auto& func : globalPostBoundaryHandlingFunctions_){
-      func(level);
+      func.first(level);
    }
 
    // 1.6 Fine to Coarse Communication, receiving end
@@ -74,7 +74,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       sweepCollection_.streamCollide(b);                // then Stream-Collide on interior, and swap arrays
    }
    for( const auto& func : globalPostCollisionFunctions_){
-      func(level);
+      func.first(level);
    }
 
    // 2.2 Recursive Descent
@@ -91,7 +91,7 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
       if(level != maxLevel_) pdfFieldPackInfo_->prepareCoalescence(b);
    }
    for( const auto& func : globalPostBoundaryHandlingFunctions_){
-      func(level);
+      func.first(level);
    }
 
    // 2.6 Fine to Coarse Communication, receiving end
@@ -106,56 +106,61 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 {
    // 1.1 Collision
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level), "Refinement Cycle: streamCollide on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
+   for ( auto func : globalPostCollisionFunctions_) {
+      timeloop.addFuncBeforeTimeStep([func, level]() {func.first(level);}  , "Refinement Cycle: Post Collision: " + func.second + " on level " + std::to_string(level));
+   }
 
    // 1.2 Recursive Descent
-   if(level < maxLevel_){
+   if(level < maxLevel_) {
       addRefinementToTimeLoop(timeloop, level + 1);
    }
 
    // 1.3 Coarse to Fine Communication, receiving end
-   if(level != 0){
+   if(level != 0) {
       timeloop.addFuncBeforeTimeStep(commScheme_->communicateCoarseToFineFunctor(level), "Refinement Cycle: communicate coarse to fine on level " + std::to_string(level));
    }
 
    // 1.4 Equal-Level Communication
    timeloop.addFuncBeforeTimeStep(commScheme_->communicateEqualLevelFunctor(level), "Refinement Cycle: communicate equal level on level " + std::to_string(level));
 
-
    // 1.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
-
-   // 1.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel_){
-      timeloop.addFuncBeforeTimeStep(commScheme_->communicateFineToCoarseFunctor(level + 1), "Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
+   for ( auto func : globalPostBoundaryHandlingFunctions_) {
+      timeloop.addFuncBeforeTimeStep([func, level]() {func.first(level);}  , "Refinement Cycle: Post Boundary: " + func.second + " on level " + std::to_string(level));
    }
 
+   // 1.6 Fine to Coarse Communication, receiving end
+   if(level < maxLevel_) {
+      timeloop.addFuncBeforeTimeStep(commScheme_->communicateFineToCoarseFunctor(level + 1), "Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
+   }
    // Stop here if on coarsest level.
    // Otherwise, continue to second subcycle.
    if(level == 0) return;
 
    // 2.1 Collision and Ghost-Layer Propagation
    timeloop.addFuncBeforeTimeStep(executeStreamCollideOnLevel(level, true), "Refinement Cycle: streamCollide with ghost layer propagation on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostCollisionFunctions(level), "Refinement Cycle: post collision functions on level " + std::to_string(level));
+   for ( auto func : globalPostCollisionFunctions_) {
+      timeloop.addFuncBeforeTimeStep([func, level]() {func.first(level);}  , "Refinement Cycle: Post Collision: " + func.second + " on level " + std::to_string(level));
+   }
 
    // 2.2 Recursive Descent
-   if(level < maxLevel_)
+   if(level < maxLevel_) {
       addRefinementToTimeLoop(timeloop, level + 1);
-
+   }
 
    // 2.4 Equal-Level Communication
    timeloop.addFuncBeforeTimeStep(commScheme_->communicateEqualLevelFunctor(level), "Refinement Cycle: communicate equal level on level " + std::to_string(level));
 
    // 2.5 Boundary Handling and Coalescence Preparation
    timeloop.addFuncBeforeTimeStep(executeBoundaryHandlingOnLevel(level), "Refinement Cycle: boundary handling on level " + std::to_string(level));
-   timeloop.addFuncBeforeTimeStep(executePostBoundaryFunctions(level), "Refinement Cycle: post boundary handling functions on level " + std::to_string(level));
-
-   // 2.6 Fine to Coarse Communication, receiving end
-   if(level < maxLevel_){
-      timeloop.addFuncBeforeTimeStep(commScheme_->communicateFineToCoarseFunctor(level + 1), "Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
+   for ( auto func : globalPostBoundaryHandlingFunctions_) {
+      timeloop.addFuncBeforeTimeStep([func, level]() {func.first(level);}  , "Refinement Cycle: Post Boundary: " + func.second + " on level " + std::to_string(level));
    }
 
+   // 2.6 Fine to Coarse Communication, receiving end
+   if(level < maxLevel_) {
+      timeloop.addFuncBeforeTimeStep(commScheme_->communicateFineToCoarseFunctor(level + 1), "Refinement Cycle: communicate fine to coarse on level " + std::to_string(level + 1));
+   }
 }
 
 
@@ -193,26 +198,6 @@ std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, Bo
    };
 }
 
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostBoundaryFunctions(uint_t level)
-{
-   return [level, this]() {
-      for( const auto& func : globalPostBoundaryHandlingFunctions_){
-         func(level);
-      }
-   };
-}
-
-template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-std::function<void()>  BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::executePostCollisionFunctions(uint_t level)
-{
-   return [level, this]() {
-      for( const auto& func : globalPostCollisionFunctions_){
-         func(level);
-      }
-   };
-}
-
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
 void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::ghostLayerPropagation(Block * block)
@@ -231,15 +216,15 @@ void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingFunction( const LevelFunction& function )
+inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostBoundaryHandlingFunction( const LevelFunction& function, std::string identifier )
 {
-   globalPostBoundaryHandlingFunctions_.emplace_back( function );
+   globalPostBoundaryHandlingFunctions_.emplace_back( std::make_pair(function, identifier) );
 }
 
 template< typename PdfField_T, typename SweepCollection_T, typename BoundaryCollection_T >
-inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostCollisionFunction( const LevelFunction& function )
+inline void BasicRecursiveTimeStep< PdfField_T, SweepCollection_T, BoundaryCollection_T >::addPostCollisionFunction( const LevelFunction& function, std::string identifier )
 {
-   globalPostCollisionFunctions_.emplace_back( function );
+   globalPostCollisionFunctions_.emplace_back( std::make_pair(function, identifier) );
 }
 
 } // namespace lbm_generated
