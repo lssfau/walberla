@@ -108,16 +108,13 @@ class BasicRecursiveTimeStepGPU
 
    void operator()() { timestep(0); };
    void addRefinementToTimeLoop(TimeLoop_T & timeloop, uint_t level = 0);
-   void addPostBoundaryHandlingFunction( const LevelFunction& function );
-   void addPostCollisionFunction( const LevelFunction& function );
+   void addPostBoundaryHandlingFunction( const LevelFunction& function, std::string identifier );
+   void addPostCollisionFunction( const LevelFunction& function, std::string identifier );
 
  private:
    void timestep(uint_t level);
    void ghostLayerPropagation(Block* block, gpuStream_t gpuStream);
    std::function< void() > executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation = false);
-   std::function< void() > executePostBoundaryFunctions(uint_t level);
-   std::function< void() > executePostCollisionFunctions(uint_t level);
-
    std::function< void() > executeBoundaryHandlingOnLevel(uint_t level);
 
    std::shared_ptr< StructuredBlockForest > sbfs_;
@@ -130,8 +127,8 @@ class BasicRecursiveTimeStepGPU
 
    SweepCollection_T& sweepCollection_;
    BoundaryCollection_T& boundaryCollection_;
-   std::vector< LevelFunction > globalPostBoundaryHandlingFunctions_;
-   std::vector< LevelFunction > globalPostCollisionFunctions_;
+   std::vector< std::pair< LevelFunction, std::string > > globalPostBoundaryHandlingFunctions_;
+   std::vector< std::pair< LevelFunction, std::string > > globalPostCollisionFunctions_;
 
    std::vector< std::vector< gpuStream_t >> streams_;
    uint_t nStreams_{uint_c(6)};

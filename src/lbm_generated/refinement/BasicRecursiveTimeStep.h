@@ -74,16 +74,14 @@ class BasicRecursiveTimeStep
    void operator() () { timestep(0); };
    void addRefinementToTimeLoop(SweepTimeloop & timeloop, uint_t level=0);
 
-   inline void addPostBoundaryHandlingFunction( const LevelFunction& function );
-   inline void addPostCollisionFunction( const LevelFunction& function );
+   inline void addPostBoundaryHandlingFunction( const LevelFunction& function, std::string identifier );
+   inline void addPostCollisionFunction( const LevelFunction& function, std::string identifier );
 
  private:
    void timestep(uint_t level);
    void ghostLayerPropagation(Block * block);
    std::function< void() > executeStreamCollideOnLevel(uint_t level, bool withGhostLayerPropagation=false);
    std::function< void() > executeBoundaryHandlingOnLevel(uint_t level);
-   std::function< void() > executePostBoundaryFunctions(uint_t level);
-   std::function< void() > executePostCollisionFunctions(uint_t level);
 
    std::shared_ptr< StructuredBlockForest > sbfs_;
    uint_t maxLevel_;
@@ -96,8 +94,8 @@ class BasicRecursiveTimeStep
    SweepCollection_T & sweepCollection_;
    BoundaryCollection_T & boundaryCollection_;
 
-   std::vector< LevelFunction > globalPostBoundaryHandlingFunctions_;
-   std::vector< LevelFunction > globalPostCollisionFunctions_;
+   std::vector< std::pair< LevelFunction, std::string > > globalPostBoundaryHandlingFunctions_;
+   std::vector< std::pair< LevelFunction, std::string > > globalPostCollisionFunctions_;
 };
 
 } // namespace lbm_generated
