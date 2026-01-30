@@ -64,6 +64,8 @@ namespace initializer {
       * Initializes the scalar field using parameters of config block
       * for syntax see class documentation
       *****************************************************************************************************************/
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       void init ( BlockStorage & blockStorage, const Config::BlockHandle & block ) override;
 
 

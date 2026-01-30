@@ -37,6 +37,8 @@ namespace field {
 
 
 // still virtual, one must implement protected member functions 'allocate' and 'reallocate'
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename Field_T, bool Pseudo2D = false >
 class BlockDataHandling : public blockforest::BlockDataHandling< Field_T >
 {
@@ -103,6 +105,7 @@ protected:
    InitializationFunction_T initFunction_;
 
 }; // class BlockDataHandling
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

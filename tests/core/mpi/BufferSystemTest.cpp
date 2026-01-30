@@ -73,10 +73,8 @@ void symmetricCommunication()
 {
    const int MSG_SIZE = 10;
 
-   auto mpiManager = MPIManager::instance();
-
-   int numProcesses  = mpiManager->numProcesses();
-   int rank          = mpiManager->worldRank();
+   int numProcesses  = MPIManager::instance()->numProcesses();
+   int rank          = MPIManager::instance()->worldRank();
    int leftNeighbor  = (rank-1+numProcesses)  % numProcesses;
    int rightNeighbor = (rank+1) % numProcesses;
 
@@ -121,10 +119,8 @@ void symmetricCommunication()
  */
 void asymmetricCommunication(const bool useIProbe)
 {
-   auto mpiManager = MPIManager::instance();
-
-   int numProcesses  = mpiManager->numProcesses();
-   int rank          = mpiManager->worldRank();
+   int numProcesses  = MPIManager::instance()->numProcesses();
+   int rank          = MPIManager::instance()->worldRank();
    int leftNeighbor  = (rank-1+numProcesses)  % numProcesses;
    int rightNeighbor = (rank+1) % numProcesses;
 
@@ -189,10 +185,8 @@ void asymmetricCommunication(const bool useIProbe)
 // that changes every communication step
 void timeVaryingCommunication(const bool useIProbe)
 {
-   auto mpiManager = MPIManager::instance();
-
-   int numProcesses  = mpiManager->numProcesses();
-   int rank          = mpiManager->worldRank();
+   int numProcesses  = MPIManager::instance()->numProcesses();
+   int rank          = MPIManager::instance()->worldRank();
    int leftNeighbor  = (rank-1+numProcesses)  % numProcesses;
    int rightNeighbor = (rank+1) % numProcesses;
 
@@ -371,8 +365,7 @@ int main(int argc, char**argv)
    mpi::Environment mpiEnv( argc, argv );
    debug::enterTestMode();
 
-   auto mpiManager = MPIManager::instance();
-   int numProcesses  = mpiManager->numProcesses();
+   int numProcesses  = MPIManager::instance()->numProcesses();
 
    if(numProcesses <= 2)
    {

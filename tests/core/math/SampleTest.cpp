@@ -274,10 +274,9 @@ int main(int argc, char * argv[])
 {
    debug::enterTestMode();
 
-   auto mpiManager = MPIManager::instance();
-   mpiManager->initializeMPI( &argc, &argv );
+   MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   WALBERLA_MPI_SECTION() { mpiManager->useWorldComm(); }
+   WALBERLA_MPI_SECTION() { MPIManager::instance()->useWorldComm(); }
 
    WALBERLA_ROOT_SECTION()
    {

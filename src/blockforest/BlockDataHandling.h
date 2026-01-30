@@ -32,6 +32,8 @@ namespace blockforest {
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T >
 class BlockDataHandling : public domain_decomposition::BlockDataHandling<T>
 {
@@ -53,9 +55,12 @@ public:
    /// must be thread-safe !
    virtual void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) = 0;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T >
 class AlwaysInitializeBlockDataHandling : public BlockDataHandling<T>
 {
@@ -74,9 +79,12 @@ public:
    void deserializeCoarseToFine( Block * const, const BlockDataID &, mpi::RecvBuffer & ) override {}
    void deserializeFineToCoarse( Block * const, const BlockDataID &, mpi::RecvBuffer &, const uint_t ) override {}
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T >
 class AlwaysCreateBlockDataHandling : public AlwaysInitializeBlockDataHandling<T>
 {
@@ -85,6 +93,7 @@ public:
 
    T * initialize( IBlock * const /*block*/ ) override {return new T();}
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 
@@ -111,6 +120,8 @@ public:
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T >
 class BlockDataHandlingHelper : public BlockDataHandlingWrapper
 {
@@ -188,6 +199,7 @@ private:
 
    shared_ptr< BlockDataHandling<T> > dataHandling_; 
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

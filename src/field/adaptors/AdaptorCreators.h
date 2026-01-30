@@ -43,6 +43,8 @@ public:
    AdaptorHandling( const ConstBlockDataID & adaptedFieldId, const AdaptionFunction_T & function ) :
       adaptedFieldId_( adaptedFieldId ), function_( function ) {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    Adaptor_T * initialize( IBlock * const block ) override
    {
       using AdaptedField_T = typename Adaptor_T::basefield_t;

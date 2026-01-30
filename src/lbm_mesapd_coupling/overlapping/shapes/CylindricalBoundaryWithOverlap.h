@@ -47,8 +47,12 @@ class CylindricalBoundaryWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), cylindricalBoundary_(cylindricalBoundary)
    {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    ~CylindricalBoundaryWithOverlap() override = default;
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideCylindricalBoundary(point, ac_->getPosition(idx_), cylindricalBoundary_.getRadius(),

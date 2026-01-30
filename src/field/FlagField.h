@@ -111,6 +111,8 @@ public:
 
    FlagField( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl,
               const shared_ptr<FieldAllocator<T> > &alloc = make_shared<StdFieldAlloc<T> >());
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    ~FlagField() override;
 
    inline FlagField<T> * clone()              const;
@@ -196,6 +198,8 @@ protected:
    /*! \name Shallow Copy */
    //@{
    FlagField(const FlagField<T> & other);
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    Field<T,1> * cloneShallowCopyInternal()   const override;
    //@}
    //*******************************************************************************************************************

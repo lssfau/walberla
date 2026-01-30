@@ -58,7 +58,7 @@ struct BorderSweepSlice
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::W >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::W >::ci()
 {
    return { { offset, -expand, -expand },
             { offset + thickness - 1,                                       //
@@ -67,7 +67,7 @@ CellInterval BorderSweepSlice< stencil::Direction::W >::ci()
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::E >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::E >::ci()
 {
    return { { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - offset - thickness, -expand, -expand },
             { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - (offset + 1), //
@@ -76,7 +76,7 @@ CellInterval BorderSweepSlice< stencil::Direction::E >::ci()
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::S >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::S >::ci()
 {
    return { { -expand, offset, -expand },
             { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - 1 + expand, //
@@ -85,7 +85,7 @@ CellInterval BorderSweepSlice< stencil::Direction::S >::ci()
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::N >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::N >::ci()
 {
    return { { -expand, cell_idx_c(blocks->getNumberOfYCellsPerBlock()) - offset - thickness, -expand },
             { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - 1 + expand,   //
@@ -94,7 +94,7 @@ CellInterval BorderSweepSlice< stencil::Direction::N >::ci()
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::B >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::B >::ci()
 {
    return { { -expand, -expand, offset },
             { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - 1 + expand, //
@@ -103,7 +103,7 @@ CellInterval BorderSweepSlice< stencil::Direction::B >::ci()
 };
 
 template<>
-CellInterval BorderSweepSlice< stencil::Direction::T >::ci()
+inline CellInterval BorderSweepSlice< stencil::Direction::T >::ci()
 {
    return { { -expand, -expand, cell_idx_c(blocks->getNumberOfZCellsPerBlock()) - offset - thickness },
             { cell_idx_c(blocks->getNumberOfXCellsPerBlock()) - 1 + expand, //
@@ -112,37 +112,37 @@ CellInterval BorderSweepSlice< stencil::Direction::T >::ci()
 };
 
 template<>
-bool BorderSweepSlice< stencil::Direction::W >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::W >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainXMinBorder(b);
 }
 
 template<>
-bool BorderSweepSlice< stencil::Direction::E >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::E >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainXMaxBorder(b);
 }
 
 template<>
-bool BorderSweepSlice< stencil::Direction::S >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::S >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainYMinBorder(b);
 }
 
 template<>
-bool BorderSweepSlice< stencil::Direction::N >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::N >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainYMaxBorder(b);
 }
 
 template<>
-bool BorderSweepSlice< stencil::Direction::B >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::B >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainZMinBorder(b);
 }
 
 template<>
-bool BorderSweepSlice< stencil::Direction::T >::isBlockAtBorder(IBlock& b)
+inline bool BorderSweepSlice< stencil::Direction::T >::isBlockAtBorder(IBlock& b)
 {
    return blocks->atDomainZMaxBorder(b);
 }

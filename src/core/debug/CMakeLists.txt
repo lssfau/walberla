@@ -3,7 +3,6 @@ target_sources( walberla_core
         CheckFunctions.h
         CheckFunctions.impl.h
         Debug.h
-        OperatorCheck.h
         PrintStacktrace.h
         TestSubsystem.h
         all.h

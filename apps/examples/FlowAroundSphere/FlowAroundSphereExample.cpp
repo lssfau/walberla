@@ -48,7 +48,7 @@ namespace FlowAroundSphere
     FlowAroundSphereExample::gen::QBBData sqSignedDistanceToSphere(geometry::Sphere sphere, Vector3<real_t> point) {
        real_t distance = sqrt(pow(sphere.midpoint()[0] - point[0], 2) + pow(sphere.midpoint()[1] - point[1], 2) + pow(sphere.midpoint()[2] - point[2], 2)) - sphere.radius();
        real_t sign = 1.0 ? distance >= 0 : -1.0;
-       return FlowAroundSphereExample::gen::QBBData(sign * distance * distance);
+       return {sign * distance * distance};
     }
 
     void run(int argc, char **argv)

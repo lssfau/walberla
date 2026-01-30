@@ -305,7 +305,7 @@ endif ()
 
 ############################################################################################################################
 ##
-## Legacy Code Generation (pystencils 1.3)
+## Legacy Code Generation (pystencils 1.x)
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
@@ -343,6 +343,11 @@ endif()
 
 
 if( WALBERLA_ENABLE_SWEEPGEN )
+    if( POLICY CMP0171 )
+        #   See https://cmake.org/cmake/help/latest/policy/CMP0171.html
+        #   Remove when CMake minimum version is raised to 3.31
+        cmake_policy(SET CMP0171 NEW)
+    endif()
     list (APPEND CMAKE_MODULE_PATH ${walberla_SOURCE_DIR}/sweepgen/cmake )
     include( SweepGen )
 endif()

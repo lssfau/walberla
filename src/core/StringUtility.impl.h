@@ -162,7 +162,7 @@ inline std::string string_replace_all_copy(const std::string& s, const std::stri
 // Check whether a string ends with a certain substring.
 inline bool string_ends_with(const std::string& s, const std::string& substr)
 {
-   return s.rfind(substr) == (s.length() - substr.length());
+   return s.ends_with(substr);
 }
 
 // Case-insensitive wrapper for std::string::compare (return values as for std::string::compare).

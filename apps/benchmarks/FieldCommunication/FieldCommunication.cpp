@@ -194,18 +194,17 @@ int main( int argc, char **argv )
 {
     mpi::Environment env( argc, argv );
     int scenarioNr = 0;
-    auto mpiManager = mpi::MPIManager::instance();
     for ( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
     {
-        if ( mpiManager->isMPIInitialized())
-            mpiManager->resetMPI();
+        if ( mpi::MPIManager::instance()->isMPIInitialized())
+            mpi::MPIManager::instance()->resetMPI();
         auto config = *cfg;
         auto commCfg = config->getOneBlock( "Communication" );
         auto domainCfg = config->getOneBlock( "Domain" );
 
         bool cartesianCommunicator = commCfg.getParameter< bool >( "cartesianCommunicator", true );
         if ( !cartesianCommunicator )
-            mpiManager->useWorldComm();
+            mpi::MPIManager::instance()->useWorldComm();
         scenarioNr += 1;
         WALBERLA_LOG_INFO_ON_ROOT( "Simulating scenario " << scenarioNr );
         WALBERLA_LOG_INFO_ON_ROOT( *config );
@@ -216,7 +215,7 @@ int main( int argc, char **argv )
         const Vector3< real_t > domainWeights = domainCfg.getParameter< Vector3< real_t > >( "domainWeights", Vector3< real_t >( 1.0, 1.0, 1.0 ));
         uint_t blocksPerProcess = domainCfg.getParameter< uint_t >( "blocksPerProcess", 1 );
 
-        auto numProcesses = mpiManager->numProcesses();
+        auto numProcesses = mpi::MPIManager::instance()->numProcesses();
         auto processes = math::getFactors3D( uint_c( numProcesses ), domainWeights );
         auto blockDecomposition = math::getFactors3D( uint_c( numProcesses ) * blocksPerProcess, domainWeights );
         auto aabb = AABB( real_t( 0 ), real_t( 0 ), real_t( 0 ),
@@ -383,7 +382,7 @@ int main( int argc, char **argv )
             integerProperties["fieldsScalar"] = fieldCfg.getParameter< int64_t >( "scalar" );
 
             integerProperties["numThreads"] = int64_c( numThreads );
-            integerProperties["cartesianCommunicator"] = mpiManager->hasCartesianSetup();
+            integerProperties["cartesianCommunicator"] = mpi::MPIManager::instance()->hasCartesianSetup();
 
             integerProperties["warmupIterations"] = int64_c( warmupIterations );
             integerProperties["iterations"] = int64_c( iterations );

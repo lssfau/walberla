@@ -46,8 +46,12 @@ class HalfSpaceWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), halfSpace_(halfSpace)
    {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    ~HalfSpaceWithOverlap() override = default;
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideHalfSpace(point, ac_->getPosition(idx_), halfSpace_.getNormal());

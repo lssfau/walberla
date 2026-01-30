@@ -28,7 +28,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
     set(WALBERLA_MODULE_FILE_NAME "${PYTHON_MODULE_PREFIX}walberla_cpp${PYTHON_MODULE_EXTENSION}")
 
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml  ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml )
-    add_custom_target( pythonModule ALL
+    add_custom_target( pythonModule
                        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
                                "${walberla_SOURCE_DIR}/python/waLBerla/"
                                "${CMAKE_CURRENT_BINARY_DIR}/waLBerla/"

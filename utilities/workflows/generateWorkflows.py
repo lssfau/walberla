@@ -9,10 +9,35 @@ from dataclasses import dataclass, asdict, field
 import json
 import yaml
 from pathlib import Path
+from typing import Any
 
-
-IMAGE_PATTERN = "i10git.cs.fau.de:5005/ci/images/spack:{compiler_id}"
+IMAGE_PATTERN = "$CI_CONTAINER_REPOSITORY:i10ci-walberla-{compiler_id}"
 SCRIPT_DIR = Path(__file__).parent
+
+
+class Reference:
+    """GitLab CI YAML reference Tag recreation."""
+
+    def __init__(self, job_name: str, section_name: str):
+        self._job_name: str = job_name
+        self._section_name: str = section_name
+
+
+def reference_representer(
+    dumper: yaml.SafeDumper, reference: Reference
+) -> yaml.nodes.SequenceNode:
+    """Represent an empty GitLab CI YAML reference Tag."""
+    return dumper.represent_sequence(
+        "!reference", [reference._job_name, reference._section_name], flow_style=True
+    )
+
+
+def get_dumper() -> yaml.SafeDumper:
+    """Get a YAML SafeDumper with custom representers registered."""
+    safe_dumper = yaml.SafeDumper
+    safe_dumper.default_flow_style = True  # Enable default flow style (inline) representation for collected representers
+    safe_dumper.add_representer(Reference, reference_representer)
+    return safe_dumper
 
 
 @dataclass
@@ -60,6 +85,7 @@ class ConfigurePreset:
     inherits: list[str] = ()
     displayName: str | None = None
     cacheVariables: dict[str, str] = field(default_factory=dict)
+    generator: str = "Ninja"
 
     @staticmethod
     def from_fragments(*frags: str, name: str | None = None, **kwargs):
@@ -67,7 +93,8 @@ class ConfigurePreset:
             name = ".ci-" + "-".join(frags)
         return ConfigurePreset(
             name,
-            inherits=[f".{frag}" for frag in frags] + [".codegen", ".sweepgen", ".ci-base"],
+            inherits=[f".{frag}" for frag in frags]
+            + [".codegen", ".sweepgen", ".ci-base"],
             displayName="-".join(frags),
             **kwargs,
         )
@@ -122,11 +149,14 @@ class CompilerSpec:
 
 @dataclass
 class CiJobSpec:
-    image: str | None
-    variables: dict[str, str]
-
     extends: str
+    variables: dict[str, str]
+    image: str | None
+
     stage: str = "test"
+    script: list[str | Reference] = field(default_factory=list)
+    before_script: list[str | Reference] = field(default_factory=list)
+    after_script: list[str | Reference] = field(default_factory=list)
 
 
 @dataclass
@@ -138,46 +168,47 @@ class CiConfig:
         preset: ConfigurePreset,
         compiler: CompilerSpec,
     ):
-        image: str | None = IMAGE_PATTERN.format(compiler_id=compiler.id)
-
-        match compiler.id:
-            case "clang-19":
-                base_job = ".testsuite-base-patch-clang-19"
-            case "AppleClang":
-                base_job = ".testsuite-base-MacOS"
-                image = None
-            case _:
-                base_job = ".testsuite-base-linux"
-
         spec = CiJobSpec(
-            image=image,
+            extends=".testsuite-base-linux",
+            image=IMAGE_PATTERN.format(compiler_id=compiler.id),
             variables={
                 "cmakePresetName": preset.name,
                 "CC": compiler.cc,
                 "CXX": compiler.cxx,
             },
-            extends=base_job,
         )
+
+        # --- Compiler specific adjustments ---
+
+        match compiler.id:
+            case "AppleClang":
+                spec.extends = ".testsuite-base-MacOS"
+                spec.image = None
+            case id if id.startswith("clang-"):
+                spec.script.append(Reference(".clang-library-path-patch", "script"))
+            case "gcc-15" if "cuda" in preset.name:
+                spec.variables["CUDAHOSTCXX"] = "g++-13"
+
         self.jobspecs[f"{compiler.id} [{preset.displayName}]"] = spec
 
     def export_yaml(self, fp: Path):
         obj = {
             #   Use a workflow rule to ensure the matrix pipeline always runs, and only runs as
             #   a dynamic child pipeline
-            "workflow": {
-                "rules": [
-                    {
-                        "if": '$CI_PIPELINE_SOURCE == "parent_pipeline"'
-                    }
-                ]
-            },
-            "include": "utilities/workflows/ci-common.yaml"
+            "workflow": {"rules": [{"if": '$CI_PIPELINE_SOURCE == "parent_pipeline"'}]},
+            "include": "utilities/workflows/ci-common.yaml",
         }
         obj = obj | {
-            name: asdict(spec) for name, spec in self.jobspecs.items()
+            name: asdict(
+                spec,
+                dict_factory=lambda d: {
+                    k: v for (k, v) in d if v
+                },  # Remove None or empty lists items
+            )
+            for name, spec in self.jobspecs.items()
         }
         with fp.open("w", encoding="utf-8") as yamlfile:
-            yaml.dump(obj, yamlfile)
+            yaml.dump(obj, yamlfile, Dumper=get_dumper())
 
 
 ###################################################################################################
@@ -186,19 +217,22 @@ class CiConfig:
 
 
 MATRIX_CONFIGURE_PRESETS = [
+    ConfigurePreset.from_fragments("hybrid", "singlePrecision"),
     ConfigurePreset.from_fragments("hybrid", "cuda"),
     ConfigurePreset.from_fragments("hybrid", "cuda", "singlePrecision"),
     ConfigurePreset.from_fragments("serial", "cuda"),
     ConfigurePreset.from_fragments("mpionly", "cuda"),
+    ConfigurePreset.from_fragments("mpionly"),
+    ConfigurePreset.from_fragments("hybrid"),
     ConfigurePreset.from_fragments("serial", "mac"),
     ConfigurePreset.from_fragments("mpionly", "mac"),
 ]
 
 MATRIX_COMPILERS = [
-    CompilerSpec("clang-18", "clang", "clang++"),
-    CompilerSpec("clang-19", "clang", "clang++"),
-    CompilerSpec("gcc-13", "gcc", "g++"),
+    CompilerSpec("clang-20", "clang", "clang++"),
+    CompilerSpec("clang-21", "clang", "clang++"),
     CompilerSpec("gcc-14", "gcc", "g++"),
+    CompilerSpec("gcc-15", "gcc", "g++"),
     CompilerSpec("icx-2024", "icx", "icpx"),
     CompilerSpec("icx-2025", "icx", "icpx"),
     CompilerSpec("AppleClang", "clang", "clang++"),
@@ -208,11 +242,17 @@ MATRIX_COMPILERS = [
 #   CI Test Matrix.
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
-    "clang-19": ["hybrid-cuda-singlePrecision", "mpionly-cuda"],
+    "clang-20": ["hybrid-cuda", "hybrid"],
+    "clang-21": ["hybrid-cuda-singlePrecision", "mpionly-cuda"],
     "icx-2024": ["hybrid-cuda"],
-    "icx-2025": ["hybrid-cuda-singlePrecision", "serial-cuda"],
-    "gcc-13": "hybrid-cuda",
-    "gcc-14": ["hybrid-cuda-singlePrecision", "mpionly-cuda", "serial-cuda"],
+    "icx-2025": ["hybrid-singlePrecision", "serial-cuda"],
+    "gcc-14": "hybrid-cuda",
+    "gcc-15": [
+        "hybrid-cuda-singlePrecision",
+        "mpionly-cuda",
+        "serial-cuda",
+        "mpionly",
+    ],
     "AppleClang": ["serial-mac", "mpionly-mac"],
 }
 
@@ -238,6 +278,7 @@ def get_cmake_presets() -> CMakePresets:
         "debug",
         "hybrid",
         name=".ci-clang-tidy",
+        generator="Unix Makefiles",
         cacheVariables={
             "CMAKE_EXPORT_COMPILE_COMMANDS": True,
             "WALBERLA_BUFFER_DEBUG": True,

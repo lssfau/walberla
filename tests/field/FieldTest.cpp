@@ -73,9 +73,9 @@ void simpleCreateAndIterate(field::Layout layout)
 
    uint_t counter=0;
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
-      for(cell_idx_t z=0; z < cell_idx_t( field.zSize() ); ++z )
-         for(cell_idx_t y=0; y < cell_idx_t( field.ySize() ); ++y )
-            for(cell_idx_t x=0; x < cell_idx_t( field.xSize( )); ++x ) {
+      for(cell_idx_t z=0; z < cell_idx_c( field.zSize() ); ++z )
+         for(cell_idx_t y=0; y < cell_idx_c( field.ySize() ); ++y )
+            for(cell_idx_t x=0; x < cell_idx_c( field.xSize( )); ++x ) {
                uint_t val = uint_c( x*y*z*f + x + y + z + f );
                field(x,y,z,f) = val;
                WALBERLA_CHECK_EQUAL( field(x,y,z,f),     val);
@@ -112,8 +112,8 @@ void alignmentTest()
    shared_ptr<Allocator> alloc = make_shared<Allocator>();
    Field<short,fs > field (xs,ys,zs,field::fzyx,alloc);
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
-      for(cell_idx_t z=0; z < cell_idx_t( field.zSize() ); ++z )
-         for(cell_idx_t y=0; y < cell_idx_t( field.ySize() ); ++y )
+      for(cell_idx_t z=0; z < cell_idx_c( field.zSize() ); ++z )
+         for(cell_idx_t y=0; y < cell_idx_c( field.ySize() ); ++y )
          {
             void * p = reinterpret_cast<void*>( &(field(0,y,z,f)) );
             // test that each line is aligned
@@ -134,8 +134,8 @@ void ghostLayerFieldAlignmentTest()
    shared_ptr<Allocator> alloc = make_shared<Allocator>();
    GhostLayerField<double,fs > field (xs,ys,zs,gl,field::fzyx,alloc);
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
-      for(cell_idx_t z=0; z < cell_idx_t( field.zSize() ); ++z )
-         for(cell_idx_t y=0; y < cell_idx_t( field.ySize() ); ++y )
+      for(cell_idx_t z=0; z < cell_idx_c( field.zSize() ); ++z )
+         for(cell_idx_t y=0; y < cell_idx_c( field.ySize() ); ++y )
          {
             void * p = reinterpret_cast<void*>( &(field(0,y,z,f)) );
             // test that each line is aligned
@@ -181,9 +181,9 @@ void ghostLayerFieldCreateAndIterate(field::Layout layout)
 
    uint_t counter=0;
    for(cell_idx_t f=0; f < cell_idx_c( field.fSize() ); ++f )
-      for(cell_idx_t z=-cell_idx_c(gl); z < cell_idx_t( field.zSize() + gl ); ++z )
-         for(cell_idx_t y=-cell_idx_c(gl); y < cell_idx_t( field.ySize() + gl ); ++y )
-            for(cell_idx_t x=-cell_idx_c(gl); x < cell_idx_t( field.xSize() + gl); ++x )
+      for(cell_idx_t z=-cell_idx_c(gl); z < cell_idx_c( field.zSize() + gl ); ++z )
+         for(cell_idx_t y=-cell_idx_c(gl); y < cell_idx_c( field.ySize() + gl ); ++y )
+            for(cell_idx_t x=-cell_idx_c(gl); x < cell_idx_c( field.xSize() + gl); ++x )
             {
                field(x,y,z,f) = x*y*z*f + x + y + z + f;
                WALBERLA_CHECK_EQUAL(field(x,y,z,f),x*y*z*f + x + y + z + f);

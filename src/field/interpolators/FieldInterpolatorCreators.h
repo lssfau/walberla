@@ -64,6 +64,8 @@ public:
    blockStorage_( blockStorage ), interpolatedFieldID_( interpolatedFieldID ), flagFieldID_( flagFieldID ), cellsToEvaluate_( cellsToEvaluate )
    {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    Interpolator_T * initialize( IBlock * const block ) override
    {
       using InterpolatedField_T = typename Interpolator_T::BaseField_T;

@@ -226,14 +226,13 @@ shared_ptr< BlockForest >
 
    WALBERLA_MPI_SECTION()
    {
-      auto mpiManager = MPIManager::instance();
-      if (!mpiManager->hasWorldCommSetup())
+      if (!MPIManager::instance()->hasWorldCommSetup())
       {
          //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
-         if ( ! mpiManager->rankValid() )
+         if ( ! MPIManager::instance()->rankValid() )
          {
-            mpiManager->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic,
-                                            yPeriodic, zPeriodic);
+            MPIManager::instance()->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses,
+                                             xPeriodic, yPeriodic, zPeriodic);
          }
 
          processIdMap.resize( numberOfProcesses );

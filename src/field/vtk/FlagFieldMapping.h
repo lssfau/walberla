@@ -51,6 +51,8 @@ public:
 
 protected:
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    void configure() override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
@@ -64,6 +66,8 @@ protected:
       }
    }
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    T evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
@@ -94,11 +98,15 @@ public:
 
 protected:
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    void configure() override {
       WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
       field_ = this->block_->template getData< FieldType >( fieldID_ );
    }
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( field_ );

@@ -80,6 +80,8 @@ public:
 
    void init ( const Config::BlockHandle & blockHandle );
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) override;
 
 

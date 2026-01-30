@@ -40,6 +40,8 @@ namespace domain_decomposition {
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T >
 class BlockDataHandling
 {
@@ -58,6 +60,7 @@ public:
    /// must be thread-safe !
    virtual void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) = 0;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 
@@ -145,6 +148,8 @@ namespace internal {
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 class BlockDataHandlingWrapper
 {
 public:
@@ -156,6 +161,7 @@ public:
    virtual BlockData * deserialize( IBlock * const block ) = 0;
    virtual void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) = 0;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

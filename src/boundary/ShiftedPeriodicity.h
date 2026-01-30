@@ -104,8 +104,7 @@ class ShiftedPeriodicityBase {
 
    void operator()() {
 
-      auto mpiInstance = mpi::MPIManager::instance();
-      const auto currentRank = numeric_cast<mpi::MPIRank>(mpiInstance->rank());
+      const auto currentRank = numeric_cast<mpi::MPIRank>(MPIManager::instance()->rank());
 
       const auto sbf = blockForest_.lock();
       WALBERLA_ASSERT_NOT_NULLPTR( sbf )
@@ -158,7 +157,7 @@ class ShiftedPeriodicityBase {
                if (sendRank != currentRank)
                {
                   MPI_Isend(buffer[sendTag].data(), mpi::MPISize(buffer[sendTag].size() * sizeof(ValueType)), MPI_BYTE,
-                            sendRank, sendTag, mpiInstance->comm(), &sendRequests[blockID][sendTag]);
+                            sendRank, sendTag, MPIManager::instance()->comm(), &sendRequests[blockID][sendTag]);
                }
             }
 
@@ -190,7 +189,7 @@ class ShiftedPeriodicityBase {
 
                   // Schedule receives
                   MPI_Irecv(buffer[recvTag].data(), mpi::MPISize(buffer[recvTag].size() * sizeof(ValueType)), MPI_BYTE,
-                            recvRank, recvTag, mpiInstance->comm(), &recvRequests[blockID][recvTag]);
+                            recvRank, recvTag, MPIManager::instance()->comm(), &recvRequests[blockID][recvTag]);
                }
             }
 

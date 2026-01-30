@@ -252,12 +252,12 @@ class SphereFractionMappingSweep
       WALBERLA_GPU_CHECK(gpuMalloc(&f_r, scalarArraySize));
       WALBERLA_GPU_CHECK(gpuMemcpy(f_r, f_r_h, scalarArraySize, gpuMemcpyHostToDevice));
 
-      size_t* numParticlesPerSubBlock;
+      size_t* numParticlesPerSubBlock = nullptr;
       WALBERLA_GPU_CHECK(gpuMalloc(&numParticlesPerSubBlock, numSubBlocks * sizeof(size_t)));
       WALBERLA_GPU_CHECK(gpuMemcpy(numParticlesPerSubBlock, numParticlesPerSubBlock_h, numSubBlocks * sizeof(size_t),
                                    gpuMemcpyHostToDevice));
 
-      size_t* particleIDsSubBlocks;
+      size_t* particleIDsSubBlocks = nullptr;
       if (maxParticlesPerSubBlock > uint_t(0))
       {
          WALBERLA_GPU_CHECK(gpuMalloc(&particleIDsSubBlocks, numSubBlocks * maxParticlesPerSubBlock * sizeof(size_t)));

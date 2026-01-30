@@ -45,6 +45,8 @@ namespace communication {
  * This pack info is used to apply a given reduce operation (e.g. +) to the values in the interior of a ghost layer field
  * together with the values coming from the sender's ghost layer.
  */
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< template<typename> class ReduceOperation, typename GhostLayerField_T >
 class UniformPullReductionPackInfo : public walberla::communication::UniformPackInfo
 {
@@ -76,6 +78,7 @@ protected:
    uint_t numberOfGhostLayers_;
    ReduceOperation<T> op_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

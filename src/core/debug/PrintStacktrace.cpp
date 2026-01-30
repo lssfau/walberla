@@ -106,7 +106,7 @@ namespace debug {
          // but the returned string starts with "demangle" if demangling failed
          // really hacky :(
          string demangled    = demangle( functionName );
-         if ( demangled.substr(0, 8) == "demangle")
+         if ( demangled.starts_with("demangle") )
             demangled = functionName;
 
          os << "\t" << appName << " \t " << demangled << endl;

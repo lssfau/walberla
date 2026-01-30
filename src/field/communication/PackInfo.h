@@ -38,6 +38,8 @@ namespace communication {
  * \ingroup field
  * Template parameters are equivalent of the parameters of GhostLayerField that is communicated
  */
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template<typename GhostLayerField_T>
 class PackInfo : public walberla::communication::UniformPackInfo
 {
@@ -68,6 +70,7 @@ protected:
    bool   communicateAllGhostLayers_;
    uint_t numberOfGhostLayers_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

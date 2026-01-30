@@ -213,6 +213,8 @@ using BlockCellDataWriterInterface = internal::BlockCellDataWriter;
 *   will be used for resampling the data).
 */
 //**********************************************************************************************************************
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename T, uint_t F_SIZE_ARG = 1u >
 class BlockCellDataWriter : public BlockCellDataWriterInterface
 {
@@ -268,6 +270,7 @@ protected:
    // virtual void configure() = 0; // -> don't forget to implement this member function!
 
 }; // class BlockCellDataWriter
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

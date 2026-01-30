@@ -246,8 +246,7 @@ int main( int argc, char ** argv )
 {
    debug::enterTestMode();
 
-   auto mpiManager = MPIManager::instance();
-   mpiManager->initializeMPI( &argc, &argv );
+   MPIManager::instance()->initializeMPI( &argc, &argv );
 
    using blockforest::createUniformBlockGrid;
    auto blocks = createUniformBlockGrid(confBlockCount[0],confBlockCount[1],confBlockCount[2], //blocks
