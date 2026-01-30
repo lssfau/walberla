@@ -129,6 +129,8 @@ namespace timeloop {
            nextId_(0), firstRun_(true)
       {}
 
+      // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+      // NOLINTNEXTLINE(portability-template-virtual-member-function)
       ~SweepTimeloop() override
       {
          for (auto & sweep : sweeps_ | std::views::values)
@@ -166,7 +168,11 @@ namespace timeloop {
             sweeps_.erase( sweepId );
       }
 
+      // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+      // NOLINTNEXTLINE(portability-template-virtual-member-function)
       void doTimeStep(const Set<SUID> &selectors) override;
+      // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+      // NOLINTNEXTLINE(portability-template-virtual-member-function)
       void doTimeStep(const Set<SUID> &selectors, timing::TimingPool<TP> &tp) override;
 
       uint_t nextId_;

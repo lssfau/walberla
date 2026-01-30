@@ -65,6 +65,8 @@ public:
    blockStorage_( blockStorage ), distributionDestinationFieldID_( distributionDestinationFieldID ), flagFieldID_( flagFieldID ), cellsToEvaluate_( cellsToEvaluate )
    {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    Distributor_T * initialize( IBlock * const block ) override
    {
       using DistributionDestinationField_T = typename Distributor_T::BaseField_T;

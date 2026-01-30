@@ -33,6 +33,8 @@ namespace refinement {
 
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename Field_T, typename Stencil >
 class PackInfo : public blockforest::communication::NonUniformPackInfo
 {
@@ -93,6 +95,7 @@ protected:
 
    const BlockDataID fieldId_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

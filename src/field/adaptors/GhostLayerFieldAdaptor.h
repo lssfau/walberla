@@ -78,6 +78,8 @@ namespace field {
 *
 */
 //**********************************************************************************************************************
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename Functor, uint_t glDecrease >
 class GhostLayerFieldAdaptor
 {
@@ -213,6 +215,7 @@ protected:
    const Functor functor_;
    const basefield_t & glField_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

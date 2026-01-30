@@ -183,12 +183,10 @@ int main(int argc, char **argv)
 {
    debug::enterTestMode();
 
-   //walberla::init(argc,argv);
-   auto mpiManager = MPIManager::instance();
-   mpiManager->initializeMPI(&argc,&argv);
+   MPIManager::instance()->initializeMPI(&argc,&argv);
 
    const std::array< uint_t, 3 > cells = { 5,2,7 };
-   const std::array< uint_t, 3 > blockCount = { uint_c( mpiManager->numProcesses() ), 1, 1 };
+   const std::array< uint_t, 3 > blockCount = { uint_c( MPIManager::instance()->numProcesses() ), 1, 1 };
    const uint_t nrOfTimeSteps = 30;
    bool periodic = true;
    const field::Layout layout = field::fzyx;

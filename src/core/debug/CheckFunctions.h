@@ -387,30 +387,26 @@ template< typename T, typename U, typename V >
 void printErrorAndExit( const T & lhs, const U & rhs, const char * const lhsExpression, const char * const rhsExpression,
                         const char * const opString, const char * const filename, int line, V failFunc );
 
+
+template<typename T>
+concept StreamInsertable = 
+   requires(std::ostream& os, const T& v) {
+      { os << v } -> std::same_as< std::ostream& >;
+   };
+
 template< typename T >
+requires( StreamInsertable< T > )
 std::ostream & printValue( std::ostream & os, const T & value );
 
 template< typename T >
-std::ostream & printValue( std::ostream & os, const T & value, const std::true_type & );
-
-template< typename T >
-std::ostream & printValue( std::ostream & os, const T & value, const std::false_type & );
+requires( !StreamInsertable< T > )
+std::ostream & printValue( std::ostream & os, const T & value );
 
 template< typename T >
 std::ostream & printValue( std::ostream & os, const T * value );
 
 template< typename T >
 std::ostream & printValue( std::ostream & os, T * value );
-
-std::ostream & printValue( std::ostream & os, char value );
-
-std::ostream & printValue( std::ostream & os, unsigned char value );
-
-std::ostream & printValue( std::ostream & os, float value );
-
-std::ostream & printValue( std::ostream & os, double value );
-
-std::ostream & printValue( std::ostream & os, long double value );
 
 } // namespace check_functions_detail
 } // namespace debug

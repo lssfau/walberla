@@ -79,6 +79,8 @@ public:
    * The body parameters and the parameters for the boundary are read from configuration.
    *
    *****************************************************************************************************************/
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    void init( BlockStorage & , const Config::BlockHandle & blockHandle ) override { return init(blockHandle); }
    void init( const Config::BlockHandle & blockHandle );
 

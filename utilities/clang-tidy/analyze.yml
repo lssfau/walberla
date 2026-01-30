@@ -19,8 +19,7 @@ modules:
   - timeloop
   - vtk:
       exclude-tests: true
-  - walberla/sweepgen:
-      exclude-tests: true
+  - walberla/sweepgen
   - walberla/experimental:
       exclude-tests: true
 
@@ -41,4 +40,5 @@ apps:
   - "showcases/FluidizedBed"
   - "showcases/Piping"
   - "tutorials"
+  - "examples"
   # to be extended

@@ -33,6 +33,8 @@ namespace walberla {
 namespace field {
 namespace communication {
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename GhostLayerField_T, typename Stencil_T >
 class StencilRestrictedMPIDatatypeInfo : public walberla::communication::UniformMPIDatatypeInfo
 {
@@ -85,6 +87,7 @@ private:
 
     BlockDataID fieldID_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 } // namespace communication

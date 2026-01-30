@@ -29,6 +29,8 @@ namespace walberla {
 namespace field {
 namespace communication {
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template<typename GhostLayerField_T>
 class UniformMPIDatatypeInfo : public walberla::communication::UniformMPIDatatypeInfo
 {
@@ -89,6 +91,7 @@ private:
    bool communicateAllGhostLayers_;
    uint_t numberOfGhostLayers_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 } // namespace communication

@@ -49,6 +49,8 @@ using VoidFctNoArguments = std::function<void ()>;
 */
 //*******************************************************************************************************************
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template < typename TP = timing::WcPolicy >
 class Timeloop : public ITimeloop
 {
@@ -208,6 +210,7 @@ protected:
 
    bool stop_{ false };
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

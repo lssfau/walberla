@@ -51,6 +51,8 @@ namespace field {
    * that have to be implemented by concrete strategy.
    */
    //*******************************************************************************************************************
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template<typename T>
    class FieldAllocator : FieldAllocatorBase<std::conditional_t<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>>
    {
@@ -217,6 +219,7 @@ namespace field {
       private:
          using FieldAllocatorBase<BaseType>::referenceCounts_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
    template<typename T>
    std::map<T*, uint_t> FieldAllocatorBase<T>::referenceCounts_ = std::map<T*,uint_t>();
@@ -234,6 +237,8 @@ namespace field {
    *               address 'a' of each row fulfills: a % alignment == 0
    *               alignment has to be a power of 2
    ********************************************************************************************************************/
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template <typename T, uint_t alignment>
    class AllocateAligned : public FieldAllocator<T>
    {
@@ -315,6 +320,7 @@ namespace field {
 
          uint_t offset_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
    template <typename T, uint_t alignment>
    std::map<T*,uint_t> AllocateAligned<T,alignment>::nrOfElements_ = std::map<T*,uint_t>();
 
@@ -326,6 +332,8 @@ namespace field {
    * \ingroup field
    *
    ********************************************************************************************************************/
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template <typename T>
    class StdFieldAlloc : public FieldAllocator<T>
    {
@@ -349,6 +357,7 @@ namespace field {
             values = nullptr;
          }
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
 constexpr uint_t SIMDAlignment() {

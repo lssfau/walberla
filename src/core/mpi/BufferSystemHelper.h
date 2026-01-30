@@ -34,7 +34,9 @@
 namespace walberla {
 namespace mpi {
 namespace internal {
-
+   
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template< typename RecvBuffer_T, typename SendBuffer_T>
    class AbstractCommunication
    {
@@ -99,8 +101,11 @@ namespace internal {
       MPI_Comm communicator_;
       int tag_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template< typename RecvBuffer_T, typename SendBuffer_T>
    class KnownSizeCommunication : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
    {
@@ -127,8 +132,11 @@ namespace internal {
       std::vector<MPI_Request> sendRequests_;
       std::vector<MPI_Request> recvRequests_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template< typename RecvBuffer_T, typename SendBuffer_T>
    class UnknownSizeCommunication : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
    {
@@ -159,8 +167,11 @@ namespace internal {
       std::vector<MPI_Request> recvRequests_;
       std::vector<bool>        sizeAlreadyReceived_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template< typename RecvBuffer_T, typename SendBuffer_T>
    class UnknownSizeCommunicationIProbe : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
    {
@@ -187,8 +198,10 @@ namespace internal {
 
       std::vector<MPI_Request> sendRequests_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
-
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template< typename RecvBuffer_T, typename SendBuffer_T>
    class NoMPICommunication : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
    {
@@ -212,6 +225,7 @@ namespace internal {
       bool         received_{ false };
       RecvBuffer_T tmpBuffer_;
    };
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
 

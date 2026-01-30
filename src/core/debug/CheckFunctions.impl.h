@@ -20,9 +20,6 @@
 //======================================================================================================================
 
 
-
-#include "core/debug/OperatorCheck.h"
-
 #include <algorithm>
 #include <type_traits>
 #include <ostream>
@@ -494,20 +491,24 @@ void printErrorAndExit( const T & lhs, const U & rhs, const char * const lhsExpr
    failFunc( ss.str() );
 }
 
+
 template< typename T >
+requires( StreamInsertable< T > )
 std::ostream & printValue( std::ostream & os, const T & value )
 {
-   return printValue( os, value, has_left_shift<std::ostream&, T&>() );
+   if constexpr ( std::is_same_v<std::remove_cv_t<T>, signed char> ||
+                  std::is_same_v<std::remove_cv_t<T>, unsigned char> ) 
+   {
+      return os << static_cast<int>(value);
+   } 
+   else {
+      return os << value;
+   }
 }
 
 template< typename T >
-std::ostream & printValue( std::ostream & os, const T & value, const std::true_type & )
-{
-   return os << value;
-}
-
-template< typename T >
-std::ostream & printValue( std::ostream & os, const T & /*value*/, const std::false_type & )
+requires( !StreamInsertable< T > )
+std::ostream & printValue( std::ostream & os, const T & /*value*/)
 {
    return os << "[N/A: Type can not be streamed to std::ostream]";
 }

@@ -34,10 +34,9 @@ int main(int argc, char * argv[])
 {
    debug::enterTestMode();
 
-   auto mpiManager = MPIManager::instance();
-   mpiManager->initializeMPI( &argc, &argv );
+   MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   WALBERLA_MPI_SECTION() { mpiManager->useWorldComm(); }
+   WALBERLA_MPI_SECTION() { MPIManager::instance()->useWorldComm(); }
 
    math::Sample sample;
    math::DistributedSample disSample;
@@ -109,7 +108,7 @@ int main(int argc, char * argv[])
    WALBERLA_CHECK_EQUAL( sample.size(), uint_t(0) );
    WALBERLA_CHECK_EQUAL( disSample.size(), uint_t(0) );
    
-   if(  mpiManager->numProcesses() > 1 )
+   if( MPIManager::instance()->numProcesses() > 1 )
    {
       sample.clear();
       disSample.clear();

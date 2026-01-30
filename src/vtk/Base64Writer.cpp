@@ -55,14 +55,16 @@ void Base64Writer::toStream( std::ostream& os )
          for ( uint_t j = length; j < 3; ++j )
             input[j] = static_cast<unsigned char>(0);
          encodeblock( input, output, int_c( length ) );
-         os << output[0] << output[1] << output[2] << output[3];
+         os << static_cast<char>(output[0]) << static_cast<char>(output[1])
+            << static_cast<char>(output[2]) << static_cast<char>(output[3]);
       }
       else {
          input[0] = static_cast<unsigned char>( buffer_[ i ] );
          input[1] = static_cast<unsigned char>( buffer_[i+1] );
          input[2] = static_cast<unsigned char>( buffer_[i+2] );
          encodeblock( input, output, 3 );
-         os << output[0] << output[1] << output[2] << output[3];
+         os << static_cast<char>(output[0]) << static_cast<char>(output[1])
+            << static_cast<char>(output[2]) << static_cast<char>(output[3]);
       }
    }
 

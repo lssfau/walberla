@@ -49,22 +49,6 @@
 namespace walberla {
 namespace boundary {
 
-namespace internal {
-#if defined(__GLIBCXX__) && (!defined(_GLIBCXX_RELEASE) || _GLIBCXX_RELEASE < 7)
-template< typename T >
-struct tuple_size : std::tuple_size<std::tuple<>>
-{};
-
-template< typename... Members >
-struct tuple_size< std::tuple<Members...> > : std::tuple_size<std::tuple<Members...>>
-{};
-#else
-using std::tuple_size;
-#endif
-}
-
-
-
 class BHUIDGenerator : public uid::IndexGenerator< BHUIDGenerator, uint_t >{};
 using BoundaryHandlingUID = UID<BHUIDGenerator>;
 
@@ -442,15 +426,15 @@ private:
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
    }
 
-   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
-   requires( N!=0 && std::is_same_v< typename std::is_same< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> >::type, std::false_type > )
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
+   requires( N!=0 && !std::is_same_v< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> > )
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions ) const
    {
       return getBoundaryCondition< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
-   requires( N==0 && std::is_same_v< typename std::is_same< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> >::type, std::false_type > )
+   requires( N==0 && !std::is_same_v< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> > )
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & /*uid*/, const BoundariesTuple & /*boundaryConditions*/) const
    {
       static_assert( sizeof(Boundary_T) == 0, "The requested boundary class is not part of this boundary handling." );
@@ -479,14 +463,14 @@ private:
    }
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
-   requires( N!=0 && std::is_same_v< typename std::is_same< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> >::type, std::false_type > )
+   requires( N!=0 && !std::is_same_v< Boundary_T, typename std::tuple_element_t<N, BoundariesTuple> > )
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions ) const
    {
       return getBoundaryCondition_TypeExists< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
-   requires( N==0 && std::is_same_v< typename std::is_same< Boundary_T, typename std::tuple_element_t<0, BoundariesTuple> >::type, std::false_type > )
+   requires( N==0 && !std::is_same_v< Boundary_T, typename std::tuple_element_t<0, BoundariesTuple> > )
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & /*boundaryConditions*/ ) const
    {
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
@@ -529,44 +513,45 @@ private:
    inline void addNearBoundary( const CellInterval & cells );
    inline void addBoundary( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N!=-1 )
-   inline void setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag,
+   inline void setBoundaryHelper(       BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                                         const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                         const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N==-1 )
-   inline void setBoundary( const BoundariesTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t,
+   inline void setBoundaryHelper( const BoundariesTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                               const BoundaryConfiguration & ) const;
 
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N!=-1 )
-   inline void setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellInterval & cells,
+   inline void setBoundaryHelper(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellInterval & cells,
                                                                                         const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
-   requires( N==-1 )
-   inline void setBoundary( const BoundariesTuple &, const flag_t, const CellInterval &, const BoundaryConfiguration & ) const;
 
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
-   requires( N!=-1 )
-   inline void setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellVector & cells,
-                                                                                        const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N==-1 )
-   inline void setBoundary( const BoundariesTuple &, const flag_t, const CellVector &, const BoundaryConfiguration & ) const;
+   inline void setBoundaryHelper( const BoundariesTuple &, const flag_t, const CellInterval &, const BoundaryConfiguration & ) const;
+
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
+   requires( N!=-1 )
+   inline void setBoundaryHelper(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellVector & cells,
+                                                                                        const BoundaryConfiguration & parameter );
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
+   requires( N==-1 )
+   inline void setBoundaryHelper( const BoundariesTuple &, const flag_t, const CellVector &, const BoundaryConfiguration & ) const;
    //@}
    //*******************************************************************************************************************
 
    //** Remove Boundary Cells (private helper functions) ***************************************************************
    /*! \name Remove Boundary Cells (private helper functions) */
    //@{
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N!=-1 )
-   inline void removeBoundary(       BoundariesTuple & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+   inline void removeBoundaryHelper(       BoundariesTuple & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                            const bool checkNearBoundaryFlags = true );
-   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = std::tuple_size_v<BoundariesTuple> - 1 >
    requires( N==-1 )
-   inline void removeBoundary( const BoundariesTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const bool ) const { WALBERLA_CHECK( false ); }
+   inline void removeBoundaryHelper( const BoundariesTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const bool ) const { WALBERLA_CHECK( false ); }
    //@}
    //*******************************************************************************************************************
 
@@ -1351,7 +1336,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
    WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t(1) );
 
    if( outerBB_.contains(x,y,z) )
-      setBoundary( boundaryConditions_, flag, x, y, z, parameter );
+      setBoundaryHelper( boundaryConditions_, flag, x, y, z, parameter );
 }
 
 
@@ -1381,7 +1366,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
    if( localCells.empty() )
       return;
 
-   setBoundary( boundaryConditions_, flag, localCells, parameter );
+   setBoundaryHelper( boundaryConditions_, flag, localCells, parameter );
 }
 
 
@@ -1411,7 +1396,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
    for( auto cell = begin; cell != end; ++cell )
       if( outerBB_.contains(*cell) ) localCells.push_back( *cell );
 
-   setBoundary( boundaryConditions_, flag, localCells, parameter );
+   setBoundaryHelper( boundaryConditions_, flag, localCells, parameter );
 }
 
 
@@ -1616,7 +1601,7 @@ template< typename FlagField_T, typename Stencil, typename... Boundaries >
 inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( outerBB_.contains(x,y,z) && flagField_->isPartOfMaskSet( x, y, z, boundary_ ) )
-      removeBoundary( boundaryConditions_, x, y, z );
+      removeBoundaryHelper( boundaryConditions_, x, y, z );
 }
 
 
@@ -1642,7 +1627,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
       return;
 
    if( outerBB_.contains(x,y,z) && flagField_->isPartOfMaskSet( x, y, z, bMask ) )
-      removeBoundary( boundaryConditions_, x, y, z );
+      removeBoundaryHelper( boundaryConditions_, x, y, z );
 }
 
 
@@ -1675,7 +1660,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
       for( auto cell = flagField_->beginSliceXYZ( innerHull ); cell != flagField_->end(); ++cell )
       {
          if( isPartOfMaskSet( cell, boundary_ ) )
-            removeBoundary( boundaryConditions_, cell.x(), cell.y(), cell.z(), false );
+            removeBoundaryHelper( boundaryConditions_, cell.x(), cell.y(), cell.z(), false );
          field::removeFlag( cell, nearBoundary_ );
       }
       dirty_ = true;
@@ -1690,7 +1675,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
       if( !innerHull.contains(x,y,z) )
       {
          if( isPartOfMaskSet( cell, boundary_ ) )
-            removeBoundary( boundaryConditions_, x, y, z );
+            removeBoundaryHelper( boundaryConditions_, x, y, z );
 
          if( isFlagSet( cell, nearBoundary_ ) )
          {
@@ -1735,7 +1720,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
 
    for( auto cell = flagField_->beginSliceXYZ( localCells ); cell != flagField_->end(); ++cell )
       if( isPartOfMaskSet( cell, bMask ) )
-         removeBoundary( boundaryConditions_, cell.x(), cell.y(), cell.z() );
+         removeBoundaryHelper( boundaryConditions_, cell.x(), cell.y(), cell.z() );
 }
 
 
@@ -1776,7 +1761,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
       const cell_idx_t z = cell->z();
 
       if( outerBB_.contains(x,y,z) && flagField_->isPartOfMaskSet( x, y, z, bMask) )
-         removeBoundary( boundaryConditions_, x, y, z );
+         removeBoundaryHelper( boundaryConditions_, x, y, z );
    }
 }
 
@@ -2104,7 +2089,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( cons
       dirty_ = true;
 
       if( flagField_->isPartOfMaskSet( x, y, z, boundary_ ) )
-         removeBoundary( boundaryConditions_, x, y, z );
+         removeBoundaryHelper( boundaryConditions_, x, y, z );
    }
 }
 
@@ -2127,7 +2112,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( cons
       for( auto cell = flagField_->beginSliceXYZ( innerHull ); cell != flagField_->end(); ++cell )
       {
          if( isPartOfMaskSet( cell, boundary_ ) )
-            removeBoundary( boundaryConditions_, cell.x(), cell.y(), cell.z(), false );
+            removeBoundaryHelper( boundaryConditions_, cell.x(), cell.y(), cell.z(), false );
       }
    }
 
@@ -2141,7 +2126,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( cons
       field::removeFlag( cell, nearBoundary_ );
 
       if( !innerHull.contains(x,y,z) && isPartOfMaskSet( cell, boundary_ ) )
-         removeBoundary( boundaryConditions_, x, y, z );
+         removeBoundaryHelper( boundaryConditions_, x, y, z );
    }
 
    dirty_ = true;
@@ -2734,7 +2719,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addBoundary
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N!=-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                           const BoundaryConfiguration & parameter )
 {
@@ -2748,13 +2733,13 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCell( flag, x, y, z, parameter );
    }
    else
-      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, x, y, z, parameter );
+      setBoundaryHelper< BoundariesTuple, N-1 >( boundaryConditions, flag, x, y, z, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N==-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( const BoundariesTuple &, const flag_t flag,
                                                                           const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                                           const BoundaryConfiguration & ) const
 {
@@ -2773,7 +2758,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N!=-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const CellInterval & cells, const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( outerBB_.contains( cells ) );
@@ -2803,13 +2788,13 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCells( flag, cells, parameter );
    }
    else
-      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
+      setBoundaryHelper< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N==-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( const BoundariesTuple &, const flag_t flag,
                                                                           const CellInterval &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2827,7 +2812,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N!=-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const CellVector & cells, const BoundaryConfiguration & parameter )
 {
    if( cells.empty() )
@@ -2842,13 +2827,13 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCells( flag, cells.begin(), cells.end(), parameter );
    }
    else
-      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
+      setBoundaryHelper< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N==-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundaryHelper( const BoundariesTuple &, const flag_t flag,
                                                                           const CellVector &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2866,7 +2851,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename BoundariesTuple, int N >
 requires( N!=-1 )
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( BoundariesTuple & boundaryConditions,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundaryHelper( BoundariesTuple & boundaryConditions,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                              const bool checkNearBoundaryFlags )
 {
@@ -2916,7 +2901,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
    }
    else
    {
-      removeBoundary< BoundariesTuple, N-1 >( boundaryConditions, x, y, z, checkNearBoundaryFlags );
+      removeBoundaryHelper< BoundariesTuple, N-1 >( boundaryConditions, x, y, z, checkNearBoundaryFlags );
    }
 }
 

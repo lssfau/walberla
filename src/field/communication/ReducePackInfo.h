@@ -38,6 +38,8 @@ namespace communication {
  * This class can be used, when multiple data sets from different senders should be reduced at the receiver
  * \ingroup comm
  */
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< template<typename> class ReduceOperation, typename GhostLayerField_T >
 class ReducePackInfo : public walberla::communication::ReducePackInfo
 {
@@ -68,6 +70,7 @@ protected:
    const T                  init_;
    const ReduceOperation<T> op_;
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 

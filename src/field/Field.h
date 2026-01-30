@@ -64,6 +64,8 @@ namespace field {
    * See also \ref fieldPage
    */
    //*******************************************************************************************************************
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTBEGIN(portability-template-virtual-member-function)
    template<typename T, uint_t fSize_>
    class Field
    {
@@ -395,6 +397,7 @@ namespace field {
 #endif
 
    }; // class Field
+   // NOLINTEND(portability-template-virtual-member-function)
 
 
 } // namespace field

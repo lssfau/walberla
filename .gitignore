@@ -98,3 +98,6 @@ ENV/
 
 # Coverage
 coverage
+
+# Workflows
+cmake-workflows.json

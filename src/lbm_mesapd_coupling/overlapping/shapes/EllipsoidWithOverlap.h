@@ -46,8 +46,12 @@ class EllipsoidWithOverlap : public geometry::AbstractBody
       : idx_(idx), ac_(ac), ellipsoid_(ellipsoid)
    {}
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    ~EllipsoidWithOverlap() override = default;
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    bool contains(const Vector3< real_t >& point) const override
    {
       return mesa_pd::isPointInsideEllipsoidBF(mesa_pd::transformPositionFromWFtoBF(idx_, ac_, point),

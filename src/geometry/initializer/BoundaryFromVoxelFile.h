@@ -88,6 +88,8 @@ class BoundaryFromVoxelFile : public Initializer
 public:
    BoundaryFromVoxelFile( const StructuredBlockStorage & structuredBlockStorage, BlockDataID & boundaryHandlerID );
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
    void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) override;
 
 

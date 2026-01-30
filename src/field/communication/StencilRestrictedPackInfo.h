@@ -42,6 +42,8 @@ namespace communication {
  *          the boundary are communicated, which may not be the desired behavior
  *          for the 'inner' ghost layers
  */
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTBEGIN(portability-template-virtual-member-function)
 template< typename GhostLayerField_T, typename Stencil_T >
 class StencilRestrictedPackInfo : public walberla::communication::UniformPackInfo
 {
@@ -64,6 +66,7 @@ protected:
 
    static_assert(GhostLayerField_T::F_SIZE == Stencil_T::Size, "Size of stencil and f size of field have to be equal");
 };
+// NOLINTEND(portability-template-virtual-member-function)
 
 
 template< typename GhostLayerField_T, typename Stencil >

@@ -87,6 +87,8 @@ namespace field {
                        const std::vector<T> & fValues, const Layout & layout = fzyx,
                        const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       ~GhostLayerField() override = default;
 
 
@@ -99,6 +101,8 @@ namespace field {
                  const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
 
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       void resize( uint_t xSize, uint_t ySize, uint_t zSize ) override;
               void resize( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl );
 
@@ -197,7 +201,11 @@ namespace field {
       /*! \name Slicing */
       //@{
       GhostLayerField<T,fSize_> * getSlicedField( const CellInterval & interval ) const;
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       void slice           ( const CellInterval & interval ) override;
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       void shiftCoordinates( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz ) override;
       //@}
       //****************************************************************************************************************
@@ -225,7 +233,11 @@ namespace field {
       //** Shallow Copy ************************************************************************************************
       /*! \name Shallow Copy */
       //@{
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       Field<T,fSize_> * cloneShallowCopyInternal()   const override;
+// Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+// NOLINTNEXTLINE(portability-template-virtual-member-function)
       typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const override;
       GhostLayerField(const GhostLayerField<T,fSize_> & other);
       template <typename T2, uint_t fSize2>

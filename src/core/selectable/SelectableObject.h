@@ -176,6 +176,8 @@ private:
    *   provided selector "selector".
    */
    //*******************************************************************************************************************
+   // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
+   // NOLINTNEXTLINE(portability-template-virtual-member-function)
    virtual void select( std::vector< size_t >& index, const S& selector ) const = 0;
 
    std::vector< T >           object_;
