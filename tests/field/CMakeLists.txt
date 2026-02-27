@@ -131,5 +131,6 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
     waLBerla_add_test_executable ( GeneratedFieldNonUniformPackInfoTestCPU codegen/GeneratedFieldNonUniformPackInfoTestCPU.cpp )
     target_link_libraries ( GeneratedFieldNonUniformPackInfoTestCPU walberla::blockforest walberla::core walberla::field
             walberla::timeloop CodegenGeneratedNonUniformPackInfoTest )
-    waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestCPU )
+    waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestCPU1 COMMAND $<TARGET_FILE:GeneratedFieldNonUniformPackInfoTestCPU> PROCESSES 1 )
+    waLBerla_execute_test( NAME GeneratedFieldNonUniformPackInfoTestCPU4 COMMAND $<TARGET_FILE:GeneratedFieldNonUniformPackInfoTestCPU> PROCESSES 4 )
 endif()

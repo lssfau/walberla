@@ -98,8 +98,8 @@ void GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::communicateL
    CellInterval packInterval = field::refinement::coarseToFinePackInterval( dir, srcField->xyzSize(),  fineReceiver->getId() );
    auto dstField = fineReceiver->getData< Field_T >( fieldID_ );
    CellInterval unpackInterval = field::refinement::coarseToFineUnpackInterval( stencil::inverseDir[dir], dstField->xyzSize(), fineReceiver->getId() );
-   auto size = sizeCoarseToFineSend(coarseSender, fineReceiver->getId(), dir);
-   std::vector<unsigned char> bufferPtr(size);
+   auto packSize = sizeCoarseToFineSend(coarseSender, fineReceiver->getId(), dir);
+   std::vector<unsigned char> bufferPtr(packSize);
    kernels_.packEqual(srcField, packInterval, &bufferPtr[0]);
    kernels_.unpackCoarseToFine(dstField, unpackInterval, &bufferPtr[0]);
 }
@@ -187,8 +187,8 @@ template< typename Field_T, typename PackingKernels_T >
 uint_t GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) const
 {
    auto field = fineReceiver->getData< Field_T >(fieldID_);
-   CellInterval ci = field::refinement::coarseToFineUnpackInterval( dir, field->xyzSize(), uint_t(1) );
-   return (ci.numCells() >> 2) * field->fSize() * sizeof(value_type);
+   CellInterval ci = field::refinement::coarseToFineUnpackInterval( dir, field->xyzSize(), fineReceiver->getId() );
+   return (ci.numCells() >> 3) * field->fSize() * sizeof(value_type);
 }
 
 
