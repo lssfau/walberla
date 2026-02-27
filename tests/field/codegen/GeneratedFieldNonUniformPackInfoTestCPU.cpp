@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
    setupBfs.addRefinementSelectionFunction(refinementSelectionFunction);
    setupBfs.addWorkloadMemorySUIDAssignmentFunction(blockforest::uniformWorkloadAndMemoryAssignment);
    setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
-   setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), 1);
+   setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), uint_c(mpi::MPIManager::instance()->numProcesses()));
 
    auto bfs = std::make_shared< BlockForest >(uint_c(MPIManager::instance()->worldRank()), setupBfs);
    auto blocks = std::make_shared< StructuredBlockForest >(bfs, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2]);

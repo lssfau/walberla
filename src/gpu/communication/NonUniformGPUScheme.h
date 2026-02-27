@@ -109,6 +109,7 @@ class NonUniformGPUScheme
 
    weak_ptr< StructuredBlockForest > blockForest_;
    uint_t forestModificationStamp_{uint_c(0)};
+   bool setupBeforeNextCommunication_;
 
    std::vector< std::vector< bool > > communicationInProgress_;
    bool sendFromGPU_;
@@ -228,6 +229,7 @@ void NonUniformGPUScheme< Stencil >::refresh()
       packInfo->clearBufferSizeCheckMap();
 #endif
    forestModificationStamp_ = forest->getBlockForest().getModificationStamp();
+   setupBeforeNextCommunication_ = true;
 }
 
 template< typename Stencil >
@@ -260,7 +262,7 @@ inline void NonUniformGPUScheme< Stencil >::startCommunicateEqualLevel(const uin
    WALBERLA_ASSERT_LESS(level, forest->getNumberOfLevels())
 
    if (forestModificationStamp_ != forest->getBlockForest().getModificationStamp()) refresh();
-
+   if (setupBeforeNextCommunication_) setupCommunication();
    std::set< uint_t > participatingLevels;
    participatingLevels.insert(level);
 
@@ -277,6 +279,7 @@ inline void NonUniformGPUScheme< Stencil >::startCommunicateCoarseToFine(const u
    WALBERLA_ASSERT_LESS(fineLevel, forest->getNumberOfLevels())
 
    if (forestModificationStamp_ != forest->getBlockForest().getModificationStamp()) refresh();
+   if (setupBeforeNextCommunication_) setupCommunication();
 
    const uint_t coarsestLevel = fineLevel - uint_t(1);
 
@@ -293,6 +296,7 @@ inline void NonUniformGPUScheme< Stencil >::startCommunicateFineToCoarse(const u
    WALBERLA_ASSERT_LESS(fineLevel, forest->getNumberOfLevels())
 
    if (forestModificationStamp_ != forest->getBlockForest().getModificationStamp()) refresh();
+   if (setupBeforeNextCommunication_) setupCommunication();
 
    const uint_t finestLevel   = fineLevel;
 
@@ -967,6 +971,7 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
       }
    }
    forestModificationStamp_      = forest->getBlockForest().getModificationStamp();
+   setupBeforeNextCommunication_ = false;
 }
 
 template< typename Stencil >
@@ -999,6 +1004,6 @@ void NonUniformGPUScheme< Stencil >::addPackInfo(const shared_ptr< GeneratedNonU
       WALBERLA_ABORT("You may not add a PackInfo to a NonUniformBufferedScheme if any communication is in progress!")
    }
    packInfos_.push_back(pi);
-   setupCommunication();
+   setupBeforeNextCommunication_ = true;
 }
 } // namespace walberla::gpu::communication

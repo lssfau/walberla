@@ -190,8 +190,8 @@ template< typename Field_T, typename PackingKernels_T >
 uint_t GeneratedNonUniformGPUFieldPackInfo< Field_T, PackingKernels_T >::sizeCoarseToFineReceive ( Block* fineReceiver, stencil::Direction dir) const
 {
    auto field = fineReceiver->getData< Field_T >(fieldID_);
-   CellInterval ci = field::refinement::coarseToFineUnpackInterval( dir, field->xyzSize(), uint_t(1) );
-   return (ci.numCells() >> 2) * field->fSize() * sizeof(value_type);
+   CellInterval ci = field::refinement::coarseToFineUnpackInterval( dir, field->xyzSize(), fineReceiver->getId() );
+   return (ci.numCells() >> 3) * field->fSize() * sizeof(value_type);
 }
 
 
