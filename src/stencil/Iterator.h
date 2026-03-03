@@ -16,6 +16,7 @@
 //! \file Iterator.h
 //! \ingroup stencil
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //
 //======================================================================================================================
 
@@ -40,14 +41,14 @@ template<typename Stencil>
 class Iterator
 {
 public:
-   explicit Iterator(uint_t i) : i_(i) {}
+   explicit constexpr Iterator(uint_t i) : i_(i) {}
 
    //** Operators  *****************************************************************************************************
    /*! \name Operators*/
    //@{
-   inline Iterator & operator++()                   { ++i_;  return *this; }
-   inline bool operator==(const Iterator & o) const { return i_ == o.i_; }
-   inline bool operator!=(const Iterator & o) const { return i_ != o.i_; }
+   constexpr Iterator & operator++()                   { ++i_;  return *this; }
+   constexpr bool operator==(const Iterator & o) const { return i_ == o.i_; }
+   constexpr bool operator!=(const Iterator & o) const { return i_ != o.i_; }
    //}
    //*******************************************************************************************************************
 
@@ -55,22 +56,22 @@ public:
    //** Access Functions   *********************************************************************************************
    /*! \name Access Functions*/
    //@{
-   inline Direction          operator*()         const { return Stencil::dir[i_];                       }
-   inline Direction          direction()         const { return Stencil::dir[i_];                       }
-   inline Direction          inverseDir()        const { return stencil::inverseDir[Stencil::dir[i_]];  }
-   inline uint_t             toIdx()             const { return i_;                                     }
-   inline uint_t             toInvIdx()          const { return Stencil::idx[inverseDir()];             }
-   inline int                cx()                const { return stencil::cx[Stencil::dir[i_]];          }
-   inline int                cy()                const { return stencil::cy[Stencil::dir[i_]];          }
-   inline int                cz()                const { return stencil::cz[Stencil::dir[i_]];          }
-   inline int                c( const uint_t d ) const { WALBERLA_ASSERT_LESS( d, 3 );
-                                                         return stencil::c[d][Stencil::dir[i_]];        }
-   inline real_t             length()            const { return stencil::dirLength[Stencil::dir[i_]];   }
-   inline BinaryDirection    binaryDir()         const { return stencil::dirToBinary[Stencil::dir[i_]]; }
-   inline const std::string& dirString()         const { return stencil::dirToString[Stencil::dir[i_]]; }
-   inline Direction          mirrorX()           const { return stencil::mirrorX[Stencil::dir[i_]];     }
-   inline Direction          mirrorY()           const { return stencil::mirrorY[Stencil::dir[i_]];     }
-   inline Direction          mirrorZ()           const { return stencil::mirrorZ[Stencil::dir[i_]];     }
+   constexpr Direction          operator*()         const { return Stencil::dir[i_];                       }
+   constexpr Direction          direction()         const { return Stencil::dir[i_];                       }
+   constexpr Direction          inverseDir()        const { return stencil::inverseDir[Stencil::dir[i_]];  }
+   constexpr uint_t             toIdx()             const { return i_;                                     }
+   constexpr uint_t             toInvIdx()          const { return Stencil::idx[inverseDir()];             }
+   constexpr int                cx()                const { return stencil::cx[Stencil::dir[i_]];          }
+   constexpr int                cy()                const { return stencil::cy[Stencil::dir[i_]];          }
+   constexpr int                cz()                const { return stencil::cz[Stencil::dir[i_]];          }
+   constexpr int                c( const uint_t d ) const { WALBERLA_ASSERT_LESS( d, 3 ); 
+                                                            return stencil::c[d][Stencil::dir[i_]];        }
+   constexpr real_t             length()            const { return stencil::dirLength[Stencil::dir[i_]];   }
+   constexpr BinaryDirection    binaryDir()         const { return stencil::dirToBinary[Stencil::dir[i_]]; }
+   constexpr const std::string& dirString()         const { return stencil::dirToString[Stencil::dir[i_]]; }
+   constexpr Direction          mirrorX()           const { return stencil::mirrorX[Stencil::dir[i_]];     }
+   constexpr Direction          mirrorY()           const { return stencil::mirrorY[Stencil::dir[i_]];     }
+   constexpr Direction          mirrorZ()           const { return stencil::mirrorZ[Stencil::dir[i_]];     }
    //}
    //*******************************************************************************************************************
 

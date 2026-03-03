@@ -64,7 +64,6 @@ testsuite+coverage (gcc15-hybrid-cuda):
       --print-summary
       --html-details coverage/coverage.html
       --cobertura coverage/coverage.xml
-      --makdown-summary coverage/coverage.md
       build/${cmakePresetName}
   variables:
     RUNNER_AFTER_SCRIPT_TIMEOUT: 20m
