@@ -1,0 +1,14 @@
+DomainSetup
+{
+    cells < 128, 32, 64 >;
+    periodic < 1, 1, 1 >;
+    dx 0.5;
+}
+
+Parameters
+{
+    timesteps   4;
+    delayFactorKernel1 1e0;
+    delayFactorKernel2 1e1;
+    delayFactorKernel3 1e-2;
+}

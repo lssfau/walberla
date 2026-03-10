@@ -181,12 +181,48 @@ documentation:
     - cmake -S . -B build/documentation
     - cd build/documentation
     - cmake --build . --target walberla_doc
+    # Save the current Job ID to a file so the next job can use it
+    - echo "BUILD_JOB_ID=$CI_JOB_ID" >> $CI_PROJECT_DIR/build.env
   tags:
     - docker
   artifacts:
+    reports:
+      dotenv: build.env # This makes $BUILD_JOB_ID available in downstream jobs
     paths:
       - build/documentation/doc
-    expire_in: 1 weeks
+      - build/documentation/DoxygenWarnings.txt
+    expire_in: 1 week
+    when: always
+
+documentation:preview:
+  stage: Documentation
+  needs:
+    - job: documentation
+      artifacts: true
+  variables:
+    # Constructing the URL using the ID from the build job (exported via dotenv)
+    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/build/documentation/doc/html/index.html"
+  environment:
+    name: doc/${CI_COMMIT_REF_SLUG}
+    url: $REVIEW_URL
+    on_stop: documentation:preview:stop
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - echo "Setting up environment link for job ${BUILD_JOB_ID}"
+    - echo "View documentation at ${REVIEW_URL}"
+
+documentation:preview:stop:
+  stage: Documentation
+  environment:
+    name: doc/${CI_COMMIT_REF_SLUG}
+    action: stop
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
+      allow_failure: true
+  script:
+    - echo "Stopping environment doc/${CI_COMMIT_REF_SLUG}"
 
 pages:
   image: alpine:latest
