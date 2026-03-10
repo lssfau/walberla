@@ -108,10 +108,17 @@ class SetParticleVelocitiesSweep
       // For every cell, compute the particle velocities of the overlapping particles evaluated at the cell center
       const real_t dx = block->getAABB().xSize() / real_t(nOverlappingParticlesField->xSize());
       WALBERLA_FOR_ALL_CELLS_XYZ(
-         particleVelocitiesField, const Vector3< real_t > cellCenter =
-                                     Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
-                                                       real_t(z) + real_t(0.5) * dx) +
-                                     block->getAABB().minCorner();
+         particleVelocitiesField,
+         for (uint_t i = 0; i < MaxParticlesPerCell; i++) {
+            particleVelocitiesField->get(x, y, z, i * 3 + 0) = real_t(0.0);
+            particleVelocitiesField->get(x, y, z, i * 3 + 1) = real_t(0.0);
+            particleVelocitiesField->get(x, y, z, i * 3 + 2) = real_t(0.0);
+         }
+
+         const Vector3< real_t >
+            cellCenter = Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
+                                           real_t(z) + real_t(0.5) * dx) +
+                         block->getAABB().minCorner();
          for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++) {
             Vector3< real_t > particleVelocityAtWFPoint =
                Vector3< real_t >(linearVelocities[idxField->get(x, y, z, p) * 3 + 0],
@@ -235,6 +242,7 @@ class ReduceParticleForcesSweep
                      hydrodynamicTorques[idxField->get(x, y, z, p) * 3 + 2] += torqueOnParticle[2];
                   }
                }
+               // Do not clean particleForcesField to visualize it in VTK
             }
          }
       }

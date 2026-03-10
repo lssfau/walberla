@@ -20,6 +20,8 @@
 //
 //======================================================================================================================
 
+#include "lbm_mesapd_coupling/DataTypesCodegen.h"
+
 #include "PSMUtilityGPU.h"
 #include "PSMWrapperKernels.h"
 
@@ -45,6 +47,14 @@ __global__ void SetParticleVelocities(walberla::gpu::FieldAccessor< uint_t > nOv
    nOverlappingParticlesField.set(blockIdx_uint3, threadIdx_uint3);
    idxField.set(blockIdx_uint3, threadIdx_uint3);
    particleVelocitiesField.set(blockIdx_uint3, threadIdx_uint3);
+
+   // Clear the fields
+   for (uint i = 0; i < MaxParticlesPerCell; i++)
+   {
+      particleVelocitiesField.get(i * 3 + 0) = real_t(0.0);
+      particleVelocitiesField.get(i * 3 + 1) = real_t(0.0);
+      particleVelocitiesField.get(i * 3 + 2) = real_t(0.0);
+   }
 
    // Cell center is needed in order to compute the particle velocity at this WF point
    const real_t cellCenter[] = { real_t(blockStart.x + (threadIdx.x + real_t(0.5)) * dx), // NOLINT(*-avoid-c-arrays)
@@ -95,6 +105,7 @@ __global__ void ReduceParticleForces(walberla::gpu::FieldAccessor< uint_t > nOve
                                               &hydrodynamicTorques[idxField.get(p) * 3], forceOnParticle,
                                               &positions[idxField.get(p) * 3], cellCenter);
    }
+   // Do not clean particleForcesField to visualize it in VTK
 }
 
 } // namespace gpu
