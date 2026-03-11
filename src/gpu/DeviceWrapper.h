@@ -179,6 +179,14 @@ inline gpuError_t gpuStreamWaitEvent (gpuStream_t /*stream*/, gpuEvent_t /*event
 inline gpuError_t gpuGetDeviceCount(int* /*count*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 inline gpuError_t gpuSetDevice(int /*device*/) { WALBERLA_DEVICE_FUNCTION_ERROR }
 
+using gpuLimit_t = int;
+const gpuLimit_t gpuLimitStackSize                    = 0;
+const gpuLimit_t gpuLimitPrintfFifoSize               = 1;
+const gpuLimit_t gpuLimitMallocHeapSize               = 2;
+
+inline gpuError_t gpuDeviceGetLimit(size_t * /*pValue*/, gpuLimit_t /*limit*/){ WALBERLA_DEVICE_FUNCTION_ERROR }
+inline gpuError_t gpuDeviceSetLimit(gpuLimit_t /*limit*/, size_t /*value*/){ WALBERLA_DEVICE_FUNCTION_ERROR }
+
 struct CUuuid_st
 {
    char bytes;
