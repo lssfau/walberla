@@ -84,6 +84,14 @@
     #define gpuDeviceProp cudaDeviceProp
     #define gpuGetDeviceProperties cudaGetDeviceProperties
 
+    using gpuLimit_t = cudaLimit;
+    #define gpuLimitStackSize cudaLimitStackSize
+    #define gpuLimitPrintfFifoSize cudaLimitPrintfFifoSize
+    #define gpuLimitMallocHeapSize cudaLimitMallocHeapSize
+
+    #define gpuDeviceGetLimit cudaDeviceGetLimit
+    #define gpuDeviceSetLimit cudaDeviceSetLimit
+
     #define gpuLaunchKernel cudaLaunchKernel
 #endif
 
@@ -150,6 +158,14 @@
     #define gpuSetDevice hipSetDevice
     #define gpuDeviceProp hipDeviceProp_t
     #define gpuGetDeviceProperties hipGetDeviceProperties
+
+    using gpuLimit_t = hipLimit_t;
+    #define gpuLimitStackSize hipLimitStackSize
+    #define gpuLimitPrintfFifoSize hipLimitPrintfFifoSize
+    #define gpuLimitMallocHeapSize hipLimitMallocHeapSize
+
+    #define gpuDeviceGetLimit hipDeviceGetLimit
+    #define gpuDeviceSetLimit hipDeviceSetLimit
 
     #define gpuLaunchKernel hipLaunchKernel
 #endif
