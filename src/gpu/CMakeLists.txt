@@ -68,6 +68,9 @@ if (WALBERLA_BUILD_WITH_CUDA)
     )
 endif (WALBERLA_BUILD_WITH_CUDA)
 
+add_subdirectory( timeloop )
+add_subdirectory( timing )
+
 add_subdirectory( sweeps )
 add_subdirectory( communication )
 if ( WALBERLA_BUILD_LEGACY_LBM )
