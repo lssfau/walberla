@@ -31,6 +31,8 @@ namespace psm
 {
 namespace gpu
 {
+   
+// NOLINTBEGIN(readability-non-const-parameter)
 
 inline __device__ void cross(real_t* __restrict__ const crossResult, const real_t* __restrict__ const lhs,
                       const real_t* __restrict__ const rhs)
@@ -89,6 +91,8 @@ inline __device__ void addHydrodynamicForceTorqueAtWFPosAtomic(real_t* __restric
    unsafeAtomicAdd(&(particleTorque[2]), torque[2]);
 #endif
 }
+
+// NOLINTEND(readability-non-const-parameter)
 
 } // namespace gpu
 } // namespace psm

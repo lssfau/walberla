@@ -4,6 +4,7 @@ include:
 stages:
   - Testsuite
   - Code Quality
+  - Code Quality Preview
   - Test Matrix
   - Documentation
   - deploy
@@ -31,10 +32,18 @@ testsuite-full (clang-21-hybrid-cuda):
   extends: .testsuite-base-linux
   script:
     - !reference [.clang-library-path-patch, script]
+    - !reference [.testsuite-common, script]
   variables:
     cmakePresetName: .ci-branch-testsuite
     CC: clang
     CXX: clang++
+  artifacts:
+    when: on_failure
+    paths:
+      - build/${cmakePresetName}/CMakeCache.txt
+      - build/${cmakePresetName}/compile_commands.json
+      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+    expire_in: 2 days
 
 testsuite-full (icx-2025-hybrid-cuda):
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
@@ -44,6 +53,13 @@ testsuite-full (icx-2025-hybrid-cuda):
     cmakePresetName: .ci-branch-testsuite
     CC: icx
     CXX: icpx
+  artifacts:
+    when: on_failure
+    paths:
+      - build/${cmakePresetName}/CMakeCache.txt
+      - build/${cmakePresetName}/compile_commands.json
+      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+    expire_in: 2 days
 
 testsuite+coverage (gcc15-hybrid-cuda):
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
@@ -76,6 +92,9 @@ testsuite+coverage (gcc15-hybrid-cuda):
     when: always
     paths:
       - coverage/
+      - build/${cmakePresetName}/CMakeCache.txt
+      - build/${cmakePresetName}/compile_commands.json
+      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     reports:
       coverage_report:
         coverage_format: cobertura
@@ -94,26 +113,65 @@ clang-tidy:
     - apt-get update; apt-get install -y tree
     - !reference [.testsuite-common, before_script]
   script:
+    - !reference [.clang-library-path-patch, script]
     - cmake --preset ${cmakePresetName}
     - cd build/${cmakePresetName}
     - cmake --build . --target codegen
     - python3 utilities/clang-tidy/analyze.py -p utilities/clang-tidy/analyze.yml -r ../.. -c compile_commands.json -o clang-tidy-output --html
+    # Save the current Job ID to a file so the next job can use it
+    - echo "BUILD_JOB_ID=$CI_JOB_ID" >> $CI_PROJECT_DIR/build.env
   after_script:
     - mkdir -p $CI_PROJECT_DIR/artifacts
-    - mv $CI_PROJECT_DIR/build/${cmakePresetName}/clang-tidy-output $CI_PROJECT_DIR/artifacts/clang-tidy-output
-    - cd $CI_PROJECT_DIR/artifacts/clang-tidy-output
+    - mv $CI_PROJECT_DIR/build/${cmakePresetName}/clang-tidy-output $CI_PROJECT_DIR/clang-tidy-output
+    - cd $CI_PROJECT_DIR/clang-tidy-output
     - tree -H . > index.html
   variables:
     cmakePresetName: .ci-clang-tidy
     CC: "clang"
     CXX: "clang++"
+    WALBERLA_CI_CUDA_ARCHITECTURES: "60"
   artifacts:
+    reports:
+      dotenv: build.env # This makes $BUILD_JOB_ID available in downstream jobs
     when: always
     paths:
-      - $CI_PROJECT_DIR/artifacts/clang-tidy-output
+      - clang-tidy-output
+      - build/${cmakePresetName}/CMakeCache.txt
+      - build/${cmakePresetName}/compile_commands.json
+      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     expire_in: 2 days
   tags:
     - docker
+
+clang-tidy:preview:
+  stage: "Code Quality Preview"
+  dependencies:
+    - clang-tidy
+  variables:
+    # Constructing the URL using the ID from the build job (exported via dotenv)
+    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/clang-tidy-output/index.html"
+  environment:
+    name: clang-tidy/${CI_COMMIT_REF_SLUG}
+    url: $REVIEW_URL
+    on_stop: clang-tidy:preview:stop
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: always
+  script:
+    - echo "Setting up environment link for job ${BUILD_JOB_ID}"
+    - echo "View clang-tidy output at ${REVIEW_URL}"
+
+clang-tidy:preview:stop:
+  stage: "Code Quality Preview"
+  environment:
+    name: clang-tidy/${CI_COMMIT_REF_SLUG}
+    action: stop
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
+      allow_failure: true
+  script:
+    - echo "Stopping environment clang-tidy/${CI_COMMIT_REF_SLUG}"
 
 python-static-checks:
   image: i10git.cs.fau.de:5005/pycodegen/pycodegen/nox:alpine

@@ -55,8 +55,7 @@ class PackInfoTest
 
    PackInfoTest(const uint_t numGhostLayers)
    {
-      auto mpiManager             = mpi::MPIManager::instance();
-      uint_t numProcs             = uint_c(mpiManager->numProcesses());
+      uint_t numProcs             = uint_c(mpi::MPIManager::instance()->numProcesses());
       Vector3< uint_t > numBlocks = math::getFactors3D(numProcs);
 
       blocks_ = blockforest::createUniformBlockGrid( //
