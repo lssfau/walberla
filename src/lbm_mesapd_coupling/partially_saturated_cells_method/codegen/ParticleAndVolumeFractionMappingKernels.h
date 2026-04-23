@@ -35,6 +35,8 @@ namespace psm
 namespace gpu
 {
 
+// NOLINTBEGIN(bugprone-dynamic-static-initializers)
+
 template< int Weighting_T >
 __global__ void superSampling(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
                               walberla::gpu::FieldAccessor< real_t > BsField,
@@ -61,6 +63,8 @@ __global__ void boxMapping(walberla::gpu::FieldAccessor< uint_t > nOverlappingPa
                            walberla::gpu::FieldAccessor< id_t > idxField, walberla::gpu::FieldAccessor< real_t > BField,
                            const real_t omega, const double3 boxPositionMin, const double3 boxPositionMax,
                            const double3 blockStart, const real_t dx, const id_t idxMapped);
+
+// NOLINTEND(bugprone-dynamic-static-initializers)
 
 } // namespace gpu
 } // namespace psm

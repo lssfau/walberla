@@ -32,6 +32,8 @@ namespace psm
 namespace gpu
 {
 
+// NOLINTBEGIN(bugprone-dynamic-static-initializers)
+
 __global__ void SetParticleVelocities(walberla::gpu::FieldAccessor< uint_t > nOverlappingParticlesField,
                                       walberla::gpu::FieldAccessor< uint_t > idxField,
                                       walberla::gpu::FieldAccessor< real_t > particleVelocitiesField,
@@ -47,6 +49,8 @@ __global__ void ReduceParticleForces(walberla::gpu::FieldAccessor< uint_t > nOve
                                      real_t* __restrict__ const hydrodynamicTorques,
                                      real_t* __restrict__ const positions, const double3 blockStart, const real_t dx,
                                      const real_t forceScalingFactor);
+                                     
+// NOLINTEND(bugprone-dynamic-static-initializers)
 
 } // namespace gpu
 } // namespace psm

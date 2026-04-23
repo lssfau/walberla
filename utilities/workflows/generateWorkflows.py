@@ -186,6 +186,7 @@ class CiConfig:
                 spec.image = None
             case id if id.startswith("clang-"):
                 spec.script.append(Reference(".clang-library-path-patch", "script"))
+                spec.script.append(Reference(".testsuite-common", "script"))
             case "gcc-15" if "cuda" in preset.name:
                 spec.variables["CUDAHOSTCXX"] = "g++-13"
 
@@ -277,6 +278,7 @@ def get_cmake_presets() -> CMakePresets:
         "clang",
         "debug",
         "hybrid",
+        "cuda",
         name=".ci-clang-tidy",
         generator="Unix Makefiles",
         cacheVariables={

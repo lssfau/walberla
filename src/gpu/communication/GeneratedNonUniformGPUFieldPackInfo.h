@@ -47,7 +47,7 @@ class GeneratedNonUniformGPUFieldPackInfo : public walberla::gpu::GeneratedNonUn
    GeneratedNonUniformGPUFieldPackInfo( const BlockDataID fieldID )
       : fieldID_(fieldID) {};
 
-   ~GeneratedNonUniformGPUFieldPackInfo() = default;
+   ~GeneratedNonUniformGPUFieldPackInfo() override = default;
 
    bool constantDataExchange() const override { return true; };
    bool threadsafeReceiving() const override { return false; };

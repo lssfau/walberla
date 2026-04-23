@@ -88,11 +88,11 @@ void withBlockStorage()
             false,                            // one block per process? - "false" means all blocks to one process
             true, true, true );               // no periodicity
 
-   typedef GhostLayerField<real_t,1> ScalarField;
+   using ScalarField = GhostLayerField<real_t,1>;
    BlockDataID cpuFieldID1 = field::addToStorage<ScalarField>( blocks, "CPUField 1", real_c(42), field::fzyx, uint_c(1) );
    BlockDataID cpuFieldID2 = field::addToStorage<ScalarField>( blocks, "CPUField 2", real_c(0),  field::fzyx, uint_c(1) );
 
-   typedef gpu::GPUField<real_t> GPUField;
+   using GPUField = gpu::GPUField<real_t>;
    BlockDataID gpuFieldID = blocks->addStructuredBlockData< GPUField >(
             [&] ( IBlock * block, StructuredBlockStorage * const s ) {
                return new GPUField( s->getNumberOfXCells(*block),

@@ -69,7 +69,7 @@ using FlagField_T = FlagField< flag_t > ;
 using NoSlip_T = lbm::CumulantMRTNoSlip ;
 
 #if defined(WALBERLA_BUILD_WITH_GPU_SUPPORT)
-typedef gpu::GPUField< real_t > GPUField;
+using GPUField =  gpu::GPUField< real_t >;
 #endif
 
 //////////////////////////////////////////

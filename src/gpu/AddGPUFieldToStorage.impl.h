@@ -68,7 +68,7 @@ namespace gpu
 
    template< typename GPUField_T>
    BlockDataID addGPUFieldToStorage(const shared_ptr< StructuredBlockStorage >& bs,
-                                    const std::string & identifier,
+                                    const std::string & identifier, // NOLINT(misc-unused-parameters)
                                     uint_t fSize,
                                     const Layout layout,
                                     uint_t nrOfGhostLayers,
@@ -82,7 +82,7 @@ namespace gpu
    template< typename Field_T>
    BlockDataID addGPUFieldToStorage( const shared_ptr< StructuredBlockStorage > & bs,
                                      ConstBlockDataID cpuFieldID,
-                                     const std::string & identifier,
+                                     const std::string & identifier, // NOLINT(misc-unused-parameters)
                                      bool usePitchedMem )
    {
       auto func = [cpuFieldID, usePitchedMem](const IBlock * const block, const auto * const sbs) { return internal::createGPUFieldFromCPUField<Field_T>(block, sbs, cpuFieldID, usePitchedMem); };
