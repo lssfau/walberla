@@ -26,6 +26,10 @@ add_subdirectory( simd )
 add_subdirectory( stencil )
 add_subdirectory( timeloop )
 
+if( WALBERLA_ENABLE_V8CORE )
+    add_subdirectory( v8 )
+endif()
+
 if( WALBERLA_ENABLE_SWEEPGEN )
     add_subdirectory( sweepgen )
 endif()

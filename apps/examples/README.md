@@ -1,4 +1,4 @@
-# Example Apps {#example-apps}
+@page example-apps Example Apps
 
 \viewOnGitlab{apps/examples}
 

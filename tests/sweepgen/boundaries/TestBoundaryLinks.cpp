@@ -36,7 +36,7 @@
 
 #include "timeloop/all.h"
 
-#include "walberla/experimental/Sweep.hpp"
+#include "walberla/v8/Sweep.hpp"
 
 #if defined(WALBERLA_BUILD_WITH_OPENMESH)
 #   include "mesh_common/DistanceFunction.h"
@@ -83,7 +83,7 @@ std::vector< Link > createSolutionIndexVector()
 template< typename Link >
 void testIndexVector(
    shared_ptr< StructuredBlockForest > blocks,
-   walberla::experimental::sweep::SparseIndexList< Link, walberla::experimental::memory::memtag::host > indexVector)
+   walberla::v8::sweep::SparseIndexList< Link, walberla::v8::memory::memtag::host > indexVector)
 {
    auto reference_vec = createSolutionIndexVector< Link >();
    for (auto& block : *blocks)

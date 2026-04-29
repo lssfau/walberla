@@ -32,6 +32,7 @@
 #include "OpenMP.h"
 #include "Set.h"
 #include "SharedFunctor.h"
+#include "Stdlib.hpp"
 #include "StringUtility.h"
 #include "VectorTrait.h"
 

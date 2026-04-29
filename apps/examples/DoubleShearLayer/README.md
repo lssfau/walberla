@@ -1,4 +1,4 @@
-# Fully Periodic Double Shear Layer {#example-DoubleShearLayer}
+@page example-DoubleShearLayer Fully Periodic Double Shear Layer
 
 \viewOnGitlab{apps/examples/DoubleShearLayer}
 
@@ -29,6 +29,9 @@ and vertical perturbation $\delta$:
     }
 \end{align}
 
+This example showcases a portable parallel simulation app built with waLBerla V8, solving the transient
+evolution from the above initial conditions.
+
 ## Code Generation
 
 The numerical kernels for the double shear-layer application are generated
@@ -44,11 +47,10 @@ from the pycodegen packages and SweepGen:
 \skip import
 \until LbmBulk
 
-Next, we open the code generation manager.
-We set the namespace and fix the target architecture to `CPU`:
+Next, we open the code generation manager, enable the `walberla::v8` field classes, and set the namespace:
 
 \skip with SourceFileGenerator
-\until .target =
+\until .namespace(
 
 ### Numerical Kernels
 
@@ -97,16 +99,14 @@ and namespace declarations:
 \until namespace
 
 Next, we define a few type aliases.
+We automatically select the memory tag from the build configuration;
 We set up field types for the scalar and vector fields,
 as well as the LBM Stencil and PDF field type.
 These must match the stencil used in the code generator script (see above)
 in both dimensionality and size of the velocity set.
 
-Finally, a communication scheme and pack info class are defined, which are later
-used to synchronize the ghost layers of the PDF field between blocks.
-
-\skip using ScalarField
-\until using PdfsPackInfo
+\skip begin aliases
+\until end aliases
 
 ### Domain and Fields Setup
 
@@ -121,8 +121,8 @@ and the simulation domain is initialized.
 
 We then add the required fields to the domain:
 
-\skip pdfsId =
-\until vorticityId =
+\skip begin fields
+\until end fields
 
 ### Parameters and Initial State
 
@@ -163,8 +163,8 @@ In addition to the pack info for the PDF field
 we also register a ghost-layer pack info for the velocity field.
 This is required by the finite-difference scheme of the vorticity sweep.
 
-\skip CommScheme
-\until (uId)
+\skip begin halo exchange
+\until end halo exchange
 
 Finally, we prepare the timeloop and register both sweeps and the communication
 scheme with it.
@@ -184,7 +184,7 @@ and register output functions for the density, velocity, and vorticity fields wi
 and add it to the time loop:
 
 \skip outputParams
-\until }
+\until end vtk output
 
 ### Invoke the Timeloop
 
@@ -209,13 +209,17 @@ any parameter files to the build directory:
 
 \until link_files
 
-We add an executable and register the application frame as a source file:
+We add an executable and register the application frame as a source file.
+For portability between CPU and GPU, we use `walberla_set_gpu_language` to set
+the correct GPU compilation language for our source files.
 
 \skip add_executable
-\until target_sources
+\until walberla_set_gpu_language
 
 Then, we register the code generation script such that its output files
-will be linked against the application:
+will be linked against the application.
+We set the `AUTO_LANGUAGE` option such that the code generator selects the correct
+output language for the current GPU target:
 
 \skip generate_sources
 \until )
@@ -229,13 +233,14 @@ Finally, we need to link the app against waLBerla's runtime libraries:
 
 ### Compilation
 
-If not already done, generate the waLBerla build system with SweepGen
-(and, recommendedly, OpenMP) enabled
+If not already done, generate the waLBerla build system with the V8 Core and SweepGen enabled
 by running this command in the waLBerla project root:
 
 ```bash
-cmake -S . -B build -DWALBERLA_ENABLE_SWEEPGEN=ON -DWALBERLA_BUILD_WITH_OPENMP=ON
+cmake -S . -B build -DWALBERLA_ENABLE_V8CORE=ON -DWALBERLA_ENABLE_SWEEPGEN=ON
 ```
+
+Depending on your hardware, you may optionally enable OpenMP, CUDA or HIP for parallelization.
 
 Navigate to `build/apps/examples/DoubleShearLayer` and build the app:
 

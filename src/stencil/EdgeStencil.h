@@ -143,6 +143,10 @@ struct EdgeStencil
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { 0,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0 };
 
+   static constexpr size_t subdirsLength { 36 };
+   static constexpr std::array< Direction, 36 > subdirs { NW, NE, TN, BN, SW, SE, TS, BS, NW, SW, TW, BW, NE, SE, TE, BE, TN, TS, TW, TE, BN, BS, BW, BE, NW, NE, SW, SE, TN, TS, TW, TE, BN, BS, BW, BE };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { 0, 0, 4, 8, 12, 16, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 36, 36, 36, 36, 36, 36, 36, 36 };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

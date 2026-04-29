@@ -30,7 +30,7 @@ from pystencils import (
     Target,
     create_type,
 )
-from pystencils.types import deconstify, PsCustomType, PsStructType
+from pystencils.types import deconstify, PsCustomType, PsStructType, PsType
 
 from pystencilssfg import SfgComposer
 from pystencilssfg.lang import (
@@ -49,7 +49,6 @@ from .api import (
     GenericWalberlaField,
     GhostLayerFieldPtr,
     GpuFieldPtr,
-    IndexListBufferPtr,
     SparseIndexList,
     IBlockPtr,
     BlockDataID,
@@ -57,6 +56,9 @@ from .api import (
     Vector3,
     CellInterval,
     CellIdx,
+    MemTags,
+    sweep_parts,
+    experimental,
 )
 
 from .core.properties import PropertiesContainerBuilder, PropertiesContainer
@@ -84,8 +86,15 @@ class FieldInfo(ABC):
         return self.view
 
 
+class DomainFieldInfo:
+    @abstractmethod
+    def with_cell_interval(
+        self, ci: CellInterval | None
+    ) -> SupportsFieldExtraction: ...
+
+
 @dataclass
-class GlFieldInfo(FieldInfo):
+class GlFieldInfo(DomainFieldInfo, FieldInfo):
     glfield: GenericWalberlaField
     data_id: BlockDataID
 
@@ -99,6 +108,9 @@ class GlFieldInfo(FieldInfo):
 
     def create_view(self, block: IBlockPtr) -> AugExpr:
         return block.getData(self.glfield.field_type, self.data_id)
+
+    def with_cell_interval(self, ci: CellInterval | None) -> SupportsFieldExtraction:
+        return self.glfield.with_cell_interval(ci)
 
 
 @dataclass
@@ -118,6 +130,37 @@ class IndexListInfo(FieldInfo):
         return self.idx_list.view(block.deref())
 
 
+@dataclass
+class V8FieldInfo(DomainFieldInfo, FieldInfo):
+    ex_field: experimental.Field
+    buffer_view: experimental.BufferView
+
+    @property
+    def entity(self) -> AugExpr:
+        return self.ex_field
+
+    @property
+    def view(self) -> AugExpr:
+        return self.buffer_view
+
+    def create_view(self, block):
+        return self.ex_field.bufferSystem().view(block.deref())
+
+    def view_extraction(self) -> SupportsFieldExtraction:
+        return experimental.BufferKernelParamsAdaptor(
+            self.buffer_view,
+            cell_interval=None,
+            emulate_spatial_rank=self.field.spatial_dimensions,
+        )
+
+    def with_cell_interval(self, ci: CellInterval | None) -> SupportsFieldExtraction:
+        return experimental.BufferKernelParamsAdaptor(
+            self.buffer_view,
+            cell_interval=ci,
+            emulate_spatial_rank=self.field.spatial_dimensions,
+        )
+
+
 class ShadowFieldsManager:
     """
     Information needed:
@@ -125,21 +168,43 @@ class ShadowFieldsManager:
         - Name of shadow field
     """
 
-    def __init__(self) -> None:
-        self._originals: dict[str, GlFieldInfo] = dict()
+    def __init__(self, block_ptr: IBlockPtr) -> None:
+        self._block_ptr = block_ptr
+        self._originals: dict[str, GlFieldInfo | V8FieldInfo] = dict()
+        self._caches: dict[str, sweep_parts.ShadowBufferCache] = dict()
 
-    def add_shadow(self, original: GlFieldInfo):
+    def add_shadow(self, original: GlFieldInfo | V8FieldInfo):
         self._originals[original.field.name] = original
 
-    def get_shadow(self, original_name: str) -> AugExpr:
+    def view_shadow(self, original_name: str) -> AugExpr:
         original = self._originals[original_name]
-        return AugExpr.format(
-            "this->{}({})", self._getter(original.field.name), original.glfield
-        )
+        match original:
+            case GlFieldInfo():
+                return AugExpr.format(
+                    "this->{}({})", self._getter(original.field.name), original.glfield
+                )
+            case V8FieldInfo():
+                return self._cache_member(original).view(original.ex_field)
 
-    def perform_swap(self, original_name: str, shadow_field: GlFieldInfo) -> AugExpr:
-        original = self._originals[original_name]
-        return original.glfield.swapDataPointers(shadow_field.glfield)
+    def perform_swap(
+        self, original_name: str, shadow_info: GlFieldInfo | V8FieldInfo
+    ) -> AugExpr:
+        match shadow_info:
+            case GlFieldInfo():
+                original = cast(GlFieldInfo, self._originals[original_name])
+                return AugExpr.format(
+                    "{};", original.glfield.swapDataPointers(shadow_info.glfield)
+                )
+            case V8FieldInfo():
+                original_info = cast(
+                    V8FieldInfo, self._originals[original_name]
+                )
+                return AugExpr.format(
+                    "{};",
+                    self._cache_member(original_info).swapBuffers(
+                        original_info.ex_field, self._block_ptr.deref()
+                    ),
+                )
 
     def render(self, sfg: SfgComposer):
         if not self._originals:
@@ -151,34 +216,55 @@ class ShadowFieldsManager:
         getters = []
 
         for orig_name, orig in self._originals.items():
-            unique_ptr_type = PsCustomType(
-                f"std::unique_ptr< {orig.glfield.field_type} >"
-            )
-            cache_ptr_name = self._cache_ptr(orig.glfield)
-            cache_ptrs.append(sfg.var(cache_ptr_name, unique_ptr_type))
+            match orig:
+                case GlFieldInfo():
+                    unique_ptr_type = PsCustomType(
+                        f"std::unique_ptr< {orig.glfield.field_type} >"
+                    )
+                    cache_ptr_name = self._cache_member_name(orig.field.name)
+                    cache_ptrs.append(sfg.var(cache_ptr_name, unique_ptr_type))
 
-            getters.append(
-                sfg.method(self._getter(orig_name))
-                .returns(orig.glfield.get_dtype())
-                .inline()(
-                    sfg.branch(f"{cache_ptr_name} == nullptr")(
-                        AugExpr.format(
-                            "{}.reset({});",
-                            cache_ptr_name,
-                            orig.glfield.cloneUninitialized(),
+                    getters.append(
+                        sfg.method(self._getter(orig_name))
+                        .returns(orig.glfield.get_dtype())
+                        .inline()(
+                            sfg.branch(f"{cache_ptr_name} == nullptr")(
+                                AugExpr.format(
+                                    "{}.reset({});",
+                                    cache_ptr_name,
+                                    orig.glfield.cloneUninitialized(),
+                                )
+                            ),
+                            f"return {cache_ptr_name}.get();",
                         )
-                    ),
-                    f"return {cache_ptr_name}.get();",
-                )
-            )
+                    )
+                case V8FieldInfo():
+                    cache_ptrs.append(self._cache_member_var(orig))
 
         return (sfg.private(*cache_ptrs, *getters),)
 
     def _getter(self, orig_name: str) -> str:
         return f"_getShadow_{orig_name}"
 
-    def _cache_ptr(self, orig: GenericWalberlaField) -> str:
-        return f"shadow_{str(orig)}_"
+    def _cache_member_name(self, orig_name: str) -> str:
+        return f"shadow_{orig_name}_"
+
+    def _cache_member_var(
+        self, orig: V8FieldInfo
+    ) -> sweep_parts.ShadowBufferCache:
+        if orig.field.name not in self._caches:
+            self._caches[orig.field.name] = sweep_parts.ShadowBufferCache(
+                TField=orig.ex_field.get_dtype()
+            ).var(self._cache_member_name(orig.field.name))
+
+        return self._caches[orig.field.name]
+
+    def _cache_member(
+        self, orig: V8FieldInfo
+    ) -> sweep_parts.ShadowBufferCache:
+        return sweep_parts.ShadowBufferCache(TField=orig.ex_field.get_dtype()).bind(
+            f"this->{self._cache_member_name(orig.field.name)}"
+        )
 
 
 def combine_vectors(
@@ -258,6 +344,25 @@ class Sweep(CustomGenerator):
             override options from the `WalberlaBuildConfig`.
     """
 
+    _use_experimental_fields: bool = False
+
+    class _UseExperimentalFields:
+        def __init__(self, reset_to: bool):
+            self._reset_to = reset_to
+
+        def __enter__(self):
+            pass
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            Sweep._use_experimental_fields = self._reset_to
+
+    @staticmethod
+    def use_v8core_fields(use: bool = True):
+        """Generate code for the experimental field system in ``walberla::v8::memory``."""
+        prev_value = Sweep._use_experimental_fields
+        Sweep._use_experimental_fields = use
+        return Sweep._UseExperimentalFields(prev_value)
+
     def __init__(
         self,
         name: str,
@@ -296,6 +401,7 @@ class Sweep(CustomGenerator):
 
         #   Set only later once the full codegen config is known
         self._glfield_type: type[GpuFieldPtr] | type[GhostLayerFieldPtr]
+        self._memtag_t: PsType
 
         #   Map from shadow field to shadowed field
         self._shadow_fields: dict[Field, Field] = dict()
@@ -367,31 +473,26 @@ class Sweep(CustomGenerator):
     def _set_field_interface(self, target: Target):
         if target.is_gpu():
             self._glfield_type = GpuFieldPtr
+            self._memtag_t = MemTags.unified
         elif target.is_cpu():
             self._glfield_type = GhostLayerFieldPtr
+            self._memtag_t = MemTags.host
         else:
             raise ValueError(
                 f"Cannot generate sweep for target {self._gen_config.target}"
             )
 
-    def _walberla_field(self, f: Field) -> GenericWalberlaField | IndexListBufferPtr:
-        match f.field_type:
-            case FieldType.GENERIC | FieldType.CUSTOM:
-                return self._glfield_type.create(f)
-            case FieldType.INDEXED:
-                assert isinstance(f.dtype, PsStructType)
-                return IndexListBufferPtr(f.dtype).var(f.name)
-            case _:
-                raise ValueError(
-                    f"Unable to map field {f} of type {f.field_type} to a waLBerla field."
-                )
-
     def _make_field_info(self, f: Field, target: Target) -> FieldInfo:
         match f.field_type:
             case FieldType.GENERIC | FieldType.CUSTOM:
-                glfield = self._glfield_type.create(f)
-                data_id = BlockDataID().var(f"{f.name}Id")
-                return GlFieldInfo(f, glfield, data_id)
+                if self._use_experimental_fields:
+                    ex_field = experimental.Field.from_field(f, self._memtag_t)
+                    buffer_view = ex_field.bufferViewType().var(f.name + "_view")
+                    return V8FieldInfo(f, ex_field, buffer_view)
+                else:
+                    glfield = self._glfield_type.create(f)
+                    data_id = BlockDataID().var(f"{f.name}Id")
+                    return GlFieldInfo(f, glfield, data_id)
             case FieldType.INDEXED:
                 assert isinstance(f.dtype, PsStructType)
                 idx_list = SparseIndexList.from_field(f, target=target)
@@ -443,18 +544,19 @@ class Sweep(CustomGenerator):
             f.name: self._make_field_info(f, target) for f in khandle.fields
         }
 
-        swaps: dict[str, GlFieldInfo] = dict()
-        shadows_cache = ShadowFieldsManager()
+        block = IBlockPtr().var("block")
+
+        swaps: dict[str, GlFieldInfo | V8FieldInfo] = dict()
+        shadows_cache = ShadowFieldsManager(block)
 
         for shadow, orig in self._shadow_fields.items():
             shadow_fi = all_fields[shadow.name]
-            assert isinstance(shadow_fi, GlFieldInfo)
+            assert isinstance(shadow_fi, GlFieldInfo | V8FieldInfo)
             original_fi = all_fields[orig.name]
-            assert isinstance(original_fi, GlFieldInfo)
+            assert isinstance(original_fi, GlFieldInfo | V8FieldInfo)
             swaps[orig.name] = shadow_fi
             shadows_cache.add_shadow(original_fi)
 
-        block = IBlockPtr().var("block")
         block_fields = sorted(
             (fi for fi in all_fields.values() if fi.field not in self._shadow_fields),
             key=lambda fi: fi.field.name,
@@ -496,20 +598,20 @@ class Sweep(CustomGenerator):
                 *(sfg.init(fi.view)(fi.create_view(block)) for fi in block_fields),
                 #   Get shadow fields from cache
                 *(
-                    sfg.init(shadow_info.glfield)(shadows_cache.get_shadow(orig_name))
+                    sfg.init(shadow_info.view)(shadows_cache.view_shadow(orig_name))
                     for orig_name, shadow_info in swaps.items()
                 ),
-                #   Map GhostLayerFields to pystencils fields
+                #   Map domain fields to pystencils fields
                 *(
-                    sfg.map_field(fi.field, fi.glfield.with_cell_interval(ci))
+                    sfg.map_field(fi.field, fi.with_cell_interval(ci))
                     for fi in all_fields.values()
-                    if isinstance(fi, GlFieldInfo)
+                    if isinstance(fi, DomainFieldInfo)
                 ),
                 #   Extract indexing information from field view for all remaining fields
                 *(
                     sfg.map_field(fi.field, fi.view_extraction())
                     for fi in all_fields.values()
-                    if not isinstance(fi, GlFieldInfo)
+                    if not isinstance(fi, DomainFieldInfo)
                 ),
                 #   Get parameters from class
                 *(

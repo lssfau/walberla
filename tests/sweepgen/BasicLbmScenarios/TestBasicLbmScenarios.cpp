@@ -14,12 +14,12 @@
 
 #include "SimDomain.hpp"
 
-#include "walberla/experimental/Sweep.hpp"
+#include "walberla/v8/Sweep.hpp"
 
 namespace BasicLbmScenarios
 {
 using namespace walberla;
-using namespace walberla::experimental;
+using namespace walberla::v8;
 
 using TestFunction = std::function< void(mpi::Environment&) >;
 

@@ -20,8 +20,7 @@ modules:
   - vtk:
       exclude-tests: true
   - walberla/sweepgen
-  - walberla/experimental:
-      exclude-tests: true
+  - walberla/v8
 
 apps:
   - "examples/DoubleShearLayer"

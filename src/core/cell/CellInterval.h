@@ -52,66 +52,66 @@ class CellInterval {
 public:
    using const_iterator = CellIntervalIterator;
 
-   CellInterval() : min_( cell_idx_c(0), cell_idx_c(0), cell_idx_c(0) ), max_( cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(-1) ) {}
-   CellInterval( const Cell& _min, const Cell& _max ) : min_( _min ), max_( _max ) {}
-   CellInterval( const cell_idx_t _xMin, const cell_idx_t _yMin, const cell_idx_t _zMin,
+   WALBERLA_HOST_DEVICE CellInterval() : min_( cell_idx_c(0), cell_idx_c(0), cell_idx_c(0) ), max_( cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(-1) ) {}
+   WALBERLA_HOST_DEVICE CellInterval( const Cell& _min, const Cell& _max ) : min_( _min ), max_( _max ) {}
+   WALBERLA_HOST_DEVICE CellInterval( const cell_idx_t _xMin, const cell_idx_t _yMin, const cell_idx_t _zMin,
                  const cell_idx_t _xMax, const cell_idx_t _yMax, const cell_idx_t _zMax ) :
                  min_( _xMin, _yMin, _zMin ), max_( _xMax, _yMax, _zMax ) {}
 
-   bool operator==( const CellInterval& rhs ) const { return ( empty() && rhs.empty() ) || ( min_ == rhs.min_ && max_ == rhs.max_ ); }
-   bool operator!=( const CellInterval& rhs ) const { return !operator==( rhs ); }
+   WALBERLA_HOST_DEVICE bool operator==( const CellInterval& rhs ) const { return ( empty() && rhs.empty() ) || ( min_ == rhs.min_ && max_ == rhs.max_ ); }
+   WALBERLA_HOST_DEVICE bool operator!=( const CellInterval& rhs ) const { return !operator==( rhs ); }
 
-   inline Cell& min() { return min_; }
-   inline cell_idx_t& xMin() { return min_[0]; }
-   inline cell_idx_t& yMin() { return min_[1]; }
-   inline cell_idx_t& zMin() { return min_[2]; }
+   WALBERLA_HOST_DEVICE inline Cell& min() { return min_; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& xMin() { return min_[0]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& yMin() { return min_[1]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& zMin() { return min_[2]; }
 
-   inline Cell& max() { return max_; }
-   inline cell_idx_t& xMax() { return max_[0]; }
-   inline cell_idx_t& yMax() { return max_[1]; }
-   inline cell_idx_t& zMax() { return max_[2]; }
+   WALBERLA_HOST_DEVICE inline Cell& max() { return max_; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& xMax() { return max_[0]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& yMax() { return max_[1]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t& zMax() { return max_[2]; }
 
-   inline const Cell& min() const { return min_; }
-   inline cell_idx_t xMin() const { return min_[0]; }
-   inline cell_idx_t yMin() const { return min_[1]; }
-   inline cell_idx_t zMin() const { return min_[2]; }
+   WALBERLA_HOST_DEVICE inline const Cell& min() const { return min_; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t xMin() const { return min_[0]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t yMin() const { return min_[1]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t zMin() const { return min_[2]; }
 
-   inline const Cell& max() const { return max_; }
-   inline cell_idx_t xMax() const { return max_[0]; }
-   inline cell_idx_t yMax() const { return max_[1]; }
-   inline cell_idx_t zMax() const { return max_[2]; }
+   WALBERLA_HOST_DEVICE inline const Cell& max() const { return max_; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t xMax() const { return max_[0]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t yMax() const { return max_[1]; }
+   WALBERLA_HOST_DEVICE inline cell_idx_t zMax() const { return max_[2]; }
 
-   inline bool empty() const { return min_.x() > max_.x() || min_.y() > max_.y() || min_.z() > max_.z(); }
-   inline bool positiveIndicesOnly() const;
+   WALBERLA_HOST_DEVICE inline bool empty() const { return min_.x() > max_.x() || min_.y() > max_.y() || min_.z() > max_.z(); }
+   WALBERLA_HOST_DEVICE inline bool positiveIndicesOnly() const;
 
-   inline bool contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
-   inline bool contains( const uint_t     x, const uint_t     y, const uint_t     z ) const { return contains( Cell(x,y,z) ); }
-   inline bool contains( const Cell& cell ) const { return contains( cell.x(), cell.y(), cell.z() ); }
-   inline bool contains( const CellInterval& other ) const;
+   WALBERLA_HOST_DEVICE inline bool contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
+   WALBERLA_HOST_DEVICE inline bool contains( const uint_t     x, const uint_t     y, const uint_t     z ) const { return contains( Cell(x,y,z) ); }
+   WALBERLA_HOST_DEVICE inline bool contains( const Cell& cell ) const { return contains( cell.x(), cell.y(), cell.z() ); }
+   WALBERLA_HOST_DEVICE inline bool contains( const CellInterval& other ) const;
 
-   inline bool overlaps( const CellInterval& other )      const;
-          bool overlaps( const CellSet&      cellSet )    const;
-          bool overlaps( const CellVector&   cellVector ) const;
+   WALBERLA_HOST_DEVICE inline bool overlaps( const CellInterval& other )      const;
+                               bool overlaps( const CellSet&      cellSet )    const;
+                               bool overlaps( const CellVector&   cellVector ) const;
 
-   inline CellInterval& shift( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ); ///< diagonal shift
-   inline CellInterval& shift( const uint_t     x, const uint_t     y, const uint_t     z ); ///< diagonal shift
-   inline CellInterval& shift( const Cell & offset );
+   WALBERLA_HOST_DEVICE inline CellInterval& shift( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ); ///< diagonal shift
+   WALBERLA_HOST_DEVICE inline CellInterval& shift( const uint_t     x, const uint_t     y, const uint_t     z ); ///< diagonal shift
+   WALBERLA_HOST_DEVICE inline CellInterval& shift( const Cell & offset );
 
-   inline void expand( const cell_idx_t numberOfCells );
-   inline void expand( const Cell & numberOfCells );
+   WALBERLA_HOST_DEVICE inline void expand( const cell_idx_t numberOfCells );
+   WALBERLA_HOST_DEVICE inline void expand( const Cell & numberOfCells );
 
-   inline void intersect( const CellInterval& other );
+   WALBERLA_HOST_DEVICE inline void intersect( const CellInterval& other );
 
-   inline uint_t xSize() const { return empty() ? uint_c(0) : uint_c( max_.x() - min_.x() + cell_idx_c(1) ); }
-   inline uint_t ySize() const { return empty() ? uint_c(0) : uint_c( max_.y() - min_.y() + cell_idx_c(1) ); }
-   inline uint_t zSize() const { return empty() ? uint_c(0) : uint_c( max_.z() - min_.z() + cell_idx_c(1) ); }
+   WALBERLA_HOST_DEVICE inline uint_t xSize() const { return empty() ? uint_c(0) : uint_c( max_.x() - min_.x() + cell_idx_c(1) ); }
+   WALBERLA_HOST_DEVICE inline uint_t ySize() const { return empty() ? uint_c(0) : uint_c( max_.y() - min_.y() + cell_idx_c(1) ); }
+   WALBERLA_HOST_DEVICE inline uint_t zSize() const { return empty() ? uint_c(0) : uint_c( max_.z() - min_.z() + cell_idx_c(1) ); }
 
-   inline uint_t size( const uint_t i ) const { return empty() ? uint_c(0) : uint_c( max_[i] - min_[i] + cell_idx_c(1) ); }
+   WALBERLA_HOST_DEVICE inline uint_t size( const uint_t i ) const { return empty() ? uint_c(0) : uint_c( max_[i] - min_[i] + cell_idx_c(1) ); }
 
-   inline uint_t numCells() const { return xSize() * ySize() * zSize(); }
+   WALBERLA_HOST_DEVICE inline uint_t numCells() const { return xSize() * ySize() * zSize(); }
 
-   inline const_iterator begin() const;
-   inline const_iterator end()   const;
+   WALBERLA_HOST_DEVICE inline const_iterator begin() const;
+   WALBERLA_HOST_DEVICE inline const_iterator end()   const;
 
 private:
 
@@ -121,7 +121,7 @@ private:
 
 
 
-inline bool CellInterval::positiveIndicesOnly() const {
+WALBERLA_HOST_DEVICE inline bool CellInterval::positiveIndicesOnly() const {
 
    return cell_idx_c(0) <= min_.x() && cell_idx_c(0) <= max_.x() &&
           cell_idx_c(0) <= min_.y() && cell_idx_c(0) <= max_.y() &&
@@ -138,29 +138,29 @@ public:
    using pointer = Cell *;
    using reference = Cell &;
 
-   CellIntervalIterator( const CellInterval & ci, const Cell & cell ) : ci_(ci), cell_( cell ) { }
+   WALBERLA_HOST_DEVICE CellIntervalIterator( const CellInterval & ci, const Cell & cell ) : ci_(ci), cell_( cell ) { }
 
-   const CellIntervalIterator &  operator++()    { increment(); return *this; }
-         CellIntervalIterator    operator++(int) { CellIntervalIterator tmp = *this; increment(); return tmp; }
+   WALBERLA_HOST_DEVICE const CellIntervalIterator &  operator++()    { increment(); return *this; }
+   WALBERLA_HOST_DEVICE       CellIntervalIterator    operator++(int) { CellIntervalIterator tmp = *this; increment(); return tmp; }
 
-   const CellIntervalIterator &  operator--()    { decrement(); return *this; }
-         CellIntervalIterator    operator--(int) { CellIntervalIterator tmp = *this; decrement(); return tmp; }
+   WALBERLA_HOST_DEVICE const CellIntervalIterator &  operator--()    { decrement(); return *this; }
+   WALBERLA_HOST_DEVICE       CellIntervalIterator    operator--(int) { CellIntervalIterator tmp = *this; decrement(); return tmp; }
 
-   bool operator==(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ == other.cell_; }
-   bool operator!=(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ != other.cell_; }
+   WALBERLA_HOST_DEVICE bool operator==(const CellIntervalIterator & other) const { /* TODO: Device Support */ WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ == other.cell_; }
+   WALBERLA_HOST_DEVICE bool operator!=(const CellIntervalIterator & other) const { /* TODO: Device Support */ WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ != other.cell_; }
 
-         Cell   operator*()  const { WALBERLA_ASSERT( ci_.contains(cell_) ) return cell_;  }
-   const Cell * operator->() const { WALBERLA_ASSERT( ci_.contains(cell_) ) return &cell_; }
+   WALBERLA_HOST_DEVICE       Cell   operator*()  const { /* TODO: Device Support */ WALBERLA_ASSERT( ci_.contains(cell_) ) return cell_;  }
+   WALBERLA_HOST_DEVICE const Cell * operator->() const { /* TODO: Device Support */ WALBERLA_ASSERT( ci_.contains(cell_) ) return &cell_; }
 
 private:
-   inline void increment();
-   inline void decrement();
+   WALBERLA_HOST_DEVICE inline void increment();
+   WALBERLA_HOST_DEVICE inline void decrement();
 
    const CellInterval & ci_;
    Cell cell_;
 };
 
-void CellIntervalIterator::increment()
+WALBERLA_HOST_DEVICE void CellIntervalIterator::increment()
 {
    if( ++cell_.x() > ci_.xMax() )
    {
@@ -173,7 +173,7 @@ void CellIntervalIterator::increment()
    }
 }
 
-void CellIntervalIterator::decrement()
+WALBERLA_HOST_DEVICE void CellIntervalIterator::decrement()
 {
    if( --cell_.x() < ci_.xMin() )
    {
@@ -186,7 +186,7 @@ void CellIntervalIterator::decrement()
    }
 }
 
-CellInterval::const_iterator CellInterval::begin() const
+WALBERLA_HOST_DEVICE CellInterval::const_iterator CellInterval::begin() const
 {
    if( empty() )
       return end();
@@ -194,12 +194,12 @@ CellInterval::const_iterator CellInterval::begin() const
       return { *this, min() };
 }
 
-CellInterval::const_iterator CellInterval::end()   const { return ++CellIntervalIterator(*this, max()); }
+WALBERLA_HOST_DEVICE CellInterval::const_iterator CellInterval::end()   const { return ++CellIntervalIterator(*this, max()); }
 
 
 /// Returns true only if cell (x,y,z) is contained in the cell interval
 
-inline bool CellInterval::contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+WALBERLA_HOST_DEVICE inline bool CellInterval::contains( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    return ( ( min_.x() <= x ) && ( x <= max_.x() )
          && ( min_.y() <= y ) && ( y <= max_.y() )
@@ -208,7 +208,7 @@ inline bool CellInterval::contains( const cell_idx_t x, const cell_idx_t y, cons
 
 
 
-inline bool CellInterval::contains( const CellInterval& other ) const
+WALBERLA_HOST_DEVICE inline bool CellInterval::contains( const CellInterval& other ) const
 {
    if( empty() )
       return false;
@@ -231,7 +231,7 @@ inline bool CellInterval::contains( const CellInterval& other ) const
  * \return  true if the intervals overlap, false else.
  **********************************************************************************************************************/
 
-inline bool CellInterval::overlaps( const CellInterval& other ) const
+WALBERLA_HOST_DEVICE inline bool CellInterval::overlaps( const CellInterval& other ) const
 {
    if( empty() || other.empty() )
       return false;
@@ -243,7 +243,7 @@ inline bool CellInterval::overlaps( const CellInterval& other ) const
 
 
 
-inline CellInterval& CellInterval::shift( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) {
+WALBERLA_HOST_DEVICE inline CellInterval& CellInterval::shift( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) {
 
    min_.x() += x;
    min_.y() += y;
@@ -258,11 +258,11 @@ inline CellInterval& CellInterval::shift( const cell_idx_t x, const cell_idx_t y
 
 
 
-inline CellInterval& CellInterval::shift( const uint_t x, const uint_t y, const uint_t z ) {
+WALBERLA_HOST_DEVICE inline CellInterval& CellInterval::shift( const uint_t x, const uint_t y, const uint_t z ) {
 
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(x), 0 )
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(y), 0 )
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(z), 0 )
+   /* TODO: Device Support */ WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(x), 0 )
+   /* TODO: Device Support */ WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(y), 0 )
+   /* TODO: Device Support */ WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(z), 0 )
 
    min_.x() += cell_idx_c(x);
    min_.y() += cell_idx_c(y);
@@ -277,7 +277,7 @@ inline CellInterval& CellInterval::shift( const uint_t x, const uint_t y, const 
 
 
 
-inline CellInterval& CellInterval::shift( const Cell & offset )
+WALBERLA_HOST_DEVICE inline CellInterval& CellInterval::shift( const Cell & offset )
 {
    min_ += offset;
    max_ += offset;
@@ -287,7 +287,7 @@ inline CellInterval& CellInterval::shift( const Cell & offset )
 
 
 
-inline void CellInterval::expand( const cell_idx_t numberOfCells )
+WALBERLA_HOST_DEVICE inline void CellInterval::expand( const cell_idx_t numberOfCells )
 {
    min_.x() -= numberOfCells;
    min_.y() -= numberOfCells;
@@ -300,7 +300,7 @@ inline void CellInterval::expand( const cell_idx_t numberOfCells )
 
 
 
-inline void CellInterval::expand( const Cell & numberOfCells )
+WALBERLA_HOST_DEVICE inline void CellInterval::expand( const Cell & numberOfCells )
 {
    min_.x() -= numberOfCells.x();
    min_.y() -= numberOfCells.y();
@@ -313,15 +313,15 @@ inline void CellInterval::expand( const Cell & numberOfCells )
 
 
 
-inline void CellInterval::intersect( const CellInterval& other ) {
+WALBERLA_HOST_DEVICE inline void CellInterval::intersect( const CellInterval& other ) 
+{
+   min_.x() = (xMin() > other.xMin()) ? xMin() : other.xMin();
+   min_.y() = (yMin() > other.yMin()) ? yMin() : other.yMin();
+   min_.z() = (zMin() > other.zMin()) ? zMin() : other.zMin();
 
-   min_.x() = std::max( xMin(), other.xMin() );
-   min_.y() = std::max( yMin(), other.yMin() );
-   min_.z() = std::max( zMin(), other.zMin() );
-
-   max_.x() = std::min( xMax(), other.xMax() );
-   max_.y() = std::min( yMax(), other.yMax() );
-   max_.z() = std::min( zMax(), other.zMax() );
+   max_.x() = (xMax() < other.xMax()) ? xMax() : other.xMax();
+   max_.y() = (yMax() < other.yMax()) ? yMax() : other.yMax();
+   max_.z() = (zMax() < other.zMax()) ? zMax() : other.zMax();
 }
 
 

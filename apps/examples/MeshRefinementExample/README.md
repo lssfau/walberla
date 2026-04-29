@@ -1,4 +1,4 @@
-# Mesh Refinement For Flow Around A Sphere {#example-MeshRefinementExample}
+@page example-MeshRefinementExample Mesh Refinement For Flow Around A Sphere
 
 \viewOnGitlab{apps/examples/MeshRefinementExample}
 

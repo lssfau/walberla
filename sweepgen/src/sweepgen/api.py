@@ -275,7 +275,7 @@ class GenericWalberlaField(AugExpr, SupportsFieldExtraction):
         return AugExpr.format("{}cloneUninitialized()", self._a)
 
     def swapDataPointers(self, other: AugExpr) -> AugExpr:
-        return AugExpr.format("{}swapDataPointers({});", self._a, other)
+        return AugExpr.format("{}swapDataPointers({})", self._a, other)
 
 
 class GhostLayerFieldPtr(GenericWalberlaField):
@@ -419,16 +419,17 @@ def glfield(field: Field, ci: str | AugExpr | None = None):
 
 
 class MemTags:
-    _header = "walberla/experimental/Memory.hpp"
+    _header = "walberla/v8/Memory.hpp"
 
-    host = cpptype("walberla::experimental::memory::memtag::host", _header)()
-    unified = cpptype("walberla::experimental::memory::memtag::unified", _header)()
+    stdmem = cpptype("walberla::v8::memory::memtag::stdmem", _header)()
+    host = cpptype("walberla::v8::memory::memtag::host", _header)()
+    unified = cpptype("walberla::v8::memory::memtag::unified", _header)()
 
 
 class SparseIndexList(AugExpr):
     _template = cpptype(
-        "walberla::experimental::sweep::SparseIndexList< {IndexStruct}, {memtag_t} >",
-        "walberla/experimental/sweep/SparseIndexList.hpp",
+        "walberla::v8::sweep::SparseIndexList< {IndexStruct}, {memtag_t} >",
+        "walberla/v8/sweep/SparseIndexList.hpp",
     )
 
     def __init__(
@@ -480,8 +481,8 @@ class SparseIndexList(AugExpr):
 
 class IndexListBufferPtr(AugExpr, SupportsFieldExtraction):
     _template = cpptype(
-        "walberla::experimental::sweep::internal::IndexListBuffer< {IndexStruct} >",
-        "walberla/experimental/sweep/SparseIndexList.hpp",
+        "walberla::v8::sweep::internal::IndexListBuffer< {IndexStruct} >",
+        "walberla/v8/sweep/SparseIndexList.hpp",
     )
 
     def __init__(self, idx_struct: PsStructType):
@@ -524,5 +525,250 @@ CellIdx = PsStructType(
         ("y", create_type("int64_t")),
         ("z", create_type("int64_t")),
     ),
-    "walberla::experimental::sweep::CellIdx",
+    "walberla::v8::sweep::CellIdx",
 )
+
+#   SweepGen internal apis
+
+
+class sweep_parts:
+    class ShadowBufferCache(CppClass):
+        template = cpptype(
+            "walberla::sweepgen::sweep_parts::ShadowBufferCache< {TField} >",
+            "walberla/sweepgen/SweepParts.hpp",
+        )
+
+        def view(self, field: AugExpr) -> AugExpr:
+            return AugExpr.format("{}.view({})", self, field)
+
+        def swapBuffers(self, field: AugExpr, block: IBlock) -> AugExpr:
+            return AugExpr.format("{}.swapBuffers({}, {})", self, field, block)
+
+
+#   Experimental Field and Buffer APIs
+
+
+class experimental:
+    class BufferView(AugExpr, SupportsFieldExtraction):
+        _template = cpptype(
+            "walberla::v8::memory::BufferView< {TElement}, {TRank}, {TMemTag} >",
+            "walberla/v8/memory/BufferSystem.hpp",
+        )
+
+        def __init__(
+            self,
+            element_type: PsType,
+            rank: int,
+            memtag_t: PsType,
+            const: bool = False,
+            ref: bool = False,
+        ):
+            dtype = self._template(
+                TElement=element_type,
+                TRank=rank,
+                TMemTag=memtag_t,
+                const=const,
+                ref=ref,
+            )
+
+            self._element_type = element_type
+            self._rank = rank
+            self._memtag_t = memtag_t
+
+            super().__init__(dtype)
+
+        def data(self) -> AugExpr:
+            return AugExpr.format("{}.data()", self)
+
+        def dataAt(self, indices: AugExpr) -> AugExpr:
+            return AugExpr.format("{}.dataAt({})", self, indices)
+
+        def shape(self) -> std.span:
+            return std.span("const uint64_t").bind("{}.shape()", self)
+
+        def strides(self) -> std.span:
+            return std.span("const uint64_t").bind("{}.strides()", self)
+
+        def _extract_ptr(self):
+            return self.data()
+
+        def _extract_size(self, coordinate):
+            if coordinate >= self._rank:
+                raise ValueError(
+                    f"Invalid coordinate: {coordinate}. Must be < {self._rank}"
+                )
+            return AugExpr.format("{}[{}]", self.shape(), coordinate)
+
+        def _extract_stride(self, coordinate):
+            if coordinate >= self._rank:
+                raise ValueError(
+                    f"Invalid coordinate: {coordinate}. Must be < {self._rank}"
+                )
+            return AugExpr.format("{}[{}]", self.strides(), coordinate)
+
+    class BufferKernelParamsAdaptor(SupportsFieldExtraction):
+        def __init__(
+            self,
+            buffer_view: experimental.BufferView,
+            cell_interval: CellInterval | None = None,
+            emulate_spatial_rank: int = 3,
+        ) -> None:
+            self._buffer_view = buffer_view
+            self._ci = cell_interval
+            self._emulate_spatial_rank = emulate_spatial_rank
+
+            self._ci_size_calls = ("xSize()", "ySize()", "zSize()")
+
+        def _extract_ptr(self) -> AugExpr:
+            data_at: AugExpr | str
+            if self._ci is not None:
+                ci = self._ci
+                data_at = AugExpr.format(
+                    "{ci}.xMin(), {ci}.yMin(), {ci}.zMin(), 0", ci=ci
+                )
+                return self._buffer_view.dataAt(data_at)
+            else:
+                return self._buffer_view._extract_ptr()
+
+        def _extract_size(self, coordinate: int) -> AugExpr | None:
+            if coordinate > self._emulate_spatial_rank:
+                d = self._emulate_spatial_rank
+                raise IndexError(
+                    f"Invalid coordinate for pseudo-{d}-dimensional waLBerla field: {coordinate}"
+                )
+
+            actual_index: int = (
+                coordinate
+                if coordinate < self._emulate_spatial_rank
+                else 3  # fix index of f-dimension in non-3D fields
+            )
+
+            if self._ci is not None and actual_index < 3:
+                return AugExpr.format(
+                    "{}.{}", self._ci, self._ci_size_calls[actual_index]
+                )
+            else:
+                return self._buffer_view._extract_size(actual_index)
+
+        def _extract_stride(self, coordinate: int) -> AugExpr | None:
+            if coordinate > self._emulate_spatial_rank:
+                d = self._emulate_spatial_rank
+                raise IndexError(
+                    f"Invalid coordinate for {d}-dimensional waLBerla field: {coordinate}"
+                )
+
+            actual_index: int = (
+                coordinate
+                if coordinate < self._emulate_spatial_rank
+                else 3  # fix index of f-dimension in non-3D fields
+            )
+            return self._buffer_view._extract_stride(actual_index)
+
+    class BufferSystem(AugExpr):
+        _template = cpptype(
+            "walberla::v8::memory::BufferSystem< {TElement}, {TRank}, {TMemTag} >",
+            "walberla/v8/memory/BufferSystem.hpp",
+        )
+
+        def __init__(
+            self,
+            element_type: PsType,
+            rank: int,
+            memtag_t: PsType,
+            const: bool = False,
+            ref: bool = False,
+        ):
+            dtype = self._template(
+                TElement=element_type,
+                TRank=rank,
+                TMemTag=memtag_t,
+                const=const,
+                ref=ref,
+            )
+
+            self._element_type = element_type
+            self._rank = rank
+            self._memtag_t = memtag_t
+
+            super().__init__(dtype)
+
+        @property
+        def buffer_type(self):
+            return cpptype(f"{self._dtype}::BufferType")
+
+        def view(self, block: IBlock) -> experimental.BufferView:
+            return experimental.BufferView(
+                self._element_type, self._rank, self._memtag_t
+            ).bind("{}.view({})", self, block)
+
+        def buffer(self, block: IBlock) -> AugExpr:
+            return AugExpr(
+                self.buffer_type(const=self.get_dtype().const, ref=True)
+            ).bind("{}.buffer({})", self, block)
+
+    class Field(AugExpr):
+        _template = cpptype(
+            "walberla::v8::memory::Field< {TElement}, {fSize}, {TMemTag} >",
+            "walberla/v8/memory/Field.hpp",
+        )
+
+        def __init__(
+            self,
+            element_type: PsType,
+            f_size: int,
+            memtag_t: PsType,
+            const: bool = False,
+            ref: bool = False,
+        ):
+            dtype = self._template(
+                TElement=element_type,
+                fSize=f_size,
+                TMemTag=memtag_t,
+                const=const,
+                ref=ref,
+            )
+
+            self._element_type = element_type
+            self._f_size = f_size
+            self._memtag_t = memtag_t
+
+            super().__init__(dtype)
+
+        def bufferViewType(
+            self, const: bool = False, ref: bool = False
+        ) -> experimental.BufferView:
+            return experimental.BufferView(
+                self._element_type, 4, self._memtag_t, const=const, ref=ref
+            )
+
+        def bufferSystem(self) -> experimental.BufferSystem:
+            return experimental.BufferSystem(
+                self._element_type, 4, self._memtag_t
+            ).bind("{}.bufferSystem()", self)
+
+        @staticmethod
+        def from_field(
+            field: Field, memtag_t: PsType, const: bool = False, ref: bool = False
+        ) -> experimental.Field:
+            """Create an `walberla::v8::Field` instance from a pystencils field"""
+
+            if isinstance(field.dtype, DynamicType):
+                raise ValueError(
+                    "Cannot map dynamically typed field to walberla::v8::Field"
+                )
+
+            element_type = field.dtype
+
+            match field.index_shape:
+                case []:
+                    f_size = 1
+                case [q]:
+                    f_size = q
+                case _:
+                    raise ValueError(
+                        f"Cannot map field with index shape {field.index_shape} to a waLBerla field"
+                    )
+
+            return experimental.Field(
+                element_type, f_size, memtag_t, const=const, ref=ref
+            ).var(field.name)

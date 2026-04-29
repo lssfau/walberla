@@ -5,10 +5,10 @@
 #include "field/all.h"
 
 #include "gen/GeometryKernels.hpp"
-#include "walberla/experimental/Sweep.hpp"
+#include "walberla/v8/Sweep.hpp"
 
 using namespace walberla;
-namespace wex = walberla::experimental;
+using namespace walberla::v8;
 
 using Int64Field = field::GhostLayerField< int64_t, 3 >;
 using RealField  = field::GhostLayerField< real_t, 3 >;
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
    auto intFieldId  = field::addToStorage< Int64Field >(blocks, "intField");
    auto realFieldId = field::addToStorage< RealField >(blocks, "realField");
 
-   wex::sweep::SerialSweeper sweeper{ blocks };
+   sweep::SerialSweeper sweeper{ blocks };
 
    {
       CellCentersGlobal cellCenters{ blocks, realFieldId };
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
       sweeper.sweep([&](IBlock& block) {
          RealField& outp = *block.getData< RealField >(realFieldId);
-         sweeper.forAllCells(ci, [&](Cell c) {
+         sweep::forAllCells(sweep::exectag::Serial{}, ci, [&](Cell c) {
             Vector3< real_t > desired = blocks->getBlockLocalCellCenter(block, c);
 
             WALBERLA_CHECK_FLOAT_EQUAL(outp.get(c, 0), desired[0]);
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
       sweeper.sweep([&](IBlock& block) {
          RealField& outp = *block.getData< RealField >(realFieldId);
          AABB blockAbb = block.getAABB();
-         sweeper.forAllCells(ci, [&](Cell c) {
+         sweep::forAllCells(sweep::exectag::Serial{}, ci, [&](Cell c) {
             Vector3< real_t > desired = blocks->getBlockLocalCellCenter(block, c) - blockAbb.min();
 
             WALBERLA_CHECK_FLOAT_EQUAL(outp.get(c, 0), desired[0]);
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
 
       sweeper.sweep([&](IBlock& block) {
          Int64Field& outp = *block.getData< Int64Field >(intFieldId);
-         sweeper.forAllCells(ci, [&](Cell c) {
+         sweep::forAllCells(sweep::exectag::Serial{}, ci, [&](Cell c) {
             WALBERLA_CHECK_EQUAL(outp.get(c, 0), c[0]);
             WALBERLA_CHECK_EQUAL(outp.get(c, 1), c[1]);
             WALBERLA_CHECK_EQUAL(outp.get(c, 2), c[2]);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 
       sweeper.sweep([&](IBlock& block) {
          Int64Field& outp = *block.getData< Int64Field >(intFieldId);
-         sweeper.forAllCells(ci, [&](Cell c) {
+         sweep::forAllCells(sweep::exectag::Serial{}, ci, [&](Cell c) {
             Cell globalCell{ c };
             blocks->transformBlockLocalToGlobalCell(globalCell, block);
 

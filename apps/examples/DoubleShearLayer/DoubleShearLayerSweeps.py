@@ -22,15 +22,17 @@ import sympy as sp
 import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
-from sweepgen import Sweep, get_build_config
+from sweepgen import Sweep
+from sweepgen.build_config import DEBUG
 from sweepgen.symbolic import cell
 from sweepgen.prefabs import LbmBulk
 
+DEBUG.use_cpu_default()
+
 
 with SourceFileGenerator() as sfg:
+    Sweep.use_v8core_fields()
     sfg.namespace("DoubleShearLayer::gen")
-
-    get_build_config(sfg).target = ps.Target.CurrentCPU
 
     stencil = LBStencil(Stencil.D3Q19)
     lbm_config = LBMConfig(

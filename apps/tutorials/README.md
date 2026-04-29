@@ -1,4 +1,4 @@
-# Tutorials {#tutorials}
+@page tutorials Tutorials
 
 **Basics**
 

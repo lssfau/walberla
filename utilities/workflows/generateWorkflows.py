@@ -91,10 +91,17 @@ class ConfigurePreset:
     def from_fragments(*frags: str, name: str | None = None, **kwargs):
         if name is None:
             name = ".ci-" + "-".join(frags)
+
+        inherits = [f".{frag}" for frag in frags] + [".codegen"]
+
+        if "mac" not in frags:  # V8 and SweepGen don't work right with AppleClang
+            inherits.append(".sweepgen")
+
+        inherits.append(".ci-base")
+
         return ConfigurePreset(
             name,
-            inherits=[f".{frag}" for frag in frags]
-            + [".codegen", ".sweepgen", ".ci-base"],
+            inherits=inherits,
             displayName="-".join(frags),
             **kwargs,
         )

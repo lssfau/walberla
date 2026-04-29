@@ -140,6 +140,14 @@ def main():
         action="store_true",
         help="Format output as HTML files for display in the browser",
     )
+    parser.add_argument(
+        "-v",
+        "--verbosity",
+        dest="verbosity",
+        default=0,
+        type=int,
+        help="Verbosity level"
+    )
 
     args = parser.parse_args()
 
@@ -203,6 +211,10 @@ def main():
             cc_filtered = remove_duplicate_commands(cc_filtered)
 
             print(f"  -- Retained {len(cc_filtered)} compile commands")
+
+            if args.verbosity > 0:
+                for cmd in cc_filtered:
+                    print("      > " + cmd["file"])
 
             with database_fp.open("w") as db_out:
                 json.dump(cc_filtered, db_out)
@@ -270,7 +282,13 @@ def main():
                 case _:
                     assert False
 
-            include_paths = [src_dir / module_name]
+            include_paths = []
+
+            module_sources = src_dir / module_name
+
+            if module_sources.exists():
+                include_paths.append(module_sources)
+            
             if not exclude_tests:
                 match module_name.split("/"):
                     case ["walberla", mod]:
@@ -278,7 +296,7 @@ def main():
                     case _:
                         include_paths.append(tests_dir / module_name)
 
-            header_filter = rf".*/src/{module_name}/.*"
+            header_filter = rf".*/(src|include)/{module_name}/.*"
 
             succ = run_clang_tidy(
                 orig_db,

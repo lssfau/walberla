@@ -12,7 +12,7 @@ These are the documentation pages for the project's C++ code base.
 
 @RELEASE_NOTE@
 
-\section getting-started Getting Started
+\section mainpage-getting-started Getting Started
 
 On the following pages, you can find instructions on downloading and
 setting up waLBerla both as a standalone project and as a library:

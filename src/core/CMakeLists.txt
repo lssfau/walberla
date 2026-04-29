@@ -45,6 +45,18 @@ if ( OpenMP_CXX_FOUND )
     target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
 endif ()
 
+# CUDA
+
+if ( WALBERLA_BUILD_WITH_CUDA )
+    target_link_libraries ( walberla_core PUBLIC CUDA::cudart )
+endif ( WALBERLA_BUILD_WITH_CUDA )
+
+# HIP
+
+if ( WALBERLA_BUILD_WITH_HIP )
+    target_link_libraries( walberla_core PUBLIC hip::host )
+endif ( WALBERLA_BUILD_WITH_HIP )
+
 # half-precision
 
 if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
@@ -81,6 +93,7 @@ target_sources( walberla_core
         Sanitizer.h
         Set.h
         SharedFunctor.h
+        Stdlib.hpp
         STLIO.h
         stringToNum.h
         StringUtility.h

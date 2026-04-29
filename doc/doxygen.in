@@ -591,7 +591,7 @@ STRICT_PROTO_MATCHING  = NO
 # documentation.
 # The default value is: YES.
 
-GENERATE_TODOLIST      = YES
+GENERATE_TODOLIST      = NO
 
 # The GENERATE_TESTLIST tag can be used to enable ( YES) or disable ( NO) the
 # test list. This list is created by putting \test commands in the
@@ -753,7 +753,8 @@ WARN_LOGFILE           = "@CMAKE_CURRENT_BINARY_DIR@/DoxygenWarnings.txt"
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = "@walberla_SOURCE_DIR@/src" \
+INPUT                  = "@walberla_SOURCE_DIR@/include" \
+                         "@walberla_SOURCE_DIR@/src" \
                          "@walberla_SOURCE_DIR@/doc" \
                          "@walberla_BINARY_DIR@/doc/input" \
                          "@walberla_SOURCE_DIR@/apps/tutorials" \

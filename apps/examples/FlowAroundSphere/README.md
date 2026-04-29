@@ -1,4 +1,4 @@
-# Flow Around A Sphere (Uniform Grid Version) {#example-FlowAroundSphere}
+@page example-FlowAroundSphere Flow Around A Sphere (Uniform Grid Version)
 
 \viewOnGitlab{apps/examples/FlowAroundSphere}
 

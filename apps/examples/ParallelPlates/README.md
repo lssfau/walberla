@@ -1,4 +1,4 @@
-# Parallel Plates {#example-ParallelPlates}
+@page example-ParallelPlates Parallel Plates
 
 \viewOnGitlab{apps/examples/ParallelPlates}
 

@@ -16,6 +16,7 @@
 //! \file GenericAABB.h
 //! \ingroup core
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //
 //======================================================================================================================
 
@@ -36,6 +37,7 @@ namespace math {
 
 /**
  * \brief GenericAABB represents an axis-aligned bounding box
+ * \ingroup v8core-device
  *
  * \tparam T The data type used to store the minimal and maximal corner points. May be float, double or long double.
  *
@@ -52,11 +54,11 @@ public:
    using vector_type = Vector3<T>; /// data type for three dimensional vectors
 
    // Constructors
-   inline GenericAABB();
+   WALBERLA_HOST_DEVICE GenericAABB();
    template< typename U >
-   inline GenericAABB( const GenericAABB< U > & other );
-   inline GenericAABB( const vector_type & corner0, const vector_type & corner1 );
-   inline GenericAABB( const value_type x0, const value_type y0, const value_type z0,
+   WALBERLA_HOST_DEVICE GenericAABB( const GenericAABB< U > & other );
+   WALBERLA_HOST_DEVICE GenericAABB( const vector_type & corner0, const vector_type & corner1 );
+   WALBERLA_HOST_DEVICE GenericAABB( const value_type x0, const value_type y0, const value_type z0,
                        const value_type x1, const value_type y1, const value_type z1 );
    template< typename InputIterator >
    inline GenericAABB( InputIterator first, InputIterator last );
@@ -71,31 +73,31 @@ public:
    inline GenericAABB & operator=( const GenericAABB< U > & other );
 
    // Observers
-   inline const vector_type & minCorner() const;
-   inline const vector_type & maxCorner() const;
+   WALBERLA_HOST_DEVICE const vector_type & minCorner() const;
+   WALBERLA_HOST_DEVICE const vector_type & maxCorner() const;
 
-   inline const vector_type & min() const { return minCorner(); }
-   inline const vector_type & max() const { return maxCorner(); }
+   WALBERLA_HOST_DEVICE const vector_type & min() const { return minCorner(); }
+   WALBERLA_HOST_DEVICE const vector_type & max() const { return maxCorner(); }
 
-   inline value_type xMin() const;
-   inline value_type yMin() const;
-   inline value_type zMin() const;
+   WALBERLA_HOST_DEVICE value_type xMin() const;
+   WALBERLA_HOST_DEVICE value_type yMin() const;
+   WALBERLA_HOST_DEVICE value_type zMin() const;
 
-   inline value_type min( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return minCorner_[index]; }
+   WALBERLA_HOST_DEVICE value_type min( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return minCorner_[index]; }
 
-   inline value_type xMax() const;
-   inline value_type yMax() const;
-   inline value_type zMax() const;
+   WALBERLA_HOST_DEVICE value_type xMax() const;
+   WALBERLA_HOST_DEVICE value_type yMax() const;
+   WALBERLA_HOST_DEVICE value_type zMax() const;
 
-   inline value_type max( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return maxCorner_[index]; }
+   WALBERLA_HOST_DEVICE value_type max( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return maxCorner_[index]; }
 
    inline bool empty() const;
 
-   inline vector_type sizes() const;
-   inline value_type size( const uint_t index ) const;
-   inline value_type xSize() const;
-   inline value_type ySize() const;
-   inline value_type zSize() const;
+   WALBERLA_HOST_DEVICE inline vector_type sizes() const;
+   WALBERLA_HOST_DEVICE inline value_type size( const uint_t index ) const;
+   WALBERLA_HOST_DEVICE inline value_type xSize() const;
+   WALBERLA_HOST_DEVICE inline value_type ySize() const;
+   WALBERLA_HOST_DEVICE inline value_type zSize() const;
 
    inline value_type volume() const;
 

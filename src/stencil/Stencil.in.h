@@ -110,6 +110,10 @@ struct $name
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { $d_per_d_length };
 
+   static constexpr size_t subdirsLength { $subdirs_length };
+   static constexpr std::array< Direction, $subdirs_length > subdirs { $subdirs };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { $subdirsPtr };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

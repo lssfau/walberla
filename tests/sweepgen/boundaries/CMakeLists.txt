@@ -15,7 +15,7 @@ target_link_libraries(
     ${AppName}
     PRIVATE
     walberla::core
-    walberla::experimental
+    walberla::v8
     walberla::blockforest
     walberla::geometry
     walberla::stencil

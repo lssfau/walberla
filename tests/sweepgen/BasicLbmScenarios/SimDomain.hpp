@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "gen/LbmAlgorithms.hpp"
-#include "walberla/experimental/Sweep.hpp"
+#include "walberla/v8/Sweep.hpp"
 
 #if defined(LBM_SCENARIOS_GPU_BUILD)
 #   include "gpu/AddGPUFieldToStorage.h"
@@ -29,7 +29,7 @@ namespace BasicLbmScenarios
 {
 
 using namespace walberla;
-using namespace walberla::experimental;
+using namespace walberla::v8;
 
 using PdfField_T    = field::GhostLayerField< real_t, gen::LbStencil::Q >;
 using ScalarField_T = field::GhostLayerField< real_t, 1 >;
