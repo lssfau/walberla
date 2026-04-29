@@ -22,6 +22,9 @@
 #pragma once
 
 #include "waLBerlaDefinitions.h"
+#include "Macros.h"
+#include "Stdlib.hpp"
+#include WALBERLA_STDLIB(limits)
 
 #include <cmath>
 #include <cstddef>
@@ -40,7 +43,7 @@ namespace walberla {
 /// workaround to implement <tt>static_assert(false)</tt> (CWG 2518 / P2593R1)
 template <typename> struct never_true : std::false_type {};
 
-template< typename T > bool isIdentical( const T a, const T b );
+template< typename T > WALBERLA_HOST_DEVICE bool isIdentical( const T a, const T b );
 
 
 // shared ptr
@@ -50,38 +53,47 @@ using std::weak_ptr;
 using std::make_shared;
 using std::dynamic_pointer_cast;
 
+#if defined(__CUDACC__)
+   // suppress warning: 'long double' is treated as 'double' in device code
+   #pragma nv_diag_suppress 20208
+#endif
+
 
 // numeric cast (performs range checks in debug mode)
 
 template< typename S, typename T >
-inline S numeric_cast( T t ) {
+WALBERLA_HOST_DEVICE inline S numeric_cast( T t ) {
 #ifndef NDEBUG
+   bool fail = false;
    if( std::is_integral_v<S> && std::is_integral_v<T> && !std::is_same_v<S,T> )
         // integer to different integer: check that forward and back conversion does not change value
    {
-      if( !isIdentical( static_cast<T>( static_cast<S>(t) ), t ) )
-      {
-         throw std::range_error("out of range");
-      }
+      fail = !isIdentical( static_cast<T>( static_cast<S>(t) ), t );
    }
    else if( !std::is_integral_v<S> && !std::is_integral_v<T> && sizeof(S) < sizeof(T) )
        // float to shorter float: check that value within limits of shorter type
    {
       using H = typename std::conditional_t< !std::is_integral_v<S> && !std::is_integral_v<T> && (sizeof(S) < sizeof(T)), T, long double >; // always true, but makes Intel's overflow check happy
       H h = static_cast<H>(t);
-      if( h < static_cast<H>(std::numeric_limits<S>::lowest()) || h > static_cast<H>(std::numeric_limits<S>::max()) ) {
-         throw std::range_error("out of range");
-      }
+      fail =  h < static_cast<H>(stdlib::numeric_limits<S>::lowest()) || h > static_cast<H>(stdlib::numeric_limits<S>::max()); 
    }
    else if( std::is_integral_v<S> && !std::is_integral_v<T> )
        // float to integer: check that value within limits of integer
    {
       using H = typename std::conditional_t< std::is_integral_v<S> && !std::is_integral_v<T>, T, long double >; // always true, but makes Intel's overflow check happy
       H h = static_cast<H>(t);
-      if( h < static_cast<H>(std::numeric_limits<S>::lowest()) || h > static_cast<H>(std::numeric_limits<S>::max()) ) {
-         throw std::range_error("out of range");
-      }
+      fail =  h < static_cast<H>(stdlib::numeric_limits<S>::lowest()) || h > static_cast<H>(stdlib::numeric_limits<S>::max());
    }
+
+   if (fail)
+   {
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+      assert(false && "numeric_cast out of range");     // Abort on device
+#else
+      throw std::range_error("numeric_cast out of range");
+#endif
+   }
+
 #endif
    return static_cast< S >(t);
 }
@@ -93,10 +105,17 @@ using int16_t = std::int16_t;   ///< 16 bit signed integer
 using int32_t = std::int32_t;   ///< 32 bit signed integer
 using int64_t = std::int64_t;   ///< 64 bit signed integer
 
-template< typename T > inline int8_t   int8_c( T t ) { return numeric_cast< int8_t  >(t); } ///< cast to type int8_t  using "int8_c(x)"
-template< typename T > inline int16_t int16_c( T t ) { return numeric_cast< int16_t >(t); } ///< cast to type int16_t using "int16_c(x)"
-template< typename T > inline int32_t int32_c( T t ) { return numeric_cast< int32_t >(t); } ///< cast to type int32_t using "int32_c(x)"
-template< typename T > inline int64_t int64_c( T t ) { return numeric_cast< int64_t >(t); } ///< cast to type int64_t using "int64_c(x)"
+template< typename T > 
+WALBERLA_HOST_DEVICE inline int8_t   int8_c( T t ) { return numeric_cast< int8_t  >(t); } ///< cast to type int8_t  using "int8_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline int16_t int16_c( T t ) { return numeric_cast< int16_t >(t); } ///< cast to type int16_t using "int16_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline int32_t int32_c( T t ) { return numeric_cast< int32_t >(t); } ///< cast to type int32_t using "int32_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline int64_t int64_c( T t ) { return numeric_cast< int64_t >(t); } ///< cast to type int64_t using "int64_c(x)"
 
 
 
@@ -109,10 +128,17 @@ using uint64_t = std::uint64_t;   ///< 64 bit unsigned integer
 using byte_t = uint8_t;
 using id_t = uint64_t;            //sid datatype
 
-template< typename T > inline uint8_t   uint8_c( T t ) { return numeric_cast< uint8_t  >(t); } ///< cast to type uint8_t  using "uint8_c(x)"
-template< typename T > inline uint16_t uint16_c( T t ) { return numeric_cast< uint16_t >(t); } ///< cast to type uint16_t using "uint16_c(x)"
-template< typename T > inline uint32_t uint32_c( T t ) { return numeric_cast< uint32_t >(t); } ///< cast to type uint32_t using "uint32_c(x)"
-template< typename T > inline uint64_t uint64_c( T t ) { return numeric_cast< uint64_t >(t); } ///< cast to type uint64_t using "uint64_c(x)"
+template< typename T > 
+WALBERLA_HOST_DEVICE inline uint8_t   uint8_c( T t ) { return numeric_cast< uint8_t  >(t); } ///< cast to type uint8_t  using "uint8_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline uint16_t uint16_c( T t ) { return numeric_cast< uint16_t >(t); } ///< cast to type uint16_t using "uint16_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline uint32_t uint32_c( T t ) { return numeric_cast< uint32_t >(t); } ///< cast to type uint32_t using "uint32_c(x)"
+
+template< typename T > 
+WALBERLA_HOST_DEVICE inline uint64_t uint64_c( T t ) { return numeric_cast< uint64_t >(t); } ///< cast to type uint64_t using "uint64_c(x)"
 
 
 
@@ -120,10 +146,11 @@ template< typename T > inline uint64_t uint64_c( T t ) { return numeric_cast< ui
 
 using ptrdiff_t = std::ptrdiff_t;
 
-template< typename T > inline int int_c( T t ) { return numeric_cast< int >(t); } ///< cast to type int using "int_c(x)"
+template< typename T > 
+WALBERLA_HOST_DEVICE inline int int_c( T t ) { return numeric_cast< int >(t); } ///< cast to type int using "int_c(x)"
 
 template< typename INT >
-inline void static_assert_int_t() {
+WALBERLA_HOST_DEVICE inline void static_assert_int_t() {
    static_assert( std::numeric_limits<INT>::is_specialized && std::numeric_limits<INT>::is_integer, "Integer type required/expected!" );
 }
 
@@ -138,10 +165,11 @@ static_assert( std::numeric_limits<uint_t>::is_specialized &&
                std::numeric_limits<uint_t>::is_integer &&
               !std::numeric_limits<uint_t>::is_signed, "Type \"uint_t\" must be an unsigned integer!" );
 
-template< typename T > inline uint_t uint_c( T t ) { return numeric_cast< uint_t >(t); } ///< cast to type uint_t using "uint_c(x)"
+template< typename T > 
+WALBERLA_HOST_DEVICE inline uint_t uint_c( T t ) { return numeric_cast< uint_t >(t); } ///< cast to type uint_t using "uint_c(x)"
 
 template< typename UINT >
-inline void static_assert_uint_t() {
+WALBERLA_HOST_DEVICE inline void static_assert_uint_t() {
    static_assert( std::numeric_limits<UINT>::is_specialized &&
                   std::numeric_limits<UINT>::is_integer     &&
                  !std::numeric_limits<UINT>::is_signed, "Unsigned integer type required/expected!" );
@@ -156,7 +184,8 @@ WALBERLA_STATIC_ASSERT( std::numeric_limits<cell_idx_t>::is_specialized &&
                         std::numeric_limits<cell_idx_t>::is_integer &&
                         std::numeric_limits<cell_idx_t>::is_signed );
 
-template< typename T > inline cell_idx_t cell_idx_c( T t ) { return numeric_cast< cell_idx_t >(t); } ///< cast to type cell_idx_t using "cell_idx_c(x)"
+template< typename T > 
+WALBERLA_HOST_DEVICE inline cell_idx_t cell_idx_c( T t ) { return numeric_cast< cell_idx_t >(t); } ///< cast to type cell_idx_t using "cell_idx_c(x)"
 
 
 
@@ -207,15 +236,15 @@ using float16 = half;
 using float32 = float;
 using float64 = double;
 
-inline constexpr real_t operator""_r( long double t ) { return static_cast< real_t >(t); }
-inline constexpr real_t operator""_r( unsigned long long int t ) { return static_cast< real_t >(t); }
-template< typename T > inline real_t real_c  ( T t ) { return numeric_cast< real_t >(t); } ///< cast to type real_t using "real_c(x)"
-template< typename T > inline double double_c( T t ) { return numeric_cast< double >(t); } ///< cast to type double
-template< typename T > inline float  float_c ( T t ) { return numeric_cast< float > (t); } ///< cast to type float
+WALBERLA_HOST_DEVICE inline constexpr real_t operator""_r( long double t ) { return static_cast< real_t >(t); }
+WALBERLA_HOST_DEVICE inline constexpr real_t operator""_r( unsigned long long int t ) { return static_cast< real_t >(t); }
+template< typename T > WALBERLA_HOST_DEVICE inline real_t real_c  ( T t ) { return numeric_cast< real_t >(t); } ///< cast to type real_t using "real_c(x)"
+template< typename T > WALBERLA_HOST_DEVICE inline double double_c( T t ) { return numeric_cast< double >(t); } ///< cast to type double
+template< typename T > WALBERLA_HOST_DEVICE  inline float  float_c ( T t ) { return numeric_cast< float > (t); } ///< cast to type float
 
 /// If you want to compare two reals using operator == and you really know what you are doing, you can use the following function:
 template <typename T>
-inline bool isIdentical( const T a, const T b )
+WALBERLA_HOST_DEVICE inline bool isIdentical( const T a, const T b )
 {
 #ifdef WALBERLA_CXX_COMPILER_IS_GNU
 #pragma GCC diagnostic push
@@ -227,7 +256,7 @@ inline bool isIdentical( const T a, const T b )
 #endif
 }
 
-inline bool realIsIdentical( const real_t a, const real_t b )
+WALBERLA_HOST_DEVICE inline bool realIsIdentical( const real_t a, const real_t b )
 {
    return isIdentical( a, b );
 }
@@ -249,33 +278,33 @@ namespace real_comparison
 }
 /// \endcond
 
-inline bool realIsEqual( const real_t a, const real_t b, const real_t eps = real_comparison::Epsilon<real_t>::value ) {
-   return std::fabs( a - b ) < eps;
+WALBERLA_HOST_DEVICE inline bool realIsEqual( const real_t lhs, const real_t rhs, const real_t epsilon = real_comparison::Epsilon<real_t>::value ) {
+   const auto difference = lhs - rhs;
+   return ( (difference < 0) ? -difference : difference ) < epsilon;
 }
 
-
-inline bool floatIsEqual( long double lhs, long double rhs, const long double epsilon = real_comparison::Epsilon<long double>::value )
+template< typename T1, typename T2 >
+WALBERLA_HOST_DEVICE inline bool floatIsEqual(T1 lhs, T2 rhs,
+   const std::common_type_t< T1, T2 > epsilon = real_comparison::Epsilon< std::common_type_t< T1, T2 > >::value)
 {
-   return std::fabs( lhs - rhs ) < epsilon;
-}
-
-inline bool floatIsEqual( double lhs, double rhs, const double epsilon = real_comparison::Epsilon<double>::value )
-{
-   return std::fabs( lhs - rhs ) < epsilon;
-}
-
-inline bool floatIsEqual( float lhs, float rhs, const float epsilon = real_comparison::Epsilon<float>::value )
-{
-   return std::fabs( lhs - rhs ) < epsilon;
+    using T = std::common_type_t< T1, T2 >;
+    const T diff = T(lhs) - T(rhs);
+    return ((diff < T(0)) ? -diff : diff) < epsilon;
 }
 
 #ifdef WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
-inline bool floatIsEqual( walberla::float16 lhs, walberla::float16 rhs, const walberla::float16 epsilon = real_comparison::Epsilon<walberla::float16>::value )
+WALBERLA_HOST_DEVICE inline bool floatIsEqual( walberla::float16 lhs, walberla::float16 rhs, const walberla::float16 epsilon = real_comparison::Epsilon<walberla::float16>::value )
 {
    const auto difference = lhs - rhs;
    return ( (difference < 0) ? -difference : difference ) < epsilon;
 }
 #endif // WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT
+
+
+#if defined(__CUDACC__)
+   #pragma nv_diag_default 20208
+#endif
+
 
 } // namespace walberla
 

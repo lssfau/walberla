@@ -7,7 +7,7 @@ set( TestIDs
 
 add_executable( TestBasicLbmScenariosCPU TestBasicLbmScenarios.cpp )
 walberla_generate_sources( TestBasicLbmScenariosCPU SCRIPTS LbmAlgorithms.py SCRIPT_ARGS --target=cpu )
-target_link_libraries( TestBasicLbmScenariosCPU PRIVATE walberla::core walberla::blockforest walberla::field walberla::geometry walberla::experimental )
+target_link_libraries( TestBasicLbmScenariosCPU PRIVATE walberla::core walberla::blockforest walberla::field walberla::geometry walberla::v8 )
 add_dependencies( waLBerlaTestsuite TestBasicLbmScenariosCPU )
 
 foreach( TestID ${TestIDs} )
@@ -26,7 +26,7 @@ if( $CACHE{WALBERLA_BUILD_WITH_CUDA} )
 
     add_executable( TestBasicLbmScenariosCUDA TestBasicLbmScenarios.cpp )
     walberla_generate_sources( TestBasicLbmScenariosCUDA SCRIPTS LbmAlgorithms.py SCRIPT_ARGS --target=cuda FILE_EXTENSIONS ${_codegen_suffixes} )
-    target_link_libraries( TestBasicLbmScenariosCUDA PRIVATE walberla::core walberla::blockforest walberla::field walberla::gpu walberla::geometry walberla::experimental CUDA::cudart )
+    target_link_libraries( TestBasicLbmScenariosCUDA PRIVATE walberla::core walberla::blockforest walberla::field walberla::gpu walberla::geometry walberla::v8 CUDA::cudart )
 
     add_dependencies( waLBerlaTestsuite TestBasicLbmScenariosCUDA )
 
@@ -46,7 +46,7 @@ if( $CACHE{WALBERLA_BUILD_WITH_HIP} )
 
     add_executable( TestBasicLbmScenariosHIP TestBasicLbmScenarios.cpp )
     walberla_generate_sources( TestBasicLbmScenariosHIP SCRIPTS LbmAlgorithms.py SCRIPT_ARGS --target=hip FILE_EXTENSIONS ${_codegen_suffixes} )
-    target_link_libraries( TestBasicLbmScenariosHIP PRIVATE walberla::core walberla::blockforest walberla::field walberla::gpu walberla::geometry walberla::experimental )
+    target_link_libraries( TestBasicLbmScenariosHIP PRIVATE walberla::core walberla::blockforest walberla::field walberla::gpu walberla::geometry walberla::v8 )
 
     add_dependencies( waLBerlaTestsuite TestBasicLbmScenariosHIP )
 

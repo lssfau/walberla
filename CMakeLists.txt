@@ -77,8 +77,6 @@ option ( WALBERLA_BUILD_WITH_LTO            "Enable link time optimizations"    
 option ( WALBERLA_BUILD_WITH_OPENMP         "Enable OpenMP support"                              )
 option ( WALBERLA_BUILD_WITH_PYTHON         "Support for embedding Python"                       )
 option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation"              OFF )
-option ( WALBERLA_ENABLE_SWEEPGEN           "Enable the SweepGen metaprogramming system"     OFF )
-
 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
@@ -91,6 +89,11 @@ option ( WALBERLA_BUILD_WITH_FASTMATH       "Fast math"                         
 option ( WALBERLA_SIMD_FORCE_SCALAR         "Do not use SIMD operations even when available" OFF )
 
 option ( WALBERLA_BUFFER_DEBUG              "Type checking for BufferSystem ( slow )"        OFF )
+
+#   v8 Core Library Features
+
+option ( WALBERLA_ENABLE_V8CORE             "Enable the experimental v8 core library"        OFF )
+option ( WALBERLA_ENABLE_SWEEPGEN           "Enable the SweepGen metaprogramming system"     OFF )
 
 # Profile guided optimization
 option ( WALBERLA_PROFILE_GENERATE          "Generates Profile for Optimization"                 )
@@ -333,24 +336,6 @@ if ( WALBERLA_BUILD_WITH_CODEGEN )
     endif()
 endif()
 ############################################################################################################################
-
-
-############################################################################################################################
-##
-## SweepGen Metaprogramming
-##
-#############################################################################################################################
-
-
-if( WALBERLA_ENABLE_SWEEPGEN )
-    if( POLICY CMP0171 )
-        #   See https://cmake.org/cmake/help/latest/policy/CMP0171.html
-        #   Remove when CMake minimum version is raised to 3.31
-        cmake_policy(SET CMP0171 NEW)
-    endif()
-    list (APPEND CMAKE_MODULE_PATH ${walberla_SOURCE_DIR}/sweepgen/cmake )
-    include( SweepGen )
-endif()
 
 
 ############################################################################################################################
@@ -614,6 +599,8 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         set(CMAKE_CUDA_ARCHITECTURES OFF)
         message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
     endif()
+    
+    add_flag( CMAKE_CUDA_FLAGS "--extended-lambda" )    # Required for __host__ __device__ lambdas
 endif ( )
 
 # Can be used in CMake files containing generated files where the file suffix is dependent on the target
@@ -638,6 +625,7 @@ if ( WALBERLA_BUILD_WITH_HIP )
 
     enable_language(HIP)
     find_package(hip REQUIRED)
+
     # since waLBerla also supports CUDA we only use HIP on an AMD platform
     add_compile_definitions(__HIP_PLATFORM_AMD__)
     # include_directories(${HSA_HEADER})
@@ -821,7 +809,7 @@ endif()
 
 ############################################################################################################################
 #
-# Subdirectories
+# Libraries and Modules
 #
 ############################################################################################################################
 
@@ -843,7 +831,44 @@ configure_file ( src/waLBerlaDefinitions.in.h
 install( FILES ${walberla_BINARY_DIR}/src/waLBerlaDefinitions.h DESTINATION walberla/ )
 
 
-# test
+############################################################################################################################
+##
+## Experimental V8 Core Library
+##
+#############################################################################################################################
+
+if( WALBERLA_ENABLE_V8CORE )
+    include( walberla_v8core )
+endif()
+
+############################################################################################################################
+##
+## SweepGen Metaprogramming
+##
+#############################################################################################################################
+
+
+if( WALBERLA_ENABLE_SWEEPGEN )
+    if( NOT WALBERLA_ENABLE_V8CORE )
+        message( FATAL_ERROR "To use SweepGen, the v8 core library must be enabled. Set WALBERLA_ENABLE_V8CORE to ON." )
+    endif()
+
+    if( POLICY CMP0171 )
+        #   See https://cmake.org/cmake/help/latest/policy/CMP0171.html
+        #   Remove when CMake minimum version is raised to 3.31
+        cmake_policy(SET CMP0171 NEW)
+    endif()
+    list (APPEND CMAKE_MODULE_PATH ${walberla_SOURCE_DIR}/sweepgen/cmake )
+    include( SweepGen )
+endif()
+
+############################################################################################################################
+##
+## Testsuite and Applications
+##
+#############################################################################################################################
+
+
 if ( WALBERLA_BUILD_TESTS )
     add_subdirectory ( tests )
 endif()

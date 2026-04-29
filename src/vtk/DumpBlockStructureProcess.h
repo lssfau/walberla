@@ -33,12 +33,15 @@ namespace vtk {
 class DumpBlockStructureProcess : public ::walberla::vtk::BlockCellDataWriter< int > {
 
 public:
+   using Base = ::walberla::vtk::BlockCellDataWriter< int >;
 
-   DumpBlockStructureProcess( const std::string& id ) : ::walberla::vtk::BlockCellDataWriter<int>( id ) {}
+   DumpBlockStructureProcess( const std::string& id ) : Base( id ) {}
 
 protected:
 
    void configure() override {}
+
+   using Base::evaluate;
 
    int evaluate( const cell_idx_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) override { return MPIManager::instance()->rank(); }
 

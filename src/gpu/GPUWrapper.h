@@ -38,11 +38,15 @@
     #define gpuMallocManaged cudaMallocManaged
     #define gpuHostAllocDefault cudaHostAllocDefault
     #define gpuHostAlloc cudaHostAlloc
+    #define gpuMemcpyHostToHost cudaMemcpyHostToHost
     #define gpuMemcpyHostToDevice cudaMemcpyHostToDevice
     #define gpuMemcpyDeviceToHost cudaMemcpyDeviceToHost
     #define gpuMemcpyDeviceToDevice cudaMemcpyDeviceToDevice
+    #define gpuMemcpyDefault cudaMemcpyDefault
     #define gpuMemcpy cudaMemcpy
     #define gpuMemcpyAsync cudaMemcpyAsync
+    #define gpuMemcpy2D cudaMemcpy2D
+    #define gpuMemcpy2DAsync cudaMemcpy2DAsync
     #define gpuMemcpy3D cudaMemcpy3D
     #define gpuMemcpy3DParms cudaMemcpy3DParms
     #define gpuMemcpy3DAsync cudaMemcpy3DAsync
@@ -75,6 +79,8 @@
     using gpuEvent_t = cudaEvent_t;
     #define gpuEventCreate cudaEventCreate
     #define gpuEventRecord cudaEventRecord
+    #define gpuEventSynchronize cudaEventSynchronize
+    #define gpuEventElapsedTime cudaEventElapsedTime
     #define gpuEventDestroy cudaEventDestroy
     #define gpuStreamWaitEvent cudaStreamWaitEvent
     #define gpuStreamDefault cudaStreamDefault
@@ -113,11 +119,15 @@
     #define gpuHostAllocDefault hipHostMallocDefault
     // warning: 'hipHostAlloc' is deprecated: use hipHostMalloc insteadwarning: 'hipHostAlloc' is deprecated: use hipHostMalloc instead
     #define gpuHostAlloc hipHostMalloc
+    #define gpuMemcpyHostToHost hipMemcpyHostToHost
     #define gpuMemcpyHostToDevice hipMemcpyHostToDevice
     #define gpuMemcpyDeviceToHost hipMemcpyDeviceToHost
     #define gpuMemcpyDeviceToDevice hipMemcpyDeviceToDevice
+    #define gpuMemcpyDefault hipMemcpyDefault
     #define gpuMemcpy hipMemcpy
     #define gpuMemcpyAsync hipMemcpyAsync
+    #define gpuMemcpy2D hipMemcpy2D
+    #define gpuMemcpy2DAsync hipMemcpy2DAsync
     #define gpuMemcpy3D hipMemcpy3D
     #define gpuMemcpy3DParms hipMemcpy3DParms
     #define gpuMemcpy3DAsync hipMemcpy3DAsync
@@ -150,6 +160,8 @@
     using gpuEvent_t = hipEvent_t;
     #define gpuEventCreate hipEventCreate
     #define gpuEventRecord hipEventRecord
+    #define gpuEventSynchronize hipEventSynchronize
+    #define gpuEventElapsedTime hipEventElapsedTime 
     #define gpuEventDestroy hipEventDestroy
     #define gpuStreamWaitEvent hipStreamWaitEvent
     #define gpuStreamDefault hipStreamDefault

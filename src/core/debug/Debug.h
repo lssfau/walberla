@@ -65,7 +65,7 @@
  *    WALBERLA_ASSERT_LESS( 42, 5, "42 is larger than 5!" )
  *
  */
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
 
 #define WALBERLA_ASSERT_1(X)                 { if( !walberla::debug::check_functions_detail::check              ( (X)      ) ) { walberla::debug::check_functions_detail::check              (           #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler() ); } }
 #define WALBERLA_ASSERT_NULLPTR_1(X)         { if( !walberla::debug::check_functions_detail::check_nullptr      ( (X)      ) ) { walberla::debug::check_functions_detail::check_nullptr      ( (X),      #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler() ); } }

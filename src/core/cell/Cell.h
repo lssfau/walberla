@@ -23,6 +23,7 @@
 #pragma once
 
 #include "core/DataTypes.h"
+#include WALBERLA_STDLIB(array)
 #include "core/debug/Debug.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/BufferSizeTrait.h"
@@ -41,6 +42,7 @@ namespace cell {
 
 /*******************************************************************************************************************//**
  * \brief   A representation of a Cell's coordinates (in 3D)
+ * \ingroup v8core-device
  **********************************************************************************************************************/
 class Cell
 {
@@ -48,50 +50,50 @@ public:
 
    /*! \name Constructors */
    //@{
-   Cell() = default;
-   inline Cell( const cell_idx_t _x, const cell_idx_t _y, const cell_idx_t _z ) { cell[0] = _x; cell[1] = _y; cell[2] = _z; }
-   inline Cell( const Vector3<cell_idx_t> _vec ) {cell[0] = _vec[0]; cell[1] = _vec[1]; cell[2] = _vec[2];}
+   WALBERLA_HOST_DEVICE Cell() = default;
+   WALBERLA_HOST_DEVICE inline Cell( const cell_idx_t _x, const cell_idx_t _y, const cell_idx_t _z ) { cell[0] = _x; cell[1] = _y; cell[2] = _z; }
+   /* TODO: Device Support */   inline Cell( const Vector3<cell_idx_t> _vec ) {cell[0] = _vec[0]; cell[1] = _vec[1]; cell[2] = _vec[2];}
 
-   inline Cell( const uint_t     _x, const uint_t     _y, const uint_t     _z );
-   inline Cell( const Vector3<uint_t> _vec );
+   WALBERLA_HOST_DEVICE inline Cell( const uint_t     _x, const uint_t     _y, const uint_t     _z );
+   /* TODO: Device Support */   inline Cell( const Vector3<uint_t> _vec );
    //@}
 
    /*! \name Arithmetic operators */
    //@{
-   inline Cell operator+( const Cell & rhs ) const;
-   inline Cell operator-( const Cell & rhs ) const;
+   WALBERLA_HOST_DEVICE inline Cell operator+( const Cell & rhs ) const;
+   WALBERLA_HOST_DEVICE inline Cell operator-( const Cell & rhs ) const;
 
-   inline Cell & operator+=( const Cell & rhs );
-   inline Cell & operator-=( const Cell & rhs );
+   WALBERLA_HOST_DEVICE inline Cell & operator+=( const Cell & rhs );
+   WALBERLA_HOST_DEVICE inline Cell & operator-=( const Cell & rhs );
 
-   inline Cell operator+() const;
-   inline Cell operator-() const;
+   WALBERLA_HOST_DEVICE inline Cell operator+() const;
+   WALBERLA_HOST_DEVICE inline Cell operator-() const;
    //@}
 
    /*! \name Comparison operators */
    //@{
-   bool operator< ( const Cell & rhs ) const;
-   bool operator==( const Cell & rhs ) const;
-   bool operator!=( const Cell & rhs ) const { return !operator==( rhs ); }
+   WALBERLA_HOST_DEVICE bool operator< ( const Cell & rhs ) const;
+   WALBERLA_HOST_DEVICE bool operator==( const Cell & rhs ) const;
+   WALBERLA_HOST_DEVICE bool operator!=( const Cell & rhs ) const { return !operator==( rhs ); }
    //@}
 
    /*! \name Access operators */
    //@{
-   cell_idx_t   operator[]( std::size_t idx ) const;
-   cell_idx_t & operator[]( std::size_t idx );
+   WALBERLA_HOST_DEVICE cell_idx_t   operator[]( std::size_t idx ) const;
+   WALBERLA_HOST_DEVICE cell_idx_t & operator[]( std::size_t idx );
 
-   cell_idx_t   x() const { return cell[0]; }
-   cell_idx_t & x()       { return cell[0]; }
-   cell_idx_t   y() const { return cell[1]; }
-   cell_idx_t & y()       { return cell[1]; }
-   cell_idx_t   z() const { return cell[2]; }
-   cell_idx_t & z()       { return cell[2]; }
+   WALBERLA_HOST_DEVICE cell_idx_t   x() const { return cell[0]; }
+   WALBERLA_HOST_DEVICE cell_idx_t & x()       { return cell[0]; }
+   WALBERLA_HOST_DEVICE cell_idx_t   y() const { return cell[1]; }
+   WALBERLA_HOST_DEVICE cell_idx_t & y()       { return cell[1]; }
+   WALBERLA_HOST_DEVICE cell_idx_t   z() const { return cell[2]; }
+   WALBERLA_HOST_DEVICE cell_idx_t & z()       { return cell[2]; }
    //@}
 
-   bool positiveIndicesOnly() const { return x() >= cell_idx_c(0) && y() >= cell_idx_c(0) && z() >= cell_idx_c(0); }
+   WALBERLA_HOST_DEVICE bool positiveIndicesOnly() const { return x() >= cell_idx_c(0) && y() >= cell_idx_c(0) && z() >= cell_idx_c(0); }
 
 private:
-   std::array< cell_idx_t, 3 > cell; ///< Array of the cells coordinates. cell == {x, y, z}.
+   stdlib::array< cell_idx_t, 3 > cell ; ///< Array of the cells coordinates. cell == {x, y, z}.
 };
 
 
@@ -102,7 +104,7 @@ std::ostream & operator<<( std::ostream & os, const Cell & cell );
 std::istream & operator>>( std::istream & is,       Cell & cell );
 //@}
 
-inline Cell::Cell( const uint_t _x, const uint_t _y, const uint_t _z )
+WALBERLA_HOST_DEVICE inline Cell::Cell( const uint_t _x, const uint_t _y, const uint_t _z )
 {
    cell[0] = cell_idx_c( _x );
    cell[1] = cell_idx_c( _y );
@@ -120,16 +122,17 @@ inline Cell::Cell( const Vector3<uint_t> _vec )
 /*******************************************************************************************************************//**
  * \brief   Less-than comparison operator for Cells.
  *
- * Compares a cell's coordinates lexicographically (first x, then eventually y and (if necessary) finally z).
+ * Compares a cell's coordinates lexicographically (first z, then y, then x).
  *
  * \param [in] rhs  the cell compared to *this.
  *
- * \return  \code std::lexicographical_compare(this->cell, this->cell + 3, rhs.cell, rhs.cell + 3). \endcode
+ * \return  true if this cell is lexicographically smaller than rhs when comparing coordinates in the order z, then y, then x.
  **********************************************************************************************************************/
-inline bool Cell::operator<( const Cell & rhs ) const
+WALBERLA_HOST_DEVICE inline bool Cell::operator<( const Cell & rhs ) const
 {
-   return std::lexicographical_compare( std::reverse_iterator<const cell_idx_t*>( this->cell.data() + 3 ), std::reverse_iterator<const cell_idx_t*>( this->cell.data() ),
-                                        std::reverse_iterator<const cell_idx_t*>( rhs.cell.data() + 3 ),   std::reverse_iterator<const cell_idx_t*>( rhs.cell.data() ) );
+   if( cell[2] != rhs.z() ) return cell[2] < rhs.z();
+   if( cell[1] != rhs.y() ) return cell[1] < rhs.y();
+   return cell[0] < rhs.x();
 }
 
 
@@ -143,7 +146,7 @@ inline bool Cell::operator<( const Cell & rhs ) const
  *
  * \return  \code (this->x == rhs.x) && (this->y == rhs.y) && (this->z == rhs.z) \endcode
  **********************************************************************************************************************/
-inline bool Cell::operator==( const Cell & rhs ) const
+WALBERLA_HOST_DEVICE inline bool Cell::operator==( const Cell & rhs ) const
 {
    return ( this->x() == rhs.x() ) && ( this->y() == rhs.y() ) && ( this->z() == rhs.z() );
 }
@@ -157,9 +160,9 @@ inline bool Cell::operator==( const Cell & rhs ) const
  *
  * \return  The idx-th coordinate component. This is equal to this->cell[i].
  **********************************************************************************************************************/
-inline cell_idx_t Cell::operator[]( std::size_t idx ) const
+WALBERLA_HOST_DEVICE inline cell_idx_t Cell::operator[]( std::size_t idx ) const
 {
-   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
+   /* TODO: Device Support */   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
    return cell[idx];
 }
 
@@ -170,7 +173,7 @@ inline cell_idx_t Cell::operator[]( std::size_t idx ) const
  *
  * \return  a Cell which components are the sum of this and rhs components
  **********************************************************************************************************************/
-Cell Cell::operator+( const Cell & rhs ) const
+WALBERLA_HOST_DEVICE Cell Cell::operator+( const Cell & rhs ) const
 {
    Cell result;
    result.cell[0] = cell[0] + rhs.cell[0];
@@ -186,7 +189,7 @@ Cell Cell::operator+( const Cell & rhs ) const
  *
  * \return  a Cell which components are the difference of this and rhs components
  **********************************************************************************************************************/
-Cell Cell::operator-( const Cell & rhs ) const
+WALBERLA_HOST_DEVICE Cell Cell::operator-( const Cell & rhs ) const
 {
    Cell result;
    result.cell[0] = cell[0] - rhs.cell[0];
@@ -202,7 +205,7 @@ Cell Cell::operator-( const Cell & rhs ) const
  *
  * \return  Reference to this.
  **********************************************************************************************************************/
-Cell & Cell::operator+=( const Cell & rhs )
+WALBERLA_HOST_DEVICE Cell & Cell::operator+=( const Cell & rhs )
 {
    cell[0] += rhs.cell[0];
    cell[1] += rhs.cell[1];
@@ -218,7 +221,7 @@ Cell & Cell::operator+=( const Cell & rhs )
  *
  * \return  Reference to this.
  **********************************************************************************************************************/
-Cell & Cell::operator-=( const Cell & rhs )
+WALBERLA_HOST_DEVICE Cell & Cell::operator-=( const Cell & rhs )
 {
    cell[0] -= rhs.cell[0];
    cell[1] -= rhs.cell[1];
@@ -232,7 +235,7 @@ Cell & Cell::operator-=( const Cell & rhs )
  *
  * \return  *this unmodified.
  **********************************************************************************************************************/
-inline Cell Cell::operator+() const
+WALBERLA_HOST_DEVICE inline Cell Cell::operator+() const
 {
    return *this;
 }
@@ -242,7 +245,7 @@ inline Cell Cell::operator+() const
  *
  * \return  Cell with negated components.
  **********************************************************************************************************************/
-inline Cell Cell::operator-() const
+WALBERLA_HOST_DEVICE inline Cell Cell::operator-() const
 {
    return { -x(), -y(), -z() };
 }
@@ -256,9 +259,9 @@ inline Cell Cell::operator-() const
  *
  * \return  The idx-th coordinate component. This is equal to this->cell[i].
  **********************************************************************************************************************/
-inline cell_idx_t & Cell::operator[]( std::size_t idx )
+WALBERLA_HOST_DEVICE inline cell_idx_t & Cell::operator[]( std::size_t idx )
 {
-   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
+   /* TODO: Device Support */   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
    return cell[idx];
 }
 

@@ -143,6 +143,10 @@ struct D3EdgeCornerStencil
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { 0,8,8,8,8,8,8,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1 };
 
+   static constexpr size_t subdirsLength { 92 };
+   static constexpr std::array< Direction, 92 > subdirs { NW, NE, TN, BN, TNE, TNW, BNE, BNW, SW, SE, TS, BS, TSE, TSW, BSE, BSW, NW, SW, TW, BW, TNW, TSW, BNW, BSW, NE, SE, TE, BE, TNE, TSE, BNE, BSE, TN, TS, TW, TE, TNE, TNW, TSE, TSW, BN, BS, BW, BE, BNE, BNW, BSE, BSW, NW, TNW, BNW, NE, TNE, BNE, SW, TSW, BSW, SE, TSE, BSE, TN, TNE, TNW, TS, TSE, TSW, TW, TNW, TSW, TE, TNE, TSE, BN, BNE, BNW, BS, BSE, BSW, BW, BNW, BSW, BE, BNE, BSE, TNE, TNW, TSE, TSW, BNE, BNW, BSE, BSW };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { 0, 0, 8, 16, 24, 32, 40, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 85, 86, 87, 88, 89, 90, 91, 92 };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

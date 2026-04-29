@@ -46,6 +46,10 @@
 
 #cmakedefine WALBERLA_STL_BOUNDS_CHECKS
 
+// v8core and sweepgen
+#cmakedefine WALBERLA_ENABLE_V8CORE
+#cmakedefine WALBERLA_ENABLE_SWEEPGEN
+
 // Compiler
 #cmakedefine WALBERLA_CXX_COMPILER_IS_GNU
 #cmakedefine WALBERLA_CXX_COMPILER_IS_INTEL

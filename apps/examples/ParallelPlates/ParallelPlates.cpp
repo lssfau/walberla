@@ -30,7 +30,7 @@
 #include "field/communication/StencilRestrictedPackInfo.h"
 #include "domain_decomposition/SharedSweep.h"
 
-#include "walberla/experimental/Sweep.hpp"
+#include "walberla/v8/Sweep.hpp"
 
 #include "gen/ParallelPlatesSweeps.hpp"
 

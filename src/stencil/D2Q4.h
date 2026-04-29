@@ -143,6 +143,10 @@ struct D2Q4
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { 0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
+   static constexpr size_t subdirsLength { 4 };
+   static constexpr std::array< Direction, 4 > subdirs { N, S, W, E };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { 0, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

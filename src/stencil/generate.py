@@ -123,6 +123,8 @@ def generate_d_per_d(dirs):
     """ Generate d_per_d array from directions"""
     d_per_d = []
     d_per_d_length = []
+    compact_subdirs = []
+    compact_subdir_ptr = [0]
 
     for globalDir1 in directions:
         subdirs = []
@@ -133,7 +135,10 @@ def generate_d_per_d(dirs):
         d_per_d.append("{" + ",".join(subdirs) + "}")
         d_per_d_length.append(len(subdirs))
 
-    return (d_per_d, d_per_d_length)
+        compact_subdirs += subdirs
+        compact_subdir_ptr.append(compact_subdir_ptr[-1] + len(subdirs))
+
+    return (d_per_d, d_per_d_length), (compact_subdirs, compact_subdir_ptr)
 
 
 def generate_dir_pos(dirs):
@@ -239,9 +244,14 @@ for stencil in stencils:
     vals['D'] = stencil['dim']
     vals['Q'] = len(dirs)
 
-    (d_per_d, d_per_d_length) = generate_d_per_d(dirs)
+    (d_per_d, d_per_d_length), (subdirs, subdirs_ptr) = generate_d_per_d(dirs)
     vals['d_per_d'] = ",\n\t\t\t\t\t\t\t\t".join(d_per_d)
     vals['d_per_d_length'] = ",".join(str(i) for i in d_per_d_length)
+
+    vals["subdirs"] = ", ".join(subdirs)
+    vals["subdirs_length"] = str(len(subdirs))
+    vals["subdirsPtr"] = ", ".join(str(p) for p in subdirs_ptr)
+
     vals['containsCenter'] = "true" if ('C' in dirs) else "false"
     vals['noCenterFirstIndex'] = "1" if ('C' in dirs) else '0'
 

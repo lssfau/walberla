@@ -19,11 +19,14 @@
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
 //! \author Martin Bauer <martin.bauer@fau.de>
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //! \brief Header file for the implementation of a 3D vector
 //
 //======================================================================================================================
 
 #pragma once
+
+#include "core/Stdlib.hpp"
 
 #include "FPClassify.h"
 #include "MathTrait.h"
@@ -38,10 +41,12 @@
 #include "core/mpi/SendBuffer.h"
 #include "core/debug/CheckFunctions.h"
 
+#include WALBERLA_STDLIB(array)
+#include WALBERLA_STDLIB(limits)
+
 #include <cmath>
 #include <cstddef>
 #include <iostream>
-#include <limits>
 #include <type_traits>
 
 
@@ -66,6 +71,7 @@ namespace math {
 //**********************************************************************************************************************
 /*!\brief Efficient, generic implementation of a 3-dimensional vector.
 // \ingroup math
+// \ingroup v8core-device
 //
 // The Vector3 class is the representation of a 3D vector with a total of 3 statically allocated
 // elements of arbitrary type. The naming convention of the elements is as follows:
@@ -102,15 +108,15 @@ public:
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
-                              explicit inline constexpr Vector3() = default;
-                              explicit inline constexpr Vector3( Type init );
-   template< typename Other > explicit inline constexpr Vector3( Other init );
-                              explicit inline constexpr Vector3( Type x, Type y, Type z );
-                              explicit inline constexpr Vector3( const Type* init );
-                                       inline constexpr Vector3( const Vector3& v ) = default;
+                              explicit WALBERLA_HOST_DEVICE constexpr Vector3() = default;
+                              explicit WALBERLA_HOST_DEVICE constexpr Vector3( Type init );
+   template< typename Other > explicit WALBERLA_HOST_DEVICE constexpr Vector3( Other init );
+                              explicit WALBERLA_HOST_DEVICE constexpr Vector3( Type x, Type y, Type z );
+                              explicit WALBERLA_HOST_DEVICE constexpr Vector3( const Type* init );
+                                       WALBERLA_HOST_DEVICE constexpr Vector3( const Vector3& v ) = default;
 
    template< typename Other >
-   inline constexpr Vector3( const Vector3<Other>& v );
+   WALBERLA_HOST_DEVICE constexpr Vector3( const Vector3<Other>& v );
    //*******************************************************************************************************************
 
    //**Destructor*******************************************************************************************************
@@ -120,14 +126,14 @@ public:
    //**Operators********************************************************************************************************
    /*!\name Operators */
    //@{
-   inline Vector3&                              operator= ( const Vector3& v ) = default;
-   template< typename Other > inline Vector3&   operator= ( const Vector3<Other>& v );
-   template< typename Other > inline bool       operator==( Other rhs )                 const;
-   template< typename Other > inline bool       operator==( const Vector3<Other>& rhs ) const;
-   template< typename Other > inline bool       operator!=( Other rhs )                 const;
-   template< typename Other > inline bool       operator!=( const Vector3<Other>& rhs ) const;
-   inline Type&                                 operator[]( uint_t index );
-   inline const Type&                           operator[]( uint_t index )                const;
+   WALBERLA_HOST_DEVICE Vector3&                              operator= ( const Vector3& v ) = default;
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&   operator= ( const Vector3<Other>& v );
+   template< typename Other > WALBERLA_HOST_DEVICE bool       operator==( Other rhs )                 const;
+   template< typename Other > WALBERLA_HOST_DEVICE bool       operator==( const Vector3<Other>& rhs ) const;
+   template< typename Other > WALBERLA_HOST_DEVICE bool       operator!=( Other rhs )                 const;
+   template< typename Other > WALBERLA_HOST_DEVICE bool       operator!=( const Vector3<Other>& rhs ) const;
+   WALBERLA_HOST_DEVICE Type&                                 operator[]( uint_t index );
+   WALBERLA_HOST_DEVICE const Type&                           operator[]( uint_t index )                const;
    //@}
    //*******************************************************************************************************************
 
@@ -138,37 +144,37 @@ public:
    // \brief (for further detail see the MathTrait class description).
    */
    //@{
-                              inline Vector3       operator-()                             const;
-   template< typename Other > inline Vector3&      operator%=( const Vector3<Other>& rhs );       //cross product
-   template< typename Other > inline Vector3&      operator+=( const Vector3<Other>& rhs );
-   template< typename Other > inline Vector3&      operator-=( const Vector3<Other>& rhs );
-   template< typename Other > inline Vector3&      operator*=( Other rhs );
-   template< typename Other > inline Vector3&      operator/=( Other rhs );
-   template< typename Other > inline Vector3<HIGH> operator% ( const Vector3<Other>& rhs ) const; //cross product
-   template< typename Other > inline Vector3<HIGH> operator+ ( const Vector3<Other>& rhs ) const;
-   template< typename Other > inline Vector3<HIGH> operator- ( const Vector3<Other>& rhs ) const;
-   template< typename Other > inline Vector3<HIGH> operator* ( Other rhs )                 const;
-   template< typename Other > inline HIGH          operator* ( const Vector3<Other>& rhs ) const;
-   template< typename Other > inline Vector3<HIGH> operator/ ( Other rhs )                 const;
+                              WALBERLA_HOST_DEVICE Vector3       operator-()                             const;
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&      operator%=( const Vector3<Other>& rhs );       //cross product
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&      operator+=( const Vector3<Other>& rhs );
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&      operator-=( const Vector3<Other>& rhs );
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&      operator*=( Other rhs );
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3&      operator/=( Other rhs );
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3<HIGH> operator% ( const Vector3<Other>& rhs ) const; //cross product
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3<HIGH> operator+ ( const Vector3<Other>& rhs ) const;
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3<HIGH> operator- ( const Vector3<Other>& rhs ) const;
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3<HIGH> operator* ( Other rhs )                 const;
+   template< typename Other > WALBERLA_HOST_DEVICE HIGH          operator* ( const Vector3<Other>& rhs ) const;
+   template< typename Other > WALBERLA_HOST_DEVICE Vector3<HIGH> operator/ ( Other rhs )                 const;
    //@}
    //*******************************************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline uint_t          indexOfMax( )                  const;
-   inline uint_t          indexOfMin( )                  const;
-   inline Type            max( )                         const;
-   inline Type            min( )                         const;
-   inline void            set( Type x, Type y, Type z );
-   inline Length          length()                       const;
-   inline Type            sqrLength()                    const;
-   inline Vector3<Length> getNormalized()                const;
-   inline Vector3<Length> getNormalizedOrZero()          const;
-   inline Vector3<Length> getNormalizedIfNotZero()       const;
-   inline void            reset();
-   inline Type*           data()                         {return v_.data();}
-   inline Type const *    data()                         const {return v_.data();}
+   WALBERLA_HOST_DEVICE uint_t          indexOfMax( )                  const;
+   WALBERLA_HOST_DEVICE uint_t          indexOfMin( )                  const;
+   WALBERLA_HOST_DEVICE Type            max( )                         const;
+   WALBERLA_HOST_DEVICE Type            min( )                         const;
+   WALBERLA_HOST_DEVICE void            set( Type x, Type y, Type z );
+   WALBERLA_HOST_DEVICE Length          length()                       const;
+   WALBERLA_HOST_DEVICE Type            sqrLength()                    const;
+   WALBERLA_HOST_DEVICE Vector3<Length> getNormalized()                const;
+   WALBERLA_HOST_DEVICE Vector3<Length> getNormalizedOrZero()          const;
+   WALBERLA_HOST_DEVICE Vector3<Length> getNormalizedIfNotZero()       const;
+   WALBERLA_HOST_DEVICE void            reset();
+   WALBERLA_HOST_DEVICE Type*           data()                         {return v_.data();}
+   WALBERLA_HOST_DEVICE Type const *    data()                         const {return v_.data();}
    //@}
    //*******************************************************************************************************************
 
@@ -185,7 +191,7 @@ public:
     * 0 & 1 & 2 \\
     * \end{array}\right)\f]
    **/
-   std::array< Type, 3 > v_ = { Type(), Type(), Type() };
+   stdlib::array< Type, 3 > v_ = { Type(), Type(), Type() };
    //@}
    //*******************************************************************************************************************
 };
@@ -193,7 +199,7 @@ static_assert( std::is_trivially_copyable_v<Vector3<real_t>>, "Vector3<real_t> h
 //**********************************************************************************************************************
 
 template<typename T>
-Vector3<T> & normalize( Vector3<T> & v );
+WALBERLA_HOST_DEVICE inline Vector3<T> & normalize( Vector3<T> & v );
 
 
 //======================================================================================================================
@@ -210,7 +216,7 @@ Vector3<T> & normalize( Vector3<T> & v );
 // \param init Initial value for all vector elements.
 */
 template< typename Type >
-inline constexpr Vector3<Type>::Vector3( Type init )
+WALBERLA_HOST_DEVICE inline constexpr Vector3<Type>::Vector3( Type init )
 {
    v_[0] = v_[1] = v_[2] = init;
 }
@@ -225,7 +231,7 @@ inline constexpr Vector3<Type>::Vector3( Type init )
 */
 template< typename Type >
 template< typename Other >
-inline constexpr Vector3<Type>::Vector3( Other init )
+WALBERLA_HOST_DEVICE inline constexpr Vector3<Type>::Vector3( Other init )
 {
    static_assert( std::is_arithmetic_v<Other>, "Vector3 only accepts arithmetic data types in Vector3( Other init )");
 
@@ -243,7 +249,7 @@ inline constexpr Vector3<Type>::Vector3( Other init )
 // \param z The initial value for the z-component.
 */
 template< typename Type >
-inline constexpr Vector3<Type>::Vector3( Type x, Type y, Type z )
+WALBERLA_HOST_DEVICE inline constexpr Vector3<Type>::Vector3( Type x, Type y, Type z )
 {
    v_[0] = x;
    v_[1] = y;
@@ -261,7 +267,7 @@ inline constexpr Vector3<Type>::Vector3( Type x, Type y, Type z )
 // The array is assumed to have at least three valid elements.
 */
 template< typename Type >
-inline constexpr Vector3<Type>::Vector3( const Type* init )
+WALBERLA_HOST_DEVICE inline constexpr Vector3<Type>::Vector3( const Type* init )
 {
    v_[0] = init[0];
    v_[1] = init[1];
@@ -278,7 +284,7 @@ inline constexpr Vector3<Type>::Vector3( const Type* init )
 */
 template< typename Type >
 template< typename Other >
-inline constexpr Vector3<Type>::Vector3( const Vector3<Other>& v )
+WALBERLA_HOST_DEVICE inline constexpr Vector3<Type>::Vector3( const Vector3<Other>& v )
 {
    v_[0] = numeric_cast<Type>( v.v_[0] );
    v_[1] = numeric_cast<Type>( v.v_[1] );
@@ -305,7 +311,7 @@ inline constexpr Vector3<Type>::Vector3( const Vector3<Other>& v )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator=( const Vector3<Other>& v )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator=( const Vector3<Other>& v )
 {
    // This implementation is faster than the synthesized default copy assignment operator and
    // faster than an implementation with the C library function 'memcpy' in combination with a
@@ -331,7 +337,7 @@ inline Vector3<Type>& Vector3<Type>::operator=( const Vector3<Other>& v )
 */
 template< typename Type >
 template< typename Other >
-inline bool Vector3<Type>::operator==( Other rhs ) const
+WALBERLA_HOST_DEVICE inline bool Vector3<Type>::operator==( Other rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type within the equal function.
@@ -349,7 +355,7 @@ inline bool Vector3<Type>::operator==( Other rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline bool Vector3<Type>::operator==( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline bool Vector3<Type>::operator==( const Vector3<Other>& rhs ) const
 {
    // In order to compare the two vectors, the data values of the lower-order data
    // type are converted to the higher-order data type within the equal function.
@@ -370,7 +376,7 @@ inline bool Vector3<Type>::operator==( const Vector3<Other>& rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline bool Vector3<Type>::operator!=( Other rhs ) const
+WALBERLA_HOST_DEVICE inline bool Vector3<Type>::operator!=( Other rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type within the equal function.
@@ -388,7 +394,7 @@ inline bool Vector3<Type>::operator!=( Other rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline bool Vector3<Type>::operator!=( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline bool Vector3<Type>::operator!=( const Vector3<Other>& rhs ) const
 {
    // In order to compare the two vectors, the data values of the lower-order data
    // type are converted to the higher-order data type within the equal function.
@@ -405,7 +411,7 @@ inline bool Vector3<Type>::operator!=( const Vector3<Other>& rhs ) const
 // \return Reference to the accessed value.
 */
 template< typename Type >
-inline Type& Vector3<Type>::operator[]( uint_t index )
+WALBERLA_HOST_DEVICE inline Type& Vector3<Type>::operator[]( uint_t index )
 {
    WALBERLA_ASSERT_LESS( index, 3 , "Invalid vector access index" );
    return v_[index];
@@ -421,7 +427,7 @@ inline Type& Vector3<Type>::operator[]( uint_t index )
 // \return Reference-to-const to the accessed value.
 */
 template< typename Type >
-inline const Type& Vector3<Type>::operator[]( uint_t index ) const
+WALBERLA_HOST_DEVICE inline const Type& Vector3<Type>::operator[]( uint_t index ) const
 {
    WALBERLA_ASSERT_LESS( index, 3, "Invalid vector access index" );
    return v_[index];
@@ -444,7 +450,7 @@ inline const Type& Vector3<Type>::operator[]( uint_t index ) const
 // \return The inverse of the vector.
 */
 template< typename Type >
-inline Vector3<Type> Vector3<Type>::operator-() const
+WALBERLA_HOST_DEVICE inline Vector3<Type> Vector3<Type>::operator-() const
 {
    return Vector3( -v_[0], -v_[1], -v_[2] );
 }
@@ -460,7 +466,7 @@ inline Vector3<Type> Vector3<Type>::operator-() const
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator%=( const Vector3<Other>& rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator%=( const Vector3<Other>& rhs )
 {
    Type tmp0 = v_[1] * rhs.v_[2] - v_[2] * rhs.v_[1];
    Type tmp1 = v_[2] * rhs.v_[0] - v_[0] * rhs.v_[2];
@@ -481,7 +487,7 @@ inline Vector3<Type>& Vector3<Type>::operator%=( const Vector3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator+=( const Vector3<Other>& rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator+=( const Vector3<Other>& rhs )
 {
    v_[0] += numeric_cast<Type>(rhs.v_[0]);
    v_[1] += numeric_cast<Type>(rhs.v_[1]);
@@ -501,7 +507,7 @@ inline Vector3<Type>& Vector3<Type>::operator+=( const Vector3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator-=( const Vector3<Other>& rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator-=( const Vector3<Other>& rhs )
 {
    v_[0] -= numeric_cast<Type>(rhs.v_[0]);
    v_[1] -= numeric_cast<Type>(rhs.v_[1]);
@@ -521,7 +527,7 @@ inline Vector3<Type>& Vector3<Type>::operator-=( const Vector3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator*=( Other rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator*=( Other rhs )
 {
    v_[0] *= numeric_cast<Type>(rhs);
    v_[1] *= numeric_cast<Type>(rhs);
@@ -543,11 +549,11 @@ inline Vector3<Type>& Vector3<Type>::operator*=( Other rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<Type>& Vector3<Type>::operator/=( Other rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type>& Vector3<Type>::operator/=( Other rhs )
 {
    // Depending on the two involved data types, an integer division is applied or a
    // floating point division is selected.
-   if( std::numeric_limits<HIGH>::is_integer ) {
+   if( stdlib::numeric_limits<HIGH>::is_integer ) {
       v_[0] /= numeric_cast<Type>(rhs);
       v_[1] /= numeric_cast<Type>(rhs);
       v_[2] /= numeric_cast<Type>(rhs);
@@ -573,7 +579,7 @@ inline Vector3<Type>& Vector3<Type>::operator/=( Other rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<HIGH> Vector3<Type>::operator%( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> Vector3<Type>::operator%( const Vector3<Other>& rhs ) const
 {
    return Vector3<HIGH>( v_[1] * rhs.v_[2] - v_[2] * rhs.v_[1],
                          v_[2] * rhs.v_[0] - v_[0] * rhs.v_[2],
@@ -590,7 +596,7 @@ inline Vector3<HIGH> Vector3<Type>::operator%( const Vector3<Other>& rhs ) const
 // \return The cross product.
 */
 template< typename Type >
-inline Vector3<Type> cross( const Vector3<Type>& lhs, const Vector3<Type>& rhs )
+WALBERLA_HOST_DEVICE inline Vector3<Type> cross( const Vector3<Type>& lhs, const Vector3<Type>& rhs )
 {
    return lhs % rhs;
 }
@@ -609,7 +615,7 @@ inline Vector3<Type> cross( const Vector3<Type>& lhs, const Vector3<Type>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<HIGH> Vector3<Type>::operator+( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> Vector3<Type>::operator+( const Vector3<Other>& rhs ) const
 {
    return Vector3<HIGH>( v_[0]+numeric_cast<Type>(rhs.v_[0]), v_[1]+numeric_cast<Type>(rhs.v_[1]), v_[2]+numeric_cast<Type>(rhs.v_[2]) );
 }
@@ -628,7 +634,7 @@ inline Vector3<HIGH> Vector3<Type>::operator+( const Vector3<Other>& rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<HIGH> Vector3<Type>::operator-( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> Vector3<Type>::operator-( const Vector3<Other>& rhs ) const
 {
    return Vector3<HIGH>( v_[0]-numeric_cast<Type>(rhs.v_[0]), v_[1]-numeric_cast<Type>(rhs.v_[1]), v_[2]-numeric_cast<Type>(rhs.v_[2]) );
 }
@@ -648,7 +654,7 @@ inline Vector3<HIGH> Vector3<Type>::operator-( const Vector3<Other>& rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<HIGH> Vector3<Type>::operator*( Other rhs ) const
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> Vector3<Type>::operator*( Other rhs ) const
 {
    return Vector3<HIGH>( v_[0]*numeric_cast<Type>(rhs), v_[1]*numeric_cast<Type>(rhs), v_[2]*numeric_cast<Type>(rhs) );
 }
@@ -668,7 +674,7 @@ inline Vector3<HIGH> Vector3<Type>::operator*( Other rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline HIGH Vector3<Type>::operator*( const Vector3<Other>& rhs ) const
+WALBERLA_HOST_DEVICE inline HIGH Vector3<Type>::operator*( const Vector3<Other>& rhs ) const
 {
    return ( v_[0]*numeric_cast<Type>(rhs.v_[0]) + v_[1]*numeric_cast<Type>(rhs.v_[1]) + v_[2]*numeric_cast<Type>(rhs.v_[2]) );
 }
@@ -689,11 +695,11 @@ inline HIGH Vector3<Type>::operator*( const Vector3<Other>& rhs ) const
 */
 template< typename Type >
 template< typename Other >
-inline Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
 {
    // Depending on the two involved data types, an integer division is applied or a
    // floating point division is selected.
-   if( std::numeric_limits<HIGH>::is_integer ) {
+   if( stdlib::numeric_limits<HIGH>::is_integer ) {
       return Vector3<HIGH>( v_[0]/rhs, v_[1]/rhs, v_[2]/rhs );
    }
    else {
@@ -704,7 +710,7 @@ inline Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
 //**********************************************************************************************************************
 
 template< typename Type, typename Other >
-inline Vector3<HIGH> operator/( Other lhs, const Vector3<Type>& rhs )
+WALBERLA_HOST_DEVICE inline Vector3<HIGH> operator/( Other lhs, const Vector3<Type>& rhs )
 {
    return Vector3<HIGH>( lhs/rhs[0], lhs/rhs[1], lhs/rhs[2] );
 }
@@ -722,7 +728,7 @@ inline Vector3<HIGH> operator/( Other lhs, const Vector3<Type>& rhs )
 // \brief Returns index of absolute maximum value
 */
 template< typename Type >
-inline uint_t Vector3<Type>::indexOfMax( ) const {
+WALBERLA_HOST_DEVICE inline uint_t Vector3<Type>::indexOfMax( ) const {
    if(math::abs(v_[1]) > math::abs(v_[2]))
       return (math::abs(v_[0]) > math::abs(v_[1])) ? 0u : 1u;
    else
@@ -735,7 +741,7 @@ inline uint_t Vector3<Type>::indexOfMax( ) const {
 // \brief Returns index of absolute minimum value
 */
 template< typename Type >
-inline uint_t Vector3<Type>::indexOfMin( ) const {
+WALBERLA_HOST_DEVICE inline uint_t Vector3<Type>::indexOfMin( ) const {
    if(math::abs(v_[2]) < math::abs(v_[1]))
       return (math::abs(v_[2]) < math::abs(v_[0])) ? 2u : 0u;
    else
@@ -748,7 +754,7 @@ inline uint_t Vector3<Type>::indexOfMin( ) const {
 // \brief Returns maximum value
 */
 template< typename Type >
-inline Type Vector3<Type>::max( ) const {
+WALBERLA_HOST_DEVICE inline Type Vector3<Type>::max( ) const {
    return std::max(v_[0], std::max(v_[1], v_[2]));
 }
 //**********************************************************************************************************************
@@ -758,7 +764,7 @@ inline Type Vector3<Type>::max( ) const {
 // \brief Returns minimum value
 */
 template< typename Type >
-inline Type Vector3<Type>::min( ) const {
+WALBERLA_HOST_DEVICE inline Type Vector3<Type>::min( ) const {
    return std::min(v_[0], std::min(v_[1], v_[2]));
 }
 //**********************************************************************************************************************
@@ -772,7 +778,7 @@ inline Type Vector3<Type>::min( ) const {
 // \param z The initial value for the z-component.
 */
 template< typename Type >
-inline void Vector3<Type>::set( Type x, Type y, Type z )
+WALBERLA_HOST_DEVICE inline void Vector3<Type>::set( Type x, Type y, Type z )
 {
    v_[0] = x;
    v_[1] = y;
@@ -808,7 +814,7 @@ inline void Vector3<Type>::set( Type x, Type y, Type z )
 // </table>
 */
 template< typename Type >
-inline typename SqrtTrait<Type>::Type Vector3<Type>::length() const
+WALBERLA_HOST_DEVICE inline typename SqrtTrait<Type>::Type Vector3<Type>::length() const
 {
    return std::sqrt( static_cast<typename SqrtTrait<Type>::Type>( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] ) );
 }
@@ -822,7 +828,7 @@ inline typename SqrtTrait<Type>::Type Vector3<Type>::length() const
 // \return The square length of the vector.
 */
 template< typename Type >
-inline Type Vector3<Type>::sqrLength() const
+WALBERLA_HOST_DEVICE inline Type Vector3<Type>::sqrLength() const
 {
    return ( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] );
 }
@@ -840,7 +846,7 @@ inline Type Vector3<Type>::sqrLength() const
 // The function returns the normalized vector.
 */
 template< typename Type >
-Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalized() const
+WALBERLA_HOST_DEVICE Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalized() const
 {
    const Length len( length() );
 
@@ -865,7 +871,7 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalized() const
 // \return The normalized vector or a vector with all components equal to zero if vector is too small.
 */
 template< typename Type >
-Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() const
+WALBERLA_HOST_DEVICE Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() const
 {
    const Length len( length() );
 
@@ -890,7 +896,7 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() con
 // \return The normalized vector or the original vector if vector is too small.
 */
 template< typename Type >
-Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedIfNotZero() const
+WALBERLA_HOST_DEVICE Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedIfNotZero() const
 {
    const Length len( length() );
 
@@ -913,7 +919,7 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedIfNotZero() 
 // \brief Sets all components of the vector to 0.
 */
 template< typename Type >
-void Vector3<Type>::reset()
+WALBERLA_HOST_DEVICE void Vector3<Type>::reset()
 {
    v_[0] = 0;
    v_[1] = 0;
@@ -1677,7 +1683,7 @@ inline bool finite( const Vector3<Type>& v )
 template< typename Type >
 inline const Vector3<Type> abs( const Vector3<Type>& v )
 {
-   static_assert( std::numeric_limits<Type>::is_integer, "v has to be of integral type!" );
+   static_assert( stdlib::numeric_limits<Type>::is_integer, "v has to be of integral type!" );
    return Vector3<Type>( std::abs(v[0]), std::abs(v[1]), std::abs(v[2]) );
 }
 //**********************************************************************************************************************
@@ -1697,7 +1703,7 @@ inline const Vector3<Type> abs( const Vector3<Type>& v )
 template< typename Type >
 inline const Vector3<Type> fabs( const Vector3<Type>& v )
 {
-   static_assert( !std::numeric_limits<Type>::is_integer, "v has to be of floating point type!" );
+   static_assert( !stdlib::numeric_limits<Type>::is_integer, "v has to be of floating point type!" );
    return Vector3<Type>( std::fabs(v[0]), std::fabs(v[1]), std::fabs(v[2]) );
 }
 //**********************************************************************************************************************
@@ -1758,7 +1764,7 @@ inline void normals(const Vector3<Type>& v, Vector3<Type>& defNor, Vector3<Type>
 // use member function getNormalized() instead
 */
 template<typename T>
-Vector3<T> & normalize( Vector3<T> & v )
+WALBERLA_HOST_DEVICE Vector3<T> & normalize( Vector3<T> & v )
 {
    static_assert( std::is_floating_point_v<T>,
       "You can only normalize floating point vectors in-place!");

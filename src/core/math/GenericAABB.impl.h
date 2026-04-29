@@ -16,6 +16,7 @@
 //! \file GenericAABB.impl.h
 //! \ingroup core
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //
 //======================================================================================================================
 
@@ -30,7 +31,7 @@ namespace math {
  * \post minCorner = maxCorner = (0,0,0)
  */
 template< typename T >
-GenericAABB< T >::GenericAABB() : minCorner_( value_type(0), value_type(0), value_type(0) ),
+WALBERLA_HOST_DEVICE GenericAABB< T >::GenericAABB() : minCorner_( value_type(0), value_type(0), value_type(0) ),
                                   maxCorner_( value_type(0), value_type(0), value_type(0) )
 {
    WALBERLA_ASSERT( checkInvariant(), *this );
@@ -47,7 +48,7 @@ GenericAABB< T >::GenericAABB() : minCorner_( value_type(0), value_type(0), valu
  */
 template< typename T >
 template< typename U >
-inline GenericAABB< T >::GenericAABB( const GenericAABB< U > & other )
+WALBERLA_HOST_DEVICE GenericAABB< T >::GenericAABB( const GenericAABB< U > & other )
    : minCorner_( other.minCorner() ),
      maxCorner_( other.maxCorner() )
 {
@@ -62,7 +63,7 @@ inline GenericAABB< T >::GenericAABB( const GenericAABB< U > & other )
  * \param corner1 second corner spanning the AABB
  */
 template< typename T >
-GenericAABB< T >::GenericAABB( const vector_type & corner0, const vector_type & corner1 )
+WALBERLA_HOST_DEVICE GenericAABB< T >::GenericAABB( const vector_type & corner0, const vector_type & corner1 )
 {
    for( uint_t i = 0; i < 3; ++i )
    {
@@ -94,7 +95,7 @@ GenericAABB< T >::GenericAABB( const vector_type & corner0, const vector_type & 
  * \param z1  z-coordinate of the second corner spanning the AABB
  */
 template< typename T >
-GenericAABB< T >::GenericAABB( const value_type x0, const value_type y0, const value_type z0,
+WALBERLA_HOST_DEVICE GenericAABB< T >::GenericAABB( const value_type x0, const value_type y0, const value_type z0,
                                const value_type x1, const value_type y1, const value_type z1 )
 {
    if( x0 < x1 )
@@ -290,7 +291,7 @@ inline GenericAABB< T > & GenericAABB< T >::operator=( const GenericAABB< U > & 
  * \returns the corner with minimal values
  */
 template< typename T >
-const typename GenericAABB< T >::vector_type & GenericAABB< T >::minCorner() const
+WALBERLA_HOST_DEVICE const typename GenericAABB< T >::vector_type & GenericAABB< T >::minCorner() const
 {
    return minCorner_;
 }
@@ -303,7 +304,7 @@ const typename GenericAABB< T >::vector_type & GenericAABB< T >::minCorner() con
  * \returns the corner with maximal values
  */
 template< typename T >
-const typename GenericAABB< T >::vector_type & GenericAABB< T >::maxCorner() const
+WALBERLA_HOST_DEVICE const typename GenericAABB< T >::vector_type & GenericAABB< T >::maxCorner() const
 {
    return maxCorner_;
 }
@@ -316,7 +317,7 @@ const typename GenericAABB< T >::vector_type & GenericAABB< T >::maxCorner() con
  * \returns the x-component of the corner with minimal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::xMin() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::xMin() const
 {
    return minCorner_[0];
 }
@@ -329,7 +330,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::xMin() const
  * \returns the y-component of the corner with minimal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::yMin() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::yMin() const
 {
    return minCorner_[1];
 }
@@ -342,7 +343,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::yMin() const
  * \returns the z-component of the corner with minimal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::zMin() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::zMin() const
 {
    return minCorner_[2];
 }
@@ -355,7 +356,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::zMin() const
  * \returns the x-component of the corner with maximal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::xMax() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::xMax() const
 {
    return maxCorner_[0];
 }
@@ -368,7 +369,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::xMax() const
  * \returns the y-component of the corner with maximal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::yMax() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::yMax() const
 {
    return maxCorner_[1];
 }
@@ -381,7 +382,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::yMax() const
  * \returns the z-component of the corner with maximal values
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::zMax() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::zMax() const
 {
    return maxCorner_[2];
 }
@@ -409,7 +410,7 @@ bool GenericAABB< T >::empty() const
  * \returns A vector with the GenericAABBs extends in x-, y-, and z-Direction
  */
 template< typename T >
-typename GenericAABB< T >::vector_type GenericAABB< T >::sizes() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::vector_type GenericAABB< T >::sizes() const
 {
    WALBERLA_ASSERT( checkInvariant() );
 
@@ -426,7 +427,7 @@ typename GenericAABB< T >::vector_type GenericAABB< T >::sizes() const
  * \returns The extend of the GenericAABB on the requested axis
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::size( const uint_t index ) const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::size( const uint_t index ) const
 {
    WALBERLA_ASSERT( checkInvariant() );
 
@@ -441,7 +442,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::size( const uint_t index
  * \returns The extend of the GenericAABB on the x axis
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::xSize() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::xSize() const
 {
    WALBERLA_ASSERT( checkInvariant() );
 
@@ -456,7 +457,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::xSize() const
  * \returns The extend of the GenericAABB on the y axis
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::ySize() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::ySize() const
 {
    WALBERLA_ASSERT( checkInvariant() );
 
@@ -471,7 +472,7 @@ typename GenericAABB< T >::value_type GenericAABB< T >::ySize() const
  * \returns The extend of the GenericAABB on the z axis
  */
 template< typename T >
-typename GenericAABB< T >::value_type GenericAABB< T >::zSize() const
+WALBERLA_HOST_DEVICE typename GenericAABB< T >::value_type GenericAABB< T >::zSize() const
 {
    WALBERLA_ASSERT( checkInvariant() );
 

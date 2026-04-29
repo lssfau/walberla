@@ -143,6 +143,10 @@ struct D3Q15
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { 1,5,5,5,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1 };
 
+   static constexpr size_t subdirsLength { 63 };
+   static constexpr std::array< Direction, 63 > subdirs { C, N, TNE, TNW, BNE, BNW, S, TSE, TSW, BSE, BSW, W, TNW, TSW, BNW, BSW, E, TNE, TSE, BNE, BSE, T, TNE, TNW, TSE, TSW, B, BNE, BNW, BSE, BSW, TNW, BNW, TNE, BNE, TSW, BSW, TSE, BSE, TNE, TNW, TSE, TSW, TNW, TSW, TNE, TSE, BNE, BNW, BSE, BSW, BNW, BSW, BNE, BSE, TNE, TNW, TSE, TSW, BNE, BNW, BSE, BSW };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { 0, 1, 6, 11, 16, 21, 26, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63 };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

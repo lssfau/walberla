@@ -32,12 +32,15 @@ namespace vtk {
 class DumpBlockStructureLevel : public ::walberla::vtk::BlockCellDataWriter< uint8_t > {
 
 public:
+   using Base = ::walberla::vtk::BlockCellDataWriter< uint8_t >;
 
-   DumpBlockStructureLevel( const std::string& id ) : ::walberla::vtk::BlockCellDataWriter<uint8_t>( id ), level_( uint8_c(0) ) {}
+   DumpBlockStructureLevel( const std::string& id ) : Base( id ), level_( uint8_c(0) ) {}
 
 protected:
 
    void configure() override { WALBERLA_ASSERT_NOT_NULLPTR( this->block_ ); WALBERLA_ASSERT_NOT_NULLPTR( this->blockStorage_ ); level_ = uint8_c( this->blockStorage_->getLevel( *(this->block_) ) ); }
+
+   using Base::evaluate;
 
    uint8_t evaluate( const cell_idx_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) override { return level_; }
 

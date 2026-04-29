@@ -24,9 +24,68 @@
 
 #include "core/cell/CellInterval.h"
 
-namespace walberla {
-namespace field {
+#include "stencil/Directions.h"
 
+namespace walberla
+{
+namespace field
+{
+
+namespace detail
+{
+inline CellInterval getGhostRegion(std::array< cell_idx_t, 3 > fieldSize, size_t totalGhostLayers, stencil::Direction d,
+                                   cell_idx_t thickness, bool fullSlice)
+{
+   WALBERLA_ASSERT_GREATER(thickness, 0);
+
+   cell_idx_t fullSliceInc = fullSlice ? cell_idx_c(totalGhostLayers) : 0;
+
+   CellInterval ci;
+   for (uint_t dim = 0; dim < 3; ++dim)
+      switch (stencil::c[dim][d])
+      {
+      case -1:
+         ci.min()[dim] = -thickness;
+         ci.max()[dim] = 0 - 1;
+         break;
+      case 0:
+         ci.min()[dim] = -fullSliceInc;
+         ci.max()[dim] = fieldSize[dim] + fullSliceInc - 1;
+         break;
+      case 1:
+         ci.min()[dim] = fieldSize[dim];
+         ci.max()[dim] = fieldSize[dim] + thickness - 1;
+         break;
+      }
+   return ci;
+}
+
+inline CellInterval getSliceBeforeGhostLayer(const std::array< cell_idx_t, 3 > fieldSize, size_t totalGhostLayers,
+                                             stencil::Direction d, cell_idx_t thickness, bool fullSlice)
+{
+   WALBERLA_ASSERT_GREATER(thickness, 0);
+
+   CellInterval ci;
+   cell_idx_t fullSliceInc = fullSlice ? cell_idx_c(totalGhostLayers) : 0;
+   for (uint_t dim = 0; dim < 3; ++dim)
+      switch (stencil::c[dim][d])
+      {
+      case -1:
+         ci.min()[dim] = 0;
+         ci.max()[dim] = thickness - 1;
+         break;
+      case 0:
+         ci.min()[dim] = -fullSliceInc;
+         ci.max()[dim] = fieldSize[dim] + fullSliceInc - 1;
+         break;
+      case 1:
+         ci.min()[dim] = fieldSize[dim] - thickness;
+         ci.max()[dim] = fieldSize[dim] - 1;
+         break;
+      }
+   return ci;
+}
+} // namespace detail
 
 //*******************************************************************************************************************
 /*!\brief Constructs CellInterval containing the ghost region in the specified direction
@@ -42,32 +101,15 @@ namespace field {
  *                   are included.
  * \return CellInterval describing the ghost layer
  *******************************************************************************************************************/
-template< typename GhostLayerField_T>
-CellInterval getGhostRegion( const GhostLayerField_T & f, stencil::Direction d,
-                             cell_idx_t thickness, bool fullSlice )
+template< typename GhostLayerField_T >
+CellInterval getGhostRegion(const GhostLayerField_T& f, stencil::Direction d, cell_idx_t thickness, bool fullSlice)
 {
-   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( f.xSize() ),
-                                   cell_idx_c( f.ySize() ),
-                                   cell_idx_c( f.zSize() )};
+   const std::array< cell_idx_t, 3 > sizeArr = { cell_idx_c(f.xSize()), cell_idx_c(f.ySize()), cell_idx_c(f.zSize()) };
 
-   WALBERLA_ASSERT_GREATER( thickness, 0 );
-   WALBERLA_ASSERT_LESS_EQUAL( uint_c(thickness), f.nrOfGhostLayers() );
-   const cell_idx_t ghosts = cell_idx_c ( thickness );
+   WALBERLA_ASSERT_LESS_EQUAL(uint_c(thickness), f.nrOfGhostLayers());
 
-   cell_idx_t fullSliceInc = fullSlice ? cell_idx_c( f.nrOfGhostLayers() ) : 0;
-
-   CellInterval ci;
-   for( uint_t dim = 0; dim< 3; ++dim )
-      switch ( stencil::c[dim][d] )
-      {
-         case -1: ci.min()[dim] =     -ghosts;     ci.max()[dim] =         0                   - 1; break;
-         case  0: ci.min()[dim] = -fullSliceInc;   ci.max()[dim] =  sizeArr[dim]+fullSliceInc  - 1; break;
-         case  1: ci.min()[dim] =   sizeArr[dim];  ci.max()[dim] =  sizeArr[dim]+ghosts        - 1; break;
-      }
-   return ci;
+   return detail::getGhostRegion(sizeArr, f.nrOfGhostLayers(), d, thickness, fullSlice);
 }
-
-
 
 //*******************************************************************************************************************
 /*!\brief Constructs CellInterval containing the last slice before the ghost layer begins
@@ -83,29 +125,16 @@ CellInterval getGhostRegion( const GhostLayerField_T & f, stencil::Direction d,
  *                   are included, otherwise only inner cells are returned
  * \return CellInterval describing the slice before ghost layer
  *******************************************************************************************************************/
-template< typename GhostLayerField_T>
-CellInterval getSliceBeforeGhostLayer(const GhostLayerField_T & f, stencil::Direction d,
-                                      cell_idx_t thickness, bool fullSlice )
+template< typename GhostLayerField_T >
+CellInterval getSliceBeforeGhostLayer(const GhostLayerField_T& f, stencil::Direction d, cell_idx_t thickness,
+                                      bool fullSlice)
 {
-   WALBERLA_ASSERT_GREATER( thickness, 0 );
+   WALBERLA_ASSERT_GREATER(thickness, 0);
 
-   const std::array<cell_idx_t, 3> sizeArr = { cell_idx_c( f.xSize() ),
-                                   cell_idx_c( f.ySize() ),
-                                   cell_idx_c( f.zSize() )};
+   const std::array< cell_idx_t, 3 > sizeArr = { cell_idx_c(f.xSize()), cell_idx_c(f.ySize()), cell_idx_c(f.zSize()) };
 
-
-   CellInterval ci;
-   cell_idx_t fullSliceInc = fullSlice ? cell_idx_c( f.nrOfGhostLayers()) : 0;
-   for( uint_t dim = 0; dim< 3; ++dim )
-      switch ( stencil::c[dim][d] )
-      {
-         case -1: ci.min()[dim] =                      0;  ci.max()[dim] =     thickness              - 1; break;
-         case  0: ci.min()[dim] =          -fullSliceInc;  ci.max()[dim] =  sizeArr[dim] +fullSliceInc- 1; break;
-         case  1: ci.min()[dim] = sizeArr[dim]-thickness;  ci.max()[dim] =  sizeArr[dim]              - 1; break;
-      }
-   return ci;
+   return detail::getSliceBeforeGhostLayer(sizeArr, f.nrOfGhostLayers(), d, thickness, fullSlice);
 }
-
 
 } // namespace field
 } // namespace walberla

@@ -143,6 +143,10 @@ struct D2CornerStencil
     */
    static constexpr std::array< uint_t, NR_OF_DIRECTIONS > d_per_d_length { 0,2,2,2,2,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
+   static constexpr size_t subdirsLength { 12 };
+   static constexpr std::array< Direction, 12 > subdirs { NW, NE, SW, SE, NW, SW, NE, SE, NW, NE, SW, SE };
+   static constexpr std::array< size_t, NR_OF_DIRECTIONS + 1 > subdirsPtr { 0, 0, 2, 4, 6, 8, 8, 8, 9, 10, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 };
+
    /**
     * \brief Views directions as cells in a 3x3x3 grid. Describes neighborhood between cells/directions.
     *

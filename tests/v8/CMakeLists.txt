@@ -1,0 +1,22 @@
+
+function( walberla_v8_add_tests TEST_EXECUTABLE )
+    set(multiValueArgs IDS PROCESSES )
+    cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
+
+    foreach( _testId ${_arg_IDS} )
+        set( _command $<TARGET_FILE:${TEST_EXECUTABLE}> ${_testId} )
+        if(NOT _arg_PROCESSES)
+            set( _testName "${TEST_EXECUTABLE} - ${_testId}" )
+            waLBerla_execute_test( NAME ${_testName} COMMAND ${_command} ${_arg_UNPARSED_ARGUMENTS})
+        else()
+            foreach( _procCount ${_arg_PROCESSES})    
+                set( _testName "${TEST_EXECUTABLE} - ${_testId} (np=${_procCount})" )
+                waLBerla_execute_test( NAME ${_testName} COMMAND ${_command} ${_arg_UNPARSED_ARGUMENTS} PROCESSES ${_procCount} )
+            endforeach()
+        endif()
+    endforeach()
+endfunction()
+
+add_subdirectory( memory )
+add_subdirectory( halo_exchange )
+add_subdirectory( sweep )

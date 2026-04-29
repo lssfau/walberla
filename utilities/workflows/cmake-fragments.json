@@ -198,8 +198,17 @@
             }
         },
         {
+            "displayName": "Enable experimental v8 core library",
+            "name": ".v8core",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_ENABLE_V8CORE": true
+            }
+        },
+        {
             "displayName": "Enable SweepGen metaprogramming",
             "name": ".sweepgen",
+            "inherits": ".v8core",
             "hidden": true,
             "cacheVariables": {
                 "WALBERLA_ENABLE_SWEEPGEN": true,
