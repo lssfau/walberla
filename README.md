@@ -31,17 +31,18 @@ or the waLBerla mailing list ([cs10-walberla@fau.de](mailto:cs10-walberla@fau.de
 
 ## Authors
 
-Many thanks go to waLBerla's [contributors](AUTHORS.txt)
+Many thanks go to waLBerla's contributors. For a complete list, see [CITATION.cff](CITATION.cff).
 
 ### Please cite us
 
-If you use waLBerla in a publication, please cite the following articles:
-
-Overview:
+If you use waLBerla in a publication, please cite it using the metadata in [CITATION.cff](CITATION.cff).
+The preferred citation is the following article:
 
 - M. Bauer et al., _waLBerla: A block-structured high-performance framework for
   multiphysics simulations_. Computers & Mathematics with Applications, 2020.
   https://doi.org/10.1016/j.camwa.2020.01.007.
+
+Additional applications and references:
 
 Grid Refinement:
 
@@ -78,6 +79,8 @@ Carbon Nanotubes:
 - G. Drozdov et al., _Densification of single-walled carbon nanotube films:
   Mesoscopic distinct element method simulations and experimental validation_.
   Journal of Applied Physics, 2020. https://doi.org/10.1063/5.0025505
+
+For a comprehensive list of all references, see [CITATION.cff](CITATION.cff).
 
 ## License
 

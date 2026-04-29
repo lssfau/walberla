@@ -183,6 +183,18 @@ python-static-checks:
     - cd sweepgen
     - nox -s lint typecheck
 
+schema-validation:
+  image: "python:3.13"
+  stage: "Code Quality"
+  needs: []
+  tags:
+    - docker
+  before_script:
+    - pip install --upgrade pip
+    - pip install jsonschema pyyaml
+  script:
+    - python utilities/schema-validation/validate-files.py
+
 ####################################################################################################
 #       Test Matrix
 ####################################################################################################
