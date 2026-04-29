@@ -1,0 +1,257 @@
+cff-version: 1.2.0
+title: waLBerla
+abstract: waLBerla (widely applicable Lattice Boltzmann from Erlangen) is a massively parallel framework for multiphysics simulation applications. Beyond computational fluid dynamics with the lattice Boltzmann method, the framework features multiphase and free-surface flows, rigid body and particle dynamics as well as fluid-structure coupling with moving geometries. It scales from laptops to current and future supercomputers while maintaining near-perfect efficiency.
+message: >-
+   If you use this software, please cite the article from preferred-citation, the software from identifiers, and relevant references from the references section.
+type: software
+authors:
+   - family-names: Stewart
+     given-names: Cameron
+   - family-names: Feichtinger
+     given-names: Christian
+   - family-names: Godenschwager
+     given-names: Christian
+   - family-names: Rettinger
+     given-names: Christoph
+   - family-names: Schwarzmeier
+     given-names: Christoph
+   - family-names: Ritter
+     given-names: Daniel
+   - family-names: Anderl
+     given-names: Daniela
+   - family-names: Staubach
+     given-names: David
+   - family-names: Bartuschat
+     given-names: Dominik
+   - family-names: Fattahi
+     given-names: Ehsan
+   - family-names: Winterhalter
+     given-names: Felix
+   - family-names: Schornbaum
+     given-names: Florian
+   - family-names: Hennig
+     given-names: Frederik
+     orcid: "https://orcid.org/0000-0001-5298-7968"
+   - family-names: Drozdov
+     given-names: Grigorii
+   - family-names: Schottenhamml
+     given-names: Helen
+     orcid: "https://orcid.org/0000-0001-7504-2908"
+   - family-names: Ostanin
+     given-names: Igor
+   - family-names: Götz
+     given-names: Jan
+   - family-names: Hönig
+     given-names: Jan
+   - family-names: Risso
+     given-names: João Victor Tozatti
+   - family-names: Habich
+     given-names: Johannes
+   - family-names: Iglberger
+     given-names: Klaus
+   - family-names: Pickl
+     given-names: Kristina
+   - family-names: Hufnagel
+     given-names: Lorenz
+   - family-names: Werner
+     given-names: Lukas
+   - family-names: Holzer
+     given-names: Markus
+     orcid: "https://orcid.org/0000-0001-5499-5857"
+   - family-names: Bauer
+     given-names: Martin
+   - family-names: Markl
+     given-names: Matthias
+   - family-names: Kuron
+     given-names: Michael
+   - family-names: Zikeli
+     given-names: Michael
+     orcid: "https://orcid.org/0009-0001-1290-108X"
+   - family-names: Kohl
+     given-names: Nils
+     orcid: "https://orcid.org/0000-0003-4797-0664"
+   - family-names: Carvalho
+     given-names: Paulo
+   - family-names: Suffa
+     given-names: Philipp
+     orcid: "https://orcid.org/0009-0002-5706-4075"
+   - family-names: Ammer
+     given-names: Regina
+   - family-names: Dolas
+     given-names: Sagar
+   - family-names: Eibl
+     given-names: Sebastian
+   - family-names: Bergler
+     given-names: Silke
+   - family-names: Bogner
+     given-names: Simon
+   - family-names: Donath
+     given-names: Stefan
+   - family-names: Seitz
+     given-names: Stephan
+   - family-names: Kontham
+     given-names: Sunil
+   - family-names: Leemann
+     given-names: Tobias
+   - family-names: Preclik
+     given-names: Tobias
+   - family-names: Scharpff
+     given-names: Tobias
+   - family-names: Schruff
+     given-names: Tobias
+   - family-names: Plewinski
+     given-names: Jonas
+     orcid: "https://orcid.org/0000-0002-4815-7643"
+   - family-names: Safaei
+     given-names: Behzad
+     orcid: "https://orcid.org/0000-0002-2422-0556"
+contact:
+   - email: cs10-walberla@fau.de
+     name: waLBerla project
+license: GPL-3.0
+repository-code: https://i10git.cs.fau.de/walberla/walberla
+identifiers:
+   - type: doi
+     value: 10.5281/zenodo.16760078
+     description: Zenodo concept DOI for waLBerla software
+   - type: swh
+     value: "swh:1:dir:4002200d9d84738e376f640f676f70a762244172"
+     description: Software Heritage directory identifier
+   - type: doi
+     value: 10.5281/zenodo.16760078
+     description: Zenodo DOI for waLBerla v7.2
+
+keywords:
+   - lattice Boltzmann method
+   - multiphysics simulation
+   - computational fluid dynamics
+   - particle dynamics
+   - free-surface flows
+   - fluid-structure coupling
+   - high-performance computing
+preferred-citation:
+   type: article
+   authors:
+      - family-names: Bauer
+        given-names: M.
+      - family-names: Eibl
+        given-names: S.
+      - family-names: Godenschwager
+        given-names: C.
+      - family-names: Haber
+        given-names: A.
+      - family-names: Heitmann
+        given-names: D.
+      - family-names: Hennig
+        given-names: F.
+      - family-names: Holzer
+        given-names: M.
+      - family-names: Kohl
+        given-names: N.
+      - family-names: Kuron
+        given-names: M.
+      - family-names: Markl
+        given-names: M.
+      - family-names: Müthing
+        given-names: T.
+      - family-names: Reuschel
+        given-names: T.
+      - family-names: Schornbaum
+        given-names: F.
+      - family-names: Schwarzmeier
+        given-names: C.
+      - family-names: Täufer
+        given-names: D.
+      - family-names: Wetzel
+        given-names: F.
+      - family-names: Winklhofer
+        given-names: G.
+   title: "waLBerla: A block-structured high-performance framework for multiphysics simulations"
+   journal: Computers & Mathematics with Applications
+   year: 2020
+   volume: 81
+   pages: "478-501"
+   doi: 10.1016/j.camwa.2020.01.007
+references:
+   - type: article
+     authors:
+        - family-names: Schornbaum
+          given-names: F.
+        - family-names: Rüde
+          given-names: U.
+     title: "Massively parallel algorithms for the lattice Boltzmann method on nonuniform grids"
+     journal: SIAM Journal on Scientific Computing
+     year: 2016
+     volume: 38
+     issue: 2
+     pages: "C96-C126"
+     doi: 10.1137/15M1035240
+   - type: article
+     authors:
+        - family-names: Rettinger
+          given-names: C.
+        - family-names: Rüde
+          given-names: U.
+     title: "A comparative study of fluid-particle coupling methods for fully resolved lattice Boltzmann simulations"
+     journal: Computers & Fluids
+     year: 2017
+     volume: 154
+     pages: "269-281"
+     doi: 10.1016/j.compfluid.2017.05.033
+   - type: article
+     authors:
+        - family-names: Schwarzmeier
+          given-names: C.
+        - family-names: Bauer
+          given-names: M.
+        - family-names: Godenschwager
+          given-names: C.
+     title: "Comparison of free-surface and conservative Allen-Cahn phase-field lattice Boltzmann method"
+     journal: Journal of Computational Physics
+     year: 2023
+     volume: 476
+     pages: "111753"
+     doi: 10.1016/j.jcp.2022.111753
+   - type: article
+     authors:
+        - family-names: Holzer
+          given-names: M.
+        - family-names: Bauer
+          given-names: M.
+        - family-names: Eibl
+          given-names: S.
+     title: "Highly efficient lattice Boltzmann multiphase simulations of immiscible fluids at high-density ratios on CPUs and GPUs through code generation"
+     journal: The International Journal of High Performance Computing Applications
+     year: 2021
+     volume: 35
+     issue: 4
+     pages: "413-427"
+     doi: 10.1177/10943420211016525
+   - type: article
+     authors:
+        - family-names: Eibl
+          given-names: S.
+        - family-names: Rüde
+          given-names: U.
+     title: "A Modular and Extensible Software Architecture for Particle Dynamics"
+     conference:
+        name: "Proceedings of the 8th International Conference on Discrete Element Methods"
+     year: 2019
+     doi: 10.48550/arXiv.1906.10963
+   - type: article
+     authors:
+        - family-names: Drozdov
+          given-names: G.
+        - family-names: Steinle
+          given-names: T.
+        - family-names: Gommes
+          given-names: C.
+        - family-names: Rüde
+          given-names: U.
+     title: "Densification of single-walled carbon nanotube films: Mesoscopic distinct element method simulations and experimental validation"
+     journal: Journal of Applied Physics
+     year: 2020
+     volume: 128
+     issue: 11
+     pages: "115105"
+     doi: 10.1063/5.0025505
