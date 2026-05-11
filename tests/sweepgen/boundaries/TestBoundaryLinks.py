@@ -18,7 +18,7 @@ import sympy as sp
 import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
-from sweepgen.boundaries import GenericBoundary
+from sweepgen.boundaries import SparseBoundary
 from sweepgen.prefabs import LbmBulk
 from sweepgen import get_build_config
 
@@ -45,10 +45,10 @@ with SourceFileGenerator(keep_unknown_argv=True) as sfg:
 
     lb_method = create_lb_method(lbm_config)
 
-    noSlip = GenericBoundary(NoSlip(name="NoSlip"), lb_method, pdfs)
+    noSlip = SparseBoundary(NoSlip(name="NoSlip"), lb_method, pdfs)
     sfg.generate(noSlip)
 
-    qbb = GenericBoundary(QuadraticBounceBack(omega, name="QBB"), lb_method, pdfs)
+    qbb = SparseBoundary(QuadraticBounceBack(omega, name="QBB"), lb_method, pdfs)
     sfg.generate(qbb)
 
 

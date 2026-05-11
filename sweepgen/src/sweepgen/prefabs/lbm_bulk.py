@@ -99,7 +99,7 @@ class LbmBulk(CustomGenerator):
             )
 
         if lbm_optimisation.symbolic_field is None:
-            self._pdfs = lbm_optimisation.symbolic_field = Field.create_generic(
+            lbm_optimisation.symbolic_field = Field.create_generic(
                 "f",
                 spatial_dimensions=D,
                 index_shape=(Q,),
@@ -107,8 +107,10 @@ class LbmBulk(CustomGenerator):
                 dtype=dtype,
             )
 
+        self._pdfs = lbm_optimisation.symbolic_field
+
         if lbm_optimisation.symbolic_temporary_field is None:
-            self._pdfs_tmp = lbm_optimisation.symbolic_temporary_field = (
+            lbm_optimisation.symbolic_temporary_field = (
                 Field.create_generic(
                     "f_tmp",
                     spatial_dimensions=D,
@@ -117,6 +119,8 @@ class LbmBulk(CustomGenerator):
                     dtype=dtype,
                 )
             )
+
+        self._pdfs_tmp = lbm_optimisation.symbolic_temporary_field
 
         self._rho, self._u = fields(  # type: ignore
             f"rho, u({D}): {dtype}[{D}D]", layout=lbm_optimisation.field_layout

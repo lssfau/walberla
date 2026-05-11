@@ -249,6 +249,7 @@ walberla_generate_sources( <target>
     [DEPENDS dependency1.py [dependency2.py...] ]
     [FILE_EXTENSIONS <header-extension> <impl-extension>]
     [OUTPUT_MODE <standalone|inline|header-only>]
+    [LANGUAGE] <CXX|CUDA|HIP>
     [AUTO_LANGUAGE]
 )
 ```
@@ -257,20 +258,32 @@ This is a wrapper around `pystencilssfg_generate_target_sources`
 without the `CONFIG_MODULE` parameter, and some additional options.
 See also https://pycodegen.pages.i10git.cs.fau.de/pystencils-sfg/usage/project_integration.html#add-generator-scripts
 
-Options:
+Parameters and Options:
+ - LANGUAGE: If set, generated files will be compiled as source files of the given language.
+             Cannot be combined with `AUTO_LANGUAGE`, `FILE_EXTENSIONS` and `HEADER_ONLY`.
  - AUTO_LANGUAGE: If set, auto-select the code generator's output language from the build configuration (C++, CUDA or HIP).
-        When setting AUTO_LANGUAGE, do not specify FILE_EXTENSIONS.
+        When setting AUTO_LANGUAGE, do not specify FILE_EXTENSIONS or `HEADER_ONLY`.
+        Cannot be combined with `AUTO_LANGUAGE`.
 
 #]]
 function(walberla_generate_sources TARGET)
     set( _options AUTO_LANGUAGE )
-    set( _oneValueArgs )
+    set( _oneValueArgs LANGUAGE )
     set( _multiValueArgs )
     cmake_parse_arguments( PARSE_ARGV 1 _args "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" )
 
     set( _extraArgs )
     if( ${_args_AUTO_LANGUAGE} )
+        if( ${_args_LANGUAGE} )
+            message( FATAL_ERROR "Cannot specify both LANGUAGE and AUTO_LANGUAGE." )
+        endif()
         list( APPEND _extraArgs FILE_EXTENSIONS .hpp $CACHE{SWEEPGEN_DEFAULT_EXTENSION} )
+    elseif( _args_LANGUAGE STREQUAL "CXX" )
+        list( APPEND _extraArgs FILE_EXTENSIONS .hpp .cpp )
+    elseif( _args_LANGUAGE STREQUAL "CUDA" )
+        list( APPEND _extraArgs FILE_EXTENSIONS .hpp .cu )
+    elseif( _args_LANGUAGE STREQUAL "HIP" )
+        list( APPEND _extraArgs FILE_EXTENSIONS .hpp .hip )
     endif()
 
     pystencilssfg_generate_target_sources(

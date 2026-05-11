@@ -158,7 +158,38 @@ void forAllCells(const exectag::GPU&, const CellInterval&, Func&&)
 
 #endif
 
-inline void sync() { WALBERLA_GPU_CHECK(gpuDeviceSynchronize()) }
+/**
+ * @brief Invoke `forAllCells` on the default per-block cell interval.
+ */
+template< ExecTag XTag, CellFunction Func >
+void forAllCells(const XTag& exTag, const StructuredBlockForest& blocks, Func&& func)
+{
+   CellInterval ci {
+      Cell { cell_idx_t(0), cell_idx_t(0), cell_idx_t(0)  },
+      Cell {
+         cell_idx_c(blocks.getNumberOfXCellsPerBlock() - 1),
+         cell_idx_c(blocks.getNumberOfYCellsPerBlock() - 1),
+         cell_idx_c(blocks.getNumberOfZCellsPerBlock() - 1),
+      }
+   };
+
+   forAllCells(exTag, ci, std::forward< Func >(func));
+}
+
+/** 
+ * @brief Synchronize with concurrent execution on the default stream
+ *
+ * When running with a GPU programming model, wait for currently active work on the primary
+ * stream or queue is finished.
+ *
+ * @note This function only waits for executions dispatched on a default-constructed `exectag::GPU`.
+ * @note When no GPU back-end is enabled, this function may still safely be called, but will do nothing
+ */
+inline void sync() {
+#if defined(WALBERLA_BUILD_WITH_GPU_SUPPORT)
+   WALBERLA_GPU_CHECK(gpuDeviceSynchronize())
+#endif 
+}
 
 /**
  * @brief Run an operation for every pair of cells in the given intervals
