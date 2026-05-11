@@ -11,7 +11,6 @@
 # You should have received a copy of the GNU General Public License along
 # with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 
-from argparse import ArgumentParser
 from dataclasses import replace
 
 from lbmpy import (
@@ -28,24 +27,19 @@ import sympy as sp
 import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
-from sweepgen import Sweep, get_build_config
-from sweepgen.boundaries import GenericBoundary
+from sweepgen import Sweep
+from sweepgen.boundaries import SparseBoundary
 from sweepgen.symbolic import cell, domain
 from sweepgen.prefabs import LbmBulk
 
 from sweepgen.build_config import DEBUG
 
-DEBUG.use_cpu_default()
+DEBUG.use_cuda_default()
 
 with SourceFileGenerator(keep_unknown_argv=True) as sfg:
     sfg.namespace("ParallelPlates::gen")
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--target", choices=["cpu", "gpu"], default="cpu")
-    args = parser.parse_args(sfg.context.argv)
-
-    build_cfg = get_build_config(sfg)
-    build_cfg.target = ps.Target[args.target.upper()]
-
+    Sweep.use_v8core_fields()
+    
     stencil = LBStencil(Stencil.D3Q19)
     nu, u_max, rho = sp.symbols("nu, u_max, rho")
 
@@ -118,9 +112,9 @@ with SourceFileGenerator(keep_unknown_argv=True) as sfg:
 
     #   Boundary Conditions
 
-    noSlip = GenericBoundary(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    noSlip = SparseBoundary(NoSlip(name="NoSlip"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(noSlip)
 
     wall_velocity = (u_max, 0, 0)
-    ubb = GenericBoundary(UBB(wall_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
+    ubb = SparseBoundary(UBB(wall_velocity, name="UBB"), lbm_bulk.lb_method, lbm_bulk.pdfs)
     sfg.generate(ubb)

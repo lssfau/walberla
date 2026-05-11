@@ -94,11 +94,20 @@ namespace field {
       inline bool           operator==( const FieldIterator& it ) const;
       inline bool           operator!=( const FieldIterator& it ) const;
 
+#if defined(__NVCC__) && defined(__NVCC_DIAG_PRAGMA_SUPPORT__)
+#pragma nv_diagnostic push
+#pragma nv_diag_suppress 554
+#endif
+
       operator const FieldIterator<const T, fieldFSize> & () const {
          const FieldIterator<const T, fieldFSize> * ptr;
          ptr = reinterpret_cast< const FieldIterator<const T, fieldFSize>* > ( this );
          return *ptr;
       }
+
+#if defined(__NVCC__) && defined(__NVCC_DIAG_PRAGMA_SUPPORT__)
+#pragma nv_diagnostic pop
+#endif
 
       //@}
       //****************************************************************************************************************

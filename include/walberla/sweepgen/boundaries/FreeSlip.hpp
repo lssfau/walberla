@@ -40,7 +40,7 @@
 
 namespace walberla::sweepgen
 {
-struct IrregularFreeSlipLinkInfo
+struct FreeSlipLinkInfo
 {
    int32_t x;
    int32_t y;
@@ -50,23 +50,17 @@ struct IrregularFreeSlipLinkInfo
    int32_t source_offset_y;
    int32_t source_offset_z;
    int32_t source_dir;
-   IrregularFreeSlipLinkInfo(walberla::Cell fluidCell, walberla::stencil::Direction linkDir, walberla::Cell sourceCell,
+   FreeSlipLinkInfo(walberla::Cell fluidCell, walberla::stencil::Direction linkDir, walberla::Cell sourceCell,
                              walberla::stencil::Direction sourceDir)
       : x{ fluidCell.x() }, y{ fluidCell.y() }, z{ fluidCell.z() }, dir{ int32_t(linkDir) },
         source_offset_x{ sourceCell.x() - fluidCell.x() }, source_offset_y{ sourceCell.y() - fluidCell.y() },
         source_offset_z{ sourceCell.z() - fluidCell.z() }, source_dir{ int32_t(sourceDir) }
    {}
-
-   bool operator==(const IrregularFreeSlipLinkInfo& other) const
-   {
-      return std::tie(x, y, z, dir, source_offset_x, source_offset_y, source_offset_z, source_dir) ==
-             std::tie(other.x, other.y, other.z, other.dir, other.source_offset_x, other.source_offset_y,
-                      other.source_offset_z, other.source_dir);
-   }
 };
 
 namespace detail
 {
+
 template< typename Stencil, typename FlagField_T, typename IndexList_T >
 class FreeSlipLinksFromFlagField
 {
@@ -111,7 +105,7 @@ class FreeSlipLinksFromFlagField
    }
 
  private:
-   IrregularFreeSlipLinkInfo createLink(FlagField_T* flagField, const Cell& fluidCell, const stencil::Direction dir)
+   FreeSlipLinkInfo createLink(FlagField_T* flagField, const Cell& fluidCell, const stencil::Direction dir)
    {
       const flag_t fluidFlag{ flagField->getFlag(fluidFlagUID_) };
       const Cell wallCell{ fluidCell + dir };
@@ -170,19 +164,19 @@ template< typename Impl >
 struct IrregularFreeSlipFactoryImplTraits
 {
    using Stencil_T   = typename Impl::Stencil;
-   using IdxStruct_T = IrregularFreeSlipLinkInfo;
+   using IdxStruct_T = FreeSlipLinkInfo;
    using IndexListMemTag_T = typename Impl::memtag_t;
-   using IndexList_T = walberla::v8::sweep::SparseIndexList< IrregularFreeSlipLinkInfo, IndexListMemTag_T >;
+   using IndexList_T = walberla::v8::sweep::SparseIndexList< FreeSlipLinkInfo, IndexListMemTag_T >;
 };
 
 template< typename Impl >
-class IrregularFreeSlipFactory
+class FreeSlipFactory
 {
    using ImplTraits = IrregularFreeSlipFactoryImplTraits< Impl >;
 
  public:
-   IrregularFreeSlipFactory(const shared_ptr< StructuredBlockForest > blocks, BlockDataID pdfFieldID)
-      : blocks_{ blocks }, pdfFieldID_{ pdfFieldID }
+   FreeSlipFactory(const shared_ptr< StructuredBlockForest > blocks)
+      : blocks_{ blocks }
    {}
 
    template< typename FlagField_T >
@@ -197,7 +191,6 @@ class IrregularFreeSlipFactory
 
  protected:
    shared_ptr< StructuredBlockForest > blocks_;
-   BlockDataID pdfFieldID_;
 
  private:
    Impl& impl() { return *static_cast< Impl* >(this); }

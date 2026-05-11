@@ -25,5 +25,5 @@ add_dependencies( waLBerlaTestsuite TestBlockforestGeometry )
 waLBerla_execute_test( NAME TestBlockforestGeometry COMMAND TestBlockforestGeometry )
 
 
-add_subdirectory( BasicLbmScenarios )
+add_subdirectory( LbmScenarios )
 add_subdirectory( boundaries )

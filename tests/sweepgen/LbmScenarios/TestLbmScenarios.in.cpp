@@ -13,33 +13,44 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file V8.hpp
-//! \author Frederik Hennig <frederik.hennig@fau.de>
+//! \author Frederik Hennig
 //
 //======================================================================================================================
 
-#pragma once
+#include "core/all.h"
 
-/**
- * @defgroup v8core V8 Core Library [Experimental]
- * @brief The waLBerla v8 core library.
- * 
- * The v8 core library is the new-generation portable framework core for waLBerla.
- * 
- * @warning This module is *under active development* and *highly experimental*.
- *          APIs may change rapidly and without warning.
- *          Use with care.
- * 
- * ## Include
- * 
- * ```
- * #include "walberla/V8.hpp"
- * ```
- */
+#include "walberla/V8.hpp"
+#include "walberla/v8/Testing.hpp"
 
- #include "./v8/Domain.hpp"
-#include "./v8/Memory.hpp"
-#include "./v8/Sweep.hpp"
-#include "./v8/HaloExchange.hpp"
-#include "./v8/StencilRanges.hpp"
-#include "./v8/Device.hpp"
+// Scenarios
+#include "FreeSlipPipe.hpp"
+#include "FullyPeriodic.hpp"
+#include "MirroredHalfChannel.hpp"
+
+using namespace walberla;
+using namespace walberla::v8;
+
+// clang-format off
+#define TEST_LANGUAGE_@_testLanguage@
+// clang-format on
+
+#if defined(TEST_LANGUAGE_CUDA) || defined(TEST_LANGUAGE_HIP)
+using MemoryTag = memtag::unified;
+#else
+using MemoryTag = memtag::host;
+#endif
+
+using namespace lbm_scenarios;
+
+int main(int argc, char** argv)
+{
+   mpi::Environment env{ argc, argv };
+
+   return walberla::v8::testing::TestsRunner( //
+             {
+                { "FullyPeriodic", &FullyPeriodic< MemoryTag >::run },
+                { "MirroredHalfChannel", &MirroredHalfChannel< MemoryTag >::run },
+                { "FreeSlipPipe", &FreeSlipPipe< MemoryTag >::run },
+             })
+      .run(argc, argv);
+}

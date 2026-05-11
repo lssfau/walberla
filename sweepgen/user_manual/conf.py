@@ -51,7 +51,9 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3.8", None),
     "numpy": ("https://docs.scipy.org/doc/numpy/", None),
     "sympy": ("https://docs.sympy.org/latest/", None),
-    "pystencils": ("https://pycodegen.pages.i10git.cs.fau.de/docs/pystencils/2.0dev/", None),
+    "pystencils": ("https://pycodegen.pages.i10git.cs.fau.de/pystencils/", None),
+    "pystencilssfg": ("https://pycodegen.pages.i10git.cs.fau.de/pystencils-sfg/", None),
+    "lbmpy": ("https://pycodegen.pages.i10git.cs.fau.de/lbmpy/", None),
 }
 
 #   Set this variable in the environment to point at the HTTP URL
