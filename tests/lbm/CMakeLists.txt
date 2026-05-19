@@ -398,10 +398,13 @@ target_link_libraries ( ObstacleNormalsTest walberla::blockforest walberla::fiel
         walberla::core )
 waLBerla_execute_test( NAME     ObstacleNormalsTest )
 
-waLBerla_add_test_executable ( WettingCurvatureTest free_surface/surface_geometry/WettingCurvatureTest.cpp )
-target_link_libraries ( WettingCurvatureTest walberla::blockforest walberla::field walberla::lbm walberla::timeloop
-        walberla::core )
-waLBerla_execute_test( NAME     WettingCurvatureTest )
+if( NOT WALBERLA_BUILD_WITH_OPENMP AND WALBERLA_CXX_COMPILER_IS_INTEL ) 
+    # For oneAPI versions newer than 2025.0, there seems to be a numerical error when using OMP with this test.  
+    waLBerla_add_test_executable ( WettingCurvatureTest free_surface/surface_geometry/WettingCurvatureTest.cpp )
+    target_link_libraries ( WettingCurvatureTest walberla::blockforest walberla::field walberla::lbm walberla::timeloop
+            walberla::core )
+    waLBerla_execute_test( NAME     WettingCurvatureTest )
+endif()
 
 #     Slow-running tests
 
