@@ -4,10 +4,12 @@ set( AppName FlowAroundSphereExample )
 
 add_executable( ${AppName} )
 target_sources( ${AppName} PRIVATE ${AppName}.cpp )
+walberla_set_gpu_language(${AppName}.cpp)
 
 walberla_generate_sources(
     ${AppName}
     SCRIPTS ${AppName}.py
+    AUTO_LANGUAGE
 )
 
 target_link_libraries(

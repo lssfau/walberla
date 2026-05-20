@@ -30,6 +30,8 @@
 #include "field/communication/StencilRestrictedPackInfo.h"
 #include "domain_decomposition/SharedSweep.h"
 
+#include "walberla/v8/HaloExchange.hpp"
+#include "walberla/v8/Memory.hpp"
 #include "walberla/v8/Sweep.hpp"
 
 #include "gen/FlowAroundSphereExample.hpp"
@@ -37,12 +39,15 @@
 namespace FlowAroundSphere
 {
     using namespace walberla;
+    using namespace walberla::v8;
 
-    using ScalarField_T = field::GhostLayerField<real_t, 1>;
-    using VectorField_T = field::GhostLayerField<real_t, 3>;
+    using MemoryTag = memtag::automatic;
+
+    using ScalarField_T = memory::Field<real_t, 1, MemoryTag>;
+    using VectorField_T = memory::Field<real_t, 3, MemoryTag>;
 
     using LbStencil = stencil::D3Q19;
-    using PdfField_T = field::GhostLayerField<real_t, LbStencil::Q>;
+    using PdfField_T = memory::Field<real_t, LbStencil::Q, MemoryTag>;
 
 
     FlowAroundSphereExample::gen::QBBData sqSignedDistanceToSphere(geometry::Sphere sphere, Vector3<real_t> point) {
@@ -60,9 +65,9 @@ namespace FlowAroundSphere
         auto dx = blocks->dx();
         auto domainAABB = blocks->getDomain();
         WALBERLA_LOG_INFO_ON_ROOT("dx " << dx << " domain " << domainAABB)
-        BlockDataID pdfsId = field::addToStorage<PdfField_T>(blocks, "pdfs", real_c(0.0), field::fzyx, 1);
-        BlockDataID rhoId = field::addToStorage<ScalarField_T>(blocks, "rho", real_c(1.0), field::fzyx, 0);
-        BlockDataID uId = field::addToStorage<VectorField_T>(blocks, "u", real_c(0.0), field::fzyx, 0);
+        PdfField_T pdfs{ *blocks };
+        ScalarField_T rho{ *blocks };
+        VectorField_T u{ *blocks };
         
         Config::BlockHandle simParams = config->getBlock("Parameters");
         const real_t reynoldsNumber{ simParams.getParameter< real_t >("re") };
@@ -72,8 +77,8 @@ namespace FlowAroundSphere
         real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
 
         // Initialize macroscopic fields and PDF field
-        FlowAroundSphereExample::gen::IntializeMacroFields initFields{rhoId, uId, vel_inflow};
-        FlowAroundSphereExample::gen::LBM::InitPdfs lbInit{pdfsId, rhoId, uId};
+        FlowAroundSphereExample::gen::IntializeMacroFields initFields{rho, u, vel_inflow};
+        FlowAroundSphereExample::gen::LBM::InitPdfs lbInit{pdfs, rho, u};
 
         for (auto &b : *blocks)
         {
@@ -82,11 +87,11 @@ namespace FlowAroundSphere
         }
 
         //  Set up LB stream/collide sweep
-        auto streamCollide = std::make_shared< FlowAroundSphereExample::gen::LBM::StreamCollide >(pdfsId, rhoId, uId, omega);
+        auto streamCollide = std::make_shared< FlowAroundSphereExample::gen::LBM::StreamCollide >(pdfs, rho, u, omega);
 
         //  Set up ghost layer communication
-        blockforest::communication::UniformBufferedScheme<LbStencil> comm{blocks};
-        comm.addPackInfo(std::make_shared<field::communication::StencilRestrictedPackInfo<PdfField_T, LbStencil>>(pdfsId));
+        auto haloExchange = HaloExchange::create< LbStencil, MemoryTag >(blocks)
+                               .sync(halo_exchange::streamPullSync< LbStencil >(pdfs)).makeShared();
 
         //  Set up boundary conditions
         geometry::Sphere sphere(Vector3<real_t> (domainAABB.xSize()*0.35,domainAABB.ySize()*0.5,domainAABB.zSize()*0.5), refLen*0.5);
@@ -119,16 +124,16 @@ namespace FlowAroundSphere
         };
 
 
-        auto qbb = FlowAroundSphereExample::gen::QBBFactory{ blocks, pdfsId, omega }.fromLinks(sphereLinks);
-        auto noSlip = FlowAroundSphereExample::gen::NoSlipFactory{ blocks, pdfsId }.fromLinks(sideWallLinks);
-        auto inflow = FlowAroundSphereExample::gen::UBBFactory{ blocks, pdfsId, vel_inflow }.fromLinks(inflowLinks);
-        auto outflow = FlowAroundSphereExample::gen::OutflowFactory{ blocks, pdfsId }.fromLinks(outflowLinks);
+        auto qbb = FlowAroundSphereExample::gen::QBBFactory{ blocks, pdfs, omega }.fromLinks(sphereLinks);
+        auto noSlip = FlowAroundSphereExample::gen::NoSlipFactory{ blocks, pdfs }.fromLinks(sideWallLinks);
+        auto inflow = FlowAroundSphereExample::gen::UBBFactory{ blocks, pdfs, vel_inflow }.fromLinks(inflowLinks);
+        auto outflow = FlowAroundSphereExample::gen::OutflowFactory{ blocks, pdfs }.fromLinks(outflowLinks);
         
         //  Timeloop
         const uint_t numTimesteps{simParams.getParameter<uint_t>("timesteps")};
         SweepTimeloop loop{blocks->getBlockStorage(), numTimesteps};
 
-        loop.add() << Sweep(makeSharedSweep(streamCollide)) << AfterFunction(comm);
+        loop.add() << Sweep(makeSharedSweep(streamCollide)) << AfterFunction(SharedFunctor(haloExchange));
         loop.add() << Sweep(noSlip);
         loop.add() << Sweep(inflow);
         loop.add() << Sweep(outflow);
@@ -147,10 +152,10 @@ namespace FlowAroundSphere
             auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                             "simulation_step", false, true, true, false, 0);
 
-            auto densityWriter = make_shared<field::VTKWriter<ScalarField_T, float32>>(rhoId, "density");
+            auto densityWriter = make_shared<memory::FieldVtkWriter<ScalarField_T, float32>>(rho, "density");
             vtkOutput->addCellDataWriter(densityWriter);
 
-            auto velWriter = make_shared<field::VTKWriter<VectorField_T, float32>>(uId, "velocity");
+            auto velWriter = make_shared<memory::FieldVtkWriter<VectorField_T, float32>>(u, "velocity");
             vtkOutput->addCellDataWriter(velWriter);
 
             loop.addFuncAfterTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
