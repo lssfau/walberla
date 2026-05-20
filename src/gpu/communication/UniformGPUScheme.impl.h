@@ -29,31 +29,14 @@ namespace communication {
    UniformGPUScheme<Stencil>::UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
                                                 const bool sendDirectlyFromGPU,
                                                 const bool useLocalCommunication,
-                                                const int tag )
-        : blockForest_( bf ),
-          setupBeforeNextCommunication_( true ),
-          communicationInProgress_( false ),
-          sendFromGPU_( sendDirectlyFromGPU ),
-          useLocalCommunication_(useLocalCommunication),
-          bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
-          bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
-          requiredBlockSelectors_( Set<SUID>::emptySet() ),
-          incompatibleBlockSelectors_( Set<SUID>::emptySet() )
-   {
-      WALBERLA_MPI_SECTION()
-      {
-// Open MPI supports compile time CUDA-aware support check
-#if (defined(OPEN_MPI) && OPEN_MPI) && !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
-         WALBERLA_CHECK(!sendDirectlyFromGPU)
-#endif
-      }
-      if(sendFromGPU_){WALBERLA_LOG_DETAIL_ON_ROOT("Using GPU-Direct Communication in UniformGPUScheme")}
-      else{WALBERLA_LOG_DETAIL_ON_ROOT("Using Communication via CPU Memory")}
-
-      for (uint_t i = 0; i < Stencil::Q; ++i){
-         streams_[i] = StreamRAII::newStream();
-      }
-   }
+                                                std::optional<int> tag )
+        : UniformGPUScheme( bf,
+                       Set<SUID>::emptySet(),
+                       Set<SUID>::emptySet(),
+                       sendDirectlyFromGPU,
+                       useLocalCommunication,
+                       tag )
+   {}
 
    template<typename Stencil>
    UniformGPUScheme<Stencil>::UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
@@ -61,20 +44,21 @@ namespace communication {
                                                 const Set<SUID> & incompatibleBlockSelectors,
                                                 const bool sendDirectlyFromGPU,
                                                 const bool useLocalCommunication,
-                                                const int tag )
+                                                std::optional<int> tag )
       : blockForest_( bf ),
         setupBeforeNextCommunication_( true ),
         communicationInProgress_( false ),
         sendFromGPU_( sendDirectlyFromGPU ),
         useLocalCommunication_(useLocalCommunication),
-        bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
-        bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
+        bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag.value_or(5432) ),
+        bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag.value_or(5432) ),
         requiredBlockSelectors_( requiredBlockSelectors ),
         incompatibleBlockSelectors_( incompatibleBlockSelectors )
    {
       WALBERLA_MPI_SECTION()
       {
-#if !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
+// Open MPI supports compile time CUDA-aware support check
+#if (defined(OPEN_MPI) && OPEN_MPI) && !(defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT)
          WALBERLA_CHECK(!sendDirectlyFromGPU)
 #endif
       }

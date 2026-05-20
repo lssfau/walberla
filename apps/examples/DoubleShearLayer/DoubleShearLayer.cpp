@@ -115,6 +115,7 @@ void run(int argc, char** argv)
    //! [begin halo exchange]
    //  Set up ghost layer communication
    auto haloExchange = HaloExchange::create< LbStencil, MemoryTag >(blocks)
+                          .sendDirectlyFromGPU(true)
                           .sync(halo_exchange::streamPullSync< LbStencil >(pdfs))
                           .sync(u)
                           .makeShared();
