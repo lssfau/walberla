@@ -21,6 +21,7 @@
 #pragma once
 
 #include "./AbstractCommScheme.hpp"
+#include "./CommSchemeOptions.hpp"
 #include "./LegacyCpuScheme.hpp"
 #include "./LegacyGpuScheme.hpp"
 #include "walberla/v8/memory/MemoryTags.hpp"
@@ -46,7 +47,8 @@ struct CommSchemeTraits
    static std::shared_ptr< PackInfoWrapper > wrapPackInfo(TPackInfo);
 
    static std::unique_ptr< AbstractCommScheme > createCommScheme(const std::shared_ptr< StructuredBlockForest >&,
-                                                                 std::vector< std::shared_ptr< PackInfoWrapper > >);
+                                                                 std::vector< std::shared_ptr< PackInfoWrapper > >,
+                                                                 const CommSchemeOptions&);
 };
 
 template< typename TCommStencil >

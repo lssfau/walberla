@@ -74,6 +74,7 @@ namespace communication {
 *
 * When running multiple Schemes concurrently different MPI tags have to be used
 * for the schemes: the tag can be passed in the constructor.
+* Default MPI tag: "waLBerla" = 119+97+76+66+101+114+108+97 = 778
 */
 //*******************************************************************************************************************
 template< typename Stencil_T >
@@ -96,27 +97,20 @@ public:
    //@{
 
    explicit UniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
-                                   const int tag = 778 ) // waLBerla = 119+97+76+66+101+114+108+97
-      : blockForest_( bf ),
-        localMode_( START ),
-        bufferSystem_( mpi::MPIManager::instance()->comm(), tag ),
-        setupBeforeNextCommunication_( true ),
-        communicationInProgress_( false ),
-        requiredBlockSelectors_( Set<SUID>::emptySet() ),
-        incompatibleBlockSelectors_( Set<SUID>::emptySet() )
-   {
-      auto forest = blockForest_.lock();
-      WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" );
-      forestModificationStamp_ = forest->getBlockForest().getModificationStamp();
-   }
+                                   std::optional<int> tag = std::nullopt) 
+      : UniformBufferedScheme( bf,
+                            Set<SUID>::emptySet(),
+                            Set<SUID>::emptySet(),
+                            tag )
+   {}
 
    UniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
                           const Set<SUID> & requiredBlockSelectors,
                           const Set<SUID> & incompatibleBlockSelectors,
-                          const int tag = 778 ) // waLBerla = 119+97+76+66+101+114+108+97
+                          std::optional<int> tag = std::nullopt )
       : blockForest_( bf ),
         localMode_( START ),
-        bufferSystem_( mpi::MPIManager::instance()->comm(), tag ),
+        bufferSystem_( mpi::MPIManager::instance()->comm(), tag.value_or(778) ),
         setupBeforeNextCommunication_( true ),
         communicationInProgress_( false ),
         requiredBlockSelectors_( requiredBlockSelectors ),
