@@ -25,3 +25,18 @@ if( $CACHE{WALBERLA_BUILD_WITH_GPU_SUPPORT} )
         PROCESSES 1 2 4
     )
 endif()
+
+waLBerla_add_test_executable( TestCommunicationHiding TestCommunicationHiding.cpp )
+walberla_set_gpu_language( TestCommunicationHiding.cpp )
+walberla_generate_sources(
+        TestCommunicationHiding
+        SCRIPTS TestCommunicationHiding.py
+        AUTO_LANGUAGE
+)
+target_link_libraries( TestCommunicationHiding PRIVATE walberla::v8 )
+walberla_v8_add_tests(
+        TestCommunicationHiding
+        IDS
+        testCommunicationHiding
+        PROCESSES 1 2 4
+)
