@@ -1,32 +1,29 @@
-
 # Benchmarks
-if ( WALBERLA_BUILD_BENCHMARKS )
-    add_subdirectory ( benchmarks )
+if(WALBERLA_BUILD_BENCHMARKS)
+    add_subdirectory (benchmarks)
 endif()
-
 
 # Tools
-if ( WALBERLA_BUILD_TOOLS )
-    add_subdirectory ( tools )
+if(WALBERLA_BUILD_TOOLS)
+    add_subdirectory (tools)
 endif()
 
-
 # Tutorials
-if ( WALBERLA_BUILD_TUTORIALS )
-    add_subdirectory ( tutorials )
+if(WALBERLA_BUILD_TUTORIALS)
+    add_subdirectory (tutorials)
 endif()
 
 # Examples
-if ( WALBERLA_BUILD_EXAMPLES )
-    add_subdirectory (examples )
+if(WALBERLA_BUILD_EXAMPLES)
+    add_subdirectory (examples)
 endif()
 
 # Showcases
-if ( WALBERLA_BUILD_SHOWCASES )
-    add_subdirectory ( showcases )
+if(WALBERLA_BUILD_SHOWCASES)
+    add_subdirectory (showcases)
 endif()
 
 # Python module
-if ( WALBERLA_BUILD_WITH_PYTHON )
-    add_subdirectory( pythonmodule )
+if(WALBERLA_BUILD_WITH_PYTHON)
+    add_subdirectory (pythonmodule)
 endif()

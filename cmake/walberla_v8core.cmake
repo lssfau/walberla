@@ -19,58 +19,49 @@
 Targets and Build Settings for the waLBerla v8 Core Library
 ===========================================================
 
-]]#
+]]
+#
 
-add_library( walberla_v8 INTERFACE )
-add_library( walberla::v8 ALIAS walberla_v8 )
+add_library (walberla_v8 INTERFACE)
+add_library (walberla::v8 ALIAS walberla_v8)
 
-target_include_directories(
+target_include_directories (
     walberla_v8
-    INTERFACE
-    ${walberla_SOURCE_DIR}/include
+    INTERFACE ${walberla_SOURCE_DIR}/include
 )
 
-target_link_libraries(
+target_link_libraries (
     walberla_v8
-    INTERFACE
-    walberla_core
-    walberla_stencil
-    walberla_blockforest
-    walberla_field
+    INTERFACE walberla_core walberla_stencil walberla_blockforest walberla_field
 )
 
-if( WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP )
-    target_link_libraries( walberla_v8 INTERFACE walberla_gpu )
+if(WALBERLA_BUILD_WITH_CUDA OR WALBERLA_BUILD_WITH_HIP)
+    target_link_libraries (walberla_v8 INTERFACE walberla_gpu)
 endif()
 
-if( WALBERLA_BUILD_WITH_CUDA )
+if(WALBERLA_BUILD_WITH_CUDA)
 
     #   Enable relaxed constexpr for consuming CUDA TUs
-    target_compile_options(
-        walberla_v8
-        INTERFACE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
+    target_compile_options (walberla_v8 INTERFACE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 
-elseif( WALBERLA_BUILD_WITH_HIP )
-    
+elseif(WALBERLA_BUILD_WITH_HIP)
+
     #   Fetch and link core against HIP C++ standard libraries
-    FetchContent_Declare(
+    FetchContent_Declare (
         libhipcxx
         GIT_REPOSITORY https://github.com/ROCm/libhipcxx.git
         GIT_TAG release/2.7.x
     )
 
-    FetchContent_MakeAvailable( libhipcxx ) 
+    FetchContent_MakeAvailable (libhipcxx)
 
-    target_link_libraries( walberla_core PUBLIC libhipcxx::libhipcxx )
+    target_link_libraries (walberla_core PUBLIC libhipcxx::libhipcxx)
 
     #   Suppress custom `#warning` messages in hip/std runtime headers which would otherwise cause compilation to fail
     #   See https://clang.llvm.org/docs/WarningSuppressionMappings.html
-    target_compile_options(
+    target_compile_options (
         walberla_v8
-        INTERFACE
-        $<$<COMPILE_LANGUAGE:HIP>:--warning-suppression-mappings=${walberla_SOURCE_DIR}/cmake/hip-warning-suppression.txt>
+        INTERFACE $<$<COMPILE_LANGUAGE:HIP>:--warning-suppression-mappings=${walberla_SOURCE_DIR}/cmake/hip-warning-suppression.txt>
     )
 
 endif()
@@ -83,17 +74,9 @@ endif()
 #######################################################################################################################
 
 function(walberla_set_gpu_language FILES)
-    if( $CACHE{WALBERLA_BUILD_WITH_CUDA} )
-        set_source_files_properties(
-            ${FILES}
-            PROPERTIES 
-            LANGUAGE CUDA
-        )
-    elseif( $CACHE{WALBERLA_BUILD_WITH_HIP} )
-        set_source_files_properties(
-            ${FILES}
-            PROPERTIES
-            LANGUAGE HIP
-        )
+    if($CACHE{WALBERLA_BUILD_WITH_CUDA})
+        set_source_files_properties (${FILES} PROPERTIES LANGUAGE CUDA)
+    elseif($CACHE{WALBERLA_BUILD_WITH_HIP})
+        set_source_files_properties (${FILES} PROPERTIES LANGUAGE HIP)
     endif()
 endfunction()

@@ -190,10 +190,12 @@ schema-validation:
   tags:
     - docker
   before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
     - pip install --upgrade pip
-    - pip install jsonschema pyyaml
+    - pip install -r utilities/developer-tools/requirements.txt
   script:
-    - python utilities/schema-validation/validate-files.py
+    - python utilities/developer-tools/schema-validation/validate-files.py
 
 ####################################################################################################
 #       Test Matrix
@@ -203,6 +205,9 @@ generate-test-matrix:
   stage: Test Matrix
   image: "python:3.13"
   before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
     - pip install pyyaml
   script:
     - cd utilities/workflows
