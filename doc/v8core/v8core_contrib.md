@@ -55,7 +55,7 @@ Each module has a primary header file `walberla/v8/ModuleX.hpp` that `#include`s
 the module's public APIs.
 The primary header files are in turn included the bulk-header `walberla/V8.hpp`.
 
-### Documentation
+### Documentation {#v8core-contrib-documentation}
 
 Public APIs must be sufficiently documented.
 We use [Doxygen documentation comments](https://www.doxygen.nl/manual/docblocks.html) in Javadoc-style

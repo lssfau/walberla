@@ -3,7 +3,7 @@ import yaml
 from jsonschema import validate, ValidationError
 
 # Additional schema checks can be added here as file, schema tuples
-validate_files = [("CITATION.cff", "utilities/schema-validation/.cffschema")]
+validate_files = [("CITATION.cff", "utilities/developer-tools/schema-validation/.cffschema")]
 
 success = True
 

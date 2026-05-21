@@ -1,11 +1,9 @@
-include(waLBerlaHelperFunctions)
+include (waLBerlaHelperFunctions)
 
-
-set(WALBERLA_GLOB_FILES *.cpp
-        *.c
-        *.h
-        *.cu
-        CACHE INTERNAL "File endings to glob for source files")
+set (WALBERLA_GLOB_FILES
+     *.cpp *.c *.h *.cu
+     CACHE INTERNAL "File endings to glob for source files"
+)
 
 #######################################################################################################################
 
@@ -15,15 +13,14 @@ set(WALBERLA_GLOB_FILES *.cpp
 #
 #######################################################################################################################
 
-add_custom_target(waLBerlaTestsuite)
+add_custom_target (waLBerlaTestsuite)
 
 function(waLBerla_add_test_executable)
-    add_executable(${ARGV})
-    add_dependencies(waLBerlaTestsuite ${ARGV0})
+    add_executable (${ARGV})
+    add_dependencies (waLBerlaTestsuite ${ARGV0})
 endfunction()
 
 #######################################################################################################################
-
 
 #######################################################################################################################
 #
@@ -43,25 +40,27 @@ endfunction()
 function(waLBerla_link_files_to_builddir globExpression)
 
     # don't need links for in-source builds
-    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-        return()
-    endif ()
+    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+        return ()
+    endif()
 
-    file(GLOB filesToLink RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${globExpression})
+    file (GLOB filesToLink
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+          ${globExpression}
+    )
 
-    foreach (f ${filesToLink})
-        if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-            configure_file(${f} ${f} COPYONLY)
-        else ()
-            execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-                    ${CMAKE_CURRENT_SOURCE_DIR}/${f}
-                    ${CMAKE_CURRENT_BINARY_DIR}/${f})
-        endif ()
+    foreach(f ${filesToLink})
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+            configure_file (${f} ${f} COPYONLY)
+        else()
+            execute_process (COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/${f}
+                                     ${CMAKE_CURRENT_BINARY_DIR}/${f}
+            )
+        endif()
 
-    endforeach ()
+    endforeach()
 
 endfunction(waLBerla_link_files_to_builddir)
-
 
 #######################################################################################################################
 #
@@ -79,27 +78,24 @@ endfunction(waLBerla_link_files_to_builddir)
 
 function(waLBerla_link_geometry_to_builddir globExpression)
 
-    set(GEOMETRY_DIR ${walberla_SOURCE_DIR}/geometry)
+    set (GEOMETRY_DIR ${walberla_SOURCE_DIR}/geometry)
 
-    file(GLOB filesToLink "${GEOMETRY_DIR}/${globExpression}")
+    file (GLOB filesToLink "${GEOMETRY_DIR}/${globExpression}")
 
     # Create symlink link to the build directory (directly in ${CMAKE_CURRENT_BINARY_DIR})
-    foreach (f ${filesToLink})
-        get_filename_component(OBJ_FILENAME ${f} NAME)
+    foreach(f ${filesToLink})
+        get_filename_component (OBJ_FILENAME ${f} NAME)
 
-        set(OBJ_BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}/${OBJ_FILENAME}")
+        set (OBJ_BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}/${OBJ_FILENAME}")
 
-        if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-            configure_file(${f} ${OBJ_BUILD_PATH} COPYONLY)
-        else ()
-            execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-                    ${f} ${OBJ_BUILD_PATH}
-            )
-        endif ()
-    endforeach ()
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+            configure_file (${f} ${OBJ_BUILD_PATH} COPYONLY)
+        else()
+            execute_process (COMMAND ${CMAKE_COMMAND} -E create_symlink ${f} ${OBJ_BUILD_PATH})
+        endif()
+    endforeach()
 
 endfunction(waLBerla_link_geometry_to_builddir)
-
 
 #######################################################################################################################
 #
@@ -114,24 +110,26 @@ endfunction(waLBerla_link_geometry_to_builddir)
 #######################################################################################################################
 
 function(waLBerla_current_module_name)
-    foreach (moduleDir ${ARGN} ${WALBERLA_MODULE_DIRS})
-        file(RELATIVE_PATH moduleFolder ${moduleDir} ${CMAKE_CURRENT_SOURCE_DIR})
-        if (NOT ${moduleFolder} MATCHES "\\.\\./.*")
+    foreach(moduleDir ${ARGN} ${WALBERLA_MODULE_DIRS})
+        file (RELATIVE_PATH moduleFolder ${moduleDir} ${CMAKE_CURRENT_SOURCE_DIR})
+        if(NOT ${moduleFolder} MATCHES "\\.\\./.*")
             #append / to make cmake_path also work with one directory only
-            string(REGEX REPLACE "(.*)/.*" "\\1" moduleNameOut ${moduleFolder})
-            set(moduleName walberla::${moduleNameOut} PARENT_SCOPE)
-            return()
-        endif ()
-    endforeach ()
+            string (REGEX REPLACE "(.*)/.*" "\\1" moduleNameOut ${moduleFolder})
+            set (moduleName
+                 walberla::${moduleNameOut}
+                 PARENT_SCOPE
+            )
+            return ()
+        endif()
+    endforeach()
 
-    message(WARNING "Called get_current_module_name, in a directory "
-            "that is not a subdirectory of WALBERLA_MODULE_DIRS\n"
-            "Module Dirs: ${WALBERLA_MODULE_DIRS} \n"
-            "Current Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-
+    message (WARNING "Called get_current_module_name, in a directory "
+                     "that is not a subdirectory of WALBERLA_MODULE_DIRS\n"
+                     "Module Dirs: ${WALBERLA_MODULE_DIRS} \n"
+                     "Current Dir: ${CMAKE_CURRENT_SOURCE_DIR}"
+    )
 
 endfunction(waLBerla_current_module_name)
-
 
 #######################################################################################################################
 #
@@ -153,62 +151,78 @@ endfunction(waLBerla_current_module_name)
 
 function(waLBerla_execute_test)
 
-    set(options NO_MODULE_LABEL)
-    set(oneValueArgs NAME PROCESSES)
-    set(multiValueArgs COMMAND LABELS CONFIGURATIONS DEPENDS_ON_TARGETS)
-    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    set (options NO_MODULE_LABEL)
+    set (oneValueArgs NAME PROCESSES)
+    set (multiValueArgs COMMAND LABELS CONFIGURATIONS DEPENDS_ON_TARGETS)
+    cmake_parse_arguments (
+        ARG
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
 
-    if (NOT ARG_NAME)
-        message(FATAL_ERROR "waLBerla_execute_test called without a NAME")
-    endif ()
+    if(NOT ARG_NAME)
+        message (FATAL_ERROR "waLBerla_execute_test called without a NAME")
+    endif()
 
-    if (NOT ARG_COMMAND AND NOT TARGET ${ARG_NAME})
-        if (WALBERLA_LOG_SKIPPED)
-            message(STATUS "Skipping test ${ARG_NAME} since the corresponding target is not built")
-        endif ()
-        return()
-    endif ()
+    if(NOT ARG_COMMAND AND NOT TARGET ${ARG_NAME})
+        if(WALBERLA_LOG_SKIPPED)
+            message (STATUS "Skipping test ${ARG_NAME} since the corresponding target is not built")
+        endif()
+        return ()
+    endif()
 
-    foreach (dependency_target ${ARG_DEPENDS_ON_TARGETS})
-        if (NOT TARGET ${dependency_target})
-            if (WALBERLA_LOG_SKIPPED)
-                message(STATUS "Skipping test ${ARG_NAME} since the target ${dependency_target} is not built")
-            endif ()
-            return()
-        endif ()
-    endforeach (dependency_target)
+    foreach(dependency_target ${ARG_DEPENDS_ON_TARGETS})
+        if(NOT TARGET ${dependency_target})
+            if(WALBERLA_LOG_SKIPPED)
+                message (STATUS "Skipping test ${ARG_NAME} since the target ${dependency_target} is not built")
+            endif()
+            return ()
+        endif()
+    endforeach(dependency_target)
 
-    if (NOT ARG_PROCESSES)
-        set(numProcesses 1)
-    else ()
-        set(numProcesses ${ARG_PROCESSES})
-    endif ()
+    if(NOT ARG_PROCESSES)
+        set (numProcesses 1)
+    else()
+        set (numProcesses ${ARG_PROCESSES})
+    endif()
 
-    if (NOT ARG_COMMAND)
-        set(ARG_COMMAND $<TARGET_FILE:${ARG_NAME}>)
-    endif ()
+    if(NOT ARG_COMMAND)
+        set (ARG_COMMAND $<TARGET_FILE:${ARG_NAME}>)
+    endif()
 
-    if (WALBERLA_BUILD_WITH_MPI)
-        list(INSERT ARG_COMMAND 0 ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${numProcesses} ${MPIEXEC_PREFLAGS} ${WALBERLA_MPIEXEC_PREFLAGS})
-    elseif (numProcesses GREATER 1)
-        return()
-    endif ()
+    if(WALBERLA_BUILD_WITH_MPI)
+        list (INSERT
+              ARG_COMMAND
+              0
+              ${MPIEXEC_EXECUTABLE}
+              ${MPIEXEC_NUMPROC_FLAG}
+              ${numProcesses}
+              ${MPIEXEC_PREFLAGS}
+              ${WALBERLA_MPIEXEC_PREFLAGS}
+        )
+    elseif(numProcesses GREATER 1)
+        return ()
+    endif()
 
-    if (ARG_CONFIGURATIONS)
-        add_test(NAME ${ARG_NAME} ${ARG_UNPARSED_ARGUMENTS} COMMAND ${ARG_COMMAND} CONFIGURATIONS ${ARG_CONFIGURATIONS})
-    else ()
-        add_test(NAME ${ARG_NAME} ${ARG_UNPARSED_ARGUMENTS} COMMAND ${ARG_COMMAND})
-    endif ()
+    if(ARG_CONFIGURATIONS)
+        add_test (NAME ${ARG_NAME} ${ARG_UNPARSED_ARGUMENTS}
+                  COMMAND ${ARG_COMMAND}
+                  CONFIGURATIONS ${ARG_CONFIGURATIONS}
+        )
+    else()
+        add_test (NAME ${ARG_NAME} ${ARG_UNPARSED_ARGUMENTS} COMMAND ${ARG_COMMAND})
+    endif()
 
-    if (ARG_NO_MODULE_LABEL)
-        set_tests_properties(${ARG_NAME} PROPERTIES LABELS "${ARG_LABELS}")
-    else ()
-        waLBerla_current_module_name ( )
-        set_tests_properties(${ARG_NAME} PROPERTIES LABELS "${moduleName} ${ARG_LABELS}")
-    endif ()
+    if(ARG_NO_MODULE_LABEL)
+        set_tests_properties (${ARG_NAME} PROPERTIES LABELS "${ARG_LABELS}")
+    else()
+        walberla_current_module_name ()
+        set_tests_properties (${ARG_NAME} PROPERTIES LABELS "${moduleName} ${ARG_LABELS}")
+    endif()
 
-    set_tests_properties(${ARG_NAME} PROPERTIES PROCESSORS ${numProcesses})
+    set_tests_properties (${ARG_NAME} PROPERTIES PROCESSORS ${numProcesses})
 
 endfunction(waLBerla_execute_test)
 #######################################################################################################################
-

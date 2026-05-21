@@ -1,4 +1,3 @@
-
 #######################################################################################################################
 #
 # Function to add a flag to the given flag string
@@ -8,11 +7,14 @@
 # param ARGV0: optional boolean value if the flag should be added
 #
 #######################################################################################################################
-function ( add_flag  _VAR  _FLAG )
-   if ( ARGC EQUAL 0 OR ARGV0 )
-      set ( ${_VAR} "${${_VAR}} ${_FLAG}" PARENT_SCOPE )
-   endif ( )
-endfunction ( add_flag )
+function(add_flag _VAR _FLAG)
+    if(ARGC EQUAL 0 OR ARGV0)
+        set (${_VAR}
+             "${${_VAR}} ${_FLAG}"
+             PARENT_SCOPE
+        )
+    endif()
+endfunction(add_flag)
 #######################################################################################################################
 
 #######################################################################################################################
@@ -36,67 +38,77 @@ endfunction ( add_flag )
 # The python script, when called with -l, should return a semicolon-separated list of generated files
 # if this list changes, CMake has to be run manually again.
 #######################################################################################################################
-function( waLBerla_generate_target_from_python )
-    set( options )
-    set( oneValueArgs NAME FILE CODEGEN_CFG)
-    set( multiValueArgs OUT_FILES)
-    cmake_parse_arguments( PYGEN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-    if( NOT WALBERLA_BUILD_WITH_CODEGEN )
-        if( WALBERLA_LOG_SKIPPED )
-            message(STATUS "Skipping ${PYGEN_NAME} since pystencils code generation is not enabled")
+function(waLBerla_generate_target_from_python)
+    set (options)
+    set (oneValueArgs NAME FILE CODEGEN_CFG)
+    set (multiValueArgs OUT_FILES)
+    cmake_parse_arguments (
+        PYGEN
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
+    if(NOT WALBERLA_BUILD_WITH_CODEGEN)
+        if(WALBERLA_LOG_SKIPPED)
+            message (STATUS "Skipping ${PYGEN_NAME} since pystencils code generation is not enabled")
         endif()
-        return()
+        return ()
     endif()
 
     #set(sourcefile ${PYGEN_FILE})
-    get_filename_component(sourceFile ${PYGEN_FILE} ABSOLUTE )
-    if (PYGEN_CODEGEN_CFG)
-        set( codegenCfg ${PYGEN_CODEGEN_CFG})
+    get_filename_component (sourceFile ${PYGEN_FILE} ABSOLUTE)
+    if(PYGEN_CODEGEN_CFG)
+        set (codegenCfg ${PYGEN_CODEGEN_CFG})
     else()
-        set( codegenCfg "default_codegen")
+        set (codegenCfg "default_codegen")
     endif()
-    set( generatedSourceFiles ${PYGEN_OUT_FILES} )
-    set( generatedWithAbsolutePath )
-    foreach( filename ${generatedSourceFiles} )
-        list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}/${filename})
+    set (generatedSourceFiles ${PYGEN_OUT_FILES})
+    set (generatedWithAbsolutePath)
+    foreach(filename ${generatedSourceFiles})
+        list (APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}/${filename})
     endforeach()
 
-    set(cmakeVars "\\\{  "
-            "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
-            "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
-            "\"CODEGEN_CFG\": \"${codegenCfg}\","
-            "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
-            "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
-            "\"WALBERLA_BUILD_WITH_HIP\": \"${WALBERLA_BUILD_WITH_HIP}\","
-            "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\}"
-            )
-    string(REPLACE "\"" "\\\"" cmakeVars ${cmakeVars})   # even one more quoting level required
-    string(REPLACE "\n" "" cmakeVars ${cmakeVars})  # remove newline characters
+    set (cmakeVars
+         "\\\{  "
+         "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
+         "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
+         "\"CODEGEN_CFG\": \"${codegenCfg}\","
+         "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
+         "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
+         "\"WALBERLA_BUILD_WITH_HIP\": \"${WALBERLA_BUILD_WITH_HIP}\","
+         "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\}"
+    )
+    string (REPLACE "\"" "\\\"" cmakeVars ${cmakeVars}) # even one more quoting level required
+    string (REPLACE "\n" "" cmakeVars ${cmakeVars}) # remove newline characters
 
-    set( WALBERLA_PYTHON_DIR ${walberla_SOURCE_DIR}/python)
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
+    set (WALBERLA_PYTHON_DIR ${walberla_SOURCE_DIR}/python)
+    file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
 
-    add_custom_command(OUTPUT ${generatedWithAbsolutePath}
-          DEPENDS ${sourceFile}
-          COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${Python_EXECUTABLE} ${sourceFile} -f ${generatedWithAbsolutePath} -c ${cmakeVars}
-          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
+    add_custom_command (
+        OUTPUT ${generatedWithAbsolutePath}
+        DEPENDS ${sourceFile}
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${Python_EXECUTABLE}
+                ${sourceFile} -f ${generatedWithAbsolutePath} -c ${cmakeVars}
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}"
+    )
 
-    add_library(${PYGEN_NAME} ${generatedWithAbsolutePath})
+    add_library (${PYGEN_NAME} ${generatedWithAbsolutePath})
     # cmake might not be able to determine linker language since file extension is "hidden" in variable
-    set_target_properties(${PYGEN_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-    target_include_directories(${PYGEN_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg})
-    target_link_libraries( ${PYGEN_NAME} PUBLIC walberla::core )
-    if ( OpenMP_CXX_FOUND )
-        target_link_libraries( ${PYGEN_NAME} PUBLIC OpenMP::OpenMP_CXX )
-    endif ()
+    set_target_properties (${PYGEN_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories (${PYGEN_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg})
+    target_link_libraries (${PYGEN_NAME} PUBLIC walberla::core)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries (${PYGEN_NAME} PUBLIC OpenMP::OpenMP_CXX)
+    endif()
 
-    if ( WALBERLA_BUILD_WITH_CUDA )
-       target_link_libraries( ${PYGEN_NAME} PUBLIC CUDA::cudart)
-    endif ( WALBERLA_BUILD_WITH_CUDA )
+    if(WALBERLA_BUILD_WITH_CUDA)
+        target_link_libraries (${PYGEN_NAME} PUBLIC CUDA::cudart)
+    endif(WALBERLA_BUILD_WITH_CUDA)
 
-    if ( WALBERLA_BUILD_WITH_HIP )
-        target_link_libraries( ${PYGEN_NAME} PUBLIC hip::host )
-    endif ( WALBERLA_BUILD_WITH_HIP )
+    if(WALBERLA_BUILD_WITH_HIP)
+        target_link_libraries (${PYGEN_NAME} PUBLIC hip::host)
+    endif(WALBERLA_BUILD_WITH_HIP)
 endfunction()
 #######################################################################################################################
 
@@ -112,24 +124,30 @@ endfunction()
 #      -> result has a single entry: "entry2"
 #
 #######################################################################################################################
-function( list_minus resultOut )
-    set( options )
-    set( oneValueArgs )
-    set( multiValueArgs LIST1 LIST2 )
-    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+function(list_minus resultOut)
+    set (options)
+    set (oneValueArgs)
+    set (multiValueArgs LIST1 LIST2)
+    cmake_parse_arguments (
+        ARG
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
 
-    set ( result ${ARG_LIST1} )
-    foreach ( secondEntry ${ARG_LIST2} )
-        list (REMOVE_ITEM result ${secondEntry} )
+    set (result ${ARG_LIST1})
+    foreach(secondEntry ${ARG_LIST2})
+        list (REMOVE_ITEM result ${secondEntry})
     endforeach()
 
-    set ( ${resultOut} ${result} PARENT_SCOPE )
+    set (${resultOut}
+         ${result}
+         PARENT_SCOPE
+    )
 
-endfunction( list_minus )
+endfunction(list_minus)
 #######################################################################################################################
-
-
-
 
 #######################################################################################################################
 #
@@ -140,63 +158,94 @@ endfunction( list_minus )
 # See for example waLBerla_import
 #
 #######################################################################################################################
-function ( waLBerla_export )
+function(waLBerla_export)
     # Write the build directory to the cmake package config
     # which is under  ~/.cmake/packages (Linux), or in the registry (Windows)
-    export( PACKAGE waLBerla )
+    export (PACKAGE waLBerla)
 
     # Copy a config file to the build directory which is executed when from another project
     # find_package( waLBerla ) is called
-    configure_file ( cmake/walberla-config-builddir.cmake
-                     walberla-config.cmake @ONLY )
+    configure_file (cmake/walberla-config-builddir.cmake walberla-config.cmake @ONLY)
 
     # Export compiler flags
-    set ( compilerList "CXX" "C" )
-    foreach ( compiler ${compilerList} )
-        set ( WALBERLA_INCLUDE_SYSTEM_FLAG_${compiler}  ${CMAKE_INCLUDE_SYSTEM_FLAG_${compiler}}
-              CACHE INTERNAL "${compiler} include flags for walberla" )
-        set ( WALBERLA_${compiler}_FLAGS ${CMAKE_${compiler}_FLAGS}
-              CACHE INTERNAL "${compiler} flags for walberla" )
+    set (compilerList "CXX" "C")
+    foreach(compiler ${compilerList})
+        set (WALBERLA_INCLUDE_SYSTEM_FLAG_${compiler}
+             ${CMAKE_INCLUDE_SYSTEM_FLAG_${compiler}}
+             CACHE INTERNAL "${compiler} include flags for walberla"
+        )
+        set (WALBERLA_${compiler}_FLAGS
+             ${CMAKE_${compiler}_FLAGS}
+             CACHE INTERNAL "${compiler} flags for walberla"
+        )
 
-        foreach ( buildType ${CMAKE_CONFIGURATION_TYPES} )
-            set ( WALBERLA_${compiler}_FLAGS_${buildType} ${CMAKE_${compiler}_FLAGS_${buildType}}
-                  CACHE INTERNAL "${compiler} flags for walberla" )
+        foreach(buildType ${CMAKE_CONFIGURATION_TYPES})
+            set (WALBERLA_${compiler}_FLAGS_${buildType}
+                 ${CMAKE_${compiler}_FLAGS_${buildType}}
+                 CACHE INTERNAL "${compiler} flags for walberla"
+            )
         endforeach()
     endforeach()
 
     # Export linker flags
-    set ( WALBERLA_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} CACHE INTERNAL "walberla linker flags")
-    foreach ( buildType ${CMAKE_CONFIGURATION_TYPES} )
-        set ( WALBERLA_EXE_LINKER_FLAGS_${buildType} ${CMAKE_EXE_LINKER_FLAGS_${buildType}}
-                CACHE INTERNAL "walberla linker flags for ${buildType}" )
+    set (WALBERLA_EXE_LINKER_FLAGS
+         ${CMAKE_EXE_LINKER_FLAGS}
+         CACHE INTERNAL "walberla linker flags"
+    )
+    foreach(buildType ${CMAKE_CONFIGURATION_TYPES})
+        set (WALBERLA_EXE_LINKER_FLAGS_${buildType}
+             ${CMAKE_EXE_LINKER_FLAGS_${buildType}}
+             CACHE INTERNAL "walberla linker flags for ${buildType}"
+        )
     endforeach()
 
     # Export service libs
-    set ( WALBERLA_CORE_SERVICE_LIBS ${CORE_SERVICE_LIBS} CACHE INTERNAL "Ext. libraries necessary for waLBerla core" )
+    set (WALBERLA_CORE_SERVICE_LIBS
+         ${CORE_SERVICE_LIBS}
+         CACHE INTERNAL "Ext. libraries necessary for waLBerla core"
+    )
 
     # Export compile definitions
-    get_directory_property( WALBERLA_COMPILE_DEFINITIONS DIRECTORY ${walberla_SOURCE_DIR} COMPILE_DEFINITIONS )
-    set ( WALBERLA_COMPILE_DEFINITIONS ${WALBERLA_COMPILE_DEFINITIONS} CACHE INTERNAL "waLBerla compile definitions" )
+    get_directory_property (WALBERLA_COMPILE_DEFINITIONS DIRECTORY ${walberla_SOURCE_DIR} COMPILE_DEFINITIONS)
+    set (WALBERLA_COMPILE_DEFINITIONS
+         ${WALBERLA_COMPILE_DEFINITIONS}
+         CACHE INTERNAL "waLBerla compile definitions"
+    )
 
     # Export include paths
-    get_directory_property( WALBERLA_INCLUDE_DIRS DIRECTORY ${walberla_SOURCE_DIR} INCLUDE_DIRECTORIES)
-    set ( WALBERLA_INCLUDE_DIRS ${WALBERLA_INCLUDE_DIRS} CACHE INTERNAL "waLBerla include directories" )
+    get_directory_property (WALBERLA_INCLUDE_DIRS DIRECTORY ${walberla_SOURCE_DIR} INCLUDE_DIRECTORIES)
+    set (WALBERLA_INCLUDE_DIRS
+         ${WALBERLA_INCLUDE_DIRS}
+         CACHE INTERNAL "waLBerla include directories"
+    )
 
     # Export link paths
-    set ( WALBERLA_LINK_DIRS ${LINK_DIRS} CACHE INTERNAL "waLBerla link directories" )
+    set (WALBERLA_LINK_DIRS
+         ${LINK_DIRS}
+         CACHE INTERNAL "waLBerla link directories"
+    )
 
-    set( WALBERLA_CXX_STANDARD ${CMAKE_CXX_STANDARD} CACHE INTERNAL "CXX standard")
-    set( WALBERLA_CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED} CACHE INTERNAL "CXX Standard Required")
-    set( WALBERLA_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS} CACHE INTERNAL "CXX Extensions")
+    set (WALBERLA_CXX_STANDARD
+         ${CMAKE_CXX_STANDARD}
+         CACHE INTERNAL "CXX standard"
+    )
+    set (WALBERLA_CXX_STANDARD_REQUIRED
+         ${CMAKE_CXX_STANDARD_REQUIRED}
+         CACHE INTERNAL "CXX Standard Required"
+    )
+    set (WALBERLA_CXX_EXTENSIONS
+         ${CMAKE_CXX_EXTENSIONS}
+         CACHE INTERNAL "CXX Extensions"
+    )
 
-    set( WALBERLA_Python_EXECUTABLE ${Python_EXECUTABLE} CACHE INTERNAL "Python EXECUTABLE")
+    set (WALBERLA_Python_EXECUTABLE
+         ${Python_EXECUTABLE}
+         CACHE INTERNAL "Python EXECUTABLE"
+    )
 
-endfunction( waLBerla_export)
+endfunction(waLBerla_export)
 
 #######################################################################################################################
-
-
-
 
 #######################################################################################################################
 #
@@ -204,58 +253,90 @@ endfunction( waLBerla_export)
 # Useful when waLBerla was added as a subdirectory
 #
 #######################################################################################################################
-function ( waLBerla_import )
-    set( options NO_COMPILER_FLAGS NO_INCLUDE_DIRS NO_COMPILE_DEFINITIONS )
-    set( oneValueArgs )
-    set( multiValueArgs  )
-    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+function(waLBerla_import)
+    set (options NO_COMPILER_FLAGS NO_INCLUDE_DIRS NO_COMPILE_DEFINITIONS)
+    set (oneValueArgs)
+    set (multiValueArgs)
+    cmake_parse_arguments (
+        ARG
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
 
-    if ( NOT NO_INCLUDE_DIRS )
-        foreach( directory ${WALBERLA_INCLUDE_DIRS} )
-            if( ${directory} MATCHES "walberla/src$" )
-                include_directories( ${directory} )
+    if(NOT NO_INCLUDE_DIRS)
+        foreach(directory ${WALBERLA_INCLUDE_DIRS})
+            if(${directory} MATCHES "walberla/src$")
+                include_directories (${directory})
             else()
-                include_directories( SYSTEM ${directory} )
+                include_directories (SYSTEM ${directory})
             endif()
         endforeach()
     endif()
 
     # Import compile definitions
-    if ( NOT NO_COMPILE_DEFINITIONS )
-        set_property( DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY COMPILE_DEFINITIONS ${WALBERLA_COMPILE_DEFINITIONS} )
+    if(NOT NO_COMPILE_DEFINITIONS)
+        set_property (DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY COMPILE_DEFINITIONS ${WALBERLA_COMPILE_DEFINITIONS})
     endif()
 
     # Import compiler flags
-    if ( NOT NO_COMPILER_FLAGS )
-        set ( compilerList "CXX" "C" )
-        foreach ( compiler ${compilerList} )
-            set ( CMAKE_INCLUDE_SYSTEM_FLAG_${compiler}  ${WALBERLA_INCLUDE_SYSTEM_FLAG_${compiler}}  PARENT_SCOPE )
-            set ( CMAKE_${compiler}_FLAGS                ${WALBERLA_${compiler}_FLAGS}                PARENT_SCOPE )
+    if(NOT NO_COMPILER_FLAGS)
+        set (compilerList "CXX" "C")
+        foreach(compiler ${compilerList})
+            set (CMAKE_INCLUDE_SYSTEM_FLAG_${compiler}
+                 ${WALBERLA_INCLUDE_SYSTEM_FLAG_${compiler}}
+                 PARENT_SCOPE
+            )
+            set (CMAKE_${compiler}_FLAGS
+                 ${WALBERLA_${compiler}_FLAGS}
+                 PARENT_SCOPE
+            )
 
-            foreach ( buildType ${CMAKE_CONFIGURATION_TYPES} )
-                set ( CMAKE_${compiler}_FLAGS_${buildType} ${WALBERLA_${compiler}_FLAGS_${buildType}} PARENT_SCOPE )
+            foreach(buildType ${CMAKE_CONFIGURATION_TYPES})
+                set (CMAKE_${compiler}_FLAGS_${buildType}
+                     ${WALBERLA_${compiler}_FLAGS_${buildType}}
+                     PARENT_SCOPE
+                )
             endforeach()
         endforeach()
 
         # Import linker flags
-        set ( CMAKE_EXE_LINKER_FLAGS ${WALBERLA_EXE_LINKER_FLAGS}  )
-        foreach ( buildType ${CMAKE_CONFIGURATION_TYPES} )
-            set ( CMAKE_EXE_LINKER_FLAGS_${buildType} ${WALBERLA_EXE_LINKER_FLAGS_${buildType}} PARENT_SCOPE )
+        set (CMAKE_EXE_LINKER_FLAGS ${WALBERLA_EXE_LINKER_FLAGS})
+        foreach(buildType ${CMAKE_CONFIGURATION_TYPES})
+            set (CMAKE_EXE_LINKER_FLAGS_${buildType}
+                 ${WALBERLA_EXE_LINKER_FLAGS_${buildType}}
+                 PARENT_SCOPE
+            )
         endforeach()
     endif()
 
-    set( CORE_SERVICE_LIBS ${WALBERLA_CORE_SERVICE_LIBS} PARENT_SCOPE )
+    set (CORE_SERVICE_LIBS
+         ${WALBERLA_CORE_SERVICE_LIBS}
+         PARENT_SCOPE
+    )
 
-    set( CMAKE_CXX_STANDARD ${WALBERLA_CXX_STANDARD}  PARENT_SCOPE)
-    set( CMAKE_CXX_STANDARD_REQUIRED ${WALBERLA_STANDARD_REQUIRED} PARENT_SCOPE)
-    set( CMAKE_CXX_EXTENSIONS ${WALBERLA_EXTENSIONS} PARENT_SCOPE)
+    set (CMAKE_CXX_STANDARD
+         ${WALBERLA_CXX_STANDARD}
+         PARENT_SCOPE
+    )
+    set (CMAKE_CXX_STANDARD_REQUIRED
+         ${WALBERLA_STANDARD_REQUIRED}
+         PARENT_SCOPE
+    )
+    set (CMAKE_CXX_EXTENSIONS
+         ${WALBERLA_EXTENSIONS}
+         PARENT_SCOPE
+    )
 
-    set( Python_EXECUTABLE ${WALBERLA_Python_EXECUTABLE} PARENT_SCOPE)
+    set (Python_EXECUTABLE
+         ${WALBERLA_Python_EXECUTABLE}
+         PARENT_SCOPE
+    )
 
-    link_directories( ${WALBERLA_LINK_DIRS} )
-endfunction( waLBerla_import)
+    link_directories (${WALBERLA_LINK_DIRS})
+endfunction(waLBerla_import)
 #######################################################################################################################
-
 
 #######################################################################################################################
 #
@@ -268,43 +349,47 @@ endfunction( waLBerla_import)
 #     group_files ( "Source Files" FILES ${sourceFiles} )
 #
 #######################################################################################################################
-function( group_files group )
-    set( options )
-    set( oneValueArgs)
-    set( multiValueArgs FILES)
-    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+function(group_files group)
+    set (options)
+    set (oneValueArgs)
+    set (multiValueArgs FILES)
+    cmake_parse_arguments (
+        ARG
+        "${options}"
+        "${oneValueArgs}"
+        "${multiValueArgs}"
+        ${ARGN}
+    )
 
-    foreach( filename ${ARG_FILES} )
-       file( RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${filename})
-       if( rel MATCHES ".*/.*" )
-          # subdirectory found -> add to subdirectory
-          get_filename_component(dir ${rel} PATH )
-          # replace slashes by some underscores to use path as variable name
-          # -> you are allowed to use at max two underscores in your folder name
-          string( REGEX REPLACE  "/" "___" subname ${dir} )
-          list( APPEND subfiles${subname} ${filename} )
-          list( APPEND subnames           ${subname}  )
-       else()
-          # no subdirectory found -> add to normal group
-          list( APPEND files ${filename} )
-       endif()
+    foreach(filename ${ARG_FILES})
+        file (RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${filename})
+        if(rel MATCHES ".*/.*")
+            # subdirectory found -> add to subdirectory
+            get_filename_component (dir ${rel} PATH)
+            # replace slashes by some underscores to use path as variable name
+            # -> you are allowed to use at max two underscores in your folder name
+            string (REGEX REPLACE "/" "___" subname ${dir})
+            list (APPEND subfiles${subname} ${filename})
+            list (APPEND subnames ${subname})
+        else()
+            # no subdirectory found -> add to normal group
+            list (APPEND files ${filename})
+        endif()
     endforeach()
 
-    if( subnames )
-       list( REMOVE_DUPLICATES subnames )
+    if(subnames)
+        list (REMOVE_DUPLICATES subnames)
     endif()
 
-    foreach( subname ${subnames} )
-       string( REGEX REPLACE  "___" "\\\\" subgroup ${subname} )
-       #message( STATUS " Group: ${group}\\${subgroup} and files: ${subfiles${subname}}" )
-       source_group( "${group}\\${subgroup}" FILES ${subfiles${subname}} )
+    foreach(subname ${subnames})
+        string (REGEX REPLACE "___" "\\\\" subgroup ${subname})
+        #message( STATUS " Group: ${group}\\${subgroup} and files: ${subfiles${subname}}" )
+        source_group ("${group}\\${subgroup}" FILES ${subfiles${subname}})
     endforeach()
     #message( STATUS " Group: ${group} and files: ${files}" )
-    source_group( "${group}" FILES ${files} )
-endfunction( group_files )
+    source_group ("${group}" FILES ${files})
+endfunction(group_files)
 #######################################################################################################################
-
-
 
 #######################################################################################################################
 #
@@ -313,10 +398,19 @@ endfunction( group_files )
 # Example:
 #
 #######################################################################################################################
-function( set_version VERSION_MAJOR VERSION_PATCH )
-  set( WALBERLA_MAJOR_VERSION ${VERSION_MAJOR} CACHE STRING "waLBerla major version" FORCE )
-  set( WALBERLA_PATCH_LEVEL   ${VERSION_PATCH} CACHE STRING "waLBerla patch level" FORCE )
-  set( WALBERLA_VERSION "${VERSION_MAJOR}.${VERSION_PATCH}" CACHE STRING "waLBerla version" FORCE )
-  mark_as_advanced( WALBERLA_MAJOR_VERSION WALBERLA_PATCH_LEVEL )
+function(set_version VERSION_MAJOR VERSION_PATCH)
+    set (WALBERLA_MAJOR_VERSION
+         ${VERSION_MAJOR}
+         CACHE STRING "waLBerla major version" FORCE
+    )
+    set (WALBERLA_PATCH_LEVEL
+         ${VERSION_PATCH}
+         CACHE STRING "waLBerla patch level" FORCE
+    )
+    set (WALBERLA_VERSION
+         "${VERSION_MAJOR}.${VERSION_PATCH}"
+         CACHE STRING "waLBerla version" FORCE
+    )
+    mark_as_advanced (WALBERLA_MAJOR_VERSION WALBERLA_PATCH_LEVEL)
 endfunction()
 #######################################################################################################################
