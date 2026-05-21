@@ -456,6 +456,8 @@ class Sweep(CustomGenerator):
         The data arrays of ``field`` and ``shadow_field`` will be swapped
         after each invocation of the sweep, such that data written to the shadow field
         overwrites the old content of ``field``.
+        This is only true for a full sweep. When calling "runOnCellIntervall", the swap is only happening,
+        when also setting the "swapBuffers" parameter to true.
         """
         if field in self._shadow_fields:
             raise ValueError(f"Field swap for {field} was already registered.")
@@ -587,7 +589,7 @@ class Sweep(CustomGenerator):
         property_cache = props_struct().var("properties_")
         property_cache_ref = props_struct(ref=True).bind(f"this->{property_cache}")
 
-        def render_runmethod(ci: CellInterval | None = None):
+        def render_runmethod(ci: CellInterval | None = None, generate_swap: bool = True):
             return [
                 #   Get IDs from class
                 *(
@@ -640,19 +642,52 @@ class Sweep(CustomGenerator):
                 ker_invocation,
                 #   Perform field swaps
                 *(
-                    shadows_cache.perform_swap(orig_name, shadow_info)
-                    for orig_name, shadow_info in swaps.items()
+                    (
+                        shadows_cache.perform_swap(orig_name, shadow_info)
+                        for orig_name, shadow_info in swaps.items()
+                    ) if generate_swap else ()
+                ),
+            ]
+
+        def render_swap_only():
+            return [
+                *(
+                    sfg.init(fi.entity)(property_cache_ref.get(fi.entity))
+                    for fi in block_fields if fi.field.name in swaps
+                ),
+                *(
+                    (
+                        shadows_cache.perform_swap(orig_name, shadow_info)
+                        for orig_name, shadow_info in swaps.items()
+                    )
                 ),
             ]
 
         runmethods = [sfg.method("operator()")(*render_runmethod())]
 
         if not self.sparse:
+            ci_var = CellInterval(const=True, ref=True).var("ci")
             runmethods.append(
                 sfg.method("runOnCellInterval")(
-                    *render_runmethod(CellInterval(const=True, ref=True).var("ci"))
+                    *render_runmethod(ci_var, generate_swap=False)
                 )
             )
+            # Field swaps not empty
+            if swaps:
+                field_swap_var = SfgVar("swapBuffers", "const bool")
+                runmethods.append(
+                    sfg.method("runOnCellInterval")(
+                        AugExpr.format("runOnCellInterval({}, {});", block, ci_var),
+                        sfg.branch(field_swap_var)(
+                            AugExpr.format("swapShadowBuffers({});", block),
+                        ),
+                    ).params(block, ci_var, field_swap_var)
+                )
+                runmethods.append(
+                    sfg.method("swapShadowBuffers")(
+                        *render_swap_only()
+                    )
+                )
 
         sfg.klass(self._name)(
             sfg.public(
