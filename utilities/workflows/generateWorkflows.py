@@ -225,43 +225,35 @@ class CiConfig:
 
 
 MATRIX_CONFIGURE_PRESETS = [
-    ConfigurePreset.from_fragments("hybrid", "singlePrecision"),
-    ConfigurePreset.from_fragments("hybrid", "cuda"),
-    ConfigurePreset.from_fragments("hybrid", "cuda", "singlePrecision"),
-    ConfigurePreset.from_fragments("serial", "cuda"),
-    ConfigurePreset.from_fragments("mpionly", "cuda"),
-    ConfigurePreset.from_fragments("mpionly"),
-    ConfigurePreset.from_fragments("hybrid"),
-    ConfigurePreset.from_fragments("serial", "mac"),
-    ConfigurePreset.from_fragments("mpionly", "mac"),
+    ConfigurePreset.from_fragments("cuda", "hybrid", "debugOptimized", "singlePrecision"),
+    ConfigurePreset.from_fragments("cuda", "omponly", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "mpionly", "debugOptimized"),
+    ConfigurePreset.from_fragments("cpuonly", "hybrid", "singlePrecision", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "omponly", "debugOptimized"),
+    ConfigurePreset.from_fragments("cpuonly", "serial"),
 ]
 
 MATRIX_COMPILERS = [
-    CompilerSpec("clang-20", "clang", "clang++"),
+    CompilerSpec("clang-17", "clang", "clang++"),
     CompilerSpec("clang-21", "clang", "clang++"),
+    CompilerSpec("clang-22", "clang", "clang++"),
+    CompilerSpec("gcc-bootstrap", "gcc", "g++"),
     CompilerSpec("gcc-14", "gcc", "g++"),
     CompilerSpec("gcc-15", "gcc", "g++"),
-    CompilerSpec("icx-2024", "icx", "icpx"),
+    CompilerSpec("icx-2023", "icx", "icpx"),
     CompilerSpec("icx-2025", "icx", "icpx"),
-    CompilerSpec("AppleClang", "clang", "clang++"),
+    CompilerSpec("icx-2026", "icx", "icpx"),
 ]
-
 
 #   CI Test Matrix.
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
-    "clang-20": ["hybrid-cuda", "hybrid"],
-    "clang-21": ["hybrid-cuda-singlePrecision", "mpionly-cuda"],
-    "icx-2024": ["hybrid-cuda"],
-    "icx-2025": ["hybrid-singlePrecision", "serial-cuda"],
-    "gcc-14": "hybrid-cuda",
-    "gcc-15": [
-        "hybrid-cuda-singlePrecision",
-        "mpionly-cuda",
-        "serial-cuda",
-        "mpionly",
-    ],
-    "AppleClang": ["serial-mac", "mpionly-mac"],
+    "clang-17": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial"],
+    "clang-21": ["cpuonly-mpionly-debugOptimized"],
+    "icx-2023": ["cpuonly-hybrid-singlePrecision-make"],
+    "icx-2025": ["cuda-omponly-make", "cpuonly-mpionly-debugOptimized"],
+    "gcc-bootstrap": ["cpuonly-hybrid-singlePrecision-make", "cpuonly-omponly-debugOptimized"],
+    "gcc-14": ["cpuonly-mpionly-debugOptimized"],
 }
 
 
