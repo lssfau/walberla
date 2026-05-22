@@ -31,7 +31,12 @@
                 "WARNING_ERROR": true,
                 "WALBERLA_LOGLEVEL": "INFO",
                 "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}",
-                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true,
+                "WALBERLA_BUILD_WITH_CODEGEN": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/",
+                "WALBERLA_ENABLE_V8CORE": true,
+                "WALBERLA_ENABLE_SWEEPGEN": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         },
         {
@@ -50,7 +55,11 @@
                 "WALBERLA_BUILD_WITH_OPENMESH": false,
                 "WARNING_ERROR": true,
                 "WALBERLA_LOGLEVEL": "INFO",
-                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/",
+                "WALBERLA_ENABLE_V8CORE": true,
+                "WALBERLA_ENABLE_SWEEPGEN": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         },
         {
