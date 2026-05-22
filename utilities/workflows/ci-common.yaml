@@ -1,3 +1,7 @@
+# Note: You can use `extends` to merge hashes but not arrays. (See example: https://docs.gitlab.com/ci/yaml/yaml_optimization/#merge-details)
+# Note: YAML anchors can be used to merge arrays, but only from the same file. (No included files)
+# Note: The `!reference` tag works work with included files as well.
+
 variables:
   CI_CONTAINER_REPOSITORY: i10git.cs.fau.de:5005/ci/images/spack-stable-bincache
 
@@ -31,41 +35,54 @@ workflow:
       --patch-main-presets-file CMakePresets.json
     # Check envrionment paths
     - echo -e "[Before build] LD_LIBRARY_PATH is:\n$LD_LIBRARY_PATH"
-    # Check if variable export in before_scrit affects script section
-    - echo "$MPIEXEC_PREFLAGS"
+    # Set MPI environment
+    - export MPIEXEC_PREFLAGS="--allow-run-as-root"
   script:
     # Run Test Workflow
     - cmake --workflow --preset ${cmakePresetName}
-  after_script: []
   artifacts:
     reports:
       junit: build/${cmakePresetName}/junit-report.xml
 
+####################################################################################################
+#                                   Operating Systems                                              #
+####################################################################################################
+
 .testsuite-base-linux:
   extends: .testsuite-common
-  before_script:
-    - !reference [.testsuite-common, before_script]
-    - echo "Append setup steps specific for Linux Systems."
-    # Install cupy
-    - pip install cupy-cuda12x
-    # Set MPI environment
-    - export MPIEXEC_PREFLAGS="--allow-run-as-root"
-  after_script: []
-  variables:
-    WALBERLA_CI_CUDA_ARCHITECTURES: "60"
   tags:
     - docker
-    - cuda
-    - cudaComputeCapability6.1
-
-# Patch for clang: LLVM OpenMP runtime libary are not on LD_LIBRARY_PATH
-.clang-library-path-patch:
-  script:
-    - echo "Applying clang library path patch"
-    - export LLVM_ROOT=$(dirname $(dirname $(which clang)))
-    - export LD_LIBRARY_PATH=$LLVM_ROOT/lib/x86_64-unknown-linux-gnu:$LD_LIBRARY_PATH
 
 .testsuite-base-MacOS:
   extends: .testsuite-common
   tags:
     - macmini
+
+####################################################################################################
+#                                     Device Domain                                                #
+####################################################################################################
+
+.testsuite-base-linux-cuda:
+  extends: .testsuite-base-linux
+  before_script:
+    - !reference [.testsuite-base-linux, before_script]
+    # Install cupy
+    - pip install cupy-cuda12x
+  variables:
+    WALBERLA_CI_CUDA_ARCHITECTURES: "60"
+  tags:
+    - cudaComputeCapability6.1
+
+####################################################################################################
+#                                             Patches                                              #
+# ------------------------------------------------------------------------------------------------ #
+# Note: All patches need to be inserted (!reference [.<patch-name>, <section>]) jobs.              #
+# They do not work hierarchically like the domain bases.                                           #
+####################################################################################################
+
+# Patch for clang: LLVM OpenMP runtime libary are not on LD_LIBRARY_PATH
+.clang-library-path-patch:
+  before_script:
+    - echo "Applying clang library path patch"
+    - export LLVM_ROOT=$(dirname $(dirname $(which clang)))
+    - export LD_LIBRARY_PATH=$LLVM_ROOT/lib/x86_64-unknown-linux-gnu:$LD_LIBRARY_PATH
