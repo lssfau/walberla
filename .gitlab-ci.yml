@@ -26,7 +26,7 @@ workflow:
 #       Every-Commit Test Suite & Coverage Collection
 ####################################################################################################
 
-clang | none:
+clang [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: Testsuite
   extends: .testsuite-base-linux
@@ -34,7 +34,7 @@ clang | none:
     - !reference [.clang-library-path-patch, script]
     - !reference [.testsuite-common, script]
   variables:
-    cmakePresetName: .ci-branch-testsuite
+    cmakePresetName: .ci-testsuite-clang
     CC: clang
     CXX: clang++
   artifacts:
@@ -45,12 +45,12 @@ clang | none:
       - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     expire_in: 2 days
 
-icx | omp:
+icx [cpu-omp]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2026
   stage: Testsuite
   extends: .testsuite-base-linux
   variables:
-    cmakePresetName: .ci-branch-testsuite
+    cmakePresetName: .ci-testsuite-icx
     CC: icx
     CXX: icpx
   artifacts:
@@ -61,16 +61,15 @@ icx | omp:
       - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     expire_in: 2 days
 
-gcc | cuda+coverage:
-  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-16
+gcc [cuda-mpi-coverage]:
+  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Testsuite
-  extends: .testsuite-base-linux
+  extends: .testsuite-base-linux-cuda
   before_script:
-    - !reference [.testsuite-base-linux, before_script]
+    - !reference [.testsuite-base-linux-cuda, before_script]
     - pip install gcovr
     - gcovr --version
   after_script:
-    - !reference [.testsuite-base-linux, after_script]
     - mkdir coverage
     - source .venv/bin/activate
     - >
@@ -83,7 +82,7 @@ gcc | cuda+coverage:
       build/${cmakePresetName}
   variables:
     RUNNER_AFTER_SCRIPT_TIMEOUT: 20m
-    cmakePresetName: .ci-coverage
+    cmakePresetName: .ci-testsuite-gcc-coverage
     CC: gcc
     CXX: g++
     CUDAHOSTCXX: "g++-13"
@@ -242,7 +241,7 @@ trigger-test-matrix:
 ####################################################################################################
 
 documentation:
-  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-16
+  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Documentation
   needs: []
   variables:
