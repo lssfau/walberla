@@ -30,9 +30,9 @@ clang [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: Testsuite
   extends: .testsuite-base-linux
-  script:
-    - !reference [.clang-library-path-patch, script]
-    - !reference [.testsuite-common, script]
+  before_script:
+    - !reference [.clang-library-path-patch, before_script]
+    - !reference [.testsuite-common, before_script]
   variables:
     cmakePresetName: .ci-testsuite-clang
     CC: clang
@@ -109,10 +109,10 @@ clang-tidy:
   stage: "Code Quality"
   needs: []
   before_script:
+    - !reference [.clang-library-path-patch, before_script]
     - apt-get update; apt-get install -y tree
     - !reference [.testsuite-base-linux, before_script]
   script:
-    - !reference [.clang-library-path-patch, script]
     - cmake --preset ${cmakePresetName}
     - cd build/${cmakePresetName}
     - cmake --build . --target codegen

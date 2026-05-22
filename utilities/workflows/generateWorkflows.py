@@ -182,8 +182,13 @@ class CiConfig:
                 spec.extends = ".testsuite-base-MacOS"
                 spec.image = None
             case ["clang", *_]:
-                spec.script.append(Reference(".clang-library-path-patch", "script"))
-                spec.script.append(Reference(".testsuite-common", "script"))
+                # The clang from spack cannot fine omp without the patch.
+                spec.script.append(Reference(".clang-library-path-patch", "before_script"))
+                # Since `extends` is overriding lists instead of merging them, we need to re-append the right before_script.
+                if "cuda" in preset.name:
+                    spec.script.append(Reference(".testsuite-base-linux-cuda", "before_script"))
+                else:
+                    spec.script.append(Reference(".testsuite-common", "before_script"))
             case ["gcc", int(version), *_] if version < 13 and "cuda" in preset.name:
                 # There are problems with older GCC versions as CUDA host compiler,
                 # so we set the CUDAHOSTCXX images base compiler wich currently is g++-13.
