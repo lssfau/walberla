@@ -139,6 +139,15 @@
             }
         },
         {
+            "displayName": "OMP-only shared-memory parallelization",
+            "name": ".omponly",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMP": true,
+                "WALBERLA_BUILD_WITH_MPI": false
+            }
+        },
+        {
             "displayName": "Hybrid parallelization with OpenMP and MPI",
             "name": ".hybrid",
             "hidden": true,
@@ -153,6 +162,7 @@
             "hidden": true,
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_CUDA": true,
+                "WALBERLA_BUILD_WITH_HIP": false,
                 "CMAKE_CUDA_ARCHITECTURES": "$env{WALBERLA_CI_CUDA_ARCHITECTURES}"
             }
         },
@@ -161,7 +171,17 @@
             "name": ".hip",
             "hidden": true,
             "cacheVariables": {
-                "WALBERLA_BUILD_WITH_HIP": true
+                "WALBERLA_BUILD_WITH_HIP": true,
+                "WALBERLA_BUILD_WITH_CUDA": false
+            }
+        },
+        {
+            "displayName": "Disable GPU support",
+            "name": ".cpuonly",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_HIP": false,
+                "WALBERLA_BUILD_WITH_CUDA": false
             }
         },
         {
