@@ -15,6 +15,8 @@
 //
 //! \file DomainSlices.hpp
 //! \author Frederik Hennig <frederik.hennig@fau.de>
+//! \author Philipp Suffa <philipp.suffa@fau.de>
+
 //
 //======================================================================================================================
 
@@ -216,6 +218,82 @@ auto doFuse(const Sweep auto& first, const Sweep auto&... others)
 }
 } // namespace detail
 
+
+enum CommHidingIntervall {
+   ALL,
+   INNER,
+   OUTER,
+};
+
+template< CommHidingIntervall Intervall_T, CellIntervalSweep Sweep_T >
+class CommHidingSweep
+{
+
+public:
+   CommHidingSweep(const shared_ptr< StructuredBlockForest >& blocks, Sweep_T& sweep, Cell innerOuterSplit)
+      : blocks_(blocks), sweep_{ sweep }, innerOuterSplit_{ innerOuterSplit }
+   {}
+
+   void operator()(IBlock* block)
+   {
+      for (const auto& ci : getCellIntervals()) {
+         if constexpr ((Intervall_T == OUTER || Intervall_T == ALL)) {
+            sweep_.runOnCellInterval(block, ci, true);
+         }
+         else {
+            sweep_.runOnCellInterval(block, ci, false);
+         }
+      }
+   }
+
+
+private:
+   std::vector<CellInterval> getCellIntervals() const
+   {
+      const auto xSize = cell_idx_c(blocks_->getNumberOfXCellsPerBlock());
+      const auto ySize = cell_idx_c(blocks_->getNumberOfYCellsPerBlock());
+      const auto zSize = cell_idx_c(blocks_->getNumberOfZCellsPerBlock());
+
+      std::vector<CellInterval> cis;
+
+      if constexpr (Intervall_T == ALL)
+      {
+         cis.emplace_back(0, 0, 0, xSize - 1, ySize - 1, zSize - 1);
+      }
+      else if constexpr (Intervall_T == INNER)
+      {
+         cis.emplace_back(innerOuterSplit_.x(), innerOuterSplit_.y(), innerOuterSplit_.z(),
+                          xSize - innerOuterSplit_.x() - 1, ySize - innerOuterSplit_.y() - 1,
+                          zSize - innerOuterSplit_.z() - 1);
+      }
+      else if constexpr (Intervall_T == OUTER)
+      {
+         const auto ox = innerOuterSplit_.x();
+         const auto oy = innerOuterSplit_.y();
+         const auto oz = innerOuterSplit_.z();
+
+         // B
+         cis.emplace_back(0, 0, 0, xSize - 1, ySize - 1, oz - 1);
+         // T
+         cis.emplace_back(0, 0, zSize - oz, xSize - 1, ySize - 1, zSize - 1);
+         // S
+         cis.emplace_back(0, 0, oz, xSize - 1, oy - 1, zSize - oz - 1);
+         // N
+         cis.emplace_back(0, ySize - oy, oz, xSize - 1, ySize - 1, zSize - oz - 1);
+         // W
+         cis.emplace_back(0, oy, oz, ox - 1, ySize - oy - 1, zSize - oz - 1);
+         // E
+         cis.emplace_back(xSize - ox, oy, oz, xSize - 1, ySize - oy - 1, zSize - oz - 1);
+      }
+      return cis;
+   }
+
+   shared_ptr< StructuredBlockForest > blocks_;
+   Sweep_T& sweep_;
+   Cell innerOuterSplit_;
+};
+
+
 /**
  * @brief Factory for derived and wrapper sweeps.
  * 
@@ -267,6 +345,27 @@ class SweepFactory
     * the specified order.
     */
    auto fuse(const Sweep auto&... sweeps) { return detail::doFuse(std::forward< decltype(sweeps) >(sweeps)...); }
+
+
+   /**
+    * @brief INNER and OUTER sweep for communication hiding.
+    *
+    * Return a wrapper sweep which executes the given `sweep`
+    * only on cells in the inner or outer part of the simulation domain
+    *
+    * @param sweep The original sweep object
+    * @param innerOuterSplit Thickness of the outer iteration slice in 3 dimensions
+    *
+    * @note Field swaps for AB streaming pattern are performed only after the OUTER sweep.
+    */
+   template< CommHidingIntervall Intervall_T, CellIntervalSweep Sweep_T >
+   CommHidingSweep< Intervall_T, Sweep_T > commHidingSweep( //
+      Sweep_T& sweep, //
+      Cell innerOuterSplit = Cell(1,1,1)//
+   )
+   {
+      return { blocks_, sweep, innerOuterSplit };
+   }
 };
 
 } // namespace walberla::v8::sweep

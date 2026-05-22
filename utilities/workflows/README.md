@@ -8,7 +8,7 @@ waLBerla's continuous integration and testing (CI) workflows.
 -  [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 -  [GitLab CI/CD](https://docs.gitlab.com/topics/build_your_application/)
 
-## CMake Presets
+## CMake Presets {#walberla-specific-cmake-presets}
 
 All CMake configure-build-test workflows are encoded as CMake presets.
 

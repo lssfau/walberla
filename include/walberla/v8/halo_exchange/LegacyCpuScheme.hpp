@@ -34,6 +34,7 @@
 #include "stencil/Directions.h"
 
 #include "./AbstractCommScheme.hpp"
+#include "./CommSchemeOptions.hpp"
 #include "./IPackInfo.hpp"
 #include "walberla/v8/sweep/ExecutionTags.hpp"
 
@@ -134,9 +135,12 @@ struct LegacyCpuSchemeTraits
 
    static std::unique_ptr< AbstractCommScheme >
       createCommScheme(const std::shared_ptr< StructuredBlockForest >& blocks,
-                       std::vector< std::shared_ptr< PackInfoWrapper > > pInfos)
+                       std::vector< std::shared_ptr< PackInfoWrapper > > pInfos,
+                       const CommSchemeOptions& opts)
    {
-      auto scheme = std::make_unique< CommScheme >(blocks);
+      auto scheme = std::make_unique< CommScheme >(blocks,
+         opts.requiredBlockSelectors, opts.incompatibleBlockSelectors, opts.mpiTag);
+
       for (auto& pInfo : pInfos)
       {
          scheme->addPackInfo(pInfo);

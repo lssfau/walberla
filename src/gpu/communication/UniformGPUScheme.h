@@ -73,6 +73,7 @@ namespace communication {
  *
  * When running multiple \ref UniformGPUScheme concurrently, different MPI tags
  * have to be used for the schemes: the tag can be passed in the constructor.
+ * Default MPI tag = 5432
  */
    template<typename Stencil>
    class UniformGPUScheme
@@ -81,14 +82,14 @@ namespace communication {
        explicit UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
                                   const bool sendDirectlyFromGPU = false,
                                   const bool useLocalCommunication = true,
-                                  const int tag = 5432 );
+                                  std::optional<int> tag = std::nullopt );
 
        explicit UniformGPUScheme( const weak_ptr< StructuredBlockForest >& bf,
                                   const Set<SUID> & requiredBlockSelectors,
                                   const Set<SUID> & incompatibleBlockSelectors,
                                   const bool sendDirectlyFromGPU = false,
                                   const bool useLocalCommunication = true,
-                                  const int tag = 5432 );
+                                  std::optional<int> tag = std::nullopt );
 
        UniformGPUScheme(const UniformGPUScheme &) = delete;
 

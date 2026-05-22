@@ -1,128 +1,131 @@
-
 ############################################################################################################################
 #
 # Build Info
 #
 ############################################################################################################################
 
+include (GetGitRevisionDescription)
+get_git_head_revision (GIT_REFSPEC WALBERLA_GIT_SHA1)
 
-include( GetGitRevisionDescription )
-get_git_head_revision( GIT_REFSPEC WALBERLA_GIT_SHA1 )
+string (TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPER)
 
-string( TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPER )
-
-set( WALBERLA_BUILD_TYPE ${CMAKE_BUILD_TYPE} )
-set( WALBERLA_COMPILER_FLAGS "${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE_UPPER}} ${CMAKE_CXX_FLAGS}" )
-string( REPLACE "\"" "\\\"" WALBERLA_COMPILER_FLAGS ${WALBERLA_COMPILER_FLAGS} )
-site_name( WALBERLA_BUILD_MACHINE )
+set (WALBERLA_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+set (WALBERLA_COMPILER_FLAGS "${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE_UPPER}} ${CMAKE_CXX_FLAGS}")
+string (REPLACE "\"" "\\\"" WALBERLA_COMPILER_FLAGS ${WALBERLA_COMPILER_FLAGS})
+site_name (WALBERLA_BUILD_MACHINE)
 
 # Generate file with compile options, and add install rule for it
-configure_file( waLBerlaBuildInfo.in.cpp
-        waLBerlaBuildInfo.cpp )
+configure_file (waLBerlaBuildInfo.in.cpp waLBerlaBuildInfo.cpp)
 
 ############################################################################################################################
 
-include( math/math.cmake )
-include( logging/logging.cmake )
+include (math/math.cmake)
+include (logging/logging.cmake)
 
-add_library( walberla_core )
-add_library( walberla::core ALIAS walberla_core )
+add_library (walberla_core)
+add_library (walberla::core ALIAS walberla_core)
 
 # MPI
 
-if ( MPI_FOUND )
-    foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-        if ( LIB )
-            target_link_libraries ( walberla_core PUBLIC ${LIB} )
-        endif ( )
-    endforeach ( )
-    target_include_directories( walberla_core SYSTEM PUBLIC ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
-endif ()
+if(MPI_FOUND)
+    foreach(LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
+        if(LIB)
+            target_link_libraries (walberla_core PUBLIC ${LIB})
+        endif()
+    endforeach()
+    target_include_directories (walberla_core SYSTEM PUBLIC ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH})
+endif()
 
 # OpenMP
 
-if ( OpenMP_CXX_FOUND )
-    target_link_libraries( walberla_core PUBLIC OpenMP::OpenMP_CXX )
-endif ()
+if(OpenMP_CXX_FOUND)
+    target_link_libraries (walberla_core PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 # CUDA
 
-if ( WALBERLA_BUILD_WITH_CUDA )
-    target_link_libraries ( walberla_core PUBLIC CUDA::cudart )
-endif ( WALBERLA_BUILD_WITH_CUDA )
+if(WALBERLA_BUILD_WITH_CUDA)
+    target_link_libraries (walberla_core PUBLIC CUDA::cudart)
+endif(WALBERLA_BUILD_WITH_CUDA)
 
 # HIP
 
-if ( WALBERLA_BUILD_WITH_HIP )
-    target_link_libraries( walberla_core PUBLIC hip::host )
-endif ( WALBERLA_BUILD_WITH_HIP )
+if(WALBERLA_BUILD_WITH_HIP)
+    target_link_libraries (walberla_core PUBLIC hip::host)
+endif(WALBERLA_BUILD_WITH_HIP)
 
 # half-precision
 
-if ( WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT )
+if(WALBERLA_BUILD_WITH_HALF_PRECISION_SUPPORT)
     # Actual support for float16 is available only since C++23
     #   before is_arithmetic and is_floating_point evaluated to false,
     #   also many STL functions are compatible with float16 only since C++23.
     # Which features are actually supported depend on the compiler
-    target_compile_features( walberla_core PUBLIC cxx_std_23 )
-endif ()
+    target_compile_features (walberla_core PUBLIC cxx_std_23)
+endif()
 
 # likwid
 
-if ( LIKWID_FOUND AND LIKWID_LIB )
-    target_link_libraries ( walberla_core PUBLIC ${LIKWID_LIB} )
+if(LIKWID_FOUND AND LIKWID_LIB)
+    target_link_libraries (walberla_core PUBLIC ${LIKWID_LIB})
 endif()
 
-target_link_libraries( walberla_core PUBLIC ${CORE_SERVICE_LIBS} )
-target_include_directories( walberla_core PUBLIC ${walberla_SOURCE_DIR}/src/ ${walberla_BINARY_DIR}/src/ )
-target_sources( walberla_core
-        PUBLIC
-        Abort.h
-        AllSet.h
-        ConcatIterator.h
-        Conversion.h
-        DataTypes.h
-        EndianIndependentSerialization.h
-        Environment.h
-        FunctionTraits.h
-        Hostname.h
-        Macros.h
-        MemoryUsage.h
-        OpenMP.h
-        RandomUUID.h
-        Sanitizer.h
-        Set.h
-        SharedFunctor.h
-        Stdlib.hpp
-        STLIO.h
-        stringToNum.h
-        StringUtility.h
-        StringUtility.impl.h
-        typeToString.h
-        UniqueID.h
-        VectorTrait.h
-        waLBerlaBuildInfo.h
+target_link_libraries (
+    walberla_core
+    PUBLIC ${CORE_SERVICE_LIBS}
+)
+target_include_directories (
+    walberla_core
+    PUBLIC ${walberla_SOURCE_DIR}/src/ ${walberla_BINARY_DIR}/src/
+)
+target_sources (
+    walberla_core
+    PUBLIC Abort.h
+           AllSet.h
+           ConcatIterator.h
+           Conversion.h
+           DataTypes.h
+           EndianIndependentSerialization.h
+           Environment.h
+           FunctionTraits.h
+           Hostname.h
+           Macros.h
+           MemoryUsage.h
+           OpenMP.h
+           RandomUUID.h
+           Sanitizer.h
+           Set.h
+           SharedFunctor.h
+           Stdlib.hpp
+           STLIO.h
+           stringToNum.h
+           StringUtility.h
+           StringUtility.impl.h
+           typeToString.h
+           UniqueID.h
+           VectorTrait.h
+           waLBerlaBuildInfo.h
 )
 
-target_sources( walberla_core
-        PRIVATE
-        Abort.cpp
-        Conversion.cpp
-        DataTypes.cpp
-        Environment.cpp
-        Hostname.cpp
-        MemoryUsage.cpp
-        RandomUUID.cpp
-        waLBerlaBuildInfo.cpp
+target_sources (
+    walberla_core
+    PRIVATE Abort.cpp
+            Conversion.cpp
+            DataTypes.cpp
+            Environment.cpp
+            Hostname.cpp
+            MemoryUsage.cpp
+            RandomUUID.cpp
+            waLBerlaBuildInfo.cpp
 )
 
-add_subdirectory( cell )
-add_subdirectory( debug )
-add_subdirectory( mpi )
-add_subdirectory( inplace_streaming )
-add_subdirectory( logging )
-add_subdirectory( load_balancing )
-add_subdirectory( config )
-add_subdirectory( math )
-add_subdirectory( timing )
-add_subdirectory( grid_generator )
+add_subdirectory (cell)
+add_subdirectory (debug)
+add_subdirectory (mpi)
+add_subdirectory (inplace_streaming)
+add_subdirectory (logging)
+add_subdirectory (load_balancing)
+add_subdirectory (config)
+add_subdirectory (math)
+add_subdirectory (timing)
+add_subdirectory (grid_generator)

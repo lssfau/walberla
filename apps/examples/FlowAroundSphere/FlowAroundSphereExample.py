@@ -35,13 +35,8 @@ from sweepgen.build_config import DEBUG
 DEBUG.use_cpu_default()
 
 with SourceFileGenerator(keep_unknown_argv=True) as sfg:
+    Sweep.use_v8core_fields()
     sfg.namespace("FlowAroundSphereExample::gen")
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--target", choices=["cpu", "gpu"], default="cpu")
-    args = parser.parse_args(sfg.context.argv)
-
-    build_cfg = get_build_config(sfg)
-    build_cfg.target = ps.Target[args.target.upper()]
 
     stencil = LBStencil(Stencil.D3Q19)
     omega = sp.symbols("omega")

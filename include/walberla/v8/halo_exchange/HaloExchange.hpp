@@ -26,6 +26,7 @@
 
 #include "./AbstractCommScheme.hpp"
 #include "./CommSchemeTraits.hpp"
+#include "./CommSchemeOptions.hpp"
 
 #include "walberla/v8/memory/MemoryTags.hpp"
 
@@ -81,6 +82,31 @@ class HaloExchangeBuilder
       return *this;
    }
 
+   Self& requiredBlockSelectors(const Set< SUID >& selectors) {
+      options_.requiredBlockSelectors += selectors;
+      return *this;
+   }
+
+   Self& incompatibleBlockSelectors(const Set< SUID >& selectors) {
+      options_.incompatibleBlockSelectors += selectors;
+      return *this;
+   }
+
+   Self& sendDirectlyFromGPU(bool useGpuDirect) {
+      options_.sendDirectlyFromGPU = useGpuDirect;
+      return *this;
+   }
+
+   Self& useLocalCommunication(bool useLocalComm) {
+      options_.useLocalCommunication = useLocalComm;
+      return *this;
+   }
+
+   Self& mpiTag(int tag) {
+      options_.mpiTag = tag;
+      return *this;
+   }
+
    HaloExchange build();
 
    std::shared_ptr< HaloExchange > makeShared() {
@@ -90,6 +116,7 @@ class HaloExchangeBuilder
  private:
    std::shared_ptr< StructuredBlockForest > blocks_;
    std::vector< std::shared_ptr< PackInfoWrapper > > packInfos_;
+   CommSchemeOptions options_;
 };
 
 /**
@@ -133,7 +160,7 @@ class HaloExchange
 template< typename TCommStencil, memory::MemTag TMemTag >
 inline HaloExchange HaloExchangeBuilder< TCommStencil, TMemTag >::build()
 {
-   return HaloExchange(CsTraits::createCommScheme(blocks_, std::move(packInfos_)));
+   return HaloExchange(CsTraits::createCommScheme(blocks_, std::move(packInfos_), options_));
 }
 
 } // namespace halo_exchange

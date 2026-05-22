@@ -188,17 +188,12 @@ schema-validation:
   tags:
     - docker
   before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
     - pip install --upgrade pip
-    - pip install jsonschema pyyaml
+    - pip install -r utilities/developer-tools/requirements.txt
   script:
-    - python utilities/schema-validation/validate-files.py
-  rules:
-    # Only activate on non-draft MRs, master, and tags
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_DRAFT == "false"
-    - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_TAG
-    - when: manual 
-      allow_failure: true
+    - python utilities/developer-tools/schema-validation/validate-files.py
 
 ####################################################################################################
 #       Test Matrix
@@ -208,6 +203,9 @@ generate-test-matrix:
   stage: Test Matrix
   image: "python:3.13"
   before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
     - pip install pyyaml
   script:
     - cd utilities/workflows
