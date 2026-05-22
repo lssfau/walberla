@@ -173,6 +173,7 @@ clang-tidy:preview:stop:
 python-static-checks:
   image: i10git.cs.fau.de:5005/pycodegen/pycodegen/nox:alpine
   stage: "Code Quality"
+  needs: []
   tags:
     - docker
   script:
@@ -182,6 +183,7 @@ python-static-checks:
 schema-validation:
   image: "python:3.13"
   stage: "Code Quality"
+  needs: []
   tags:
     - docker
   before_script:
@@ -238,6 +240,7 @@ trigger-test-matrix:
 documentation:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Documentation
+  needs: []
   variables:
     WALBERLA_DOXYGEN_HTTP_ROOT: /walberla
   before_script:
