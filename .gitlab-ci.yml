@@ -107,6 +107,7 @@ gcc [cuda-mpi-coverage]:
 clang-tidy:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: "Code Quality"
+  needs: [clang]
   before_script:
     - !reference [.clang-library-path-patch, before_script]
     - apt-get update; apt-get install -y tree
