@@ -14,6 +14,7 @@
 from .api import real_t, Vector3, GhostLayerFieldPtr, glfield, IBlockPtr
 from .sweep import Sweep
 from .build_config import WalberlaBuildConfig, get_build_config
+from . import flow
 
 __all__ = [
     "real_t",
@@ -24,6 +25,7 @@ __all__ = [
     "Sweep",
     "WalberlaBuildConfig",
     "get_build_config",
+    "flow",
 ]
 
 from . import _version

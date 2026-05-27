@@ -13,7 +13,7 @@
 
 from __future__ import annotations
 
-from typing import Sequence, cast
+from typing import cast
 from dataclasses import dataclass
 from collections import defaultdict
 from abc import ABC, abstractmethod
@@ -22,7 +22,6 @@ import warnings
 from pystencilssfg.composer.custom import CustomGenerator
 
 from pystencils import (
-    Assignment,
     AssignmentCollection,
     CreateKernelConfig,
     Field,
@@ -31,6 +30,8 @@ from pystencils import (
     create_type,
 )
 from pystencils.types import deconstify, PsCustomType, PsStructType, PsType
+from pystencils.codegen.driver import SymbolicKernel
+from pystencils.flow import FlowgraphNode, Flowgraph, tie
 
 from pystencilssfg import SfgComposer
 from pystencilssfg.lang import (
@@ -196,9 +197,7 @@ class ShadowFieldsManager:
                     "{};", original.glfield.swapDataPointers(shadow_info.glfield)
                 )
             case V8FieldInfo():
-                original_info = cast(
-                    V8FieldInfo, self._originals[original_name]
-                )
+                original_info = cast(V8FieldInfo, self._originals[original_name])
                 return AugExpr.format(
                     "{};",
                     self._cache_member(original_info).swapBuffers(
@@ -249,9 +248,7 @@ class ShadowFieldsManager:
     def _cache_member_name(self, orig_name: str) -> str:
         return f"shadow_{orig_name}_"
 
-    def _cache_member_var(
-        self, orig: V8FieldInfo
-    ) -> sweep_parts.ShadowBufferCache:
+    def _cache_member_var(self, orig: V8FieldInfo) -> sweep_parts.ShadowBufferCache:
         if orig.field.name not in self._caches:
             self._caches[orig.field.name] = sweep_parts.ShadowBufferCache(
                 TField=orig.ex_field.get_dtype()
@@ -259,9 +256,7 @@ class ShadowFieldsManager:
 
         return self._caches[orig.field.name]
 
-    def _cache_member(
-        self, orig: V8FieldInfo
-    ) -> sweep_parts.ShadowBufferCache:
+    def _cache_member(self, orig: V8FieldInfo) -> sweep_parts.ShadowBufferCache:
         return sweep_parts.ShadowBufferCache(TField=orig.ex_field.get_dtype()).bind(
             f"this->{self._cache_member_name(orig.field.name)}"
         )
@@ -366,7 +361,7 @@ class Sweep(CustomGenerator):
     def __init__(
         self,
         name: str,
-        assignments: Sequence[Assignment] | AssignmentCollection,
+        symbolic_kernel: SymbolicKernel,
         config: CreateKernelConfig | None = None,
     ):
         if config is not None:
@@ -394,10 +389,14 @@ class Sweep(CustomGenerator):
         self._name = name
         self._gen_config = cfg
 
-        if isinstance(assignments, AssignmentCollection):
-            self._assignments = assignments
-        else:
-            self._assignments = AssignmentCollection(assignments)  # type: ignore
+        self._symbolic_kernel: AssignmentCollection | Flowgraph
+        match symbolic_kernel:
+            case AssignmentCollection() | Flowgraph():
+                self._symbolic_kernel = symbolic_kernel
+            case FlowgraphNode():
+                self._symbolic_kernel = tie(symbolic_kernel, name=name)
+            case _:
+                self._symbolic_kernel = AssignmentCollection(symbolic_kernel)  # type: ignore
 
         #   Set only later once the full codegen config is known
         self._glfield_type: type[GpuFieldPtr] | type[GhostLayerFieldPtr]
@@ -532,7 +531,7 @@ class Sweep(CustomGenerator):
         target = gen_config.get_target()
         self._set_field_interface(target)
 
-        assignments = BlockforestParamExtraction.process(self._assignments)
+        assignments = BlockforestParamExtraction.process(self._symbolic_kernel)
 
         with SuppressDiagnostics(sfg, "unused-variable"):
             knamespace = sfg.kernel_namespace(f"{self._name}_kernels")
