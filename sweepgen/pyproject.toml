@@ -5,8 +5,8 @@ authors = [
     {name = "Frederik Hennig", email = "frederik.hennig@fau.de"},
 ]
 dependencies = [
-    "pystencils>=2.0b1",
-    "pystencilssfg>=0.1",
+    "pystencils>=2.0b2",
+    "pystencilssfg>=0.1.1",
     "lbmpy",
     "py-cpuinfo>=9.0"
 ]
