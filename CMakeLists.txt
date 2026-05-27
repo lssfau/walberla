@@ -458,8 +458,15 @@ endif()
 ############################################################################################################################
 
 if(WALBERLA_BUILD_WITH_PARMETIS)
-    # metis is required for parmetis
-    set (WALBERLA_BUILD_WITH_METIS TRUE FORCE)
+    if(NOT WALBERLA_BUILD_WITH_MPI)
+        message (WARNING "ParMetis was disabled, since it requires MPI.
+            You can use METIS instead or enable MPI support."
+        )
+        set (WALBERLA_BUILD_WITH_PARMETIS FALSE FORCE)
+    else()
+        # metis is required for parmetis
+        set (WALBERLA_BUILD_WITH_METIS TRUE FORCE)
+    endif()
 endif()
 
 if(WALBERLA_BUILD_WITH_METIS)
