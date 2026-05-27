@@ -258,7 +258,9 @@
             "hidden": true,
             "inherits": ".metis",
             "cacheVariables": {
-                "WALBERLA_BUILD_WITH_PARMETIS": true
+                "WALBERLA_BUILD_WITH_PARMETIS": true,
+                "WALBERLA_BUILD_WITH_METIS": true,
+                "WALBERLA_BUILD_WITH_MPI": true
             }
         },
         {
