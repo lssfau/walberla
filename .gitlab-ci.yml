@@ -107,7 +107,7 @@ gcc [cuda-mpi-coverage]:
 clang-tidy:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: "Code Quality"
-  needs: ['clang [cpu-hybrid]']
+  needs: ['clang [cpu-hybrid]', 'gcc [cuda-mpi-coverage]']
   before_script:
     - !reference [.clang-library-path-patch, before_script]
     - apt-get update; apt-get install -y tree
@@ -128,6 +128,7 @@ clang-tidy:
     cmakePresetName: .ci-clang-tidy
     CC: "clang"
     CXX: "clang++"
+    WALBERLA_CI_CUDA_ARCHITECTURES: "60"
   artifacts:
     reports:
       dotenv: build.env # This makes $BUILD_JOB_ID available in downstream jobs
@@ -140,6 +141,7 @@ clang-tidy:
     expire_in: 2 days
   tags:
     - docker
+    - cudaComputeCapability6.1
 
 clang-tidy:preview:
   stage: "Code Quality Preview"
