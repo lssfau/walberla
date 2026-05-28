@@ -466,7 +466,7 @@ endif()
 
 if(WALBERLA_BUILD_WITH_PARMETIS)
     if(NOT WALBERLA_BUILD_WITH_MPI)
-        message (fatal_error "ParMetis depends on MPI. Please enable MPI or use METIS instead.")
+        message (FATAL_ERROR "ParMetis depends on MPI. Please enable MPI or use METIS instead.")
     else()
         find_package (Parmetis REQUIRED)
         include_directories (${PARMETIS_INCLUDE_DIR})
