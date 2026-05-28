@@ -27,7 +27,7 @@ workflow:
 ####################################################################################################
 
 clang [cpu-hybrid]:
-  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
+  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-21
   stage: Testsuite
   extends: .testsuite-base-linux
   before_script:
@@ -46,7 +46,7 @@ clang [cpu-hybrid]:
     expire_in: 2 days
 
 icx [cpu-omp]:
-  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2026
+  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
   stage: Testsuite
   extends: .testsuite-base-linux
   variables:
@@ -105,7 +105,7 @@ gcc [cuda-mpi-coverage]:
 ####################################################################################################
 
 clang-tidy:
-  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
+  image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-21
   stage: "Code Quality"
   needs: []
   before_script:
