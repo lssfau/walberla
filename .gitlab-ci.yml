@@ -141,7 +141,6 @@ clang-tidy:
     expire_in: 2 days
   tags:
     - docker
-    - cudaComputeCapability6.1
 
 clang-tidy:preview:
   stage: "Code Quality Preview"
