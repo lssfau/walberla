@@ -457,6 +457,13 @@ endif()
 ##
 ############################################################################################################################
 
+if(WALBERLA_BUILD_WITH_METIS OR WALBERLA_BUILD_WITH_PARMETIS)
+    # metis is required for parmetis
+    set (WALBERLA_BUILD_WITH_METIS TRUE FORCE)
+    find_package (Metis REQUIRED)
+    include_directories (${METIS_INCLUDE_DIRS})
+endif()
+
 if(WALBERLA_BUILD_WITH_PARMETIS)
     if(NOT WALBERLA_BUILD_WITH_MPI)
         message (WARNING "ParMetis was disabled, since it requires MPI.
@@ -464,21 +471,9 @@ if(WALBERLA_BUILD_WITH_PARMETIS)
         )
         set (WALBERLA_BUILD_WITH_PARMETIS FALSE FORCE)
     else()
-        # metis is required for parmetis
-        set (WALBERLA_BUILD_WITH_METIS TRUE FORCE)
+        find_package (Parmetis REQUIRED)
+        include_directories (${PARMETIS_INCLUDE_DIR})
     endif()
-endif()
-
-if(WALBERLA_BUILD_WITH_METIS)
-    find_package (Metis REQUIRED)
-
-    include_directories (${METIS_INCLUDE_DIRS})
-endif()
-
-if(WALBERLA_BUILD_WITH_PARMETIS)
-    find_package (Parmetis REQUIRED)
-
-    include_directories (${PARMETIS_INCLUDE_DIR})
 endif()
 
 ############################################################################################################################
