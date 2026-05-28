@@ -89,7 +89,7 @@ struct GPU : public _exec_tag {
     void sync() const { WALBERLA_GPU_CHECK(gpuStreamSynchronize(stream_)) }
 
 private:
-    dim3 block_{ 32, 4, 4 };
+    dim3 block_{ 8, 8, 4 };
     gpuStream_t stream_{ gpuStreamDefault };
 #else
     void sync() const {}

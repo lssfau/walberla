@@ -503,7 +503,7 @@ class Sweep(CustomGenerator):
                 raise ValueError(f"Unexpected field type: {f.field_type} at field  {f}")
 
     def _render_invocation(
-        self, sfg: SfgComposer, target: Target, khandle: SfgKernelHandle
+        self, sfg: SfgComposer, target: Target, khandle: SfgKernelHandle, exec_tag: SfgVar | None = None,
     ) -> tuple[SfgCallTreeNode, set[SfgVar]]:
         """Render and return the kernel invocation plus a set of additional parameters required
         at the call site."""
@@ -518,7 +518,17 @@ class Sweep(CustomGenerator):
             #     block_size = sfg.gpu_api.dim3(const=True).var("gpuBlockSize")
             #     return (sfg.gpu_invoke(khandle, block_size=block_size), {block_size})
             # else:
-            return (sfg.gpu_invoke(khandle), set())
+            if exec_tag is None:
+                return (sfg.gpu_invoke(khandle), set())
+
+            return (
+                sfg.gpu_invoke(
+                    khandle,
+                    block_size=AugExpr.format("{}.block()", exec_tag),
+                    stream=AugExpr.format("{}.stream()", exec_tag),
+                ),
+                set(),
+            )
 
         else:
             return (sfg.call(khandle), set())
@@ -537,8 +547,16 @@ class Sweep(CustomGenerator):
             knamespace = sfg.kernel_namespace(f"{self._name}_kernels")
             khandle = knamespace.create(assignments, self._name, gen_config)
 
+        if target.is_gpu():
+            sfg.include("walberla/v8/sweep/ExecutionTags.hpp")
+
+            default_exec_tag = "walberla::v8::sweep::exectag::GPU{}"
+            exec_tag = SfgVar("exTag", PsCustomType("const walberla::v8::sweep::exectag::GPU&"))
+        else:
+            exec_tag = None
+
         ker_invocation, ker_call_site_params = self._render_invocation(
-            sfg, target, khandle
+            sfg, target, khandle, exec_tag=exec_tag
         )
 
         all_fields: dict[str, FieldInfo] = {
@@ -662,31 +680,63 @@ class Sweep(CustomGenerator):
                 ),
             ]
 
-        runmethods = [sfg.method("operator()")(*render_runmethod())]
+        if target.is_gpu():
+            runmethods = [
+                sfg.method("operator()")(*render_runmethod()).params(block, (exec_tag, default_exec_tag)),
+            ]
 
-        if not self.sparse:
-            ci_var = CellInterval(const=True, ref=True).var("ci")
-            runmethods.append(
-                sfg.method("runOnCellInterval")(
-                    *render_runmethod(ci_var, generate_swap=False)
-                )
-            )
-            # Field swaps not empty
-            if swaps:
-                field_swap_var = SfgVar("swapBuffers", "const bool")
+            if not self.sparse:
+                ci_var = CellInterval(const=True, ref=True).var("ci")
                 runmethods.append(
                     sfg.method("runOnCellInterval")(
-                        AugExpr.format("runOnCellInterval({}, {});", block, ci_var),
-                        sfg.branch(field_swap_var)(
-                            AugExpr.format("swapShadowBuffers({});", block),
-                        ),
-                    ).params(block, ci_var, field_swap_var)
+                        *render_runmethod(ci_var, generate_swap=False)
+                    ).params(block, ci_var, (exec_tag, default_exec_tag))
                 )
+                # Field swaps not empty
+                if swaps:
+                    field_swap_var = SfgVar("swapBuffers", "const bool")
+                    runmethods.append(
+                        sfg.method("runOnCellInterval")(
+                            AugExpr.format(
+                                "runOnCellInterval({}, {}, {});",
+                                block,
+                                ci_var,
+                                exec_tag,
+                            ),
+                            sfg.branch(field_swap_var)(
+                                AugExpr.format("swapShadowBuffers({});", block),
+                            ),
+                        ).params(block, ci_var, field_swap_var, (exec_tag, default_exec_tag))
+                    )
+
+        else:
+            runmethods = [sfg.method("operator()")(*render_runmethod())]
+
+            if not self.sparse:
+                ci_var = CellInterval(const=True, ref=True).var("ci")
                 runmethods.append(
-                    sfg.method("swapShadowBuffers")(
-                        *render_swap_only()
+                    sfg.method("runOnCellInterval")(
+                        *render_runmethod(ci_var, generate_swap=False)
                     )
                 )
+                # Field swaps not empty
+                if swaps:
+                    field_swap_var = SfgVar("swapBuffers", "const bool")
+                    runmethods.append(
+                        sfg.method("runOnCellInterval")(
+                            AugExpr.format("runOnCellInterval({}, {});", block, ci_var),
+                            sfg.branch(field_swap_var)(
+                                AugExpr.format("swapShadowBuffers({});", block),
+                            ),
+                        ).params(block, ci_var, field_swap_var)
+                    )
+
+        if not self.sparse and swaps:
+            runmethods.append(
+                sfg.method("swapShadowBuffers")(
+                    *render_swap_only()
+                )
+            )
 
         sfg.klass(self._name)(
             sfg.public(
