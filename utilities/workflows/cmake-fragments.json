@@ -145,8 +145,7 @@
             ],
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_OPENMP": false,
-                "WALBERLA_BUILD_WITH_MPI": false,
-                "WALBERLA_BUILD_WITH_PARMETIS": false
+                "WALBERLA_BUILD_WITH_MPI": false
             }
         },
         {
