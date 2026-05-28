@@ -145,8 +145,9 @@ clang-tidy:
 
 clang-tidy:preview:
   stage: "Code Quality Preview"
-  dependencies:
-    - clang-tidy
+  needs:
+    - job: clang-tidy
+      artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
     REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/clang-tidy-output/index.html"
@@ -156,7 +157,6 @@ clang-tidy:preview:
     on_stop: clang-tidy:preview:stop
   rules:
     - if: $CI_MERGE_REQUEST_ID
-      when: always
   script:
     - echo "Setting up environment link for job ${BUILD_JOB_ID}"
     - echo "View clang-tidy output at ${REVIEW_URL}"
