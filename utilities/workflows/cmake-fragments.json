@@ -63,6 +63,14 @@
             }
         },
         {
+            "displayName": "Disables all libraries that only work with MPI enabled",
+            "name": ".disable-mpi-dependent-libs",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_PARMETIS": false
+            }
+        },
+        {
             "name": ".ninja",
             "hidden": true,
             "generator": "Ninja"
@@ -132,6 +140,9 @@
             "displayName": "Serial build - OpenMP and MPI disabled",
             "name": ".serial",
             "hidden": true,
+            "inherits": [
+                ".disable-mpi-dependent-libs"
+            ],
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_OPENMP": false,
                 "WALBERLA_BUILD_WITH_MPI": false,
@@ -151,6 +162,9 @@
             "displayName": "OMP-only shared-memory parallelization",
             "name": ".omponly",
             "hidden": true,
+            "inherits": [
+                ".disable-mpi-dependent-libs"
+            ],
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_OPENMP": true,
                 "WALBERLA_BUILD_WITH_MPI": false
