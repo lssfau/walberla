@@ -221,11 +221,12 @@ with CodeGeneration() as ctx:
         pass
     else:
         raise ValueError("Invalid weight method")
-
-    if velocity_str == 'mean':
-        wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.MEAN_VELOCITY
+    if velocity_str == 'instantaneous':
+        wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.INSTANTANEOUS_VELOCITY
     elif velocity_str == 'filtered':
         wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.FILTERED_VELOCITY
+    elif velocity_str == 'mean':
+        wfb_common_params['reference_velocity'] = WallFunctionBounce.ReferenceVelocity.MEAN_VELOCITY
     else:
         raise ValueError("Invalid reference velocity")
 
