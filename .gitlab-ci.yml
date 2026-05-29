@@ -45,7 +45,7 @@ clang [cpu-hybrid]:
       - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     expire_in: 2 days
 
-icx [cpu-omp]:
+icx [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
   stage: Testsuite
   extends: .testsuite-base-linux
@@ -61,7 +61,7 @@ icx [cpu-omp]:
       - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     expire_in: 2 days
 
-gcc [cuda-mpi-coverage]:
+gcc [cuda-hybrid-coverage]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Testsuite
   extends: .testsuite-base-linux-cuda

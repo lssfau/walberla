@@ -261,7 +261,7 @@ def get_cmake_presets() -> CMakePresets:
 
     #   GCC + Coverage Testsuite preset chain
     presets.add_preset_chain(
-        ConfigurePreset.from_fragments("mpionly", "cuda", "gcov", name=".ci-testsuite-gcc-coverage"),
+        ConfigurePreset.from_fragments("hybrid", "cuda", "gcov", name=".ci-testsuite-gcc-coverage"),
         targets="waLBerlaTestsuite",
     )
 
@@ -273,7 +273,7 @@ def get_cmake_presets() -> CMakePresets:
 
     #   Intel Testsuite preset chain
     presets.add_preset_chain(
-        ConfigurePreset.from_fragments("omponly", name=".ci-testsuite-icx"),
+        ConfigurePreset.from_fragments("hybrid", name=".ci-testsuite-icx"),
         targets="waLBerlaTestsuite",
     )
 
