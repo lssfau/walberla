@@ -249,7 +249,7 @@ MATRIX_COMPILERS = [
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
     "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial-make"],
-    "clang-21": ["cpuonly-ompyonly-debugOptimized"],
+    "clang-21": ["cpuonly-omponly-debugOptimized"],
     "icx-2023": ["cpuonly-omponly-singlePrecision-make"],
     "icx-2025": ["cuda-hybrid-make", "cpuonly-mpionly-debugOptimized"],
     "gcc-bootstrap": ["cpuonly-hybrid-singlePrecision-make", "cpuonly-omponly-debugOptimized"],
