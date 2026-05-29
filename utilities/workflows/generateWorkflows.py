@@ -225,11 +225,12 @@ class CiConfig:
 
 MATRIX_CONFIGURE_PRESETS = [
     ConfigurePreset.from_fragments("cuda", "hybrid", "debugOptimized", "singlePrecision"),
-    ConfigurePreset.from_fragments("cuda", "omponly", "make"),
+    ConfigurePreset.from_fragments("cuda", "hybrid", "make"),
     ConfigurePreset.from_fragments("cpuonly", "mpionly", "debugOptimized"),
     ConfigurePreset.from_fragments("cpuonly", "hybrid", "singlePrecision", "make"),
     ConfigurePreset.from_fragments("cpuonly", "omponly", "debugOptimized"),
-    ConfigurePreset.from_fragments("cpuonly", "serial"),
+    ConfigurePreset.from_fragments("cpuonly", "omponly", "singlePrecision", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "serial", "make"),
 ]
 
 MATRIX_COMPILERS = [
@@ -247,13 +248,18 @@ MATRIX_COMPILERS = [
 #   CI Test Matrix.
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
-    "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial"],
-    "clang-21": ["cpuonly-mpionly-debugOptimized"],
-    "icx-2023": ["cpuonly-hybrid-singlePrecision-make"],
-    "icx-2025": ["cuda-omponly-make", "cpuonly-mpionly-debugOptimized"],
+    "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial-make"],
+    "clang-21": ["cpuonly-ompyonly-debugOptimized"],
+    "icx-2023": ["cpuonly-omponly-singlePrecision-make"],
+    "icx-2025": ["cuda-hybrid-make", "cpuonly-mpionly-debugOptimized"],
     "gcc-bootstrap": ["cpuonly-hybrid-singlePrecision-make", "cpuonly-omponly-debugOptimized"],
     "gcc-14": ["cpuonly-mpionly-debugOptimized"],
 }
+# Cases that are currently tested before merging to master:
+# gnu: (cuda: mpi&omp, ninja, Release, fp64); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release))
+# llvm: (cuda: mpi&omp, ninja, Debug, fp32); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release)) 
+# intel: (cuda: mpi&omp, make, Release, fp64); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release)) 
+# overall: (cuda: mpi&omp, (Debug/Release), (make/ninja), (fp32/fp64))
 
 
 def get_cmake_presets() -> CMakePresets:
