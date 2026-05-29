@@ -301,7 +301,7 @@ documentation:preview:stop:
 pages:
   image: alpine:latest
   stage: deploy
-  needs: ["documentation", "gcc [cuda-mpi-coverage]"]
+  needs: ["documentation", "gcc [cuda-hybrid-coverage]"]
   script:
     - mv build/documentation/doc/html public
     - mv coverage public/coverage
