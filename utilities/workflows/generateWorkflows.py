@@ -233,7 +233,7 @@ MATRIX_CONFIGURE_PRESETS = [
 ]
 
 MATRIX_COMPILERS = [
-    CompilerSpec("clang-17", "clang", "clang++"),
+    CompilerSpec("clang-19", "clang", "clang++"),
     CompilerSpec("clang-21", "clang", "clang++"),
     CompilerSpec("clang-22", "clang", "clang++"),
     CompilerSpec("gcc-bootstrap", "gcc", "g++"),
@@ -247,7 +247,7 @@ MATRIX_COMPILERS = [
 #   CI Test Matrix.
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
-    "clang-17": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial"],
+    "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial"],
     "clang-21": ["cpuonly-mpionly-debugOptimized"],
     "icx-2023": ["cpuonly-hybrid-singlePrecision-make"],
     "icx-2025": ["cuda-omponly-make", "cpuonly-mpionly-debugOptimized"],
