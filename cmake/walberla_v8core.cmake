@@ -42,7 +42,11 @@ endif()
 if(WALBERLA_BUILD_WITH_CUDA)
 
     #   Enable relaxed constexpr for consuming CUDA TUs
-    target_compile_options (walberla_v8 INTERFACE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+    target_compile_options (
+        walberla_v8
+        INTERFACE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr --extended-lambda>
+    )
 
 elseif(WALBERLA_BUILD_WITH_HIP)
 
