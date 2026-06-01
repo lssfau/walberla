@@ -640,8 +640,6 @@ if(WALBERLA_BUILD_WITH_CUDA)
         message (WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}"
         )
     endif()
-
-    add_flag (CMAKE_CUDA_FLAGS "--extended-lambda") # Required for __host__ __device__ lambdas
 endif()
 
 # Can be used in CMake files containing generated files where the file suffix is dependent on the target
