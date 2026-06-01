@@ -459,7 +459,7 @@ endif()
 
 if(WALBERLA_BUILD_WITH_METIS OR WALBERLA_BUILD_WITH_PARMETIS)
     # metis is required for parmetis
-    set (WALBERLA_BUILD_WITH_METIS TRUE FORCE)
+    set (WALBERLA_BUILD_WITH_METIS TRUE CACHE BOOL "" FORCE)
     find_package (Metis REQUIRED)
     include_directories (${METIS_INCLUDE_DIRS})
 endif()
