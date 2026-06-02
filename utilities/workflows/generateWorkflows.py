@@ -240,7 +240,7 @@ MATRIX_COMPILERS = [
     CompilerSpec("gcc-bootstrap", "gcc", "g++"),
     CompilerSpec("gcc-14", "gcc", "g++"),
     CompilerSpec("gcc-15", "gcc", "g++"),
-    CompilerSpec("icx-2023", "icx", "icpx"),
+    CompilerSpec("icx-2024", "icx", "icpx"),
     CompilerSpec("icx-2025", "icx", "icpx"),
     CompilerSpec("icx-2026", "icx", "icpx"),
 ]
@@ -250,7 +250,7 @@ MATRIX_COMPILERS = [
 CI_MATRIX = {
     "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial-make"],
     "clang-21": ["cpuonly-omponly-debugOptimized"],
-    "icx-2023": ["cpuonly-omponly-singlePrecision-make"],
+    "icx-2024": ["cpuonly-omponly-singlePrecision-make"],
     "icx-2025": ["cuda-hybrid-make", "cpuonly-mpionly-debugOptimized"],
     "gcc-bootstrap": ["cpuonly-hybrid-singlePrecision-make", "cpuonly-omponly-debugOptimized"],
     "gcc-14": ["cpuonly-mpionly-debugOptimized"],
