@@ -76,7 +76,7 @@ gcc [cuda-hybrid-coverage]:
   artifacts:
     when: always
     paths:
-      - !reference [.testsuite-common, paths]
+      - !reference [.testsuite-common, artifacts, paths]
       - coverage/
     reports:
       coverage_report:
