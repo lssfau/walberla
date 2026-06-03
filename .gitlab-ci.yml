@@ -104,7 +104,7 @@ clang-tidy:
     # Save the current Job ID to a file so the next job can use it
     - echo "BUILD_JOB_ID=$CI_JOB_ID" >> $CI_PROJECT_DIR/build.env
   after_script:
-    - echo -e "[After build] Collect clang-tidy output. 
+    - echo -e "[After build] Collect clang-tidy output."
     - mv $CI_PROJECT_DIR/build/${cmakePresetName}/clang-tidy-output $CI_PROJECT_DIR/clang-tidy-output
     - cd $CI_PROJECT_DIR/clang-tidy-output
     - tree -H . > index.html

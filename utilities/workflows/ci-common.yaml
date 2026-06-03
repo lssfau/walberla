@@ -16,7 +16,7 @@ workflow:
 
 .debugging:
   after_script:
-    - echo -e "[After build] Move necessary debugging artifacts into debug folder. 
+    - echo -e "[After build] Move necessary debugging artifacts into debug folder."
     - cd $CI_PROJECT_DIR/build/${cmakePresetName}
     - mv CMakeCache.txt $CI_PROJECT_DIR/debug/
     - mv compile_commands.json $CI_PROJECT_DIR/debug/
