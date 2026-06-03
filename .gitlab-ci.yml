@@ -37,13 +37,6 @@ clang [cpu-hybrid]:
     cmakePresetName: .ci-testsuite-clang
     CC: clang
     CXX: clang++
-  artifacts:
-    when: on_failure
-    paths:
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
-    expire_in: 2 days
 
 icx [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
@@ -53,13 +46,6 @@ icx [cpu-hybrid]:
     cmakePresetName: .ci-testsuite-icx
     CC: icx
     CXX: icpx
-  artifacts:
-    when: on_failure
-    paths:
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
-    expire_in: 2 days
 
 gcc [cuda-hybrid-coverage]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
@@ -90,15 +76,12 @@ gcc [cuda-hybrid-coverage]:
   artifacts:
     when: always
     paths:
+      - !reference [.testsuite-common, paths]
       - coverage/
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
-    expire_in: 2 days
 
 ####################################################################################################
 #       Code Quality

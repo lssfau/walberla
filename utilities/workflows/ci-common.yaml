@@ -41,8 +41,15 @@ workflow:
     # Run Test Workflow
     - cmake --workflow --preset ${cmakePresetName}
   artifacts:
+    when: always
     reports:
       junit: build/${cmakePresetName}/junit-report.xml
+    paths:
+      - build/${cmakePresetName}/CMakeCache.txt
+      - build/${cmakePresetName}/compile_commands.json
+      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+    expire_in: 2 days
+
 
 ####################################################################################################
 #                                   Operating Systems                                              #
