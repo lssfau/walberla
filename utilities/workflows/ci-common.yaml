@@ -12,6 +12,12 @@ workflow:
   auto_cancel:
     on_new_commit: interruptible
 
+.debugging:
+  artifactPaths:
+    - build/${cmakePresetName}/CMakeCache.txt
+    - build/${cmakePresetName}/compile_commands.json
+    - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+
 .testsuite-common:
   before_script:
     # Check software versions
@@ -45,9 +51,7 @@ workflow:
     reports:
       junit: build/${cmakePresetName}/junit-report.xml
     paths:
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+      - !reference [.debugging, artifactPaths]
     expire_in: 2 days
 
 
