@@ -66,6 +66,7 @@ gcc [cuda-hybrid-coverage]:
       --html-details coverage/coverage.html
       --cobertura coverage/coverage.xml
       build/${cmakePresetName}
+    - !reference [.debugging, after_script]
   variables:
     RUNNER_AFTER_SCRIPT_TIMEOUT: 20m
     cmakePresetName: .ci-testsuite-gcc-coverage
@@ -76,8 +77,8 @@ gcc [cuda-hybrid-coverage]:
   artifacts:
     when: always
     paths:
-      - !reference [.debugging, artifactPaths]
       - coverage/
+      - debug/
     reports:
       coverage_report:
         coverage_format: cobertura
@@ -103,9 +104,11 @@ clang-tidy:
     # Save the current Job ID to a file so the next job can use it
     - echo "BUILD_JOB_ID=$CI_JOB_ID" >> $CI_PROJECT_DIR/build.env
   after_script:
+    - echo -e "[After build] Collect clang-tidy output. 
     - mv $CI_PROJECT_DIR/build/${cmakePresetName}/clang-tidy-output $CI_PROJECT_DIR/clang-tidy-output
     - cd $CI_PROJECT_DIR/clang-tidy-output
     - tree -H . > index.html
+    - !reference [.debugging, after_script]
   variables:
     cmakePresetName: .ci-clang-tidy
     CC: "clang"
@@ -117,9 +120,7 @@ clang-tidy:
     when: always
     paths:
       - clang-tidy-output
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+      - debug/
     expire_in: 2 days
   tags:
     - docker
