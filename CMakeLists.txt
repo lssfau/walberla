@@ -279,6 +279,63 @@ mark_as_advanced (WALBERLA_CXX_COMPILER_IS_INTELLLVM)
 
 ############################################################################################################################
 ##
+## DebugOptimized Build Configuration for fast execution of tests with enabled asserts
+##
+############################################################################################################################
+
+# cmake-format: off
+set( CMAKE_C_FLAGS_DEBUGOPTIMIZED             ${CMAKE_C_FLAGS_DEBUG}             )
+set( CMAKE_CXX_FLAGS_DEBUGOPTIMIZED           ${CMAKE_CXX_FLAGS_DEBUG}           )
+set( CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED    ${CMAKE_EXE_LINKER_FLAGS_DEBUG}    )
+set( CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED ${CMAKE_SHARED_LINKER_FLAGS_DEBUG} )
+set( CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED ${CMAKE_MODULE_LINKER_FLAGS_DEBUG} )
+# cmake-format: on
+
+set_property (GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOptimized)
+
+set (CMAKE_C_FLAGS_DEBUGOPTIMIZED
+     ${CMAKE_C_FLAGS_DEBUGOPTIMIZED}
+     CACHE STRING "Flags used by the compiler during DebugOptimized builds"
+)
+set (CMAKE_CXX_FLAGS_DEBUGOPTIMIZED
+     ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED}
+     CACHE STRING "Flags used by the compiler during DebugOptimized builds"
+)
+set (CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED
+     ${CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED}
+     CACHE STRING "Flags used by the linker for executables during DebugOptimized builds"
+)
+set (CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED
+     ${CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED}
+     CACHE STRING "Flags used by the linker for shared libraries during DebugOptimized builds"
+)
+set (CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED
+     ${CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED}
+     CACHE STRING "Flags used by the linker for loadable modules during DebugOptimized builds"
+)
+
+mark_as_advanced (
+    CMAKE_C_FLAGS_DEBUGOPTIMIZED
+    CMAKE_CXX_FLAGS_DEBUGOPTIMIZED
+    CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED
+    CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED
+    CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED
+)
+
+# This variable is only set for multi-config IDE generators like VC
+if(CMAKE_CONFIGURATION_TYPES)
+    list (APPEND CMAKE_CONFIGURATION_TYPES DebugOptimized)
+    list (REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
+    set (CMAKE_CONFIGURATION_TYPES
+         "${CMAKE_CONFIGURATION_TYPES}"
+         CACHE STRING "Semicolon separated list of supported types
+                      [Debug|Release|MinSizeRel|RelWithDebInfo|ReleaseNoOutfiles|DebugOptimized]" FORCE
+    )
+endif()
+############################################################################################################################
+
+############################################################################################################################
+##
 ## Compiler Setup
 ##
 ############################################################################################################################
@@ -459,7 +516,10 @@ endif()
 
 if(WALBERLA_BUILD_WITH_METIS OR WALBERLA_BUILD_WITH_PARMETIS)
     # metis is required for parmetis
-    set (WALBERLA_BUILD_WITH_METIS TRUE CACHE BOOL "" FORCE)
+    set (WALBERLA_BUILD_WITH_METIS
+         TRUE
+         CACHE BOOL "" FORCE
+    )
     find_package (Metis REQUIRED)
     include_directories (${METIS_INCLUDE_DIRS})
 endif()
@@ -546,63 +606,6 @@ endif()
 
 ############################################################################################################################
 ##
-## DebugOptimized Build Configuration for fast execution of tests with enabled asserts
-##
-############################################################################################################################
-
-# cmake-format: off
-set( CMAKE_C_FLAGS_DEBUGOPTIMIZED             ${CMAKE_C_FLAGS_DEBUG}             )
-set( CMAKE_CXX_FLAGS_DEBUGOPTIMIZED           ${CMAKE_CXX_FLAGS_DEBUG}           )
-set( CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED    ${CMAKE_EXE_LINKER_FLAGS_DEBUG}    )
-set( CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED ${CMAKE_SHARED_LINKER_FLAGS_DEBUG} )
-set( CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED ${CMAKE_MODULE_LINKER_FLAGS_DEBUG} )
-# cmake-format: on
-
-set_property (GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOptimized)
-
-set (CMAKE_C_FLAGS_DEBUGOPTIMIZED
-     ${CMAKE_C_FLAGS_DEBUGOPTIMIZED}
-     CACHE STRING "Flags used by the compiler during DebugOptimized builds"
-)
-set (CMAKE_CXX_FLAGS_DEBUGOPTIMIZED
-     ${CMAKE_CXX_FLAGS_DEBUGOPTIMIZED}
-     CACHE STRING "Flags used by the compiler during DebugOptimized builds"
-)
-set (CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED
-     ${CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED}
-     CACHE STRING "Flags used by the linker for executables during DebugOptimized builds"
-)
-set (CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED
-     ${CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED}
-     CACHE STRING "Flags used by the linker for shared libraries during DebugOptimized builds"
-)
-set (CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED
-     ${CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED}
-     CACHE STRING "Flags used by the linker for loadable modules during DebugOptimized builds"
-)
-
-mark_as_advanced (
-    CMAKE_C_FLAGS_DEBUGOPTIMIZED
-    CMAKE_CXX_FLAGS_DEBUGOPTIMIZED
-    CMAKE_EXE_LINKER_FLAGS_DEBUGOPTIMIZED
-    CMAKE_SHARED_LINKER_FLAGS_DEBUGOPTIMIZED
-    CMAKE_MODULE_LINKER_FLAGS_DEBUGOPTIMIZED
-)
-
-# This variable is only set for multi-config IDE generators like VC
-if(CMAKE_CONFIGURATION_TYPES)
-    list (APPEND CMAKE_CONFIGURATION_TYPES DebugOptimized)
-    list (REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
-    set (CMAKE_CONFIGURATION_TYPES
-         "${CMAKE_CONFIGURATION_TYPES}"
-         CACHE STRING "Semicolon separated list of supported types
-                      [Debug|Release|MinSizeRel|RelWithDebInfo|ReleaseNoOutfiles|DebugOptimized]" FORCE
-    )
-endif()
-############################################################################################################################
-
-############################################################################################################################
-##
 ## OpenMP
 ##
 ############################################################################################################################
@@ -649,6 +652,7 @@ if(WALBERLA_BUILD_WITH_CUDA)
 else()
     set (CODEGEN_FILE_SUFFIX "cpp")
 endif()
+
 ############################################################################################################################
 
 ############################################################################################################################
