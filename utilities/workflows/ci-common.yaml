@@ -25,9 +25,18 @@ workflow:
 
 .testsuite-common:
   before_script:
+    # Check driver versions
+    - nvidia-container-toolkit --version  || echo "No NVIDIA container toolkit installed."
+    - nvidia-smi || echo "No CUDA driver installed."
+    - nvidia-smi --query-gpu=compute_cap --format=csv || echo "Failed to query compute capability."
+    # Check envrionment paths
+    - echo -e "[Before build] LD_LIBRARY_PATH is:\n$LD_LIBRARY_PATH"
+    - ls -l /usr/local/cuda/lib64/libcudart.so || echo "CUDA runtime library not found."
     # Check software versions
     - $CXX --version
     - cmake --version
+    - cmake -E capabilities | grep -A 10 "CUDA" || echo "CUDA not detected by CMake."
+    - nvcc --version || echo "NVCC not found (CUDA not installed in container)."
     - ccache --version
     - mpirun --version
     - python3 --version
@@ -44,8 +53,6 @@ workflow:
       utilities/workflows/generateWorkflows.py
       cmake-presets utilities/workflows/ci-workflows.json
       --patch-main-presets-file CMakePresets.json
-    # Check envrionment paths
-    - echo -e "[Before build] LD_LIBRARY_PATH is:\n$LD_LIBRARY_PATH"
     # Set MPI environment
     - export MPIEXEC_PREFLAGS="--allow-run-as-root"
   script:
