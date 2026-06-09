@@ -291,11 +291,17 @@ class WFBAdditionalDataHandler(AdditionalDataHandler):
 
     @property
     def additional_field_data(self):
+        if self._reference_velocity == WallFunctionBounce.ReferenceVelocity.INSTANTANEOUS_VELOCITY:
+            return ""
+
         identifier = "CPU" if self._target == Target.GPU else ""
         return f"auto {self._field_name} = block->getData< field::GhostLayerField<{self._velocity_data_type}, " \
                f"{self._stencil.D}> >({self._field_name}{identifier}ID); "
 
     def data_initialisation(self, direction_index):
+
+        if self._reference_velocity == WallFunctionBounce.ReferenceVelocity.INSTANTANEOUS_VELOCITY:
+            return ""
 
         init_list = []
         for key, value in self.get_init_dict().items():

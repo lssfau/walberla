@@ -22,7 +22,7 @@ import sympy as sp
 import pystencils as ps
 
 from pystencilssfg import SourceFileGenerator
-from sweepgen import Sweep
+import sweepgen as sg
 from sweepgen.build_config import DEBUG
 from sweepgen.symbolic import cell
 from sweepgen.prefabs import LbmBulk
@@ -31,7 +31,7 @@ DEBUG.use_cpu_default()
 
 
 with SourceFileGenerator() as sfg:
-    Sweep.use_v8core_fields()
+    sg.Sweep.use_v8core_fields()
     sfg.namespace("DoubleShearLayer::gen")
 
     stencil = LBStencil(Stencil.D3Q19)
@@ -45,41 +45,43 @@ with SourceFileGenerator() as sfg:
     lbm_bulk = LbmBulk(sfg, "LBM", lbm_config)
     sfg.generate(lbm_bulk)
 
-    #   Initial State
     rho, u = lbm_bulk.rho, lbm_bulk.u
-    u_0, kappa, delta = sp.symbols("u_0, kappa, delta")
 
-    initial_state_assignments = [
-        ps.Assignment(rho(), 1),
-        ps.Assignment(
-            u(0),
-            sp.Piecewise(
-                (
-                    u_0 * sp.tanh(kappa * (cell.y() - sp.Rational(1, 4))),
-                    cell.y() <= sp.Rational(1, 2),
-                ),
-                (
-                    u_0 * sp.tanh(kappa * (sp.Rational(3, 4) - cell.y())),
-                    cell.y() > sp.Rational(1, 2),
-                ),
+    #   Initial State
+
+    @sg.flow.generate_sweep(sfg)
+    def SetInitialState(_eq):
+        u_0, kappa, delta = sp.symbols("u_0, kappa, delta")
+
+        _eq.store[rho()] = 1
+
+        _eq.store[u(0)] = sp.Piecewise(
+            (
+                u_0 * sp.tanh(kappa * (cell.y() - sp.Rational(1, 4))),
+                cell.y() <= sp.Rational(1, 2),
             ),
-        ),
-        ps.Assignment(
-            u(1), delta * u_0 * sp.sin(2 * sp.pi * (cell.x() + sp.Rational(1, 4)))
-        ),
-        ps.Assignment(u(2), 0),
-    ]
+            (
+                u_0 * sp.tanh(kappa * (sp.Rational(3, 4) - cell.y())),
+                cell.y() > sp.Rational(1, 2),
+            ),
+        )
 
-    initial_state_sweep = Sweep("SetInitialState", initial_state_assignments)
-    sfg.generate(initial_state_sweep)
+        _eq.store[u(1)] = (
+            delta * u_0 * sp.sin(2 * sp.pi * (cell.x() + sp.Rational(1, 4)))
+        )
+        _eq.store[u(2)] = 0
+
+    #   end initial state
 
     #   Compute Vorticity
 
-    dvx, duy = sp.symbols("dvx, duy")
-    vorticity = ps.fields(f"vorticity: double[{stencil.D}D]", layout="fzyx")
-    vorticity_assignments = [
-        ps.Assignment(dvx, (u[1, 0, 0](1) - u[-1, 0, 0](1)) / (2 * cell.dx())),
-        ps.Assignment(duy, (u[0, 1, 0](0) - u[0, -1, 0](0)) / (2 * cell.dy())),
-        ps.Assignment(vorticity(), (dvx - duy) / 2),
-    ]
-    sfg.generate(Sweep("ComputeVorticity", vorticity_assignments))
+    @sg.flow.generate_sweep(sfg)
+    def ComputeVorticity(_eq):
+        dvx, duy = sp.symbols("dvx, duy")
+        vorticity = ps.fields(f"vorticity: double[{stencil.D}D]", layout="fzyx")
+
+        _eq.let[dvx] = (u[1, 0, 0](1) - u[-1, 0, 0](1)) / (2 * cell.dx())
+        _eq.let[duy] = (u[0, 1, 0](0) - u[0, -1, 0](0)) / (2 * cell.dy())
+        _eq.store[vorticity()] = (dvx - duy) / 2
+
+    #   end vorticity

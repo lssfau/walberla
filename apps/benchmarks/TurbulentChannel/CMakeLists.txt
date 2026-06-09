@@ -4,7 +4,7 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
 
     foreach(stencil d3q19 d3q27)
         foreach(weights none lattice geometric)
-            foreach(velocity filtered mean)
+            foreach(velocity instantaneous filtered mean)
                 foreach(sgs_model none smago qr)
 
                     if (${stencil} STREQUAL "d3q19" AND ( NOT ${weights} STREQUAL "none" ))

@@ -1,4 +1,5 @@
 import pystencils as ps
+
 from pystencilssfg import SourceFileGenerator
 from sweepgen import Sweep, get_build_config
 from sweepgen.build_config import DEBUG
@@ -17,7 +18,7 @@ with SourceFileGenerator() as sfg:
     asms = [
         ps.Assignment(out_real.center(0), cell.x()),
         ps.Assignment(out_real.center(1), cell.y()),
-        ps.Assignment(out_real.center(2), cell.z())
+        ps.Assignment(out_real.center(2), cell.z()),
     ]
 
     sweep = Sweep("CellCentersGlobal", asms)
@@ -25,24 +26,24 @@ with SourceFileGenerator() as sfg:
 
     #   Local Cell Centers
 
-    asms = [
-        ps.Assignment(out_real.center(0), cell.local_x()),
-        ps.Assignment(out_real.center(1), cell.local_y()),
-        ps.Assignment(out_real.center(2), cell.local_z())
-    ]
+    @ps.flow.block
+    def cellCentersLocal(_eq):
+        _eq.store[out_real.center(0)] = cell.local_x()
+        _eq.store[out_real.center(1)] = cell.local_y()
+        _eq.store[out_real.center(2)] = cell.local_z()
 
-    sweep = Sweep("CellCentersLocal", asms)
+    sweep = Sweep("CellCentersLocal", cellCentersLocal)
     sfg.generate(sweep)
 
     #   Local Cell Indices
 
-    asms = [
-        ps.Assignment(out_int.center(0), cell_index.x_local()),
-        ps.Assignment(out_int.center(1), cell_index.y_local()),
-        ps.Assignment(out_int.center(2), cell_index.z_local())
-    ]
+    @ps.flow.block
+    def cellIndicesLocal(_eq):
+        _eq.store[out_int.center(0)] = cell_index.x_local()
+        _eq.store[out_int.center(1)] = cell_index.y_local()
+        _eq.store[out_int.center(2)] = cell_index.z_local()
 
-    sweep = Sweep("CellIndicesLocal", asms)
+    sweep = Sweep("CellIndicesLocal", cellIndicesLocal)
     sfg.generate(sweep)
 
     #   Global Cell Indices
@@ -50,7 +51,7 @@ with SourceFileGenerator() as sfg:
     asms = [
         ps.Assignment(out_int.center(0), cell_index.x_global()),
         ps.Assignment(out_int.center(1), cell_index.y_global()),
-        ps.Assignment(out_int.center(2), cell_index.z_global())
+        ps.Assignment(out_int.center(2), cell_index.z_global()),
     ]
 
     sweep = Sweep("CellIndicesGlobal", asms)

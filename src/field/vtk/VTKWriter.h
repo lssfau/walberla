@@ -119,6 +119,8 @@ protected:
       field_ = this->block_->template getData< Field_T >( bdid_ );
    }
 
+   using base_t::evaluate;
+
 // Suppressed because waLBerla relies on templated polymorphic interfaces (see Issue 305).
 // NOLINTNEXTLINE(portability-template-virtual-member-function)
    OutputType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override

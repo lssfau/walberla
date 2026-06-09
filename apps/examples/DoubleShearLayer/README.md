@@ -70,19 +70,20 @@ API. We pass this to the `LbmBulk` prefab to generate the sweeps for the bulk dy
 
 #### Initial State
 
-Then, we encode the above equations defining the initial state using
-SymPy and produce an initialization sweep from them:
+Then, we encode the above equations defining the initial state using SymPy and
+[pystencils.flow](https://pycodegen.pages.i10git.cs.fau.de/pystencils/user_manual/flowgraphs.html),
+and produce an initialization sweep from them:
 
 \skip rho, u =
-\until generate(initial_state_sweep)
+\until end initial state
 
 #### Finite Differences for Vorticity
 
 Finally, we set up a sweep computing the 2D vorticity from the velocity field
 using finite differences:
 
-\skip dvx, duy
-\until "ComputeVorticity"
+\skip Compute Vorticity
+\until end vorticity
 
 
 ## Application Frame

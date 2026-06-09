@@ -13,14 +13,12 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, overload
 import sympy as sp
 
-from pystencils import (
-    Assignment,
-    AssignmentCollection,
-    DEFAULTS
-)
+from pystencils import Assignment, AssignmentCollection, DEFAULTS
+import pystencils.flow as psflow
+from pystencils.simp.assignment_collection import SymbolGen
 
 from pystencilssfg import SfgComposer
 from pystencilssfg.lang import (
@@ -48,8 +46,28 @@ class BlockforestParamExtraction:
             dict()
         )
 
+    @overload
     @staticmethod
-    def process(asms: AssignmentCollection) -> AssignmentCollection:
+    def process(ker: AssignmentCollection) -> AssignmentCollection: ...  # noqa: E704
+
+    @overload
+    @staticmethod
+    def process(ker: psflow.Flowgraph) -> psflow.Flowgraph: ...  # noqa: E704
+
+    @staticmethod
+    def process(
+        ker: AssignmentCollection | psflow.Flowgraph,
+    ) -> AssignmentCollection | psflow.Flowgraph:
+        match ker:
+            case AssignmentCollection():
+                return BlockforestParamExtraction._process_assignment_collection(ker)
+            case psflow.Flowgraph():
+                return BlockforestParamExtraction._process_flowgraph(ker)
+
+    @staticmethod
+    def _process_assignment_collection(
+        asms: AssignmentCollection,
+    ) -> AssignmentCollection:
         from sympy.core.function import AppliedUndef
 
         expandable_appls: set[AppliedUndef] = filter(  # type: ignore
@@ -64,6 +82,28 @@ class BlockforestParamExtraction:
             subs[appl] = symb
 
         return asms.new_with_substitutions(subs)
+
+    @staticmethod
+    def _process_flowgraph(graph: psflow.Flowgraph) -> psflow.Flowgraph:
+        from sympy.core.function import AppliedUndef
+
+        expandable_appls: set[AppliedUndef] = filter(  # type: ignore
+            lambda expr: hasattr(expr, "expansion_func"), graph.atoms(AppliedUndef)
+        )
+
+        symgen = SymbolGen("_geometry_subexpr")
+        subs: dict[sp.Basic, sp.Symbol] = dict()
+
+        @psflow.block
+        def blockforest_geometry(_eq):
+            for appl in expandable_appls:
+                expansion: sp.Expr = appl.expansion_func(*appl.args)  # type: ignore
+                symb = next(symgen)  # type: ignore
+                _eq.export[symb] = expansion
+                subs[appl] = symb
+
+        ker_graph = psflow.subgraph(graph.subs(subs), preds=[blockforest_geometry])
+        return psflow.tie(ker_graph, name=graph.name)
 
     def filter_params(self, params: set[SfgVar]) -> tuple[set[SfgVar], bool]:
         params_filtered = set()
@@ -91,7 +131,7 @@ class BlockforestParamExtraction:
                 ),
                 #   If spatial counters escape the kernel (e.g. the z-counter in a 2D-kernel),
                 #   they are set to zero
-                DEFAULTS.spatial_counters[coord].name: lambda _: AugExpr.format("0")
+                DEFAULTS.spatial_counters[coord].name: lambda _: AugExpr.format("0"),
             }
 
             with_blockforest = {
