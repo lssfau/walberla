@@ -130,6 +130,7 @@ clang-tidy:preview:
     auto_stop_in: 1 month
   rules:
     - if: $CI_MERGE_REQUEST_ID
+      when: always
   script:
     - echo "Setting up environment link for job ${BUILD_JOB_ID}"
     - cp -r clang-tidy-output stored-clang-tidy-output
