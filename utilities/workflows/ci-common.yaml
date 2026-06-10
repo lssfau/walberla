@@ -1,8 +1,6 @@
-# Note: You can use `extends` to merge hashes but not arrays. (See example: https://docs.gitlab.com/ci/yaml/yaml_optimization/#merge-details)
-# Note: YAML anchors can be used to merge arrays, but only from the same file. (No included files)
-# Note: The `!reference` tag works work with included files as well.
-# Note: GitLab CI will apply flattening for sequences passed with the !reference tag ONLY for "script-like" hashes. 
-#       Sequences from every other hash, will be nested. I.e., !reference tag sequences can only be merged for "before_script", "script", and "after_script" sections. 
+####################################################################################################
+#       Common Global Pipeline Settings
+####################################################################################################
 
 variables:
   CI_CONTAINER_REPOSITORY: i10git.cs.fau.de:5005/ci/images/spack-stable-bincache
@@ -10,9 +8,29 @@ variables:
 default:
   interruptible: true
 
+# Workflow definition
+# See https://docs.gitlab.com/ci/yaml/workflow/
 workflow:
+  rules:
+    # Run merge request pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Do not run branch pipelines if a merge request exists
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    # Do run branch pipelines otherwise
+    - if: $CI_COMMIT_BRANCH
   auto_cancel:
     on_new_commit: interruptible
+
+####################################################################################################
+#       Hidden CI Job Templates (to be extended or referenced by actual jobs)
+# --------------------------------------------------------------------------------------------------
+# Note: You can use `extends` to merge hashes but not arrays. (See example: https://docs.gitlab.com/ci/yaml/yaml_optimization/#merge-details)
+# Note: YAML anchors can be used to merge arrays, but only from the same file. (No included files)
+# Note: The `!reference` tag works work with included files as well.
+# Note: GitLab CI will apply flattening for sequences passed with the !reference tag ONLY for "script-like" hashes. 
+#       Sequences from every other hash, will be nested. I.e., !reference tag sequences can only be merged for "before_script", "script", and "after_script" sections. 
+####################################################################################################
 
 .debugging:
   after_script:
