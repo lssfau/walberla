@@ -120,7 +120,8 @@ clang-tidy:preview:
       artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
-    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/clang-tidy-output/index.html"
+    # REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/clang-tidy-output/index.html"
+    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${CI_JOB_ID}/artifacts/stored-clang-tidy-output/index.html"
   environment:
     # name: clang-tidy/${CI_COMMIT_REF_SLUG}
     name: clang-tidy/${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
@@ -131,6 +132,7 @@ clang-tidy:preview:
     - if: $CI_MERGE_REQUEST_ID
   script:
     - echo "Setting up environment link for job ${BUILD_JOB_ID}"
+    - cp -r clang-tidy-output stored-clang-tidy-output
     - echo "View clang-tidy output at ${REVIEW_URL}"
 
 clang-tidy:preview:stop:
