@@ -40,24 +40,45 @@ workflow:
     - mv CMakeCache.txt $CI_PROJECT_DIR/debug/
     - mv compile_commands.json $CI_PROJECT_DIR/debug/
     - mv src/waLBerlaDefinitions.h $CI_PROJECT_DIR/debug/
+  before_script:
+    - echo "Debugging information will be collected and stored in the debug/ folder as artifacts for 2 days."
+    - | # Set up debugging information collection
+      export DEBUG_SYSTEM_FILE=$CI_PROJECT_DIR/debug/system.log
+      mkdir -p $CI_PROJECT_DIR/debug
+      touch $DEBUG_SYSTEM_FILE
+      echo "System Information for debugging purposes:" >> $DEBUG_SYSTEM_FILE
+    - | # Check NVIDIA driver versions
+      {
+        echo -e "\nGPU Information:\n"
+        nvidia-container-toolkit --version  || echo "No NVIDIA container toolkit installed."
+        nvidia-smi || echo "No CUDA driver installed."
+        nvidia-smi --query-gpu=compute_cap --format=csv || echo "Failed to query compute capability."
+      } >> $DEBUG_SYSTEM_FILE 
+    - | # Get CPU information
+      {
+        echo -e "\nCPU Information:\n"
+        cat /proc/cpuinfo || echo "/proc/cpuinfo not available."
+      } >> $DEBUG_SYSTEM_FILE
+    - | # Check environment paths
+      {
+        echo -e "[Before build] LD_LIBRARY_PATH is:\n$LD_LIBRARY_PATH"
+        ls -l /usr/local/cuda/lib64/libcudart.so || echo "CUDA runtime library not found."
+      } | tee $DEBUG_SYSTEM_FILE
+    - | # Check software versions
+      {
+        $CXX --version
+        cmake --version
+        cmake -E capabilities | grep -A 10 "CUDA" || echo "CUDA not detected by CMake."
+        nvcc --version || echo "NVCC not found (CUDA not installed in container)."
+        ccache --version
+        mpirun --version
+        python3 --version
+      } | tee $DEBUG_SYSTEM_FILE
+
 
 .testsuite-common:
   before_script:
-    # Check driver versions
-    - nvidia-container-toolkit --version  || echo "No NVIDIA container toolkit installed."
-    - nvidia-smi || echo "No CUDA driver installed."
-    - nvidia-smi --query-gpu=compute_cap --format=csv || echo "Failed to query compute capability."
-    # Check envrionment paths
-    - echo -e "[Before build] LD_LIBRARY_PATH is:\n$LD_LIBRARY_PATH"
-    - ls -l /usr/local/cuda/lib64/libcudart.so || echo "CUDA runtime library not found."
-    # Check software versions
-    - $CXX --version
-    - cmake --version
-    - cmake -E capabilities | grep -A 10 "CUDA" || echo "CUDA not detected by CMake."
-    - nvcc --version || echo "NVCC not found (CUDA not installed in container)."
-    - ccache --version
-    - mpirun --version
-    - python3 --version
+    - !reference [.debugging, before_script]
     # Create and activate Python Environment
     - python3 -m venv .venv
     - source .venv/bin/activate
