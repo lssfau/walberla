@@ -242,7 +242,6 @@ MATRIX_COMPILERS = [
     CompilerSpec("gcc-15", "gcc", "g++"),
     CompilerSpec("icx-2024", "icx", "icpx"),
     CompilerSpec("icx-2025", "icx", "icpx"),
-    CompilerSpec("icx-2026", "icx", "icpx"),
 ]
 
 #   CI Test Matrix.
