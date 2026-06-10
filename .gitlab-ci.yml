@@ -169,8 +169,6 @@ schema-validation:
   image: "python:3.13"
   stage: "Code Quality"
   needs: []
-  tags:
-    - docker
   before_script:
     - python -m venv .venv
     - source .venv/bin/activate
@@ -291,8 +289,6 @@ pages:
   artifacts:
     paths:
       - public
-  tags:
-    - docker
   rules:
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
