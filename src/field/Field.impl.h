@@ -656,9 +656,9 @@ namespace field {
    void Field<T,fSize_>::assertValidCoordinates( cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f ) const
    {
       //Bounds checks
-      const cell_idx_t xEff = xOff_ + x;
-      const cell_idx_t yEff = yOff_ + y;
-      const cell_idx_t zEff = zOff_ + z;
+      [[maybe_unused]] const cell_idx_t xEff = xOff_ + x;
+      [[maybe_unused]] const cell_idx_t yEff = yOff_ + y;
+      [[maybe_unused]] const cell_idx_t zEff = zOff_ + z;
 
       WALBERLA_ASSERT_GREATER_EQUAL( xEff, 0, "Field access out of bounds: x too small: " << x << " < " << - xOff_ );
       WALBERLA_ASSERT_GREATER_EQUAL( yEff, 0, "Field access out of bounds: y too small: " << y << " < " << - yOff_ );

@@ -26,51 +26,36 @@ workflow:
 #       Every-Commit Test Suite & Coverage Collection
 ####################################################################################################
 
-testsuite-full (clang-21-hybrid-cuda):
+clang [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-21
   stage: Testsuite
   extends: .testsuite-base-linux
-  script:
-    - !reference [.clang-library-path-patch, script]
-    - !reference [.testsuite-common, script]
+  before_script:
+    - !reference [.clang-library-path-patch, before_script]
+    - !reference [.testsuite-common, before_script]
   variables:
-    cmakePresetName: .ci-branch-testsuite
+    cmakePresetName: .ci-testsuite-clang
     CC: clang
     CXX: clang++
-  artifacts:
-    when: on_failure
-    paths:
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
-    expire_in: 2 days
 
-testsuite-full (icx-2025-hybrid-cuda):
+icx [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
   stage: Testsuite
   extends: .testsuite-base-linux
   variables:
-    cmakePresetName: .ci-branch-testsuite
+    cmakePresetName: .ci-testsuite-icx
     CC: icx
     CXX: icpx
-  artifacts:
-    when: on_failure
-    paths:
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
-    expire_in: 2 days
 
-testsuite+coverage (gcc15-hybrid-cuda):
+gcc [cuda-hybrid-coverage]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Testsuite
-  extends: .testsuite-base-linux
+  extends: .testsuite-base-linux-cuda
   before_script:
-    - !reference [.testsuite-base-linux, before_script]
+    - !reference [.testsuite-base-linux-cuda, before_script]
     - pip install gcovr
     - gcovr --version
   after_script:
-    - !reference [.testsuite-base-linux, after_script]
     - mkdir coverage
     - source .venv/bin/activate
     - >
@@ -81,9 +66,10 @@ testsuite+coverage (gcc15-hybrid-cuda):
       --html-details coverage/coverage.html
       --cobertura coverage/coverage.xml
       build/${cmakePresetName}
+    - !reference [.debugging, after_script]
   variables:
     RUNNER_AFTER_SCRIPT_TIMEOUT: 20m
-    cmakePresetName: .ci-coverage
+    cmakePresetName: .ci-testsuite-gcc-coverage
     CC: gcc
     CXX: g++
     CUDAHOSTCXX: "g++-13"
@@ -92,14 +78,11 @@ testsuite+coverage (gcc15-hybrid-cuda):
     when: always
     paths:
       - coverage/
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+      - debug/
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
-    expire_in: 2 days
 
 ####################################################################################################
 #       Code Quality
@@ -110,10 +93,10 @@ clang-tidy:
   stage: "Code Quality"
   needs: []
   before_script:
+    - !reference [.clang-library-path-patch, before_script]
     - apt-get update; apt-get install -y tree
-    - !reference [.testsuite-common, before_script]
+    - !reference [.testsuite-base-linux, before_script]
   script:
-    - !reference [.clang-library-path-patch, script]
     - cmake --preset ${cmakePresetName}
     - cd build/${cmakePresetName}
     - cmake --build . --target codegen
@@ -121,10 +104,11 @@ clang-tidy:
     # Save the current Job ID to a file so the next job can use it
     - echo "BUILD_JOB_ID=$CI_JOB_ID" >> $CI_PROJECT_DIR/build.env
   after_script:
-    - mkdir -p $CI_PROJECT_DIR/artifacts
+    - echo -e "[After build] Collect clang-tidy output."
     - mv $CI_PROJECT_DIR/build/${cmakePresetName}/clang-tidy-output $CI_PROJECT_DIR/clang-tidy-output
     - cd $CI_PROJECT_DIR/clang-tidy-output
     - tree -H . > index.html
+    - !reference [.debugging, after_script]
   variables:
     cmakePresetName: .ci-clang-tidy
     CC: "clang"
@@ -136,17 +120,16 @@ clang-tidy:
     when: always
     paths:
       - clang-tidy-output
-      - build/${cmakePresetName}/CMakeCache.txt
-      - build/${cmakePresetName}/compile_commands.json
-      - build/${cmakePresetName}/src/waLBerlaDefinitions.h
+      - debug/
     expire_in: 2 days
   tags:
     - docker
 
 clang-tidy:preview:
   stage: "Code Quality Preview"
-  dependencies:
-    - clang-tidy
+  needs:
+    - job: clang-tidy
+      artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
     REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/clang-tidy-output/index.html"
@@ -156,7 +139,6 @@ clang-tidy:preview:
     on_stop: clang-tidy:preview:stop
   rules:
     - if: $CI_MERGE_REQUEST_ID
-      when: always
   script:
     - echo "Setting up environment link for job ${BUILD_JOB_ID}"
     - echo "View clang-tidy output at ${REVIEW_URL}"
@@ -302,7 +284,7 @@ documentation:preview:stop:
 pages:
   image: alpine:latest
   stage: deploy
-  needs: ["documentation", "testsuite+coverage (gcc15-hybrid-cuda)"]
+  needs: ["documentation", "gcc [cuda-hybrid-coverage]"]
   script:
     - mv build/documentation/doc/html public
     - mv coverage public/coverage
@@ -314,109 +296,108 @@ pages:
   rules:
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-###############################################################################
-##                                                                           ##
-##    Benchmarks                                                             ##
-##                                                                           ##
-###############################################################################
+# ###############################################################################
+# ##                                                                           ##
+# ##    Benchmarks                                                             ##
+# ##                                                                           ##
+# ###############################################################################
 
-.benchmark_template: &benchmark_definition
-  script:
-    - apt-get update --fix-missing
-    - apt-get install -y python3-influxdb python3-git
-    - $CXX --version
-    - cmake --version
-    - ccache --version
-    - mpirun --version
-    - export CCACHE_BASEDIR=$CI_PROJECT_DIR
-    - mkdir $CI_PROJECT_DIR/build
-    - cd $CI_PROJECT_DIR/build
-    - cmake .. -DWALBERLA_BUFFER_DEBUG=OFF -DWALBERLA_BUILD_TESTS=OFF -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=OFF -DWALBERLA_BUILD_TOOLS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_CUDA=OFF -DWALBERLA_BUILD_WITH_PYTHON=OFF -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=RELEASE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=ON -DWARNING_ERROR=ON -DWALBERLA_BUILD_WITH_METIS=OFF -DWALBERLA_BUILD_WITH_PARMETIS=OFF -DWALBERLA_OPTIMIZE_FOR_LOCALHOST=ON -DWALBERLA_BUILD_WITH_FASTMATH=ON -DWALBERLA_BUILD_WITH_LTO=ON
-    - cmake . -LA
-    - cd apps/benchmarks/GranularGas
-    - make -j 20
-    - export PATH=$PATH:/usr/local/likwid/bin
-    - likwid-setFrequencies -t 0
-    - likwid-setFrequencies -g performance
-    - likwid-setFrequencies -f 3.3 # set frequency to 3.3
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --DEM --syncNextNeighbor | tee GranularGas_DEM_NN.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --DEM --syncShadowOwners | tee GranularGas_DEM_SO.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticFrictionlessContact | tee GranularGas_HCSITS_NN_IFC.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --ApproximateInelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_AICCBD.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_ICCBD.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticGeneralizedMaximumDissipationContact | tee GranularGas_HCSITS_NN_IGMDC.txt
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncShadowOwners --InelasticFrictionlessContact | tee GranularGas_HCSITS_SO_IFC.txt
-    - python3 pe_upload.py
-    - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./MESA_PD_KernelBenchmark MESA_PD_Benchmark.cfg | tee mesa_pd.txt
-    - python3 mesa_pd_upload.py
-  when: manual
-  needs: []
-  stage: benchmark
-  tags:
-    - docker-benchmark
-  artifacts:
-    paths:
-      - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.txt
-      - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.sqlite
+# .benchmark_template: &benchmark_definition
+#   script:
+#     - apt-get update --fix-missing
+#     - apt-get install -y python3-influxdb python3-git
+#     - $CXX --version
+#     - cmake --version
+#     - ccache --version
+#     - mpirun --version
+#     - export CCACHE_BASEDIR=$CI_PROJECT_DIR
+#     - mkdir $CI_PROJECT_DIR/build
+#     - cd $CI_PROJECT_DIR/build
+#     - cmake .. -DWALBERLA_BUFFER_DEBUG=OFF -DWALBERLA_BUILD_TESTS=OFF -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=OFF -DWALBERLA_BUILD_TOOLS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_CUDA=OFF -DWALBERLA_BUILD_WITH_PYTHON=OFF -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=RELEASE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=ON -DWARNING_ERROR=ON -DWALBERLA_BUILD_WITH_METIS=OFF -DWALBERLA_BUILD_WITH_PARMETIS=OFF -DWALBERLA_OPTIMIZE_FOR_LOCALHOST=ON -DWALBERLA_BUILD_WITH_FASTMATH=ON -DWALBERLA_BUILD_WITH_LTO=ON
+#     - cmake . -LA
+#     - cd apps/benchmarks/GranularGas
+#     - make -j 20
+#     - export PATH=$PATH:/usr/local/likwid/bin
+#     - likwid-setFrequencies -t 0
+#     - likwid-setFrequencies -g performance
+#     - likwid-setFrequencies -f 3.3 # set frequency to 3.3
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --DEM --syncNextNeighbor | tee GranularGas_DEM_NN.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --DEM --syncShadowOwners | tee GranularGas_DEM_SO.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticFrictionlessContact | tee GranularGas_HCSITS_NN_IFC.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --ApproximateInelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_AICCBD.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_ICCBD.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticGeneralizedMaximumDissipationContact | tee GranularGas_HCSITS_NN_IGMDC.txt
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncShadowOwners --InelasticFrictionlessContact | tee GranularGas_HCSITS_SO_IFC.txt
+#     - python3 pe_upload.py
+#     - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./MESA_PD_KernelBenchmark MESA_PD_Benchmark.cfg | tee mesa_pd.txt
+#     - python3 mesa_pd_upload.py
+#   when: manual
+#   stage: benchmark
+#   tags:
+#     - docker-benchmark
+#   artifacts:
+#     paths:
+#       - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.txt
+#       - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.sqlite
 
-benchmark_intel22:
-  <<: *benchmark_definition
-  image: i10git.cs.fau.de:5005/walberla/buildenvs/intel-2022
+# benchmark_intel22:
+#   <<: *benchmark_definition
+#   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel-2022
 
-benchmark_gcc13:
-  <<: *benchmark_definition
-  image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
+# benchmark_gcc13:
+#   <<: *benchmark_definition
+#   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-13
 
-benchmark_clang17:
-  <<: *benchmark_definition
-  image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17
+# benchmark_clang17:
+#   <<: *benchmark_definition
+#   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17
 
-benchmark_ClangBuildAnalyzer:
-  stage: benchmark
-  script:
-    - cmake --version
-    - ccache --version
-    - mpirun --version
-    - export CC=clang
-    - export CXX=clang++
-    - $CXX --version
-    - cd /tmp
-    - git clone https://github.com/aras-p/ClangBuildAnalyzer.git
-    - cd ClangBuildAnalyzer
-    - cmake .
-    - make
-    - export PATH+=:$(pwd)
-    - mkdir $CI_PROJECT_DIR/build
-    - cd $CI_PROJECT_DIR/build
-    - cmake .. -DWALBERLA_BUFFER_DEBUG=OFF -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_CUDA=OFF -DWALBERLA_BUILD_WITH_PYTHON=OFF -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=RELEASE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=ON -DWARNING_ERROR=ON -DWALBERLA_BUILD_WITH_METIS=OFF -DWALBERLA_BUILD_WITH_PARMETIS=OFF -DWALBERLA_OPTIMIZE_FOR_LOCALHOST=ON -DWALBERLA_BUILD_WITH_FASTMATH=ON -DWALBERLA_BUILD_WITH_LTO=ON -DCMAKE_CXX_FLAGS=-ftime-trace -G Ninja
-    - cmake . -LA
-    - ClangBuildAnalyzer --start .
-    - ninja all
-    - ClangBuildAnalyzer --stop . CBA
-    - ClangBuildAnalyzer --analyze CBA
-  image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17
-  tags:
-    - docker-benchmark
-  only:
-    variables:
-      - $ENABLE_NIGHTLY_BUILDS
+# benchmark_ClangBuildAnalyzer:
+#   stage: benchmark
+#   script:
+#     - cmake --version
+#     - ccache --version
+#     - mpirun --version
+#     - export CC=clang
+#     - export CXX=clang++
+#     - $CXX --version
+#     - cd /tmp
+#     - git clone https://github.com/aras-p/ClangBuildAnalyzer.git
+#     - cd ClangBuildAnalyzer
+#     - cmake .
+#     - make
+#     - export PATH+=:$(pwd)
+#     - mkdir $CI_PROJECT_DIR/build
+#     - cd $CI_PROJECT_DIR/build
+#     - cmake .. -DWALBERLA_BUFFER_DEBUG=OFF -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_CUDA=OFF -DWALBERLA_BUILD_WITH_PYTHON=OFF -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=RELEASE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=ON -DWARNING_ERROR=ON -DWALBERLA_BUILD_WITH_METIS=OFF -DWALBERLA_BUILD_WITH_PARMETIS=OFF -DWALBERLA_OPTIMIZE_FOR_LOCALHOST=ON -DWALBERLA_BUILD_WITH_FASTMATH=ON -DWALBERLA_BUILD_WITH_LTO=ON -DCMAKE_CXX_FLAGS=-ftime-trace -G Ninja
+#     - cmake . -LA
+#     - ClangBuildAnalyzer --start .
+#     - ninja all
+#     - ClangBuildAnalyzer --stop . CBA
+#     - ClangBuildAnalyzer --analyze CBA
+#   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang-17
+#   tags:
+#     - docker-benchmark
+#   only:
+#     variables:
+#       - $ENABLE_NIGHTLY_BUILDS
 
-continuous_benchmark_trigger:
-  stage: benchmark
-  image: curlimages/curl
-  tags:
-    - docker
-  script:
-    - curl
-      --fail
-      --request POST
-      --form "token=$CB_TRIGGER_TOKEN"
-      --form "ref=master"
-      --form "variables[WALBERLA_GITLAB_INSTANCE]=https://$CI_SERVER_HOST"
-      --form "variables[WALBERLA_PROJECT_ID]=$CI_PROJECT_PATH"
-      --form "variables[WALBERLA_BRANCH]=$CI_COMMIT_BRANCH"
-      --form "variables[WALBERLA_COMMIT]=$CI_COMMIT_SHA"
-      "$CB_TRIGGER_API_URL"
-  rules:
-    - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: on_success
+# continuous_benchmark_trigger:
+#   stage: benchmark
+#   image: curlimages/curl
+#   tags:
+#     - docker
+#   script:
+#     - curl
+#       --fail
+#       --request POST
+#       --form "token=$CB_TRIGGER_TOKEN"
+#       --form "ref=master"
+#       --form "variables[WALBERLA_GITLAB_INSTANCE]=https://$CI_SERVER_HOST"
+#       --form "variables[WALBERLA_PROJECT_ID]=$CI_PROJECT_PATH"
+#       --form "variables[WALBERLA_BRANCH]=$CI_COMMIT_BRANCH"
+#       --form "variables[WALBERLA_COMMIT]=$CI_COMMIT_SHA"
+#       "$CB_TRIGGER_API_URL"
+#   rules:
+#     - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#       when: on_success

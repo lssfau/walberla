@@ -23,19 +23,17 @@ class Reference:
         self._section_name: str = section_name
 
 
-def reference_representer(
-    dumper: yaml.SafeDumper, reference: Reference
-) -> yaml.nodes.SequenceNode:
+def reference_representer(dumper: yaml.SafeDumper, reference: Reference) -> yaml.nodes.SequenceNode:
     """Represent an empty GitLab CI YAML reference Tag."""
-    return dumper.represent_sequence(
-        "!reference", [reference._job_name, reference._section_name], flow_style=True
-    )
+    return dumper.represent_sequence("!reference", [reference._job_name, reference._section_name], flow_style=True)
 
 
 def get_dumper() -> yaml.SafeDumper:
     """Get a YAML SafeDumper with custom representers registered."""
     safe_dumper = yaml.SafeDumper
-    safe_dumper.default_flow_style = True  # Enable default flow style (inline) representation for collected representers
+    safe_dumper.default_flow_style = (
+        True  # Enable default flow style (inline) representation for collected representers
+    )
     safe_dumper.add_representer(Reference, reference_representer)
     return safe_dumper
 
@@ -68,9 +66,7 @@ class CMakePresets:
             targets = []
 
         self.configurePresets.append(cpreset)
-        self.buildPresets.append(
-            BuildPreset.for_configure_preset(cpreset, targets=targets)
-        )
+        self.buildPresets.append(BuildPreset.for_configure_preset(cpreset, targets=targets))
         self.testPresets.append(TestPreset.for_configure_preset(cpreset))
         self.workflowPresets.append(WorkflowPreset.for_configure_preset(cpreset))
 
@@ -92,12 +88,10 @@ class ConfigurePreset:
         if name is None:
             name = ".ci-" + "-".join(frags)
 
-        inherits = [f".{frag}" for frag in frags] + [".codegen"]
+        inherits = [f".{frag}" for frag in frags] + [".ci-base"]
 
-        if "mac" not in frags:  # V8 and SweepGen don't work right with AppleClang
-            inherits.append(".sweepgen")
-
-        inherits.append(".ci-base")
+        if "mac" in frags:  # V8 and SweepGen don't work right with AppleClang
+            inherits.remove(".sweepgen")
 
         return ConfigurePreset(
             name,
@@ -126,9 +120,7 @@ class TestPreset:
 
     @staticmethod
     def for_configure_preset(preset: ConfigurePreset, **kwargs):
-        return TestPreset(
-            preset.name, preset.name, inherits=[".ci-test-base"], **kwargs
-        )
+        return TestPreset(preset.name, preset.name, inherits=[".ci-test-base"], **kwargs)
 
 
 @dataclass
@@ -140,10 +132,7 @@ class WorkflowPreset:
     def for_configure_preset(preset: ConfigurePreset):
         return WorkflowPreset(
             preset.name,
-            [
-                {"type": ptype, "name": preset.name}
-                for ptype in ("configure", "build", "test")
-            ],
+            [{"type": ptype, "name": preset.name} for ptype in ("configure", "build", "test")],
         )
 
 
@@ -160,6 +149,7 @@ class CiJobSpec:
     variables: dict[str, str]
     image: str | None
 
+    tags: list[str | None] = field(default_factory=list)
     stage: str = "test"
     script: list[str | Reference] = field(default_factory=list)
     before_script: list[str | Reference] = field(default_factory=list)
@@ -177,7 +167,7 @@ class CiConfig:
     ):
         spec = CiJobSpec(
             extends=".testsuite-base-linux",
-            image=IMAGE_PATTERN.format(compiler_id=compiler.id),
+            image=IMAGE_PATTERN.format(compiler_id=compiler.id),  # TODO change here the image pattern once necessary
             variables={
                 "cmakePresetName": preset.name,
                 "CC": compiler.cc,
@@ -187,15 +177,26 @@ class CiConfig:
 
         # --- Compiler specific adjustments ---
 
-        match compiler.id:
-            case "AppleClang":
+        match compiler.id.split("-"):
+            case ["AppleClang", *_]:
                 spec.extends = ".testsuite-base-MacOS"
                 spec.image = None
-            case id if id.startswith("clang-"):
-                spec.script.append(Reference(".clang-library-path-patch", "script"))
-                spec.script.append(Reference(".testsuite-common", "script"))
-            case "gcc-15" if "cuda" in preset.name:
+            case ["clang", *_]:
+                # The clang from spack cannot fine omp without the patch.
+                spec.before_script.append(Reference(".clang-library-path-patch", "before_script"))
+                # Since `extends` is overriding lists instead of merging them, we need to re-append the right before_script.
+                if "cuda" in preset.name:
+                    spec.before_script.append(Reference(".testsuite-base-linux-cuda", "before_script"))
+                else:
+                    spec.before_script.append(Reference(".testsuite-common", "before_script"))
+            case ["gcc", int(version), *_] if version < 13 and "cuda" in preset.name:
+                # There are problems with older GCC versions as CUDA host compiler,
+                # so we set the CUDAHOSTCXX images base compiler wich currently is g++-13.
+                # This should be updated if the CUDA host compiler base image is updated.
                 spec.variables["CUDAHOSTCXX"] = "g++-13"
+
+        if "cuda" in preset.name:
+            spec.extends += "-cuda"
 
         self.jobspecs[f"{compiler.id} [{preset.displayName}]"] = spec
 
@@ -209,9 +210,7 @@ class CiConfig:
         obj = obj | {
             name: asdict(
                 spec,
-                dict_factory=lambda d: {
-                    k: v for (k, v) in d if v
-                },  # Remove None or empty lists items
+                dict_factory=lambda d: {k: v for (k, v) in d if v},  # Remove None or empty lists items
             )
             for name, spec in self.jobspecs.items()
         }
@@ -225,76 +224,81 @@ class CiConfig:
 
 
 MATRIX_CONFIGURE_PRESETS = [
-    ConfigurePreset.from_fragments("hybrid", "singlePrecision"),
-    ConfigurePreset.from_fragments("hybrid", "cuda"),
-    ConfigurePreset.from_fragments("hybrid", "cuda", "singlePrecision"),
-    ConfigurePreset.from_fragments("serial", "cuda"),
-    ConfigurePreset.from_fragments("mpionly", "cuda"),
-    ConfigurePreset.from_fragments("mpionly"),
-    ConfigurePreset.from_fragments("hybrid"),
-    ConfigurePreset.from_fragments("serial", "mac"),
-    ConfigurePreset.from_fragments("mpionly", "mac"),
+    ConfigurePreset.from_fragments("cuda", "hybrid", "debugOptimized", "singlePrecision"),
+    ConfigurePreset.from_fragments("cuda", "hybrid", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "mpionly", "debugOptimized"),
+    ConfigurePreset.from_fragments("cpuonly", "hybrid", "singlePrecision", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "omponly", "debugOptimized"),
+    ConfigurePreset.from_fragments("cpuonly", "omponly", "singlePrecision", "make"),
+    ConfigurePreset.from_fragments("cpuonly", "serial", "make"),
 ]
 
 MATRIX_COMPILERS = [
-    CompilerSpec("clang-20", "clang", "clang++"),
+    CompilerSpec("clang-19", "clang", "clang++"),
     CompilerSpec("clang-21", "clang", "clang++"),
+    CompilerSpec("clang-22", "clang", "clang++"),
+    CompilerSpec("gcc-bootstrap", "gcc", "g++"),
     CompilerSpec("gcc-14", "gcc", "g++"),
     CompilerSpec("gcc-15", "gcc", "g++"),
     CompilerSpec("icx-2024", "icx", "icpx"),
     CompilerSpec("icx-2025", "icx", "icpx"),
-    CompilerSpec("AppleClang", "clang", "clang++"),
+    CompilerSpec("icx-2026", "icx", "icpx"),
 ]
-
 
 #   CI Test Matrix.
 #   Make sure that each preset and compiler ID used here is defined in the arrays above.
 CI_MATRIX = {
-    "clang-20": ["hybrid-cuda", "hybrid"],
-    "clang-21": ["hybrid-cuda-singlePrecision", "mpionly-cuda"],
-    "icx-2024": ["hybrid-cuda"],
-    "icx-2025": ["hybrid-singlePrecision", "serial-cuda"],
-    "gcc-14": "hybrid-cuda",
-    "gcc-15": [
-        "hybrid-cuda-singlePrecision",
-        "mpionly-cuda",
-        "serial-cuda",
-        "mpionly",
-    ],
-    "AppleClang": ["serial-mac", "mpionly-mac"],
+    "clang-19": ["cuda-hybrid-debugOptimized-singlePrecision", "cpuonly-serial-make"],
+    "clang-21": ["cpuonly-omponly-debugOptimized"],
+    "icx-2024": ["cpuonly-omponly-singlePrecision-make"],
+    "icx-2025": ["cuda-hybrid-make", "cpuonly-mpionly-debugOptimized"],
+    "gcc-bootstrap": ["cpuonly-hybrid-singlePrecision-make", "cpuonly-omponly-debugOptimized"],
+    "gcc-14": ["cpuonly-mpionly-debugOptimized"],
 }
+# Cases that are currently tested before merging to master:
+# gnu: (cuda: mpi&omp, ninja, Release, fp64); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release))
+# llvm: (cuda: mpi&omp, ninja, Debug, fp32); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release)) 
+# intel: (cuda: mpi&omp, make, Release, fp64); (cpu: mpi&omp, mpi(ON,OFF), omp(ON/OFF), (make/ninja), (Debug/Release)) 
+# overall: (cuda: mpi&omp, (Debug/Release), (make/ninja), (fp32/fp64))
 
 
 def get_cmake_presets() -> CMakePresets:
     presets = CMakePresets.create()
 
-    #   Coverage task preset chain
-    gcov_preset = ConfigurePreset.from_fragments(
-        "hybrid", "cuda", "gcov", name=".ci-coverage"
+    #   GCC + Coverage Testsuite preset chain
+    presets.add_preset_chain(
+        ConfigurePreset.from_fragments("hybrid", "cuda", "gcov", name=".ci-testsuite-gcc-coverage"),
+        targets="waLBerlaTestsuite",
     )
-    presets.add_preset_chain(gcov_preset, targets="waLBerlaTestsuite")
 
-    #   Branch-Pipeline preset chain
-    bpipe_preset = ConfigurePreset.from_fragments(
-        "hybrid", "cuda", name=".ci-branch-testsuite"
+    #   Clang Testsuite preset chain
+    presets.add_preset_chain(
+        ConfigurePreset.from_fragments("hybrid", name=".ci-testsuite-clang"),
+        targets="waLBerlaTestsuite",
     )
-    presets.add_preset_chain(bpipe_preset, targets="waLBerlaTestsuite")
+
+    #   Intel Testsuite preset chain
+    presets.add_preset_chain(
+        ConfigurePreset.from_fragments("hybrid", name=".ci-testsuite-icx"),
+        targets="waLBerlaTestsuite",
+    )
 
     #   clang-tidy configure preset
-    ctidy_preset = ConfigurePreset.from_fragments(
-        "clang",
-        "debug",
-        "hybrid",
-        "cuda",
-        name=".ci-clang-tidy",
-        generator="Unix Makefiles",
-        cacheVariables={
-            "CMAKE_EXPORT_COMPILE_COMMANDS": True,
-            "WALBERLA_BUFFER_DEBUG": True,
-            "WALBERLA_LOGLEVEL": "DETAIL",
-        },
+    presets.configurePresets.append(
+        ConfigurePreset.from_fragments(
+            "clang",
+            "debug",
+            "hybrid",
+            "cuda",
+            name=".ci-clang-tidy",
+            generator="Unix Makefiles",
+            cacheVariables={
+                "CMAKE_EXPORT_COMPILE_COMMANDS": True,
+                "WALBERLA_BUFFER_DEBUG": True,
+                "WALBERLA_LOGLEVEL": "DETAIL",
+            },
+        ),
     )
-    presets.configurePresets.append(ctidy_preset)
 
     #   Matrix preset chains
     for cpreset in MATRIX_CONFIGURE_PRESETS:
@@ -346,9 +350,7 @@ def generate_ci_test_matrix(args):
             preset_ids = [preset_ids]
 
         for preset_id in preset_ids:
-            preset = next(
-                filter(lambda p: p.name == f".ci-{preset_id}", MATRIX_CONFIGURE_PRESETS)
-            )
+            preset = next(filter(lambda p: p.name == f".ci-{preset_id}", MATRIX_CONFIGURE_PRESETS))
             ci_config.add_job_for_preset(preset, compiler)
 
     config_filepath = Path(args.output_file).resolve()

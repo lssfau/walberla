@@ -31,7 +31,12 @@
                 "WARNING_ERROR": true,
                 "WALBERLA_LOGLEVEL": "INFO",
                 "MPIEXEC_PREFLAGS": "$env{MPIEXEC_PREFLAGS}",
-                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true,
+                "WALBERLA_BUILD_WITH_CODEGEN": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/",
+                "WALBERLA_ENABLE_V8CORE": true,
+                "WALBERLA_ENABLE_SWEEPGEN": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         },
         {
@@ -50,7 +55,19 @@
                 "WALBERLA_BUILD_WITH_OPENMESH": false,
                 "WARNING_ERROR": true,
                 "WALBERLA_LOGLEVEL": "INFO",
-                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true
+                "WALBERLA_OPTIMIZE_FOR_LOCALHOST": true,
+                "Python_ROOT_DIR": "${sourceDir}/.venv/",
+                "WALBERLA_ENABLE_V8CORE": true,
+                "WALBERLA_ENABLE_SWEEPGEN": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
+            }
+        },
+        {
+            "displayName": "Disables all libraries that only work with MPI enabled",
+            "name": ".disable-mpi-dependent-libs",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_PARMETIS": false
             }
         },
         {
@@ -123,10 +140,12 @@
             "displayName": "Serial build - OpenMP and MPI disabled",
             "name": ".serial",
             "hidden": true,
+            "inherits": [
+                ".disable-mpi-dependent-libs"
+            ],
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_OPENMP": false,
-                "WALBERLA_BUILD_WITH_MPI": false,
-                "WALBERLA_BUILD_WITH_PARMETIS": false
+                "WALBERLA_BUILD_WITH_MPI": false
             }
         },
         {
@@ -136,6 +155,18 @@
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_OPENMP": false,
                 "WALBERLA_BUILD_WITH_MPI": true
+            }
+        },
+        {
+            "displayName": "OMP-only shared-memory parallelization",
+            "name": ".omponly",
+            "hidden": true,
+            "inherits": [
+                ".disable-mpi-dependent-libs"
+            ],
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_OPENMP": true,
+                "WALBERLA_BUILD_WITH_MPI": false
             }
         },
         {
@@ -153,6 +184,7 @@
             "hidden": true,
             "cacheVariables": {
                 "WALBERLA_BUILD_WITH_CUDA": true,
+                "WALBERLA_BUILD_WITH_HIP": false,
                 "CMAKE_CUDA_ARCHITECTURES": "$env{WALBERLA_CI_CUDA_ARCHITECTURES}"
             }
         },
@@ -161,7 +193,17 @@
             "name": ".hip",
             "hidden": true,
             "cacheVariables": {
-                "WALBERLA_BUILD_WITH_HIP": true
+                "WALBERLA_BUILD_WITH_HIP": true,
+                "WALBERLA_BUILD_WITH_CUDA": false
+            }
+        },
+        {
+            "displayName": "Disable GPU support",
+            "name": ".cpuonly",
+            "hidden": true,
+            "cacheVariables": {
+                "WALBERLA_BUILD_WITH_HIP": false,
+                "WALBERLA_BUILD_WITH_CUDA": false
             }
         },
         {
@@ -229,7 +271,8 @@
             "hidden": true,
             "inherits": ".metis",
             "cacheVariables": {
-                "WALBERLA_BUILD_WITH_PARMETIS": true
+                "WALBERLA_BUILD_WITH_PARMETIS": true,
+                "WALBERLA_BUILD_WITH_MPI": true
             }
         },
         {
