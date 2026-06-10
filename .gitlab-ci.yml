@@ -134,6 +134,7 @@ clang-tidy:preview:
 
 clang-tidy:preview:stop:
   stage: "Code Quality Preview"
+  dependencies: []
   environment:
     name: clang-tidy/${CI_COMMIT_REF_SLUG}
     action: stop
@@ -173,6 +174,7 @@ schema-validation:
 generate-test-matrix:
   stage: Test Matrix
   image: "python:3.13"
+  dependencies: []
   before_script:
     - python -m venv .venv
     - source .venv/bin/activate
@@ -259,6 +261,7 @@ documentation:preview:
 
 documentation:preview:stop:
   stage: Documentation
+  dependencies: []
   environment:
     name: doc/${CI_COMMIT_REF_SLUG}
     action: stop
