@@ -125,6 +125,7 @@ clang-tidy:preview:
     name: clang-tidy/${CI_COMMIT_REF_SLUG}
     url: $REVIEW_URL
     on_stop: clang-tidy:preview:stop
+    auto_stop_in: 1 month
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
@@ -249,6 +250,7 @@ documentation:preview:
     name: doc/${CI_COMMIT_REF_SLUG}
     url: $REVIEW_URL
     on_stop: documentation:preview:stop
+    auto_stop_in: 1 month
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
