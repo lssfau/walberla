@@ -92,7 +92,7 @@ waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_PSM_TorqueSphereSC2W2SingleTest 
 waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_PSM_TorqueSphereSC3W2FuncTest     COMMAND $<TARGET_FILE:LBM_MESAPD_COUPLING_PSM_TorqueSphere> --funcTest --SC3W2   PROCESSES 1 )
 waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_PSM_TorqueSphereSC3W2SingleTest   COMMAND $<TARGET_FILE:LBM_MESAPD_COUPLING_PSM_TorqueSphere> --SC3W2              PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )
 
-if (WALBERLA_BUILD_WITH_CODEGEN)
+if (WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_DOUBLE_ACCURACY)
     if (NOT WALBERLA_BUILD_WITH_GPU_SUPPORT OR (WALBERLA_BUILD_WITH_GPU_SUPPORT AND (CMAKE_CUDA_ARCHITECTURES GREATER_EQUAL 60 OR WALBERLA_BUILD_WITH_HIP)))
         waLBerla_add_test_executable ( LBM_MESAPD_COUPLING_PSM_DragForceSphere_CPU_GPU partially_saturated_cells_method/codegen/DragForceSpherePSM.cpp )
         target_link_libraries ( LBM_MESAPD_COUPLING_PSM_DragForceSphere_CPU_GPU walberla::blockforest walberla::core walberla::gpu walberla::field walberla::lbm_mesapd_coupling walberla::mesa_pd PSMCodegenPython_srt_sc1_force )
