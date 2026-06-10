@@ -39,7 +39,6 @@ clang [cpu-hybrid]:
     CXX: clang++
 
 icx [cpu-hybrid]:
-icx [cpu-omp]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2026
   stage: Testsuite
   extends: .testsuite-base-linux
