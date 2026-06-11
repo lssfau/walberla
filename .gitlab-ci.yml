@@ -134,7 +134,6 @@ clang-tidy:preview:
   script:
     - echo "Copy clang-tidy output of job ${BUILD_JOB_ID} for longer storage."
     - cp -r clang-tidy-output stored-clang-tidy-output
-    - echo "clang-tidy output was stored"
     - echo "View clang-tidy output at ${REVIEW_URL}"
   artifacts:
     paths:
@@ -264,8 +263,7 @@ documentation:preview:
       artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
-    # REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/build/documentation/doc/html/index.html"
-    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${CI_JOB_ID}/artifacts/stored-doc/index.html"
+    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${CI_JOB_ID}/artifacts/stored-html/index.html"
   environment:
     name: doc/${CI_COMMIT_REF_SLUG}
     url: $REVIEW_URL
@@ -275,12 +273,11 @@ documentation:preview:
     - if: $CI_MERGE_REQUEST_ID
   script:
     - echo "Copy documentation output of job ${BUILD_JOB_ID} for longer storage."
-    - cp -r build/documentation/doc stored-doc
-    - echo "Documentation output was stored"
+    - cp -r build/documentation/doc/html stored-html
     - echo "View documentation at ${REVIEW_URL}"
   artifacts:
     paths:
-      - stored-doc
+      - stored-html
 
 documentation:preview:stop:
   stage: Documentation
