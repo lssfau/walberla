@@ -132,9 +132,13 @@ clang-tidy:preview:
     - if: $CI_MERGE_REQUEST_ID
       when: always
   script:
-    - echo "Setting up environment link for job ${BUILD_JOB_ID}"
+    - echo "Copy clang-tidy output of job ${BUILD_JOB_ID} for longer storage."
     - cp -r clang-tidy-output stored-clang-tidy-output
+    - echo "clang-tidy output was stored"
     - echo "View clang-tidy output at ${REVIEW_URL}"
+  artifacts:
+    paths:
+      - stored-clang-tidy-output
 
 clang-tidy:preview:stop:
   stage: "Code Quality Preview"
@@ -250,7 +254,7 @@ documentation:
     paths:
       - build/documentation/doc
       - build/documentation/DoxygenWarnings.txt
-    expire_in: 1 week
+    expire_in: 2 days
     when: always
 
 documentation:preview:
@@ -260,7 +264,8 @@ documentation:preview:
       artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
-    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/build/documentation/doc/html/index.html"
+    # REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${BUILD_JOB_ID}/artifacts/build/documentation/doc/html/index.html"
+    REVIEW_URL: "https://walberla.pages.i10git.cs.fau.de/-/walberla/-/jobs/${CI_JOB_ID}/artifacts/stored-doc/index.html"
   environment:
     name: doc/${CI_COMMIT_REF_SLUG}
     url: $REVIEW_URL
@@ -269,8 +274,13 @@ documentation:preview:
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
-    - echo "Setting up environment link for job ${BUILD_JOB_ID}"
+    - echo "Copy documentation output of job ${BUILD_JOB_ID} for longer storage."
+    - cp -r build/documentation/doc stored-doc
+    - echo "Documentation output was stored"
     - echo "View documentation at ${REVIEW_URL}"
+  artifacts:
+    paths:
+      - stored-doc
 
 documentation:preview:stop:
   stage: Documentation
