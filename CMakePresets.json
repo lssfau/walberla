@@ -29,7 +29,8 @@
       "configurePreset": "ParallelPlates",
       "targets": [
         "ParallelPlates"
-      ]
+      ],
+      "jobs": 0
     }
   ],
   "testPresets": [
