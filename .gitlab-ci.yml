@@ -191,12 +191,16 @@ generate-test-matrix:
   rules:
     # Only activate on non-draft MRs, master, and tags
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_DRAFT == "false"
+      when: on_success
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_TAG
+      when: always
   artifacts:
     paths:
       - utilities/workflows/ci-matrix.yaml
     expire_in: 1 day
+  when: manual
 
 trigger-test-matrix:
   stage: Test Matrix
@@ -204,13 +208,17 @@ trigger-test-matrix:
   rules:
     # Only activate on non-draft MRs, master, and tags
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_DRAFT == "false"
+      when: on_success
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_TAG
+      when: always
   trigger:
     include:
       - artifact: utilities/workflows/ci-matrix.yaml
         job: generate-test-matrix
     strategy: depend
+  when: manual
 
 ####################################################################################################
 #       Documentation & Pages
