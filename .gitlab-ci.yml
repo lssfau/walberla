@@ -196,11 +196,11 @@ generate-test-matrix:
       when: always
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_TAG
       when: always
+    - when: manual
   artifacts:
     paths:
       - utilities/workflows/ci-matrix.yaml
     expire_in: 1 day
-  when: manual
 
 trigger-test-matrix:
   stage: Test Matrix
@@ -213,12 +213,12 @@ trigger-test-matrix:
       when: always
     - if: $CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_TAG
       when: always
+    - when: manual
   trigger:
     include:
       - artifact: utilities/workflows/ci-matrix.yaml
         job: generate-test-matrix
     strategy: depend
-  when: manual
 
 ####################################################################################################
 #       Documentation & Pages
