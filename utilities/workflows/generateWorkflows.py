@@ -106,6 +106,7 @@ class BuildPreset:
     name: str
     configurePreset: str
     targets: str | list[str] = field(default_factory=list)
+    jobs: int | None = 0
 
     @staticmethod
     def for_configure_preset(preset: ConfigurePreset, **kwargs):
