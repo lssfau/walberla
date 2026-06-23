@@ -2006,6 +2006,7 @@ inline bool check_float_equal_eps( const math::Vector3<real_t> & lhs, const math
 
 namespace std
 {
+   // NOLINTBEGIN(bugprone-std-namespace-modification)
     template<typename T>
     struct hash< walberla::Vector3<T> >
     {
@@ -2014,4 +2015,5 @@ namespace std
             return walberla::math::hash_value( v );
         }
     };
+   // NOLINTEND(bugprone-std-namespace-modification)
 } // namespace std

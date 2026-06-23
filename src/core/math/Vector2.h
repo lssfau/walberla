@@ -1690,6 +1690,7 @@ namespace walberla {
 
 namespace std
 {
+   // NOLINTBEGIN(bugprone-std-namespace-modification)
     template<typename T>
     struct hash< walberla::Vector2<T> >
     {
@@ -1698,4 +1699,5 @@ namespace std
             return walberla::math::hash_value( v );
         }
     };
+   // NOLINTEND(bugprone-std-namespace-modification)
 } // namespace std
