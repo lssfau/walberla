@@ -243,6 +243,12 @@ namespace field {
    class AllocateAligned : public FieldAllocator<T>
    {
 
+      public:
+
+         void setInnerGhostLayerSize( uint_t innerGhostLayerSize ) override {
+            offset_ = sizeof(T) * innerGhostLayerSize;
+         }
+
       protected:
 
          T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
@@ -279,10 +285,6 @@ namespace field {
                nrOfElements_[ret] = size;
             }
             return ret;
-         }
-
-         void setInnerGhostLayerSize( uint_t innerGhostLayerSize ) override {
-            offset_ = sizeof(T) * innerGhostLayerSize;
          }
 
          void deallocate(T *& values ) override
@@ -337,7 +339,7 @@ namespace field {
    template <typename T>
    class StdFieldAlloc : public FieldAllocator<T>
    {
-      public:
+      protected:
          T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
                                        uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3) override
          {

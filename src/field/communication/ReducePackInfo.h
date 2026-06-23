@@ -57,13 +57,13 @@ public:
    bool constantDataExchange() const { return false; }
    bool threadsafeReceiving()  const { return false; }
 
-   void safeCommunicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
-   void packData            ( const IBlock * sender,   stencil::Direction dir, mpi::SendBuffer & outBuffer ) override;
-   void safeUnpackData      (       IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer    ) override;
+   void packData( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) override;
 
    size_t getDataSize() const { return getSize() * sizeof(T); }
 
 protected:
+   void safeCommunicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
+   void safeUnpackData      (       IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer    ) override;
    size_t initData( IBlock * receiver, stencil::Direction dir ) override;
 
    const BlockDataID        bdId_;
