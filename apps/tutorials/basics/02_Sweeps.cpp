@@ -20,6 +20,7 @@
 
 #include "blockforest/Initialization.h"
 #include "core/Environment.h"
+#include "core/math/Random.h"
 #include "field/Field.h"
 #include "field/vtk/VTKWriter.h"
 #include "timeloop/SweepTimeloop.h"
@@ -117,7 +118,7 @@ int main( int argc, char ** argv )
 
       // iterate the field and set random values
       for( auto iter = field->begin(); iter != field->end(); ++iter )
-         *iter = real_c( rand() % ARBITRARY_VALUE );
+         *iter = walberla::math::realRandom<real_t>(real_t{0}, real_t{ARBITRARY_VALUE});
    }
 
    // create time loop
