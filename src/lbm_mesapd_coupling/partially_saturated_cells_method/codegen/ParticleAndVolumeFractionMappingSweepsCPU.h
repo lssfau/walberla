@@ -63,7 +63,7 @@ inline void calculateWeighting< 1 >(real_t* const weighting, const real_t& epsil
 template<>
 inline void calculateWeighting< 2 >(real_t* const weighting, const real_t& epsilon, const real_t& tau)
 {
-   *weighting = epsilon * (tau - real_t(0.5)) / ((real_t(1) - epsilon) + (tau - real_t(0.5)));
+   *weighting = epsilon * (tau - real_t{0.5}) / ((real_t{1} - epsilon) + (tau - real_t{0.5}));
 }
 
 template< int Weighting_T >
@@ -83,16 +83,16 @@ void mapParticles(IBlock& blockIt, const ParticleAndVolumeFractionSoA_T< Weighti
    WALBERLA_FOR_ALL_CELLS_XYZ(
       BField,
       for (size_t i = 0; i < MaxParticlesPerCell; i++) {
-         BsField->get(x, y, z, i)  = real_t(0.0);
-         idxField->get(x, y, z, i) = size_t(0);
-      } nOverlappingParticlesField->get(x, y, z) = uint_t(0);
-      BField->get(x, y, z)                       = real_t(0.0);
+         BsField->get(x, y, z, i)  = real_t{0.0};
+         idxField->get(x, y, z, i) = size_t{0};
+      } nOverlappingParticlesField->get(x, y, z) = uint_t{0};
+      BField->get(x, y, z)                       = real_t{0.0};
       const Vector3< real_t > cellCenter =
-         Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx, real_t(z) + real_t(0.5) * dx) +
+         Vector3< real_t >(static_cast< real_t >(x) + real_t{0.5} * dx, static_cast< real_t >(y) + real_t{0.5} * dx, static_cast< real_t >(z) + real_t{0.5} * dx) +
          blockIt.getAABB().minCorner();
-      const Vector3< size_t > subBlockIndex(size_t(real_t(x) / blockIt.getAABB().xSize() * real_t(subBlocksPerDim[0])),
-                                            size_t(real_t(y) / blockIt.getAABB().ySize() * real_t(subBlocksPerDim[1])),
-                                            size_t(real_t(z) / blockIt.getAABB().zSize() * real_t(subBlocksPerDim[2])));
+      const Vector3< size_t > subBlockIndex(size_t(static_cast< real_t >(x) / blockIt.getAABB().xSize() * real_t(subBlocksPerDim[0])),
+                                            size_t(static_cast< real_t >(y) / blockIt.getAABB().ySize() * real_t(subBlocksPerDim[1])),
+                                            size_t(static_cast< real_t >(z) / blockIt.getAABB().zSize() * real_t(subBlocksPerDim[2])));
       const size_t linearizedSubBlockIndex = subBlockIndex[2] * subBlocksPerDim[0] * subBlocksPerDim[1] +
                                              subBlockIndex[1] * subBlocksPerDim[0] + subBlockIndex[0];
 
@@ -119,8 +119,8 @@ void mapParticles(IBlock& blockIt, const ParticleAndVolumeFractionSoA_T< Weighti
                sphereRadii[idxMapped];
 
             real_t epsilon = -D + f_rs[idxMapped];
-            epsilon        = std::max(epsilon, real_t(0));
-            epsilon        = std::min(epsilon, real_t(1));
+            epsilon        = std::max(epsilon, real_t{0});
+            epsilon        = std::min(epsilon, real_t{1});
 
             // Store overlap fraction only if there is an intersection
             if (epsilon > 0.0)
@@ -130,7 +130,7 @@ void mapParticles(IBlock& blockIt, const ParticleAndVolumeFractionSoA_T< Weighti
                BsField->get(x, y, z, nOverlappingParticlesField->get(x, y, z)) = epsilon;
                calculateWeighting< Weighting_T >(&BsField->get(x, y, z, nOverlappingParticlesField->get(x, y, z)),
                                                  BsField->get(x, y, z, nOverlappingParticlesField->get(x, y, z)),
-                                                 real_t(1.0) / particleAndVolumeFractionSoA.omega_);
+                                                 real_t{1.0} / particleAndVolumeFractionSoA.omega_);
                idxField->get(x, y, z, nOverlappingParticlesField->get(x, y, z)) = idxMapped;
                BField->get(x, y, z) += BsField->get(x, y, z, nOverlappingParticlesField->get(x, y, z));
                nOverlappingParticlesField->get(x, y, z) += 1;
@@ -165,8 +165,8 @@ class SphereFractionMappingSweep
       for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
       {
          auto aabb = blockIt->getAABB();
-         if (size_t(aabb.xSize()) % subBlockSize_[0] != 0 || size_t(aabb.ySize()) % subBlockSize_[1] != 0 ||
-             size_t(aabb.zSize()) % subBlockSize_[2] != 0)
+         if (static_cast< size_t >(aabb.xSize()) % subBlockSize_[0] != 0 || static_cast< size_t >(aabb.ySize()) % subBlockSize_[1] != 0 ||
+             static_cast< size_t >(aabb.zSize()) % subBlockSize_[2] != 0)
          {
             WALBERLA_ABORT("Number of cells per block (" << aabb << ") is not divisible by subBlockSize ("
                                                          << subBlockSize_ << ").")
@@ -188,15 +188,15 @@ class SphereFractionMappingSweep
          }
       }
 
-      if (numMappedParticles == uint_t(0)) return;
+      if (numMappedParticles == uint_t{0}) return;
 
       // Allocate memory storing the particle information needed for the overlap fraction computations
       const size_t scalarArraySize = numMappedParticles * sizeof(real_t);
 
       if (particleAndVolumeFractionSoA_.positions != nullptr) { free(particleAndVolumeFractionSoA_.positions); }
-      particleAndVolumeFractionSoA_.positions = (real_t*) malloc(3 * scalarArraySize);
-      real_t* radii                           = (real_t*) malloc(scalarArraySize);
-      real_t* f_r = (real_t*) malloc(scalarArraySize); // f_r is described in https://doi.org/10.1108/EC-02-2016-0052
+      particleAndVolumeFractionSoA_.positions = static_cast< real_t* > (malloc(3 * scalarArraySize));
+      real_t* radii                           = static_cast< real_t* > (malloc(scalarArraySize));
+      real_t* f_r = static_cast< real_t* > (malloc(scalarArraySize)); // f_r is described in https://doi.org/10.1108/EC-02-2016-0052
 
       // Store particle information inside the memory
       size_t idxMapped = 0;
@@ -213,12 +213,12 @@ class SphereFractionMappingSweep
             {
                const real_t radius = static_cast< mesa_pd::data::Sphere* >(ac_->getShape(idx))->getRadius();
                radii[idxMapped]    = radius;
-               real_t Va           = real_t(
+               real_t Va           = real_t{
                   (1.0 / 12.0 - radius * radius) * atan((0.5 * sqrt(radius * radius - 0.5)) / (0.5 - radius * radius)) +
                   1.0 / 3.0 * sqrt(radius * radius - 0.5) +
                   (radius * radius - 1.0 / 12.0) * atan(0.5 / sqrt(radius * radius - 0.5)) -
-                  4.0 / 3.0 * radius * radius * radius * atan(0.25 / (radius * sqrt(radius * radius - 0.5))));
-               f_r[idxMapped] = Va - radius + real_t(0.5);
+                  4.0 / 3.0 * radius * radius * radius * atan(0.25 / (radius * sqrt(radius * radius - 0.5)))};
+               f_r[idxMapped] = Va - radius + real_t{0.5};
             }
             idxMapped++;
          }
@@ -229,8 +229,8 @@ class SphereFractionMappingSweep
       // the particle mapping, each iteration only has to check the potentially overlapping particles.
       auto blockAABB = block->getAABB();
       const Vector3< uint_t > subBlocksPerDim =
-         Vector3< uint_t >(uint_t(blockAABB.xSize()) / subBlockSize_[0], uint_t(blockAABB.ySize()) / subBlockSize_[1],
-                           uint_t(blockAABB.zSize()) / subBlockSize_[2]);
+         Vector3< uint_t >(static_cast< uint_t >(blockAABB.xSize()) / subBlockSize_[0], static_cast< uint_t >(blockAABB.ySize()) / subBlockSize_[1],
+                           static_cast< uint_t >(blockAABB.zSize()) / subBlockSize_[2]);
       const size_t numSubBlocks = subBlocksPerDim[0] * subBlocksPerDim[1] * subBlocksPerDim[2];
       std::vector< std::vector< size_t > > subBlocks(numSubBlocks);
 
@@ -246,9 +246,9 @@ class SphereFractionMappingSweep
                {
                   auto intersectionAABB = blockAABB.getIntersection(sphereAABB);
                   intersectionAABB.translate(-blockAABB.minCorner());
-                  mesa_pd::Vec3 blockScaling = mesa_pd::Vec3(real_t(subBlocksPerDim[0]) / blockAABB.sizes()[0],
-                                                             real_t(subBlocksPerDim[1]) / blockAABB.sizes()[1],
-                                                             real_t(subBlocksPerDim[2]) / blockAABB.sizes()[2]);
+                  mesa_pd::Vec3 blockScaling = mesa_pd::Vec3(static_cast< real_t >(subBlocksPerDim[0]) / blockAABB.sizes()[0],
+                                                             static_cast< real_t >(subBlocksPerDim[1]) / blockAABB.sizes()[1],
+                                                             static_cast< real_t >(subBlocksPerDim[2]) / blockAABB.sizes()[2]);
 
                   for (size_t z = size_t(intersectionAABB.zMin() * blockScaling[2]);
                        z < size_t(ceil(intersectionAABB.zMax() * blockScaling[2])); ++z)
@@ -275,8 +275,8 @@ class SphereFractionMappingSweep
          maxParticlesPerSubBlock = std::max(maxParticlesPerSubBlock, subBlock.size());
       });
 
-      size_t* numParticlesPerSubBlock = (size_t*) malloc(numSubBlocks * sizeof(size_t));
-      size_t* particleIDsSubBlocks    = (size_t*) malloc(numSubBlocks * maxParticlesPerSubBlock * sizeof(size_t));
+      size_t* numParticlesPerSubBlock = static_cast< size_t* > (malloc(numSubBlocks * sizeof(size_t)));
+      size_t* particleIDsSubBlocks    = static_cast< size_t* > (malloc(numSubBlocks * maxParticlesPerSubBlock * sizeof(size_t)));
 
       // Copy data from std::vector to memory
       for (size_t z = 0; z < subBlocksPerDim[2]; ++z)

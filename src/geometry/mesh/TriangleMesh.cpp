@@ -55,14 +55,14 @@ TriangleMesh::index_t TriangleMesh::addVertex(const vertex_t & v)
 {
    vertices_.push_back(v);
    WALBERLA_ASSERT_LESS( vertices_.size(), std::numeric_limits<index_t>::max() );
-   return index_t(vertices_.size() -1);
+   return static_cast< index_t >(vertices_.size() -1);
 }
 
 TriangleMesh::index_t TriangleMesh::addVertexNormal(const vertex_t & n)
 {
    vertexNormals_.push_back(n);
    WALBERLA_ASSERT_LESS( vertexNormals_.size(), std::numeric_limits<index_t>::max() );
-   return index_t(vertexNormals_.size() -1);
+   return static_cast< index_t >(vertexNormals_.size() -1);
 }
 
 TriangleMesh::index_t TriangleMesh::addVertex(const vertex_t & v, const color_t & c)
@@ -71,7 +71,7 @@ TriangleMesh::index_t TriangleMesh::addVertex(const vertex_t & v, const color_t 
    vertexColors_.push_back(c);
    WALBERLA_ASSERT_LESS( vertices_.size(), std::numeric_limits<index_t>::max() );
    WALBERLA_ASSERT_EQUAL( vertices_.size(), vertexColors_.size() );
-   return index_t(vertices_.size() -1);
+   return static_cast< index_t >(vertices_.size() -1);
 }
 
 //**********************************************************************************************************************
@@ -234,7 +234,7 @@ size_t TriangleMesh::removeDuplicateVertices( real_t tolerance )
    // adapt the indices in the triangles
    for(unsigned int & vertexIndice : vertexIndices_) {
       WALBERLA_ASSERT_LESS( oldToNewIndex[ vertexIndice ], vInd.size() - removedVertices);
-      vertexIndice = index_t( oldToNewIndex[ vertexIndice ] );
+      vertexIndice = static_cast< index_t >( oldToNewIndex[ vertexIndice ] );
    }
 
    return removedVertices;
@@ -265,9 +265,9 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
    map   < index_t, TriangleMeshNode* > nodes;
    vector<          TriangleMeshNode* > tnode( 3u );
 
-   for( size_t triangle = size_t(0u); triangle < getNumTriangles(); ++triangle )
+   for( size_t triangle = size_t{0u}; triangle < getNumTriangles(); ++triangle )
    {
-      for( uint8_t index = uint8_t(0u); index < 3; ++index )
+      for( uint8_t index = uint8_t{0u}; index < 3; ++index )
       {
          const index_t vIndex = getVertexIndex( triangle, index );
          if( nodes.find( vIndex ) == nodes.end() ){
@@ -303,7 +303,7 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
       snode.push_back( node );
       node->used = true;
 
-      for( size_t index = size_t(0u); index < snode.size(); ++index )
+      for( size_t index = size_t{0u}; index < snode.size(); ++index )
       {
          for( auto cit = snode[index]->conns.begin(); cit != snode[index]->conns.end(); ++cit )
          {
@@ -322,7 +322,7 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
    vector< map< index_t, index_t > > vid( ssnode.size() );
    vector< map< index_t, index_t > > nid( ssnode.size() );
    map< index_t, size_t > ind;
-   size_t index = size_t(0u);
+   size_t index = size_t{0u};
    for( auto srcIt = ssnode.begin(); srcIt != ssnode.end(); ++srcIt, ++index)
    {
       for(auto node : *srcIt)
@@ -351,19 +351,19 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
    }
 
    // add triangles to new meshes
-   for( size_t triangle = size_t(0u); triangle < getNumTriangles(); ++triangle )
+   for( size_t triangle = size_t{0u}; triangle < getNumTriangles(); ++triangle )
    {
-      const index_t vIndex0 = getVertexIndex( triangle, uint8_t(0u) );
-      const index_t vIndex1 = getVertexIndex( triangle, uint8_t(1u) );
-      const index_t vIndex2 = getVertexIndex( triangle, uint8_t(2u) );
+      const index_t vIndex0 = getVertexIndex( triangle, uint8_t{0u} );
+      const index_t vIndex1 = getVertexIndex( triangle, uint8_t{1u} );
+      const index_t vIndex2 = getVertexIndex( triangle, uint8_t{2u} );
 
       index = ind[vIndex0];
 
       if( hasNormalIndices() )
       {
-         const index_t nIndex0 = getNormalIndex( triangle, uint8_t(0u) );
-         const index_t nIndex1 = getNormalIndex( triangle, uint8_t(1u) );
-         const index_t nIndex2 = getNormalIndex( triangle, uint8_t(2u) );
+         const index_t nIndex0 = getNormalIndex( triangle, uint8_t{0u} );
+         const index_t nIndex1 = getNormalIndex( triangle, uint8_t{1u} );
+         const index_t nIndex2 = getNormalIndex( triangle, uint8_t{2u} );
 
          meshes[index].addTriangle(
             vid[index][vIndex0], vid[index][vIndex1], vid[index][vIndex2],
@@ -464,7 +464,7 @@ real_t TriangleMesh::volume() const
    for(size_t i = 0; i < getNumTriangles(); ++i)
    {
       getTriangle( i, v0, v1, v2 );
-      result += ( v0 * ( v1 % v2 ) ) / real_t(6);
+      result += ( v0 * ( v1 % v2 ) ) / real_t{6};
    }
 
    return std::fabs(result);
@@ -483,7 +483,7 @@ real_t TriangleMesh::surfaceArea() const
       result += ( ( v1 - v0 ) % ( v2 - v0 ) ).length();
    }
 
-   return result * real_t( 0.5 );
+   return result * real_t{ 0.5 };
 }
 
 

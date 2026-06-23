@@ -36,14 +36,14 @@ void check( )
 {
    using namespace walberla::mesa_pd::collision_detection;
 
-   auto sp0 = data::Sphere(real_t(0.6));
-   auto sp1 = data::Sphere(real_t(0.4));
+   auto sp0 = data::Sphere(real_t{0.6});
+   auto sp1 = data::Sphere(real_t{0.4});
 
    GJK gjk;
-   WALBERLA_CHECK( gjk.doGJKmargin( Support(Vec3(real_t(1),real_t(2),real_t(3)), Rot3(), sp0),
-                                    Support(Vec3(real_t(2),real_t(2),real_t(3)), Rot3(), sp0) ));
-   WALBERLA_CHECK( !gjk.doGJKmargin( Support(Vec3(real_t(1),real_t(2),real_t(3)), Rot3(), sp1),
-                                     Support(Vec3(real_t(2),real_t(2),real_t(3)), Rot3(), sp1) ));
+   WALBERLA_CHECK( gjk.doGJKmargin( Support(Vec3(real_t{1},real_t{2},real_t{3}), Rot3(), sp0),
+                                    Support(Vec3(real_t{2},real_t{2},real_t{3}), Rot3(), sp0) ));
+   WALBERLA_CHECK( !gjk.doGJKmargin( Support(Vec3(real_t{1},real_t{2},real_t{3}), Rot3(), sp1),
+                                     Support(Vec3(real_t{2},real_t{2},real_t{3}), Rot3(), sp1) ));
 }
 
 } //namespace mesa_pd

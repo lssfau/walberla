@@ -102,11 +102,11 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
    CellInterval fineInterval = pdfField->xyzSize();
    CellInterval coarseInterval = fineInterval;
 
-   fineInterval.expand( cell_idx_t(4) );
+   fineInterval.expand( cell_idx_t{4} );
    coarseInterval.xMax() = ( coarseInterval.xMax() >> 1 );
    coarseInterval.yMax() = ( coarseInterval.yMax() >> 1 );
-   coarseInterval.zMax() = ( Stencil::D == uint_t(3) ) ? ( coarseInterval.zMax() >> 1 ) : cell_idx_t(0);
-   coarseInterval.expand( cell_idx_t(2) );
+   coarseInterval.zMax() = ( Stencil::D == uint_t{3} ) ? ( coarseInterval.zMax() >> 1 ) : cell_idx_t{0};
+   coarseInterval.expand( cell_idx_t{2} );
 
    std::vector< CellInterval > coarseIntervals;
    std::vector< CellInterval >   fineIntervals;
@@ -124,21 +124,21 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
          {
             if( stencil::c[i][*d] == -1 )
             {
-               coarse.max()[i] = coarse.min()[i] + cell_idx_t(1);
-               fine.max()[i] = fine.min()[i] + cell_idx_t(3);
+               coarse.max()[i] = coarse.min()[i] + cell_idx_t{1};
+               fine.max()[i] = fine.min()[i] + cell_idx_t{3};
             }
             else if( stencil::c[i][*d] == 1 )
             {
-               coarse.min()[i] = coarse.max()[i] - cell_idx_t(1);
-               fine.min()[i] = fine.max()[i] - cell_idx_t(3);
+               coarse.min()[i] = coarse.max()[i] - cell_idx_t{1};
+               fine.min()[i] = fine.max()[i] - cell_idx_t{3};
             }
             else
             {
                WALBERLA_ASSERT_EQUAL( stencil::c[i][*d], 0 );
-               coarse.min()[i] += cell_idx_t(2);
-               coarse.max()[i] -= cell_idx_t(2);
-               fine.min()[i] += cell_idx_t(4);
-               fine.max()[i] -= cell_idx_t(4);
+               coarse.min()[i] += cell_idx_t{2};
+               coarse.max()[i] -= cell_idx_t{2};
+               fine.min()[i] += cell_idx_t{4};
+               fine.max()[i] -= cell_idx_t{4};
             }
          }
 
@@ -159,10 +159,10 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
 
    if( tmpFields_.find( coarseInterval.max() ) == tmpFields_.end() )
    {
-      tmpFields_[ coarseInterval.max() ] = std::make_pair( make_shared< CoarseField >( coarseInterval.xSize() - uint_t(4), coarseInterval.ySize() - uint_t(4),
-                                                                                       coarseInterval.zSize() - uint_t(4), uint_t(2), pdfField->layout() ),
-                                                           make_shared< BoolField >( coarseInterval.xSize() - uint_t(4), coarseInterval.ySize() - uint_t(4),
-                                                                                     coarseInterval.zSize() - uint_t(4), uint_t(3), pdfField->layout() ) );
+      tmpFields_[ coarseInterval.max() ] = std::make_pair( make_shared< CoarseField >( coarseInterval.xSize() - uint_t{4}, coarseInterval.ySize() - uint_t{4},
+                                                                                       coarseInterval.zSize() - uint_t{4}, uint_t{2}, pdfField->layout() ),
+                                                           make_shared< BoolField >( coarseInterval.xSize() - uint_t{4}, coarseInterval.ySize() - uint_t{4},
+                                                                                     coarseInterval.zSize() - uint_t{4}, uint_t{3}, pdfField->layout() ) );
    }
    auto fields = tmpFields_[ coarseInterval.max() ];
    auto tmpField = fields.first;
@@ -215,7 +215,7 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
 #endif
 
       CellInterval expanded( coarse );
-      expanded.expand( cell_idx_t(1) );
+      expanded.expand( cell_idx_t{1} );
 
       for( auto cell = boolField->beginSliceXYZ( expanded ); cell != boolField->end(); ++cell )
          *cell = false;
@@ -226,32 +226,32 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
          for( auto y = coarse.yMin(); y <= coarse.yMax(); ++y ) {
             for( auto x = coarse.xMin(); x <= coarse.xMax(); ++x )
             {
-               if( boundaryHandling->isDomain( cell_idx_t(2) * x, cell_idx_t(2) * y, cell_idx_t(2) * z ) )
+               if( boundaryHandling->isDomain( cell_idx_t{2} * x, cell_idx_t{2} * y, cell_idx_t{2} * z ) )
                {
-                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y,                 cell_idx_t(2) * z                 ) );
-                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z                 ) );
-                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z                 ) );
-                  if( Stencil::D == uint_t(3) )
+                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y,                 cell_idx_t{2} * z                 ) );
+                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z                 ) );
+                  WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z                 ) );
+                  if( Stencil::D == uint_t{3} )
                   {
-                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y,                 cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y,                 cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z + cell_idx_t(1) ) );
+                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y,                 cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y,                 cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z + cell_idx_t{1} ) );
                   }
                   
                   boolField->get(x,y,z) = true;
                }
                else
                {
-                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y,                 cell_idx_t(2) * z                 ) );
-                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z                 ) );
-                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z                 ) );
-                  if( Stencil::D == uint_t(3) )
+                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y,                 cell_idx_t{2} * z                 ) );
+                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z                 ) );
+                  WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z                 ) );
+                  if( Stencil::D == uint_t{3} )
                   {
-                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y,                 cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y,                 cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x,                 cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z + cell_idx_t(1) ) );
-                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t(2) * x + cell_idx_t(1), cell_idx_t(2) * y + cell_idx_t(1), cell_idx_t(2) * z + cell_idx_t(1) ) );
+                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y,                 cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y,                 cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x,                 cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z + cell_idx_t{1} ) );
+                     WALBERLA_ASSERT( !boundaryHandling->isDomain( cell_idx_t{2} * x + cell_idx_t{1}, cell_idx_t{2} * y + cell_idx_t{1}, cell_idx_t{2} * z + cell_idx_t{1} ) );
                   }
                }
             }
@@ -263,21 +263,21 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
 
    for( auto const &fine : fineIntervals )
    {
-      WALBERLA_ASSERT( (fine.xSize() & uint_t(1)) == uint_t(0) );
-      WALBERLA_ASSERT( (fine.ySize() & uint_t(1)) == uint_t(0) );
-      WALBERLA_ASSERT( ( Stencil::D == uint_t(2) && fine.zSize() == uint_t(1) ) || ( Stencil::D == uint_t(3) && (fine.zSize() & uint_t(1)) == uint_t(0) ) );
+      WALBERLA_ASSERT( (fine.xSize() & uint_t{1}) == uint_t{0} );
+      WALBERLA_ASSERT( (fine.ySize() & uint_t{1}) == uint_t{0} );
+      WALBERLA_ASSERT( ( Stencil::D == uint_t{2} && fine.zSize() == uint_t{1} ) || ( Stencil::D == uint_t{3} && (fine.zSize() & uint_t{1}) == uint_t{0} ) );
       
 #ifdef _OPENMP
 
       if( fine.zSize() >= fine.ySize() )
       {
-         int zSize = (Stencil::D == uint_t(3)) ? ( int_c( fine.zSize() ) / 2 ) : 1;
+         int zSize = (Stencil::D == uint_t{3}) ? ( int_c( fine.zSize() ) / 2 ) : 1;
 
          #pragma omp parallel for schedule(static)
          for( int zi = 0; zi < zSize; ++zi )
          {
-            const cell_idx_t z = fine.zMin() + cell_idx_c(zi) * cell_idx_t(2);
-            for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t(2) )
+            const cell_idx_t z = fine.zMin() + cell_idx_c(zi) * cell_idx_t{2};
+            for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t{2} )
                internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
       }
@@ -288,14 +288,14 @@ void LinearExplosion< LatticeModel_T, BoundaryHandling_T >::operator()( Block * 
          #pragma omp parallel for schedule(static)
          for( int yi = 0; yi < ySize; ++yi )
          {
-            const cell_idx_t y = fine.yMin() + cell_idx_c(yi) * cell_idx_t(2);
-            for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t(2) )
+            const cell_idx_t y = fine.yMin() + cell_idx_c(yi) * cell_idx_t{2};
+            for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t{2} )
                internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
       }
 #else
-      for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t(2) ) {
-         for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t(2) )
+      for( cell_idx_t z = fine.zMin(); z <= fine.zMax(); z += cell_idx_t{2} ) {
+         for( cell_idx_t y = fine.yMin(); y <= fine.yMax(); y += cell_idx_t{2} )
          {
             internal::linearInterpolation< PdfField_T, BoundaryHandling_T, CoarseField, BoolField >( y, z, fine, pdfField, boundaryHandling, tmpField, boolField );
          }
@@ -316,9 +316,9 @@ void fillTemporaryCoarseField( const cell_idx_t y, const cell_idx_t z, const Cel
    for( cell_idx_t x = coarse.xMin(); x <= coarse.xMax(); ++x ) {
       for( uint_t f = 0; f < PdfField_T::F_SIZE; ++f )
       {
-         const auto fx = cell_idx_t(2) * x;
-         const auto fy = cell_idx_t(2) * y;
-         const auto fz = cell_idx_t(2) * z;
+         const auto fx = cell_idx_t{2} * x;
+         const auto fy = cell_idx_t{2} * y;
+         const auto fz = cell_idx_t{2} * z;
 
          const auto value = pdfField->get( fx, fy, fz, f );
 
@@ -331,24 +331,24 @@ void fillTemporaryCoarseField( const cell_idx_t y, const cell_idx_t z, const Cel
 
          /*
          WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy                , fz                , f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy                , fz + cell_idx_t(1), f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy + cell_idx_t(1), fz                , f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy + cell_idx_t(1), fz + cell_idx_t(1), f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t(1), fy                , fz                , f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t(1), fy                , fz + cell_idx_t(1), f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz                , f ) ) );
-         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz + cell_idx_t(1), f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy                , fz + cell_idx_t{1}, f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy + cell_idx_t{1}, fz                , f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx                , fy + cell_idx_t{1}, fz + cell_idx_t{1}, f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t{1}, fy                , fz                , f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t{1}, fy                , fz + cell_idx_t{1}, f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t{1}, fy + cell_idx_t{1}, fz                , f ) ) );
+         WALBERLA_ASSERT( !math::isnan( pdfField->get( fx + cell_idx_t{1}, fy + cell_idx_t{1}, fz + cell_idx_t{1}, f ) ) );
 
          auto value  = pdfField->get( fx                , fy                , fz                , f );
-              value += pdfField->get( fx                , fy                , fz + cell_idx_t(1), f );
-              value += pdfField->get( fx                , fy + cell_idx_t(1), fz                , f );
-              value += pdfField->get( fx                , fy + cell_idx_t(1), fz + cell_idx_t(1), f );
-              value += pdfField->get( fx + cell_idx_t(1), fy                , fz                , f );
-              value += pdfField->get( fx + cell_idx_t(1), fy                , fz + cell_idx_t(1), f );
-              value += pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz                , f );
-              value += pdfField->get( fx + cell_idx_t(1), fy + cell_idx_t(1), fz + cell_idx_t(1), f );
+              value += pdfField->get( fx                , fy                , fz + cell_idx_t{1}, f );
+              value += pdfField->get( fx                , fy + cell_idx_t{1}, fz                , f );
+              value += pdfField->get( fx                , fy + cell_idx_t{1}, fz + cell_idx_t{1}, f );
+              value += pdfField->get( fx + cell_idx_t{1}, fy                , fz                , f );
+              value += pdfField->get( fx + cell_idx_t{1}, fy                , fz + cell_idx_t{1}, f );
+              value += pdfField->get( fx + cell_idx_t{1}, fy + cell_idx_t{1}, fz                , f );
+              value += pdfField->get( fx + cell_idx_t{1}, fy + cell_idx_t{1}, fz + cell_idx_t{1}, f );
 
-         tmpField->get(x,y,z,f) = real_t(0.125) * value;
+         tmpField->get(x,y,z,f) = real_t{0.125} * value;
          */
       }
    }
@@ -372,33 +372,33 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                                          {  0.25,  0.25, -0.25 },
                                          {  0.25,  0.25,  0.25 } };
 
-   for( cell_idx_t x = fine.xMin(); x < fine.xMax(); x += cell_idx_t(2) )
+   for( cell_idx_t x = fine.xMin(); x < fine.xMax(); x += cell_idx_t{2} )
    {
       if( boundaryHandling->isDomain(x,y,z) )
       {
-         WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t(1), y,                 z                 ) );
-         WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y + cell_idx_t(1), z                 ) );
-         WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t(1), y + cell_idx_t(1), z                 ) );
-         if( PdfField_T::Stencil::D == uint_t(3) )
+         WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t{1}, y,                 z                 ) );
+         WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y + cell_idx_t{1}, z                 ) );
+         WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t{1}, y + cell_idx_t{1}, z                 ) );
+         if( PdfField_T::Stencil::D == uint_t{3} )
          {
-            WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y,                 z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t(1), y,                 z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y + cell_idx_t(1), z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1) ) );
+            WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y,                 z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t{1}, y,                 z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( boundaryHandling->isDomain( x,                 y + cell_idx_t{1}, z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( boundaryHandling->isDomain( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1} ) );
          }
 
-         Cell cell( ( ( x + cell_idx_t(4) ) >> 1 ) - cell_idx_t(2),
-                    ( ( y + cell_idx_t(4) ) >> 1 ) - cell_idx_t(2),
-                    (PdfField_T::Stencil::D == uint_t(3)) ? ( ( ( z + cell_idx_t(4) ) >> 1 ) - cell_idx_t(2) ) : cell_idx_t(0) );
+         Cell cell( ( ( x + cell_idx_t{4} ) >> 1 ) - cell_idx_t{2},
+                    ( ( y + cell_idx_t{4} ) >> 1 ) - cell_idx_t{2},
+                    (PdfField_T::Stencil::D == uint_t{3}) ? ( ( ( z + cell_idx_t{4} ) >> 1 ) - cell_idx_t{2} ) : cell_idx_t{0} );
 
          Cell min[3], max[3];
 
-         min[0][0] = cell[0] - cell_idx_t(1); min[0][1] = cell[1]; min[0][2] = cell[2];
-         max[0][0] = cell[0] + cell_idx_t(1); max[0][1] = cell[1]; max[0][2] = cell[2];
-         min[1][0] = cell[0]; min[1][1] = cell[1] - cell_idx_t(1); min[1][2] = cell[2];
-         max[1][0] = cell[0]; max[1][1] = cell[1] + cell_idx_t(1); max[1][2] = cell[2];
-         min[2][0] = cell[0]; min[2][1] = cell[1]; min[2][2] = cell[2] - cell_idx_t(1);
-         max[2][0] = cell[0]; max[2][1] = cell[1]; max[2][2] = cell[2] + cell_idx_t(1);
+         min[0][0] = cell[0] - cell_idx_t{1}; min[0][1] = cell[1]; min[0][2] = cell[2];
+         max[0][0] = cell[0] + cell_idx_t{1}; max[0][1] = cell[1]; max[0][2] = cell[2];
+         min[1][0] = cell[0]; min[1][1] = cell[1] - cell_idx_t{1}; min[1][2] = cell[2];
+         max[1][0] = cell[0]; max[1][1] = cell[1] + cell_idx_t{1}; max[1][2] = cell[2];
+         min[2][0] = cell[0]; min[2][1] = cell[1]; min[2][2] = cell[2] - cell_idx_t{1};
+         max[2][0] = cell[0]; max[2][1] = cell[1]; max[2][2] = cell[2] + cell_idx_t{1};
 
          for( uint_t f = 0; f < PdfField_T::F_SIZE; ++f )
          {
@@ -406,7 +406,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
 
             const auto v = tmpField->get( cell, f );
 
-            Vector3< real_t > grad( real_t(0) );
+            Vector3< real_t > grad( real_t{0} );
 
             for( uint_t i = 0; i < PdfField_T::Stencil::D; ++i )
             {
@@ -419,7 +419,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                   WALBERLA_ASSERT( !math::isnan( tmpField->get( max[i], f ) ) );
                   WALBERLA_ASSERT( !math::isnan( tmpField->get( min[i], f ) ) );
 
-                  grad[i] = real_t(0.5) * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
+                  grad[i] = real_t{0.5} * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
                }
 
 #else
@@ -429,7 +429,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                   if( boolField->get( min[i] ) )
                   {
                      WALBERLA_ASSERT( !math::isnan( tmpField->get( min[i], f ) ) );
-                     grad[i] = real_t(0.5) * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
+                     grad[i] = real_t{0.5} * ( tmpField->get( max[i], f ) - tmpField->get( min[i], f ) );
                   }
                   else
                   {
@@ -456,16 +456,16 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
 #endif
 #undef WALBERLA_LBM_REFINEMENT_EXPLOSION_CHEN_CORRECTION
 
-            const auto xx = x + cell_idx_t(1);
-            const auto yy = y + cell_idx_t(1);
+            const auto xx = x + cell_idx_t{1};
+            const auto yy = y + cell_idx_t{1};
             pdfField->get( x , y , z , f ) = v + ( weights[0][0] * grad[0] + weights[0][1] * grad[1] + weights[0][2] * grad[2] );
             pdfField->get( x , yy, z , f ) = v + ( weights[2][0] * grad[0] + weights[2][1] * grad[1] + weights[2][2] * grad[2] );
             pdfField->get( xx, y , z , f ) = v + ( weights[4][0] * grad[0] + weights[4][1] * grad[1] + weights[4][2] * grad[2] );
             pdfField->get( xx, yy, z , f ) = v + ( weights[6][0] * grad[0] + weights[6][1] * grad[1] + weights[6][2] * grad[2] );
 
-            if( PdfField_T::Stencil::D == uint_t(3) )
+            if( PdfField_T::Stencil::D == uint_t{3} )
             {
-               const auto zz = z + cell_idx_t(1);
+               const auto zz = z + cell_idx_t{1};
                pdfField->get( x , y , zz, f ) = v + ( weights[1][0] * grad[0] + weights[1][1] * grad[1] + weights[1][2] * grad[2] );
                pdfField->get( x , yy, zz, f ) = v + ( weights[3][0] * grad[0] + weights[3][1] * grad[1] + weights[3][2] * grad[2] );
                pdfField->get( xx, y , zz, f ) = v + ( weights[5][0] * grad[0] + weights[5][1] * grad[1] + weights[5][2] * grad[2] );
@@ -475,15 +475,15 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
       }
       else
       {
-         WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t(1), y,                 z                 ) );
-         WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y + cell_idx_t(1), z                 ) );
-         WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t(1), y + cell_idx_t(1), z                 ) );
-         if( PdfField_T::Stencil::D == uint_t(3) )
+         WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t{1}, y,                 z                 ) );
+         WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y + cell_idx_t{1}, z                 ) );
+         WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t{1}, y + cell_idx_t{1}, z                 ) );
+         if( PdfField_T::Stencil::D == uint_t{3} )
          {
-            WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y,                 z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t(1), y,                 z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y + cell_idx_t(1), z + cell_idx_t(1) ) );
-            WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1) ) );
+            WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y,                 z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t{1}, y,                 z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( !boundaryHandling->isDomain( x,                 y + cell_idx_t{1}, z + cell_idx_t{1} ) );
+            WALBERLA_ASSERT( !boundaryHandling->isDomain( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1} ) );
          }
       }
    }

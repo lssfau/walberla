@@ -124,15 +124,15 @@ class CellwiseSweep
                      const DensityVelocityOut_T & _densityVelocityOut = DefaultDensityVelocityCallback() ) : \
          SweepBase< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T >( src, dst, _filter, _densityVelocityIn, _densityVelocityOut ) {} \
       \
-      void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) ) \
+      void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} ) \
       { \
          streamCollide( block, numberOfGhostLayersToInclude ); \
       } \
       \
-      void streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) ); \
+      void streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} ); \
       \
-      void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) ); \
-      void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) ); \
+      void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} ); \
+      void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} ); \
    }; \
    \
    template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn_T, typename DensityVelocityOut_T > \
@@ -225,7 +225,7 @@ class CellwiseSweep
          const real_t velYTerm = vN + vNW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + velXTerm + velYTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = real_t{1.0} / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW ); \
          const real_t velY = invRho * ( velYTerm + vNE - vS  - vSW - vSE );
@@ -291,7 +291,7 @@ class CellwiseSweep
          const real_t velZTerm = vT + vTS + vTW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + vBS + vBW + velXTerm + velYTerm + velZTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = real_t{1.0} / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW - vTW - vBW ); \
          const real_t velY = invRho * ( velYTerm + vNE - vS  - vSW - vSE - vTS - vBS ); \
@@ -374,7 +374,7 @@ class CellwiseSweep
          const real_t velZTerm = vT + vTS + vTW + vTSW; \
          \
          const real_t rho = vC + vS + vW + vB + vSW + vBS + vBW + vBSW + velXTerm + velYTerm + velZTerm; \
-         const real_t invRho = real_t(1.0) / rho; \
+         const real_t invRho = real_t{1.0} / rho; \
          \
          const real_t velX = invRho * ( velXTerm - vW  - vNW - vSW - vTW - vBW - vTNW - vTSW - vBNW - vBSW ); \
          const real_t velY = invRho * ( velYTerm + vNE + vTNE + vBNE - vS  - vSW - vSE - vTS - vBS  - vTSE - vTSW - vBSE - vBSW ); \

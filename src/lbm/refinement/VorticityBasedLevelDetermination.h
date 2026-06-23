@@ -85,17 +85,17 @@ void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::ve
 
       if( u == nullptr )
       {
-         level = uint_t(0);
+         level = uint_t{0};
          continue;
       }
 
-      WALBERLA_ASSERT_GREATER_EQUAL(u->nrOfGhostLayers(), uint_t(1));
+      WALBERLA_ASSERT_GREATER_EQUAL(u->nrOfGhostLayers(), uint_t{1});
 
       CellInterval interval = u->xyzSize();
-      Cell expand( cell_idx_c(-1), cell_idx_c(-1), Pseudo2D ? cell_idx_t(0) : cell_idx_c(-1) );
+      Cell expand( cell_idx_c(-1), cell_idx_c(-1), Pseudo2D ? cell_idx_t{0} : cell_idx_c(-1) );
       interval.expand( expand );
 
-      const cell_idx_t one( cell_idx_t(1) );
+      const cell_idx_t one( cell_idx_t{1} );
       const real_t half( real_c(0.5) );
 
       bool refine( false );
@@ -107,9 +107,9 @@ void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::ve
       const cell_idx_t ySize = cell_idx_c( interval.ySize() );
       const cell_idx_t zSize = cell_idx_c( interval.zSize() );
 
-      for( cell_idx_t z = cell_idx_t(0); z < zSize; ++z ) {
-         for (cell_idx_t y = cell_idx_t(0); y < ySize; ++y) {
-            for (cell_idx_t x = cell_idx_t(0); x < xSize; ++x) {
+      for( cell_idx_t z = cell_idx_t{0}; z < zSize; ++z ) {
+         for (cell_idx_t y = cell_idx_t{0}; y < ySize; ++y) {
+            for (cell_idx_t x = cell_idx_t{0}; x < xSize; ++x) {
                if( filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z) && filter_(x,y-one,z) &&
                    ( Pseudo2D || (filter_(x,y,z+one) && filter_(x,y,z-one)) ) )
                {
@@ -146,12 +146,12 @@ void VorticityBasedLevelDetermination< Filter_T, Pseudo2D >::operator()( std::ve
       if( refine && block.getLevel() < maxLevel_ )
       {
          WALBERLA_ASSERT( !coarsen );
-         level = block.getLevel() + uint_t(1);
+         level = block.getLevel() + uint_t{1};
       }
-      if( coarsen && block.getLevel() > uint_t(0) )
+      if( coarsen && block.getLevel() > uint_t{0} )
       {
          WALBERLA_ASSERT( !refine );
-         level = block.getLevel() - uint_t(1);
+         level = block.getLevel() - uint_t{1};
       }
    }
 }

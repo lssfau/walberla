@@ -72,7 +72,6 @@ inline const T sqr( const T& a );
 template< typename T1, typename T2 >
 inline bool equal( T1 a, T2 b );
 
-inline real_t round( real_t a );
 //@}
 //**********************************************************************************************************************
 
@@ -354,22 +353,6 @@ inline bool equal( T1 a, T2 b )
    return equal_backend<High>( a, b );
 }
 //**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
-/*!\brief Rounding function.
-// \ingroup math
-//
-// \param  a Floating point value.
-// \return The floating point value rounded towards the next whole number.
-
- */
-inline real_t round( real_t a )
-{
-   return std::floor( a + real_t(0.5) );
-}
-//**********************************************************************************************************************
-
 
 
 } // namespace math

@@ -145,8 +145,8 @@ public:
                        const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( filter ),
-      executionCounter_( uint_t(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
-      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t(1) ),
+      executionCounter_( uint_t{0} ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
+      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t{1} ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {}
 
@@ -156,9 +156,9 @@ public:
                        const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                        const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( Filter_T() ),
-      executionCounter_( uint_t(0) ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
-      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t(1) ),
-      L1_( real_t(0) ), L2_( real_t(0) ), Lmax_( real_t(0) ),
+      executionCounter_( uint_t{0} ), plotFrequency_( plotFrequency ), logFrequency_( logFrequency ),
+      filename_( internal::accuracyEvaluationFilename ), normalizationFactor_( real_t{1} ),
+      L1_( real_t{0} ), L2_( real_t{0} ), Lmax_( real_t{0} ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
@@ -205,13 +205,13 @@ private:
 template< typename Field_T, typename SolutionFunction_T, typename Filter_T >
 void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
 {
-   if( logFrequency_ == uint_t(0) && ( plotFrequency_ == uint_t(0) || filename_.empty() ) )
+   if( logFrequency_ == uint_t{0} && ( plotFrequency_ == uint_t{0} || filename_.empty() ) )
       return;
 
    ++executionCounter_;
 
-   const bool plot = ( plotFrequency_ != uint_t(0) && ( executionCounter_ - uint_c(1) ) % plotFrequency_ == uint_t(0) && !filename_.empty() );
-   const bool log  = ( logFrequency_  != uint_t(0) && ( executionCounter_ - uint_c(1) ) % logFrequency_  == uint_t(0) );
+   const bool plot = ( plotFrequency_ != uint_t{0} && ( executionCounter_ - uint_c(1) ) % plotFrequency_ == uint_t{0} && !filename_.empty() );
+   const bool log  = ( logFrequency_  != uint_t{0} && ( executionCounter_ - uint_c(1) ) % logFrequency_  == uint_t{0} );
 
    if( !log && !plot )
       return;
@@ -221,9 +221,9 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
 
    const auto & domainAABB = blocks->getDomain();
 
-   real_t _L1( real_t(0) );
-   real_t _L2( real_t(0) );
-   real_t _Lmax( real_t(0) );
+   real_t _L1( real_t{0} );
+   real_t _L2( real_t{0} );
+   real_t _Lmax( real_t{0} );
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
    {
@@ -236,7 +236,7 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
 
 #ifdef _OPENMP
 
-      std::vector< real_t > lmax( numeric_cast<size_t>( omp_get_max_threads() ), real_t(0) );
+      std::vector< real_t > lmax( numeric_cast<size_t>( omp_get_max_threads() ), real_t{0} );
 
       #pragma omp parallel
       {
@@ -294,7 +294,7 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
    {
       const auto & id = blocks->getBlockDataIdentifier( fieldId_ );
 
-      if( plot && executionCounter_ == uint_t(1) )
+      if( plot && executionCounter_ == uint_t{1} )
       {
          std::ofstream file( filename_.c_str() );
          file << "# accuracy evaluation of data '" << id <<  "'\n"
@@ -313,7 +313,7 @@ void AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T >::operator()()
       if( plot )
       {
          std::ofstream file( filename_.c_str(), std::ofstream::out | std::ofstream::app );
-         file << ( executionCounter_ - uint_t(1) ) << " " << L1_ << " " << L2_ << " " << Lmax_ << std::endl;
+         file << ( executionCounter_ - uint_t{1} ) << " " << L1_ << " " << L2_ << " " << Lmax_ << std::endl;
          file.close();
       }
    }
@@ -399,10 +399,10 @@ inline void accuracyEvaluationConfigParser( const shared_ptr< Config > & config,
 } // namespace internal
 
 #define WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_CONFIG_PARSER( config ) \
-   uint_t defaultPlotFrequency = uint_t(0); \
-   uint_t defaultLogFrequency = uint_t(0); \
+   uint_t defaultPlotFrequency = uint_t{0}; \
+   uint_t defaultLogFrequency = uint_t{0}; \
    std::string defaultFilename = internal::accuracyEvaluationFilename; \
-   real_t defaultNormalizationFactor = uint_t(1); \
+   real_t defaultNormalizationFactor = uint_t{1}; \
    internal::accuracyEvaluationConfigParser( config, configBlockName, defaultPlotFrequency, defaultLogFrequency, defaultFilename, defaultNormalizationFactor );
 
 #define WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_SET_AND_RETURN() \

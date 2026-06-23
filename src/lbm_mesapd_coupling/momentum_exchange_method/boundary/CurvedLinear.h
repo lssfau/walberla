@@ -180,9 +180,9 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
    auto particleIdx = ac_->uidToIdx(particleField_->get( nx, ny, nz ));
    WALBERLA_ASSERT_UNEQUAL( particleIdx, ac_->getInvalidIdx(), "Index of particle is invalid! " << x << " " << y << " " << z  << " -> " << nx << " " << ny << " " << nz << " " << cellCenter << " UID:" << particleField_->get( nx, ny, nz ) );
 
-   real_t delta = real_t(0);
-   real_t pdf_new = real_t(0);
-   real_t alpha = real_t(0);
+   real_t delta = real_t{0};
+   real_t pdf_new = real_t{0};
+   real_t alpha = real_t{0};
 
    // get the cell indices of the cell further away from the obstacle
    const cell_idx_t xff = x - cell_idx_c( stencil::cx[ dir ] );
@@ -198,17 +198,17 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
       // depending on the implementation for the specific particle, either an analytical formula (e.g. for the sphere) or a line search algorithm is used
 
       // (if applicable) line search accuracy
-      const real_t tolerance = real_t( 1e-4 ) * lengthScalingFactor_;
+      const real_t tolerance = real_t{ 1e-4 } * lengthScalingFactor_;
 
       mesa_pd::kernel::SingleCast singleCast;
       mesa_pd::RayParticleIntersectionRatioFunctor intersectionRatioFctr;
       delta = singleCast(particleIdx, *ac_, intersectionRatioFctr, *ac_, cellCenter, direction, tolerance );
 
-      WALBERLA_ASSERT_LESS_EQUAL( delta, real_t(1));
-      WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t(0));
+      WALBERLA_ASSERT_LESS_EQUAL( delta, real_t{1});
+      WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t{0});
 
       // coefficients from Table 3
-      const real_t kappa0 = ( real_t(1) - real_t(2) * delta ) / ( real_t(1) + real_t(2) * delta );
+      const real_t kappa0 = ( real_t{1} - real_t{2} * delta ) / ( real_t{1} + real_t{2} * delta );
 
       // Eq. (4.1)
       pdf_new = /*kappa1*/ pdfField_->get( x  , y  , z  , Stencil_T::idx[dir] )
@@ -216,16 +216,16 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
                 - kappa0 * pdfField_->get( x  , y  , z  , Stencil_T::invDirIdx(dir) );
 
       // Table 4
-      alpha = real_t(4) / ( real_t(1) + real_t(2) * delta);
+      alpha = real_t{4} / ( real_t{1} + real_t{2} * delta);
 
    }
    else
    {
       // fall back to Simple Bounce back
 
-      delta = real_t(0.5);
+      delta = real_t{0.5};
       pdf_new = pdfField_->get( x, y, z, Stencil_T::idx[dir] );
-      alpha = real_t(2);
+      alpha = real_t{2};
    }
 
    // assumed boundary position
@@ -238,14 +238,14 @@ inline void CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >::tre
    if( LatticeModel_T::compressible )
    {
       const auto density = pdfField_->getDensity(x,y,z);
-      pdf_new -= real_t(3.0) * alpha * density * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+      pdf_new -= real_t{3.0} * alpha * density * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
                  ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
                    real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
                    real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
    }
    else
    {
-      pdf_new -= real_t(3.0) * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+      pdf_new -= real_t{3.0} * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
                  ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
                    real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
                    real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );

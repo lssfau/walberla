@@ -51,14 +51,14 @@ int main(int argc, char** argv)
    Environment env(argc, argv);
 
    // define the domain size (2x1x1)
-   const Vector3< uint_t > numBlocks(uint_t(1));
-   const Vector3< uint_t > domainSize(uint_t(2), uint_t(1), uint_t(1));
+   const Vector3< uint_t > numBlocks(uint_t{1});
+   const Vector3< uint_t > domainSize(uint_t{2}, uint_t{1}, uint_t{1});
    const Vector3< uint_t > cellsPerBlock(domainSize[0] / numBlocks[0], domainSize[1] / numBlocks[1],
                                          domainSize[2] / numBlocks[2]);
 
    // ease access to both cells
-   const Cell cell0 = Cell(cell_idx_t(0), cell_idx_t(0), cell_idx_t(0));
-   const Cell cell1 = Cell(cell_idx_t(1), cell_idx_t(0), cell_idx_t(0));
+   const Cell cell0 = Cell(cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{0});
+   const Cell cell1 = Cell(cell_idx_t{1}, cell_idx_t{0}, cell_idx_t{0});
 
    // create block grid
    const std::shared_ptr< StructuredBlockForest > blockForest =
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
       WALBERLA_FOR_ALL_CELLS(pdfFieldIt, pdfField, pdfFieldStreamIntervalIt, pdfFieldStreamInterval, {
          // check equality of each PDF
-         for (uint_t i = uint_t(0); i != pdfField->F_SIZE; ++i)
+         for (uint_t i = uint_t{0}; i != pdfField->F_SIZE; ++i)
          {
             WALBERLA_CHECK_FLOAT_EQUAL(pdfFieldIt[i], pdfFieldStreamIntervalIt[i]);
          }

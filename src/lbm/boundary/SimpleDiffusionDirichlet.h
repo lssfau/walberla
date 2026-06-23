@@ -60,8 +60,8 @@ public:
 
    class ScalarConfiguration : public BoundaryConfiguration {
    public:
-             ScalarConfiguration( const real_t _val = real_t(0) ) : val_( _val ) {}
-      inline ScalarConfiguration( const Config::BlockHandle & config ){ val_ = ( config && config.isDefined( "val" ) ) ? config.getParameter< real_t >( "val" ) : real_t(0); }
+             ScalarConfiguration( const real_t _val = real_t{0} ) : val_( _val ) {}
+      inline ScalarConfiguration( const Config::BlockHandle & config ){ val_ = ( config && config.isDefined( "val" ) ) ? config.getParameter< real_t >( "val" ) : real_t{0}; }
 
       const real_t & val() const { return val_; }
             real_t & val()       { return val_; }
@@ -72,7 +72,7 @@ public:
 
    static shared_ptr<ScalarConfiguration> createConfiguration( const Config::BlockHandle & config ) { return make_shared<ScalarConfiguration>( config ); }
 
-   inline SimpleDiffusionDirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, const real_t val = real_t(0) );
+   inline SimpleDiffusionDirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, const real_t val = real_t{0} );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -177,7 +177,7 @@ inline void SimpleDiffusionDirichlet< LatticeModel_T, flag_t >::treatDirection( 
    WALBERLA_ASSERT_EQUAL  ( mask & this->mask_, this->mask_ );
    // only true if "this->mask_" only contains one single flag, which is the case for the current implementation of this boundary condition (SimpleDiffusionDirichlet)
 
-   pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) = real_t(2) * val_ * LatticeModel_T::w[Stencil::idx[dir]] - pdfField_->get( x, y, z, Stencil::idx[dir] );
+   pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) = real_t{2} * val_ * LatticeModel_T::w[Stencil::idx[dir]] - pdfField_->get( x, y, z, Stencil::idx[dir] );
 }
 
 

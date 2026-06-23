@@ -44,12 +44,12 @@ public:
 
    NormalsVertexDataSource( const std::string & _name = "Normals" )
       : VTKMeshWriter<MeshType>::template VertexDataSource< OutputType >( _name ) { }
-   uint_t numComponents() override { return uint_t(3); }
+   uint_t numComponents() override { return uint_t{3}; }
    void   getData( const MeshType & mesh, const Vertices & vertices, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_vertex_normals(), "You are trying to write vertex normals of a mesh which does not have any!" );
 
-      data.reserve( size_t(3) * vertices.size() );
+      data.reserve( size_t{3} * vertices.size() );
 
       for( auto it = vertices.begin(); it != vertices.end(); ++it )
       {
@@ -73,12 +73,12 @@ public:
 
    NormalsFaceDataSource( const std::string & _name = "Normals" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< OutputType >( _name ) { }
-   uint_t numComponents() override { return uint_t(3); }
+   uint_t numComponents() override { return uint_t{3}; }
    void   getData( const MeshType & mesh, const Faces & faces, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_face_normals(), "You are trying to write face normals of a mesh which does not have any!" );
 
-      data.reserve( size_t(3) * faces.size() );
+      data.reserve( size_t{3} * faces.size() );
 
       for( auto it = faces.begin(); it != faces.end(); ++it )
       {
@@ -102,7 +102,7 @@ public:
 
    AreaFaceDataSource( const std::string & _name = "Area" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< OutputType >( _name ) { }
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & mesh, const Faces & faces, std::vector<value_type> & data ) override
    {
       data.reserve( faces.size() );
@@ -128,7 +128,7 @@ public:
 
    StatusBitFaceDataSource( const OpenMesh::Attributes::StatusBits & bit, const std::string & _name )
       : VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >( _name ), bit_( bit ) {}
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & mesh, const Faces & faces, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_face_status(), "Cannot write face status bits, because the faces do not have them!" );
@@ -136,7 +136,7 @@ public:
       data.reserve( faces.size() );
       for( auto it = faces.begin(); it != faces.end(); ++it )
       {
-         data.push_back( mesh.status( *it ).is_bit_set( bit_ ) ? uint8_t(1) : uint8_t(0) );
+         data.push_back( mesh.status( *it ).is_bit_set( bit_ ) ? uint8_t{1} : uint8_t{0} );
       }
    }
 
@@ -155,7 +155,7 @@ public:
 
    StatusBitVertexDataSource( const OpenMesh::Attributes::StatusBits & bit, const std::string & _name )
       : VTKMeshWriter<MeshType>::template VertexDataSource< uint8_t >( _name ), bit_( bit ) {}
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & mesh, const Vertices & vertices, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_vertex_status(), "Cannot write vertex status bits, because the vertices do not have them!" );
@@ -163,7 +163,7 @@ public:
       data.reserve( vertices.size() );
       for( auto it = vertices.begin(); it != vertices.end(); ++it )
       {
-         data.push_back( mesh.status( *it ).is_bit_set( bit_ ) ? uint8_t(1) : uint8_t(0) );
+         data.push_back( mesh.status( *it ).is_bit_set( bit_ ) ? uint8_t{1} : uint8_t{0} );
       }
    }
 
@@ -183,7 +183,7 @@ public:
    ColorFaceDataSource( const std::string & _name = "color" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< uint8_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(3); }
+   uint_t numComponents() override { return uint_t{3}; }
    void   getData( const MeshType & mesh, const Faces & faces, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_face_colors(), "Cannot write face colors, because the faces do not have them!" );
@@ -211,7 +211,7 @@ public:
    ColorVertexDataSource( const std::string & _name = "color" )
       : VTKMeshWriter<MeshType>::template VertexDataSource< uint8_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(3); }
+   uint_t numComponents() override { return uint_t{3}; }
    void   getData( const MeshType & mesh, const Vertices & vertices, std::vector<value_type> & data ) override
    {
       WALBERLA_CHECK( mesh.has_vertex_colors(), "Cannot write vertex colors, because the vertices do not have them!" );
@@ -237,7 +237,7 @@ public:
    IndexFaceDataSource( const std::string & _name = "index" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< int32_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data ) override
    {
       data.reserve( faces.size() );
@@ -259,7 +259,7 @@ public:
    IndexVertexDataSource( const std::string & _name = "index" )
       : VTKMeshWriter<MeshType>::template VertexDataSource< int32_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & /*mesh*/, const Vertices & vertices, std::vector<value_type> & data ) override
    {
       data.reserve( vertices.size() );
@@ -281,7 +281,7 @@ public:
    RankFaceDataSource( const std::string & _name = "rank" )
       : VTKMeshWriter<MeshType>::template FaceDataSource< int32_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data ) override
    {
       int32_t rank = MPIManager::instance()->rank();
@@ -300,7 +300,7 @@ public:
    RankVertexDataSource( const std::string & _name = "rank" )
       : VTKMeshWriter<MeshType>::template VertexDataSource< int32_t >( _name ) {}
 
-   uint_t numComponents() override { return uint_t(1); }
+   uint_t numComponents() override { return uint_t{1}; }
    void   getData( const MeshType & /*mesh*/, const Vertices & vertices, std::vector<value_type> & data ) override
    {
       int32_t rank = MPIManager::instance()->rank();

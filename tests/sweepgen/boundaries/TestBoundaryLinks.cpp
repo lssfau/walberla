@@ -95,7 +95,7 @@ void testIndexVector(
          WALBERLA_CHECK(std::ranges::any_of(reference_vec, [&](const Link& link) {
             if constexpr (std::same_as< Link, gen::QBBLink >)
                return link.x == idx.x && link.y == idx.y && link.z == idx.z && link.dir == idx.dir &&
-                      abs(link.q - idx.q) < 0.01;
+                      fabs(link.q - idx.q) < 0.01;
             else
                return link.x == idx.x && link.y == idx.y && link.z == idx.z && link.dir == idx.dir;
          }))

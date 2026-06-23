@@ -160,8 +160,8 @@ int main( int argc, char * argv[] )
    int64_t wgtflag = 0;
    int64_t numflag = 0;
    int64_t ndims   = 2;
-   int64_t ncon    = int64_t( 1 );
-   int64_t nparts  = int64_t( 5 );
+   int64_t ncon    = int64_t{ 1 };
+   int64_t nparts  = int64_t{ 5 };
    std::vector< double > tpwgts( static_cast<size_t>(nparts), 1.0 / static_cast<double>( nparts ) );
    std::vector< double > ubvec(  static_cast<size_t>(ncon), 1.05 );
    double  ipc2redist =  1.0;

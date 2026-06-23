@@ -502,8 +502,8 @@ void NoMPICommunication<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo
    {
       switch( recvInfos.size() )
       {
-      case size_t(0):  break;
-      case size_t(1):  WALBERLA_ASSERT_EQUAL( recvInfos.begin()->first, 0 ); break;
+      case size_t{0}:  break;
+      case size_t{1}:  WALBERLA_ASSERT_EQUAL( recvInfos.begin()->first, 0 ); break;
       default:         WALBERLA_ABORT("BufferSystem may only communicate with rank 0 in NonMPI mode!");
       }
    }
@@ -519,7 +519,7 @@ MPIRank NoMPICommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, Receiv
       return INVALID_RANK;
    }
 
-   WALBERLA_ASSERT_EQUAL( recvInfos.size(), size_t( 1 ) );
+   WALBERLA_ASSERT_EQUAL( recvInfos.size(), size_t{ 1 } );
    WALBERLA_ASSERT_EQUAL( recvInfos.begin()->first, 0 );
 
    if( received_ )

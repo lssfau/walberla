@@ -47,7 +47,7 @@ public:
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {
       WALBERLA_ASSERT_EQUAL( weights.size(), Stencil_T::Size );
-      for( uint_t i = uint_t(0); i < Stencil_T::Size; ++i )
+      for( uint_t i = uint_t{0}; i < Stencil_T::Size; ++i )
          weights_[i] = weights[i];
       init();
    }
@@ -80,14 +80,14 @@ protected:
 template< typename Stencil_T >
 real_t ResidualNorm< Stencil_T >::weightedL2() const
 {
-   real_t result( real_t(0) );
+   real_t result( real_t{0} );
    
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {
       const Field_T * const uf = block->template getData< const Field_T >( uId_ );
       const Field_T * const ff = block->template getData< const Field_T >( fId_ );
       
-      real_t blockResult( real_t(0) );
+      real_t blockResult( real_t{0} );
       
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( uf, omp parallel for schedule(static) reduction(+:blockResult),
 
@@ -114,7 +114,7 @@ real_t ResidualNorm< Stencil_T >::weightedL2() const
 template< typename Stencil_T >
 void ResidualNorm< Stencil_T >::init()
 {
-   uint_t cells( uint_t(0) );
+   uint_t cells( uint_t{0} );
    
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {

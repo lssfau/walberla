@@ -62,7 +62,7 @@ namespace gpu
          allocSize3=size3;
          void * result = nullptr;
          WALBERLA_GPU_CHECK(gpuHostAlloc(&result, size0 * size1 * size2 * size3 * sizeof(T), HostAllocFlags))
-         return (T*)(result);
+         return static_cast< T* >(result);
       }
 
       T * allocateMemory ( uint_t size ) override
@@ -74,7 +74,7 @@ namespace gpu
 
          void * result = nullptr;
          WALBERLA_GPU_CHECK(gpuHostAlloc(&result, size*sizeof(T), HostAllocFlags))
-         return (T*)(result);
+         return static_cast< T* >(result);
       }
 
       void deallocate(T *& values) override {

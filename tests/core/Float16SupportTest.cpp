@@ -43,7 +43,7 @@ using dst_t                         = float16;
 using src_t                         = real_t;
 constexpr real_t     precisionLimit = walberla::float16( 1e-3 );
 const std::string    precisionType  = "float16";
-constexpr const auto maxLevel       = uint_t( 3 );
+constexpr const auto maxLevel       = uint_t{ 3 };
 
 void simple_array_test()
 {

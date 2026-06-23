@@ -117,7 +117,7 @@ class DragForceEvaluator
          real_c(-5.566269)
       };
 
-      for (uint_t s = 0; s <= uint_t(30); ++s)
+      for (uint_t s = 0; s <= uint_t{30}; ++s)
       {
          analyticalDrag += dragCoefficients[s] * tempChiPowS;
          tempChiPowS *= setup->chi;
@@ -175,7 +175,7 @@ class DragForceEvaluator
    {
       size_t idx = ac_->uidToIdx(sphereID_);
       WALBERLA_ASSERT_UNEQUAL(idx, ac_->getInvalidIdx(), "Index of particle is invalid!");
-      real_t force = real_t(0);
+      real_t force = real_t{0};
       if (idx != ac_->getInvalidIdx()) { force = ac_->getHydrodynamicForce(idx)[0]; }
 
       WALBERLA_MPI_SECTION() { mpi::allReduceInplace(force, mpi::SUM); }
@@ -186,7 +186,7 @@ class DragForceEvaluator
    // calculate the average velocity in forcing direction (here: x) inside the domain (assuming dx=1)
    real_t computeAverageVel()
    {
-      auto velocity_sum = real_t(0);
+      auto velocity_sum = real_t{0};
       // iterate all blocks stored locally on this process
       for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt)
       {
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
    setup.chi                     = real_c(0.5);  // porosity parameter: diameter / length
    setup.tau                     = tau;          // relaxation time
    setup.extForce                = real_c(1e-7); // constant particle force in lattice units
-   setup.checkFrequency          = uint_t(100);  // evaluate the drag force only every checkFrequency time steps
+   setup.checkFrequency          = uint_t{100};  // evaluate the drag force only every checkFrequency time steps
    setup.radius                  = real_c(0.5) * setup.chi * real_c(setup.length); // sphere radius
    setup.visc                    = (setup.tau - real_c(0.5)) / real_c(3);          // viscosity in lattice units
    const real_t omega            = real_c(1) / setup.tau;                          // relaxation rate
@@ -337,9 +337,9 @@ int main(int argc, char** argv)
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const uint_t XBlocks = (processes >= 2) ? uint_t(2) : uint_t(1);
-   const uint_t YBlocks = (processes >= 4) ? uint_t(2) : uint_t(1);
-   const uint_t ZBlocks = (processes == 8) ? uint_t(2) : uint_t(1);
+   const uint_t XBlocks = (processes >= 2) ? uint_t{2} : uint_t{1};
+   const uint_t YBlocks = (processes >= 4) ? uint_t{2} : uint_t{1};
+   const uint_t ZBlocks = (processes == 8) ? uint_t{2} : uint_t{1};
    const uint_t XCells  = setup.length / XBlocks;
    const uint_t YCells  = setup.length / YBlocks;
    const uint_t ZCells  = setup.length / ZBlocks;
@@ -366,9 +366,9 @@ int main(int argc, char** argv)
    //////////////////
 
    // connect to pe
-   const real_t overlap = real_t(1.5) * dx;
+   const real_t overlap = real_t{1.5} * dx;
 
-   if (setup.radius > real_c(setup.length) * real_t(0.5) - overlap)
+   if (setup.radius > real_c(setup.length) * real_t{0.5} - overlap)
    {
       std::cerr << "Periodic sphere is too large and would lead to incorrect mapping!" << std::endl;
       // solution: create the periodic copies explicitly
@@ -400,16 +400,16 @@ int main(int argc, char** argv)
    BlockDataID pdfFieldCPUGPUID =
       lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
    BlockDataID densityFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t(1));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t{1});
    BlockDataID velFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t(3));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t{3});
 #else
-   BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "Density", real_t(0), field::fzyx);
+   BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "Density", real_t{0}, field::fzyx);
    BlockDataID pdfFieldCPUGPUID =
       lbm_generated::addPdfFieldToStorage(blocks, "pdf field CPU", StorageSpec, 1, field::fzyx);
 #endif
 
-   BlockDataID velFieldID = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t(0), field::fzyx);
+   BlockDataID velFieldID = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t{0}, field::fzyx);
 
    ///////////////
    // TIME LOOP //
@@ -442,7 +442,7 @@ int main(int argc, char** argv)
 
    pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                          particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                         real_t(0), real_t(0), real_t(0), real_t(1.0), real_t(0), real_t(0), real_t(0));
+                                         real_t{0}, real_t{0}, real_t{0}, real_t{1.0}, real_t{0}, real_t{0}, real_t{0});
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -457,18 +457,18 @@ int main(int argc, char** argv)
    pystencils::PSMSweep PSMSweep(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                  particleAndVolumeFractionSoA.particleForcesFieldID,
                                  particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                 setup.extForce, real_t(0.0), real_t(0.0), omega);
+                                 setup.extForce, real_t{0.0}, real_t{0.0}, omega);
 
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
    pystencils::PSM_MacroGetter getterSweep(particleAndVolumeFractionSoA.BsFieldID,
                                            particleAndVolumeFractionSoA.BFieldID, densityFieldGPUID,
                                            particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                           velFieldGPUID, setup.extForce, real_t(0.0), real_t(0.0));
+                                           velFieldGPUID, setup.extForce, real_t{0.0}, real_t{0.0});
 #else
    pystencils::PSM_MacroGetter getterSweep(particleAndVolumeFractionSoA.BsFieldID,
                                            particleAndVolumeFractionSoA.BFieldID, densityFieldID,
                                            particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                           velFieldID, setup.extForce, real_t(0.0), real_t(0.0));
+                                           velFieldID, setup.extForce, real_t{0.0}, real_t{0.0});
 #endif
 
    // add LBM communication function and streaming & force evaluation

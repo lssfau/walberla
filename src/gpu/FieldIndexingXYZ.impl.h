@@ -89,8 +89,8 @@ FieldIndexingXYZ<T> FieldIndexingXYZ<T>::interval ( const GPUField<T> & f, const
            ( ci.yMin() + gl )* int_c(yOffset) +
            ( ci.zMin() + gl )* int_c(zOffset);
 
-   dim3 gridDim ( (unsigned int)ci.xSize(), 1, 1 );
-   dim3 blockDim( (unsigned int)ci.ySize(), (unsigned int)ci.zSize(), 1 );
+   dim3 gridDim ( static_cast< unsigned int >(ci.xSize()), 1, 1 );
+   dim3 blockDim( static_cast< unsigned int >(ci.ySize()), static_cast< unsigned int >(ci.zSize()), 1 );
    return FieldIndexingXYZ<T> ( f, gridDim, blockDim,
                                 FieldAccessorXYZ<T>( data, xOffset, yOffset, zOffset, fOffset ) );
 }

@@ -173,27 +173,27 @@ namespace stencil {
    /// The x,y,z component for each normalized direction \ingroup stencil
    inline constexpr std::array< std::array< real_t, NR_OF_DIRECTIONS >, 3 > cNorm { {
       {
-         real_t(0), real_t(0), real_t(0), real_t(-1), real_t(1), real_t(0), real_t(0), real_t(-1) / std::numbers::sqrt2_v<real_t>,
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(0), real_t(0),
-         real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(0), real_t(0), real_t(-1) / std::numbers::sqrt2_v<real_t>,
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>,
-         real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>,
-         real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>
+         real_t{0}, real_t{0}, real_t{0}, real_t{-1}, real_t{1}, real_t{0}, real_t{0}, real_t{-1} / std::numbers::sqrt2_v<real_t>,
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{0}, real_t{0},
+         real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{0}, real_t{0}, real_t{-1} / std::numbers::sqrt2_v<real_t>,
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>,
+         real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>,
+         real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>
       }, {
-         real_t(0), real_t(1), real_t(-1), real_t(0), real_t(0), real_t(0), real_t(0), real_t(1) / std::numbers::sqrt2_v<real_t>,
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>,
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(0), real_t(0), real_t(1) / std::numbers::sqrt2_v<real_t>,
-         real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(0), real_t(0), real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>,
-         real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>,
-         real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>
+         real_t{0}, real_t{1}, real_t{-1}, real_t{0}, real_t{0}, real_t{0}, real_t{0}, real_t{1} / std::numbers::sqrt2_v<real_t>,
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>,
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{0}, real_t{0}, real_t{1} / std::numbers::sqrt2_v<real_t>,
+         real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{0}, real_t{0}, real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>,
+         real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>,
+         real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>
       }, {
-         real_t(0), real_t(0), real_t(0), real_t(0), real_t(0), real_t(1), real_t(-1), real_t(0), real_t(0), real_t(0), real_t(0),
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt2_v<real_t>,
-         real_t(1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>,
-         real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(-1) / std::numbers::sqrt2_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>,
-         real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>, real_t(1) / std::numbers::sqrt3_v<real_t>,
-         real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>, real_t(-1) / std::numbers::sqrt3_v<real_t>,
-         real_t(-1) / std::numbers::sqrt3_v<real_t>
+         real_t{0}, real_t{0}, real_t{0}, real_t{0}, real_t{0}, real_t{1}, real_t{-1}, real_t{0}, real_t{0}, real_t{0}, real_t{0},
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt2_v<real_t>,
+         real_t{1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>,
+         real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{-1} / std::numbers::sqrt2_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>,
+         real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>, real_t{1} / std::numbers::sqrt3_v<real_t>,
+         real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>, real_t{-1} / std::numbers::sqrt3_v<real_t>,
+         real_t{-1} / std::numbers::sqrt3_v<real_t>
       }
    } };
 
@@ -220,7 +220,7 @@ namespace stencil {
 
    /// Length for each direction \ingroup stencil
    inline constexpr std::array< real_t, NR_OF_DIRECTIONS > dirLength {
-        real_t(0), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1), real_t(1),
+        real_t{0}, real_t{1}, real_t{1}, real_t{1}, real_t{1}, real_t{1}, real_t{1},
         std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>,
         std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>,
         std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>, std::numbers::sqrt2_v<real_t>,
@@ -230,26 +230,26 @@ namespace stencil {
 
 
    inline constexpr std::array< real_t, NR_OF_DIRECTIONS > gaussianWeights {
-      real_t(8) / real_t(64),
-      real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64), real_t(4) / real_t(64),
-      real_t(4) / real_t(64), real_t(4) / real_t(64),
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64),
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64),
-      real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64), real_t(2) / real_t(64),
-      real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64),
-      real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64), real_t(1) / real_t(64)
+      real_t{8} / real_t{64},
+      real_t{4} / real_t{64}, real_t{4} / real_t{64}, real_t{4} / real_t{64}, real_t{4} / real_t{64},
+      real_t{4} / real_t{64}, real_t{4} / real_t{64},
+      real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64},
+      real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64},
+      real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64}, real_t{2} / real_t{64},
+      real_t{1} / real_t{64}, real_t{1} / real_t{64}, real_t{1} / real_t{64}, real_t{1} / real_t{64},
+      real_t{1} / real_t{64}, real_t{1} / real_t{64}, real_t{1} / real_t{64}, real_t{1} / real_t{64}
    };
 
 
    inline constexpr std::array< uint_t, NR_OF_DIRECTIONS > gaussianMultipliers {
-      uint_t(8u),
-      uint_t(4u), uint_t(4u), uint_t(4u), uint_t(4u) ,
-      uint_t(4u), uint_t(4u),
-      uint_t(2u), uint_t(2u), uint_t(2u), uint_t(2u) ,
-      uint_t(2u), uint_t(2u), uint_t(2u), uint_t(2u) ,
-      uint_t(2u), uint_t(2u), uint_t(2u), uint_t(2u) ,
-      uint_t(1u), uint_t(1u), uint_t(1u), uint_t(1u) ,
-      uint_t(1u), uint_t(1u), uint_t(1u), uint_t(1u)
+      uint_t{8u},
+      uint_t{4u}, uint_t{4u}, uint_t{4u}, uint_t{4u} ,
+      uint_t{4u}, uint_t{4u},
+      uint_t{2u}, uint_t{2u}, uint_t{2u}, uint_t{2u} ,
+      uint_t{2u}, uint_t{2u}, uint_t{2u}, uint_t{2u} ,
+      uint_t{2u}, uint_t{2u}, uint_t{2u}, uint_t{2u} ,
+      uint_t{1u}, uint_t{1u}, uint_t{1u}, uint_t{1u} ,
+      uint_t{1u}, uint_t{1u}, uint_t{1u}, uint_t{1u}
    };
 
 

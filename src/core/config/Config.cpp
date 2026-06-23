@@ -121,7 +121,7 @@ void Config::readParameterFile( const char* const filename )
       int size=0;
       WALBERLA_ROOT_SECTION() {
          fileContent=block_.getString();
-         size=int(fileContent.size());
+         size=static_cast< int >(fileContent.size());
          //std::cout<<"Sending contents of parameter file to other processes... ("<<size<<" bytes)"<<std::endl;
          }
       MPI_Bcast(&size,1,MPITrait<int>::type(),0,MPI_COMM_WORLD);

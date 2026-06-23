@@ -63,7 +63,7 @@ public:
    data::Particle& p_;
 };
 
-real_t VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
+real_t VelocityUpdateNotification::Parameters::relaxationParam = real_t{0.8};
 
 // Update method for broadcast
 inline void update(data::Particle&& p, const VelocityUpdateNotification::Parameters& objparam) {
@@ -77,10 +77,10 @@ inline void update(data::Particle&& p, const VelocityUpdateNotification::Paramet
 template<>
 inline void reset<VelocityUpdateNotification>(data::Particle& p )
 {
-   p.setDv( Vec3(real_t(0)) );
-   p.setDw( Vec3(real_t(0)) );
-   p.setLinearVelocity( Vec3(real_t(0)) );
-   p.setAngularVelocity( Vec3(real_t(0)) );
+   p.setDv( Vec3(real_t{0}) );
+   p.setDw( Vec3(real_t{0}) );
+   p.setLinearVelocity( Vec3(real_t{0}) );
+   p.setAngularVelocity( Vec3(real_t{0}) );
 }
 
 }  // namespace mesa_pd

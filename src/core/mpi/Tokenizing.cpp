@@ -36,7 +36,7 @@ namespace mpi {
    {
       WALBERLA_MPI_SECTION()
       {
-         if( nrOfTokens_ > uint_t(0) )
+         if( nrOfTokens_ > uint_t{0} )
          {
             int rank = 0;
             MPI_Comm_rank( communicator_, &rank );
@@ -57,7 +57,7 @@ namespace mpi {
    {
       WALBERLA_MPI_SECTION()
       {
-         if( nrOfTokens_ > uint_t(0) )
+         if( nrOfTokens_ > uint_t{0} )
          {
             int rank  = 0;
             int ranks = 0;

@@ -61,11 +61,11 @@ int main( int argc, char ** argv )
 
    //init kernels
    kernel::ForceLJ lj(1);
-   lj.setEpsilon(0, 0, real_t(0.121));
-   lj.setSigma  (0, 0, real_t(0.212));
+   lj.setEpsilon(0, 0, real_t{0.121});
+   lj.setSigma  (0, 0, real_t{0.212});
 
    //check equilibrium distance
-   const real_t eq_dist = std::pow(real_t(2), real_t(1.0)/real_t(6.0));
+   const real_t eq_dist = std::pow(real_t{2}, real_t{1.0}/real_t{6.0});
    accessor.setPosition(1, Vec3( eq_dist * lj.getSigma(0, 0), 0, 0));
    lj(0, 1, accessor);
    WALBERLA_CHECK_FLOAT_EQUAL( p1.getForce(), Vec3(0,0,0) );
@@ -74,7 +74,7 @@ int main( int argc, char ** argv )
    //force is zero for large distances
    accessor.setForce(0, Vec3(0,0,0));
    accessor.setForce(1, Vec3(0,0,0));
-   accessor.setPosition(1, Vec3( eq_dist * lj.getSigma(0, 0) * real_t(100), 0, 0));
+   accessor.setPosition(1, Vec3( eq_dist * lj.getSigma(0, 0) * real_t{100}, 0, 0));
    lj(0, 1, accessor);
    WALBERLA_CHECK_FLOAT_EQUAL( accessor.getForce(0), Vec3(0,0,0) );
    WALBERLA_CHECK_FLOAT_EQUAL( accessor.getForce(1), Vec3(0,0,0) );
@@ -82,23 +82,23 @@ int main( int argc, char ** argv )
    //attractive
    p1.getForceRef()           = Vec3(0,0,0);
    p2.getForceRef()           = Vec3(0,0,0);
-   p2.getPositionRef()        = Vec3( real_t(2) * lj.getSigma(0, 0), 0, 0);
+   p2.getPositionRef()        = Vec3( real_t{2} * lj.getSigma(0, 0), 0, 0);
    lj(0, 1, accessor);
-   WALBERLA_CHECK_GREATER( p1.getForce()[0], real_t(0), p1 << p2 );
-   WALBERLA_CHECK_LESS   ( p2.getForce()[0], real_t(0), p1 << p2 );
+   WALBERLA_CHECK_GREATER( p1.getForce()[0], real_t{0}, p1 << p2 );
+   WALBERLA_CHECK_LESS   ( p2.getForce()[0], real_t{0}, p1 << p2 );
 
    //repulsive
    p1.getForceRef()           = Vec3(0,0,0);
    p2.getForceRef()           = Vec3(0,0,0);
    p2.getPositionRef()        = Vec3( lj.getSigma(0, 0), 0, 0);
    lj(0, 1, accessor);
-   WALBERLA_CHECK_LESS   ( p1.getForce()[0], real_t(0), p1 << p2 );
-   WALBERLA_CHECK_GREATER( p2.getForce()[0], real_t(0), p1 << p2 );
+   WALBERLA_CHECK_LESS   ( p1.getForce()[0], real_t{0}, p1 << p2 );
+   WALBERLA_CHECK_GREATER( p2.getForce()[0], real_t{0}, p1 << p2 );
 
    //action = reaction
    p1.getForceRef()           = Vec3(0,0,0);
    p2.getForceRef()           = Vec3(0,0,0);
-   p2.getPositionRef()        = Vec3( 1, 2, 3) * real_t(0.1);
+   p2.getPositionRef()        = Vec3( 1, 2, 3) * real_t{0.1};
    lj(0, 1, accessor);
    WALBERLA_CHECK_FLOAT_EQUAL( p1.getForce(), -p2.getForce() );
 

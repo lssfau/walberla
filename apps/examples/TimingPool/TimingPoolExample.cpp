@@ -60,13 +60,13 @@ void myTrivialKernel(IBlock* block, BlockDataID fieldBlockDataID, const real_t d
    for (auto cell = field->begin(); cell != field->end(); ++cell)
    {
       // some arbitrary write access to the field
-      (*cell) = walberla::math::realRandom(real_t(0), real_t(1));
+      (*cell) = walberla::math::realRandom(real_t{0}, real_t{1});
 
       // introduce some random delay to simulate non-uniform computation time
       if ((*cell) <= threshold)
       {
          // the delay is proportional to the MPI rank to showcase and test the thread based timing pool reduction.
-         const uint_t delay = uint_c(std::round(delay_weight * walberla::math::realRandom(real_t(0), real_t(10))));
+         const uint_t delay = uint_c(std::round(delay_weight * walberla::math::realRandom(real_t{0}, real_t{10})));
          std::this_thread::sleep_for(std::chrono::microseconds(delay));
       }
    }

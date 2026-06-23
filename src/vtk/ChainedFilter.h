@@ -41,7 +41,7 @@ public:
 
    void addFilter( const CellFilter& filter ) { filters_.push_back( filter ); }
 
-   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t(0) ) const
+   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t{0} ) const
    {
       if( !filters_.empty() )
          filters_[0]( filteredCells, block, storage, ghostLayers );

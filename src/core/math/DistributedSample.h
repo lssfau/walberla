@@ -40,7 +40,7 @@ class DistributedSample
 public:
 
    DistributedSample() :
-      sum_( real_t(0) ), min_( real_t(0) ), max_( real_t(0) ), size_( uint_t(0) ), mean_( real_t(0) ), variance_( real_t(0) ) {}
+      sum_( real_t{0} ), min_( real_t{0} ), max_( real_t{0} ), size_( uint_t{0} ), mean_( real_t{0} ), variance_( real_t{0} ) {}
 
    // insert
 
@@ -55,7 +55,7 @@ public:
    template <class InputIterator>
    void castToRealAndInsert( InputIterator first, InputIterator last );
 
-   void clear() { data_.clear(); sum_ = real_t(0); min_ = real_t(0); max_ = real_t(0); size_ = uint_t(0); mean_ = real_t(0); variance_ = real_t(0); }
+   void clear() { data_.clear(); sum_ = real_t{0}; min_ = real_t{0}; max_ = real_t{0}; size_ = uint_t{0}; mean_ = real_t{0}; variance_ = real_t{0}; }
 
    // synchronization
 

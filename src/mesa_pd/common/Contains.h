@@ -53,16 +53,16 @@ inline
 bool isPointInsideHalfSpace(const Vec3& point,
                             const Vec3& halfSpacePosition, const Vec3& halfSpaceNormal )
 {
-   return !((point - halfSpacePosition) * halfSpaceNormal > real_t(0));
+   return !((point - halfSpacePosition) * halfSpaceNormal > real_t{0});
 }
 
 inline
 bool isPointInsideBoxBF(const Vec3& pointBF,
                         const Vec3& edgeLengths )
 {
-   return std::fabs(pointBF[0]) <= real_t(0.5)*edgeLengths[0] &&
-          std::fabs(pointBF[1]) <= real_t(0.5)*edgeLengths[1] &&
-          std::fabs(pointBF[2]) <= real_t(0.5)*edgeLengths[2];
+   return std::fabs(pointBF[0]) <= real_t{0.5}*edgeLengths[0] &&
+          std::fabs(pointBF[1]) <= real_t{0.5}*edgeLengths[1] &&
+          std::fabs(pointBF[2]) <= real_t{0.5}*edgeLengths[2];
 }
 
 inline
@@ -96,7 +96,7 @@ bool isPointInsideConvexPolyhedronBF(const Vec3& point, const mesh::TriangleMesh
                          const mesh::TriangleMesh::Point &pp = mesh.point(mesh.to_vertex_handle(mesh.halfedge_handle(fh))); // Point on plane
 
                          // normal * (p - pointOnPlane)
-                         return (n[0] * (point[0] - pp[0]) + n[1] * (point[1] - pp[1]) + n[2] * (point[2] - pp[2]) >= real_t(0));
+                         return (n[0] * (point[0] - pp[0]) + n[1] * (point[1] - pp[1]) + n[2] * (point[2] - pp[2]) >= real_t{0});
                        });
 }
 #endif

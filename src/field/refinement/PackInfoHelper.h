@@ -35,8 +35,8 @@ namespace refinement {
 
 inline bool divisibleByTwo(const CellInterval& cellBB)
 {
-   return ((cellBB.xSize() & uint_t(1)) == uint_t(0)) && ((cellBB.ySize() & uint_t(1)) == uint_t(0)) &&
-          ((cellBB.zSize() & uint_t(1)) == uint_t(0));
+   return ((cellBB.xSize() & uint_t{1}) == uint_t{0}) && ((cellBB.ySize() & uint_t{1}) == uint_t{0}) &&
+          ((cellBB.zSize() & uint_t{1}) == uint_t{0});
 }
 
 //////////////////////////////
@@ -64,7 +64,7 @@ inline bool isCornerDirection(stencil::Direction dir)
 
 inline bool blocksConnectedByFaces(const Block* block, const BlockID& neighbor)
 {
-   const std::array<uint_t, 6> face = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
+   const std::array<uint_t, 6> face = { uint_t{4}, uint_t{10}, uint_t{12}, uint_t{13}, uint_t{15}, uint_t{21} };
    for (unsigned long i : face)
    {
       for (uint_t n = 0; n != block->getNeighborhoodSectionSize(i); ++n)
@@ -75,8 +75,8 @@ inline bool blocksConnectedByFaces(const Block* block, const BlockID& neighbor)
 
 inline bool blocksConnectedByEdges(const Block* block, const BlockID& neighbor)
 {
-   const std::array<uint_t, 12> face = { uint_t(1),  uint_t(3),  uint_t(5),  uint_t(7),  uint_t(9),  uint_t(11),
-                           uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
+   const std::array<uint_t, 12> face = { uint_t{1},  uint_t{3},  uint_t{5},  uint_t{7},  uint_t{9},  uint_t{11},
+                           uint_t{14}, uint_t{16}, uint_t{18}, uint_t{20}, uint_t{22}, uint_t{24} };
 
    for (unsigned long i : face)
    {
@@ -88,7 +88,7 @@ inline bool blocksConnectedByEdges(const Block* block, const BlockID& neighbor)
 
 inline bool coarserNeighborExists(const Block* block, stencil::Direction dir)
 {
-   if (block->getLevel() == uint_t(0)) return false;
+   if (block->getLevel() == uint_t{0}) return false;
 
    Vector3< int > min(-1);
    Vector3< int > max(1);
@@ -122,12 +122,12 @@ inline Vector3< cell_idx_t > getNeighborShift(const BlockID& smallBlock,
 
    uint_t branchId = smallBlock.getBranchId();
 
-   shift[0] = (stencil::cx[dir] == 0) ? (((branchId & uint_t(1)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-                                        cell_idx_t(0);
-   shift[1] = (stencil::cy[dir] == 0) ? (((branchId & uint_t(2)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-                                        cell_idx_t(0);
-   shift[2] = (stencil::cz[dir] == 0) ? (((branchId & uint_t(4)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-                                        cell_idx_t(0);
+   shift[0] = (stencil::cx[dir] == 0) ? (((branchId & uint_t{1}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+                                        cell_idx_t{0};
+   shift[1] = (stencil::cy[dir] == 0) ? (((branchId & uint_t{2}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+                                        cell_idx_t{0};
+   shift[2] = (stencil::cz[dir] == 0) ? (((branchId & uint_t{4}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+                                        cell_idx_t{0};
 
    return shift;
 }
@@ -147,7 +147,7 @@ inline CellInterval equalLevelUnpackInterval(stencil::Direction dir, const CellI
          interval.min()[i] = interval.max()[i] - cell_idx_c(numberOfLayers - 1);
       else
       {
-         WALBERLA_ASSERT_EQUAL(c, cell_idx_t(0));
+         WALBERLA_ASSERT_EQUAL(c, cell_idx_t{0});
          interval.min()[i] += cell_idx_c(numberOfLayers);
          interval.max()[i] -= cell_idx_c(numberOfLayers);
       }
@@ -173,15 +173,15 @@ inline CellInterval equalLevelPackInterval(stencil::Direction dir, const CellInt
 
 inline CellInterval coarseToFinePackInterval(stencil::Direction dir, const CellInterval& cellBB, const BlockID& smallBlock)
 {
-   CellInterval interval       = equalLevelPackInterval(dir, cellBB, uint_t(1));
+   CellInterval interval       = equalLevelPackInterval(dir, cellBB, uint_t{1});
    Vector3< cell_idx_t > shift = getNeighborShift(smallBlock, dir);
 
    WALBERLA_ASSERT(divisibleByTwo(cellBB));
 
    for (uint_t i = 0; i != 3; ++i)
    {
-      if (shift[i] == cell_idx_t(-1)) interval.max()[i] = interval.min()[i] + cell_idx_c(cellBB.size(i) / uint_t(2));
-      if (shift[i] == cell_idx_t(1)) interval.min()[i] = interval.max()[i] - cell_idx_c(cellBB.size(i) / uint_t(2));
+      if (shift[i] == cell_idx_t{-1}) interval.max()[i] = interval.min()[i] + cell_idx_c(cellBB.size(i) / uint_t{2});
+      if (shift[i] == cell_idx_t{1}) interval.min()[i] = interval.max()[i] - cell_idx_c(cellBB.size(i) / uint_t{2});
    }
 
    WALBERLA_ASSERT(cellBB.contains(interval));
@@ -191,18 +191,18 @@ inline CellInterval coarseToFinePackInterval(stencil::Direction dir, const CellI
 
 inline CellInterval coarseToFineUnpackInterval(stencil::Direction dir, const CellInterval& cellBB, const BlockID& smallBlock)
 {
-   CellInterval interval       = equalLevelUnpackInterval(dir, cellBB, uint_t(2));
+   CellInterval interval       = equalLevelUnpackInterval(dir, cellBB, uint_t{2});
    Vector3< cell_idx_t > shift = getNeighborShift(smallBlock, dir);
 
    for (uint_t i = 0; i != 3; ++i)
    {
-      if (shift[i] == cell_idx_t(-1)) interval.max()[i] += cell_idx_t(2);
-      if (shift[i] == cell_idx_t(1)) interval.min()[i] -= cell_idx_t(2);
+      if (shift[i] == cell_idx_t{-1}) interval.max()[i] += cell_idx_t{2};
+      if (shift[i] == cell_idx_t{1}) interval.min()[i] -= cell_idx_t{2};
    }
 
 #ifndef NDEBUG
    CellInterval expandedCellBB(cellBB);
-   expandedCellBB.expand(cell_idx_t(2));
+   expandedCellBB.expand(cell_idx_t{2});
    WALBERLA_ASSERT(expandedCellBB.contains(interval));
 #endif
 
@@ -211,27 +211,27 @@ inline CellInterval coarseToFineUnpackInterval(stencil::Direction dir, const Cel
 
 inline CellInterval fineToCoarsePackInterval(stencil::Direction dir, const CellInterval& cellBB)
 {
-   return equalLevelPackInterval(dir, cellBB, uint_t(2));
+   return equalLevelPackInterval(dir, cellBB, uint_t{2});
 }
 
 inline CellInterval fineToCoarseUnpackInterval(stencil::Direction dir, const CellInterval& cellBB, const BlockID& smallBlock)
 {
-   CellInterval interval       = equalLevelUnpackInterval(dir, cellBB, uint_t(1));
+   CellInterval interval       = equalLevelUnpackInterval(dir, cellBB, uint_t{1});
    Vector3< cell_idx_t > shift = getNeighborShift(smallBlock, dir);
 
    WALBERLA_ASSERT(divisibleByTwo(cellBB));
 
    for (uint_t i = 0; i != 3; ++i)
    {
-      if (shift[i] == cell_idx_t(-1))
-         interval.max()[i] = interval.min()[i] + cell_idx_c(cellBB.size(i) / uint_t(2)) - cell_idx_t(1);
-      if (shift[i] == cell_idx_t(1))
-         interval.min()[i] = interval.max()[i] - cell_idx_c(cellBB.size(i) / uint_t(2)) + cell_idx_t(1);
+      if (shift[i] == cell_idx_t{-1})
+         interval.max()[i] = interval.min()[i] + cell_idx_c(cellBB.size(i) / uint_t{2}) - cell_idx_t{1};
+      if (shift[i] == cell_idx_t{1})
+         interval.min()[i] = interval.max()[i] - cell_idx_c(cellBB.size(i) / uint_t{2}) + cell_idx_t{1};
    }
 
 #ifndef NDEBUG
    CellInterval expandedCellBB(cellBB);
-   expandedCellBB.expand(cell_idx_t(1));
+   expandedCellBB.expand(cell_idx_t{1});
    WALBERLA_ASSERT(expandedCellBB.contains(interval));
 #endif
 

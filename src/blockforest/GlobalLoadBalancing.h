@@ -838,7 +838,7 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
    // second call to METIS: try to balance both workload and memory as good as possible ...
 
-   real_t minUbvec = real_t(1);
+   real_t minUbvec = real_t{1};
    ubvec[1] = minUbvec;
 
    ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), nullptr, &(adjwgt[0]), &nparts, nullptr,
@@ -917,7 +917,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    for( uint_t i = 0; i != blocks.size(); ++i )
    {
       BLOCK* block = blocks[ i ];
-      if( realIsIdentical( block->getWorkload(), workload_t(0) ) )
+      if( realIsIdentical( block->getWorkload(), workload_t{0} ) )
          continue;
 
       block->setIndex( j++ );
@@ -929,15 +929,15 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    for( uint_t i = 0; i != blocks.size(); ++i )
    {
       const BLOCK* block = blocks[ i ];
-      if( realIsIdentical( block->getWorkload(), workload_t(0) ) )
+      if( realIsIdentical( block->getWorkload(), workload_t{0} ) )
          continue;
 
       for( uint_t k = 0; k != blocks[ i ]->getNeighborhoodSize(); ++k )
       {
-         if( block->getNeighbor( k )->getLevel() == block->getLevel() && block->getNeighbor( k )->getWorkload() > workload_t(0) )
+         if( block->getNeighbor( k )->getLevel() == block->getLevel() && block->getNeighbor( k )->getWorkload() > workload_t{0} )
          {
             blockPairs.push_back( std::make_pair( blocks[ i ], blocks[ i ]->getNeighbor( k ) ) );
-            communicationWeights.push_back( real_t( 1 ) );
+            communicationWeights.push_back( real_t{ 1 } );
          }
       }
    }
@@ -955,7 +955,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    {
       const BLOCK* block = blocks[ i ];
 
-      if( realIsIdentical( block->getWorkload(), workload_t(0) ) )
+      if( realIsIdentical( block->getWorkload(), workload_t{0} ) )
          continue;
    
       ++nvtxs;
@@ -964,13 +964,13 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    
       for( uint_t k = 0; k != block->getNeighborhoodSize(); ++k ) 
       {
-         if( block->getNeighbor( k )->getLevel() == block->getLevel() && block->getNeighbor( k )->getWorkload() > workload_t(0) )
+         if( block->getNeighbor( k )->getLevel() == block->getLevel() && block->getNeighbor( k )->getWorkload() > workload_t{0} )
          {
-            if( communicationWeights[ commIdx ] > real_t(0) )
+            if( communicationWeights[ commIdx ] > real_t{0} )
             {
                adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor( k )->getIndex() ) );
                WALBERLA_ASSERT_LESS( commIdx, communicationWeights.size() );
-               WALBERLA_ASSERT_GREATER( numeric_cast<int64_t>( communicationWeights[ commIdx ] ), int64_t(0) );
+               WALBERLA_ASSERT_GREATER( numeric_cast<int64_t>( communicationWeights[ commIdx ] ), int64_t{0} );
                adjwgt.push_back( numeric_cast<int64_t>( communicationWeights[ commIdx ] ) );
                xadj.back() += 1;
             }
@@ -980,7 +980,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    }
 
    WALBERLA_ASSERT_EQUAL( vwgt.size(), uint_c( nvtxs ) );
-   WALBERLA_ASSERT_EQUAL( xadj.size(), uint_c( nvtxs ) + uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( xadj.size(), uint_c( nvtxs ) + uint_t{1} );
    WALBERLA_ASSERT_EQUAL( adjncy.size(), adjwgt.size() );
    WALBERLA_ASSERT_EQUAL( adjncy.size(), communicationWeights.size() );
    
@@ -991,9 +991,9 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    
    std::array< int64_t, METIS_NOPTIONS > options;
    core::METIS_SetDefaultOptions( options.data() );
-   options[ size_t(core::METIS_OPTION_NITER) ] = 1000;
-   options[ size_t(core::METIS_OPTION_NSEPS) ] = 100;
-   options[ size_t(core::METIS_OPTION_NCUTS) ] = 100;
+   options[ static_cast< size_t >(core::METIS_OPTION_NITER) ] = 1000;
+   options[ static_cast< size_t >(core::METIS_OPTION_NSEPS) ] = 100;
+   options[ static_cast< size_t >(core::METIS_OPTION_NCUTS) ] = 100;
 
    int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), nullptr, &( adjwgt[0] ),
                                   &nparts, nullptr, nullptr, options.data(), &objval, &( part[ 0 ] ) );
@@ -1009,7 +1009,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    {
       const BLOCK* block = blocks[ i ];
 
-      if( block->getWorkload() > workload_t(0) )
+      if( block->getWorkload() > workload_t{0} )
       {
          WALBERLA_ASSERT_LESS( part[ blockCounter ], int_c( numberOfProcesses ) );
          WALBERLA_ASSERT_GREATER_EQUAL( part[ blockCounter ], 0 );

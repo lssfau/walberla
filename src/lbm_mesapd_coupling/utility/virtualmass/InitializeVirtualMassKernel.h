@@ -30,10 +30,10 @@ namespace lbm_mesapd_coupling {
  * This kernel calculates virtual mass and inertia and sets them as attributes on a particle.
  *
  * It requires the following particle attributes:
- *  ps.addProperty("virtualMass",                  "walberla::real_t",        defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.addProperty("invMassIncludingVirtual",      "walberla::real_t",        defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.addProperty("virtualInertiaBF",             "walberla::mesa_pd::Mat3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.addProperty("invInertiaBFIncludingVirtual", "walberla::mesa_pd::Mat3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("virtualMass",                  "walberla::real_t",        defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("invMassIncludingVirtual",      "walberla::real_t",        defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("virtualInertiaBF",             "walberla::mesa_pd::Mat3", defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("invInertiaBFIncludingVirtual", "walberla::mesa_pd::Mat3", defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
  */
 class InitializeVirtualMassKernel {
 public:
@@ -51,7 +51,7 @@ inline void InitializeVirtualMassKernel::operator()(const size_t i, Accessor& ac
 
    const real_t virtualMass = C_v * fluidDensity * ac.getVolume(i);
    ac.setVirtualMass(i, virtualMass);
-   ac.setInvMassIncludingVirtual(i, real_t(1.) / (ac.getMass(i) + virtualMass));
+   ac.setInvMassIncludingVirtual(i, real_t{1.} / (ac.getMass(i) + virtualMass));
 
    const real_t angularVirtualMass = C_v_omega * fluidDensity * ac.getVolume(i);
    const mesa_pd::Mat3 virtualInertiaBF = ac.getInertiaBF(i) * ac.getInvMass(i) * angularVirtualMass;

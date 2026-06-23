@@ -67,10 +67,10 @@ AABB SetupBlockForest::RootBlockAABB::operator()( const uint_t index ) const // 
 
 uint_t SetupBlockForest::getNumberOfBlocks( const uint_t level ) const
 {
-   if( depth_ == uint_t(0) )
+   if( depth_ == uint_t{0} )
       return getNumberOfBlocks();
 
-   uint_t count( uint_t(0) );
+   uint_t count( uint_t{0} );
 
    for(auto coarseBlock : forest_) {
 
@@ -1209,7 +1209,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
 {
    WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." )
 
-   if( minBufferProcessesFraction < real_t(0) || minBufferProcessesFraction >= real_t(1))
+   if( minBufferProcessesFraction < real_t{0} || minBufferProcessesFraction >= real_t{1})
       WALBERLA_ABORT( "Load balancing failed: \'buffer processes fraction\' must be in [0,1). "
                       "The value you provided was \'" << minBufferProcessesFraction << "\'." )
    
@@ -1223,7 +1223,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
    //
    // integer = cast< integer >( 0.5 + floating point )  [for correct rounding]
 
-   const uint_t numberOfWorkerProcesses = uint_c( real_c(0.5) + ( real_t(1) - minBufferProcessesFraction ) * real_c( numberOfProcesses ) );
+   const uint_t numberOfWorkerProcesses = uint_c( real_c(0.5) + ( real_t{1} - minBufferProcessesFraction ) * real_c( numberOfProcesses ) );
    WALBERLA_CHECK_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
    const uint_t numberOfBufferProcesses = numberOfProcesses - numberOfWorkerProcesses;
    
@@ -1564,7 +1564,7 @@ void SetupBlockForest::balanceLoadHelper( const TargetProcessAssignmentFunction 
 
    // make sure that the per process memory limit is satisfied
 
-   if( perProcessMemoryLimit > memory_t(0) )
+   if( perProcessMemoryLimit > memory_t{0} )
    {
       std::vector< memory_t > memory( numberOfWorkerProcesses, memory_c(0) );
       for(auto & block : blocks)
@@ -2005,14 +2005,14 @@ void SetupBlockForest::writeCSV( const std::string & filestem ) const
 
    std::ofstream outfile( oss.str().c_str() );
 
-   uint_t c = uint_t(0);
+   uint_t c = uint_t{0};
 
    for( auto blocks = blockDistribution_.begin(); blocks != blockDistribution_.end(); ++blocks, ++c )
    {
       outfile << c << "," << blocks->size();
       for( uint_t i = 0; i <= depth_; ++i )
       {
-         uint_t n = uint_t(0);
+         uint_t n = uint_t{0};
          for(auto block : *blocks)
             if( block->getLevel() == i ) ++n;
          outfile << "," << n;
@@ -2028,7 +2028,7 @@ void SetupBlockForest::writeCSV( const std::string & filestem ) const
 
 void SetupBlockForest::toStream( std::ostream & os ) const
 {
-   uint_t discardedRootBlocks = uint_t(0);
+   uint_t discardedRootBlocks = uint_t{0};
    for(auto block : forest_)
       if( block == nullptr ) ++discardedRootBlocks;
 
@@ -2036,23 +2036,23 @@ void SetupBlockForest::toStream( std::ostream & os ) const
       << "- initial decomposition: " << size_[0] << " x " << size_[1] << " x " << size_[2] << " (= forest size)\n"
       << std::boolalpha << "- periodicity: " << periodic_[0] << " x " << periodic_[1] << " x " << periodic_[2] << "\n"
       << "- number of blocks discarded from the initial grid: " << discardedRootBlocks << " (= "
-                                                                << ( real_t(100) * real_c(discardedRootBlocks) / real_c(size_[0]*size_[1]*size_[2]) ) << " %)\n"
+                                                                << ( real_t{100} * real_c(discardedRootBlocks) / real_c(size_[0]*size_[1]*size_[2]) ) << " %)\n"
       << "- number of levels: " << getNumberOfLevels() << "\n"
       << "- tree ID digits: " << treeIdDigits_ << " (-> block ID bytes = " << getBlockIdBytes() << ")\n"
       << "- total number of blocks: " << numberOfBlocks_ << "\n";
 
-   if( numberOfProcesses_ == uint_t(0) )
+   if( numberOfProcesses_ == uint_t{0} )
    {
       os << "- blocks have not yet been distributed to processes";
 
-      if( depth_ > uint_t(0) )
+      if( depth_ > uint_t{0} )
       {
          os << "\n- distribution of space/memory/work to different grid levels:\n";
 
-         std::vector< real_t > space         ( depth_ + 2, real_t(0) );
-         std::vector< real_t > memory        ( depth_ + 2, real_t(0) );
-         std::vector< real_t > workload      ( depth_ + 2, real_t(0) );
-         std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t(0) );
+         std::vector< real_t > space         ( depth_ + 2, real_t{0} );
+         std::vector< real_t > memory        ( depth_ + 2, real_t{0} );
+         std::vector< real_t > workload      ( depth_ + 2, real_t{0} );
+         std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t{0} );
 
          for(const auto & block : *this)
          {
@@ -2061,23 +2061,23 @@ void SetupBlockForest::toStream( std::ostream & os ) const
             space[ level ]          += block.getAABB().volume();
             memory[ level ]         += real_c( block.getMemory() );
             workload[ level ]       += real_c( block.getWorkload() );
-            numberOfBlocks[ level ] += uint_t(1);
+            numberOfBlocks[ level ] += uint_t{1};
 
             space.back()          += block.getAABB().volume();
             memory.back()         += real_c( block.getMemory() );
             workload.back()       += real_c( block.getWorkload() );
-            numberOfBlocks.back() += uint_t(1);
+            numberOfBlocks.back() += uint_t{1};
          }
 
          WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() )
 
-         for( uint_t l = uint_t(0); l <= depth_; ++l )
+         for( uint_t l = uint_t{0}; l <= depth_; ++l )
          {
             os << "   + level " << l << ":\n"
                << "      - " << numberOfBlocks[l] << " blocks ...\n"
-               << "      - ... cover " << ( real_t(100) * space[l] / space.back() ) << " % of the total simulation space\n"
-               << "      - ... account for " << ( real_t(100) * memory[l] / memory.back() ) << " % of the total memory foot print\n"
-               << "      - ... generate " << ( real_t(100) * workload[l] / workload.back() ) << " % of the total workload";
+               << "      - ... cover " << ( real_t{100} * space[l] / space.back() ) << " % of the total simulation space\n"
+               << "      - ... account for " << ( real_t{100} * memory[l] / memory.back() ) << " % of the total memory foot print\n"
+               << "      - ... generate " << ( real_t{100} * workload[l] / workload.back() ) << " % of the total workload";
             if( l != depth_ ) os << "\n";
          }
       }
@@ -2092,19 +2092,19 @@ void SetupBlockForest::toStream( std::ostream & os ) const
 
       for( auto & process: blockDistribution_ )
       {
-         std::vector< uint_t >     processBlocks  ( depth_ + 2, uint_t(0) );
-         std::vector< memory_t >   processMemory  ( depth_ + 2, memory_t(0) );
-         std::vector< workload_t > processWorkload( depth_ + 2, workload_t(0) );
+         std::vector< uint_t >     processBlocks  ( depth_ + 2, uint_t{0} );
+         std::vector< memory_t >   processMemory  ( depth_ + 2, memory_t{0} );
+         std::vector< workload_t > processWorkload( depth_ + 2, workload_t{0} );
 
          for(auto block : process)
          {
             const auto level = block->getLevel();
 
-            processBlocks[level]   += uint_t(1);
+            processBlocks[level]   += uint_t{1};
             processMemory[level]   += block->getMemory();
             processWorkload[level] += block->getWorkload();
 
-            processBlocks.back()   += uint_t(1);
+            processBlocks.back()   += uint_t{1};
             processMemory.back()   += block->getMemory();
             processWorkload.back() += block->getWorkload();
          }
@@ -2141,33 +2141,33 @@ void SetupBlockForest::toStream( std::ostream & os ) const
          << "      - stdDev    = " << workload.back().stdDeviation() << "\n"
          << "      - relStdDev = " << workload.back().relativeStdDeviation();
 
-      if( depth_ > uint_t(0) )
+      if( depth_ > uint_t{0} )
       {
          os << "\n- distribution of space/memory/work to different grid levels:\n";
 
-         std::vector< real_t > space( depth_ + 2, real_t(0) );
-         std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t(0) );
+         std::vector< real_t > space( depth_ + 2, real_t{0} );
+         std::vector< uint_t > numberOfBlocks( depth_ + 2, uint_t{0} );
 
          for(const auto & block : *this)
          {
             const auto level = block.getLevel();
 
             space[ level ] += block.getAABB().volume();
-            numberOfBlocks[ level ] += uint_t(1);
+            numberOfBlocks[ level ] += uint_t{1};
 
             space.back() += block.getAABB().volume();
-            numberOfBlocks.back() += uint_t(1);
+            numberOfBlocks.back() += uint_t{1};
          }
 
          WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() )
 
-         for( uint_t l = uint_t(0); l <= depth_; ++l )
+         for( uint_t l = uint_t{0}; l <= depth_; ++l )
          {
             os << "   + level " << l << ":\n"
                << "      - " << numberOfBlocks[l] << " blocks ...\n"
-               << "      - ... cover " << ( real_t(100) * space[l] / space.back() ) << " % of the total simulation space\n"
-               << "      - ... account for " << ( real_t(100) * memory[l].sum() / memory.back().sum() ) << " % of the total memory foot print\n"
-               << "      - ... generate " << ( real_t(100) * workload[l].sum() / workload.back().sum() ) << " % of the total work load\n"
+               << "      - ... cover " << ( real_t{100} * space[l] / space.back() ) << " % of the total simulation space\n"
+               << "      - ... account for " << ( real_t{100} * memory[l].sum() / memory.back().sum() ) << " % of the total memory foot print\n"
+               << "      - ... generate " << ( real_t{100} * workload[l].sum() / workload.back().sum() ) << " % of the total work load\n"
                << "      - blocks per process:\n"
                << "         + min       = " << blocks[l].min() << "\n"
                << "         + max       = " << blocks[l].max() << "\n"

@@ -132,7 +132,7 @@ void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDa
       for(auto cell : xyz)
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
-         rhs->get( cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+         rhs->get( cell ) = real_t{4} * math::pi * math::pi * std::sin( real_t{2} * math::pi * p[0] ) * std::sinh( real_t{2} * math::pi * p[1] );
       }
    }
 }
@@ -178,7 +178,7 @@ void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks,
       {
 
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
-         real_t val = std::sin( real_t( 2 ) * math::pi * p[0] ) * std::sinh( real_t( 2 ) * math::pi * p[1] );
+         real_t val = std::sin( real_t{ 2 } * math::pi * p[0] ) * std::sinh( real_t{ 2 } * math::pi * p[1] );
 
          boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
@@ -187,7 +187,7 @@ void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks,
       // Set all other boundaries to zero
       for( auto & ci : { west, east, south } )
       {
-         boundaryHandling->forceBoundary( Dirichlet_Flag, ci, pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( real_t( 0 ) ) );
+         boundaryHandling->forceBoundary( Dirichlet_Flag, ci, pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( real_t{ 0 } ) );
       }
 
       // All the remaining cells need to be marked as being fluid. The 'fillWithDomain' call does just that.
@@ -220,7 +220,7 @@ void setBoundaryConditionsMixed( shared_ptr< StructuredBlockForest > & blocks, c
       for(auto cell : north)
       {
 
-         const real_t val = real_t(2);
+         const real_t val = real_t{2};
          boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
       }
@@ -229,7 +229,7 @@ void setBoundaryConditionsMixed( shared_ptr< StructuredBlockForest > & blocks, c
       for(auto cell : south)
       {
 
-         const real_t val = real_t(-2);
+         const real_t val = real_t{-2};
          boundaryHandling->forceBoundary( Dirichlet_Flag, cell.x(), cell.y(), cell.z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
 
       }
@@ -237,7 +237,7 @@ void setBoundaryConditionsMixed( shared_ptr< StructuredBlockForest > & blocks, c
       // Set all other boundaries to homogeneous Neumann BCs
       for( auto & ci : { west, east} )
       {
-         boundaryHandling->forceBoundary( Neumann_Flag, ci, pde::Neumann< Stencil_T, flag_t >::NeumannBC( real_t( 0 ) ) );
+         boundaryHandling->forceBoundary( Neumann_Flag, ci, pde::Neumann< Stencil_T, flag_t >::NeumannBC( real_t{ 0 } ) );
       }
 
       // All the remaining cells need to be marked as being fluid. The 'fillWithDomain' call does just that.
@@ -270,7 +270,7 @@ int main( int argc, char** argv )
    mpi::Environment env( argc, argv );
 
    const uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
-   if( processes != uint_t(1) && processes != uint_t(4) && processes != uint_t(8) )
+   if( processes != uint_t{1} && processes != uint_t{4} && processes != uint_t{8} )
       WALBERLA_ABORT( "The number of processes must be equal to 1, 4, or 8!" );
 
    logging::Logging::printHeaderOnStream();
@@ -280,27 +280,27 @@ int main( int argc, char** argv )
    for( int i = 1; i < argc; ++i )
       if( std::strcmp( argv[i], "--shortrun" ) == 0 ) shortrun = true;
 
-   const uint_t xBlocks = ( processes == uint_t(1) ) ? uint_t(1) : ( ( processes == uint_t(4) ) ? uint_t(2) : uint_t(4) );
-   const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t xCells = ( processes == uint_t(1) ) ? uint_t(200) : ( ( processes == uint_t(4) ) ? uint_t(100) : uint_t(50) );
-   const uint_t yCells = ( processes == uint_t(1) ) ? uint_t(100) : uint_t(50);
-   const real_t xSize = real_t(2);
-   const real_t ySize = real_t(1);
-   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
-   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0),
-                                                                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, dx ),
-                                                      xBlocks, yBlocks, uint_t(1),
-                                                      xCells, yCells, uint_t(1),
+   const uint_t xBlocks = ( processes == uint_t{1} ) ? uint_t{1} : ( ( processes == uint_t{4} ) ? uint_t{2} : uint_t{4} );
+   const uint_t yBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t xCells = ( processes == uint_t{1} ) ? uint_t{200} : ( ( processes == uint_t{4} ) ? uint_t{100} : uint_t{50} );
+   const uint_t yCells = ( processes == uint_t{1} ) ? uint_t{100} : uint_t{50};
+   const real_t xSize = real_t{2};
+   const real_t ySize = real_t{1};
+   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t{1} );
+   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t{1} );
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t{0.5} * dx, real_t{0.5} * dy, real_t{0},
+                                                                  xSize - real_t{0.5} * dx, ySize - real_t{0.5} * dy, dx ),
+                                                      xBlocks, yBlocks, uint_t{1},
+                                                      xCells, yCells, uint_t{1},
                                                       true,
                                                       false, false, false );
 
-   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t(0), field::fzyx, uint_t(1) );
-   BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::fzyx, uint_t(1) );
-   BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::fzyx, uint_t(1) );
-   BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t{0}, field::fzyx, uint_t{1} );
+   BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t{0}, field::fzyx, uint_t{1} );
+   BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t{0}, field::fzyx, uint_t{1} );
+   BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t{0}, field::fzyx, uint_t{1} );
 
-   BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t{0}, field::fzyx, uint_t{1} );
 
    initRHS( blocks, rhsId );
 
@@ -308,11 +308,11 @@ int main( int argc, char** argv )
    synchronizeD.addPackInfo( make_shared< field::communication::PackInfo< Field_T > >( dId ) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(4) * math::pi * math::pi;
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t{2} / ( blocks->dx() * blocks->dx() ) + real_t{2} / ( blocks->dy() * blocks->dy() ) + real_t{4} * math::pi * math::pi;
+   weights[ Stencil_T::idx[ stencil::N ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
 
 
    BlockDataID stencilId = field::addToStorage< StencilField_T >( blocks, "w" );
@@ -330,13 +330,13 @@ int main( int argc, char** argv )
    setBoundaryConditionsDirichl( blocks, boundaryHandlingId );
 
    
-   SweepTimeloop timeloop( blocks, uint_t(2) );
+   SweepTimeloop timeloop( blocks, uint_t{2} );
 
    timeloop.add()
             << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingId ), "boundary handling" )
             << AfterFunction(
                      pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), solId, rId, dId, zId, rhsId, stencilBCadaptedId,
-                                                    shortrun ? uint_t( 10 ) : uint_t( 10000 ), synchronizeD, real_c( 1e-6 ) ), "CG iteration" );
+                                                    shortrun ? uint_t{ 10 } : uint_t{ 10000 }, synchronizeD, real_c( 1e-6 ) ), "CG iteration" );
 
    timeloop.singleStep();
 
@@ -417,7 +417,7 @@ int main( int argc, char** argv )
    // Test Mixed BCs and re-setting BCs //
    setBoundaryConditionsMixed( blocks, boundaryHandlingId );
    // set RHS to zero to get 'ramp' as solution
-   setRHSConstValue( blocks, rhsId, real_t(0));
+   setRHSConstValue( blocks, rhsId, real_t{0});
 
    timeloop.singleStep();
 

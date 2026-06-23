@@ -72,7 +72,7 @@ public:
    template <typename Accessor>
    void operator()(const size_t i, Accessor& ac) const;
 private:
-   real_t dt_ = real_t(0.0);
+   real_t dt_ = real_t{0.0};
 };
 
 template <typename Accessor>
@@ -116,9 +116,9 @@ inline void ExplicitEuler::operator()(const size_t idx,
       {%- endif %}
    }
 
-   ac.setForce (idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setForce (idx, Vec3(real_t{0}, real_t{0}, real_t{0}));
    {%- if bIntegrateRotation %}
-   ac.setTorque(idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setTorque(idx, Vec3(real_t{0}, real_t{0}, real_t{0}));
    {%- endif %}
 }
 

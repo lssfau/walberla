@@ -406,20 +406,20 @@ void TimingNode<TP>::printImpl(std::ostream & os, const std::string& prefix, con
    for ( const auto &[name, node] : tree_ )
    {
       const uint_t count = node.timer_.getCounter();
-      const double percentageTotal  = ( count == uint_t(0) ) ? 0.0 : ( node.timer_.total() / totalTime * 100.0 );
-      const double percentageParent = ( count == uint_t(0) ) ? 0.0 : ( node.timer_.total() / parentTime * 100.0 );
+      const double percentageTotal  = ( count == uint_t{0} ) ? 0.0 : ( node.timer_.total() / totalTime * 100.0 );
+      const double percentageParent = ( count == uint_t{0} ) ? 0.0 : ( node.timer_.total() / parentTime * 100.0 );
 
       os << setw(firstColumn-1)    << std::left  << prefix + name  << " "       << "|";
 
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentageTotal << "% |";
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentageParent << "% |";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.total() )    << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t{0} ) ? 0.0 : node.timer_.total() )    << "|";
 
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.average() )  << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t{0} ) ? 0.0 : node.timer_.average() )  << "|";
       os << setw(OTHER_COLUMNS)    << std::right << node.timer_.getCounter() << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.min() )      << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.max() )      << "|";
-      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t(0) ) ? 0.0 : node.timer_.variance() ) << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t{0} ) ? 0.0 : node.timer_.min() )      << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t{0} ) ? 0.0 : node.timer_.max() )      << "|";
+      os << setw(OTHER_COLUMNS)    << std::right << ( ( count == uint_t{0} ) ? 0.0 : node.timer_.variance() ) << "|";
       os << endl;
 
       node.printImpl(os, " " + prefix, totalTime, node.timer_.total(), firstColumn);

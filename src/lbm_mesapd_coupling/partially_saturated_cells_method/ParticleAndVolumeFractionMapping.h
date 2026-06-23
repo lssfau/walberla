@@ -52,7 +52,7 @@ class ParticleAndVolumeFractionMapping
                                     const shared_ptr< ParticleAccessor_T >& ac,
                                     const ParticleSelector_T& mappingParticleSelector,
                                     const BlockDataID& particleAndVolumeFractionFieldID,
-                                    const uint_t superSamplingDepth = uint_t(4))
+                                    const uint_t superSamplingDepth = uint_t{4})
       : blockStorage_(blockStorage), ac_(ac), mappingParticleSelector_(mappingParticleSelector),
         particleAndVolumeFractionFieldID_(particleAndVolumeFractionFieldID), superSamplingDepth_(superSamplingDepth)
    {
@@ -118,7 +118,7 @@ class ParticleAndVolumeFractionMapping
             real_t fraction = singleCast_(idx, *ac_, overlapFractionFctr_, ac_, cellCenter, dxVec, superSamplingDepth_);
 
             id_t particleUid = ac_->getUid(idx);
-            if (fraction > real_t(0)) { particleAndVolumeFractionField->get(cell).emplace_back(particleUid, fraction); }
+            if (fraction > real_t{0}) { particleAndVolumeFractionField->get(cell).emplace_back(particleUid, fraction); }
          }
       }
    }

@@ -69,7 +69,7 @@ public:
                 const Set< FlagUID > & cellsToCount = Set< FlagUID >::emptySet(),
                 const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
-      totalNumberOfCells_( uint64_t(0) ), totalNumberOfBlocksContainingCell_( uint64_t(0) ),
+      totalNumberOfCells_( uint64_t{0} ), totalNumberOfBlocksContainingCell_( uint64_t{0} ),
       blocks_( blocks ), cellsToCount_( cellsToCount ), flagFieldId_( flagFieldId ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}
@@ -155,14 +155,14 @@ private:
 template< typename FlagField_T >
 void CellCounter< FlagField_T >::operator()()
 {
-   totalNumberOfCells_ = uint64_t(0);
-   totalNumberOfBlocksContainingCell_ = uint64_t(0);
+   totalNumberOfCells_ = uint64_t{0};
+   totalNumberOfBlocksContainingCell_ = uint64_t{0};
 
    auto blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'CellCounter' for a block storage object that doesn't exist anymore" );
 
-   numberOfCells_.assign( blocks->getNumberOfLevels(), uint64_t(0) );
-   numberOfBlocksContainingCell_.assign( blocks->getNumberOfLevels(), uint64_t(0) );
+   numberOfCells_.assign( blocks->getNumberOfLevels(), uint64_t{0} );
+   numberOfBlocksContainingCell_.assign( blocks->getNumberOfLevels(), uint64_t{0} );
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
    {
@@ -236,9 +236,9 @@ void CellCounter< FlagField_T >::operator()()
    mpi::allReduceInplace( numberOfCells_,                mpi::SUM );
    mpi::allReduceInplace( numberOfBlocksContainingCell_, mpi::SUM );
 
-   totalNumberOfCells_                = std::accumulate( numberOfCells_.begin(), numberOfCells_.end(), uint64_t(0) );
+   totalNumberOfCells_                = std::accumulate( numberOfCells_.begin(), numberOfCells_.end(), uint64_t{0} );
    totalNumberOfBlocksContainingCell_ = std::accumulate( numberOfBlocksContainingCell_.begin(),
-                                                         numberOfBlocksContainingCell_.end(), uint64_t(0) );
+                                                         numberOfBlocksContainingCell_.end(), uint64_t{0} );
 }
 
 

@@ -538,7 +538,7 @@ typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allR
 {
    int numProcesses = MPIManager::instance()->numProcesses();
    RankRange r;
-   std::generate_n( std::inserter(r, r.end()), numProcesses, [&]{ return MPIRank(r.size()); } );
+   std::generate_n( std::inserter(r, r.end()), numProcesses, [&]{ return static_cast< MPIRank >(r.size()); } );
    return r;
 }
 template< typename Rb, typename Sb>
@@ -546,7 +546,7 @@ typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allR
 {
    int const numProcesses = MPIManager::instance()->numProcesses();
    RankRange r;
-   std::generate_n( std::inserter(r, r.end()), numProcesses-1, [&]{ return MPIRank(r.size()+size_t(1)); } );
+   std::generate_n( std::inserter(r, r.end()), numProcesses-1, [&]{ return static_cast< MPIRank >(r.size()+size_t{1}); } );
    return r;
 }
 template< typename Rb, typename Sb>

@@ -27,8 +27,8 @@ namespace walberla
 namespace math
 {
 ///Converts a degrees angle to radians.
-constexpr real_t degToRad(real_t deg) {return deg * (pi / real_t(180));}
+constexpr real_t degToRad(real_t deg) {return deg * (pi / real_t{180});}
 ///Converts a radians angle to degrees.
-constexpr real_t radToDeg(real_t rad) {return rad * (real_t(180) / pi);}
+constexpr real_t radToDeg(real_t rad) {return rad * (real_t{180} / pi);}
 } // namespace math
 } // namespace walberla

@@ -45,7 +45,7 @@ void Restrict< Stencil_T >::operator()( IBlock * const block ) const
       const cell_idx_t fy = 2*y;
       cell_idx_t fz = z;
 
-      if( Stencil_T::D == uint_t(3) )
+      if( Stencil_T::D == uint_t{3} )
       {
          fz = 2*z;
 
@@ -55,7 +55,7 @@ void Restrict< Stencil_T >::operator()( IBlock * const block ) const
       else
       {
          WALBERLA_ASSERT_EQUAL(z, 0);
-         coarse->get(x,y,z) = real_t(0);
+         coarse->get(x,y,z) = real_t{0};
       }
 
       coarse->get(x,y,z) +=   fine->get(fx  , fy  , fz  ) + fine->get(fx+1, fy  , fz  )
@@ -72,14 +72,14 @@ void ProlongateAndCorrect< Stencil_T >::operator()( IBlock * const block ) const
    auto coarse = block->getData< Field_T >( coarseFieldId_ );
 
    WALBERLA_FOR_ALL_CELLS_XYZ( fine,
-      if( Stencil_T::D == uint_t(3) )
+      if( Stencil_T::D == uint_t{3} )
       {
-         fine->get(x,y,z) +=  real_t(0.125) * coarse->get(x/2,y/2,z/2);
+         fine->get(x,y,z) +=  real_t{0.125} * coarse->get(x/2,y/2,z/2);
       }
       else
       {
          WALBERLA_ASSERT_EQUAL(z, 0);
-         fine->get(x,y,z) +=  real_t(0.25) * coarse->get(x/2,y/2,z);
+         fine->get(x,y,z) +=  real_t{0.25} * coarse->get(x/2,y/2,z);
       }
    );
 }
@@ -146,7 +146,7 @@ void ComputeResidualFixedStencil< Stencil_T >::operator()( IBlock * const block 
 template< typename Stencil_T >
 void CoarsenStencilFieldsDCA<Stencil_T >::operator()( const std::vector<BlockDataID> & stencilFieldId ) const
 {
-   const real_t scalingFactor = real_t(1)/real_c(2<< (operatorOrder_-1) ); // scaling by ( 1/h^operatorOrder )^lvl
+   const real_t scalingFactor = real_t{1}/real_c(2<< (operatorOrder_-1) ); // scaling by ( 1/h^operatorOrder )^lvl
 
    WALBERLA_ASSERT_EQUAL(numLvl_, stencilFieldId.size(), "This function can only be called when operating with stencil fields!");
 
@@ -191,28 +191,28 @@ inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vec
          Array3D_7 p;
 
          // Set to restriction weights from constant restrict operator
-          for(auto z = uint_t(0); z < uint_t(2); ++z) {
-            for(auto y = uint_t(0); y < uint_t(2); ++y) {
-               for(auto x = uint_t(0); x < uint_t(2); ++x) {
-                  r[x][y][z] = real_t(1);
+          for(auto z = uint_t{0}; z < uint_t{2}; ++z) {
+            for(auto y = uint_t{0}; y < uint_t{2}; ++y) {
+               for(auto x = uint_t{0}; x < uint_t{2}; ++x) {
+                  r[x][y][z] = real_t{1};
                }
             }
          }
 
          // Init to 0 //
-         for(auto k = uint_t(0); k < uint_t(7); ++k) {
-            for(auto j = uint_t(0); j < uint_t(7); ++j) {
-               for(auto i = uint_t(0); i < uint_t(7); ++i) {
-                  p[i][j][k] = real_t(0);
+         for(auto k = uint_t{0}; k < uint_t{7}; ++k) {
+            for(auto j = uint_t{0}; j < uint_t{7}; ++j) {
+               for(auto i = uint_t{0}; i < uint_t{7}; ++i) {
+                  p[i][j][k] = real_t{0};
                }
             }
          }
 
          // Set center to prolongation weights, including overrelaxation factor (latter therefore no longer needed in ProlongateAndCorrect)
-         for(auto k = uint_t(0); k < uint_t(2); ++k) {
-            for(auto j = uint_t(0); j < uint_t(2); ++j) {
-               for(auto i = uint_t(0); i < uint_t(2); ++i) {
-                  p[i+2][j+2][k+2] = real_t(0.125)/overrelaxFact_;   // Factor 0.125 such that same prolongation operator for DCA and GCA
+         for(auto k = uint_t{0}; k < uint_t{2}; ++k) {
+            for(auto j = uint_t{0}; j < uint_t{2}; ++j) {
+               for(auto i = uint_t{0}; i < uint_t{2}; ++i) {
+                  p[i+2][j+2][k+2] = real_t{0.125}/overrelaxFact_;   // Factor 0.125 such that same prolongation operator for DCA and GCA
                }
             }
          }
@@ -226,17 +226,17 @@ inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vec
             const cell_idx_t fy = 2*y;
             const cell_idx_t fz = 2*z;
 
-            for(auto k = uint_t(0); k < uint_t(7); ++k)
-               for(auto j = uint_t(0); j < uint_t(7); ++j)
-                  for(auto i = uint_t(0); i < uint_t(7); ++i)
-                     ap[i][j][k] = real_t(0);
+            for(auto k = uint_t{0}; k < uint_t{7}; ++k)
+               for(auto j = uint_t{0}; j < uint_t{7}; ++j)
+                  for(auto i = uint_t{0}; i < uint_t{7}; ++i)
+                     ap[i][j][k] = real_t{0};
 
 
             // Tested for spatially varying stencils! //
-            for(auto k = uint_t(1); k < uint_t(5); ++k)
-               for(auto j = uint_t(1); j < uint_t(5); ++j)
-                  for(auto i = uint_t(1); i < uint_t(5); ++i){
-                     ap[i][j][k] = real_t(0);
+            for(auto k = uint_t{1}; k < uint_t{5}; ++k)
+               for(auto j = uint_t{1}; j < uint_t{5}; ++j)
+                  for(auto i = uint_t{1}; i < uint_t{5}; ++i){
+                     ap[i][j][k] = real_t{0};
                      for(auto d = stencil::D3Q7::begin(); d != stencil::D3Q7::end(); ++d ){
                         ap[i][j][k] += p[ uint_c(cell_idx_c(i)+d.cx()) ] [ uint_c(cell_idx_c(j)+d.cy()) ] [uint_c(cell_idx_c(k)+d.cz()) ] * fine->get( fx+cell_idx_c(i%2), fy+cell_idx_c(j%2), fz+cell_idx_c(k%2), d.toIdx() ); // contains elements of one row of coarse grid matrix
                      }
@@ -245,9 +245,9 @@ inline void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vec
             // Checked, correct! //
             for(auto d = stencil::D3Q7::begin(); d != stencil::D3Q7::end(); ++d ){
                real_t sum = 0;
-               for(auto k = uint_t(0); k < uint_t(2); ++k)
-                  for(auto j = uint_t(0); j < uint_t(2); ++j)
-                     for(auto i = uint_t(0); i < uint_t(2); ++i) {
+               for(auto k = uint_t{0}; k < uint_t{2}; ++k)
+                  for(auto j = uint_t{0}; j < uint_t{2}; ++j)
+                     for(auto i = uint_t{0}; i < uint_t{2}; ++i) {
                         sum += ap[uint_c(cell_idx_c(i)+2-2*d.cx())] [uint_c(cell_idx_c(j)+2-2*d.cy())] [uint_c(cell_idx_c(k)+2-2*d.cz())] * r[i][j][k];
                         // either i+0 or i+4    // either j+0 or j+4    // either k+0 or k+4       // always 1 here
                      }

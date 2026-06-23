@@ -40,7 +40,7 @@ namespace math {
  **********************************************************************************************************************/
 void DistributedSample::mpiAllGather()
 {
-   sum_ = real_t(0);
+   sum_ = real_t{0};
    min_ =  std::numeric_limits< real_t >::max();
    max_ = -std::numeric_limits< real_t >::max();
    size_ = uint_c( data_.size() );
@@ -61,7 +61,7 @@ void DistributedSample::mpiAllGather()
    }
 
    mean_ = sum_ / real_c(size_);
-   variance_ = real_t(0);
+   variance_ = real_t{0};
 
    for(real_t & it : data_)
    {
@@ -76,12 +76,12 @@ void DistributedSample::mpiAllGather()
 
    variance_ /= real_c(size_);
    
-   if( size_ == uint_t(0) )
+   if( size_ == uint_t{0} )
    {
-      min_ = real_t(0);
-      max_ = real_t(0);
-      mean_ = real_t(0);
-      variance_ = real_t(0);
+      min_ = real_t{0};
+      max_ = real_t{0};
+      mean_ = real_t{0};
+      variance_ = real_t{0};
    }
 }
 
@@ -99,7 +99,7 @@ void DistributedSample::mpiGather( int rank )
       WALBERLA_ASSERT( rank == 0 );
    }
 
-   sum_ = real_t(0);
+   sum_ = real_t{0};
    min_ =  std::numeric_limits< real_t >::max();
    max_ = -std::numeric_limits< real_t >::max();
    size_ = uint_c( data_.size() );
@@ -120,7 +120,7 @@ void DistributedSample::mpiGather( int rank )
    }
 
    mean_ = sum_ / real_c(size_);
-   variance_ = real_t(0);
+   variance_ = real_t{0};
 
    for(real_t & it : data_)
    {
@@ -135,12 +135,12 @@ void DistributedSample::mpiGather( int rank )
 
    variance_ /= real_c(size_);
    
-   if( size_ == uint_t(0) )
+   if( size_ == uint_t{0} )
    {
-      min_ = real_t(0);
-      max_ = real_t(0);
-      mean_ = real_t(0);
-      variance_ = real_t(0);
+      min_ = real_t{0};
+      max_ = real_t{0};
+      mean_ = real_t{0};
+      variance_ = real_t{0};
    }   
 }
 
@@ -174,7 +174,7 @@ std::string DistributedSample::format( const std::string & formatString ) const
 {
    std::string result = formatString;
 
-   if( size_ > uint_t(0) )
+   if( size_ > uint_t{0} )
    {
       string_replace_all( result, "%min", std::to_string( min_ ) );
       string_replace_all( result, "%max", std::to_string( max_ ) );

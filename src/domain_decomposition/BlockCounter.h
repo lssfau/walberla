@@ -55,7 +55,7 @@ public:
    BlockCounter( const weak_ptr< StructuredBlockStorage > & blocks,
                  const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                  const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
-      totalNumberOfBlocks_( uint_t(0) ), blocks_( blocks ),
+      totalNumberOfBlocks_( uint_t{0} ), blocks_( blocks ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors ) {}
 
    uint_t numberOfBlocks() const
@@ -74,13 +74,13 @@ public:
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'BlockCounter' for a block storage object that doesn't exist anymore" );
 
-      totalNumberOfBlocks_ = uint_t(0);
-      numberOfBlocks_.assign( blocks->getNumberOfLevels(), uint_t(0) );
+      totalNumberOfBlocks_ = uint_t{0};
+      numberOfBlocks_.assign( blocks->getNumberOfLevels(), uint_t{0} );
 
       for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
       {
          WALBERLA_ASSERT_LESS( blocks->getLevel( *block ), blocks->getNumberOfLevels() );
-         numberOfBlocks_[ blocks->getLevel( *block ) ] += uint_t(1);
+         numberOfBlocks_[ blocks->getLevel( *block ) ] += uint_t{1};
       }
 
       mpi::allReduceInplace( numberOfBlocks_, mpi::SUM );

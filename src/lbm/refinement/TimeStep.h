@@ -181,7 +181,7 @@ public:
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'TimeStep' (refinement) for a block storage object that doesn't exist anymore" );
       if( blocks->getNumberOfLevels() > postCollideVoidFunctions_.size() )
          refresh( blocks->getNumberOfLevels() );
-      recursiveStep( uint_t(0), uint_t(0) );
+      recursiveStep( uint_t{0}, uint_t{0} );
    }
 
    void addPackInfo( const typename blockforest::communication::NonUniformBufferedScheme< CommunicationStencil_T >::PackInfo & packInfo )
@@ -330,7 +330,7 @@ TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::TimeStep( weak_ptr< Str
                                                                    const Set<SUID> & requiredBlockSelectors /*= Set<SUID>::emptySet()*/,
                                                                    const Set<SUID> & incompatibleBlockSelectors /*= Set<SUID>::emptySet()*/ ) :
    blocks_( blocks ), sweep_( sweep ),
-   boundarySweep_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, uint_t(0) ) ),
+   boundarySweep_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, uint_t{0} ) ),
    boundarySweepWithLayers_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, StreamIncludedGhostLayers ) ),
    asynchronousCommunication_( true ), optimizedCommunication_( true ),
 #ifdef NDEBUG   
@@ -356,7 +356,7 @@ TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::TimeStep( weak_ptr< Str
                                                                    const Set<SUID> & requiredBlockSelectors /*= Set<SUID>::emptySet()*/,
                                                                    const Set<SUID> & incompatibleBlockSelectors /*= Set<SUID>::emptySet()*/ ) :
    blocks_( blocks ), sweep_( sweep ),
-   boundarySweep_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, uint_t(0) ) ),
+   boundarySweep_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, uint_t{0} ) ),
    boundarySweepWithLayers_( BoundaryHandling_T::getBlockSweep( boundaryHandlingId, StreamIncludedGhostLayers ) ),
    asynchronousCommunication_( true ), optimizedCommunication_( true ),
    pdfPackInfo_( pdfPackInfo ),
@@ -413,34 +413,34 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::consistencyChecks(
       auto * flagField = boundaryHandling->getFlagField();
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );
 
-      if( LatticeModel_T::Stencil::D == uint_t(3) )
+      if( LatticeModel_T::Stencil::D == uint_t{3} )
       {
-         if( ( pdfField->xSize() & uint_t(1) ) == uint_t(1) || ( pdfField->ySize() & uint_t(1) ) == uint_t(1) ||
-             ( pdfField->zSize() & uint_t(1) ) == uint_t(1) )
+         if( ( pdfField->xSize() & uint_t{1} ) == uint_t{1} || ( pdfField->ySize() & uint_t{1} ) == uint_t{1} ||
+             ( pdfField->zSize() & uint_t{1} ) == uint_t{1} )
             WALBERLA_ABORT( "The x-, y-, and z-size of the PDF field on each block must be divisible by two!\n"
                             "(PDF field size on block " << block->getId() <<
                             " is " << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() << ")" );
 
-         if( pdfField->xSize() < uint_t(4) || pdfField->ySize() < uint_t(4) || pdfField->zSize() < uint_t(4) )
+         if( pdfField->xSize() < uint_t{4} || pdfField->ySize() < uint_t{4} || pdfField->zSize() < uint_t{4} )
             WALBERLA_ABORT( "The size of the PDF field on each block must be at least 4x4x4 cells!\n"
                             "(PDF field size on block " << block->getId() <<
                             " is " << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() << ")" );
       }
       else
       {
-         WALBERLA_CHECK_EQUAL( LatticeModel_T::Stencil::D, uint_t(2) );
+         WALBERLA_CHECK_EQUAL( LatticeModel_T::Stencil::D, uint_t{2} );
 
-         if( ( pdfField->xSize() & uint_t(1) ) == uint_t(1) || ( pdfField->ySize() & uint_t(1) ) == uint_t(1) )
+         if( ( pdfField->xSize() & uint_t{1} ) == uint_t{1} || ( pdfField->ySize() & uint_t{1} ) == uint_t{1} )
             WALBERLA_ABORT( "The x- and y-size of the PDF field on each block must be divisible by two!\n"
                             "(PDF field size on block " << block->getId() <<
                             " is " << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() << ")" );
 
-         if( pdfField->xSize() < uint_t(4) || pdfField->ySize() < uint_t(4) )
+         if( pdfField->xSize() < uint_t{4} || pdfField->ySize() < uint_t{4} )
             WALBERLA_ABORT( "The size of the PDF field on each block must be at least 4x4x1 cells!\n"
                             "(PDF field size on block " << block->getId() <<
                             " is " << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() << ")" );
 
-         if( pdfField->zSize() != uint_t(1) )
+         if( pdfField->zSize() != uint_t{1} )
             WALBERLA_ABORT( "The z-size of the PDF field on each block must be 1!\n"
                             "(PDF field size on block " << block->getId() <<
                             " is " << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() << ")" );
@@ -451,11 +451,11 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::consistencyChecks(
                          "(PDF field [" << pdfField->xSize() << " x " << pdfField->ySize() << " x " << pdfField->zSize() <<
                          "] vs. flag field [" << flagField->xSize() << " x " << flagField->ySize() << " x " << flagField->zSize() << "])" );
 
-      if( pdfField->nrOfGhostLayers() < uint_t(4) )
+      if( pdfField->nrOfGhostLayers() < uint_t{4} )
          WALBERLA_ABORT( "The PDF field of each block needs at least 4 ghost layers!\n"
                          "(currently only possesses " << pdfField->nrOfGhostLayers() << " on block " << block->getId() << ")" );
 
-      if( flagField->nrOfGhostLayers() < uint_t(4) )
+      if( flagField->nrOfGhostLayers() < uint_t{4} )
          WALBERLA_ABORT( "The flag field of each block needs at least 4 ghost layers!\n"
                          "(currently only possesses " << flagField->nrOfGhostLayers() << " on block " << block->getId() << ")" );
    }
@@ -481,7 +481,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
       postStreamVoidFunctions_.resize( levels );
       postStreamBlockFunctions_.resize( levels );
       
-      for( uint_t f = uint_t(0); f != globalPostCollideVoidFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostCollideVoidFunctions_.size(); ++f )
       {
          VoidFunctionWrappper wrappedFunction( globalPostCollideVoidFunctions_, f );
          const std::string identifier = globalPostCollideVoidFunctions_[f].second;
@@ -493,7 +493,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
          }
       }
 
-      for( uint_t f = uint_t(0); f != globalPostCollideBlockFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostCollideBlockFunctions_.size(); ++f )
       {
          BlockFunctionWrappper wrappedFunction( globalPostCollideBlockFunctions_, f );
          const std::string identifier = globalPostCollideBlockFunctions_[f].second;
@@ -505,7 +505,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
          }
       }
       
-      for( uint_t f = uint_t(0); f != globalPostBoundaryHandlingVoidFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostBoundaryHandlingVoidFunctions_.size(); ++f )
       {
          VoidFunctionWrappper wrappedFunction( globalPostBoundaryHandlingVoidFunctions_, f );
          const std::string identifier = globalPostBoundaryHandlingVoidFunctions_[f].second;
@@ -517,7 +517,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
          }
       }
       
-      for( uint_t f = uint_t(0); f != globalPostBoundaryHandlingBlockFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostBoundaryHandlingBlockFunctions_.size(); ++f )
       {
          BlockFunctionWrappper wrappedFunction( globalPostBoundaryHandlingBlockFunctions_, f );
          const std::string identifier = globalPostBoundaryHandlingBlockFunctions_[f].second;
@@ -529,7 +529,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
          }
       }
       
-      for( uint_t f = uint_t(0); f != globalPostStreamVoidFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostStreamVoidFunctions_.size(); ++f )
       {
          VoidFunctionWrappper wrappedFunction( globalPostStreamVoidFunctions_, f );
          const std::string identifier = globalPostStreamVoidFunctions_[f].second;
@@ -541,7 +541,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::refresh( const uin
          }
       }
       
-      for( uint_t f = uint_t(0); f != globalPostStreamBlockFunctions_.size(); ++f )
+      for( uint_t f = uint_t{0}; f != globalPostStreamBlockFunctions_.size(); ++f )
       {
          BlockFunctionWrappper wrappedFunction( globalPostStreamBlockFunctions_, f );
          const std::string identifier = globalPostStreamBlockFunctions_[f].second;
@@ -562,7 +562,7 @@ template< typename Function >
 void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addFunction( std::vector< std::vector< std::pair< Function, std::string > > > & functions,
                                                                            const Function & function, const std::string & identifier )
 {
-   for( uint_t i = uint_t(0); i < functions.size(); ++i )
+   for( uint_t i = uint_t{0}; i < functions.size(); ++i )
    {
       functions[i].push_back( std::make_pair( function, identifier ) );
       if( timing_ && ! levelwiseTimingPool_->timerExists( getLevelwiseTimingPoolString( identifier, i ) ) )
@@ -580,8 +580,8 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addFunction( std::
                                                                            const Function & function, const std::string & identifier,
                                                                            const uint_t level )
 {
-   if( level > ( postCollideVoidFunctions_.size() - uint_t(1) ) )
-      refresh( level + uint_t(1) );
+   if( level > ( postCollideVoidFunctions_.size() - uint_t{1} ) )
+      refresh( level + uint_t{1} );
    functions[level].push_back( std::make_pair( function, identifier ) );
    if( timing_ && ! levelwiseTimingPool_->timerExists( getLevelwiseTimingPoolString( identifier, level ) ) )
       levelwiseTimingPool_->registerTimer( getLevelwiseTimingPoolString( identifier, level ) );
@@ -816,8 +816,8 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::createTimers( cons
             timingPool_->registerTimer( timer );
             
       timers.clear();
-      timers.push_back( getLevelwiseTimingPoolString( "stream & collide", levels - uint_t(1) ) );
-      for( uint_t i = uint_t(0); i < levels; ++i )
+      timers.push_back( getLevelwiseTimingPoolString( "stream & collide", levels - uint_t{1} ) );
+      for( uint_t i = uint_t{0}; i < levels; ++i )
       {
          timers.push_back( getLevelwiseTimingPoolString( "boundary handling", i ) );
          timers.push_back( getLevelwiseTimingPoolString( "collide", i ) );
@@ -825,14 +825,14 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::createTimers( cons
          timers.push_back( getLevelwiseTimingPoolString( "communication equal level", i, "[wait & unpack]" ) );
          timers.push_back( getLevelwiseTimingPoolString( "linear explosion", i ) );
          timers.push_back( getLevelwiseTimingPoolString( "stream", i ) );
-         if( i != uint_t(0) )
+         if( i != uint_t{0} )
          {
             timers.push_back( getLevelwiseTimingPoolString( "communication coarse to fine", i, "[pack & send]" ) );
             timers.push_back( getLevelwiseTimingPoolString( "communication coarse to fine", i, "[wait & unpack]" ) );
             timers.push_back( getLevelwiseTimingPoolString( "communication fine to coarse", i, "[pack & send]" ) );
             timers.push_back( getLevelwiseTimingPoolString( "communication fine to coarse", i, "[wait & unpack]" ) );
          }
-         if( i != ( levels - uint_t(1) ) )
+         if( i != ( levels - uint_t{1} ) )
          {
             timers.push_back( getLevelwiseTimingPoolString( "equal level border stream correction", i, "[prepare]" ) );
             timers.push_back( getLevelwiseTimingPoolString( "equal level border stream correction", i, "[apply]" ) );
@@ -933,7 +933,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
    auto _blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to access 'TimeStep' (refinement) for a block storage object that doesn't exist anymore" );
 
-   const uint_t finestLevel = _blocks->getNumberOfLevels() - uint_t(1);
+   const uint_t finestLevel = _blocks->getNumberOfLevels() - uint_t{1};
    const bool doEqualLevelBorderStreamCorrection = ( performEqualLevelBorderStreamCorrection_ && level != finestLevel );
 
    if( timing_ )
@@ -943,7 +943,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
@@ -977,7 +977,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
                }
 
                startTiming( "stream", level );
-               sweep_->stream( block, uint_t(0) );
+               sweep_->stream( block, uint_t{0} );
                stopTiming( "stream", level );
             }
             
@@ -994,7 +994,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
@@ -1025,7 +1025,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
                
             if( coarseNeighbors )
@@ -1037,7 +1037,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
             else
             {
                startTiming( "stream", level );
-               sweep_->stream( block, uint_t(0) );
+               sweep_->stream( block, uint_t{0} );
                stopTiming( "stream", level );
             }
             
@@ -1057,7 +1057,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
@@ -1072,7 +1072,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
                boundarySweep_( block );
                for( auto const &func : postBoundaryHandlingBlockFunctions_[level] )
                   (func.first)( block, level, executionCount );
-               sweep_->stream( block, uint_t(0) );
+               sweep_->stream( block, uint_t{0} );
             }
             
             if( doEqualLevelBorderStreamCorrection )
@@ -1084,7 +1084,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
             if( coarseNeighbors )
@@ -1103,7 +1103,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
          for( auto block : blocks )
          {
             bool coarseNeighbors = false;
-            for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
                      
             if( coarseNeighbors )
@@ -1112,7 +1112,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::stream( std::vecto
             }
             else
             {
-               sweep_->stream( block, uint_t(0) );
+               sweep_->stream( block, uint_t{0} );
             }
             
             if( doEqualLevelBorderStreamCorrection )
@@ -1130,7 +1130,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::finishStream( std:
    auto _blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to access 'TimeStep' (refinement) for a block storage object that doesn't exist anymore" );
 
-   const uint_t finestLevel = _blocks->getNumberOfLevels() - uint_t(1);
+   const uint_t finestLevel = _blocks->getNumberOfLevels() - uint_t{1};
    const bool doEqualLevelBorderStreamCorrection = ( performEqualLevelBorderStreamCorrection_ && level != finestLevel );
 
    if( timing_ )
@@ -1180,7 +1180,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
 #ifndef NDEBUG
    auto _blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to access 'TimeStep' (refinement) for a block storage object that doesn't exist anymore" );
-   WALBERLA_ASSERT_EQUAL( level, _blocks->getNumberOfLevels() - uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( level, _blocks->getNumberOfLevels() - uint_t{1} );
 #endif
 
    if( postStreamVoidFunctions_[level].empty() )
@@ -1192,7 +1192,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighborsOrPostStreamFunctions; ++i )
                   coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
@@ -1243,14 +1243,14 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
                for( auto const &func : postCollideBlockFunctions_[level] )
                {
                   startTiming( func.second, level );
-                  (func.first)( block, level, executionCount + uint_t(1) );
+                  (func.first)( block, level, executionCount + uint_t{1} );
                   stopTiming( func.second, level );
                }
             }
             for( auto const &func : postCollideVoidFunctions_[level] )
             {
                startTiming( func.second, level );
-               (func.first)( level, executionCount + uint_t(1) );
+               (func.first)( level, executionCount + uint_t{1} );
                stopTiming( func.second, level );
             }
          }
@@ -1259,7 +1259,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             for( auto block : blocks )
             {
                bool coarseNeighbors = false;
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                   coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighbors )
@@ -1290,7 +1290,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighborsOrPostStreamFunctions; ++i )
                   coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
@@ -1319,14 +1319,14 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
                for( auto const &func : postCollideBlockFunctions_[level] )
                {
                   startTiming( func.second, level );
-                  (func.first)( block, level, executionCount + uint_t(1) );
+                  (func.first)( block, level, executionCount + uint_t{1} );
                   stopTiming( func.second, level );
                }
             }
             for( auto const &func : postCollideVoidFunctions_[level] )
             {
                startTiming( func.second, level );
-               (func.first)( level, executionCount + uint_t(1) );
+               (func.first)( level, executionCount + uint_t{1} );
                stopTiming( func.second, level );
             }
          }
@@ -1338,7 +1338,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighborsOrPostStreamFunctions; ++i )
                   coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
@@ -1359,17 +1359,17 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
                   (*sweep_)( block );
                }
                for( auto const &func : postCollideBlockFunctions_[level] )
-                  (func.first)( block, level, executionCount + uint_t(1) );
+                  (func.first)( block, level, executionCount + uint_t{1} );
             }
             for( auto const &func : postCollideVoidFunctions_[level] )
-               (func.first)( level, executionCount + uint_t(1) );
+               (func.first)( level, executionCount + uint_t{1} );
          }
          else
          {
             for( auto block : blocks )
             {
                bool coarseNeighbors = false;
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighbors; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighbors; ++i )
                   coarseNeighbors = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighbors )
@@ -1388,7 +1388,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             for( auto block : blocks )
             {
                bool coarseNeighborsOrPostStreamFunctions = !(postStreamBlockFunctions_[level].empty());
-               for( uint_t i = uint_t(0); i < uint_t(26) && !coarseNeighborsOrPostStreamFunctions; ++i )
+               for( uint_t i = uint_t{0}; i < uint_t{26} && !coarseNeighborsOrPostStreamFunctions; ++i )
                   coarseNeighborsOrPostStreamFunctions = block->neighborhoodSectionHasLargerBlock(i);
 
                if( coarseNeighborsOrPostStreamFunctions )
@@ -1403,10 +1403,10 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
                   (*sweep_)( block );
                }
                for( auto const &func : postCollideBlockFunctions_[level] )
-                  (func.first)( block, level, executionCount + uint_t(1) );
+                  (func.first)( block, level, executionCount + uint_t{1} );
             }
             for( auto const &func : postCollideVoidFunctions_[level] )
-               (func.first)( level, executionCount + uint_t(1) );
+               (func.first)( level, executionCount + uint_t{1} );
          }
       }
    }
@@ -1443,7 +1443,7 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::streamCollide( std
             (func.first)( level, executionCount );
       }
 
-      collide( blocks, level, executionCount + uint_t(1) );
+      collide( blocks, level, executionCount + uint_t{1} );
    }
 }
 
@@ -1583,11 +1583,11 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
    auto _blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to access 'TimeStep' (refinement) for a block storage object that doesn't exist anymore" );
 
-   const uint_t coarsestLevel = uint_t(0);
-   const uint_t   finestLevel = _blocks->getNumberOfLevels() - uint_t(1);
+   const uint_t coarsestLevel = uint_t{0};
+   const uint_t   finestLevel = _blocks->getNumberOfLevels() - uint_t{1};
 
-   const uint_t executionCount1st = (executionCount + uint_t(1)) * uint_t(2) - uint_t(2);
-   const uint_t executionCount2nd = (executionCount + uint_t(1)) * uint_t(2) - uint_t(1);
+   const uint_t executionCount1st = (executionCount + uint_t{1}) * uint_t{2} - uint_t{2};
+   const uint_t executionCount2nd = (executionCount + uint_t{1}) * uint_t{2} - uint_t{1};
 
    std::vector< Block * > blocks = selectedBlocks( level );
 
@@ -1610,12 +1610,12 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
 
    if( level != finestLevel )
    {
-      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t(1) << " and execution count " << executionCount1st );
-      recursiveStep( level + uint_t(1), executionCount1st );
+      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t{1} << " and execution count " << executionCount1st );
+      recursiveStep( level + uint_t{1}, executionCount1st );
 
       if( asynchronousCommunication_ ) {
          WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
-         startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+         startCommunicationFineToCoarse(level + uint_t{1}); // [start] coalescence (initiated by coarse level)
       }
    }
 
@@ -1654,10 +1654,10 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
       {
          if( !asynchronousCommunication_ ) {
             WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
-            startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+            startCommunicationFineToCoarse(level + uint_t{1}); // [start] coalescence (initiated by coarse level)
          }
          WALBERLA_LOG_DETAIL("End communication fine to coarse, initiated by coarse level " << level );
-         endCommunicationFineToCoarse( level + uint_t(1) ); // [end] coalescence (initiated by coarse level)
+         endCommunicationFineToCoarse( level + uint_t{1} ); // [end] coalescence (initiated by coarse level)
       }
 
       WALBERLA_LOG_DETAIL("Finish stream on level " << level );
@@ -1680,12 +1680,12 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
 
    if( level != finestLevel )
    {
-      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t(1) << " and execution count " << executionCount2nd );
-      recursiveStep( level + uint_t(1), executionCount2nd );
+      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t{1} << " and execution count " << executionCount2nd );
+      recursiveStep( level + uint_t{1}, executionCount2nd );
    
       if( asynchronousCommunication_ ) {
          WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
-         startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+         startCommunicationFineToCoarse(level + uint_t{1}); // [start] coalescence (initiated by coarse level)
       }
    }
 
@@ -1704,10 +1704,10 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
       if( !asynchronousCommunication_ )
       {
          WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
-         startCommunicationFineToCoarse( level + uint_t(1) ); // [start] coalescence (initiated by coarse level)
+         startCommunicationFineToCoarse( level + uint_t{1} ); // [start] coalescence (initiated by coarse level)
       }
       WALBERLA_LOG_DETAIL("End communication fine to coarse, initiated by coarse level " << level );
-      endCommunicationFineToCoarse( level + uint_t(1) ); // [end] coalescence (initiated by coarse level)
+      endCommunicationFineToCoarse( level + uint_t{1} ); // [end] coalescence (initiated by coarse level)
    }
 
    WALBERLA_LOG_DETAIL("Finish stream on level " << level );

@@ -83,18 +83,18 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
 
       if( u == nullptr )
       {
-         minTargetLevel.second = uint_t(0);
+         minTargetLevel.second = uint_t{0};
          continue;
       }
 
       CellInterval interval = u->xyzSize();
       CellInterval innerInterval = interval;
-      Cell expand( cell_idx_t(-1), cell_idx_t(-1), Pseudo2D ? cell_idx_t(0) : cell_idx_t(-1) );
+      Cell expand( cell_idx_t{-1}, cell_idx_t{-1}, Pseudo2D ? cell_idx_t{0} : cell_idx_t{-1} );
       innerInterval.expand( expand );
 
       const int gradients = Pseudo2D ? 12 : 18;
 
-      const cell_idx_t one( cell_idx_t(1) );
+      const cell_idx_t one( cell_idx_t{1} );
 
       bool refine( false );
       bool coarsen( true );
@@ -109,7 +109,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
 
             real_t gradient[gradients]; // NOLINT(*-avoid-c-arrays)
             for( int i = 0; i < gradients; ++i )
-               gradient[i] = real_t(0);
+               gradient[i] = real_t{0};
 
             if( innerInterval.contains(x,y,z) )
             {
@@ -184,7 +184,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
                }
             }
 
-            real_t magnitute( real_t(0) );
+            real_t magnitute( real_t{0} );
             for( int i = 0; i < gradients; ++i )
                magnitute += gradient[i];
 
@@ -200,12 +200,12 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
       if( refine && block->getLevel() < maxLevel_ )
       {
          WALBERLA_ASSERT( !coarsen );
-         minTargetLevel.second = block->getLevel() + uint_t(1);
+         minTargetLevel.second = block->getLevel() + uint_t{1};
       }
-      if( coarsen && block->getLevel() > uint_t(0) )
+      if( coarsen && block->getLevel() > uint_t{0} )
       {
          WALBERLA_ASSERT( !refine );
-         minTargetLevel.second = block->getLevel() - uint_t(1);
+         minTargetLevel.second = block->getLevel() - uint_t{1};
       }
    }
 }

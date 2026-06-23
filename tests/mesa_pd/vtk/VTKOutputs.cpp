@@ -46,7 +46,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage> (100);
 
-   const math::AABB domain(real_t(0), real_t(0), real_t(0), real_t(4), real_t(4), real_t(4));
+   const math::AABB domain(real_t{0}, real_t{0}, real_t{0}, real_t{4}, real_t{4}, real_t{4});
    auto forest = blockforest::createBlockForest( domain,
                                                  Vector3<uint_t>(2,2,2),
                                                  Vector3<bool>(false, false, false) );
@@ -54,10 +54,10 @@ int main( int argc, char ** argv )
    auto rank = mpi::MPIManager::instance()->rank();
 
    //initialize particles
-   const Vec3 shift(real_t(0.5), real_t(0.5), real_t(0.5));
+   const Vec3 shift(real_t{0.5}, real_t{0.5}, real_t{0.5});
    for (auto& iBlk : *forest)
    {
-      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), shift, real_t(1)))
+      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), shift, real_t{1}))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
 

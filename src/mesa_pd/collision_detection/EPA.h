@@ -54,7 +54,7 @@ private :
    //**********************************************************************************************
 
 public:
-   static constexpr real_t contactThreshold = real_t(1e-8);
+   static constexpr real_t contactThreshold = real_t{1e-8};
 
    //**Query functions*****************************************************************************
    /*!\name Query functions */
@@ -377,7 +377,7 @@ inline Vec3 EPA::EPA_Triangle::getClosestPoint(const std::vector<Vec3>& points) 
  */
 inline bool EPA::EPA_Triangle::isClosestInternal() const
 {
-   real_t tol = real_t(0.0);
+   real_t tol = real_t{0.0};
    return bar_[0] >= tol
          && bar_[1] >= tol
          && bar_[2] >= tol;
@@ -408,7 +408,7 @@ inline void EPA::pushSupportMargin(const Support &geom1,
                                    std::vector<Vec3>& supportB)
 {
    Vec3 ndir;
-   if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
+   if(floatIsEqual(dir.sqrLength(), real_t{1.0})){
       ndir = dir.getNormalizedIfNotZero();
    }else{
       ndir = dir;
@@ -418,7 +418,7 @@ inline void EPA::pushSupportMargin(const Support &geom1,
    supportA.push_back(sA);
    supportB.push_back(sB);
 
-   Vec3 support = sA -sB + real_t(2.0) * ndir * margin;
+   Vec3 support = sA -sB + real_t{2.0} * ndir * margin;
    epaVolume.push_back(support);
 }
 //*************************************************************************************************
@@ -442,14 +442,14 @@ inline void EPA::replaceSupportMargin(const Support &geom1,
                                       size_t indexToReplace)
 {
    Vec3 ndir;
-   if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
+   if(floatIsEqual(dir.sqrLength(), real_t{1.0})){
       ndir = dir.getNormalizedIfNotZero();
    }else{
       ndir = dir;
    }
    Vec3 sA = geom1.support(ndir);
    Vec3 sB = geom2.support(-ndir);
-   Vec3 support = sA -sB + real_t(2.0) * ndir * margin;
+   Vec3 support = sA -sB + real_t{2.0} * ndir * margin;
 
    supportA[indexToReplace] = sA;
    supportB[indexToReplace] = sB;

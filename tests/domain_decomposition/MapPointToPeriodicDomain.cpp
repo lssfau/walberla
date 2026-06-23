@@ -37,8 +37,8 @@ int main (int argc, char** argv)
    WALBERLA_UNUSED(walberlaEnv);
 
    std::array<bool, 3> isPeriodic{{true, true, true}};
-   math::Vector3<real_t> minCorner(real_t(2), real_t(3), real_t(4));
-   math::Vector3<real_t> maxCorner(real_t(3), real_t(4), real_t(5));
+   math::Vector3<real_t> minCorner(real_t{2}, real_t{3}, real_t{4});
+   math::Vector3<real_t> maxCorner(real_t{3}, real_t{4}, real_t{5});
    math::AABB domain(minCorner, maxCorner);
 
    //minCorner -> minCorner
@@ -56,9 +56,9 @@ int main (int argc, char** argv)
    WALBERLA_CHECK_IDENTICAL( p[2], minCorner[2] );
 
    //minCorner - epsilon -> maxCorner - epsilon
-   p[0] = std::nextafter(domain.xMin(), real_t(0));
-   p[1] = std::nextafter(domain.yMin(), real_t(0));
-   p[2] = std::nextafter(domain.zMin(), real_t(0));
+   p[0] = std::nextafter(domain.xMin(), real_t{0});
+   p[1] = std::nextafter(domain.yMin(), real_t{0});
+   p[2] = std::nextafter(domain.zMin(), real_t{0});
    mapPointToPeriodicDomain( isPeriodic, domain, p);
    WALBERLA_CHECK_IDENTICAL( p[0], std::nextafter(domain.xMax(), domain.xMin()) );
    WALBERLA_CHECK_IDENTICAL( p[1], std::nextafter(domain.yMax(), domain.yMin()) );

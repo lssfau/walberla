@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
    // Create a BlockForest with 2x2x2 cells per block
    SetupBlockForest setupBfs;
-   const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), real_t(1.0), real_t(1.0), real_t(1.0));
+   const AABB domain(real_t{0.0}, real_t{0.0}, real_t{0.0}, real_t{1.0}, real_t{1.0}, real_t{1.0});
    const Vector3<uint_t>rootBlocks(2,1,1);
    const Vector3<bool>periodic(true,true,true);
    const Vector3<uint_t>cellsPerBlock(8,8,8);
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
          auto dir = stencil::Direction::E;
          const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex(dir);
 
-         WALBERLA_CHECK_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t(4))
+         WALBERLA_CHECK_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t{4})
          WALBERLA_ASSERT(block->neighborhoodSectionHasSmallerBlocks(neighborIdx))
 
          const BlockID& fineReceiverId = block->getNeighborId(neighborIdx, 0); //bottom left block

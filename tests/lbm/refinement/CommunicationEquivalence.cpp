@@ -110,7 +110,7 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
       {
          auto aabb = block.getAABB();
          if( realIsEqual( aabb.zMax(), domain.zMax() ) )
-            if( block.getLevel() < ( levels - uint_t(1) ) )
+            if( block.getLevel() < ( levels - uint_t{1} ) )
                block.setMarker( true );
       }
    }
@@ -118,27 +118,27 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
    {
       AABB topCorner( domain.xMin(),
                       domain.yMin(),
-                      domain.zMax() - domain.zMax() / real_t(14),
-                      domain.xMin() + domain.xMax() / real_t(14),
-                      domain.yMin() + domain.yMax() / real_t(14),
+                      domain.zMax() - domain.zMax() / real_t{14},
+                      domain.xMin() + domain.xMax() / real_t{14},
+                      domain.yMin() + domain.yMax() / real_t{14},
                       domain.zMax() );
 
       for( auto &block : forest )
       {
          if( block.getAABB().intersects( topCorner ) )
-            if( block.getLevel() < ( levels - uint_t(1) ) )
+            if( block.getLevel() < ( levels - uint_t{1} ) )
                block.setMarker( true );
       }
    }
    else if( testMode == MIDDLE )
    {
-      const real_t xSpan = domain.xSize() / real_t(32);
-      const real_t ySpan = domain.ySize() / real_t(32);
-      const real_t zSpan = domain.zSize() / real_t(32);
+      const real_t xSpan = domain.xSize() / real_t{32};
+      const real_t ySpan = domain.ySize() / real_t{32};
+      const real_t zSpan = domain.zSize() / real_t{32};
 
-      const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t(2);
-      const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t(2);
-      const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t(2);
+      const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t{2};
+      const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t{2};
+      const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t{2};
 
       AABB middleBox( xMiddle - xSpan, yMiddle - ySpan, zMiddle - zSpan,
                       xMiddle + xSpan, yMiddle + ySpan, zMiddle + zSpan );
@@ -146,7 +146,7 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
       for( auto &block : forest )
       {
          if( block.getAABB().intersects( middleBox ) )
-            if( block.getLevel() < ( levels - uint_t(1) ) )
+            if( block.getLevel() < ( levels - uint_t{1} ) )
                block.setMarker( true );
       }
    }
@@ -156,7 +156,7 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
       {
          auto aabb = block.getAABB();
          if( realIsEqual( aabb.zMin(), domain.zMin() ) )
-            if( block.getLevel() < ( levels - uint_t(1) ) )
+            if( block.getLevel() < ( levels - uint_t{1} ) )
                block.setMarker( true );
       }
    }
@@ -166,7 +166,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 {
    for( auto &block : forest )
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
@@ -191,7 +191,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t{0}, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -283,7 +283,7 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
 shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlockForest > & blocks,
                                                        const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId )
 {
-   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t(50), uint_t(1), false );
+   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t{50}, uint_t{1}, false );
 
    blockforest::communication::NonUniformBufferedScheme< stencil::D3Q27 > pdfGhostLayerSync( blocks );
    pdfGhostLayerSync.addPackInfo( make_shared< lbm::refinement::PdfFieldSyncPackInfo< LatticeModel_T > >( pdfFieldId ) );
@@ -298,12 +298,12 @@ shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlo
    combine.addFilter( fluidFilter );
    if( testMode == MIDDLE )
    {
-      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(7), aabb.zMin(), aabb.xMax(), real_t(8), aabb.zMax() ) );
+      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t{7}, aabb.zMin(), aabb.xMax(), real_t{8}, aabb.zMax() ) );
       combine.addFilter( aabbFilter );
    }
    else
    {
-      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(1), aabb.zMin(), aabb.xMax(), real_t(2), aabb.zMax() ) );
+      vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t{1}, aabb.zMin(), aabb.xMax(), real_t{2}, aabb.zMax() ) );
       combine.addFilter( aabbFilter );
    }
    pdfFieldVTKWriter->addCellInclusionFilter( combine );
@@ -373,39 +373,39 @@ int main( int argc, char ** argv )
 
    logging::Logging::printHeaderOnStream();
 
-   uint_t levels = shortrun ? uint_t(3) : uint_t(4);
+   uint_t levels = shortrun ? uint_t{3} : uint_t{4};
    if( testMode == ENTIRE_TOP || testMode == ENTIRE_BOTTOM )
-     levels = shortrun ? uint_t(3) : uint_t(5);
+     levels = shortrun ? uint_t{3} : uint_t{5};
 
-   uint_t xBlocks = uint_t(1);
-   uint_t yBlocks = uint_t(1);
-   uint_t zBlocks = uint_t(1);
+   uint_t xBlocks = uint_t{1};
+   uint_t yBlocks = uint_t{1};
+   uint_t zBlocks = uint_t{1};
    if( testMode == ENTIRE_TOP || testMode == ENTIRE_BOTTOM )
    {
-      zBlocks = uint_t(2);
+      zBlocks = uint_t{2};
    }
    else if( testMode == TOP )
    {
-      xBlocks = uint_t(3);
-      yBlocks = uint_t(3);
-      zBlocks = uint_t(3);
+      xBlocks = uint_t{3};
+      yBlocks = uint_t{3};
+      zBlocks = uint_t{3};
    }
    else if( testMode == MIDDLE )
    {
-      xBlocks = uint_t(4);
-      yBlocks = uint_t(4);
-      zBlocks = uint_t(4);
+      xBlocks = uint_t{4};
+      yBlocks = uint_t{4};
+      zBlocks = uint_t{4};
    }
 
-   const uint_t xCells = shortrun ? uint_t(4) : uint_t(10);
-   const uint_t yCells = ( testMode == TOP && !shortrun ) ? uint_t(8) : uint_t(4);
-   const uint_t zCells = shortrun ? uint_t(4) : uint_t(10);
+   const uint_t xCells = shortrun ? uint_t{4} : uint_t{10};
+   const uint_t yCells = ( testMode == TOP && !shortrun ) ? uint_t{8} : uint_t{4};
+   const uint_t zCells = shortrun ? uint_t{4} : uint_t{10};
 
    auto blocks = createBlockStructure( levels, xBlocks, yBlocks, zBlocks, xCells, yCells, zCells, true, true, false );
    
-   const real_t Re = real_t(10);
+   const real_t Re = real_t{10};
    const real_t omega = ( testMode == ENTIRE_TOP || testMode == ENTIRE_BOTTOM ) ? real_c(1.9) : real_c(1.3);
-   const real_t nu = ( real_t(1) / omega - real_c(0.5) ) / real_t(3);
+   const real_t nu = ( real_t{1} / omega - real_c(0.5) ) / real_t{3};
    const real_t L = real_c( zBlocks * zCells );
    const real_t topVelocity = ( Re * nu ) / L;
 
@@ -415,7 +415,7 @@ int main( int argc, char ** argv )
                               "\n   - " << levels << " levels"
                               "\n   - Reynolds number: " << Re <<
                               "\n   - omega (coarsest grid): " << omega <<
-                              "\n   - omega (finest grid): " << lbm::collision_model::levelDependentRelaxationParameter( levels - uint_t(1), omega, uint_t(0) ) <<
+                              "\n   - omega (finest grid): " << lbm::collision_model::levelDependentRelaxationParameter( levels - uint_t{1}, omega, uint_t{0} ) <<
                               "\n   - top velocity: " << topVelocity );
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
@@ -427,11 +427,11 @@ int main( int argc, char ** argv )
 
    BlockDataID pdfFieldId1 = lbm::addPdfFieldToStorage( blocks, "pdf field (1)", latticeModel,
                                                        Vector3< real_t >( topVelocity / real_c(2), real_c(0), real_c(0) ),
-                                                       real_t(1), FieldGhostLayers );
+                                                       real_t{1}, FieldGhostLayers );
 
    BlockDataID pdfFieldId2 = lbm::addPdfFieldToStorage( blocks, "pdf field (2)", latticeModel,
                                                        Vector3< real_t >( topVelocity / real_c(2), real_c(0), real_c(0) ),
-                                                       real_t(1), FieldGhostLayers );
+                                                       real_t{1}, FieldGhostLayers );
 
    BlockDataID flagFieldId1 = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field (1)", FieldGhostLayers );
    BlockDataID flagFieldId2 = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field (2)", FieldGhostLayers );
@@ -444,7 +444,7 @@ int main( int argc, char ** argv )
                                                                                  "boundary handling (2)" );
    setFlags( blocks, boundaryHandlingId2);
 
-   uint_t timeSteps = shortrun ? uint_t(2) : uint_t(101);
+   uint_t timeSteps = shortrun ? uint_t{2} : uint_t{101};
       
    SweepTimeloop timeloop( blocks->getBlockStorage(), timeSteps );
    
@@ -462,7 +462,7 @@ int main( int argc, char ** argv )
    timeloop.addFuncAfterTimeStep( EqualityChecker( blocks, pdfFieldId1, pdfFieldId2 ), "equivalence checker" );
 
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >( blocks, pdfFieldId1, flagFieldId1, Fluid_Flag,
-                                                                                                                                  uint_t(1), false, true ) ),
+                                                                                                                                  uint_t{1}, false, true ) ),
                                   "LBM stability check" );
 
 #ifdef TEST_USES_VTK_OUTPUT
@@ -474,7 +474,7 @@ int main( int argc, char ** argv )
 
 #ifdef TEST_USES_VTK_OUTPUT
    vtk::writeDomainDecomposition( blocks, "domain_decomposition" );
-   field::createVTKOutput< FlagField_T >( flagFieldId1, *blocks, "flag_field", uint_t(1), uint_t(1), false )();
+   field::createVTKOutput< FlagField_T >( flagFieldId1, *blocks, "flag_field", uint_t{1}, uint_t{1}, false )();
 #endif
 
    WcTimingPool timeloopTiming;

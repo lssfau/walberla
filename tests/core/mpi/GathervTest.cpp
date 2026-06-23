@@ -95,7 +95,7 @@ void runTestGatherv( int recvRank )
       for( int i = 0; i != numProcesses; ++i )
       {
          rBuffer >> vRecv;
-         WALBERLA_CHECK_EQUAL( vRecv.size(), ( i % 2 == 0 ) ? uint_t(3) : uint_t(2) );
+         WALBERLA_CHECK_EQUAL( vRecv.size(), ( i % 2 == 0 ) ? uint_t{3} : uint_t{2} );
          WALBERLA_CHECK_EQUAL( vRecv[0], 2 * i );
          WALBERLA_CHECK_EQUAL( vRecv[1], 2 * i + 1 );
          if( i % 2 == 0 )
@@ -157,7 +157,7 @@ void runTestAllGatherv()
    for( int i = 0; i != numProcesses; ++i )
    {
       rBuffer >> vRecv;
-      WALBERLA_CHECK_EQUAL( vRecv.size(), ( i % 2 == 0 ) ? uint_t(3) : uint_t(2) );
+      WALBERLA_CHECK_EQUAL( vRecv.size(), ( i % 2 == 0 ) ? uint_t{3} : uint_t{2} );
       WALBERLA_CHECK_EQUAL( vRecv[0], 2 * i );
       WALBERLA_CHECK_EQUAL( vRecv[1], 2 * i + 1 );
       if( i % 2 == 0 )

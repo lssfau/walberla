@@ -52,7 +52,7 @@ real_t getDensityAndMomentumDensity( Vector3< real_t > & momentumDensity, const 
    momentumDensity[0] = firstPdf * real_c(d.cx());
    momentumDensity[1] = firstPdf * real_c(d.cy());
    momentumDensity[2] = firstPdf * real_c(d.cz());
-   real_t rho =  firstPdf + ( ( LatticeModel_T::compressible ) ? real_t(0.0) : real_t(1.0) );
+   real_t rho =  firstPdf + ( ( LatticeModel_T::compressible ) ? real_t{0.0} : real_t{1.0} );
 
    ++d;
 
@@ -87,7 +87,7 @@ real_t getDensityAndMomentumDensity( Vector3< real_t > & momentumDensity, const 
    momentumDensity[0] = firstPdf * real_c(d.cx());
    momentumDensity[1] = firstPdf * real_c(d.cy());
    momentumDensity[2] = firstPdf * real_c(d.cz());
-   real_t rho =  firstPdf + ( ( LatticeModel_T::compressible ) ? real_t(0.0) : real_t(1.0) );
+   real_t rho =  firstPdf + ( ( LatticeModel_T::compressible ) ? real_t{0.0} : real_t{1.0} );
 
    ++d;
 
@@ -118,7 +118,7 @@ real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, c
    momentumDensity[1] = it[ Stencil::idx[N] ] + it[ Stencil::idx[NW] ] + it[ Stencil::idx[TN] ] + it[ Stencil::idx[BN] ];
    momentumDensity[2] = it[ Stencil::idx[T] ] + it[ Stencil::idx[TS] ] + it[ Stencil::idx[TW] ];
 
-   const real_t rho = ( ( LatticeModel_T::compressible ) ? real_t(0.0) : real_t(1.0) ) +
+   const real_t rho = ( ( LatticeModel_T::compressible ) ? real_t{0.0} : real_t{1.0} ) +
                       it[ Stencil::idx[C]  ] + it[ Stencil::idx[S]  ] + it[ Stencil::idx[W]  ] + it[ Stencil::idx[B]  ] + it[ Stencil::idx[SW] ] +
                       it[ Stencil::idx[BS] ] + it[ Stencil::idx[BW] ] + momentumDensity[0] + momentumDensity[1] + momentumDensity[2];
 
@@ -148,7 +148,7 @@ real_t getDensityAndMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, c
                         pdf.getF( &xyz0, Stencil::idx[BN] );
    momentumDensity[2] = pdf.getF( &xyz0, Stencil::idx[T]  ) + pdf.getF( &xyz0, Stencil::idx[TS] ) + pdf.getF( &xyz0, Stencil::idx[TW] );
 
-   const real_t rho = ( ( LatticeModel_T::compressible ) ? real_t(0.0) : real_t(1.0) ) +
+   const real_t rho = ( ( LatticeModel_T::compressible ) ? real_t{0.0} : real_t{1.0} ) +
                       pdf.getF( &xyz0, Stencil::idx[C]  ) + pdf.getF( &xyz0, Stencil::idx[S]  ) + pdf.getF( &xyz0, Stencil::idx[W]  ) +
                       pdf.getF( &xyz0, Stencil::idx[B]  ) + pdf.getF( &xyz0, Stencil::idx[SW] ) + pdf.getF( &xyz0, Stencil::idx[BS] ) +
                       pdf.getF( &xyz0, Stencil::idx[BW] ) + momentumDensity[0] + momentumDensity[1] + momentumDensity[2];

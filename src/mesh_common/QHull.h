@@ -167,7 +167,7 @@ public:
    std::vector< Attributes > getAttributes() const override 
    {
       std::vector< Attributes > attributes; 
-      attributes.emplace_back("Int32", "index", uint_t(1) );
+      attributes.emplace_back("Int32", "index", uint_t{1} );
       return attributes;
    }
 
@@ -289,7 +289,7 @@ template< typename MeshType >
 void QHull<MeshType>::createInitialSimplex()
 {
    // Find extreme points on coordinate axis
-   std::vector< Point > ep( size_t(6),  pointCloud_.front() );
+   std::vector< Point > ep( size_t{6},  pointCloud_.front() );
    for(const auto & p : pointCloud_)
    {
       if(p[0] < ep[0][0])

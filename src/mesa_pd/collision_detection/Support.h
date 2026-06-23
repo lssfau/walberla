@@ -56,7 +56,7 @@ inline
 Vec3 Support::support( Vec3 d ) const
 {
    auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
+   if (math::equal(len, real_t{0}))
       return Vec3(0,0,0);
 
    d = rot_.getMatrix().getTranspose() * d.getNormalized(); //vectorFromWFtoBF

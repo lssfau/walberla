@@ -59,7 +59,7 @@ class DetectWettingSweep
    using vector_t = typename std::remove_const_t< typename VectorField_T::value_type >;
 
    // restrict stencil because surface continuation in corner directions is not meaningful
-   using WettingStencil_T = typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q19 >;
+   using WettingStencil_T = typename std::conditional_t< Stencil_T::D == uint_t{2}, stencil::D2Q9, stencil::D3Q19 >;
 
  public:
    DetectWettingSweep(BlockDataID boundaryHandling, const FlagInfo< FlagField_T >& flagInfo,

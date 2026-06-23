@@ -75,7 +75,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2]) );
-         u->get( cell ) = math::realRandom( real_t(-10), real_t(10) );
+         u->get( cell ) = math::realRandom( real_t{-10}, real_t{10} );
       }
    }
     
@@ -144,8 +144,8 @@ void initURect( const shared_ptr< StructuredBlockStorage > & blocks, const Block
    WALBERLA_LOG_RESULT_ON_ROOT("Cuboid size: " << cuboidSize[0] << ", "  << cuboidSize[1] << ", "  << cuboidSize[2] );
 
 
-   AABB cuboidAABB( real_t(0.5)*(real_c(globalNumCells[0]) - cuboidSize[0]), real_t(0.5)*(real_c(globalNumCells[1]) - cuboidSize[1]), real_t(0.5)*(real_c(globalNumCells[2]) - cuboidSize[2]),
-                    real_t(0.5)*(real_c(globalNumCells[0]) + cuboidSize[0]), real_t(0.5)*(real_c(globalNumCells[1]) + cuboidSize[1]), real_t(0.5)*(real_c(globalNumCells[2]) + cuboidSize[2])
+   AABB cuboidAABB( real_t{0.5}*(real_c(globalNumCells[0]) - cuboidSize[0]), real_t{0.5}*(real_c(globalNumCells[1]) - cuboidSize[1]), real_t{0.5}*(real_c(globalNumCells[2]) - cuboidSize[2]),
+                    real_t{0.5}*(real_c(globalNumCells[0]) + cuboidSize[0]), real_t{0.5}*(real_c(globalNumCells[1]) + cuboidSize[1]), real_t{0.5}*(real_c(globalNumCells[2]) + cuboidSize[2])
    );
 
    pde::Zeroize zeroize_u(blocks, uId);
@@ -250,14 +250,14 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
                                   const uint_t numLvl, const uint_t coarseIters)
 {
 
-   const uint_t xCells = uint_t(xNumInnerCells)/xBlocks;
-   const uint_t yCells = uint_t(yNumInnerCells)/yBlocks;
-   const uint_t zCells = uint_t(zNumInnerCells)/zBlocks;
+   const uint_t xCells = static_cast< uint_t >(xNumInnerCells)/xBlocks;
+   const uint_t yCells = static_cast< uint_t >(yNumInnerCells)/yBlocks;
+   const uint_t zCells = static_cast< uint_t >(zNumInnerCells)/zBlocks;
 
    const real_t dx = xDomainSize / real_c( xBlocks * xCells );
    const real_t dy = yDomainSize / real_c( yBlocks * yCells );
    const real_t dz = zDomainSize / real_c( zBlocks * zCells );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0), real_t(0), real_t(0),
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t{0}, real_t{0}, real_t{0},
                                                                   xDomainSize, yDomainSize, zDomainSize ),
                                                       xBlocks, yBlocks, zBlocks,    // number of blocks
                                                       xCells, yCells, zCells,       // number of cells per block
@@ -267,23 +267,23 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
 
    WALBERLA_LOG_RESULT_ON_ROOT("Discretization dx: " << dx << ", " << dy << ", " << dz);
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t{0}, field::fzyx, uint_t{1} );
 
    initU(blocks, uId);
    // initURect( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t{0}, field::fzyx, uint_t{1} );
 
-   SweepTimeloop timeloop( blocks, uint_t(1) );
+   SweepTimeloop timeloop( blocks, uint_t{1} );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(2) / ( blocks->dz() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::T ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::B ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t{2} / ( blocks->dx() * blocks->dx() ) + real_t{2} / ( blocks->dy() * blocks->dy() ) + real_t{2} / ( blocks->dz() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::N ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::T ] ] = real_t{-1} / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::B ] ] = real_t{-1} / ( blocks->dx() * blocks->dz() );
 
    for (uint_t i = 0; i < Stencil_T::Size; ++i)
       WALBERLA_LOG_RESULT_ON_ROOT("Weights on finest level (" << i << ") = " << weights[i] );
@@ -297,7 +297,7 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
    real_t initialResidualNorm = residualNorm();
    WALBERLA_LOG_RESULT_ON_ROOT("Initial residual norm " << initialResidualNorm);
 
-   auto solver = walberla::make_shared< pde::VCycles< Stencil_T > >( blocks, uId, fId, weights, uint_t( 20 ),                                         // iterations
+   auto solver = walberla::make_shared< pde::VCycles< Stencil_T > >( blocks, uId, fId, weights, uint_t{ 20 },                                         // iterations
                                                                      numLvl,                                                                          // levels
                                                                      3, 3, coarseIters,                                                               // pre-smoothing, post-smoothing, coarse-grid iterations
                                                                      pde::ResidualNorm< Stencil_T >( blocks->getBlockStorage(), uId, fId, weights ),  // residual norm functor
@@ -311,7 +311,7 @@ real_t runConvergenceConstStencil(const real_t xDomainSize, const real_t yDomain
    for (uint_t i = 1; i < convrate.size(); ++i)
    {
       WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-      WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+      WALBERLA_CHECK_LESS(convrate[i], real_t{0.1});
    }
 
    // computing average convergence rate of last few V-cycles
@@ -381,15 +381,15 @@ int main( int argc, char** argv )
    mpi::Environment env( argc, argv );
 
    const uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
-   if( processes != uint_t(1) && processes != uint_t(8) )
+   if( processes != uint_t{1} && processes != uint_t{8} )
       WALBERLA_ABORT( "The number of processes must be equal to 1 or 8!" );
 
    logging::Logging::printHeaderOnStream();
    WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
-   const uint_t xBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t zBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
+   const uint_t xBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t yBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t zBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
 
    // Limit of relative deviation of convergence rates
    const real_t relDevCR_Limit = real_c(0.16);

@@ -67,7 +67,7 @@ class SurfaceDynamicsHandler
 
    // communication in corner directions (D2Q9/D3Q27) is required for all fields but the PDF field
    using CommunicationStencil_T =
-      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
    using CommunicationCorner_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
    using FreeSurfaceBoundaryHandling_T = FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >;
@@ -110,7 +110,7 @@ class SurfaceDynamicsHandler
             field::addToStorage< ScalarField_T >(blockForest_, "Excess mass", real_c(0), field::fzyx, uint_c(1));
       }
 
-      if (LatticeModel_T::Stencil::D == uint_t(2))
+      if (LatticeModel_T::Stencil::D == uint_t{2})
       {
          WALBERLA_LOG_INFO_ON_ROOT(
             "IMPORTANT REMARK: You are using a D2Q9 stencil in SurfaceDynamicsHandler. In the FSLBM, a D2Q9 setup is "
@@ -208,7 +208,7 @@ class SurfaceDynamicsHandler
           public:
             CollideSweep(const typename LatticeModel_T::Sweep& sweep) : sweep_(sweep) {}
 
-            void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0))
+            void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0})
             {
                sweep_.collide(block, numberOfGhostLayersToInclude);
             }

@@ -218,7 +218,7 @@ int main( int argc, char **argv )
         auto numProcesses = mpi::MPIManager::instance()->numProcesses();
         auto processes = math::getFactors3D( uint_c( numProcesses ), domainWeights );
         auto blockDecomposition = math::getFactors3D( uint_c( numProcesses ) * blocksPerProcess, domainWeights );
-        auto aabb = AABB( real_t( 0 ), real_t( 0 ), real_t( 0 ),
+        auto aabb = AABB( real_t{ 0 }, real_t{ 0 }, real_t{ 0 },
                           real_c( cellsPerBlock[0] * processes[0] * blocksPerProcess ),
                           real_c( cellsPerBlock[1] * processes[1] * blocksPerProcess ),
                           real_c( cellsPerBlock[2] * processes[2] * blocksPerProcess ));
@@ -290,7 +290,7 @@ int main( int argc, char **argv )
         const uint_t minIterations = runCfg.getParameter< uint_t >( "minIterations", 2 );
         const uint_t maxIterations = runCfg.getParameter< uint_t >( "maxIterations", 100 );
 
-        const real_t timeForBenchmark = runCfg.getParameter< real_t >( "timeForBenchmark", real_t(-1.0) );
+        const real_t timeForBenchmark = runCfg.getParameter< real_t >( "timeForBenchmark", real_t{-1.0} );
         const uint_t outerIterations = runCfg.getParameter< uint_t >( "outerIterations", 2 );
 
         const std::string databaseFile = runCfg.getParameter< std::string >( "databaseFile", "FieldCommunication.sqlite" );

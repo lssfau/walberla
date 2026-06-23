@@ -134,7 +134,7 @@ namespace geometry {
       /*! \name Mesh Operations */
       //@{
       void   merge(const TriangleMesh & other, const Vector3<real_t> & offset = Vector3<real_t>(0.0) );
-      size_t removeDuplicateVertices( real_t tolerance = real_t(1e-4) );
+      size_t removeDuplicateVertices( real_t tolerance = real_t{1e-4} );
       void   translate( const Vector3<real_t> & offset );
       void   scale( real_t scaleFactor ) { scale( Vector3<real_t>( scaleFactor, scaleFactor, scaleFactor ) ); }
       void   scale( const Vector3<real_t> & scaleFactors );

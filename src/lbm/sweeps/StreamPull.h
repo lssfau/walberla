@@ -53,12 +53,12 @@ struct StreamPullEverything // streaming performed for all cells
    using PdfField_T = PdfField<LatticeModel_T>;
    using Stencil_T = typename LatticeModel_T::Stencil;
 
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > );
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > );
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > );
 };
 
@@ -84,7 +84,7 @@ void StreamPullEverything< LatticeModel_T >::execute( PdfField_T * src, PdfField
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ
@@ -127,7 +127,7 @@ requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > )
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ
@@ -179,7 +179,7 @@ requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > )
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ
@@ -241,7 +241,7 @@ requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > )
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ
@@ -299,27 +299,27 @@ struct StreamPull // streaming (stream pull) performed only for cells selected b
    using Stencil_T = typename LatticeModel_T::Stencil;
 
    template< typename Filter_T >
-   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
    template< typename Filter_T >
-   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > );
    template< typename Filter_T >
-   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > );
    template< typename Filter_T >
-   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > );
 
    static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, walberla::field::DefaultEvaluationFilter & filter,
-                               const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+                               const uint_t numberOfGhostLayersToInclude = uint_t{0} );
    static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, walberla::field::DefaultEvaluationFilter & filter,
-                               const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+                               const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D2Q9 > );
    static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, walberla::field::DefaultEvaluationFilter & filter,
-                               const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+                               const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19 > );
    static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, walberla::field::DefaultEvaluationFilter & filter,
-                               const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+                               const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q27 > );
 
    static inline void execute( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z );

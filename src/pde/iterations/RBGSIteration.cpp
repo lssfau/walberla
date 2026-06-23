@@ -34,10 +34,10 @@ void RBGSIteration::operator()()
 {
    WALBERLA_LOG_PROGRESS_ON_ROOT( "Starting red-black Gauss-Seidel iteration with a maximum number of " << iterations_ << " iterations" );
 
-   iterationsPerformed_ = uint_t(0);
+   iterationsPerformed_ = uint_t{0};
    thresholdReached_ = false;
 
-   uint_t i( uint_t(0) );
+   uint_t i( uint_t{0} );
    while( i < iterations_ )
    {
       if( boundary_ )
@@ -54,9 +54,9 @@ void RBGSIteration::operator()()
       for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
          blackUpdate_( block.get() );
 
-      if( residualNormThreshold_ > real_t(0) && residualCheckFrequency_ > uint_t(0) )
+      if( residualNormThreshold_ > real_t{0} && residualCheckFrequency_ > uint_t{0} )
       {
-         if( (i % residualCheckFrequency_) == uint_t(0) )
+         if( (i % residualCheckFrequency_) == uint_t{0} )
          {
             if( boundary_ )
                boundary_();

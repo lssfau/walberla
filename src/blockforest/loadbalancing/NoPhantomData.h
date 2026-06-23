@@ -32,7 +32,7 @@ class NoPhantomData
 {
 public:
    using weight_t = uint8_t;
-   weight_t weight() const { return uint8_t(1); }
+   weight_t weight() const { return uint8_t{1}; }
 };
 
 

@@ -88,14 +88,14 @@ void IntegratedVDWContact::operator()(const size_t p_idx1,
    Vec3 moment21(0); // Total torque 21
 
    constexpr int Np = 5; // Number of integration points over each axis
-   constexpr real_t Npinv = 1.0_r / real_t(Np);
+   constexpr real_t Npinv = 1.0_r / static_cast< real_t >(Np);
    for (int i = 0; i < Np; ++i) // integral dl1
    {
       for (int j = 0; j < Np; ++j) // integral dl2
       {
          // Levers
-         Vec3 l1 = (-0.5_r * T + (0.5_r + real_t(i)) * T * Npinv) * b1;
-         Vec3 l2 = (-0.5_r * T + (0.5_r + real_t(j)) * T * Npinv) * b2;
+         Vec3 l1 = (-0.5_r * T + (0.5_r + static_cast< real_t >(i)) * T * Npinv) * b1;
+         Vec3 l2 = (-0.5_r * T + (0.5_r + static_cast< real_t >(j)) * T * Npinv) * b2;
 
          /// radius vector between dl1 and dl2
          Vec3 R12 = (O2 + l2) - (O1 + l1);

@@ -47,7 +47,7 @@ public:
 
    PdfField( const uint_t _xSize, const uint_t _ySize, const uint_t _zSize,
             const LatticeStorageSpecification_T & storageSpecification,
-             const uint_t ghostLayers = uint_t(1), const field::Layout & _layout = field::zyxf,
+             const uint_t ghostLayers = uint_t{1}, const field::Layout & _layout = field::zyxf,
              const shared_ptr< field::FieldAllocator<value_type> > & alloc = shared_ptr< field::FieldAllocator<value_type> >() );
 
    ~PdfField() override = default;

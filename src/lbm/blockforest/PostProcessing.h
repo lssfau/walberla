@@ -103,13 +103,13 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
             WALBERLA_ASSERT_NOT_NULLPTR( phantom );
             if( phantom->sourceBlockIsLarger() )
             {
-               WALBERLA_ASSERT_EQUAL( interval.xSize() & uint_t(1), uint_t(0) );
-               WALBERLA_ASSERT_EQUAL( interval.ySize() & uint_t(1), uint_t(0) );
-               WALBERLA_ASSERT( Stencil_T::D == uint_t(2) || ( interval.zSize() & uint_t(1) ) == uint_t(0) );
+               WALBERLA_ASSERT_EQUAL( interval.xSize() & uint_t{1}, uint_t{0} );
+               WALBERLA_ASSERT_EQUAL( interval.ySize() & uint_t{1}, uint_t{0} );
+               WALBERLA_ASSERT( Stencil_T::D == uint_t{2} || ( interval.zSize() & uint_t{1} ) == uint_t{0} );
 
-               const uint_t cxs = interval.xSize() / uint_t(2);
-               const uint_t cys = interval.ySize() / uint_t(2);
-               const uint_t czs = ( Stencil_T::D == uint_t(2) ) ? uint_t(1) : ( interval.zSize() / uint_t(2) );
+               const uint_t cxs = interval.xSize() / uint_t{2};
+               const uint_t cys = interval.ySize() / uint_t{2};
+               const uint_t czs = ( Stencil_T::D == uint_t{2} ) ? uint_t{1} : ( interval.zSize() / uint_t{2} );
 
                field::Field< typename PdfField_T::value_type, PdfField_T::F_SIZE > coarse( cxs, cys, czs, pdfField->layout() );
 
@@ -117,26 +117,26 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( cInterval,
 
-                  const cell_idx_t fx = x * cell_idx_t(2);
-                  const cell_idx_t fy = y * cell_idx_t(2);
-                  const cell_idx_t fz = z * cell_idx_t(2);
+                  const cell_idx_t fx = x * cell_idx_t{2};
+                  const cell_idx_t fy = y * cell_idx_t{2};
+                  const cell_idx_t fz = z * cell_idx_t{2};
 
-                  for( uint_t f = uint_t(0); f != PdfField_T::F_SIZE; ++f )
+                  for( uint_t f = uint_t{0}; f != PdfField_T::F_SIZE; ++f )
                      coarse(x,y,z,f) = pdfField->get(fx,fy,fz,f);
                )
 
                WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( cInterval,
 
-                  const cell_idx_t fx = x * cell_idx_t(2);
-                  const cell_idx_t fy = y * cell_idx_t(2);
-                  const cell_idx_t fz = z * cell_idx_t(2);
+                  const cell_idx_t fx = x * cell_idx_t{2};
+                  const cell_idx_t fy = y * cell_idx_t{2};
+                  const cell_idx_t fz = z * cell_idx_t{2};
 
-                  const cell_idx_t one = cell_idx_t(1);
+                  const cell_idx_t one = cell_idx_t{1};
 
-                  if( markerField->get(fx,fy,fz) != uint8_t(0) )
+                  if( markerField->get(fx,fy,fz) != uint8_t{0} )
                   {
                      if( filter_(fx,fy,fz) && filter_(fx+one,fy,fz) && filter_(fx,fy+one,fz) && filter_(fx+one,fy+one,fz) &&
-                         ( Stencil_T::D == uint_t(2) ||
+                         ( Stencil_T::D == uint_t{2} ||
                            ( filter_(fx,fy,fz+one) && filter_(fx+one,fy,fz+one) && filter_(fx,fy+one,fz+one) && filter_(fx+one,fy+one,fz+one) ) ) )
                      {
                         Cell min[3];
@@ -158,8 +158,8 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                            fmax[i] = max[i];
                            for( int j = 0; j != 3; ++j )
                            {
-                              fmin[i][j] *= cell_idx_t(2);
-                              fmax[i][j] *= cell_idx_t(2);
+                              fmin[i][j] *= cell_idx_t{2};
+                              fmax[i][j] *= cell_idx_t{2};
                            }
                         }
 
@@ -168,22 +168,22 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                            WALBERLA_ASSERT( !math::isnan( coarse(x,y,z,f) ) );
                            const auto v = coarse(x,y,z,f);
 
-                           Vector3< real_t > grad( real_t(0) );
+                           Vector3< real_t > grad( real_t{0} );
 
                            for( uint_t i = 0; i < Stencil_T::D; ++i )
                            {
-                              if( interval.contains( fmax[i] ) && markerField->get( fmax[i] ) != uint8_t(0) )
+                              if( interval.contains( fmax[i] ) && markerField->get( fmax[i] ) != uint8_t{0} )
                               {
-                                 if( interval.contains( fmin[i] ) && markerField->get( fmin[i] ) != uint8_t(0) )
+                                 if( interval.contains( fmin[i] ) && markerField->get( fmin[i] ) != uint8_t{0} )
                                  {
-                                    grad[i] = real_t(0.5) * ( coarse( max[i], f ) - coarse( min[i], f ) );
+                                    grad[i] = real_t{0.5} * ( coarse( max[i], f ) - coarse( min[i], f ) );
                                  }
                                  else
                                  {
                                     grad[i] = coarse( max[i], f ) - v;
                                  }
                               }
-                              else if( interval.contains( fmin[i] ) && markerField->get( fmin[i] ) != uint8_t(0) )
+                              else if( interval.contains( fmin[i] ) && markerField->get( fmin[i] ) != uint8_t{0} )
                               {
                                  grad[i] = v - coarse( min[i], f );
                               }
@@ -201,7 +201,7 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                            pdfField->get( xx, fy, fz , f ) = v + ( weights[4][0] * grad[0] + weights[4][1] * grad[1] + weights[4][2] * grad[2] );
                            pdfField->get( xx, yy, fz , f ) = v + ( weights[6][0] * grad[0] + weights[6][1] * grad[1] + weights[6][2] * grad[2] );
 
-                           if( Stencil_T::D == uint_t(3) )
+                           if( Stencil_T::D == uint_t{3} )
                            {
                               const auto zz = fz + one;
                               pdfField->get( fx, fy, zz, f ) = v + ( weights[1][0] * grad[0] + weights[1][1] * grad[1] + weights[1][2] * grad[2] );
@@ -215,15 +215,15 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                   }
                   else
                   {
-                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy,    fz    ), uint8_t(0) );
-                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy+one,fz    ), uint8_t(0) );
-                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy+one,fz    ), uint8_t(0) );
-                     if( Stencil_T::D != uint_t(2) )
+                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy,    fz    ), uint8_t{0} );
+                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy+one,fz    ), uint8_t{0} );
+                     WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy+one,fz    ), uint8_t{0} );
+                     if( Stencil_T::D != uint_t{2} )
                      {
-                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy,    fz+one), uint8_t(0) );
-                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy,    fz+one), uint8_t(0) );
-                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy+one,fz+one), uint8_t(0) );
-                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy+one,fz+one), uint8_t(0) );
+                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy,    fz+one), uint8_t{0} );
+                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy,    fz+one), uint8_t{0} );
+                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx,    fy+one,fz+one), uint8_t{0} );
+                        WALBERLA_ASSERT_UNEQUAL( markerField->get(fx+one,fy+one,fz+one), uint8_t{0} );
                      }
                   }
                )
@@ -236,7 +236,7 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                if( filter_(x,y,z) )
                {
-                  if( markerField->get(x,y,z) == uint8_t(0) )
+                  if( markerField->get(x,y,z) == uint8_t{0} )
                   {
                      bool reconstructed( false );
 
@@ -248,9 +248,9 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                         if( interval.contains( nx, ny, nz ) )
                         {
-                           if( filter_( nx, ny, nz ) && (markerField->get( nx, ny, nz ) != uint8_t(0)) )
+                           if( filter_( nx, ny, nz ) && (markerField->get( nx, ny, nz ) != uint8_t{0}) )
                            {
-                              for( uint_t f = uint_t(0); f != pdfField->fSize(); ++f )
+                              for( uint_t f = uint_t{0}; f != pdfField->fSize(); ++f )
                                  pdfField->get(x,y,z,f) = pdfField->get(nx,ny,nz,f);
                               reconstructed = true;
                            }
@@ -262,8 +262,8 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                      /*
                      Vector3<real_t> velocity;
-                     real_t density( real_t(0) );
-                     real_t count( real_t(0) );
+                     real_t density( real_t{0} );
+                     real_t count( real_t{0} );
 
                      for( auto it = NeighborsStencil_T::begin(); it != NeighborsStencil_T::end(); ++it )
                      {
@@ -273,25 +273,25 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
 
                         if( interval.contains( nx, ny, nz ) )
                         {
-                           if( filter_( nx, ny, nz ) && (markerField->get( nx, ny, nz ) != uint8_t(0)) )
+                           if( filter_( nx, ny, nz ) && (markerField->get( nx, ny, nz ) != uint8_t{0}) )
                            {
                               Vector3<real_t> vel;
                               density += pdfField->getDensityAndVelocity(vel,x,y,z);
                               velocity += vel;
-                              count += real_t(1);
+                              count += real_t{1};
                            }
                         }
                      }
                      
-                     if( count > real_t(0) )
+                     if( count > real_t{0} )
                      {
-                        const real_t factor = real_t(1) / count;
+                        const real_t factor = real_t{1} / count;
                         velocity *= factor;
                         density *= factor;
                      }
                      else
                      {
-                        density = real_t(1);
+                        density = real_t{1};
                      }
 
                      pdfField->setDensityAndVelocity(x,y,z,velocity,density);
@@ -300,7 +300,7 @@ void PostProcessing< LatticeModel_T, Filter_T >::operator()( BlockForest & fores
                }
             )
 
-            markerField->resize( uint_t(0), uint_t(0), uint_t(0) );
+            markerField->resize( uint_t{0}, uint_t{0}, uint_t{0} );
          }
       }
    }
@@ -352,7 +352,7 @@ void MarkerFieldGenerator< LatticeModel_T, Filter_T >::operator()( BlockForest &
                for( cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) {
                   for( cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x )
                   {
-                     markerField->get(x,y,z) = filter_(x,y,z) ? uint8_t(1) : uint8_t(0);
+                     markerField->get(x,y,z) = filter_(x,y,z) ? uint8_t{1} : uint8_t{0};
                   }
                }
             }
@@ -398,16 +398,16 @@ public:
 
 protected:
 
-   internal::MarkerField_T * allocate() { return new internal::MarkerField_T( uint_t(0), uint_t(0), uint_t(0) ); }
+   internal::MarkerField_T * allocate() { return new internal::MarkerField_T( uint_t{0}, uint_t{0}, uint_t{0} ); }
 
    void sizeCheck( const uint_t xSize, const uint_t ySize, const uint_t zSize )
    {
-      WALBERLA_CHECK( (xSize & uint_t(1)) == uint_t(0), "The x-size of your field must be divisible by 2." );
-      WALBERLA_CHECK( (ySize & uint_t(1)) == uint_t(0), "The y-size of your field must be divisible by 2." );
-      if( LatticeModel_T::Stencil::D == uint_t(2) )
-      { WALBERLA_CHECK( zSize == uint_t(1), "The z-size of your field must be equal to 1 (pseudo 2D mode)." ); }
+      WALBERLA_CHECK( (xSize & uint_t{1}) == uint_t{0}, "The x-size of your field must be divisible by 2." );
+      WALBERLA_CHECK( (ySize & uint_t{1}) == uint_t{0}, "The y-size of your field must be divisible by 2." );
+      if( LatticeModel_T::Stencil::D == uint_t{2} )
+      { WALBERLA_CHECK( zSize == uint_t{1}, "The z-size of your field must be equal to 1 (pseudo 2D mode)." ); }
       else
-      { WALBERLA_CHECK( (zSize & uint_t(1)) == uint_t(0), "The z-size of your field must be divisible by 2." ); }
+      { WALBERLA_CHECK( (zSize & uint_t{1}) == uint_t{0}, "The z-size of your field must be divisible by 2." ); }
    }
 
    BlockDataID pdfFieldId_;
@@ -461,24 +461,24 @@ void MarkerData< LatticeModel_T, Filter_T >::serializeCoarseToFine( Block * cons
    sizeCheck( xSize, ySize, zSize );
    
 #ifndef NDEBUG
-   buffer << child << ( xSize / uint_t(2) ) << ( ySize / uint_t(2) ) << ( (LatticeModel_T::Stencil::D == uint_t(3)) ? ( zSize / uint_t(2) ) : zSize );
+   buffer << child << ( xSize / uint_t{2} ) << ( ySize / uint_t{2} ) << ( (LatticeModel_T::Stencil::D == uint_t{3}) ? ( zSize / uint_t{2} ) : zSize );
 #endif   
 
-   std::vector<bool> filter( (LatticeModel_T::Stencil::D == uint_t(3)) ? ((xSize * ySize * zSize) / uint_t(8)) : ((xSize * ySize * zSize) / uint_t(4)) );
+   std::vector<bool> filter( (LatticeModel_T::Stencil::D == uint_t{3}) ? ((xSize * ySize * zSize) / uint_t{8}) : ((xSize * ySize * zSize) / uint_t{4}) );
 
    Filter_T localFilter( filter_ );
    localFilter( *block );
 
-   uint_t i( uint_t(0) );
-   const cell_idx_t zBegin = (LatticeModel_T::Stencil::D == uint_t(3)) ? ( (child & uint_t(4)) ? ( cell_idx_c( zSize ) / cell_idx_t(2) ) : cell_idx_t(0) ) : cell_idx_t(0);
-   const cell_idx_t zEnd = (LatticeModel_T::Stencil::D == uint_t(3)) ? ( (child & uint_t(4)) ? cell_idx_c( zSize ) : ( cell_idx_c( zSize ) / cell_idx_t(2) ) ) : cell_idx_t(1);
+   uint_t i( uint_t{0} );
+   const cell_idx_t zBegin = (LatticeModel_T::Stencil::D == uint_t{3}) ? ( (child & uint_t{4}) ? ( cell_idx_c( zSize ) / cell_idx_t{2} ) : cell_idx_t{0} ) : cell_idx_t{0};
+   const cell_idx_t zEnd = (LatticeModel_T::Stencil::D == uint_t{3}) ? ( (child & uint_t{4}) ? cell_idx_c( zSize ) : ( cell_idx_c( zSize ) / cell_idx_t{2} ) ) : cell_idx_t{1};
    for( cell_idx_t z = zBegin; z < zEnd; ++z )
    {
-      const cell_idx_t yEnd = (child & uint_t(2)) ? cell_idx_c( ySize ) : ( cell_idx_c( ySize ) / cell_idx_t(2) );
-      for( cell_idx_t y = (child & uint_t(2)) ? ( cell_idx_c( ySize ) / cell_idx_t(2) ) : cell_idx_t(0); y < yEnd; ++y )
+      const cell_idx_t yEnd = (child & uint_t{2}) ? cell_idx_c( ySize ) : ( cell_idx_c( ySize ) / cell_idx_t{2} );
+      for( cell_idx_t y = (child & uint_t{2}) ? ( cell_idx_c( ySize ) / cell_idx_t{2} ) : cell_idx_t{0}; y < yEnd; ++y )
       {
-         const cell_idx_t xEnd = (child & uint_t(1)) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t(2) );
-         for( cell_idx_t x = (child & uint_t(1)) ? ( cell_idx_c( xSize ) / cell_idx_t(2) ) : cell_idx_t(0); x < xEnd; ++x )
+         const cell_idx_t xEnd = (child & uint_t{1}) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t{2} );
+         for( cell_idx_t x = (child & uint_t{1}) ? ( cell_idx_c( xSize ) / cell_idx_t{2} ) : cell_idx_t{0}; x < xEnd; ++x )
          {
             WALBERLA_ASSERT_LESS( i, filter.size() );
             filter[i] = localFilter(x,y,z);
@@ -505,29 +505,29 @@ void MarkerData< LatticeModel_T, Filter_T >::serializeFineToCoarse( Block * cons
    sizeCheck( xSize, ySize, zSize );
 
 #ifndef NDEBUG
-   buffer << block->getId().getBranchId() << ( xSize / uint_t(2) ) << ( ySize / uint_t(2) ) << ( (LatticeModel_T::Stencil::D == uint_t(3)) ? ( zSize / uint_t(2) ) : zSize );
+   buffer << block->getId().getBranchId() << ( xSize / uint_t{2} ) << ( ySize / uint_t{2} ) << ( (LatticeModel_T::Stencil::D == uint_t{3}) ? ( zSize / uint_t{2} ) : zSize );
 #endif
 
-   std::vector<bool> filter( (LatticeModel_T::Stencil::D == uint_t(3)) ? ((xSize * ySize * zSize) / uint_t(8)) : ((xSize * ySize * zSize) / uint_t(4)) );
+   std::vector<bool> filter( (LatticeModel_T::Stencil::D == uint_t{3}) ? ((xSize * ySize * zSize) / uint_t{8}) : ((xSize * ySize * zSize) / uint_t{4}) );
 
    Filter_T localFilter( filter_ );
    localFilter( *block );
 
-   uint_t i( uint_t(0) );
-   for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
-      for( cell_idx_t y = cell_idx_t(0); y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
-         for( cell_idx_t x = cell_idx_t(0); x < cell_idx_c( xSize ); x += cell_idx_t(2) )
+   uint_t i( uint_t{0} );
+   for( cell_idx_t z = cell_idx_t{0}; z < cell_idx_c( zSize ); z += cell_idx_t{2} ) {
+      for( cell_idx_t y = cell_idx_t{0}; y < cell_idx_c( ySize ); y += cell_idx_t{2} ) {
+         for( cell_idx_t x = cell_idx_t{0}; x < cell_idx_c( xSize ); x += cell_idx_t{2} )
          {
             bool result = localFilter( x,                 y,                 z                 ) &&
-                          localFilter( x + cell_idx_t(1), y                , z                 ) &&
-                          localFilter( x                , y + cell_idx_t(1), z                 ) &&
-                          localFilter( x + cell_idx_t(1), y + cell_idx_t(1), z                 );
-            if( LatticeModel_T::Stencil::D == uint_t(3) )
+                          localFilter( x + cell_idx_t{1}, y                , z                 ) &&
+                          localFilter( x                , y + cell_idx_t{1}, z                 ) &&
+                          localFilter( x + cell_idx_t{1}, y + cell_idx_t{1}, z                 );
+            if( LatticeModel_T::Stencil::D == uint_t{3} )
             {
-               result = result && localFilter( x                , y                , z + cell_idx_t(1) ) &&
-                                  localFilter( x + cell_idx_t(1), y                , z + cell_idx_t(1) ) &&
-                                  localFilter( x                , y + cell_idx_t(1), z + cell_idx_t(1) ) &&
-                                  localFilter( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1) );
+               result = result && localFilter( x                , y                , z + cell_idx_t{1} ) &&
+                                  localFilter( x + cell_idx_t{1}, y                , z + cell_idx_t{1} ) &&
+                                  localFilter( x                , y + cell_idx_t{1}, z + cell_idx_t{1} ) &&
+                                  localFilter( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1} );
             }
 
             WALBERLA_ASSERT_LESS( i, filter.size() );
@@ -550,9 +550,9 @@ void MarkerData< LatticeModel_T, Filter_T >::deserialize( IBlock * const block, 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
 #ifndef NDEBUG
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
+   uint_t xSender( uint_t{0} );
+   uint_t ySender( uint_t{0} );
+   uint_t zSender( uint_t{0} );
    buffer >> xSender >> ySender >> zSender;
    WALBERLA_ASSERT_EQUAL( xSender, pdfField->xSize() );
    WALBERLA_ASSERT_EQUAL( ySender, pdfField->ySize() );
@@ -569,12 +569,12 @@ void MarkerData< LatticeModel_T, Filter_T >::deserialize( IBlock * const block, 
    if( markerField->xyzSize().empty() )
       markerField->resize( interval.xSize(), interval.ySize(), interval.zSize() );
 
-   uint_t i( uint_t(0) );
+   uint_t i( uint_t{0} );
    for( cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) {
       for( cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) {
          for( cell_idx_t x = interval.xMin(); x <= interval.xMax(); ++x )
          {
-            markerField->get(x,y,z) = filter[i] ? uint8_t(1) : uint8_t(0);
+            markerField->get(x,y,z) = filter[i] ? uint8_t{1} : uint8_t{0};
             ++i;
          }
       }
@@ -595,45 +595,45 @@ void MarkerData< LatticeModel_T, Filter_T >::deserializeCoarseToFine( Block * co
    sizeCheck( xSize, ySize, zSize );
 
 #ifndef NDEBUG
-   uint_t branchId( uint_t(0) );
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
+   uint_t branchId( uint_t{0} );
+   uint_t xSender( uint_t{0} );
+   uint_t ySender( uint_t{0} );
+   uint_t zSender( uint_t{0} );
    buffer >> branchId >> xSender >> ySender >> zSender;
    WALBERLA_ASSERT_EQUAL( branchId, block->getId().getBranchId() );
-   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) );
-   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) );
-   if( LatticeModel_T::Stencil::D == uint_t(3) )
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ); }
+   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t{2} );
+   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t{2} );
+   if( LatticeModel_T::Stencil::D == uint_t{3} )
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t{2} ); }
    else
    { WALBERLA_ASSERT_EQUAL( zSender, zSize ); }
 #endif
 
    std::vector<bool> filter;
    buffer >> filter;
-   WALBERLA_ASSERT_EQUAL( filter.size(), (LatticeModel_T::Stencil::D == uint_t(3)) ? (pdfField->xyzSize().numCells() / uint_t(8)) : (pdfField->xyzSize().numCells() / uint_t(4)) );
+   WALBERLA_ASSERT_EQUAL( filter.size(), (LatticeModel_T::Stencil::D == uint_t{3}) ? (pdfField->xyzSize().numCells() / uint_t{8}) : (pdfField->xyzSize().numCells() / uint_t{4}) );
 
    internal::MarkerField_T * markerField = block->template getData< internal::MarkerField_T >( id );
    if( markerField->xyzSize().empty() )
       markerField->resize( xSize, ySize, zSize );   
 
-   uint_t i( uint_t(0) );
-   for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c( zSize ); z += cell_idx_t(2) ) {
-      for( cell_idx_t y = cell_idx_t(0); y < cell_idx_c( ySize ); y += cell_idx_t(2) ) {
-         for( cell_idx_t x = cell_idx_t(0); x < cell_idx_c( xSize ); x += cell_idx_t(2) )
+   uint_t i( uint_t{0} );
+   for( cell_idx_t z = cell_idx_t{0}; z < cell_idx_c( zSize ); z += cell_idx_t{2} ) {
+      for( cell_idx_t y = cell_idx_t{0}; y < cell_idx_c( ySize ); y += cell_idx_t{2} ) {
+         for( cell_idx_t x = cell_idx_t{0}; x < cell_idx_c( xSize ); x += cell_idx_t{2} )
          {
             WALBERLA_ASSERT_LESS( i, filter.size() );
-            const uint8_t marker = filter[i] ? uint8_t(1) : uint8_t(0);
+            const uint8_t marker = filter[i] ? uint8_t{1} : uint8_t{0};
             markerField->get( x,                 y,                 z                 ) = marker;
-            markerField->get( x + cell_idx_t(1), y                , z                 ) = marker;
-            markerField->get( x                , y + cell_idx_t(1), z                 ) = marker;
-            markerField->get( x + cell_idx_t(1), y + cell_idx_t(1), z                 ) = marker;
-            if( LatticeModel_T::Stencil::D == uint_t(3) )
+            markerField->get( x + cell_idx_t{1}, y                , z                 ) = marker;
+            markerField->get( x                , y + cell_idx_t{1}, z                 ) = marker;
+            markerField->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z                 ) = marker;
+            if( LatticeModel_T::Stencil::D == uint_t{3} )
             {
-               markerField->get( x                , y                , z + cell_idx_t(1) ) = marker;
-               markerField->get( x + cell_idx_t(1), y                , z + cell_idx_t(1) ) = marker;
-               markerField->get( x                , y + cell_idx_t(1), z + cell_idx_t(1) ) = marker;
-               markerField->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1) ) = marker;
+               markerField->get( x                , y                , z + cell_idx_t{1} ) = marker;
+               markerField->get( x + cell_idx_t{1}, y                , z + cell_idx_t{1} ) = marker;
+               markerField->get( x                , y + cell_idx_t{1}, z + cell_idx_t{1} ) = marker;
+               markerField->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1} ) = marker;
             }
             ++i;
          }
@@ -656,41 +656,41 @@ void MarkerData< LatticeModel_T, Filter_T >::deserializeFineToCoarse( Block * co
    sizeCheck( xSize, ySize, zSize );
    
 #ifndef NDEBUG
-   uint_t branchId( uint_t(0) );
-   uint_t xSender( uint_t(0) );
-   uint_t ySender( uint_t(0) );
-   uint_t zSender( uint_t(0) );
+   uint_t branchId( uint_t{0} );
+   uint_t xSender( uint_t{0} );
+   uint_t ySender( uint_t{0} );
+   uint_t zSender( uint_t{0} );
    buffer >> branchId >> xSender >> ySender >> zSender;
    WALBERLA_ASSERT_EQUAL( branchId, child );
-   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t(2) );
-   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t(2) );
-   if( LatticeModel_T::Stencil::D == uint_t(3) )
-   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t(2) ); }
+   WALBERLA_ASSERT_EQUAL( xSender, xSize / uint_t{2} );
+   WALBERLA_ASSERT_EQUAL( ySender, ySize / uint_t{2} );
+   if( LatticeModel_T::Stencil::D == uint_t{3} )
+   { WALBERLA_ASSERT_EQUAL( zSender, zSize / uint_t{2} ); }
    else
    { WALBERLA_ASSERT_EQUAL( zSender, zSize ); }
 #endif
 
    std::vector<bool> filter;
    buffer >> filter;
-   WALBERLA_ASSERT_EQUAL( filter.size(), (LatticeModel_T::Stencil::D == uint_t(3)) ? (pdfField->xyzSize().numCells() / uint_t(8)) : (pdfField->xyzSize().numCells() / uint_t(4)) );
+   WALBERLA_ASSERT_EQUAL( filter.size(), (LatticeModel_T::Stencil::D == uint_t{3}) ? (pdfField->xyzSize().numCells() / uint_t{8}) : (pdfField->xyzSize().numCells() / uint_t{4}) );
    
    internal::MarkerField_T * markerField = block->template getData< internal::MarkerField_T >( id );
    if( markerField->xyzSize().empty() )
       markerField->resize( xSize, ySize, zSize );  
 
-   uint_t i( uint_t(0) );
-   const cell_idx_t zBegin = (LatticeModel_T::Stencil::D == uint_t(3)) ? ((child & uint_t(4)) ? ( cell_idx_c( zSize ) / cell_idx_t(2) ) : cell_idx_t(0)) : cell_idx_t(0);
-   const cell_idx_t zEnd = (LatticeModel_T::Stencil::D == uint_t(3)) ? ((child & uint_t(4)) ? cell_idx_c( zSize ) : ( cell_idx_c( zSize ) / cell_idx_t(2) )) : cell_idx_t(1);
+   uint_t i( uint_t{0} );
+   const cell_idx_t zBegin = (LatticeModel_T::Stencil::D == uint_t{3}) ? ((child & uint_t{4}) ? ( cell_idx_c( zSize ) / cell_idx_t{2} ) : cell_idx_t{0}) : cell_idx_t{0};
+   const cell_idx_t zEnd = (LatticeModel_T::Stencil::D == uint_t{3}) ? ((child & uint_t{4}) ? cell_idx_c( zSize ) : ( cell_idx_c( zSize ) / cell_idx_t{2} )) : cell_idx_t{1};
    for( cell_idx_t z = zBegin; z < zEnd; ++z )
    {
-      const cell_idx_t yEnd = (child & uint_t(2)) ? cell_idx_c( ySize ) : ( cell_idx_c( ySize ) / cell_idx_t(2) );
-      for( cell_idx_t y = (child & uint_t(2)) ? ( cell_idx_c( ySize ) / cell_idx_t(2) ) : cell_idx_t(0); y < yEnd; ++y )
+      const cell_idx_t yEnd = (child & uint_t{2}) ? cell_idx_c( ySize ) : ( cell_idx_c( ySize ) / cell_idx_t{2} );
+      for( cell_idx_t y = (child & uint_t{2}) ? ( cell_idx_c( ySize ) / cell_idx_t{2} ) : cell_idx_t{0}; y < yEnd; ++y )
       {
-         const cell_idx_t xEnd = (child & uint_t(1)) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t(2) );
-         for( cell_idx_t x = (child & uint_t(1)) ? ( cell_idx_c( xSize ) / cell_idx_t(2) ) : cell_idx_t(0); x < xEnd; ++x )
+         const cell_idx_t xEnd = (child & uint_t{1}) ? cell_idx_c( xSize ) : ( cell_idx_c( xSize ) / cell_idx_t{2} );
+         for( cell_idx_t x = (child & uint_t{1}) ? ( cell_idx_c( xSize ) / cell_idx_t{2} ) : cell_idx_t{0}; x < xEnd; ++x )
          {
             WALBERLA_ASSERT_LESS( i, filter.size() );
-            markerField->get(x,y,z) = filter[i] ? uint8_t(1) : uint8_t(0);
+            markerField->get(x,y,z) = filter[i] ? uint8_t{1} : uint8_t{0};
             ++i;
          }
       }

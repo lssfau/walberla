@@ -46,7 +46,7 @@ bool gjkEPAcollideHybrid(Support &geom1, Support &geom2, Vec3& normal, Vec3& con
    // Environments" by Gino van den Bergen.
 
    //1. Run GJK with considerably enlarged objects.
-   real_t margin = real_t(1e-6);
+   real_t margin = real_t{1e-6};
    GJK gjk;
    if(gjk.doGJKmargin(geom1, geom2, margin)){
       //2. If collision is possible perform EPA.
@@ -80,8 +80,8 @@ void runComparisonTest(Support& testSupport, Support& convPoly, Support& box) {
 
    WALBERLA_CHECK(polyCollided == boxCollided);
    if (polyCollided) {
-      auto eps = real_t(1e-3);
-      WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(polyNormal, boxNormal, real_t(1e-2));
+      auto eps = real_t{1e-3};
+      WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(polyNormal, boxNormal, real_t{1e-2});
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(polyContactPoint, boxContactPoint, eps);
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(polyPenetrationDepth, boxPenetrationDepth, eps);
    }
@@ -111,20 +111,20 @@ int main(int argc, char** argv){
    Box box_(Vec3(1));
    Support box(Vec3(0), Rot3(), box_);
 
-   Sphere sphere_(real_t(0.5));
-   Support sphere(Vec3(real_t(0.5),real_t(0.5),real_t(0.9)), Rot3(), sphere_);
+   Sphere sphere_(real_t{0.5});
+   Support sphere(Vec3(real_t{0.5},real_t{0.5},real_t{0.9}), Rot3(), sphere_);
    runComparisonTest(sphere, convPoly, box);
 
    /// Fuzzy Testing
 
-   AABB collisionTestAABB(mesa_pd::Vec3(real_t(-1)), mesa_pd::Vec3(real_t(1)));
+   AABB collisionTestAABB(mesa_pd::Vec3(real_t{-1}), mesa_pd::Vec3(real_t{1}));
    std::mt19937 rng;
 
    WALBERLA_LOG_INFO("Fuzzy ConvexPolyhedron <-> Sphere vs. Box <-> Sphere");
    for(uint_t i = 0; i < 500; ++i) {
       auto rndPoint = collisionTestAABB.randomPoint(rng);
 
-      Sphere fuzzSphere_(real_t(0.5));
+      Sphere fuzzSphere_(real_t{0.5});
       Support fuzzSphere(rndPoint, Rot3(), sphere_);
 
       runComparisonTest(fuzzSphere, convPoly, box);
@@ -135,7 +135,7 @@ int main(int argc, char** argv){
       auto rndPoint = collisionTestAABB.randomPoint(rng);
 
       Ellipsoid el_(rndPoint);
-      Support el(Vec3(real_t(1)), Rot3(), el_);
+      Support el(Vec3(real_t{1}), Rot3(), el_);
 
       el.rot_.rotate(Vec3(math::realRandom(), math::realRandom(), math::realRandom()));
 
@@ -146,7 +146,7 @@ int main(int argc, char** argv){
    for(uint_t i = 0; i < 500; ++i) {
       auto rndPoint = collisionTestAABB.randomPoint(rng);
 
-      Box fuzzBox_(Vec3(real_t(1),real_t(0.5),real_t(0.5)));
+      Box fuzzBox_(Vec3(real_t{1},real_t{0.5},real_t{0.5}));
       Support fuzzBox(rndPoint, Rot3(), fuzzBox_);
 
       fuzzBox.rot_.rotate(Vec3(math::realRandom(), math::realRandom(), math::realRandom()));
@@ -158,7 +158,7 @@ int main(int argc, char** argv){
    for(uint_t i = 0; i < 500; ++i) {
       auto rndPoint = collisionTestAABB.randomPoint(rng);
 
-      Box fuzzBox_(Vec3(real_t(1),real_t(0.5),real_t(0.5)));
+      Box fuzzBox_(Vec3(real_t{1},real_t{0.5},real_t{0.5}));
       Support fuzzBox(rndPoint, Rot3(), fuzzBox_);
 
       // rotate all the things

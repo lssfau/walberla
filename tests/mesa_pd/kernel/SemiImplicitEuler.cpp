@@ -73,7 +73,7 @@ int main( int argc, char ** argv )
                                         0_r, 0_r, 1.23456_r ));
 
    //init kernels
-   const real_t dt = real_t(1);
+   const real_t dt = real_t{1};
    kernel::SemiImplicitEuler integrator( dt );
 
    integrator(0, accessor);

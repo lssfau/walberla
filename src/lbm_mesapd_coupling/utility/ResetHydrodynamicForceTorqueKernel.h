@@ -43,8 +43,8 @@ public:
    {
       static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, ParticleAccessor_T>, "Provide a valid accessor as template");
 
-      ac.setHydrodynamicForce(idx, Vector3<real_t>(real_t(0)));
-      ac.setHydrodynamicTorque(idx, Vector3<real_t>(real_t(0)));
+      ac.setHydrodynamicForce(idx, Vector3<real_t>(real_t{0}));
+      ac.setHydrodynamicTorque(idx, Vector3<real_t>(real_t{0}));
    }
 };
 

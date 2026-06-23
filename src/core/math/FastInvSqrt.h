@@ -43,7 +43,7 @@ namespace math {
    template<unsigned int numIter>
    inline double fastInvSqrt( double y )
    {
-      double yhalf = ( double )0.5 * y;
+      double yhalf = 0.5 * y;
       DoubleAndLongLong u;
       u.asReal = y;
       u.asInt = 0x5fe6ec85e7de30daLL - ( u.asInt >> 1 );

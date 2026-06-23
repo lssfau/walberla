@@ -109,15 +109,15 @@ namespace communication {
                const uint_t dirIdx = Stencil::idx[*dir];
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
 
-               if( senderBlock->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
+               if( senderBlock->getNeighborhoodSectionSize( neighborIdx ) == uint_t{ 0 })
                   continue;
 
-               if( !selectable::isSetSelected( senderBlock->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               if( !selectable::isSetSelected( senderBlock->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                   continue;
 
-               if( senderBlock->neighborExistsLocally( neighborIdx, uint_t(0) ) && useLocalCommunication_ )
+               if( senderBlock->neighborExistsLocally( neighborIdx, uint_t{0} ) && useLocalCommunication_ )
                {
-                  auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
+                  auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t{0} )) );
                   for (auto& pi : packInfos_)
                   {
                      pi->communicateLocal(*dir, senderBlock, receiverBlock, streams_[dirIdx]);
@@ -125,7 +125,7 @@ namespace communication {
                }
                else
                {
-                  auto nProcess = mpi::MPIRank( senderBlock->getNeighborProcess( neighborIdx, uint_t( 0 )));
+                  auto nProcess = mpi::MPIRank( senderBlock->getNeighborProcess( neighborIdx, uint_t{ 0 }));
 
                   for( auto &pi : packInfos_ )
                   {
@@ -240,23 +240,23 @@ namespace communication {
             // skip if block has no neighbors in this direction
             const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
 
-            if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
+            if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t{ 0 })
                continue;
 
             WALBERLA_ASSERT( block->neighborhoodSectionHasEquallySizedBlock( neighborIdx ),
                              "Works for uniform setups only" )
-            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize( neighborIdx ), uint_t( 1 ),
+            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize( neighborIdx ), uint_t{ 1 },
                                    "Works for uniform setups only" )
 
-            const BlockID &nBlockId = block->getNeighborId( neighborIdx, uint_t( 0 ));
+            const BlockID &nBlockId = block->getNeighborId( neighborIdx, uint_t{ 0 });
 
-            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) && useLocalCommunication_ )
+            if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) && useLocalCommunication_ )
                continue;
 
-            auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
+            auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t{ 0 }));
 
             for( auto &pi : packInfos_ )
                receiverInfo[nProcess] += mpi::MPISize( pi->size( *dir, block ));
@@ -284,8 +284,8 @@ namespace communication {
       bufferSystemGPU_.setReceiverInfo( receiverInfo );
 
       for( auto it : receiverInfo ) {
-         bufferSystemCPU_.sendBuffer( it.first ).resize( size_t(it.second) );
-         bufferSystemGPU_.sendBuffer( it.first ).resize( size_t(it.second) );
+         bufferSystemCPU_.sendBuffer( it.first ).resize( static_cast< size_t >(it.second) );
+         bufferSystemGPU_.sendBuffer( it.first ).resize( static_cast< size_t >(it.second) );
       }
 
       forestModificationStamp_ = forest->getBlockForest().getModificationStamp();

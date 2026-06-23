@@ -289,18 +289,18 @@ void UniformBufferedScheme<Stencil>::startCommunication()
          {
             const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
 
-            if( block->getNeighborhoodSectionSize(neighborIdx) == uint_t(0) )
+            if( block->getNeighborhoodSectionSize(neighborIdx) == uint_t{0} )
                continue;
 
             WALBERLA_ASSERT( block->neighborhoodSectionHasEquallySizedBlock(neighborIdx) );
-            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) );
+            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t{1} );
 
-            const BlockID nBlockId = block->getNeighborId( neighborIdx, uint_t(0) );
+            const BlockID nBlockId = block->getNeighborId( neighborIdx, uint_t{0} );
 
-            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) && localMode_ != NO_OPTIMIZATION )
+            if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) && localMode_ != NO_OPTIMIZATION )
             {
                auto neighbor = dynamic_cast< Block * >( forest->getBlock(nBlockId) );
                WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() );
@@ -311,7 +311,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
                   {
                      SendBuffer const buffer;
                      localBuffers_.push_back( buffer );
-                     const uint_t index = uint_c( localBuffers_.size() ) - uint_t(1);
+                     const uint_t index = uint_c( localBuffers_.size() ) - uint_t{1};
 
                      VoidFunction pack = [this, index, pi=packInfo, block, direction = *dir]() {
                         this->localBufferPacking(index, pi, block, direction);
@@ -343,7 +343,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
             }
             else
             {
-               auto nProcess = block->getNeighborProcess( neighborIdx, uint_t(0) );
+               auto nProcess = block->getNeighborProcess( neighborIdx, uint_t{0} );
 
                if( !packInfos_.empty() ){
                   auto writeHeader = [bId=nBlockId, direction = *dir](SendBuffer & buf){

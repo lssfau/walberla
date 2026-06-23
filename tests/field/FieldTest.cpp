@@ -57,7 +57,7 @@ void alignedAllocTest()
 void alignedAllocWithOffsetTest()
 {
    char * p;
-   p = (char*)field::aligned_malloc_with_offset(64 + 2*8,32,8);
+   p = static_cast< char* >(field::aligned_malloc_with_offset(64 + 2*8,32,8));
    WALBERLA_CHECK_EQUAL( ((size_t)p+8) % 16, 0u  );
    field::aligned_free(p);
 }

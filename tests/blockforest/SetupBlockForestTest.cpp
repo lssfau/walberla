@@ -62,7 +62,7 @@ static void refinementSelectionFunctionRandom( SetupBlockForest& forest ) {
    const uint_t max = blocks.size() >> 3;
 
    for( uint_t i = 0; i != max; ++i ) {
-      SetupBlock* const block = blocks[ math::intRandom( uint_t(0), uint_c( blocks.size()-1 ) ) ];
+      SetupBlock* const block = blocks[ math::intRandom( uint_t{0}, uint_c( blocks.size()-1 ) ) ];
       if( block->getLevel() < maxLevel ) block->setMarker( true );
    }
 }
@@ -203,7 +203,7 @@ static void test() {
       real_t zmax = math::realRandom( zmin + real_c(10), real_c(120) );
 
       AABB domain( xmin, ymin, zmin, xmax, ymax, zmax );
-      forest.init( domain, math::intRandom( uint_t(5), uint_t(20) ), math::intRandom( uint_t(5), uint_t(20) ), math::intRandom( uint_t(5), uint_t(20) ),
+      forest.init( domain, math::intRandom( uint_t{5}, uint_t{20} ), math::intRandom( uint_t{5}, uint_t{20} ), math::intRandom( uint_t{5}, uint_t{20} ),
                            math::boolRandom(), math::boolRandom(), math::boolRandom() );
 
       checkNeighborhoodConsistency( forest );
@@ -224,7 +224,7 @@ static void test() {
       real_t zmax = math::realRandom( zmin + real_c(10), real_c(120) );
 
       AABB domain( xmin, ymin, zmin, xmax, ymax, zmax );
-      forest.init( domain, math::intRandom( uint_t(5), uint_t(20) ), math::intRandom( uint_t(5), uint_t(20) ), math::intRandom( uint_t(5), uint_t(20) ),
+      forest.init( domain, math::intRandom( uint_t{5}, uint_t{20} ), math::intRandom( uint_t{5}, uint_t{20} ), math::intRandom( uint_t{5}, uint_t{20} ),
                            math::boolRandom(), math::boolRandom(), math::boolRandom() );
 
       checkNeighborhoodConsistency( forest );

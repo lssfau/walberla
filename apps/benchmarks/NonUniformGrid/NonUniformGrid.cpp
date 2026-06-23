@@ -113,8 +113,8 @@ struct Types
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
 
-const uint_t FieldGhostLayers  = uint_t(4);
-const uint_t BlockForestLevels = uint_t(4);
+const uint_t FieldGhostLayers  = uint_t{4};
+const uint_t BlockForestLevels = uint_t{4};
 
 ///////////
 // FLAGS //
@@ -187,38 +187,38 @@ static void getCellsAndCoarseBlocks( const Config::BlockHandle & configBlock, co
                                      uint_t & xCells,  uint_t & yCells,  uint_t & zCells,
                                      uint_t & xBlocks, uint_t & yBlocks, uint_t & zBlocks )
 {
-   WALBERLA_CHECK( ( fineBlocksPerProcess == uint_t(1) ) || ( fineBlocksPerProcess == uint_t(2) ) ||
-                   ( fineBlocksPerProcess == uint_t(4) ) || ( fineBlocksPerProcess == uint_t(8) ) );
-   WALBERLA_CHECK_GREATER_EQUAL( numberOfProcesses, uint_t(64) / fineBlocksPerProcess );
-   WALBERLA_CHECK_EQUAL( numberOfProcesses % ( uint_t(64) / fineBlocksPerProcess ), uint_t(0) );
+   WALBERLA_CHECK( ( fineBlocksPerProcess == uint_t{1} ) || ( fineBlocksPerProcess == uint_t{2} ) ||
+                   ( fineBlocksPerProcess == uint_t{4} ) || ( fineBlocksPerProcess == uint_t{8} ) );
+   WALBERLA_CHECK_GREATER_EQUAL( numberOfProcesses, uint_t{64} / fineBlocksPerProcess );
+   WALBERLA_CHECK_EQUAL( numberOfProcesses % ( uint_t{64} / fineBlocksPerProcess ), uint_t{0} );
 
    getCells( configBlock, xCells, yCells, zCells );
 
-   xBlocks = uint_t(3);
-   yBlocks = numberOfProcesses / ( uint_t(64) / fineBlocksPerProcess );
-   zBlocks = uint_t(3);
+   xBlocks = uint_t{3};
+   yBlocks = numberOfProcesses / ( uint_t{64} / fineBlocksPerProcess );
+   zBlocks = uint_t{3};
 }
 
 #ifndef NDEBUG
 static inline uint_t numberOfBlocks( const uint_t numberOfProcesses, const uint_t fineBlocksPerProcess )
 {
-   return ( numberOfProcesses / ( uint_t(64) / fineBlocksPerProcess ) ) * uint_t(107);
+   return ( numberOfProcesses / ( uint_t{64} / fineBlocksPerProcess ) ) * uint_t{107};
 }
 
 static uint_t numberOfBlocksOnLevel( const uint_t level, const uint_t numberOfProcesses, const uint_t fineBlocksPerProcess )
 {
-   const uint_t factor = numberOfProcesses / ( uint_t(64) / fineBlocksPerProcess );
+   const uint_t factor = numberOfProcesses / ( uint_t{64} / fineBlocksPerProcess );
 
-   if( level == uint_t(0) )
-      return factor * uint_t(7);
-   else if( level == uint_t(1) )
-      return factor * uint_t(12);
-   else if( level == uint_t(2) )
-      return factor * uint_t(24);
-   else if( level == uint_t(3) )
-      return factor * uint_t(64);
+   if( level == uint_t{0} )
+      return factor * uint_t{7};
+   else if( level == uint_t{1} )
+      return factor * uint_t{12};
+   else if( level == uint_t{2} )
+      return factor * uint_t{24};
+   else if( level == uint_t{3} )
+      return factor * uint_t{64};
 
-   return uint_t(0);
+   return uint_t{0};
 }
 #endif
 
@@ -235,8 +235,8 @@ static void refinementSelection( SetupBlockForest& forest )
 {
    const AABB & domain = forest.getDomain();
 
-   real_t xSize = ( domain.xSize() / real_t(12) ) * real_c( 0.99 );
-   real_t zSize = ( domain.zSize() / real_t(12) ) * real_c( 0.99 );
+   real_t xSize = ( domain.xSize() / real_t{12} ) * real_c( 0.99 );
+   real_t zSize = ( domain.zSize() / real_t{12} ) * real_c( 0.99 );
 
    AABB leftCorner( domain.xMin(), domain.yMin(), domain.zMax() - zSize,
                     domain.xMin() + xSize, domain.yMax(), domain.zMax() );
@@ -249,7 +249,7 @@ static void refinementSelection( SetupBlockForest& forest )
       auto & aabb = block.getAABB();
       if( leftCorner.intersects( aabb ) || rightCorner.intersects( aabb ) )
       {
-         if( block.getLevel() < ( BlockForestLevels - uint_t(1) ) )
+         if( block.getLevel() < ( BlockForestLevels - uint_t{1} ) )
             block.setMarker( true );
       }
    }
@@ -259,7 +259,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest & forest, const memory
 
    for(auto & block : forest)
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( memoryPerBlock );
    }
 }
@@ -281,22 +281,22 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
    getCellsAndCoarseBlocks( configBlock, workerProcesses, fineBlocksPerProcess, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock,
                             numberOfXBlocks, numberOfYBlocks, numberOfZBlocks );
 
-   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( numberOfXCellsPerBlock + uint_t(2) * FieldGhostLayers ) *
-                                                             ( numberOfYCellsPerBlock + uint_t(2) * FieldGhostLayers ) *
-                                                             ( numberOfZCellsPerBlock + uint_t(2) * FieldGhostLayers ) *
+   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( numberOfXCellsPerBlock + uint_t{2} * FieldGhostLayers ) *
+                                                             ( numberOfYCellsPerBlock + uint_t{2} * FieldGhostLayers ) *
+                                                             ( numberOfZCellsPerBlock + uint_t{2} * FieldGhostLayers ) *
                                                              uint_c( 19 * sizeof(real_t) ) ) / numeric_cast< memory_t >( 1024 * 1024 );
 
    sforest.addRefinementSelectionFunction( refinementSelection );
    sforest.addWorkloadMemorySUIDAssignmentFunction( [=] (auto &forest) { workloadAndMemoryAssignment( forest, memoryPerBlock ); } );
 
-   sforest.init( AABB( real_t(0), real_t(0), real_t(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
+   sforest.init( AABB( real_t{0}, real_t{0}, real_t{0}, real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
                                                         real_c( numberOfYBlocks * numberOfYCellsPerBlock ),
                                                         real_c( numberOfZBlocks * numberOfZCellsPerBlock ) ),
                  numberOfXBlocks, numberOfYBlocks, numberOfZBlocks, false, false, false );
 
 #ifndef NDEBUG
    WALBERLA_ASSERT_EQUAL( sforest.getNumberOfBlocks(), numberOfBlocks( workerProcesses, fineBlocksPerProcess ) );
-   for( auto i = uint_t(0); i != BlockForestLevels; ++i )
+   for( auto i = uint_t{0}; i != BlockForestLevels; ++i )
    {
       std::vector< blockforest::SetupBlock * > blocks;
       sforest.getBlocks( blocks, i );
@@ -309,7 +309,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
    const memory_t memoryLimit = configBlock.getParameter< memory_t >( "memoryLimit", numeric_cast< memory_t >(256) );
 
    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, bufferProcesses, memoryLimit, true,
-                        bufferProcesses != uint_t(0) );
+                        bufferProcesses != uint_t{0} );
 
    WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest created successfully:\n" << sforest );
 }
@@ -363,12 +363,12 @@ class ReGrid
 public:
 
    ReGrid( const weak_ptr< StructuredBlockForest > & forest, const int type, const uint_t regridAt ) :
-      forest_( forest ), type_( type ), executionCounter_( uint_t(0) ), regridAt_( regridAt )
+      forest_( forest ), type_( type ), executionCounter_( uint_t{0} ), regridAt_( regridAt )
    {}
 
    void operator()()
    {
-      if( ( executionCounter_ + uint_t(1) ) == regridAt_ )
+      if( ( executionCounter_ + uint_t{1} ) == regridAt_ )
       {
          auto forest = forest_.lock();
          WALBERLA_CHECK_NOT_NULLPTR( forest );
@@ -395,8 +395,8 @@ void ReGrid::operator()( std::vector< std::pair< const Block *, uint_t > > & min
 {
    const AABB & domain = forest.getDomain();
    
-   const real_t xSize = domain.xSize() / real_t(12);
-   const real_t zSize = domain.zSize() / real_t(12);
+   const real_t xSize = domain.xSize() / real_t{12};
+   const real_t zSize = domain.zSize() / real_t{12};
    
    AABB left;
    AABB right;
@@ -420,9 +420,9 @@ void ReGrid::operator()( std::vector< std::pair< const Block *, uint_t > > & min
    {
       auto & aabb = minTargetLevel.first->getAABB();
       if( left.intersects( aabb ) || right.intersects( aabb ) )
-         minTargetLevel.second = BlockForestLevels - uint_t(1);
+         minTargetLevel.second = BlockForestLevels - uint_t{1};
       else
-         minTargetLevel.second = uint_t(0);
+         minTargetLevel.second = uint_t{0};
    }
 }
 
@@ -496,7 +496,7 @@ MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
    const uint_t level = forest->getLevel( *block );
    CellInterval domainBB = forest->getDomainCellBB( level );
    forest->transformGlobalToBlockLocalCellInterval( domainBB, *block );
-   domainBB.expand( cell_idx_t(1) );
+   domainBB.expand( cell_idx_t{1} );
 
    // no slip WEST
    CellInterval west( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(), domainBB.zMax() );
@@ -681,10 +681,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // add pdf field to blocks
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::fzyx ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::zyxf );
 
    // add flag field to blocks
@@ -693,7 +693,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add LB boundary handling to blocks
 
-   const real_t velocity = configBlock.getParameter< real_t >( "velocity", real_t(0.05) );
+   const real_t velocity = configBlock.getParameter< real_t >( "velocity", real_t{0.05} );
 
    BlockDataID boundaryHandlingId = blocks->addBlockData( make_shared< MyBoundaryHandling< LatticeModel_T > >( blocks, flagFieldId, pdfFieldId, velocity ),
                                                           "boundary handling" );
@@ -731,10 +731,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    
    auto & blockforest = blocks->getBlockForest();
    
-   const uint_t regridAt = configBlock.getParameter< uint_t >( "regridAt", uint_t(0) );
+   const uint_t regridAt = configBlock.getParameter< uint_t >( "regridAt", uint_t{0} );
    const int regridType = configBlock.getParameter< int >( "regridType", 0 );
    
-   const bool dynamicBlockStructure = ( ( regridAt > uint_t(0) ) && ( regridAt <= timeSteps ) );
+   const bool dynamicBlockStructure = ( ( regridAt > uint_t{0} ) && ( regridAt <= timeSteps ) );
    
    const bool allowMultipleRefreshCycles = ( regridType == 1 );
    const bool checkForEarlyOutInRefresh = configBlock.getParameter< bool >( "checkForEarlyOutInRefresh", false );
@@ -746,12 +746,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    const bool curveAllGather = configBlock.getParameter< bool >( "curveAllGather", true );
 
    const int diffusionMode = configBlock.getParameter< int >( "diffusionMode", 2 );
-   const uint_t diffusionMaxIterations = configBlock.getParameter< uint_t >( "diffusionMaxIterations", uint_t(20) );
+   const uint_t diffusionMaxIterations = configBlock.getParameter< uint_t >( "diffusionMaxIterations", uint_t{20} );
    const bool diffusionCheckForEarlyAbort = configBlock.getParameter< bool >( "diffusionCheckForEarlyAbort", true );
    const double diffusionAbortThreshold = configBlock.getParameter< double >( "diffusionAbortThreshold", 1.0 );
    const bool diffusionAdaptOutflow = configBlock.getParameter< bool >( "diffusionAdaptOutflow", true );
    const bool diffusionAdaptInflow = configBlock.getParameter< bool >( "diffusionAdaptInflow", true );
-   const uint_t diffusionFlowIterations = configBlock.getParameter< uint_t >( "diffusionFlowIterations", uint_t(10) );
+   const uint_t diffusionFlowIterations = configBlock.getParameter< uint_t >( "diffusionFlowIterations", uint_t{10} );
    const uint_t diffusionFlowIterationsIncreaseStart = configBlock.getParameter< uint_t >( "diffusionFlowIterationsIncreaseStart", diffusionMaxIterations );
    const double diffusionFlowIterationsIncreaseFactor = configBlock.getParameter< double >( "diffusionFlowIterationsIncreaseFactor", 0.0 );
    const bool diffusionRegardConnectivity = configBlock.getParameter< bool >( "diffusionRegardConnectivity", true );
@@ -1173,7 +1173,7 @@ int main( int argc, char **argv )
       
    const uint_t bufferProcesses = configBlock.getParameter< uint_t >( "bufferProcesses", 0 );
    const uint_t fineBlocksPerProcess = configBlock.getParameter< uint_t >( "fineBlocksPerProcess", 4 );
-   if( fineBlocksPerProcess != uint_t(1) && fineBlocksPerProcess != uint_t(2) && fineBlocksPerProcess != uint_t(4) && fineBlocksPerProcess != uint_t(8) )
+   if( fineBlocksPerProcess != uint_t{1} && fineBlocksPerProcess != uint_t{2} && fineBlocksPerProcess != uint_t{4} && fineBlocksPerProcess != uint_t{8} )
       WALBERLA_ABORT( "The number of fine blocks per process (\"fineBlocksPerProcess\") must be equal to either 1, 2, 4, or 8! (You requested " <<
                       fineBlocksPerProcess << ")" );
    
@@ -1205,9 +1205,9 @@ int main( int argc, char **argv )
       WALBERLA_CHECK_LESS( bufferProcesses, numberOfProcesses );
       
       const uint_t workerProcesses = numberOfProcesses - bufferProcesses;
-      if( workerProcesses < (uint_t(64) / fineBlocksPerProcess) || !( ( workerProcesses % (uint_t(64) / fineBlocksPerProcess) ) == uint_t(0) ) )
+      if( workerProcesses < (uint_t{64} / fineBlocksPerProcess) || !( ( workerProcesses % (uint_t{64} / fineBlocksPerProcess) ) == uint_t{0} ) )
          WALBERLA_ABORT( infoString.str() << "You selected " << fineBlocksPerProcess << " fine blocks per process -> The number of worker processes must be divisible by " <<
-                         (uint_t(64) / fineBlocksPerProcess) << "!" );
+                         (uint_t{64} / fineBlocksPerProcess) << "!" );
 
       WALBERLA_LOG_INFO_ON_ROOT( infoString.str() << "Creating the block structure ..." );
 
@@ -1223,7 +1223,7 @@ int main( int argc, char **argv )
    WALBERLA_CHECK_LESS( bufferProcesses, MPIManager::instance()->numProcesses() );
       
    const uint_t workerProcesses = uint_c( MPIManager::instance()->numProcesses() ) - bufferProcesses;
-   if( workerProcesses < (uint_t(64) / fineBlocksPerProcess ) || !( ( workerProcesses % (uint_t(64) / fineBlocksPerProcess ) ) == uint_t(0) ) )
+   if( workerProcesses < (uint_t{64} / fineBlocksPerProcess ) || !( ( workerProcesses % (uint_t{64} / fineBlocksPerProcess ) ) == uint_t{0} ) )
       WALBERLA_ABORT( "You selected " << fineBlocksPerProcess << " fine blocks per process -> The number of worker processes must be divisible by " <<
                       (64 / int_c(fineBlocksPerProcess) ) << "!\n(You requested " << workerProcesses << " worker processes...)" );
 
@@ -1267,7 +1267,7 @@ int main( int argc, char **argv )
       pure         = false;
    }
 
-   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) ); // on the coarsest grid!
+   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t{1.4} ); // on the coarsest grid!
 
    // executing benchmark
 

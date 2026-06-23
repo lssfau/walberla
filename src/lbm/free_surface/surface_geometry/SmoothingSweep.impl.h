@@ -68,7 +68,7 @@ void SmoothingSweep< Stencil_T, FlagField_T, ScalarField_T, VectorField_T >::ope
       {
          real_t normalizationConstant = real_c(0);
          real_t smoothedFillLevel     = real_c(0);
-         if constexpr (Stencil_T::D == uint_t(2))
+         if constexpr (Stencil_T::D == uint_t{2})
          {
             for (int j = -int_c(kernelSize); j <= int_c(kernelSize); ++j)
             {
@@ -107,7 +107,7 @@ void SmoothingSweep< Stencil_T, FlagField_T, ScalarField_T, VectorField_T >::ope
          }
          else
          {
-            if constexpr (Stencil_T::D == uint_t(3))
+            if constexpr (Stencil_T::D == uint_t{3})
             {
                for (int k = -int_c(kernelSize); k <= int_c(kernelSize); ++k)
                {

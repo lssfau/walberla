@@ -137,7 +137,7 @@ template< typename FlagField_T >
 void PerformanceLogger<FlagField_T>::operator()()
 {
    if( timeloop_ )
-      timestep_ = timeloop_->getCurrentTimeStep() + uint_t(1);
+      timestep_ = timeloop_->getCurrentTimeStep() + uint_t{1};
 
    if( timestep_ % interval_ == 0 )
    {

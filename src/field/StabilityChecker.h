@@ -201,7 +201,7 @@ private:
          WALBERLA_ASSERT( map_.find( this->block_ ) != map_.end() )
          WALBERLA_ASSERT( map_[ this->block_ ].find( Cell(x,y,z) ) != map_[ this->block_ ].end() )
 
-         return ( map_[ this->block_ ][ Cell(x,y,z) ].find( f ) != map_[ this->block_ ][ Cell(x,y,z) ].end() ) ? uint8_t(1) : uint8_t(0);
+         return ( map_[ this->block_ ][ Cell(x,y,z) ].find( f ) != map_[ this->block_ ][ Cell(x,y,z) ].end() ) ? uint8_t{1} : uint8_t{0};
       }
 
    private:
@@ -222,7 +222,7 @@ private:
 // NOLINTNEXTLINE(portability-template-virtual-member-function)
       cell_idx_t evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override
       {
-         return ( f == cell_idx_t(0) ) ? x : ( ( f == cell_idx_t(1) ) ? y : z );
+         return ( f == cell_idx_t{0} ) ? x : ( ( f == cell_idx_t{1} ) ? y : z );
       }
    };
 
@@ -241,7 +241,7 @@ private:
       {
          Cell cell(x,y,z);
          this->blockStorage_->transformBlockLocalToGlobalCell( cell, *(this->block_) );
-         return ( f == cell_idx_t(0) ) ? cell.x(): ( ( f == cell_idx_t(1) ) ? cell.y() : cell.z() );
+         return ( f == cell_idx_t{0} ) ? cell.x(): ( ( f == cell_idx_t{1} ) ? cell.y() : cell.z() );
       }
    };
 
@@ -381,7 +381,7 @@ template< typename Field_T, typename Filter_T, typename CheckFunction_T >
 void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::operator()()
 {
    ++executionCounter_;
-   if( checkFrequency_ == uint_t(0) || ( executionCounter_ - uint_c(1) ) % checkFrequency_ != 0 )
+   if( checkFrequency_ == uint_t{0} || ( executionCounter_ - uint_c(1) ) % checkFrequency_ != 0 )
       return;
 
    auto blocks = blocks_.lock();
@@ -434,7 +434,7 @@ void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::operator()()
    {
       if( outputVTK_ )
       {
-         auto vtkWriter = vtk::createVTKOutput_BlockData( blocks, vtkIdentifier_, uint_t(1), uint_t(0), vtkForcePVTU_,
+         auto vtkWriter = vtk::createVTKOutput_BlockData( blocks, vtkIdentifier_, uint_t{1}, uint_t{0}, vtkForcePVTU_,
                                                           vtkBaseFolder_, vtkExecutionFolder_, false, vtkBinary_, vtkLittleEndian_, vtkMPIIO_ );                                                         
 
          vtkWriter->addCellInclusionFilter( VTKCellFilter( failedCells_ ) );
@@ -470,7 +470,7 @@ void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::checkBlock( const I
 
          if( filter_(x,y,z) )
          {
-            for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
+            for( uint_t f = uint_t{0}; f < Field_T::F_SIZE; ++f )
             {
                if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                   failedCells_[ block ][ Cell(x,y,z) ].insert( cell_idx_c(f) );
@@ -497,7 +497,7 @@ void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::checkBlock( const I
             {
                if( filter_(x,y,z) )
                {
-                  for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
+                  for( uint_t f = uint_t{0}; f < Field_T::F_SIZE; ++f )
                   {
                      if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                      {
@@ -524,7 +524,7 @@ void StabilityChecker< Field_T, Filter_T, CheckFunction_T >::checkBlock( const I
             {
                if( filter_(x,y,z) )
                {
-                  for( uint_t f = uint_t(0); f < Field_T::F_SIZE; ++f )
+                  for( uint_t f = uint_t{0}; f < Field_T::F_SIZE; ++f )
                   {
                      if( !checkFunction_( field->get( x, y, z, cell_idx_c(f) ) ) )
                      {
@@ -670,7 +670,7 @@ inline void stabilityCheckerConfigParser( const shared_ptr< Config > & config, c
 } // namespace internal
 
 #define WALBERLA_FIELD_MAKE_STABILITY_CHECKER_CONFIG_PARSER( config ) \
-   uint_t defaultCheckFrequency = uint_t(0); \
+   uint_t defaultCheckFrequency = uint_t{0}; \
    bool defaultOutputToStream = true; \
    bool defaultOutputVTK = true; \
    std::string defaultVTKBaseFolder = internal::stabilityCheckerVTKBase; \

@@ -27,7 +27,7 @@ class HCSITSRelaxationStep():
         self.context['properties'].append(
             create_property("relaxationModel", "RelaxationModel", defValue="InelasticFrictionlessContact"))
         self.context['properties'].append(create_property("deltaMax", "real_t", defValue="0"))
-        self.context['properties'].append(create_property("cor", "real_t", defValue="real_t(0.2)"))
+        self.context['properties'].append(create_property("cor", "real_t", defValue="real_t{0.2}"))
 
         self.context['interface'].append(create_access("uid", "walberla::id_t", access="g"))
         self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="g"))

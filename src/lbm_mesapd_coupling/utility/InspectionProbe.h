@@ -89,12 +89,12 @@ private:
 
       std::stringstream outputString;
 
-      for(cell_idx_t z = cell_idx_t(-1); z <= cell_idx_t(1); ++z)
+      for(cell_idx_t z = cell_idx_t{-1}; z <= cell_idx_t{1}; ++z)
       {
-         for(cell_idx_t y = cell_idx_t(1); y >= cell_idx_t(-1); --y)
+         for(cell_idx_t y = cell_idx_t{1}; y >= cell_idx_t{-1}; --y)
          {
             outputString << "*------------------------------------------------------------------------------------------------------------------------------------------------------------------------*\n";
-            for(cell_idx_t x = cell_idx_t(-1); x <= cell_idx_t(1); ++x)
+            for(cell_idx_t x = cell_idx_t{-1}; x <= cell_idx_t{1}; ++x)
             {
                auto cell = centerCell + Cell(x,y,z);
                auto cellCenter = blocks_->getBlockLocalCellCenter(block, cell);
@@ -109,7 +109,7 @@ private:
                   rho = pdfField->getDensityAndVelocity(velocity,cell);
                } else{
                   isFluid = false;
-                  rho = real_t(0);
+                  rho = real_t{0};
                   auto particleIdx = ac_->uidToIdx(particleField->get( cell ));
                   velocity = mesa_pd::getVelocityAtWFPoint(particleIdx, *ac_, cellCenter );
                   if(isSet(ac_->getFlags(particleIdx), mesa_pd::data::particle_flags::FIXED)) isFixed = true;

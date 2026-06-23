@@ -57,7 +57,7 @@ CellIntervalDataMap readCellIntervalsOnRoot( const std::string & geometryFile,
    {
       auto & sendBuffer = allToRootBs.sendBuffer(0);
 
-      sendBuffer << uint8_t(0); // dummy byte to make sure a message is sent even if cellIntervals is empty
+      sendBuffer << uint8_t{0}; // dummy byte to make sure a message is sent even if cellIntervals is empty
 
       for(const auto & cellInterval : cellIntervals)
          sendBuffer << cellInterval.second;
@@ -95,7 +95,7 @@ CellIntervalDataMap readCellIntervalsOnRoot( const std::string & geometryFile,
 
       uint8_t dummy;
       recvBuffer >> dummy;
-      sendBuffer << uint8_t(0); // dummy byte to make sure a message is sent even if recvBuffer is empty
+      sendBuffer << uint8_t{0}; // dummy byte to make sure a message is sent even if recvBuffer is empty
 
       while( !recvBuffer.isEmpty() )
       {

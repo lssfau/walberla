@@ -120,18 +120,18 @@ public:
                uint_t targetLevelOfAABB = aabb.second;
                if( currentLevelOfBlock > targetLevelOfAABB )
                {
-                  targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
+                  targetLevelOfBlock = currentLevelOfBlock - uint_t{1};
                }
                else if ( currentLevelOfBlock < targetLevelOfBlock )
                {
-                  targetLevelOfBlock = currentLevelOfBlock + uint_t(1);
+                  targetLevelOfBlock = currentLevelOfBlock + uint_t{1};
                }
                // only the first found intersecting AABB is taken into account
                break;
             }
          }
 
-         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
+         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t{1}, "Only level difference of maximum 1 allowed!");
          minTargetLevel.second = targetLevelOfBlock;
       }
    }

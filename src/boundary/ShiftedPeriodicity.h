@@ -91,8 +91,8 @@ class ShiftedPeriodicityBase {
       WALBERLA_CHECK(sbf->containsGlobalBlockInformation(), "For the periodic shift, the blockforest must be constructed to retain global information.")
 
       shift_ = Vector3<ShiftType>{};
-      auto adaptedShiftValue = shiftValue % ShiftType(sbf->getNumberOfCells(shiftDir_));
-      shift_[shiftDir_] = ShiftType(adaptedShiftValue >= 0 ? adaptedShiftValue : adaptedShiftValue + ShiftType(sbf->getNumberOfCells(shiftDir_)));
+      auto adaptedShiftValue = shiftValue % static_cast< ShiftType >(sbf->getNumberOfCells(shiftDir_));
+      shift_[shiftDir_] = static_cast< ShiftType >(adaptedShiftValue >= 0 ? adaptedShiftValue : adaptedShiftValue + static_cast< ShiftType >(sbf->getNumberOfCells(shiftDir_)));
 
       // sanity checks
       WALBERLA_CHECK_UNEQUAL( shiftDir_, normalDir_, "Direction of periodic shift and boundary normal must not coincide." )
@@ -265,11 +265,11 @@ class ShiftedPeriodicityBase {
 
       const auto localShift = normalShift == 1 ? shift_ : -shift_;
 
-      const auto offset = ShiftType(int_c(shift_[shiftDir_]) % int_c(sbf->getNumberOfCellsPerBlock(shiftDir_)));
+      const auto offset = static_cast< ShiftType >(int_c(shift_[shiftDir_]) % int_c(sbf->getNumberOfCellsPerBlock(shiftDir_)));
       Vector3<ShiftType> normalShiftVector{};
-      normalShiftVector[normalDir_] = ShiftType(normalShift * int_c(sbf->getNumberOfCellsPerBlock(normalDir_)));
+      normalShiftVector[normalDir_] = static_cast< ShiftType >(normalShift * int_c(sbf->getNumberOfCellsPerBlock(normalDir_)));
 
-      const auto remDir = uint_t(3) - normalDir_ - shiftDir_;
+      const auto remDir = uint_t{3} - normalDir_ - shiftDir_;
 
       AABB aabb1 = originalAABB;
       AABB aabb2 = originalAABB;
@@ -351,10 +351,10 @@ class ShiftedPeriodicityBase {
 
       auto block = sbf->getBlock(blockID);
 
-      sendAABBs_[blockID].emplace_back(mpi::MPIRank(rank1), id1, globalAABBToLocalCI(localSendAABB1, sbf, block), sendTag1);
-      sendAABBs_[blockID].emplace_back(mpi::MPIRank(rank2), id2, globalAABBToLocalCI(localSendAABB2, sbf, block), sendTag2);
-      recvAABBs_[blockID].emplace_back(mpi::MPIRank(rank2), id2, globalAABBToLocalCI(localRecvAABB2, sbf, block), recvTag2);
-      recvAABBs_[blockID].emplace_back(mpi::MPIRank(rank1), id1, globalAABBToLocalCI(localRecvAABB1, sbf, block), recvTag1);
+      sendAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank1), id1, globalAABBToLocalCI(localSendAABB1, sbf, block), sendTag1);
+      sendAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank2), id2, globalAABBToLocalCI(localSendAABB2, sbf, block), sendTag2);
+      recvAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank2), id2, globalAABBToLocalCI(localRecvAABB2, sbf, block), recvTag2);
+      recvAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank1), id1, globalAABBToLocalCI(localRecvAABB1, sbf, block), recvTag1);
 
       WALBERLA_LOG_DETAIL("blockID = " << blockID.getID() << ", normalShift = " << normalShift
                                        << "\n\tsendRank1 = " << rank1 << "\tsendID1 = " << id1.getID() << "\tsendTag1 = " << sendTag1 << "\taabb = " << localSendAABB1
@@ -377,7 +377,7 @@ class ShiftedPeriodicityBase {
       const auto localShift = normalShift == 1 ? shift_ : -shift_;
 
       Vector3<ShiftType> normalShiftVector{};
-      normalShiftVector[normalDir_] = ShiftType(normalShift * int_c(sbf->getNumberOfCellsPerBlock(normalDir_)));
+      normalShiftVector[normalDir_] = static_cast< ShiftType >(normalShift * int_c(sbf->getNumberOfCellsPerBlock(normalDir_)));
 
       // aabb
       auto aabb = originalAABB.getExtended(nGL);
@@ -426,8 +426,8 @@ class ShiftedPeriodicityBase {
 
       auto block = sbf->getBlock(blockID);
 
-      sendAABBs_[blockID].emplace_back(mpi::MPIRank(rank), id, globalAABBToLocalCI(localSendAABB, sbf, block), sendTag);
-      recvAABBs_[blockID].emplace_back(mpi::MPIRank(rank), id, globalAABBToLocalCI(localRecvAABB, sbf, block), recvTag);
+      sendAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank), id, globalAABBToLocalCI(localSendAABB, sbf, block), sendTag);
+      recvAABBs_[blockID].emplace_back(static_cast< mpi::MPIRank >(rank), id, globalAABBToLocalCI(localRecvAABB, sbf, block), recvTag);
 
       WALBERLA_LOG_DETAIL("blockID = " << blockID.getID() << ", normalShift = " << normalShift
                                        << "\n\tsendRank = " << rank << "\tsendID = " << id.getID() << "\tsendTag = " << sendTag << "\taabb = " << localSendAABB
@@ -456,7 +456,7 @@ class ShiftedPeriodicityBase {
 
       const auto nGL = real_c(fieldGhostLayers_);
 
-      const bool shiftWholeBlock = (shift_[shiftDir_] % ShiftType(sbf->getNumberOfCells(*localBlocks[0], shiftDir_))) == 0;
+      const bool shiftWholeBlock = (shift_[shiftDir_] % static_cast< ShiftType >(sbf->getNumberOfCells(*localBlocks[0], shiftDir_))) == 0;
 
       // get f-size
       {

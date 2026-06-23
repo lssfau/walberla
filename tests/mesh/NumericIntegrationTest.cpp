@@ -44,7 +44,7 @@ namespace mesh {
 template< typename ContainmentT >
 real_t volumeNumeric( const ContainmentT & body, const AABB & aabb, const real_t spacing )
 {
-   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
+   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t{0.5} * spacing );
 
    uint_t volume = 0;
 
@@ -54,14 +54,14 @@ real_t volumeNumeric( const ContainmentT & body, const AABB & aabb, const real_t
          ++volume;
    }
 
-   return real_t(volume) * spacing * spacing * spacing;
+   return static_cast< real_t >(volume) * spacing * spacing * spacing;
 }
 
 
 template< typename ContainmentT >
 Vector3<real_t> centroidNumeric( const ContainmentT & body, const AABB & aabb, const real_t spacing )
 {
-   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
+   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t{0.5} * spacing );
 
    std::array<math::KahanAccumulator<real_t>, 3> centroid;
    uint_t numPoints = 0;
@@ -77,14 +77,14 @@ Vector3<real_t> centroidNumeric( const ContainmentT & body, const AABB & aabb, c
       }
    }
 
-   return Vector3<real_t>( centroid[0].get(), centroid[1].get(), centroid[2].get() ) / real_t(numPoints);
+   return Vector3<real_t>( centroid[0].get(), centroid[1].get(), centroid[2].get() ) / static_cast< real_t >(numPoints);
 }
 
 
 template< typename ContainmentT >
 Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aabb, const real_t spacing )
 {
-   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
+   Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t{0.5} * spacing );
 
    std::array<math::KahanAccumulator<real_t>, 6> inertiaTensor;
 
@@ -121,7 +121,7 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
 
    AABB aabb = computeAABB(*mesh);
    uint_t numPoints = 1000000;
-   real_t spacing = std::pow( aabb.volume() / real_t(numPoints), real_t(1) / real_t(3) );
+   real_t spacing = std::pow( aabb.volume() / static_cast< real_t >(numPoints), real_t{1} / real_t{3} );
 
    WALBERLA_LOG_INFO("Computing numeric volume");
    real_t numericVolume = volumeNumeric(*containmentOctree, aabb, spacing );
@@ -130,7 +130,7 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
    WALBERLA_LOG_INFO("Numerical volume:   " << numericVolume << "\n" <<
                      "Geometrical volume: " << geometricalVolume << "\n" <<
                      "Difference:         " << numericVolume - geometricalVolume );
-   WALBERLA_CHECK( std::fabs( numericVolume - geometricalVolume ) < real_t(0.001) || std::fabs( real_t(1) - numericVolume / geometricalVolume ) < real_t(0.001) );
+   WALBERLA_CHECK( std::fabs( numericVolume - geometricalVolume ) < real_t{0.001} || std::fabs( real_t{1} - numericVolume / geometricalVolume ) < real_t{0.001} );
 
 
    WALBERLA_LOG_INFO("Computing numeric centroid");
@@ -141,9 +141,9 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
                      "Geometrical centroid: " << geometricalCentroid << "\n" <<
                      "Difference:           " << numericCentroid - geometricalCentroid );
 
-   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericCentroid[0] / geometricalCentroid[0] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericCentroid[1] / geometricalCentroid[1] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericCentroid[2] / geometricalCentroid[2] ) < real_t(0.001) );
+   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t{0.001} || std::fabs( real_t{1} - numericCentroid[0] / geometricalCentroid[0] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t{0.001} || std::fabs( real_t{1} - numericCentroid[1] / geometricalCentroid[1] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t{0.001} || std::fabs( real_t{1} - numericCentroid[2] / geometricalCentroid[2] ) < real_t{0.001} );
 
    WALBERLA_LOG_INFO("Computing numeric inertia tensor");
    Matrix3<real_t> numericTensor = inertiaTensorNumeric(*containmentOctree, aabb, spacing );
@@ -153,15 +153,15 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
                      "Geometrical tensor:\n" << geometricalTensor << "\n" <<
                      "Difference:\n"         << numericTensor - geometricalTensor );
 
-   WALBERLA_CHECK( std::fabs( numericTensor[0] - geometricalTensor[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[0] / geometricalTensor[0] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[1] - geometricalTensor[1] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[1] / geometricalTensor[1] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[2] - geometricalTensor[2] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[2] / geometricalTensor[2] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[3] - geometricalTensor[3] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[3] / geometricalTensor[3] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[4] - geometricalTensor[4] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[4] / geometricalTensor[4] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[5] - geometricalTensor[5] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[5] / geometricalTensor[5] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[6] - geometricalTensor[6] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[6] / geometricalTensor[6] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[7] - geometricalTensor[7] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[7] / geometricalTensor[7] ) < real_t(0.001) );
-   WALBERLA_CHECK( std::fabs( numericTensor[8] - geometricalTensor[8] ) < real_t(0.001) || std::fabs( real_t(1) - numericTensor[8] / geometricalTensor[8] ) < real_t(0.001) );
+   WALBERLA_CHECK( std::fabs( numericTensor[0] - geometricalTensor[0] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[0] / geometricalTensor[0] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[1] - geometricalTensor[1] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[1] / geometricalTensor[1] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[2] - geometricalTensor[2] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[2] / geometricalTensor[2] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[3] - geometricalTensor[3] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[3] / geometricalTensor[3] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[4] - geometricalTensor[4] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[4] / geometricalTensor[4] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[5] - geometricalTensor[5] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[5] / geometricalTensor[5] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[6] - geometricalTensor[6] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[6] / geometricalTensor[6] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[7] - geometricalTensor[7] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[7] / geometricalTensor[7] ) < real_t{0.001} );
+   WALBERLA_CHECK( std::fabs( numericTensor[8] - geometricalTensor[8] ) < real_t{0.001} || std::fabs( real_t{1} - numericTensor[8] / geometricalTensor[8] ) < real_t{0.001} );
 }
 
 
@@ -172,7 +172,7 @@ int main( int argc, char ** argv )
    mpi::MPIManager::instance()->useWorldComm();
 
    std::vector<std::string> args( argv, argv + argc );
-   if(args.size() != size_t( 2 ))
+   if(args.size() != size_t{ 2 })
    {
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE:\n" << args[0] << "<MeshFileName>" );
    }

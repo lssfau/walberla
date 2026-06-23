@@ -144,7 +144,7 @@ struct Types
 using flag_t = walberla::uint16_t;
 using FlagField_T = FlagField<flag_t>;
 
-const uint_t FieldGhostLayers  = uint_t(4);
+const uint_t FieldGhostLayers  = uint_t{4};
 
 ///////////
 // FLAGS //
@@ -259,7 +259,7 @@ private:
    bool channelContains( SetupBlockForest & forest, const SetupBlock & block )
    {
       AABB domain = forest.getDomain();
-      domain.setAxisBounds( uint_t(1), domain.yMin() + bufferDistance_, domain.yMax() - bufferDistance_ );
+      domain.setAxisBounds( uint_t{1}, domain.yMin() + bufferDistance_, domain.yMax() - bufferDistance_ );
 
       return domain.contains( block.getAABB() ) && !(forest.atDomainYMinBorder( block )) && !(forest.atDomainYMaxBorder( block ));
    }
@@ -276,7 +276,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest, const memory_
 {
    for(auto & block : forest)
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( memoryPerBlock );
    }
 }
@@ -291,9 +291,9 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
 {
    shared_ptr< SetupBlockForest > forest = make_shared< SetupBlockForest >();
 
-   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( setup.xCells + uint_t(2) * FieldGhostLayers ) *
-                                                             ( setup.yCells + uint_t(2) * FieldGhostLayers ) *
-                                                             ( setup.zCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
+   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( setup.xCells + uint_t{2} * FieldGhostLayers ) *
+                                                             ( setup.yCells + uint_t{2} * FieldGhostLayers ) *
+                                                             ( setup.zCells + uint_t{2} * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
    forest->addWorkloadMemorySUIDAssignmentFunction([memoryPerBlock](auto & sbf) { workloadAndMemoryAssignment(sbf, memoryPerBlock); });
@@ -308,7 +308,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
    if( blocksPerProcess != 0 )
       numberOfProcesses = uint_c( std::ceil( real_c( forest->getNumberOfBlocks() ) / real_c( blocksPerProcess ) ) );
 
-   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), processMemoryLimit, true );
+   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t{0}, processMemoryLimit, true );
 
    if( outputSetupForest ) 
    {
@@ -347,7 +347,7 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure ..." );
 
    shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup,
-                                                                    uint_c( MPIManager::instance()->numProcesses() ), uint_t(0),
+                                                                    uint_c( MPIManager::instance()->numProcesses() ), uint_t{0},
                                                                     memoryPerCell, processMemoryLimit,
                                                                     configBlock.getParameter< bool >( "outputSetupForest", false ) );
 
@@ -407,7 +407,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
                                   NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                  UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_t(0), real_t(0) ) );
+                                  UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_t{0}, real_t{0} ) );
 }
 
 
@@ -481,9 +481,9 @@ protected:
       // 2nd error component -> base = maximum velocity
       // 3rd error component -> base = mean velocity
 
-      if( f == cell_idx_t(0) )
+      if( f == cell_idx_t{0} )
          return numeric_cast< OutputType >( std::fabs( ( refVelocity_x - velocity[0] ) / refVelocity_x ) );
-      else if( f == cell_idx_t(1) )
+      else if( f == cell_idx_t{1} )
          return numeric_cast< OutputType >( std::fabs( ( refVelocity_x - velocity[0] ) / setup_.maxVelocity_L ) );
       return numeric_cast< OutputType >( std::fabs( ( refVelocity_x - velocity[0] ) / setup_.meanVelocity_L ) );
    }
@@ -569,7 +569,7 @@ real_t exactFlowRate( const real_t flowRate )
 
 Vector3< real_t > exactVelocity( const Vector3< real_t > & p, const math::AABB & domain, const real_t maxLatticeVelocity )
 {
-   return Vector3< real_t >( maxLatticeVelocity * ( p[1] - domain.yMin() ) / domain.ySize(), real_t(0), real_t(0) );
+   return Vector3< real_t >( maxLatticeVelocity * ( p[1] - domain.yMin() ) / domain.ySize(), real_t{0}, real_t{0} );
 }
 
 
@@ -664,10 +664,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 {
    Config::BlockHandle configBlock = config->getBlock( "CouetteFlow" );
 
-   setup.viscosity_L    = latticeModel.collisionModel().viscosity( uint_t(0) );
+   setup.viscosity_L    = latticeModel.collisionModel().viscosity( uint_t{0} );
    setup.meanVelocity_L = ( setup.Re * setup.viscosity_L ) / real_c( setup.yBlocks * setup.yCells );
-   setup.maxVelocity_L  = real_t(2) * setup.meanVelocity_L;
-   setup.flowRate_L     = ( setup.maxVelocity_L * real_c( setup.yBlocks * setup.yCells ) * real_c( setup.zBlocks * setup.zCells ) ) / real_t(2);
+   setup.maxVelocity_L  = real_t{2} * setup.meanVelocity_L;
+   setup.flowRate_L     = ( setup.maxVelocity_L * real_c( setup.yBlocks * setup.yCells ) * real_c( setup.zBlocks * setup.zCells ) ) / real_t{2};
 
    // creating the block structure
 
@@ -675,13 +675,13 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add pdf field to blocks
 
-   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : real_t(0);
+   const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithMeanVelocity", false ) ) ? setup.meanVelocity_L : real_t{0};
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::fzyx ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::zyxf );
 
    using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
@@ -705,7 +705,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    const uint_t outerTimeSteps = configBlock.getParameter< uint_t >( "outerTimeSteps", uint_c(10) );
    const uint_t innerTimeSteps = configBlock.getParameter< uint_t >( "innerTimeSteps", uint_c(10) );
 
-   SweepTimeloop timeloop( blocks->getBlockStorage(), ( outerTimeSteps * innerTimeSteps ) + uint_t(1) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), ( outerTimeSteps * innerTimeSteps ) + uint_t{1} );
 
    // VTK
 
@@ -741,22 +741,22 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                                                                         flagFieldId, Fluid_Flag,
                                                                                                         [flowRate = setup.flowRate_L] { return exactFlowRate(flowRate); },
                                                                                                         exactSolutionFunction );
-   volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
-   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );
+   volumetricFlowRate->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
+   volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t{1} ) );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( volumetricFlowRate ), "volumetric flow rate evaluation" );
 
    auto accuracyEvaluation = field::makeAccuracyEvaluation< VelocityAdaptor_T >( configBlock, blocks, velocityAdaptorId, exactSolutionFunction );
-   accuracyEvaluation->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   accuracyEvaluation->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( accuracyEvaluation ), "accuracy evaluation" );
 
    auto linePlot = field::makeAccuracyEvaluationLinePlot< VelocityAdaptor_T >( configBlock, blocks, velocityAdaptorId, exactSolutionFunction );
-   linePlot->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
+   linePlot->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( field::makeAccuracyEvaluationLinePlotter( configBlock, linePlot ) ), "accuracy evaluation (line plot)" );
 
-   timeloop.addFuncBeforeTimeStep( makeSharedFunctor( lbm::makeMassEvaluation< DensityAdaptor_T >( configBlock, blocks, uint_t(0), densityAdaptorId ) ), "mass evaluation" );
+   timeloop.addFuncBeforeTimeStep( makeSharedFunctor( lbm::makeMassEvaluation< DensityAdaptor_T >( configBlock, blocks, uint_t{0}, densityAdaptorId ) ), "mass evaluation" );
 
    // stability check (non-finite values in the PDF field?)
 
@@ -870,7 +870,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             
             integerProperties[ "simulationTimeSteps" ] = int_c( timeloop.getNrOfTimeSteps() );
             
-            realProperties[ "simulationProgress" ] = double_c( ( outerRun + uint_t(1) ) * innerTimeSteps ) / double_c( outerTimeSteps * innerTimeSteps );
+            realProperties[ "simulationProgress" ] = double_c( ( outerRun + uint_t{1} ) * innerTimeSteps ) / double_c( outerTimeSteps * innerTimeSteps );
 
             auto runId = sqlite::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
             sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedTimeloopTiming, "Timeloop" );
@@ -1013,22 +1013,22 @@ int main( int argc, char **argv )
 
    Setup setup;
 
-   setup.xBlocks = configBlock.getParameter< uint_t >( "xBlocks", uint_t(1) );
-   setup.yBlocks = configBlock.getParameter< uint_t >( "yBlocks", uint_t(1) );
-   setup.zBlocks = configBlock.getParameter< uint_t >( "zBlocks", uint_t(1) );
+   setup.xBlocks = configBlock.getParameter< uint_t >( "xBlocks", uint_t{1} );
+   setup.yBlocks = configBlock.getParameter< uint_t >( "yBlocks", uint_t{1} );
+   setup.zBlocks = configBlock.getParameter< uint_t >( "zBlocks", uint_t{1} );
 
-   setup.xCells = configBlock.getParameter< uint_t >( "xCells", uint_t(10) );
-   setup.yCells = configBlock.getParameter< uint_t >( "yCells", uint_t(50) );
-   setup.zCells = configBlock.getParameter< uint_t >( "zCells", uint_t(10) );
+   setup.xCells = configBlock.getParameter< uint_t >( "xCells", uint_t{10} );
+   setup.yCells = configBlock.getParameter< uint_t >( "yCells", uint_t{50} );
+   setup.zCells = configBlock.getParameter< uint_t >( "zCells", uint_t{10} );
 
-   setup.Re = configBlock.getParameter< real_t >( "Re", real_t(10) );
+   setup.Re = configBlock.getParameter< real_t >( "Re", real_t{10} );
    
    // ... in bytes
-   const memory_t memoryPerCell = configBlock.getParameter< memory_t >( "memoryPerCell", memory_t( 19 * 8 + 1 ) );
+   const memory_t memoryPerCell = configBlock.getParameter< memory_t >( "memoryPerCell", memory_t{ 19 * 8 + 1 } );
    // ... in MiB
-   const memory_t processMemoryLimit = configBlock.getParameter< memory_t >( "processMemoryLimit", memory_t( 512 ) ) * memory_t( 1024 * 1024  );
+   const memory_t processMemoryLimit = configBlock.getParameter< memory_t >( "processMemoryLimit", memory_t{ 512 } ) * memory_t{ 1024 * 1024  };
 
-   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t(8) );
+   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t{8} );
 
    ////////////////////////
    // REFINEMENT REGIONS //
@@ -1044,7 +1044,7 @@ int main( int argc, char **argv )
       if( !configBlock.isDefined("borderRefinementLevel")  )
          WALBERLA_ABORT( "You have to specify \'borderRefinementLevel\' in the \"CouetteFlow\" block of the configuration file (" << argv[1] << ")" );
 
-      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", real_t(0) );
+      const real_t borderRefinementBuffer = configBlock.getParameter< real_t >( "borderRefinementBuffer", real_t{0} );
 
       BorderRefinementSelection borderRefinementSelection( setup, configBlock.getParameter< uint_t >( "borderRefinementLevel" ),
                borderRefinementBuffer );
@@ -1072,7 +1072,7 @@ int main( int argc, char **argv )
 
       WALBERLA_LOG_INFO_ON_ROOT( infoString.str() << "Creating the block structure ..." );
 
-      shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup, uint_t(0), blocksPerProcess,
+      shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup, uint_t{0}, blocksPerProcess,
                                                                        memoryPerCell, processMemoryLimit,
                                                                        configBlock.getParameter< bool >( "outputSetupForest", true ) );
       sforest->saveToFile( sbffile.c_str() );
@@ -1141,21 +1141,21 @@ int main( int argc, char **argv )
 
    // executing benchmark
 
-   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) );
+   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t{1.4} );
 
-   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t(3) / real_t(16) );
+   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t{3} / real_t{16} );
 
-   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t(1.4) );
-   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t(1.4) );
+   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t{1.4} );
+   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t{1.4} );
 
-   const real_t s1  = configBlock.getParameter< real_t >( "s1",  real_t(1.4) );
-   const real_t s2  = configBlock.getParameter< real_t >( "s2",  real_t(1.4) );
-   const real_t s4  = configBlock.getParameter< real_t >( "s4",  real_t(1.4) );
-   const real_t s9  = configBlock.getParameter< real_t >( "s9",  real_t(1.4) );
-   const real_t s10 = configBlock.getParameter< real_t >( "s10", real_t(1.4) );
-   const real_t s16 = configBlock.getParameter< real_t >( "s16", real_t(1.4) );
+   const real_t s1  = configBlock.getParameter< real_t >( "s1",  real_t{1.4} );
+   const real_t s2  = configBlock.getParameter< real_t >( "s2",  real_t{1.4} );
+   const real_t s4  = configBlock.getParameter< real_t >( "s4",  real_t{1.4} );
+   const real_t s9  = configBlock.getParameter< real_t >( "s9",  real_t{1.4} );
+   const real_t s10 = configBlock.getParameter< real_t >( "s10", real_t{1.4} );
+   const real_t s16 = configBlock.getParameter< real_t >( "s16", real_t{1.4} );
 
-   const uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t(0) );
+   const uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t{0} );
 
    // http://www.ae.metu.edu.tr/~ae244/docs/FluidMechanics-by-JamesFay/2003/Textbook/Nodes/chap06/node9.html
    // http://farside.ph.utexas.edu/teaching/336L/Fluidhtml/node106.html

@@ -49,21 +49,21 @@ public:
    struct Parameters
    {
       walberla::id_t uid {UniqueID<data::Particle>::invalidID()};
-      walberla::mesa_pd::Vec3 position {real_t(0)};
-      walberla::real_t interactionRadius {real_t(0)};
+      walberla::mesa_pd::Vec3 position {real_t{0}};
+      walberla::real_t interactionRadius {real_t{0}};
       walberla::mesa_pd::data::particle_flags::FlagT flags {};
       int owner {-1};
-      walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
-      walberla::real_t invMass {real_t(1)};
-      walberla::real_t charge {real_t(0)};
+      walberla::mesa_pd::Vec3 linearVelocity {real_t{0}};
+      walberla::real_t invMass {real_t{1}};
+      walberla::real_t charge {real_t{0}};
       size_t shapeID {};
       std::shared_ptr<walberla::mesa_pd::data::BaseShape> baseShape {make_shared<walberla::mesa_pd::data::BaseShape>()};
       walberla::mesa_pd::Rot3 rotation {};
-      walberla::mesa_pd::Vec3 angularVelocity {real_t(0)};
-      walberla::real_t radiusAtTemperature {real_t(0)};
+      walberla::mesa_pd::Vec3 angularVelocity {real_t{0}};
+      walberla::real_t radiusAtTemperature {real_t{0}};
       uint_t type {0};
       std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory {};
-      walberla::real_t temperature {real_t(0)};
+      walberla::real_t temperature {real_t{0}};
       int64_t clusterID {-1};
       int64_t segmentID {-1};
    };

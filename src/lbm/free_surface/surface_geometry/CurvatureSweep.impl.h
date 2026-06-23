@@ -108,7 +108,7 @@ void CurvatureSweepFiniteDifferences< Stencil_T, FlagField_T, ScalarField_T, Vec
 
                // equation (35) in Brackbill et al. discretized with finite difference method
                // according to Parker-Youngs
-               if constexpr (Stencil_T::D == uint_t(2))
+               if constexpr (Stencil_T::D == uint_t{2})
                {
                   const real_t weight =
                      real_c(stencil::gaussianMultipliers[stencil::D3Q27::idx[stencil::map2Dto3D[2][*dir]]]);

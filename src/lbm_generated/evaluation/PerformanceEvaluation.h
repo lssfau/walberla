@@ -86,9 +86,9 @@ public:
 
    uint64_t allFineCells() const
    {
-      uint64_t c( uint64_t(0) );
-      for( uint_t i = uint_t(0); i < levels_; ++i )
-         c += cells_.numberOfCells(i) * uint64_c( math::uintPow8( levels_ - uint_t(1) - i ) );
+      uint64_t c( uint64_t{0} );
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
+         c += cells_.numberOfCells(i) * uint64_c( math::uintPow8( levels_ - uint_t{1} - i ) );
       return c;
    }
 
@@ -105,7 +105,7 @@ public:
    double mlups( const uint_t timeSteps, const double time ) const
    {
       double m( 0.0 );
-      for( uint_t i = uint_t(0); i < levels_; ++i )
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
          m += double_c( timeSteps * math::uintPow2(i) ) * double_c( cells_.numberOfCells(i) );
       return m / ( time * 1000000.0 );
    }
@@ -123,9 +123,9 @@ public:
    double vMlups( const uint_t timeSteps, const double time ) const
    {
       double m( 0.0 );
-      for( uint_t i = uint_t(0); i < levels_; ++i )
-         m += double_c( timeSteps * math::uintPow2( levels_ - uint_t(1) ) ) *
-              double_c( uint64_c( math::uintPow8( levels_ - uint_t(1) - i ) ) * cells_.numberOfCells(i) );
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
+         m += double_c( timeSteps * math::uintPow2( levels_ - uint_t{1} ) ) *
+              double_c( uint64_c( math::uintPow8( levels_ - uint_t{1} - i ) ) * cells_.numberOfCells(i) );
       return m / ( time * 1000000.0 );
    }
 
@@ -142,7 +142,7 @@ public:
    double mflups( const uint_t timeSteps, const double time ) const
    {
       double m( 0.0 );
-      for( uint_t i = uint_t(0); i < levels_; ++i )
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
          m += double_c( timeSteps * math::uintPow2(i) ) * double_c( fluidCells_.numberOfCells(i) );
       return m / ( time * 1000000.0 );
    }
@@ -160,9 +160,9 @@ public:
    double vMflups( const uint_t timeSteps, const double time ) const
    {
       double m( 0.0 );
-      for( uint_t i = uint_t(0); i < levels_; ++i )
-         m += double_c( timeSteps * math::uintPow2( levels_ - uint_t(1) ) ) *
-              double_c( uint64_c( math::uintPow8( levels_ - uint_t(1) - i ) ) * fluidCells_.numberOfCells(i) );
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
+         m += double_c( timeSteps * math::uintPow2( levels_ - uint_t{1} ) ) *
+              double_c( uint64_c( math::uintPow8( levels_ - uint_t{1} - i ) ) * fluidCells_.numberOfCells(i) );
       return m / ( time * 1000000.0 );
    }
 
@@ -180,7 +180,7 @@ public:
 
    double fineTimeStepsPerSecond( const uint_t timeSteps, const double time ) const
    {
-      return double_c( timeSteps * math::uintPow2( levels_ - uint_t(1) ) ) / time;
+      return double_c( timeSteps * math::uintPow2( levels_ - uint_t{1} ) ) / time;
    }
 
 private:
@@ -288,15 +288,15 @@ std::string PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::logg
       << "\n- cores:       " << ( ( threadsPerCore_ == 0 ) ? na : coresString.str() )
       << "\n- time steps:  " << timeSteps;
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
-      oss << " (on the coarsest grid, " << ( timeSteps * math::uintPow2( levels_ - uint_t(1) ) ) << " on the finest grid)";
+      oss << " (on the coarsest grid, " << ( timeSteps * math::uintPow2( levels_ - uint_t{1} ) ) << " on the finest grid)";
    }
 
    oss << "\n- time:        " << time << " sec"
       << "\n- cells:       " << cells_.numberOfCells();
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
       oss << " (" << allFineCells() << " if everything were fine -> data reduction by factor of "
          << ( real_c( allFineCells() ) / real_c( cells_.numberOfCells() ) ) << ")";
@@ -305,10 +305,10 @@ std::string PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::logg
    oss << "\n- fluid cells: " << fluidCells_.numberOfCells() << " ("
       << ( real_c(100) * real_c( fluidCells_.numberOfCells() ) / real_c( cells_.numberOfCells() ) ) << " % of all cells)";
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
       oss << "\n- distribution of cells to different grid levels:";
-      for( uint_t i = uint_t(0); i < levels_; ++i )
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
          oss << "\n   + level " << i <<": " << cells_.numberOfCells(i) << " cells (" << fluidCells_.numberOfCells(i) << " fluid cells = "
          << ( real_c(100) * real_c( fluidCells_.numberOfCells(i) ) / real_c( cells_.numberOfCells(i) ) )
          << " % of all cells on this level)";
@@ -328,7 +328,7 @@ std::string PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::logg
       << "\n               " << ( ( threadsPerCore_ == 0 ) ? na : mflupsPerCoreString.str() ) << " MFLUPS / core"
       << "\n               " << timeStepsPerSecond( timeSteps, time ) << " time steps / second";
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
       std::ostringstream vMlupsPerCoreString;
       vMlupsPerCoreString << vMlupsPerCore( timeSteps, time );
@@ -379,19 +379,19 @@ void PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::getResultsF
    integerProperties[ "threadsPerCore" ]    = threadsPerCore_;
 
    integerProperties[ "timeSteps" ] = int_c( timeSteps );
-   if( levels_ > uint_t(1) )
-      integerProperties[ "fineTimeSteps" ] = int_c( timeSteps * math::uintPow2( levels_ - uint_t(1) ) );
+   if( levels_ > uint_t{1} )
+      integerProperties[ "fineTimeSteps" ] = int_c( timeSteps * math::uintPow2( levels_ - uint_t{1} ) );
 
    realProperties[ "time" ] = real_c( time );
 
    realProperties[ "cells" ] = real_c( cells_.numberOfCells() );
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
       realProperties[ "refinementCellsReduction" ] = real_c( allFineCells() ) / real_c( cells_.numberOfCells() );
    realProperties[ "fluidCells" ] = real_c( fluidCells_.numberOfCells() );
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
-      for( uint_t i = uint_t(0); i < levels_; ++i )
+      for( uint_t i = uint_t{0}; i < levels_; ++i )
       {
          std::ostringstream cells_i;
          std::ostringstream fluidCells_i;
@@ -412,7 +412,7 @@ void PerformanceEvaluationBase< CellCounter_T, FluidCellCounter_T >::getResultsF
    realProperties[ "MFLUPS_core" ]        = double_c( mflupsPerCore( timeSteps, time ) );
    realProperties[ "timeStepsPerSecond" ] = double_c( timeStepsPerSecond( timeSteps, time ) );
 
-   if( levels_ > uint_t(1) )
+   if( levels_ > uint_t{1} )
    {
       realProperties[ "vMLUPS" ]                 = double_c( vMlups( timeSteps, time ) );
       realProperties[ "vMLUPS_process" ]         = double_c( vMlupsPerProcess( timeSteps, time ) );

@@ -58,10 +58,10 @@ void periodicSync()
 
          auto p                       = ps.create();
          p->getPositionRef()          = pt;
-         p->getInteractionRadiusRef() = spacing * real_t(0.5);
+         p->getInteractionRadiusRef() = spacing * real_t{0.5};
          p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
          p->getTypeRef()              = 0;
-         p->getLinearVelocityRef()    = (forest->getDomain().center() - p->getPosition()).getNormalized() * real_t(0.1);
+         p->getLinearVelocityRef()    = (forest->getDomain().center() - p->getPosition()).getNormalized() * real_t{0.1};
       }
    }
 

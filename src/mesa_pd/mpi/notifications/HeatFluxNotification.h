@@ -58,7 +58,7 @@ public:
 template <>
 inline void reset<HeatFluxNotification>(data::Particle& p)
 {
-   p.setHeatFlux( real_t(0) );
+   p.setHeatFlux( real_t{0} );
 }
 
 inline void reduce(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)

@@ -162,7 +162,7 @@ public:
         auto domainFlag = flagField->getFlag(domainFlagUID);
 
         auto inner = flagField->xyzSize();
-        inner.expand( cell_idx_t(-1) );
+        inner.expand( cell_idx_t{-1} );
 
         indexVectorAll.clear();
         indexVectorInner.clear();

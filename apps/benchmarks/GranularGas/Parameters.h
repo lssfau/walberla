@@ -37,17 +37,17 @@ namespace mesa_pd {
 struct Parameters
 {
    std::string sorting = "none";
-   Vec3 normal = Vec3(real_t(1.0), real_t(1.0), real_t(1.0));
-   real_t spacing = real_t(1.0);
-   Vec3 shift = Vec3(real_t(0.1), real_t(0.1), real_t(0.1));
-   real_t radius = real_t(0.5);
+   Vec3 normal = Vec3(real_t{1.0}, real_t{1.0}, real_t{1.0});
+   real_t spacing = real_t{1.0};
+   Vec3 shift = Vec3(real_t{0.1}, real_t{0.1}, real_t{0.1});
+   real_t radius = real_t{0.5};
    bool bBarrier = false;
    bool storeNodeTimings = false;
    bool checkSimulation = false;
    int64_t numOuterIterations = 10;
    int64_t initialRefinementLevel = 0;
    int64_t simulationSteps = 10;
-   real_t dt = real_t(0.01);
+   real_t dt = real_t{0.01};
    int64_t visSpacing = 1000;
    std::string vtk_out = "vtk_out";
    std::string sqlFile = "benchmark.sqlite";
@@ -61,8 +61,8 @@ struct Parameters
    uint_t regridMin = uint_c(100);
    uint_t regridMax = uint_c(1000);
    int maxBlocksPerProcess = int_c(1000);
-   real_t baseWeight = real_t(10.0);
-   real_t metisipc2redist = real_t(1000.0);
+   real_t baseWeight = real_t{10.0};
+   real_t metisipc2redist = real_t{1000.0};
    std::string LBAlgorithm = "Hilbert";
    std::string metisAlgorithm = "PART_GEOM_KWAY";
    std::string metisWeightsToUse = "BOTH_WEIGHTS";

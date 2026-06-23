@@ -40,7 +40,7 @@ using geometry::TriangleMesh;
 template<typename Field_T>
 static inline Vector3<real_t> calcNormal(const Field_T & f, cell_idx_t i, cell_idx_t j, cell_idx_t k, uint_t fCoord )
 {
-   Vector3<real_t> ret( real_t(0) );
+   Vector3<real_t> ret( real_t{0} );
 
    if ( f.nrOfGhostLayers() >= 2 )
    {
@@ -401,7 +401,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
 
    for( auto i = f.beginSliceXYZ(targetInterval); i != f.end(); ++i )
    {
-      const RealVec3 offset (- real_t(0.5)*dx[0],-real_t(0.5)*dx[1],-real_t(0.5)*dx[2]);
+      const RealVec3 offset (- real_t{0.5}*dx[0],-real_t{0.5}*dx[1],-real_t{0.5}*dx[2]);
       RealVec3 curPos = offset + i.x() * ex +  i.y() * ey + i.z() * ez;
 
       std::array< real_t, 8 > value;
@@ -468,10 +468,10 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
             // not pre-computed, then interpolate edge
             const int e1 = mcEdges[e * 2];
             const int e2 = mcEdges[e * 2 + 1];
-            const RealVec3 p1 = pos[uint_t(e1)];    // scalar field pos 1
-            const RealVec3 p2 = pos[uint_t(e2)];    // scalar field pos 2
-            const real_t valp1 = value[uint_t(e1)]; // scalar field val 1
-            const real_t valp2 = value[uint_t(e2)]; // scalar field val 2
+            const RealVec3 p1 = pos[static_cast< uint_t >(e1)];    // scalar field pos 1
+            const RealVec3 p2 = pos[static_cast< uint_t >(e2)];    // scalar field pos 2
+            const real_t valp1 = value[static_cast< uint_t >(e1)]; // scalar field val 1
+            const real_t valp2 = value[static_cast< uint_t >(e2)]; // scalar field val 2
             const real_t mu = (threshold - valp1) / (valp2 - valp1);
             TriangleMesh::vertex_t position  = p1 + (p2 - p1) * mu + posOffset;
 
@@ -481,7 +481,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
             {
                TriangleMesh::normal_t normal    = calcNormal(f, i.x() + cubieOffsetX[uint_c(e1)],
                                                                 i.y() + cubieOffsetY[uint_c(e1)],
-                                                                i.z() + cubieOffsetZ[uint_c(e1)], fCoord ) * (real_t(1) - mu)
+                                                                i.z() + cubieOffsetZ[uint_c(e1)], fCoord ) * (real_t{1} - mu)
                                                 + calcNormal(f, i.x() + cubieOffsetX[uint_c(e2)],
                                                                 i.y() + cubieOffsetY[uint_c(e2)],
                                                                 i.z() + cubieOffsetZ[uint_c(e2)], fCoord) * (mu);
@@ -502,18 +502,18 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
       {
          if ( calcNormals )
          {
-            mesh.addTriangle(triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])]);
+            mesh.addTriangle(triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 2])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 2])]);
          }
          else
          {
-            mesh.addTriangle(triIndices[uint_t(mcTriTable[cubeIndex][e + 0])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 1])],
-                             triIndices[uint_t(mcTriTable[cubeIndex][e + 2])] );
+            mesh.addTriangle(triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 0])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 1])],
+                             triIndices[static_cast< uint_t >(mcTriTable[cubeIndex][e + 2])] );
          }
       }
    }

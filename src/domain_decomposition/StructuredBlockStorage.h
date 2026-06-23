@@ -529,7 +529,7 @@ inline uint_t StructuredBlockStorage::getNumberOfZCells( const uint_t level ) co
 
 inline uint_t StructuredBlockStorage::getNumberOfCells( const uint_t index, const uint_t level ) const {
 
-   WALBERLA_ASSERT_LESS( index, uint_t(3) )
+   WALBERLA_ASSERT_LESS( index, uint_t{3} )
    WALBERLA_ASSERT_LESS( level, domainCellBB_.size() )
 
    return uint_c( domainCellBB_[ level ].max()[ index ] + 1 );

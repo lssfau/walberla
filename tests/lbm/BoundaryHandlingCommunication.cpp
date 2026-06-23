@@ -72,8 +72,8 @@ const FlagUID  Fluid_Flag( "fluid" );
 const FlagUID    UBB_Flag( "velocity bounce back" );
 const FlagUID NoSlip_Flag( "no slip" );
 
-const uint_t FieldGhostLayers  = uint_t(1);
-const real_t GlobalOmega       = real_t(1.4);
+const uint_t FieldGhostLayers  = uint_t{1};
+const real_t GlobalOmega       = real_t{1.4};
 
 
 
@@ -146,7 +146,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
 
    // velocity bounce back ball :-)
 
-   const Vector3<real_t> center( real_t(36), real_t(27), real_t(33) );
+   const Vector3<real_t> center( real_t{36}, real_t{27}, real_t{33} );
    const real_t sqrRadius( real_t(7*7) );
 
    for( auto cell = flagField->beginWithGhostLayer(); cell != flagField->end(); ++cell )
@@ -160,7 +160,7 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
 
       Vector3<real_t> distance = center - cellCenter;
       if( distance.sqrLength() <= sqrRadius )
-         boundaryHandling->forceBoundary( UBB_Flag, x, y, z, typename UBB_T::Velocity( velocity_, real_t(0), real_t(0) ) );
+         boundaryHandling->forceBoundary( UBB_Flag, x, y, z, typename UBB_T::Velocity( velocity_, real_t{0}, real_t{0} ) );
    }
 
    boundaryHandling->fillWithDomain( domainBB );
@@ -247,18 +247,18 @@ int main( int argc, char ** argv )
    if( MPIManager::instance()->numProcesses() != 8 )
       WALBERLA_ABORT( "The number of processes must be equal to 8!" );
 
-   auto blocks = blockforest::createUniformBlockGrid( uint_t(6),  uint_t(6),  uint_t(6),
-                                                      uint_t(12), uint_t(9), uint_t(11),
+   auto blocks = blockforest::createUniformBlockGrid( uint_t{6},  uint_t{6},  uint_t{6},
+                                                      uint_t{12}, uint_t{9}, uint_t{11},
                                                       real_c(1.0),
-                                                      uint_t(2),  uint_t(2),  uint_t(2),
+                                                      uint_t{2},  uint_t{2},  uint_t{2},
                                                       true, false, false ); // periodicity
 
-   const real_t velocity = real_t(0.0005);
+   const real_t velocity = real_t{0.0005};
 
 #ifdef TEST_USES_VTK_OUTPUT
-   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t(201) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t{201} );
 #else
-   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t(3) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t{3} );
 #endif
 
    ///////////
@@ -360,10 +360,10 @@ int main( int argc, char ** argv )
 
 #ifdef TEST_USES_VTK_OUTPUT
 
-   field::createVTKOutput< FlagField_T >( flagFieldId1, *blocks, "flag_field_d3q19_no_comm", uint_t(1), uint_t(1) )();
-   field::createVTKOutput< FlagField_T >( flagFieldId2, *blocks, "flag_field_d3q19_comm", uint_t(1), uint_t(1) )();
+   field::createVTKOutput< FlagField_T >( flagFieldId1, *blocks, "flag_field_d3q19_no_comm", uint_t{1}, uint_t{1} )();
+   field::createVTKOutput< FlagField_T >( flagFieldId2, *blocks, "flag_field_d3q19_comm", uint_t{1}, uint_t{1} )();
 
-   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t(10) );
+   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t{10} );
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldId1 );
    fluidFilter.addFlag( Fluid_Flag );

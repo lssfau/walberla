@@ -84,7 +84,7 @@ int main(int argc, char** argv)
       const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
       const uint_t timesteps             = parameters.getParameter< uint_t >("timesteps", uint_c(50));
       const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
-      const uint_t warmupSteps  = parameters.getParameter< uint_t >("warmupSteps", uint_t(2));
+      const uint_t warmupSteps  = parameters.getParameter< uint_t >("warmupSteps", uint_t{2});
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       // CPU fields

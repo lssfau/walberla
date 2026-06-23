@@ -42,7 +42,7 @@ public:
    }
 
    data::HalfSpace halfspace_ = data::HalfSpace(Vec3(1,0,0));
-   data::Sphere    sphere_    = data::Sphere(real_t(0.5));
+   data::Sphere    sphere_    = data::Sphere(real_t{0.5});
 };
 
 class ShapeTester

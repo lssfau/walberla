@@ -41,9 +41,9 @@ std::string boolToText( const bool b )
 
 
 BlockForestEvaluation::BlockForestEvaluation( const BlockForest & forest ) :
-   forest_( forest ), blockStatistics_( forest.getNumberOfLevels() + uint_t(1) )
+   forest_( forest ), blockStatistics_( forest.getNumberOfLevels() + uint_t{1} )
 {
-   for( uint_t i = uint_t(0); i <= forest.getNumberOfLevels(); ++i )
+   for( uint_t i = uint_t{0}; i <= forest.getNumberOfLevels(); ++i )
    {
       math::DistributedSample sample;
 
@@ -60,7 +60,7 @@ BlockForestEvaluation::BlockForestEvaluation( const BlockForest & forest ) :
          blockStatistics_[i].avg = sample.mean();
          blockStatistics_[i].stdDev = sample.stdDeviation();
          const auto relStdDev = sample.relativeStdDeviation();
-         blockStatistics_[i].relStdDev = math::isnan( relStdDev ) ? real_t(0) : relStdDev;
+         blockStatistics_[i].relStdDev = math::isnan( relStdDev ) ? real_t{0} : relStdDev;
       }
    }
 }
@@ -98,10 +98,10 @@ void BlockForestEvaluation::toStream( std::ostream & os ) const
             << "\n   + relStdDev = " << blockStatistics_.back().relStdDev;
       }
 
-      if( forest_.getNumberOfLevels() > uint_t(1) )
+      if( forest_.getNumberOfLevels() > uint_t{1} )
       {
          os << "\n- distribution to different levels:";
-         for( uint_t l = uint_t(0); l != forest_.getNumberOfLevels(); ++l )
+         for( uint_t l = uint_t{0}; l != forest_.getNumberOfLevels(); ++l )
          {
             os << "\n   + level " << l
                << "\n      - " << uint_c( blockStatistics_[l].sum + real_c(0.5) ) << " blocks ..."

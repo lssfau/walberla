@@ -57,7 +57,7 @@ class ParticlePresenceLevelDetermination
             getNumberOfLocalAndShadowParticlesInNeighborhood(minTargetLevel.first);
 
          uint_t targetLevelOfBlock = currentLevelOfBlock; // keep everything as it is
-         if (numberOfParticlesInDirectNeighborhood > uint_t(0))
+         if (numberOfParticlesInDirectNeighborhood > uint_t{0})
          {
             // set block to finest level if there are particles nearby
             targetLevelOfBlock = finestLevel_;
@@ -65,10 +65,10 @@ class ParticlePresenceLevelDetermination
          else
          {
             // block could coarsen since there are no particles nearby
-            if (currentLevelOfBlock > uint_t(0)) targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
+            if (currentLevelOfBlock > uint_t{0}) targetLevelOfBlock = currentLevelOfBlock - uint_t{1};
          }
 
-         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1),
+         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t{1},
                                    "Only level difference of maximum 1 allowed!");
          minTargetLevel.second = targetLevelOfBlock;
       }
@@ -77,7 +77,7 @@ class ParticlePresenceLevelDetermination
  private:
    uint_t getNumberOfLocalAndShadowParticlesInNeighborhood(const Block* block)
    {
-      auto numParticles = uint_t(0);
+      auto numParticles = uint_t{0};
 
       // add particles of current block
       const auto infoIt = infoCollection_->find(block->getId());

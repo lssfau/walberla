@@ -44,8 +44,8 @@ using Field_T = Field< uint_t, 1 >;
 
 auto FieldAdder = [](IBlock* const block, StructuredBlockStorage* const storage) {
    return new Field_T(storage->getNumberOfXCells(*block), storage->getNumberOfYCells(*block),
-                      storage->getNumberOfZCells(*block), uint_t(0), field::fzyx,
-                      make_shared< field::AllocateAligned< uint_t, uint_t(64) > >());
+                      storage->getNumberOfZCells(*block), uint_t{0}, field::fzyx,
+                      make_shared< field::AllocateAligned< uint_t, uint_t{64} > >());
 };
 
 class Sweep1

@@ -176,7 +176,7 @@ public:
 
       normalFormParameters_ = std::accumulate(normalizedFormParametersVector_.begin(),
                                               normalizedFormParametersVector_.end(),
-                                              FormParameters(0_r)) / real_t(numFormParameters); // = average of form parameters
+                                              FormParameters(0_r)) / static_cast< real_t >(numFormParameters); // = average of form parameters
 
       dist_ = std::uniform_int_distribution<uint_t>(0, numFormParameters-1);
    }
@@ -522,7 +522,7 @@ public:
       }
 
       auto particleNumbers = transferMassFractionsToParticleNumbersFromAvgVolumes(massFractions, avgVolumesPerFraction);
-      auto totalParticles = std::accumulate(particleNumbers.begin(), particleNumbers.end(), real_t(0));
+      auto totalParticles = std::accumulate(particleNumbers.begin(), particleNumbers.end(), real_t{0});
       std::string outString = "Particle probabilities per size fraction: ";
       for(const auto & p : particleNumbers) outString += std::to_string(p/totalParticles) + " | ";
       WALBERLA_LOG_INFO_ON_ROOT(outString);

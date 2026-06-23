@@ -34,7 +34,7 @@
 namespace walberla {
 namespace mesa_pd {
 
-const real_t radius = real_t(20);
+const real_t radius = real_t{20};
 
 walberla::id_t createSphere(data::ParticleStorage& ps, domain::IDomain& domain)
 {
@@ -94,14 +94,14 @@ int main( int argc, char ** argv )
    SNN(ps, domain);
 
    std::vector<real_t> deltas {
-      real_t(0),
-            real_t(4.9),
-            real_t(5.1),
-            real_t(10),
-            real_t(14.9),
-            real_t(15.1),
-            real_t(20),
-            real_t(24.9)};
+      real_t{0},
+            real_t{4.9},
+            real_t{5.1},
+            real_t{10},
+            real_t{14.9},
+            real_t{15.1},
+            real_t{20},
+            real_t{24.9}};
 
    for (auto delta : deltas)
    {

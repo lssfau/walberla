@@ -36,10 +36,10 @@ struct QCriterion
 {
    template< typename VelocityField_T, typename Filter_T >
    static inline real_t get(const VelocityField_T& velocityField, const Filter_T& filter, const cell_idx_t x,
-                            const cell_idx_t y, const cell_idx_t z, real_t dx = real_t(1), real_t dy = real_t(1),
-                            real_t dz = real_t(1))
+                            const cell_idx_t y, const cell_idx_t z, real_t dx = real_t{1}, real_t dy = real_t{1},
+                            real_t dz = real_t{1})
    {
-      const auto one = cell_idx_t(1);
+      const auto one = cell_idx_t{1};
 
       auto f(velocityField.flattenedShallowCopy());
 
@@ -55,16 +55,16 @@ struct QCriterion
 
          return calculate(xa, xb, ya, yb, za, zb, dx, dy, dz);
       }
-      return real_t(0);
+      return real_t{0};
    }
 
    static inline real_t calculate(const Vector3< real_t > xa, const Vector3< real_t > xb, const Vector3< real_t > ya,
                                   const Vector3< real_t > yb, const Vector3< real_t > za, const Vector3< real_t > zb,
                                   const real_t dx, const real_t dy, const real_t dz)
    {
-      const auto halfInvDx = real_t(0.5) / dx;
-      const auto halfInvDy = real_t(0.5) / dy;
-      const auto halfInvDz = real_t(0.5) / dz;
+      const auto halfInvDx = real_t{0.5} / dx;
+      const auto halfInvDy = real_t{0.5} / dy;
+      const auto halfInvDz = real_t{0.5} / dz;
 
       const real_t duxdx = (xa[0] - xb[0]) * halfInvDx;
       const real_t duxdy = (ya[0] - yb[0]) * halfInvDy;
@@ -79,15 +79,15 @@ struct QCriterion
       const real_t duzdz = (za[2] - zb[2]) * halfInvDz;
 
       // Q = 1/2 * (||W||² - ||S||²)
-      real_t sNormSq = duxdx * duxdx + duydy * duydy + duzdz * duzdz + real_t(0.5) * (duxdy + duydx) * (duxdy + duydx) +
-                       real_t(0.5) * (duydz + duzdy) * (duydz + duzdy) +
-                       real_t(0.5) * (duxdz + duzdx) * (duxdz + duzdx);
+      real_t sNormSq = duxdx * duxdx + duydy * duydy + duzdz * duzdz + real_t{0.5} * (duxdy + duydx) * (duxdy + duydx) +
+                       real_t{0.5} * (duydz + duzdy) * (duydz + duzdy) +
+                       real_t{0.5} * (duxdz + duzdx) * (duxdz + duzdx);
 
-      real_t omegaNormSq = real_t(0.5) * (duxdz - duzdx) * (duxdz - duzdx) +
-                           real_t(0.5) * (duxdy - duydx) * (duxdy - duydx) +
-                           real_t(0.5) * (duydz - duzdy) * (duydz - duzdy);
+      real_t omegaNormSq = real_t{0.5} * (duxdz - duzdx) * (duxdz - duzdx) +
+                           real_t{0.5} * (duxdy - duydx) * (duxdy - duydx) +
+                           real_t{0.5} * (duydz - duzdy) * (duydz - duzdy);
 
-      return real_t(0.5) * (omegaNormSq - sNormSq);
+      return real_t{0.5} * (omegaNormSq - sNormSq);
    }
 };
 

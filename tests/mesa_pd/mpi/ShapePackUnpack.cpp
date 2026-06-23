@@ -51,8 +51,8 @@ void checkBox()
 {
    using namespace walberla::mpi;
 
-   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Box>(Vec3(real_t(2.53), real_t(4.53), real_t(3.53)));
-   bs0->updateMassAndInertia(real_t(123));
+   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Box>(Vec3(real_t{2.53}, real_t{4.53}, real_t{3.53}));
+   bs0->updateMassAndInertia(real_t{123});
    std::shared_ptr<data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("packing box");
@@ -80,9 +80,9 @@ void checkCylindricalBoundary()
 {
    using namespace walberla::mpi;
 
-   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::CylindricalBoundary>(real_t(9.99),
-                                                                                      Vec3(real_t(2.53), real_t(4.53), real_t(3.53)).getNormalized());
-   bs0->updateMassAndInertia(real_t(123));
+   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::CylindricalBoundary>(real_t{9.99},
+                                                                                      Vec3(real_t{2.53}, real_t{4.53}, real_t{3.53}).getNormalized());
+   bs0->updateMassAndInertia(real_t{123});
    std::shared_ptr<data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("packing cylindrical boundary");
@@ -111,8 +111,8 @@ void checkEllipsoid()
 {
    using namespace walberla::mpi;
 
-   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Ellipsoid>(Vec3(real_t(2.53), real_t(4.53), real_t(3.53)));
-   bs0->updateMassAndInertia(real_t(123));
+   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Ellipsoid>(Vec3(real_t{2.53}, real_t{4.53}, real_t{3.53}));
+   bs0->updateMassAndInertia(real_t{123});
    std::shared_ptr<data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("packing ellipsoid");
@@ -140,8 +140,8 @@ void checkHalfSpace()
 {
    using namespace walberla::mpi;
 
-   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::HalfSpace>(Vec3(real_t(2.53), real_t(4.53), real_t(3.53)));
-   bs0->updateMassAndInertia(real_t(123));
+   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::HalfSpace>(Vec3(real_t{2.53}, real_t{4.53}, real_t{3.53}));
+   bs0->updateMassAndInertia(real_t{123});
    std::shared_ptr<data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("packing half space");
@@ -169,8 +169,8 @@ void checkSphere()
 {
    using namespace walberla::mpi;
 
-   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Sphere>(real_t(2.53));
-   bs0->updateMassAndInertia(real_t(123));
+   std::shared_ptr<data::BaseShape> bs0 = std::make_shared<data::Sphere>(real_t{2.53});
+   bs0->updateMassAndInertia(real_t{123});
    std::shared_ptr<data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("packing sphere");

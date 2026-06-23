@@ -42,7 +42,7 @@ namespace lbm {
 //template< typename LatticeModel_T > 
 //struct VelocityField
 //{
-//   typedef walberla::field::GhostLayerField< Vector3<real_t>, uint_t(1) > type;
+//   typedef walberla::field::GhostLayerField< Vector3<real_t>, uint_t{1} > type;
 //};
 //
 //
@@ -72,7 +72,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity += latticeModel.forceModel().forceDensity() * real_t(0.5) / rho;
+      velocity += latticeModel.forceModel().forceDensity() * real_t{0.5} / rho;
    }
 };
 
@@ -84,7 +84,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity += latticeModel.forceModel().forceDensity() * real_t(0.5);
+      velocity += latticeModel.forceModel().forceDensity() * real_t{0.5};
    }
 };
 
@@ -95,7 +95,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity += latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5) / rho;
+      velocity += latticeModel.forceModel().forceDensity(x,y,z) * real_t{0.5} / rho;
    }
 };
 
@@ -106,7 +106,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity += latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5);
+      velocity += latticeModel.forceModel().forceDensity(x,y,z) * real_t{0.5};
    }
 };
 
@@ -117,7 +117,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity -= latticeModel.forceModel().forceDensity() * real_t(0.5) / rho;
+      velocity -= latticeModel.forceModel().forceDensity() * real_t{0.5} / rho;
    }
 };
 
@@ -128,7 +128,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity -= latticeModel.forceModel().forceDensity() * real_t(0.5);
+      velocity -= latticeModel.forceModel().forceDensity() * real_t{0.5};
    }
 };
 
@@ -139,7 +139,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
    {
-      velocity -= latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5) / rho;
+      velocity -= latticeModel.forceModel().forceDensity(x,y,z) * real_t{0.5} / rho;
    }
 };
 
@@ -150,7 +150,7 @@ struct VelocityCallbackCorrection< LatticeModel_T >
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
    {
-      velocity -= latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5);
+      velocity -= latticeModel.forceModel().forceDensity(x,y,z) * real_t{0.5};
    }
 };
 

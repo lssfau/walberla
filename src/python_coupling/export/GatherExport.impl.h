@@ -132,7 +132,7 @@ void exportGatherFunctions(py::module_ &m)
          const py::tuple & slice, int targetRank = 0 ) {
         return internal::gatherWrapper< FieldTypes... >(blocks, name, slice, targetRank);
       },
-      "blocks"_a, "name"_a, "slice"_a, "targetRank"_a = uint_t(0));
+      "blocks"_a, "name"_a, "slice"_a, "targetRank"_a = uint_t{0});
 }
 
 } // namespace moduleName

@@ -113,14 +113,14 @@ inline void VelocityVerletPreForceUpdate::operator()(const size_t idx, Accessor&
    {
       ac.setPosition(idx, ac.getPosition(idx) +
                             ac.getLinearVelocity(idx) * dt_ +
-                            real_t(0.5) * ac.getInvMass(idx) * ac.getOldForce(idx) * dt_ * dt_);
+                            real_t{0.5} * ac.getInvMass(idx) * ac.getOldForce(idx) * dt_ * dt_);
       // note: contribution (J*omega) x omega is ignored here -> see template for other variant
       const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
                                                   ac.getInvInertiaBF(idx)) * ac.getOldTorque(idx);
 
 
       // Calculating the rotation angle
-      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
+      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + real_t{0.5} * wdot * dt_ * dt_);
 
       // Calculating the new orientation
       auto rotation = ac.getRotation(idx);
@@ -137,7 +137,7 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t idx, Accessor
    if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
       ac.setLinearVelocity(idx, ac.getLinearVelocity(idx) +
-                                  real_t(0.5) * ac.getInvMass(idx) * (ac.getOldForce(idx) + ac.getForce(idx)) * dt_);
+                                  real_t{0.5} * ac.getInvMass(idx) * (ac.getOldForce(idx) + ac.getForce(idx)) * dt_);
       const auto torque = 0.5_r * (ac.getOldTorque(idx) + ac.getTorque(idx));
       const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
                                                   ac.getInvInertiaBF(idx)) * torque;
@@ -147,9 +147,9 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t idx, Accessor
    }
 
    ac.setOldForce(idx,       ac.getForce(idx));
-   ac.setForce(idx,          Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setForce(idx,          Vec3(real_t{0}, real_t{0}, real_t{0}));
    ac.setOldTorque(idx,      ac.getTorque(idx));
-   ac.setTorque(idx,         Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setTorque(idx,         Vec3(real_t{0}, real_t{0}, real_t{0}));
 }
 
 } //namespace kernel

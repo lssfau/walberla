@@ -38,12 +38,12 @@ void check( )
 {
    using namespace walberla::mesa_pd::collision_detection;
 
-   auto pos0    = Vec3(real_t(1),real_t(2),real_t(3));
-   auto radius0 = real_t(0.6);
-   auto pos1    = Vec3(real_t(2),real_t(2),real_t(3));
-   auto radius1 = real_t(0.6);
+   auto pos0    = Vec3(real_t{1},real_t{2},real_t{3});
+   auto radius0 = real_t{0.6};
+   auto pos1    = Vec3(real_t{2},real_t{2},real_t{3});
+   auto radius1 = real_t{0.6};
 
-   auto sp0 = data::Sphere(real_t(0.6));
+   auto sp0 = data::Sphere(real_t{0.6});
    auto geom0 = Support(pos0, Rot3(), sp0);
    auto geom1 = Support(pos1, Rot3(), sp0);
 
@@ -51,7 +51,7 @@ void check( )
    Vec3   epa_contactPoint;
    real_t epa_penetrationDepth;
 
-   real_t margin = real_t(1e-4);
+   real_t margin = real_t{1e-4};
    GJK gjk;
    WALBERLA_CHECK(gjk.doGJKmargin(geom0, geom1, margin));
    EPA epa;

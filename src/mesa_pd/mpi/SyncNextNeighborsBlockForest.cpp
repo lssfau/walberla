@@ -58,7 +58,7 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
 
    for (auto& blk : bf->getBlockMap())
    {
-      for( uint_t i = uint_t(0); i != blk.second->getNeighborhoodSize(); ++i )
+      for( uint_t i = uint_t{0}; i != blk.second->getNeighborhoodSize(); ++i )
       {
          auto nbProcessRank = blk.second->getNeighborProcess(i);
          if (bs.sendBuffer(nbProcessRank).isEmpty())
@@ -165,7 +165,7 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(walberla::mpi
       // Update nearest neighbor processes.
       auto isInsideDomain = isInsideAABB(pIt->getPosition(), pIt->getInteractionRadius(), bf->getDomain());
       std::vector<int> ranksAlreadyTreated{int_c(ownRank)};
-      for( uint_t nb = uint_t(0); nb < currentBlock->getNeighborhoodSize(); ++nb )
+      for( uint_t nb = uint_t{0}; nb < currentBlock->getNeighborhoodSize(); ++nb )
       {
          auto nbProcessRank = currentBlock->getNeighborProcess(nb);
          if (std::ranges::find(ranksAlreadyTreated, int_c(nbProcessRank)) != ranksAlreadyTreated.end())
@@ -228,7 +228,7 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(walberla::mpi
       {
          //find new owner
          int ownerRank = -1;
-         for( uint_t i = uint_t(0); i != currentBlock->getNeighborhoodSize(); ++i )
+         for( uint_t i = uint_t{0}; i != currentBlock->getNeighborhoodSize(); ++i )
          {
             if (currentBlock->getNeighborAABB(i).contains(pIt->getPosition()))
             {

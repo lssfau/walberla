@@ -212,9 +212,9 @@ static inline void getCellsAndProcesses( const Config::BlockHandle & configBlock
    getCells( configBlock, xCells, yCells, zCells );
 
    std::vector< real_t > weighting;
-   weighting.push_back( configBlock.getParameter< real_t >( "xWeight", real_t(1) ) / real_c(xCells) );
-   weighting.push_back( configBlock.getParameter< real_t >( "yWeight", real_t(1) ) / real_c(yCells) );
-   weighting.push_back( configBlock.getParameter< real_t >( "zWeight", real_t(1) ) / real_c(zCells) );
+   weighting.push_back( configBlock.getParameter< real_t >( "xWeight", real_t{1} ) / real_c(xCells) );
+   weighting.push_back( configBlock.getParameter< real_t >( "yWeight", real_t{1} ) / real_c(yCells) );
+   weighting.push_back( configBlock.getParameter< real_t >( "zWeight", real_t{1} ) / real_c(zCells) );
 
    std::vector< uint_t > processes = math::getFactors( numberOfProcesses, 3, weighting );
 
@@ -260,7 +260,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
    sforest.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
 
-   sforest.init( AABB( real_t(0), real_t(0), real_t(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
+   sforest.init( AABB( real_t{0}, real_t{0}, real_t{0}, real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
                                                         real_c( numberOfYBlocks * numberOfYCellsPerBlock ),
                                                         real_c( numberOfZBlocks * numberOfZCellsPerBlock ) ),
                                                         numberOfXBlocks, numberOfYBlocks, numberOfZBlocks, false, false, false );
@@ -294,7 +294,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
       MPIManager::instance()->useWorldComm();
 
       sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, nullptr ),
-                           numberOfXProcesses * numberOfYProcesses * numberOfZProcesses, real_t(0), 0, true );
+                           numberOfXProcesses * numberOfYProcesses * numberOfZProcesses, real_t{0}, 0, true );
    }
 
    WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest created successfully:\n" << sforest );
@@ -309,7 +309,7 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    uint_t numberOfZCellsPerBlock;
    getCells( configBlock, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
 
-   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t( 1 ) );
+   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t{ 1 } );
 
    if( configBlock.isDefined( "sbffile" ) )
    {
@@ -673,10 +673,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // add pdf field to blocks
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::fzyx ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::zyxf );
 
    // add flag field to blocks
@@ -685,7 +685,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add LB boundary handling to blocks
 
-   const real_t velocity = configBlock.getParameter< real_t >( "velocity", real_t(0.05) );
+   const real_t velocity = configBlock.getParameter< real_t >( "velocity", real_t{0.05} );
 
    BlockDataID boundaryHandlingId = blocks->template addStructuredBlockData< typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T >(
             MyBoundaryHandling< LatticeModel_T >( flagFieldId, pdfFieldId, velocity ), "boundary handling" );
@@ -872,7 +872,7 @@ int main( int argc, char **argv )
    {
       std::string  sbffile           = configBlock.getParameter< std::string >( "sbffile" );
       const uint_t numberOfProcesses = configBlock.getParameter< uint_t >( "processes" );
-      const uint_t blocksPerProcess  = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t( 1 ) );
+      const uint_t blocksPerProcess  = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t{ 1 } );
 
       std::ostringstream infoString;
       infoString << "You have selected the option of just creating the block structure (= domain decomposition) and saving the result to file\n"
@@ -952,7 +952,7 @@ int main( int argc, char **argv )
       directComm = false;
    }
 
-   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) ); // on the coarsest grid!
+   const real_t omega = configBlock.getParameter< real_t >( "omega", real_t{1.4} ); // on the coarsest grid!
 
    // executing benchmark
 

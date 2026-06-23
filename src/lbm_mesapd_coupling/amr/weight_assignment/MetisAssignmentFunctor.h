@@ -54,8 +54,8 @@ public:
 
 private:
    std::vector< WeightEvaluationFct > weightEvaluationFctVector_;
-   real_t blockBaseWeight_ = real_t(1);
-   real_t weightMultiplicator_ = real_t(1);
+   real_t blockBaseWeight_ = real_t{1};
+   real_t weightMultiplicator_ = real_t{1};
 };
 
 

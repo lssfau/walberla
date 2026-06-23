@@ -81,7 +81,7 @@ private:
 template< typename pid_t, typename idx_t >
 struct Node
 {
-   Node() : index_( std::make_pair( pid_t(0), std::numeric_limits< idx_t >::max() ) ) {}
+   Node() : index_( std::make_pair( pid_t{0}, std::numeric_limits< idx_t >::max() ) ) {}
    Node( const std::pair< pid_t, idx_t > & index ) : index_( index ) {}
    std::pair< pid_t, idx_t > index_;
    std::vector< Node > children_;
@@ -256,11 +256,11 @@ void DynamicCurveBalance< PhantomData_T >::allGatherWeighted( std::vector< std::
       
    std::vector< std::vector< std::pair< BlockID, weight_t > > > allBlocks( processes ); // one vector for every process
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
       recvBuffer >> allBlocks[p];
    recvBuffer.reset();
    
-   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1};
    std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( numLevels ); // for every level one vector of pair(source process ID, index in 'allBlocks')
 
    if( hilbert_ )
@@ -300,11 +300,11 @@ void DynamicCurveBalance< PhantomData_T >::allGatherNoWeight( std::vector< std::
    
    std::vector< std::vector< BlockID > > allBlocks( processes ); // one vector for every process
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
       recvBuffer >> allBlocks[p];
    recvBuffer.reset();
 
-   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1};
    std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( numLevels ); // for every level one vector of pair(source process ID, index in 'allBlocks')
 
    if( hilbert_ )
@@ -374,7 +374,7 @@ void DynamicCurveBalance< PhantomData_T >::masterWeighted( std::vector< std::pai
       WALBERLA_ASSERT( allBlocks[0].empty() );
       allBlocks[0] = localBlocks;
 
-      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1};
       blocksPerLevel.resize( numLevels );
 
       if( hilbert_ )
@@ -449,7 +449,7 @@ void DynamicCurveBalance< PhantomData_T >::masterNoWeight( std::vector< std::pai
       WALBERLA_ASSERT( allBlocks[0].empty() );
       allBlocks[0] = localBlocks;
 
-      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1};
       blocksPerLevel.resize( numLevels );
 
       if( hilbert_ )
@@ -485,9 +485,9 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vect
 
    std::vector< shared_ptr< Node > > forest( blockforest.getXSize() * blockforest.getYSize() * blockforest.getZSize() );
 
-   for( pid_t p = pid_t(0); p != pid_c( allBlocks.size() ); ++p )
+   for( pid_t p = pid_t{0}; p != pid_c( allBlocks.size() ); ++p )
    {
-      for( idx_t i = idx_t(0); i != idx_c( allBlocks[uint_c(p)].size() ); ++i )
+      for( idx_t i = idx_t{0}; i != idx_c( allBlocks[uint_c(p)].size() ); ++i )
       {
          BlockID id( allBlocks[uint_c(p)][i].first );
          addBlockToForest( forest, std::make_pair(p,i), id, blockforest.getLevelFromBlockId(id) );
@@ -496,8 +496,8 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vect
 
    // traverse forest in hilbert order
 
-   uint_t y( uint_t(0) );
-   uint_t x( uint_t(0) );
+   uint_t y( uint_t{0} );
+   uint_t x( uint_t{0} );
 
    uint_t yLoopEnd( blockforest.getYSize() );
    uint_t xLoopEnd( blockforest.getXSize() );
@@ -521,7 +521,7 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vect
                std::stack< uint_t > orientation;
 
                stack.push( root.get() );
-               orientation.push( uint_t(0) );
+               orientation.push( uint_t{0} );
 
                while( !stack.empty() )
                {
@@ -544,8 +544,8 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vect
                   else
                   {
                      auto & index = node->index_;
-                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ].first ) : uint_t(0);
-                     WALBERLA_ASSERT_LESS( level, levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1) );
+                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ].first ) : uint_t{0};
+                     WALBERLA_ASSERT_LESS( level, levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1} );
                      blocksPerLevel[ level ].push_back( index );
                   }
                }
@@ -575,9 +575,9 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vect
 
    std::vector< shared_ptr< Node > > forest( blockforest.getXSize() * blockforest.getYSize() * blockforest.getZSize() );
 
-   for( pid_t p = pid_t(0); p != pid_c( allBlocks.size() ); ++p )
+   for( pid_t p = pid_t{0}; p != pid_c( allBlocks.size() ); ++p )
    {
-      for( idx_t i = idx_t(0); i != idx_c( allBlocks[uint_c(p)].size() ); ++i )
+      for( idx_t i = idx_t{0}; i != idx_c( allBlocks[uint_c(p)].size() ); ++i )
       {
          BlockID id( allBlocks[uint_c(p)][i] );
          addBlockToForest( forest, std::make_pair(p,i), id, blockforest.getLevelFromBlockId(id) );
@@ -586,8 +586,8 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vect
 
    // traverse forest in hilbert order
 
-   uint_t y( uint_t(0) );
-   uint_t x( uint_t(0) );
+   uint_t y( uint_t{0} );
+   uint_t x( uint_t{0} );
 
    uint_t yLoopEnd( blockforest.getYSize() );
    uint_t xLoopEnd( blockforest.getXSize() );
@@ -611,7 +611,7 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vect
                std::stack< uint_t > orientation;
 
                stack.push( root.get() );
-               orientation.push( uint_t(0) );
+               orientation.push( uint_t{0} );
 
                while( !stack.empty() )
                {
@@ -634,8 +634,8 @@ void DynamicCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vect
                   else
                   {
                      auto & index = node->index_;
-                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ] ) : uint_t(0);
-                     WALBERLA_ASSERT_LESS( level , levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1) );
+                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ] ) : uint_t{0};
+                     WALBERLA_ASSERT_LESS( level , levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1} );
                      blocksPerLevel[ level ].push_back( index );
                   }
                }
@@ -660,7 +660,7 @@ void DynamicCurveBalance< PhantomData_T >::addBlockToForest( std::vector< shared
 {
    std::stack< uint_t > path;
 
-   for( uint_t l = uint_t(0); l != level; ++l )
+   for( uint_t l = uint_t{0}; l != level; ++l )
    {
       path.push( id.getBranchId() );
       id.removeBranchId();
@@ -669,12 +669,12 @@ void DynamicCurveBalance< PhantomData_T >::addBlockToForest( std::vector< shared
 
    if( ! (forest[ path.top() ]) )
    {
-      if( path.size() == uint_t(1) )
+      if( path.size() == uint_t{1} )
          forest[ path.top() ] = walberla::make_shared< Node >( index );
       else
       {
          forest[ path.top() ] = walberla::make_shared< Node >();
-         forest[ path.top() ]->children_.resize( uint_t(8) );
+         forest[ path.top() ]->children_.resize( uint_t{8} );
       }
    }
 
@@ -683,21 +683,21 @@ void DynamicCurveBalance< PhantomData_T >::addBlockToForest( std::vector< shared
 
    while( !path.empty() )
    {
-      WALBERLA_ASSERT_EQUAL( node->children_.size(), uint_t(8) );
-      WALBERLA_ASSERT_LESS( path.top(), uint_t(8) );
+      WALBERLA_ASSERT_EQUAL( node->children_.size(), uint_t{8} );
+      WALBERLA_ASSERT_LESS( path.top(), uint_t{8} );
 
-      if( path.size() == uint_t(1) )
+      if( path.size() == uint_t{1} )
       {
-         WALBERLA_ASSERT_EQUAL( node->children_[ path.top() ].index_.first, pid_t(0) );
+         WALBERLA_ASSERT_EQUAL( node->children_[ path.top() ].index_.first, pid_t{0} );
          WALBERLA_ASSERT_EQUAL( node->children_[ path.top() ].index_.second, std::numeric_limits< idx_t >::max() );
          WALBERLA_ASSERT( node->children_[ path.top() ].children_.empty() );
          node->children_[ path.top() ].index_ = index;
       }
       else if( node->children_[ path.top() ].children_.empty() )
       {
-         WALBERLA_ASSERT_EQUAL( node->index_.first, pid_t(0) );
+         WALBERLA_ASSERT_EQUAL( node->index_.first, pid_t{0} );
          WALBERLA_ASSERT_EQUAL( node->index_.second, std::numeric_limits< idx_t >::max() );
-         node->children_[ path.top() ].children_.resize( uint_t(8) );
+         node->children_[ path.top() ].children_.resize( uint_t{8} );
       }
 
       node = &(node->children_[ path.top() ]);
@@ -714,11 +714,11 @@ void DynamicCurveBalance< PhantomData_T >::mortonOrderWeighted( const std::vecto
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
    {
-      for( uint_t i = uint_t(0); i != allBlocks[p].size(); ++i )
+      for( uint_t i = uint_t{0}; i != allBlocks[p].size(); ++i )
       {
-         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i].first ) : uint_t(0);
+         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i].first ) : uint_t{0};
          WALBERLA_ASSERT_LESS( level, blocksPerLevel.size() );
          blocksPerLevel[ level ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
       }
@@ -744,11 +744,11 @@ void DynamicCurveBalance< PhantomData_T >::mortonOrderNoWeight( const std::vecto
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
    {
-      for( uint_t i = uint_t(0); i != allBlocks[p].size(); ++i )
+      for( uint_t i = uint_t{0}; i != allBlocks[p].size(); ++i )
       {
-         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i] ) : uint_t(0);
+         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i] ) : uint_t{0};
          WALBERLA_ASSERT_LESS( level, blocksPerLevel.size() );
          blocksPerLevel[ level ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
       }
@@ -775,7 +775,7 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
       targets[p].resize( allBlocks[p].size() );
    
    for(const auto & blocks : blocksPerLevel)
@@ -788,8 +788,8 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
          totalWeight += numeric_cast< long double >( allBlocks[ uint_c( block.first ) ][ block.second ].second );
       }
       
-      uint_t c( uint_t(0) );
-      for( uint_t p = uint_t(0); p != processes; ++p )
+      uint_t c( uint_t{0} );
+      for( uint_t p = uint_t{0}; p != processes; ++p )
       {
          const long double pWeight = totalWeight / numeric_cast< long double >( processes - p );
          long double weight( 0 );
@@ -811,8 +811,8 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
       }
       while( c < blocks.size() )
       {
-         targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c( processes - uint_t(1) );
-         sender[ processes - uint_t(1) ].insert( blocks[c].first );
+         targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c( processes - uint_t{1} );
+         sender[ processes - uint_t{1} ].insert( blocks[c].first );
          ++c;
       }
    }
@@ -828,7 +828,7 @@ void DynamicCurveBalance< PhantomData_T >::balanceNoWeight( const std::vector< s
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );   
    
-   for( uint_t p = uint_t(0); p != processes; ++p )
+   for( uint_t p = uint_t{0}; p != processes; ++p )
       targets[p].resize( allBlocks[p].size() );
    
    for(const auto & blocks : blocksPerLevel)
@@ -836,11 +836,11 @@ void DynamicCurveBalance< PhantomData_T >::balanceNoWeight( const std::vector< s
       const uint_t base = uint_c( blocks.size() ) / processes;
       const uint_t rest = uint_c( blocks.size() ) % processes;
 
-      uint_t c( uint_t(0) );
-      for( uint_t p = uint_t(0); p != processes; ++p )
+      uint_t c( uint_t{0} );
+      for( uint_t p = uint_t{0}; p != processes; ++p )
       {
-         const uint_t numBlocks = ( p < rest ) ? ( base + uint_t(1) ) : base;
-         for( uint_t j = uint_t(0); j < numBlocks; ++j )
+         const uint_t numBlocks = ( p < rest ) ? ( base + uint_t{1} ) : base;
+         for( uint_t j = uint_t{0}; j < numBlocks; ++j )
          {
             WALBERLA_ASSERT_LESS( c, blocks.size() );
             targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c(p);
@@ -860,7 +860,7 @@ void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<p
                                                                std::set< uint_t > & processesToRecvFrom ) const
 {
 #ifndef NDEBUG
-   for( uint_t p = uint_t(0); p != targets.size(); ++p )
+   for( uint_t p = uint_t{0}; p != targets.size(); ++p )
    {
       for( auto &t : targets[p] )
       {
@@ -868,7 +868,7 @@ void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<p
          WALBERLA_ASSERT( sender[uint_c(t)].find( int_c(p) ) != sender[uint_c(t)].end() );
       }
    }
-   for( uint_t p = uint_t(0); p != sender.size(); ++p )
+   for( uint_t p = uint_t{0}; p != sender.size(); ++p )
    {
       for( auto &s : sender[p] )
       {
@@ -901,8 +901,8 @@ void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<p
       for( auto recvIt = resultsBufferSystem.begin(); recvIt != resultsBufferSystem.end(); ++recvIt )
       {
          WALBERLA_ASSERT_EQUAL( recvIt.rank(), 0 );
-         WALBERLA_ASSERT_EQUAL( targets.size(), uint_t(0) );
-         WALBERLA_ASSERT_EQUAL( sender.size(), uint_t(0) );
+         WALBERLA_ASSERT_EQUAL( targets.size(), uint_t{0} );
+         WALBERLA_ASSERT_EQUAL( sender.size(), uint_t{0} );
 
          targets.resize(1);
          sender.resize(1);
@@ -916,7 +916,7 @@ void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<p
       WALBERLA_CHECK( resultsBufferSystem.begin() == resultsBufferSystem.end() );
    }
    
-   finalAssignment( uint_t(0), targets, sender, targetProcess, processesToRecvFrom );
+   finalAssignment( uint_t{0}, targets, sender, targetProcess, processesToRecvFrom );
 }
 
 
@@ -929,7 +929,7 @@ void DynamicCurveBalance< PhantomData_T >::finalAssignment( const uint_t index, 
 {
    WALBERLA_ASSERT_GREATER( targets.size(), index );
    WALBERLA_ASSERT_EQUAL( targetProcess.size(), targets[index].size() );
-   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+   for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
       targetProcess[i].second = uint_c( targets[index][i] );
 
    for(pid_t s : sender[index])

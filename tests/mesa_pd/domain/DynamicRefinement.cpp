@@ -62,7 +62,7 @@ void createSphere(data::ParticleStorage& ps, domain::IDomain& domain, const Vec3
    {
       data::Particle&& p          = *ps.create();
       p.getPositionRef()          = pos;
-      p.getInteractionRadiusRef() = real_t(1);
+      p.getInteractionRadiusRef() = real_t{1};
       p.getOwnerRef()             = mpi::MPIManager::instance()->rank();
    }
 }
@@ -117,14 +117,14 @@ int main( bool simple )
 
    domain::BlockForestDomain domain(forest);
    // creating particles
-   createSphere(*ps, domain, Vec3(real_t(2.5), real_t(2.5), real_t(2.5)));
-   createSphere(*ps, domain, Vec3(real_t(2.5), real_t(2.5), real_t(7.5)));
-   createSphere(*ps, domain, Vec3(real_t(2.5), real_t(7.5), real_t(2.5)));
-   createSphere(*ps, domain, Vec3(real_t(2.5), real_t(7.5), real_t(7.5)));
-   createSphere(*ps, domain, Vec3(real_t(7.5), real_t(2.5), real_t(2.5)));
-   createSphere(*ps, domain, Vec3(real_t(7.5), real_t(2.5), real_t(7.5)));
-   createSphere(*ps, domain, Vec3(real_t(7.5), real_t(7.5), real_t(2.5)));
-   createSphere(*ps, domain, Vec3(real_t(7.5), real_t(7.5), real_t(7.5)));
+   createSphere(*ps, domain, Vec3(real_t{2.5}, real_t{2.5}, real_t{2.5}));
+   createSphere(*ps, domain, Vec3(real_t{2.5}, real_t{2.5}, real_t{7.5}));
+   createSphere(*ps, domain, Vec3(real_t{2.5}, real_t{7.5}, real_t{2.5}));
+   createSphere(*ps, domain, Vec3(real_t{2.5}, real_t{7.5}, real_t{7.5}));
+   createSphere(*ps, domain, Vec3(real_t{7.5}, real_t{2.5}, real_t{2.5}));
+   createSphere(*ps, domain, Vec3(real_t{7.5}, real_t{2.5}, real_t{7.5}));
+   createSphere(*ps, domain, Vec3(real_t{7.5}, real_t{7.5}, real_t{2.5}));
+   createSphere(*ps, domain, Vec3(real_t{7.5}, real_t{7.5}, real_t{7.5}));
 
    //***** TESTING *****
    WALBERLA_CHECK_EQUAL( forest->size(), mpi::MPIManager::instance()->rank() == 0 ? 1 : 0 );

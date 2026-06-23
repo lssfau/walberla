@@ -201,8 +201,8 @@ void initializeVTKOutput( std::map< std::string, OutputFunction > & outputFuncti
          vtkOutput = createVTKOutput_BlockData( *storage, identifier, writeFrequency, ghostLayers, forcePVTU,
                                                 baseFolder, executionFolder, continuousNumbering, binary, littleEndian, useMPIIO, initialExecutionCount );
 
-      const uint_t initialWriteCallsToSkip = block.getParameter< uint_t >( "initialWriteCallsToSkip", uint_t(0) );
-      if( initialWriteCallsToSkip > uint_t(0) )
+      const uint_t initialWriteCallsToSkip = block.getParameter< uint_t >( "initialWriteCallsToSkip", uint_t{0} );
+      if( initialWriteCallsToSkip > uint_t{0} )
          vtkOutput->setInitialWriteCallsToSkip( initialWriteCallsToSkip );
 
       const real_t samplingResolution = block.getParameter< real_t >( "samplingResolution", real_c(-1) );

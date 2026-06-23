@@ -37,13 +37,13 @@ public:
                     }
 
                     // collide
-                    const real_t vel_sqr = u.sqrLength() * real_t(1.5);
+                    const real_t vel_sqr = u.sqrLength() * real_t{1.5};
                     for( auto d = LM::Stencil::begin(); d != LM::Stencil::end(); ++d )
                     {
                         const real_t pdf = src->get(x - d.cx(), y - d.cy(), z - d.cz(), d.toIdx());
                         const real_t vel = real_c(d.cx())*u[0] + real_c(d.cy())*u[1] + real_c(d.cz())*u[2];
-                        dst->get(x, y, z, d.toIdx()) = ( real_t(1.0) - omega_ ) * pdf +
-                                                       omega_ * LM::w[ d.toIdx() ] * ( rho - vel_sqr + real_t(3.0)*vel + real_t(4.5)*vel*vel );
+                        dst->get(x, y, z, d.toIdx()) = ( real_t{1.0} - omega_ ) * pdf +
+                                                       omega_ * LM::w[ d.toIdx() ] * ( rho - vel_sqr + real_t{3.0}*vel + real_t{4.5}*vel*vel );
                     }
                 });
         src->swapDataPointers(*dst);
@@ -74,10 +74,10 @@ public:
         using namespace stencil;
         using Stencil = typename LM::Stencil;
 
-        real_t omega_trm_ = real_t(1) - omega_;
-        real_t omega_w0_  = real_t(3) * ( real_t(1) / real_t( 3) ) * omega_;
-        real_t omega_w1_  = real_t(3) * ( real_t(1) / real_t(18) ) * omega_;
-        real_t omega_w2_  = real_t(3) * ( real_t(1) / real_t(36) ) * omega_;
+        real_t omega_trm_ = real_t{1} - omega_;
+        real_t omega_w0_  = real_t{3} * ( real_t{1} / real_t{ 3} ) * omega_;
+        real_t omega_w1_  = real_t{3} * ( real_t{1} / real_t{18} ) * omega_;
+        real_t omega_w2_  = real_t{3} * ( real_t{1} / real_t{36} ) * omega_;
 
         WALBERLA_FOR_ALL_CELLS_XYZ(src, {
 
@@ -115,13 +115,13 @@ public:
             const real_t velYY = velY * velY;
             const real_t velZZ = velZ * velZ;
 
-            const real_t dir_indep_trm = ( real_t(1) / real_t(3) ) * rho - real_t(0.5) * ( velXX + velYY + velZZ );
+            const real_t dir_indep_trm = ( real_t{1} / real_t{3} ) * rho - real_t{0.5} * ( velXX + velYY + velZZ );
 
             dst->get(x,y,z,Stencil::idx[C]) = omega_trm_ * dd_tmp_C + omega_w0_ * dir_indep_trm;
 
-            const real_t vel_trm_E_W = dir_indep_trm + real_t(1.5) * velXX;
-            const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
-            const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
+            const real_t vel_trm_E_W = dir_indep_trm + real_t{1.5} * velXX;
+            const real_t vel_trm_N_S = dir_indep_trm + real_t{1.5} * velYY;
+            const real_t vel_trm_T_B = dir_indep_trm + real_t{1.5} * velZZ;
 
             dst->get(x,y,z,Stencil::idx[E]) = omega_trm_ * dd_tmp_E + omega_w1_ * ( vel_trm_E_W + velX );
             dst->get(x,y,z,Stencil::idx[W]) = omega_trm_ * dd_tmp_W + omega_w1_ * ( vel_trm_E_W - velX );
@@ -131,37 +131,37 @@ public:
             dst->get(x,y,z,Stencil::idx[B]) = omega_trm_ * dd_tmp_B + omega_w1_ * ( vel_trm_T_B - velZ );
 
             const real_t velXmY = velX - velY;
-            const real_t vel_trm_NW_SE = dir_indep_trm + real_t(1.5) * velXmY * velXmY;
+            const real_t vel_trm_NW_SE = dir_indep_trm + real_t{1.5} * velXmY * velXmY;
 
             dst->get(x,y,z,Stencil::idx[NW]) = omega_trm_ * dd_tmp_NW + omega_w2_ * ( vel_trm_NW_SE - velXmY );
             dst->get(x,y,z,Stencil::idx[SE]) = omega_trm_ * dd_tmp_SE + omega_w2_ * ( vel_trm_NW_SE + velXmY );
 
             const real_t velXpY = velX + velY;
-            const real_t vel_trm_NE_SW = dir_indep_trm + real_t(1.5) * velXpY * velXpY;
+            const real_t vel_trm_NE_SW = dir_indep_trm + real_t{1.5} * velXpY * velXpY;
 
             dst->get(x,y,z,Stencil::idx[NE]) = omega_trm_ * dd_tmp_NE + omega_w2_ * ( vel_trm_NE_SW + velXpY );
             dst->get(x,y,z,Stencil::idx[SW]) = omega_trm_ * dd_tmp_SW + omega_w2_ * ( vel_trm_NE_SW - velXpY );
 
             const real_t velXmZ = velX - velZ;
-            const real_t vel_trm_TW_BE = dir_indep_trm + real_t(1.5) * velXmZ * velXmZ;
+            const real_t vel_trm_TW_BE = dir_indep_trm + real_t{1.5} * velXmZ * velXmZ;
 
             dst->get(x,y,z,Stencil::idx[TW]) = omega_trm_ * dd_tmp_TW + omega_w2_ * ( vel_trm_TW_BE - velXmZ );
             dst->get(x,y,z,Stencil::idx[BE]) = omega_trm_ * dd_tmp_BE + omega_w2_ * ( vel_trm_TW_BE + velXmZ );
 
             const real_t velXpZ = velX + velZ;
-            const real_t vel_trm_TE_BW = dir_indep_trm + real_t(1.5) * velXpZ * velXpZ;
+            const real_t vel_trm_TE_BW = dir_indep_trm + real_t{1.5} * velXpZ * velXpZ;
 
             dst->get(x,y,z,Stencil::idx[TE]) = omega_trm_ * dd_tmp_TE + omega_w2_ * ( vel_trm_TE_BW + velXpZ );
             dst->get(x,y,z,Stencil::idx[BW]) = omega_trm_ * dd_tmp_BW + omega_w2_ * ( vel_trm_TE_BW - velXpZ );
 
             const real_t velYmZ = velY - velZ;
-            const real_t vel_trm_TS_BN = dir_indep_trm + real_t(1.5) * velYmZ * velYmZ;
+            const real_t vel_trm_TS_BN = dir_indep_trm + real_t{1.5} * velYmZ * velYmZ;
 
             dst->get(x,y,z,Stencil::idx[TS]) = omega_trm_ * dd_tmp_TS + omega_w2_ * ( vel_trm_TS_BN - velYmZ );
             dst->get(x,y,z,Stencil::idx[BN]) = omega_trm_ * dd_tmp_BN + omega_w2_ * ( vel_trm_TS_BN + velYmZ );
 
             const real_t velYpZ = velY + velZ;
-            const real_t vel_trm_TN_BS = dir_indep_trm + real_t(1.5) * velYpZ * velYpZ;
+            const real_t vel_trm_TN_BS = dir_indep_trm + real_t{1.5} * velYpZ * velYpZ;
 
             dst->get(x,y,z,Stencil::idx[TN]) = omega_trm_ * dd_tmp_TN + omega_w2_ * ( vel_trm_TN_BS + velYpZ );
             dst->get(x,y,z,Stencil::idx[BS]) = omega_trm_ * dd_tmp_BS + omega_w2_ * ( vel_trm_TN_BS - velYpZ );

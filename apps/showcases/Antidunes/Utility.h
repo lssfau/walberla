@@ -63,9 +63,9 @@ inline void write2DVectorToFile(const std::vector< real_t >& vec, uint_t len1, u
 
    file << "# " << len1 << " " << len2 << "\n";
 
-   for (uint_t j = uint_t(0); j < len2; ++j)
+   for (uint_t j = uint_t{0}; j < len2; ++j)
    {
-      for (uint_t i = uint_t(0); i < len1; ++i)
+      for (uint_t i = uint_t{0}; i < len1; ++i)
       {
          file << vec[i + j * len1] << "\n";
       }
@@ -84,10 +84,10 @@ class BedloadTransportEvaluator
 
    void operator()()
    {
-      real_t transportRate(real_t(0));
-      real_t velocity(real_t(0));
+      real_t transportRate(real_t{0});
+      real_t velocity(real_t{0});
 
-      for (uint_t i = uint_t(0); i < ac_->size(); ++i)
+      for (uint_t i = uint_t{0}; i < ac_->size(); ++i)
       {
          if (!isSet(ac_->getFlags(i), mesa_pd::data::particle_flags::GHOST) &&
              !isSet(ac_->getFlags(i), mesa_pd::data::particle_flags::GLOBAL))
@@ -126,7 +126,7 @@ template< typename ParticleAccessor_T >
 Vector3< real_t > getTotalHydrodynamicForceOnParticles(const shared_ptr< ParticleAccessor_T >& ac)
 {
    Vector3< real_t > totalHydrodynamicForce(0_r);
-   for (uint_t i = uint_t(0); i < ac->size(); ++i)
+   for (uint_t i = uint_t{0}; i < ac->size(); ++i)
    {
       if (!isSet(ac->getFlags(i), mesa_pd::data::particle_flags::GHOST) &&
           !isSet(ac->getFlags(i), mesa_pd::data::particle_flags::GLOBAL))
@@ -153,19 +153,19 @@ class AverageDataSliceEvaluator
       ylen_ = blocks_->getNumberOfYCells();
       zlen_ = blocks_->getNumberOfZCells();
 
-      x_z_SolidVolumeFraction_ = std::vector< real_t >(xlen_ * zlen_, real_t(0));
-      x_z_FillLevel_           = std::vector< real_t >(xlen_ * zlen_, real_t(0));
-      x_z_VelocityX_           = std::vector< real_t >(xlen_ * zlen_, real_t(0));
+      x_z_SolidVolumeFraction_ = std::vector< real_t >(xlen_ * zlen_, real_t{0});
+      x_z_FillLevel_           = std::vector< real_t >(xlen_ * zlen_, real_t{0});
+      x_z_VelocityX_           = std::vector< real_t >(xlen_ * zlen_, real_t{0});
       x_z_FluidCellCount_      = std::vector< uint_t >(xlen_ * zlen_, 0);
-      maxFluidZPos_            = uint_t(0);
+      maxFluidZPos_            = uint_t{0};
    }
 
    void operator()()
    {
       // erase data
-      std::fill(x_z_SolidVolumeFraction_.begin(), x_z_SolidVolumeFraction_.end(), real_t(0));
-      std::fill(x_z_FillLevel_.begin(), x_z_FillLevel_.end(), real_t(0));
-      std::fill(x_z_VelocityX_.begin(), x_z_VelocityX_.end(), real_t(0));
+      std::fill(x_z_SolidVolumeFraction_.begin(), x_z_SolidVolumeFraction_.end(), real_t{0});
+      std::fill(x_z_FillLevel_.begin(), x_z_FillLevel_.end(), real_t{0});
+      std::fill(x_z_VelocityX_.begin(), x_z_VelocityX_.end(), real_t{0});
       std::fill(x_z_FluidCellCount_.begin(), x_z_FluidCellCount_.end(), 0);
 
       // fill contributions
@@ -181,7 +181,7 @@ class AverageDataSliceEvaluator
          CellInterval xyz = flagField->xyzSize();
          Cell globalCell;
 
-         maxFluidZPos_ = uint_t(0);
+         maxFluidZPos_ = uint_t{0};
 
          // iterate all (inner) cells in the field
          for (auto cell : xyz)
@@ -190,8 +190,8 @@ class AverageDataSliceEvaluator
             auto entryIdx = uint_c(globalCell.x()) + uint_c(globalCell.z()) * xlen_;
             if (flagField->isFlagSet(cell, solidMO) || flagField->isFlagSet(cell, solidNoSlip))
             {
-               x_z_SolidVolumeFraction_[entryIdx] += real_t(1);
-               x_z_FillLevel_[entryIdx] += real_t(1);
+               x_z_SolidVolumeFraction_[entryIdx] += real_t{1};
+               x_z_FillLevel_[entryIdx] += real_t{1};
             }
             else
             {
@@ -320,7 +320,7 @@ inline void getAvgDiameterScalingFactor(const std::string& filename, const Vecto
 
          numParticles++;
       }
-      diameter_SI /= real_t(numParticles);
+      diameter_SI /= static_cast< real_t >(numParticles);
 
       scalingFactor = real_c(domainSize[0]) / (generationDomainSize_SI[0] * real_c(bedCopiesInX));
       avgDiameter   = diameter_SI * scalingFactor;
@@ -428,10 +428,10 @@ inline void initSpheresFromFile(const std::string& filename, walberla::mesa_pd::
 inline void getAverageVelocity(const mesa_pd::data::ParticleAccessorWithBaseShape& ac, real_t& averageVelocity,
                         real_t& maxVelocity, uint_t& numParticles, real_t& maxHeight)
 {
-   averageVelocity = real_t(0);
-   maxVelocity     = real_t(0);
-   numParticles    = uint_t(0);
-   maxHeight       = real_t(0);
+   averageVelocity = real_t{0};
+   maxVelocity     = real_t{0};
+   numParticles    = uint_t{0};
+   maxHeight       = real_t{0};
    for (uint_t i = 0; i < ac.size(); ++i)
    {
       if (isSet(ac.getFlags(i), walberla::mesa_pd::data::particle_flags::GHOST)) continue;
@@ -449,7 +449,7 @@ inline void getAverageVelocity(const mesa_pd::data::ParticleAccessorWithBaseShap
    walberla::mpi::allReduceInplace(maxVelocity, walberla::mpi::MAX);
    walberla::mpi::allReduceInplace(maxHeight, walberla::mpi::MAX);
 
-   averageVelocity /= real_t(numParticles);
+   averageVelocity /= static_cast< real_t >(numParticles);
 }
 
 inline auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, const mesa_pd::Vec3& normal)
@@ -457,7 +457,7 @@ inline auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3&
    auto p0 = ps.create(true);
    p0->setPosition(pos);
    p0->setBaseShape(std::make_shared< mesa_pd::data::HalfSpace >(normal));
-   p0->getBaseShapeRef()->updateMassAndInertia(real_t(1));
+   p0->getBaseShapeRef()->updateMassAndInertia(real_t{1});
    p0->setOwner(walberla::mpi::MPIManager::instance()->rank());
    p0->setType(0);
    p0->setInteractionRadius(std::numeric_limits< real_t >::infinity());

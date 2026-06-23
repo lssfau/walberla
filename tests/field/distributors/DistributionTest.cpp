@@ -62,7 +62,7 @@ void resetScalarField( const shared_ptr<StructuredBlockStorage> & blocks,
    {
       auto sField = blockIt->getData<ScalarField_T>( scalarFieldID );
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(sField,
-                                 sField->get(x,y,z) = real_t(0);
+                                 sField->get(x,y,z) = real_t{0};
       );
    }
 }
@@ -74,7 +74,7 @@ void resetVectorField( const shared_ptr<StructuredBlockStorage> & blocks,
    {
       auto vField = blockIt->getData<Vec3Field_T>( vectorFieldID );
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(vField,
-                                                       vField->get(x,y,z) = Vector3<real_t>(real_t(0));
+                                                       vField->get(x,y,z) = Vector3<real_t>(real_t{0});
       );
    }
 }
@@ -86,9 +86,9 @@ void resetMultiCompField( const shared_ptr<StructuredBlockStorage> & blocks,
    {
       auto mField = blockIt->getData<MultiComponentField_T>( multiComponentFieldID );
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(mField,
-                                                       mField->get(x,y,z,0) = real_t(0);
-                                                       mField->get(x,y,z,1) = real_t(0);
-                                                       mField->get(x,y,z,2) = real_t(0);
+                                                       mField->get(x,y,z,0) = real_t{0};
+                                                       mField->get(x,y,z,1) = real_t{0};
+                                                       mField->get(x,y,z,2) = real_t{0};
       );
    }
 }
@@ -116,9 +116,9 @@ void getScalarFieldQuantities( const shared_ptr<StructuredBlockStorage> & blocks
                                const BlockDataID & fieldID,
                                real_t & summarizedValue, real_t & minValue, real_t & maxValue)
 {
-   real_t sum( real_t(0) );
-   real_t min( real_t(0) );
-   real_t max( real_t(0) );
+   real_t sum( real_t{0} );
+   real_t min( real_t{0} );
+   real_t max( real_t{0} );
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto field = blockIt->getData<ScalarField_T>( fieldID );
@@ -153,9 +153,9 @@ void getVectorFieldQuantities( const shared_ptr<StructuredBlockStorage> & blocks
                                const BlockDataID & fieldID,
                                Vector3<real_t> & summarizedValue, Vector3<real_t> & minValue, Vector3<real_t> & maxValue)
 {
-   Vector3<real_t> sum( real_t(0) );
-   Vector3<real_t> min( real_t(0) );
-   Vector3<real_t> max( real_t(0) );
+   Vector3<real_t> sum( real_t{0} );
+   Vector3<real_t> min( real_t{0} );
+   Vector3<real_t> max( real_t{0} );
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto field = blockIt->getData<Vec3Field_T>( fieldID );
@@ -246,18 +246,18 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
 
    // check scalar distribution
    {
-      Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{1.9}, real_t{2.1}, real_t{2.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "NearestNeighborDistributor: Sum of scalar distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t(0), "NearestNeighborDistributor: Min of scalar distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t{0}, "NearestNeighborDistributor: Min of scalar distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max, distributionValue, "NearestNeighborDistributor: Max of scalar distribution failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -265,24 +265,24 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
 
    // check vector distribution
    {
-      Vector3<real_t> distributionPoint(real_t(5.4),real_t(2.1),real_t(3.2));
-      Vector3<real_t> distributionValue(real_t(100), real_t(-10), real_t(1));
+      Vector3<real_t> distributionPoint(real_t{5.4},real_t{2.1},real_t{3.2});
+      Vector3<real_t> distributionValue(real_t{100}, real_t{-10}, real_t{1});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<Vec3Distributor_T>(vectorDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      Vector3<real_t> sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      Vector3<real_t> sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getVectorFieldQuantities(blocks, flagFieldID, vectorFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum[0], distributionValue[0], "NearestNeighborDistributor: Sum of vec[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[1], distributionValue[1], "NearestNeighborDistributor: Sum of vec[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[2], distributionValue[2], "NearestNeighborDistributor: Sum of vec[2] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min[0], real_t(0), "NearestNeighborDistributor: Min of vec[0] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min[0], real_t{0}, "NearestNeighborDistributor: Min of vec[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(min[1], distributionValue[1], "NearestNeighborDistributor: Min of vec[1] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min[2], real_t(0), "NearestNeighborDistributor: Min of vec[2] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min[2], real_t{0}, "NearestNeighborDistributor: Min of vec[2] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max[0], distributionValue[0], "NearestNeighborDistributor: Max of vec[0] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(max[1], real_t(0), "NearestNeighborDistributor: Max of vec[1] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(max[1], real_t{0}, "NearestNeighborDistributor: Max of vec[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max[2], distributionValue[2], "NearestNeighborDistributor: Max of vec[2] distribution failed!" );
 
       resetVectorField(blocks, vectorFieldID);
@@ -290,11 +290,11 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
 
    // check multi component distribution
    {
-      Vector3<real_t> distributionPoint(real_t(4.4),real_t(2.1),real_t(3.2));
+      Vector3<real_t> distributionPoint(real_t{4.4},real_t{2.1},real_t{3.2});
       std::vector<real_t> distributionValue(3);
-      distributionValue[0] = real_t(100);
-      distributionValue[1] = real_t(-10);
-      distributionValue[2] = real_t(1);
+      distributionValue[0] = real_t{100};
+      distributionValue[1] = real_t{-10};
+      distributionValue[2] = real_t{1};
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
@@ -306,11 +306,11 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
       WALBERLA_CHECK_FLOAT_EQUAL(sum[0], distributionValue[0], "NearestNeighborDistributor: Sum of Multi Component[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[1], distributionValue[1], "NearestNeighborDistributor: Sum of Multi Component[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[2], distributionValue[2], "NearestNeighborDistributor: Sum of Multi Component[2] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min[0], real_t(0), "NearestNeighborDistributor: Min of Multi Component[0] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min[0], real_t{0}, "NearestNeighborDistributor: Min of Multi Component[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(min[1], distributionValue[1], "NearestNeighborDistributor: Min of Multi Component[1] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min[2], real_t(0), "NearestNeighborDistributor: Min of Multi Component[2] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min[2], real_t{0}, "NearestNeighborDistributor: Min of Multi Component[2] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max[0], distributionValue[0], "NearestNeighborDistributor: Max of Multi Component[0] distribution failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(max[1], real_t(0), "NearestNeighborDistributor: Max of Multi Component[1] distribution failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(max[1], real_t{0}, "NearestNeighborDistributor: Max of Multi Component[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max[2], distributionValue[2], "NearestNeighborDistributor: Max of Multi Component[2] distribution failed!" );
 
       resetMultiCompField(blocks, multiComponentFieldID);
@@ -331,18 +331,18 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
 
    // check scalar distribution
    {
-      Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{1.9}, real_t{2.1}, real_t{2.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "KernelDistributor: Sum of scalar distribution failed!" );
-      WALBERLA_CHECK(min >= real_t(0), "KernelDistributor: Min of scalar distribution failed!" );
+      WALBERLA_CHECK(min >= real_t{0}, "KernelDistributor: Min of scalar distribution failed!" );
       WALBERLA_CHECK(max <= distributionValue, "KernelDistributor: Max of scalar distribution failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -350,24 +350,24 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
 
    // check vector distribution
    {
-      Vector3<real_t> distributionPoint(real_t(5.4),real_t(2.1),real_t(3.2));
-      Vector3<real_t> distributionValue(real_t(100), real_t(-10), real_t(1));
+      Vector3<real_t> distributionPoint(real_t{5.4},real_t{2.1},real_t{3.2});
+      Vector3<real_t> distributionValue(real_t{100}, real_t{-10}, real_t{1});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<Vec3Distributor_T>(vectorDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      Vector3<real_t> sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      Vector3<real_t> sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getVectorFieldQuantities(blocks, flagFieldID, vectorFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum[0], distributionValue[0], "KernelDistributor: Sum of vec[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[1], distributionValue[1], "KernelDistributor: Sum of vec[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[2], distributionValue[2], "KernelDistributor: Sum of vec[2] distribution failed!" );
-      WALBERLA_CHECK(min[0] >= real_t(0), "KernelDistributor: Min of vec[0] distribution failed!" );
+      WALBERLA_CHECK(min[0] >= real_t{0}, "KernelDistributor: Min of vec[0] distribution failed!" );
       WALBERLA_CHECK(min[1] >= distributionValue[1], "KernelDistributor: Min of vec[1] distribution failed!" );
-      WALBERLA_CHECK(min[2] >= real_t(0), "KernelDistributor: Min of vec[2] distribution failed!" );
+      WALBERLA_CHECK(min[2] >= real_t{0}, "KernelDistributor: Min of vec[2] distribution failed!" );
       WALBERLA_CHECK(max[0] <= distributionValue[0], "KernelDistributor: Max of vec[0] distribution failed!" );
-      WALBERLA_CHECK(max[1] <= real_t(0), "KernelDistributor: Max of vec[1] distribution failed!" );
+      WALBERLA_CHECK(max[1] <= real_t{0}, "KernelDistributor: Max of vec[1] distribution failed!" );
       WALBERLA_CHECK(max[2] <= distributionValue[2], "KernelDistributor: Max of vec[2] distribution failed!" );
 
       resetVectorField(blocks, vectorFieldID);
@@ -375,11 +375,11 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
 
    // check multi component distribution
    {
-      Vector3<real_t> distributionPoint(real_t(4.4),real_t(2.1),real_t(3.2));
+      Vector3<real_t> distributionPoint(real_t{4.4},real_t{2.1},real_t{3.2});
       std::vector<real_t> distributionValue(3);
-      distributionValue[0] = real_t(100);
-      distributionValue[1] = real_t(-10);
-      distributionValue[2] = real_t(1);
+      distributionValue[0] = real_t{100};
+      distributionValue[1] = real_t{-10};
+      distributionValue[2] = real_t{1};
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if( containingBlockID != nullptr )
       {
@@ -391,11 +391,11 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
       WALBERLA_CHECK_FLOAT_EQUAL(sum[0], distributionValue[0], "KernelDistributor: Sum of Multi Component[0] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[1], distributionValue[1], "KernelDistributor: Sum of Multi Component[1] distribution failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(sum[2], distributionValue[2], "KernelDistributor: Sum of Multi Component[2] distribution failed!" );
-      WALBERLA_CHECK(min[0] >= real_t(0), "KernelDistributor: Min of Multi Component[0] distribution failed!" );
+      WALBERLA_CHECK(min[0] >= real_t{0}, "KernelDistributor: Min of Multi Component[0] distribution failed!" );
       WALBERLA_CHECK(min[1] >= distributionValue[1], "KernelDistributor: Min of Multi Component[1] distribution failed!" );
-      WALBERLA_CHECK(min[2] >= real_t(0), "KernelDistributor: Min of Multi Component[2] distribution failed!" );
+      WALBERLA_CHECK(min[2] >= real_t{0}, "KernelDistributor: Min of Multi Component[2] distribution failed!" );
       WALBERLA_CHECK(max[0] <= distributionValue[0], "KernelDistributor: Max of Multi Component[0] distribution failed!" );
-      WALBERLA_CHECK(max[1] <= real_t(0), "KernelDistributor: Max of Multi Component[1] distribution failed!" );
+      WALBERLA_CHECK(max[1] <= real_t{0}, "KernelDistributor: Max of Multi Component[1] distribution failed!" );
       WALBERLA_CHECK(max[2] <= distributionValue[2], "KernelDistributor: Max of Multi Component[2] distribution failed!" );
 
       resetMultiCompField(blocks, multiComponentFieldID);
@@ -412,17 +412,17 @@ void testNearestNeighborDistributorAtBoundary( const shared_ptr<StructuredBlockS
 
    // check scalar interpolation close to boundary
    {
-      Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{1.9}, real_t{2.1}, real_t{2.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "NearestNeighborDistributor: Sum of scalar distribution near boundary failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t(0), "NearestNeighborDistributor: Min of scalar distribution near boundary failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t{0}, "NearestNeighborDistributor: Min of scalar distribution near boundary failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max, distributionValue, "NearestNeighborDistributor: Max of scalar distribution near boundary failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -430,17 +430,17 @@ void testNearestNeighborDistributorAtBoundary( const shared_ptr<StructuredBlockS
 
    // check scalar interpolation inside boundary
    {
-      Vector3<real_t> distributionPoint(real_t(2.7), real_t(2.1), real_t(1.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{2.7}, real_t{2.1}, real_t{1.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "NearestNeighborDistributor: Sum of scalar distribution inside boundary failed!" );
-      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t(0), "NearestNeighborDistributor: Min of scalar distribution inside boundary failed!" );
+      WALBERLA_CHECK_FLOAT_EQUAL(min, real_t{0}, "NearestNeighborDistributor: Min of scalar distribution inside boundary failed!" );
       WALBERLA_CHECK_FLOAT_EQUAL(max, distributionValue, "NearestNeighborDistributor: Max of scalar distribution inside boundary failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -456,17 +456,17 @@ void testKernelDistributorAtBoundary( const shared_ptr<StructuredBlockStorage> &
 
    // check scalar interpolation close to boundary
    {
-      Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{1.9}, real_t{2.1}, real_t{2.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "KernelDistributor: Sum of scalar distribution near boundary failed!" );
-      WALBERLA_CHECK(min >= real_t(0), "KernelDistributor: Min of scalar distribution near boundary failed!" );
+      WALBERLA_CHECK(min >= real_t{0}, "KernelDistributor: Min of scalar distribution near boundary failed!" );
       WALBERLA_CHECK(max <= distributionValue, "KernelDistributor: Max of scalar distribution near boundary failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -474,17 +474,17 @@ void testKernelDistributorAtBoundary( const shared_ptr<StructuredBlockStorage> &
 
    // check scalar interpolation inside boundary
    {
-      Vector3<real_t> distributionPoint(real_t(2.7), real_t(2.1), real_t(1.1));
-      real_t distributionValue(real_t(100));
+      Vector3<real_t> distributionPoint(real_t{2.7}, real_t{2.1}, real_t{1.1});
+      real_t distributionValue(real_t{100});
       auto containingBlockID = blocks->getBlock(distributionPoint);
       if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
-      real_t sum(real_t(0)), min(real_t(0)), max(real_t(0));
+      real_t sum(real_t{0}), min(real_t{0}), max(real_t{0});
       getScalarFieldQuantities(blocks, flagFieldID, scalarFieldID, sum, min, max);
       WALBERLA_CHECK_FLOAT_EQUAL(sum, distributionValue, "KernelDistributor: Sum of scalar distribution inside boundary failed!" );
-      WALBERLA_CHECK(min >= real_t(0), "KernelDistributor: Min of scalar distribution inside boundary failed!" );
+      WALBERLA_CHECK(min >= real_t{0}, "KernelDistributor: Min of scalar distribution inside boundary failed!" );
       WALBERLA_CHECK(max <= distributionValue, "KernelDistributor: Max of scalar distribution inside boundary failed!" );
 
       resetScalarField(blocks, scalarFieldID);
@@ -499,7 +499,7 @@ int main(int argc, char **argv) {
 
    const uint_t numberOfBlocksInDirection = 2;
    const uint_t numberOfCellsPerBlockInDirection = 4;
-   const real_t dx = real_t(1);
+   const real_t dx = real_t{1};
 
    // block storage
    auto blocks = blockforest::createUniformBlockGrid( numberOfBlocksInDirection, numberOfBlocksInDirection, numberOfBlocksInDirection,
@@ -511,9 +511,9 @@ int main(int argc, char **argv) {
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers, false, initFlagField );
 
    // data fields
-   BlockDataID scalarFieldID         = field::addToStorage< ScalarField_T >( blocks, "scalar field", real_t(0), field::fzyx, FieldGhostLayers );
-   BlockDataID vectorFieldID         = field::addToStorage< Vec3Field_T >( blocks, "vec3 field", Vector3<real_t>(real_t(0)), field::fzyx, FieldGhostLayers );
-   BlockDataID multiComponentFieldID = field::addToStorage< MultiComponentField_T >( blocks, "multi component field", real_t(0), field::fzyx, FieldGhostLayers );
+   BlockDataID scalarFieldID         = field::addToStorage< ScalarField_T >( blocks, "scalar field", real_t{0}, field::fzyx, FieldGhostLayers );
+   BlockDataID vectorFieldID         = field::addToStorage< Vec3Field_T >( blocks, "vec3 field", Vector3<real_t>(real_t{0}), field::fzyx, FieldGhostLayers );
+   BlockDataID multiComponentFieldID = field::addToStorage< MultiComponentField_T >( blocks, "multi component field", real_t{0}, field::fzyx, FieldGhostLayers );
 
    // test all distributors with domain flags everywhere, i.e. without special boundary treatment necessary
    testNearestNeighborDistributor(blocks, flagFieldID, scalarFieldID, vectorFieldID, multiComponentFieldID);

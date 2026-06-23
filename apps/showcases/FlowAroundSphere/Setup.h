@@ -79,7 +79,7 @@ struct Setup
 
       valuesPerCell = (Stencil_T::Q + VelocityField_T::F_SIZE + uint_c(2) * ScalarField_T::F_SIZE);
       memoryPerCell = memory_t(valuesPerCell * sizeof(PdfField_T::value_type) + uint_c(1));
-      processMemoryLimit = parameters.getParameter< memory_t >( "processMemoryLimit", memory_t( 512 ) ) * memory_t( 1024 * 1024 );
+      processMemoryLimit = parameters.getParameter< memory_t >( "processMemoryLimit", memory_t{ 512 } ) * memory_t{ 1024 * 1024 };
 
       stencil          = infoMap["stencil"];
       streamingPattern = infoMap["streamingPattern"];

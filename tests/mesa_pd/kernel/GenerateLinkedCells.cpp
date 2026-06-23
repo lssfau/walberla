@@ -45,17 +45,17 @@ int main( int argc, char ** argv )
    mpi::MPIManager::instance()->useWorldComm();
 
    //domain setup
-   const real_t spacing = real_t(1.0);
-   math::AABB domain( Vec3(real_t(-0.5), real_t(-0.5), real_t(-0.5)),
+   const real_t spacing = real_t{1.0};
+   math::AABB domain( Vec3(real_t{-0.5}, real_t{-0.5}, real_t{-0.5}),
                       Vec3(real_t(+0.5), real_t(+0.5), real_t(+0.5)));
-   domain.scale(real_t(10));
+   domain.scale(real_t{10});
 
    //init data structures
    auto storage = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   auto  smallSphere = ss->create<data::Sphere>( real_t(1) );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
-   data::LinkedCells     linkedCells(domain.getScaled(2), real_t(1));
+   auto  smallSphere = ss->create<data::Sphere>( real_t{1} );
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
+   data::LinkedCells     linkedCells(domain.getScaled(2), real_t{1});
 
    data::ParticleAccessorWithShape accessor(storage, ss);
 
@@ -73,7 +73,7 @@ int main( int argc, char ** argv )
    //init kernels
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::ForceLJ lj(1);
-   kernel::SemiImplicitEuler integrator( real_t(0.01) );
+   kernel::SemiImplicitEuler integrator( real_t{0.01} );
 
    //timeloop
    for (auto timestep = 0; timestep < 100; ++timestep)

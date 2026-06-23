@@ -69,22 +69,22 @@ namespace kernel {
  *     kernel::IntegrateBodiesHCSITS integration;
  *
  *     kernel::InitContactsForHCSITS initContacts(1);
- *     initContacts.setFriction(0,0,real_t(0.2));
+ *     initContacts.setFriction(0,0,real_t{0.2});
  *     kernel::InitBodiesForHCSITS initBodies;
  *
  *     kernel::HCSITSRelaxationStep relaxationStep;
- *     relaxationStep.setCor(real_t(0.1)); // Only effective for PGSM
+ *     relaxationStep.setCor(real_t{0.1}); // Only effective for PGSM
  *
  *     // Init Contacts and Bodies (order is arbitrary)
  *     cs.forEachContact(false, kernel::SelectAll(), ca, initContacts, ca, pa);
  *     ps.forEachParticle(false, kernel::SelectAll(), pa, initBodies, pa, dt);
  *
  *     // Reduce and Broadcast velocities with relaxation parameter 1 before the iteration
- *     VelocityUpdateNotification::Parameters::relaxationParam = real_t(1.0);
+ *     VelocityUpdateNotification::Parameters::relaxationParam = real_t{1.0};
  *     reductionKernel.operator()<VelocityCorrectionNotification>(*ps);
  *     broadcastKernel.operator()<VelocityUpdateNotification>(*ps);
  *
- *     VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
+ *     VelocityUpdateNotification::Parameters::relaxationParam = real_t{0.8};
  *     for(int j = 0; j < 10; j++){
  *        cs.forEachContact(false, kernel::SelectAll(), ca, relaxationStep, ca, pa, dt);
  *        reductionKernel.operator()<VelocityCorrectionNotification>(*ps);
@@ -165,7 +165,7 @@ inline void HCSITSRelaxationStep::operator()(size_t cid, CAccessor &ca, PAccesso
    static_assert(std::is_base_of_v<data::IContactAccessor, CAccessor>, "please provide a valid contact accessor");
    static_assert(std::is_base_of_v<data::IAccessor, PAccessor>, "please provide a valid accessor");
 
-   real_t dtinv(real_t(1.0)/dt);
+   real_t dtinv(real_t{1.0}/dt);
    switch( getRelaxationModel() ) {
       case InelasticFrictionlessContact:
          setDeltaMax(std::max( getDeltaMax(), relaxInelasticFrictionlessContacts(cid, dtinv, ca, pa )));
@@ -1014,7 +1014,7 @@ inline real_t HCSITSRelaxationStep::relaxInelasticContactsByProjectedGaussSeidel
          // Calculate corrected contact reaction by the method of Tschigale et al.
          // Normal component is close to 0 or negative, and we cannot asses a tangential direction
          // Treat this case with the 0 impulse
-         if (fsq < real_t(1e-8)) {
+         if (fsq < real_t{1e-8}) {
             delta_max = std::max(delta_max, std::max(std::abs(ca.getP(cid)[0]),
                                                      std::max(std::abs(ca.getP(cid)[1]), std::abs(ca.getP(cid)[2]))));
             ca.getPRef(cid) = Vec3();

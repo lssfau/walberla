@@ -113,7 +113,7 @@ void ActiveCellSweep< LatticeModel_T, FlagField_T, CellOperation >::operator()( 
       #pragma omp parallel for schedule(static)
       for( int iz = 0; iz < zSize; ++iz ) {
          cell_idx_t z = cell_idx_c( iz );
-         CellInterval interval( cell_idx_t(0), cell_idx_t(0), z, xSize - cell_idx_t(1), ySize - cell_idx_t(1), z );
+         CellInterval interval( cell_idx_t{0}, cell_idx_t{0}, z, xSize - cell_idx_t{1}, ySize - cell_idx_t{1}, z );
 
          auto srcIter = src->beginSliceXYZ( interval );
          auto dstIter = dst->beginSliceXYZ( interval );

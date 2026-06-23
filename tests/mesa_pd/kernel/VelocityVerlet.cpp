@@ -42,7 +42,7 @@ public:
    ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps)
       : ParticleAccessor(ps)
    {
-      sp.updateMassAndInertia(real_t(1234));
+      sp.updateMassAndInertia(real_t{1234});
    }
 
    const auto& getInvMass(const size_t /*p_idx*/) const {return sp.getInvMass();}
@@ -52,7 +52,7 @@ public:
 
    data::BaseShape* getShape(const size_t /*p_idx*/) {return &sp;}
 private:
-   data::Sphere sp = data::Sphere(real_t(0.6));
+   data::Sphere sp = data::Sphere(real_t{0.6});
 };
 
 int main()
@@ -61,7 +61,7 @@ int main()
    auto ps = std::make_shared<data::ParticleStorage>(100);
    ParticleAccessorWithShape accessor(ps);
 
-   const Vec3 startingVelocity(real_t(1),real_t(2),real_t(3));
+   const Vec3 startingVelocity(real_t{1},real_t{2},real_t{3});
 
    //initialize particle
    data::Particle&& p        = *ps->create();
@@ -71,9 +71,9 @@ int main()
    p.getForceRef()           = Vec3(0,0,0);
    p.getOldForceRef()        = Vec3(0,0,0);
 
-   const real_t dt = real_t(0.001);
+   const real_t dt = real_t{0.001};
 
-   const real_t k = real_t(10000);
+   const real_t k = real_t{10000};
    const real_t w = std::sqrt(k*accessor.getInvMass(0));
    const Vec3   A = accessor.getLinearVelocity(0) / w;
    WALBERLA_LOG_DEVEL_VAR(w);
@@ -82,7 +82,7 @@ int main()
    auto analyticPosition = [A, w](const real_t t){return A * std::sin(w*t);};
    auto analyticVelocity = [A, w](const real_t t){return A * std::cos(w*t) * w;};
 
-   const real_t kappa = real_t(1000);
+   const real_t kappa = real_t{1000};
    const real_t omega = std::sqrt(kappa*accessor.getInvInertiaBF(0)[0]);
    const Vec3   Alpha = accessor.getAngularVelocity(0) / omega;
    WALBERLA_LOG_DEVEL_VAR(omega);
@@ -105,15 +105,15 @@ int main()
 
    ps->forEachParticle(false, kernel::SelectAll(), accessor, preForce, accessor);
 
-   p.getLinearVelocityRef()  = analyticVelocity(real_t(0));
+   p.getLinearVelocityRef()  = analyticVelocity(real_t{0});
    p.getForceRef()           = - k * p.getPosition();
 
-   p.getAngularVelocityRef() = analyticAngVel(real_t(0));
+   p.getAngularVelocityRef() = analyticAngVel(real_t{0});
    p.getTorqueRef()          = - kappa * p.getRotation().getQuaternion().getAxis() * p.getRotation().getQuaternion().getAngle();
    ps->forEachParticle(false, kernel::SelectAll(), accessor, postForce, accessor);
 
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getPosition(), Vec3(0), real_t(1e-2));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getLinearVelocity(), startingVelocity, real_t(1e-2));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getPosition(), Vec3(0), real_t{1e-2});
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getLinearVelocity(), startingVelocity, real_t{1e-2});
 
    std::fstream fout("VelocityVerlet.txt", std::ofstream::out);
    for (auto i = 1; i < 3000; ++i)
@@ -130,7 +130,7 @@ int main()
       //check velocity
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getLinearVelocity(),
                                          analyticVelocity(real_c(i) * dt),
-                                         real_t(1e-4),
+                                         real_t{1e-4},
                                          "iteration: " << i << "\n" <<
                                          "t: " << real_c(i)*dt << "\n" <<
                                          p);
@@ -138,7 +138,7 @@ int main()
       //check angular velocity
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getAngularVelocity(),
                                          analyticAngVel(real_c(i) * dt),
-                                         real_t(1e-4),
+                                         real_t{1e-4},
                                          "iteration: " << i << "\n" <<
                                          "t: " << real_c(i)*dt << "\n" <<
                                          p);
@@ -148,7 +148,7 @@ int main()
       //check position
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getPosition(),
                                          analyticPosition(real_c(i) * dt),
-                                         real_t(1e-4),
+                                         real_t{1e-4},
                                          "iteration: " << i << "\n" <<
                                          "t: " << real_c(i)*dt << "\n" <<
                                          p);
@@ -157,7 +157,7 @@ int main()
       auto angSol = Rot3(Quat(analyticRotation(real_c(i) * dt), analyticRotation(real_c(i) * dt).length()));
       WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(p.getRotation().getQuaternion().getAxis() * p.getRotation().getQuaternion().getAngle(),
                                          angSol.getQuaternion().getAxis() * angSol.getQuaternion().getAngle(),
-                                         real_t(1e-4),
+                                         real_t{1e-4},
                                          "iteration: " << i << "\n" <<
                                          "t: " << real_c(i)*dt << "\n" <<
                                          p);

@@ -172,7 +172,7 @@ public:
    bool isPeriodic( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ) return periodic_[index]; }
 
    uint_t getDepth()              const { return depth_; }
-   uint_t getNumberOfLevels()     const { return depth_ + uint_t(1); }
+   uint_t getNumberOfLevels()     const { return depth_ + uint_t{1}; }
    uint_t getMinLevel()           const;
    uint_t getMaxLevel()           const;
    uint_t getTreeIdDigits()       const { return treeIdDigits_; }
@@ -276,13 +276,13 @@ public:
    void assignAllBlocksToRootProcess();
 
    void balanceLoad( const TargetProcessAssignmentFunction & function,
-                     const uint_t numberOfProcesses, const real_t minBufferProcessesFraction = real_t(0),
-                     const memory_t perProcessMemoryLimit = memory_t(0),
+                     const uint_t numberOfProcesses, const real_t minBufferProcessesFraction = real_t{0},
+                     const memory_t perProcessMemoryLimit = memory_t{0},
                      const bool reorderProcessesByBFS = false, const bool insertBufferProcesses = false );
                      
    void balanceLoad( const TargetProcessAssignmentFunction & function,
                      const uint_t numberOfProcesses, const uint_t numberOfBufferProcesses,
-                     const memory_t perProcessMemoryLimit = memory_t(0),
+                     const memory_t perProcessMemoryLimit = memory_t{0},
                      const bool reorderProcessesByBFS = false, const bool insertBufferProcesses = false );
 
    // calculate process distribution, target = specific number of processes
@@ -594,7 +594,7 @@ inline bool SetupBlockForest::atDomainZMaxBorder( const SetupBlock & block ) con
 
 inline bool SetupBlockForest::atDomainMinBorder( const uint_t index, const SetupBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) )
+   WALBERLA_ASSERT_LESS( index, uint_t{3} )
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.min( index ), domain_.min( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index) ) );
 }
@@ -603,7 +603,7 @@ inline bool SetupBlockForest::atDomainMinBorder( const uint_t index, const Setup
 
 inline bool SetupBlockForest::atDomainMaxBorder( const uint_t index, const SetupBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) )
+   WALBERLA_ASSERT_LESS( index, uint_t{3} )
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.max( index ), domain_.max( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index ) ) );
 }

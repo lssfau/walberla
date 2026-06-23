@@ -67,7 +67,7 @@ int main( int argc, char ** argv )
    const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
    const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c(10.0) );
    const real_t          temperature     = real_c(0.01);
-   const uint_t          seed            = uint_t(0);
+   const uint_t          seed            = uint_t{0};
 
    const real_t remainingTimeLoggerFrequency = parameters.getParameter< real_t >( "remainingTimeLoggerFrequency", real_c(3.0) ); // in seconds
 
@@ -75,8 +75,8 @@ int main( int argc, char ** argv )
    real_t force             = real_c(2E-4); // Force to apply on each node on each axis
    BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", force, field::fzyx );
 
-   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, omega, omega_2, omega, seed, temperature, uint_t(0) );
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_c(1.0), uint_t(1), field::fzyx );
+   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, omega, omega_2, omega, seed, temperature, uint_t{0} );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_c(1.0), uint_t{1}, field::fzyx );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // create and initialize flag field

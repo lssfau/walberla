@@ -58,10 +58,10 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors)
          // ensure that exactly one sweep has been registered that matches the specified selectors
          size_t const numSweeps = s.sweep.getNumberOfMatching(selectors + block.getState());
 
-         if (numSweeps == size_t(0)) {
+         if (numSweeps == size_t{0}) {
             continue;
          } else {
-            if (numSweeps > size_t(1)) {
+            if (numSweeps > size_t{1}) {
                WALBERLA_ABORT("Only one sweep must be added to a single SweepAdder object. This error might be caused "
                               "by e.g. \"timeloop.add() << Sweep(A) << Sweep(B);\".")
             }
@@ -128,10 +128,10 @@ void SweepTimeloop<TP>::doTimeStep(const Set<SUID> &selectors, timing::TimingPoo
          // ensure that exactly one sweep has been registered that matches the specified selectors
          size_t const numSweeps = s.sweep.getNumberOfMatching(selectors + block.getState());
 
-         if (numSweeps == size_t(0)) {
+         if (numSweeps == size_t{0}) {
             continue;
          } else {
-            if (numSweeps > size_t(1)) {
+            if (numSweeps > size_t{1}) {
                WALBERLA_ABORT("Only one sweep must be added to a single SweepAdder object. This error might be caused "
                               "by e.g. \"timeloop.add() << Sweep(A) << Sweep(B);\".")
             }

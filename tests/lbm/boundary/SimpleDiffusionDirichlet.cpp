@@ -110,14 +110,14 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 {
    const AABB & domain = forest.getDomain();
 
-   const real_t domainxMax = domain.xMax() / real_c( pow( real_t(2), int_c( levels - uint_t(1u) ) ) );
+   const real_t domainxMax = domain.xMax() / real_c( pow( real_t{2}, int_c( levels - uint_t{1u} ) ) );
 
    AABB left( domain.xMin(), domain.yMin(), domain.zMin(),
               domainxMax,    domain.yMax(), domain.zMax() );
 
    for( auto &block : forest )
       if( block.getAABB().intersects( left ) )
-         if( block.getLevel() < ( levels - uint_t(1u) ) )
+         if( block.getLevel() < ( levels - uint_t{1u} ) )
             block.setMarker( true );
 
 }
@@ -126,7 +126,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest ) {
 
    for( auto &block : forest )
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
@@ -138,12 +138,12 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     SetupBlockForest sforest;
 
     uint_t cells[]  = { length, width, width  };
-    uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
+    uint_t blocks[] = { uint_t{1u}, uint_t{1u}, uint_t{1u} };
     sforest.addRefinementSelectionFunction( [=] ( auto & forest ) { refinementSelection( forest, refinement ); } );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(
-       AABB( real_t(0),        real_t(0),        real_t(0),             // blocks/processes in x/y/z direction
+       AABB( real_t{0},        real_t{0},        real_t{0},             // blocks/processes in x/y/z direction
              real_c(cells[0]), real_c(cells[1]), real_c(cells[2]) ),    // cells per block in x/y/z direction
              blocks[0]  , blocks[1]  , blocks[2],                       // one block per process
              false      , true       , true);                           // periodicity
@@ -151,7 +151,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     // calculate process distribution
     const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t{0}, memoryLimit, true );
 
     MPIManager::instance()->useWorldComm();
 
@@ -180,7 +180,7 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       CellInterval domainBB = blocks->getDomainCellBB( level );
       blocks->transformGlobalToBlockLocalCellInterval( domainBB, *block );
 
-      //const cell_idx_t width = cell_idx_c( uint_t(1) << level ) - cell_idx_t(1);
+      //const cell_idx_t width = cell_idx_c( uint_t{1} << level ) - cell_idx_t{1};
 
       domainBB.xMin() -= cell_idx_c( 1 );
       domainBB.xMax() += cell_idx_c( 1 );
@@ -189,8 +189,8 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       domainBB.zMin() -= cell_idx_c( ghostLayers );
       domainBB.zMax() += cell_idx_c( ghostLayers );
 
-      MyBoundaryHandling::SimpleDiffusionDirichlet_T::ScalarConfiguration scl( real_t(1)+dv );
-      MyBoundaryHandling::SimpleDiffusionDirichlet_T::ScalarConfiguration scr( real_t(1)    );
+      MyBoundaryHandling::SimpleDiffusionDirichlet_T::ScalarConfiguration scl( real_t{1}+dv );
+      MyBoundaryHandling::SimpleDiffusionDirichlet_T::ScalarConfiguration scr( real_t{1}    );
 
       // LEFT
       CellInterval left( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(),
@@ -232,18 +232,18 @@ public:
    TestSweep( ConstBlockDataID pdfFieldID, real_t omega, real_t minValue, real_t maxValue, uint_t length, uint_t time, shared_ptr<StructuredBlockForest> & blocks ) :
          pdfFieldID_(pdfFieldID),
          blocks_ (blocks),
-         k_((real_t(1)/omega-real_c(0.5))/real_t(3)),
+         k_((real_t{1}/omega-real_c(0.5))/real_t{3}),
          minValue_(minValue),
          maxValue_(maxValue),
          delta_( maxValue - minValue),
          length_(real_c(length)),
-         lengthInv_(real_t(1)/real_c(length)),
+         lengthInv_(real_t{1}/real_c(length)),
          pi_(math::pi),
-         piInv_(real_t(1)/math::pi),
-         valid_(uint_c(std::ceil(omega*omega*omega*real_t(10)))),
+         piInv_(real_t{1}/math::pi),
+         valid_(uint_c(std::ceil(omega*omega*omega*real_t{10}))),
          time_( time ),
          expArray(),
-         timestep_( uint_t(0u) ),
+         timestep_( uint_t{0u} ),
          E_max_(maxValue-minValue),
          E_mean_(maxValue-minValue)
 {
@@ -284,14 +284,14 @@ private:
    {
       const real_t xiL = x*lengthInv_;
 
-      real_t y = real_t(0);
-      real_t f = real_t(1);
-      for ( uint_t n = 1; n<uint_t(1000u); ++n ){
+      real_t y = real_t{0};
+      real_t f = real_t{1};
+      for ( uint_t n = 1; n<uint_t{1000u}; ++n ){
          const real_t npi = real_c(n)*pi_;
-         f *= -real_t(1);
+         f *= -real_t{1};
          y += f/real_c(n) * real_c( sin(npi*xiL) ) * expArray[n-1];
       }
-      return delta_*(real_t(2)*y*piInv_ + xiL) + minValue_;
+      return delta_*(real_t{2}*y*piInv_ + xiL) + minValue_;
    }
 
 
@@ -299,14 +299,14 @@ private:
    {
       const real_t xiL  = x*lengthInv_;
 
-      real_t y = real_t(0);
-      real_t f = real_t(1);
-      for ( uint_t n = 1; n<uint_t(1000u); ++n ){
+      real_t y = real_t{0};
+      real_t f = real_t{1};
+      for ( uint_t n = 1; n<uint_t{1000u}; ++n ){
          const real_t npi = real_c(n)*pi_;
-         f *= -real_t(1);
-         y -= f*length_/(real_c(n)*npi) * real_c(cos(npi*xiL)) * expArray[n-uint_t(1u)];
+         f *= -real_t{1};
+         y -= f*length_/(real_c(n)*npi) * real_c(cos(npi*xiL)) * expArray[n-uint_t{1u}];
       }
-      return delta_*(real_t(2)*y*piInv_ + real_c(0.5)*x*xiL) + x*minValue_;
+      return delta_*(real_t{2}*y*piInv_ + real_c(0.5)*x*xiL) + x*minValue_;
    }
 };
 
@@ -316,19 +316,19 @@ void TestSweep::operator()()
 {
    ++timestep_;
 
-   E_mean_ = real_t(0);
-   real_t E_max  = real_t(0);
-   uint_t blockcount = uint_t(0u);
+   E_mean_ = real_t{0};
+   real_t E_max  = real_t{0};
+   uint_t blockcount = uint_t{0u};
 
    //loop block
    for( auto block = blocks_->begin(); block != blocks_->end(); ++block, ++blockcount )
    {
-      real_t E_mean = real_t(0);
+      real_t E_mean = real_t{0};
 
       Cell localCell, globalCell;
       const uint_t level = blocks_->getLevel(*block);
       const real_t ktiLL = -k_*real_c(timestep_)*lengthInv_*lengthInv_;
-      const real_t pow2level = real_c( pow( real_t(2), int_c(level) ) );
+      const real_t pow2level = real_c( pow( real_t{2}, int_c(level) ) );
 
       for ( uint_t n = 1; n<1000; ++n ){
            const real_t npi = real_c(n)*pi_;
@@ -362,13 +362,13 @@ void TestSweep::operator()()
          // the single diffusion value does not represent the overall temperature in a cell
          analytical = diffusion( length_ - ( real_c( globalCell[0] ) + 0.5 ) / pow2level );
 #endif
-         lastNumerical = real_t( 0 );
+         lastNumerical = real_t{ 0 };
          for( uint_t z = 0; z<sz; ++z ) {
             for( uint_t y = 0; y<sy; ++y )
             {
                numerical = srcPDF_->getDensity( cell_idx_c( x ), cell_idx_c( y ), cell_idx_c( z ) );
 
-               if( lastNumerical > real_t( 0 ) && std::fabs( numerical - lastNumerical ) > 1e-14 )
+               if( lastNumerical > real_t{ 0 } && std::fabs( numerical - lastNumerical ) > 1e-14 )
                   WALBERLA_ABORT( "Unequal numerical values at " << Cell( x, y, z ) << ", t=" << timestep_ << ": E_num=" << numerical << " != " << lastNumerical );
 
                const real_t E = real_c( sqrt( ( analytical - numerical )*( analytical - numerical ) ) );
@@ -384,8 +384,8 @@ void TestSweep::operator()()
 
          //WALBERLA_LOG_RESULT( "Last Analytical: " << analytical << " and Last Numerical: " << lastNumerical );
       }
-      //E_max  /=                    pow( real_t(8),real_c(level) );
-      E_mean /= real_c( sx*sy*sz ) * real_c( pow( real_t( 8 ), int_c( level ) ) );
+      //E_max  /=                    pow( real_t{8},real_c(level) );
+      E_mean /= real_c( sx*sy*sz ) * real_c( pow( real_t{ 8 }, int_c( level ) ) );
       E_mean_ += E_mean;
    }
    E_max_   = E_max;
@@ -418,13 +418,13 @@ int main( int argc, char **argv )
    mpi::Environment env( argc, argv );
    logging::Logging::printHeaderOnStream();
 
-   uint_t length = uint_t( 16u  );
-   uint_t width  = uint_t( 16u  );
-   uint_t time   = uint_t( 10u  );
-   real_t dv     = real_t(  1   );
-   real_t omega  = real_t(  0.7 );
+   uint_t length = uint_t{ 16u  };
+   uint_t width  = uint_t{ 16u  };
+   uint_t time   = uint_t{ 10u  };
+   real_t dv     = real_t{  1   };
+   real_t omega  = real_t{  0.7 };
    bool   closed = false;
-   uint_t levels = uint_t(  1u );
+   uint_t levels = uint_t{  1u };
 
    bool useVTK = false;
 
@@ -446,17 +446,17 @@ int main( int argc, char **argv )
       }
    }
 
-   uint_t ghostLayers = uint_t(4u);
-   if(closed || levels == uint_t(1u))
+   uint_t ghostLayers = uint_t{4u};
+   if(closed || levels == uint_t{1u})
    {
-      levels      = uint_t(1u);
-      ghostLayers = uint_t(1u);
+      levels      = uint_t{1u};
+      ghostLayers = uint_t{1u};
    }
 
    auto blockStorage = makeStructuredBlockStorage( length, width, levels );
 
    LM          lm             = LM( lbm::collision_model::SRT( omega ) );
-   BlockDataID advDiffFieldID = lbm::addPdfFieldToStorage( blockStorage, "PDF field", lm, Vector3<real_t>(), real_t(1), ghostLayers );
+   BlockDataID advDiffFieldID = lbm::addPdfFieldToStorage( blockStorage, "PDF field", lm, Vector3<real_t>(), real_t{1}, ghostLayers );
 
    BlockDataID flagFieldID    = field::addFlagFieldToStorage<MyFlagField>( blockStorage, "Flag field", ghostLayers );
    BlockDataID velFieldID     = field::addToStorage<VectorField>( blockStorage, "Velocity field", Vector3<real_t>() );
@@ -466,9 +466,9 @@ int main( int argc, char **argv )
    setFlags( blockStorage, boundaryHandling, ghostLayers, closed, dv );
 
    SweepTimeloop timeloop( blockStorage->getBlockStorage(), time );
-   timeloop.addFuncAfterTimeStep( TestSweep(advDiffFieldID, omega, real_t(1), real_t(1)+dv, length, time, blockStorage ),"check error! ");
+   timeloop.addFuncAfterTimeStep( TestSweep(advDiffFieldID, omega, real_t{1}, real_t{1}+dv, length, time, blockStorage ),"check error! ");
 
-   if( levels == uint_t(1u) )
+   if( levels == uint_t{1u} )
    {
       blockforest::communication::UniformBufferedScheme< CommunicationStencil > scheme( blockStorage );
       scheme.addPackInfo( make_shared< field::communication::PackInfo< MyPdfField > >( advDiffFieldID ) );
@@ -492,12 +492,12 @@ int main( int argc, char **argv )
 
    if( useVTK )
    {
-      auto vtkOut = vtk::createVTKOutput_BlockData( *blockStorage, "block_data", uint_t(1u), uint_t(0u), false, "vtk_out/SimpleDiffusionTest" );
+      auto vtkOut = vtk::createVTKOutput_BlockData( *blockStorage, "block_data", uint_t{1u}, uint_t{0u}, false, "vtk_out/SimpleDiffusionTest" );
       auto densityWriter  = make_shared<lbm::DensityVTKWriter<LM>>( advDiffFieldID, "E" );
       vtkOut->addCellDataWriter( densityWriter );
       vtkOut->write();
       vtk::writeDomainDecomposition( blockStorage, "domain_decomposition", "vtk_out/SimpleDiffusionTest" );
-      field::createVTKOutput<MyFlagField>( flagFieldID, *blockStorage, "flag_field", uint_t(1u), uint_t(1u), false, "vtk_out/SimpleDiffusionTest" )();
+      field::createVTKOutput<MyFlagField>( flagFieldID, *blockStorage, "flag_field", uint_t{1u}, uint_t{1u}, false, "vtk_out/SimpleDiffusionTest" )();
    }
 
    logging::Logging::printFooterOnStream();

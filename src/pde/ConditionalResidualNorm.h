@@ -51,7 +51,7 @@ public:
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {
       WALBERLA_ASSERT_EQUAL( weights.size(), Stencil_T::Size );
-      for( uint_t i = uint_t(0); i < Stencil_T::Size; ++i )
+      for( uint_t i = uint_t{0}; i < Stencil_T::Size; ++i )
          weights_[i] = weights[i];
    }
 
@@ -80,8 +80,8 @@ protected:
 template< typename Stencil_T, typename FlagField_T >
 real_t ConditionalResidualNorm< Stencil_T, FlagField_T >::weightedL2() const
 {
-   real_t result( real_t(0) );
-   uint_t cells( uint_t(0) );
+   real_t result( real_t{0} );
+   uint_t cells( uint_t{0} );
 
    for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
    {
@@ -91,8 +91,8 @@ real_t ConditionalResidualNorm< Stencil_T, FlagField_T >::weightedL2() const
       const FlagField_T * const flag = block->template getData< const FlagField_T >( flagFieldId_ );
       auto domain = flag->getMask( domainMask_ );
 
-      real_t blockResult( real_t(0) );
-      uint_t blockCells( uint_t(0) );
+      real_t blockResult( real_t{0} );
+      uint_t blockCells( uint_t{0} );
 
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP( uf, omp parallel for schedule(static) reduction(+:blockResult,blockCells),
 

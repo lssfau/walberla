@@ -89,10 +89,10 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       const uint_t chunkEnd   = std::min( chunkSize * uint_c( rank + 1 ), numBlocks );
 
       std::vector<int64_t> vtxdist;
-      vtxdist.reserve( uint_c(numRunnerProcesses) + uint_t(1) );
+      vtxdist.reserve( uint_c(numRunnerProcesses) + uint_t{1} );
       for( uint_t i = 0; i < uint_c(numRunnerProcesses); ++i )
          vtxdist.push_back( int64_c( std::min( i * chunkSize, numBlocks ) ) );
-      vtxdist.push_back( int64_t( forest.getNumberOfBlocks( level ) ) );
+      vtxdist.push_back( static_cast< int64_t >( forest.getNumberOfBlocks( level ) ) );
 
       std::vector<int64_t> adjncy;
       std::vector<int64_t> xadj;
@@ -132,14 +132,14 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       if( weightsToUse_ == PARMETIS_EDGE_WEIGHTS || weightsToUse_ == PARMETIS_BOTH_WEIGHTS )
       {
          WALBERLA_ASSERT_EQUAL( adjncy.size(), blockPairs.size() );
-         adjwgt.resize( blockPairs.size(), int64_t(1) );
+         adjwgt.resize( blockPairs.size(), int64_t{1} );
          commWeightFunction_( blockPairs, adjwgt );
 
          if( adjwgt.empty() )
-            adjwgt.push_back( int64_t(0) ); // dummy value to circumvent dumb NULL pointer check of ParMetis
+            adjwgt.push_back( int64_t{0} ); // dummy value to circumvent dumb NULL pointer check of ParMetis
       }
 
-      WALBERLA_ASSERT_EQUAL( vtxdist.size(), uint_c(numRunnerProcesses) + uint_t( 1 ) );
+      WALBERLA_ASSERT_EQUAL( vtxdist.size(), uint_c(numRunnerProcesses) + uint_t{ 1 } );
       WALBERLA_ASSERT_EQUAL( uint_c(vtxdist[uint_c(rank)]), chunkBegin );
       WALBERLA_ASSERT_EQUAL( uint_c(vtxdist[uint_c(rank + 1)]), chunkEnd );
       WALBERLA_ASSERT_EQUAL( xadj.size(), (chunkEnd - chunkBegin) + 1 );
@@ -151,16 +151,16 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       int64_t numflag = 0; // C-style ordering
       int64_t ncon = 1; // Number of constraints
       int64_t ndims = 3; // Number of dimensions
-      std::array< double, 1 > ubvec = { real_t( 1.05 ) }; // imbalance tolerance
+      std::array< double, 1 > ubvec = { real_t{ 1.05 } }; // imbalance tolerance
       int64_t nparts = int64_c( numberOfProcesses ); // number of subdomains
       MPI_Comm comm = MPIManager::instance()->comm();
       std::vector<double> tpwgts( uint_c(nparts * ncon), 1.0 / double_c( nparts ) ); // vertex weight fraction that is stored in a subdomain
-      std::array< int64_t, 4 > options = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };
+      std::array< int64_t, 4 > options = { int64_t{ 1 }, int64_t{ 0 }, int64_t{ 23 }, int64_t{ 1 } };
 
       // add dummy element to circumvent null pointer check if less blocks than processes
-      adjncy.resize( std::max( adjncy.size(), size_t(1) ) );
-      part.resize( std::max( part.size(), size_t(1) ) );
-      vwgt.resize( std::max( vwgt.size(), size_t(1) ) );
+      adjncy.resize( std::max( adjncy.size(), size_t{1} ) );
+      part.resize( std::max( part.size(), size_t{1} ) );
+      vwgt.resize( std::max( vwgt.size(), size_t{1} ) );
 
       int64_t edgecut = 0;
       int metisResult = core::METIS_ERROR;

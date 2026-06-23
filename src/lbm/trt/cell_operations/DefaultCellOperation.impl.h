@@ -66,7 +66,7 @@ public:
    using PdfField_T = PdfField<LatticeModel_T>;
    using Stencil = typename LatticeModel_T::Stencil;
 
-   DefaultCellOperation() : lambda_e_( real_t(0) ), lambda_d_( real_t(0) ), latticeModel_( NULL ) {}
+   DefaultCellOperation() : lambda_e_( real_t{0} ), lambda_d_( real_t{0} ), latticeModel_( NULL ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
@@ -116,8 +116,8 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_sa
       const real_t f     = pdfs[ d.toIdx() ];
       const real_t finv  = pdfs[ d.toInvIdx() ];
 
-      dst->get( x, y, z, d.toIdx() ) = f - lambda_e_ * ( real_t( 0.5 ) * ( f + finv ) - fsym )
-                                         - lambda_d_ * ( real_t( 0.5 ) * ( f - finv ) - fasym );
+      dst->get( x, y, z, d.toIdx() ) = f - lambda_e_ * ( real_t{ 0.5 } * ( f + finv ) - fsym )
+                                         - lambda_d_ * ( real_t{ 0.5 } * ( f - finv ) - fasym );
    }
 }
 
@@ -183,18 +183,18 @@ public:
    using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() :
-      lambda_e_( real_t(0) ), lambda_e_scaled_( real_t(0) ), lambda_d_scaled_( real_t(0) ),
-      t0_( real_t(1.0) / real_t(3.0) ),
-      t1x2_( real_t(1.0) / real_t(18.0) * real_t(2.0) ),
-      t2x2_( real_t(1.0) / real_t(36.0) * real_t(2.0) ),
-      fac1_( (real_t(1.0) / real_t(18.0) * real_t(2.0)) * (real_t(9.0) / real_t(2.0)) ),
-      fac2_( (real_t(1.0) / real_t(36.0) * real_t(2.0)) * (real_t(9.0) / real_t(2.0)) ) {}
+      lambda_e_( real_t{0} ), lambda_e_scaled_( real_t{0} ), lambda_d_scaled_( real_t{0} ),
+      t0_( real_t{1.0} / real_t{3.0} ),
+      t1x2_( real_t{1.0} / real_t{18.0} * real_t{2.0} ),
+      t2x2_( real_t{1.0} / real_t{36.0} * real_t{2.0} ),
+      fac1_( (real_t{1.0} / real_t{18.0} * real_t{2.0}) * (real_t{9.0} / real_t{2.0}) ),
+      fac2_( (real_t{1.0} / real_t{36.0} * real_t{2.0}) * (real_t{9.0} / real_t{2.0}) ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
       lambda_e_ = latticeModel.collisionModel().lambda_e();
-      lambda_e_scaled_ = real_t(0.5) * lambda_e_;
-      lambda_d_scaled_ = real_t(0.5) * latticeModel.collisionModel().lambda_d();
+      lambda_e_scaled_ = real_t{0.5} * lambda_e_;
+      lambda_d_scaled_ = real_t{0.5} * latticeModel.collisionModel().lambda_d();
    }
 
    void operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const;
@@ -255,58 +255,58 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_sa
    const real_t velY = velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS;
    const real_t velZ = velZ_trm + dd_tmp_TN + dd_tmp_TE - dd_tmp_B  - dd_tmp_BN - dd_tmp_BS - dd_tmp_BW - dd_tmp_BE;
 
-   const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+   const real_t feq_common = rho - real_t{1.5} * ( velX * velX + velY * velY + velZ * velZ );
 
-   dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e_) + lambda_e_ * t0_ * feq_common;
+   dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t{1.0} - lambda_e_) + lambda_e_ * t0_ * feq_common;
 
    const real_t velXPY = velX + velY;
    const real_t  sym_NE_SW = lambda_e_scaled_ * ( dd_tmp_NE + dd_tmp_SW - fac2_ * velXPY * velXPY - t2x2_ * feq_common );
-   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2_ * velXPY );
+   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t{3.0} * t2x2_ * velXPY );
    dst->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
    dst->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
 
    const real_t velXMY = velX - velY;
    const real_t  sym_SE_NW = lambda_e_scaled_ * ( dd_tmp_SE + dd_tmp_NW - fac2_ * velXMY * velXMY - t2x2_ * feq_common );
-   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2_ * velXMY );
+   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t{3.0} * t2x2_ * velXMY );
    dst->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
    dst->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
 
    const real_t velXPZ = velX + velZ;
    const real_t  sym_TE_BW = lambda_e_scaled_ * ( dd_tmp_TE + dd_tmp_BW - fac2_ * velXPZ * velXPZ - t2x2_ * feq_common );
-   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2_ * velXPZ );
+   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t{3.0} * t2x2_ * velXPZ );
    dst->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
    dst->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
 
    const real_t velXMZ = velX - velZ;
    const real_t  sym_BE_TW = lambda_e_scaled_ * ( dd_tmp_BE + dd_tmp_TW - fac2_ * velXMZ * velXMZ - t2x2_ * feq_common );
-   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2_ * velXMZ );
+   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t{3.0} * t2x2_ * velXMZ );
    dst->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
    dst->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
 
    const real_t velYPZ = velY + velZ;
    const real_t  sym_TN_BS = lambda_e_scaled_ * ( dd_tmp_TN + dd_tmp_BS - fac2_ * velYPZ * velYPZ - t2x2_ * feq_common );
-   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2_ * velYPZ );
+   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t{3.0} * t2x2_ * velYPZ );
    dst->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
    dst->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
 
    const real_t velYMZ = velY - velZ;
    const real_t  sym_BN_TS = lambda_e_scaled_ * ( dd_tmp_BN + dd_tmp_TS - fac2_ * velYMZ * velYMZ - t2x2_ * feq_common );
-   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2_ * velYMZ );
+   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t{3.0} * t2x2_ * velYMZ );
    dst->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
    dst->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
 
    const real_t  sym_N_S = lambda_e_scaled_ * ( dd_tmp_N + dd_tmp_S - fac1_ * velY * velY - t1x2_ * feq_common );
-   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2_ * velY );
+   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t{3.0} * t1x2_ * velY );
    dst->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
    dst->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
 
    const real_t  sym_E_W = lambda_e_scaled_ * ( dd_tmp_E + dd_tmp_W - fac1_ * velX * velX - t1x2_ * feq_common );
-   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2_ * velX );
+   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t{3.0} * t1x2_ * velX );
    dst->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
    dst->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
 
    const real_t  sym_T_B = lambda_e_scaled_ * ( dd_tmp_T + dd_tmp_B  - fac1_ * velZ * velZ - t1x2_ * feq_common );
-   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2_ * velZ );
+   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t{3.0} * t1x2_ * velZ );
    dst->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
    dst->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;
 }
@@ -352,58 +352,58 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_sa
    const real_t velY = velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS;
    const real_t velZ = velZ_trm + dd_tmp_TN + dd_tmp_TE - dd_tmp_B  - dd_tmp_BN - dd_tmp_BS - dd_tmp_BW - dd_tmp_BE;
 
-   const real_t feq_common = rho - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+   const real_t feq_common = rho - real_t{1.5} * ( velX * velX + velY * velY + velZ * velZ );
 
-   dst[ Stencil::idx[C] ]= dd_tmp_C * (real_t(1.0) - lambda_e_) + lambda_e_ * t0_ * feq_common;
+   dst[ Stencil::idx[C] ]= dd_tmp_C * (real_t{1.0} - lambda_e_) + lambda_e_ * t0_ * feq_common;
 
    const real_t velXPY = velX + velY;
    const real_t  sym_NE_SW = lambda_e_scaled_ * ( dd_tmp_NE + dd_tmp_SW - fac2_ * velXPY * velXPY - t2x2_ * feq_common );
-   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2_ * velXPY );
+   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t{3.0} * t2x2_ * velXPY );
    dst[ Stencil::idx[NE] ]= dd_tmp_NE - sym_NE_SW - asym_NE_SW;
    dst[ Stencil::idx[SW] ]= dd_tmp_SW - sym_NE_SW + asym_NE_SW;
 
    const real_t velXMY = velX - velY;
    const real_t  sym_SE_NW = lambda_e_scaled_ * ( dd_tmp_SE + dd_tmp_NW - fac2_ * velXMY * velXMY - t2x2_ * feq_common );
-   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2_ * velXMY );
+   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t{3.0} * t2x2_ * velXMY );
    dst[ Stencil::idx[SE] ]= dd_tmp_SE - sym_SE_NW - asym_SE_NW;
    dst[ Stencil::idx[NW] ]= dd_tmp_NW - sym_SE_NW + asym_SE_NW;
 
    const real_t velXPZ = velX + velZ;
    const real_t  sym_TE_BW = lambda_e_scaled_ * ( dd_tmp_TE + dd_tmp_BW - fac2_ * velXPZ * velXPZ - t2x2_ * feq_common );
-   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2_ * velXPZ );
+   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t{3.0} * t2x2_ * velXPZ );
    dst[ Stencil::idx[TE] ]= dd_tmp_TE - sym_TE_BW - asym_TE_BW;
    dst[ Stencil::idx[BW] ]= dd_tmp_BW - sym_TE_BW + asym_TE_BW;
 
    const real_t velXMZ = velX - velZ;
    const real_t  sym_BE_TW = lambda_e_scaled_ * ( dd_tmp_BE + dd_tmp_TW - fac2_ * velXMZ * velXMZ - t2x2_ * feq_common );
-   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2_ * velXMZ );
+   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t{3.0} * t2x2_ * velXMZ );
    dst[ Stencil::idx[BE] ]= dd_tmp_BE - sym_BE_TW - asym_BE_TW;
    dst[ Stencil::idx[TW] ]= dd_tmp_TW - sym_BE_TW + asym_BE_TW;
 
    const real_t velYPZ = velY + velZ;
    const real_t  sym_TN_BS = lambda_e_scaled_ * ( dd_tmp_TN + dd_tmp_BS - fac2_ * velYPZ * velYPZ - t2x2_ * feq_common );
-   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2_ * velYPZ );
+   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t{3.0} * t2x2_ * velYPZ );
    dst[ Stencil::idx[TN] ]= dd_tmp_TN - sym_TN_BS - asym_TN_BS;
    dst[ Stencil::idx[BS] ]= dd_tmp_BS - sym_TN_BS + asym_TN_BS;
 
    const real_t velYMZ = velY - velZ;
    const real_t  sym_BN_TS = lambda_e_scaled_ * ( dd_tmp_BN + dd_tmp_TS - fac2_ * velYMZ * velYMZ - t2x2_ * feq_common );
-   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2_ * velYMZ );
+   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t{3.0} * t2x2_ * velYMZ );
    dst[ Stencil::idx[BN] ]= dd_tmp_BN - sym_BN_TS - asym_BN_TS;
    dst[ Stencil::idx[TS] ]= dd_tmp_TS - sym_BN_TS + asym_BN_TS;
 
    const real_t  sym_N_S = lambda_e_scaled_ * ( dd_tmp_N + dd_tmp_S - fac1_ * velY * velY - t1x2_ * feq_common );
-   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2_ * velY );
+   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t{3.0} * t1x2_ * velY );
    dst[ Stencil::idx[N] ]= dd_tmp_N - sym_N_S - asym_N_S;
    dst[ Stencil::idx[S] ]= dd_tmp_S - sym_N_S + asym_N_S;
 
    const real_t  sym_E_W = lambda_e_scaled_ * ( dd_tmp_E + dd_tmp_W - fac1_ * velX * velX - t1x2_ * feq_common );
-   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2_ * velX );
+   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t{3.0} * t1x2_ * velX );
    dst[ Stencil::idx[E] ]= dd_tmp_E - sym_E_W - asym_E_W;
    dst[ Stencil::idx[W] ]= dd_tmp_W - sym_E_W + asym_E_W;
 
    const real_t  sym_T_B = lambda_e_scaled_ * ( dd_tmp_T + dd_tmp_B  - fac1_ * velZ * velZ - t1x2_ * feq_common );
-   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2_ * velZ );
+   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t{3.0} * t1x2_ * velZ );
    dst[ Stencil::idx[T] ]= dd_tmp_T - sym_T_B - asym_T_B;
    dst[ Stencil::idx[B] ]= dd_tmp_B - sym_T_B + asym_T_B;
 }
@@ -435,16 +435,16 @@ public:
    using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() :
-      lambda_e_( real_t(0) ), lambda_e_scaled_( real_t(0) ), lambda_d_scaled_( real_t(0) ),
-      t0_0_( real_t(1.0) / real_t(3.0) ),
-      t1x2_0_( real_t(1.0) / real_t(18.0) * real_t(2.0) ),
-      t2x2_0_( real_t(1.0) / real_t(36.0) * real_t(2.0) ) {}
+      lambda_e_( real_t{0} ), lambda_e_scaled_( real_t{0} ), lambda_d_scaled_( real_t{0} ),
+      t0_0_( real_t{1.0} / real_t{3.0} ),
+      t1x2_0_( real_t{1.0} / real_t{18.0} * real_t{2.0} ),
+      t2x2_0_( real_t{1.0} / real_t{36.0} * real_t{2.0} ) {}
 
    void configure( const LatticeModel_T & latticeModel )
    {
       lambda_e_ = latticeModel.collisionModel().lambda_e();
-      lambda_e_scaled_ = real_t(0.5) * lambda_e_;
-      lambda_d_scaled_ = real_t(0.5) * latticeModel.collisionModel().lambda_d();
+      lambda_e_scaled_ = real_t{0.5} * lambda_e_;
+      lambda_d_scaled_ = real_t{0.5} * latticeModel.collisionModel().lambda_d();
    }
 
    void operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const;
@@ -498,70 +498,70 @@ void DefaultCellOperation< LatticeModel_T, typename std::enable_if_t< std::is_sa
    const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
    const real_t rho = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-   const real_t invRho = real_t(1.0) / rho;
+   const real_t invRho = real_t{1.0} / rho;
 
    const real_t velX = invRho * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
    const real_t velY = invRho * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
    const real_t velZ = invRho * ( velZ_trm + dd_tmp_TN + dd_tmp_TE - dd_tmp_B  - dd_tmp_BN - dd_tmp_BS - dd_tmp_BW - dd_tmp_BE );
 
-   const real_t feq_common = real_t(1.0) - real_t(1.5) * ( velX * velX + velY * velY + velZ * velZ );
+   const real_t feq_common = real_t{1.0} - real_t{1.5} * ( velX * velX + velY * velY + velZ * velZ );
 
-   dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t(1.0) - lambda_e_) + lambda_e_ * t0_0_ * rho * feq_common;
+   dst->get( x, y, z, Stencil::idx[C] ) = dd_tmp_C * (real_t{1.0} - lambda_e_) + lambda_e_ * t0_0_ * rho * feq_common;
 
    const real_t t2x2 = t2x2_0_ * rho;
-   const real_t fac2 = t2x2 * (real_t(9.0) / real_t(2.0));
+   const real_t fac2 = t2x2 * (real_t{9.0} / real_t{2.0});
 
    const real_t velXPY = velX + velY;
    const real_t  sym_NE_SW = lambda_e_scaled_ * ( dd_tmp_NE + dd_tmp_SW - fac2 * velXPY * velXPY - t2x2 * feq_common );
-   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t(3.0) * t2x2 * velXPY );
+   const real_t asym_NE_SW = lambda_d_scaled_ * ( dd_tmp_NE - dd_tmp_SW - real_t{3.0} * t2x2 * velXPY );
    dst->get( x, y, z, Stencil::idx[NE] ) = dd_tmp_NE - sym_NE_SW - asym_NE_SW;
    dst->get( x, y, z, Stencil::idx[SW] ) = dd_tmp_SW - sym_NE_SW + asym_NE_SW;
 
    const real_t velXMY = velX - velY;
    const real_t  sym_SE_NW = lambda_e_scaled_ * ( dd_tmp_SE + dd_tmp_NW - fac2 * velXMY * velXMY - t2x2 * feq_common );
-   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t(3.0) * t2x2 * velXMY );
+   const real_t asym_SE_NW = lambda_d_scaled_ * ( dd_tmp_SE - dd_tmp_NW - real_t{3.0} * t2x2 * velXMY );
    dst->get( x, y, z, Stencil::idx[SE] ) = dd_tmp_SE - sym_SE_NW - asym_SE_NW;
    dst->get( x, y, z, Stencil::idx[NW] ) = dd_tmp_NW - sym_SE_NW + asym_SE_NW;
 
    const real_t velXPZ = velX + velZ;
    const real_t  sym_TE_BW = lambda_e_scaled_ * ( dd_tmp_TE + dd_tmp_BW - fac2 * velXPZ * velXPZ - t2x2 * feq_common );
-   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t(3.0) * t2x2 * velXPZ );
+   const real_t asym_TE_BW = lambda_d_scaled_ * ( dd_tmp_TE - dd_tmp_BW - real_t{3.0} * t2x2 * velXPZ );
    dst->get( x, y, z, Stencil::idx[TE] ) = dd_tmp_TE - sym_TE_BW - asym_TE_BW;
    dst->get( x, y, z, Stencil::idx[BW] ) = dd_tmp_BW - sym_TE_BW + asym_TE_BW;
 
    const real_t velXMZ = velX - velZ;
    const real_t  sym_BE_TW = lambda_e_scaled_ * ( dd_tmp_BE + dd_tmp_TW - fac2 * velXMZ * velXMZ - t2x2 * feq_common );
-   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t(3.0) * t2x2 * velXMZ );
+   const real_t asym_BE_TW = lambda_d_scaled_ * ( dd_tmp_BE - dd_tmp_TW - real_t{3.0} * t2x2 * velXMZ );
    dst->get( x, y, z, Stencil::idx[BE] ) = dd_tmp_BE - sym_BE_TW - asym_BE_TW;
    dst->get( x, y, z, Stencil::idx[TW] ) = dd_tmp_TW - sym_BE_TW + asym_BE_TW;
 
    const real_t velYPZ = velY + velZ;
    const real_t  sym_TN_BS = lambda_e_scaled_ * ( dd_tmp_TN + dd_tmp_BS - fac2 * velYPZ * velYPZ - t2x2 * feq_common );
-   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t(3.0) * t2x2 * velYPZ );
+   const real_t asym_TN_BS = lambda_d_scaled_ * ( dd_tmp_TN - dd_tmp_BS - real_t{3.0} * t2x2 * velYPZ );
    dst->get( x, y, z, Stencil::idx[TN] ) = dd_tmp_TN - sym_TN_BS - asym_TN_BS;
    dst->get( x, y, z, Stencil::idx[BS] ) = dd_tmp_BS - sym_TN_BS + asym_TN_BS;
 
    const real_t velYMZ = velY - velZ;
    const real_t  sym_BN_TS = lambda_e_scaled_ * ( dd_tmp_BN + dd_tmp_TS - fac2 * velYMZ * velYMZ - t2x2 * feq_common );
-   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t(3.0) * t2x2 * velYMZ );
+   const real_t asym_BN_TS = lambda_d_scaled_ * ( dd_tmp_BN - dd_tmp_TS - real_t{3.0} * t2x2 * velYMZ );
    dst->get( x, y, z, Stencil::idx[BN] ) = dd_tmp_BN - sym_BN_TS - asym_BN_TS;
    dst->get( x, y, z, Stencil::idx[TS] ) = dd_tmp_TS - sym_BN_TS + asym_BN_TS;
 
    const real_t t1x2 = t1x2_0_ * rho;
-   const real_t fac1 = t1x2 * (real_t(9.0) / real_t(2.0));
+   const real_t fac1 = t1x2 * (real_t{9.0} / real_t{2.0});
 
    const real_t  sym_N_S = lambda_e_scaled_ * ( dd_tmp_N + dd_tmp_S - fac1 * velY * velY - t1x2 * feq_common );
-   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t(3.0) * t1x2 * velY );
+   const real_t asym_N_S = lambda_d_scaled_ * ( dd_tmp_N - dd_tmp_S - real_t{3.0} * t1x2 * velY );
    dst->get( x, y, z, Stencil::idx[N] ) = dd_tmp_N - sym_N_S - asym_N_S;
    dst->get( x, y, z, Stencil::idx[S] ) = dd_tmp_S - sym_N_S + asym_N_S;
 
    const real_t  sym_E_W = lambda_e_scaled_ * ( dd_tmp_E + dd_tmp_W - fac1 * velX * velX - t1x2 * feq_common );
-   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t(3.0) * t1x2 * velX );
+   const real_t asym_E_W = lambda_d_scaled_ * ( dd_tmp_E - dd_tmp_W - real_t{3.0} * t1x2 * velX );
    dst->get( x, y, z, Stencil::idx[E] ) = dd_tmp_E - sym_E_W - asym_E_W;
    dst->get( x, y, z, Stencil::idx[W] ) = dd_tmp_W - sym_E_W + asym_E_W;
 
    const real_t  sym_T_B = lambda_e_scaled_ * ( dd_tmp_T + dd_tmp_B  - fac1 * velZ * velZ - t1x2 * feq_common );
-   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t(3.0) * t1x2 * velZ );
+   const real_t asym_T_B = lambda_d_scaled_ * ( dd_tmp_T - dd_tmp_B - real_t{3.0} * t1x2 * velZ );
    dst->get( x, y, z, Stencil::idx[T] ) = dd_tmp_T - sym_T_B - asym_T_B;
    dst->get( x, y, z, Stencil::idx[B] ) = dd_tmp_B - sym_T_B + asym_T_B;
 }

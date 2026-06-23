@@ -83,13 +83,13 @@ public:
    WALBERLA_HOST_DEVICE value_type yMin() const;
    WALBERLA_HOST_DEVICE value_type zMin() const;
 
-   WALBERLA_HOST_DEVICE value_type min( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return minCorner_[index]; }
+   WALBERLA_HOST_DEVICE value_type min( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t{3} ); return minCorner_[index]; }
 
    WALBERLA_HOST_DEVICE value_type xMax() const;
    WALBERLA_HOST_DEVICE value_type yMax() const;
    WALBERLA_HOST_DEVICE value_type zMax() const;
 
-   WALBERLA_HOST_DEVICE value_type max( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return maxCorner_[index]; }
+   WALBERLA_HOST_DEVICE value_type max( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t{3} ); return maxCorner_[index]; }
 
    inline bool empty() const;
 

@@ -57,9 +57,9 @@ int main( int argc, char ** argv )
 
    // Create blocks
    shared_ptr< StructuredBlockForest > const blocks = blockforest::createUniformBlockGrid (
-            uint_t(1) ,              uint_t(2),                           uint_t(1), // number of blocks in x,y,z direction
-            image.size( uint_t(0) ), image.size( uint_t(1) ) / uint_t(2), uint_t(1), // how many cells per block (x,y,z)
-            real_t(1),                                                               // dx: length of one cell in physical coordinates
+            uint_t{1} ,              uint_t{2},                           uint_t{1}, // number of blocks in x,y,z direction
+            image.size( uint_t{0} ), image.size( uint_t{1} ) / uint_t{2}, uint_t{1}, // how many cells per block (x,y,z)
+            real_t{1},                                                               // dx: length of one cell in physical coordinates
             false,                                                                   // one block per process - "false" means all blocks to one process
             false, false, false );                                                   // no periodicity
 
@@ -70,7 +70,7 @@ int main( int argc, char ** argv )
    // Initializing the field from an image
    using geometry::initializer::ScalarFieldFromGrayScaleImage;
    ScalarFieldFromGrayScaleImage fieldInitializer ( *blocks, cpuFieldID ) ;
-   fieldInitializer.init( image, uint_t(2), false );
+   fieldInitializer.init( image, uint_t{2}, false );
 
    BlockDataID const gpuFieldSrcID = gpu::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
    BlockDataID const gpuFieldDstID = gpu::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Dst" );
@@ -80,7 +80,7 @@ int main( int argc, char ** argv )
    commScheme.addPackInfo( make_shared<Packing>(gpuFieldSrcID) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(101); // number of timesteps
+   const uint_t numberOfTimesteps = uint_t{101}; // number of timesteps
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

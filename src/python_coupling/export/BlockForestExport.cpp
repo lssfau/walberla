@@ -346,7 +346,7 @@ void exportBlockForest(py::module_& m)
                                                     cellsPerBlock[2], dx, oneBlockPerProcess, periodic[0], periodic[1], periodic[2],
                                                     keepGlobalBlockInformation);
       },
-      "blocks"_a, "cellsPerBlock"_a, "dx"_a = real_t(1), "oneBlockPerProcess"_a = true,
+      "blocks"_a, "cellsPerBlock"_a, "dx"_a = real_t{1}, "oneBlockPerProcess"_a = true,
       "periodic"_a = std::array< bool, 3 >{ false, false, false }, "keepGlobalBlockInformation"_a = false);
 
     m.def(
@@ -365,7 +365,7 @@ void exportBlockForest(py::module_& m)
                                                            cellsPerBlock[2], dx, oneBlockPerProcess, periodic[0], periodic[1], periodic[2],
                                                            keepGlobalBlockInformation);
             },
-            "cells"_a,"dx"_a = real_t(1), "oneBlockPerProcess"_a = true,
+            "cells"_a,"dx"_a = real_t{1}, "oneBlockPerProcess"_a = true,
             "periodic"_a = std::array< bool, 3 >{ false, false, false }, "keepGlobalBlockInformation"_a = false);
 }
 

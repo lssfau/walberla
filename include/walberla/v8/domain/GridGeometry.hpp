@@ -56,9 +56,9 @@ class CellGrid
 
    WALBERLA_HOST_DEVICE Vector3< real_t > cellCenter(const Cell& c) const
    {
-      const auto cc = Vector3< real_t >(cellExtents_[0] * (real_c(c.x()) + real_t(0.5)),
-                                        cellExtents_[1] * (real_c(c.y()) + real_t(0.5)),
-                                        cellExtents_[2] * (real_c(c.z()) + real_t(0.5)));
+      const auto cc = Vector3< real_t >(cellExtents_[0] * (real_c(c.x()) + real_t{0.5}),
+                                        cellExtents_[1] * (real_c(c.y()) + real_t{0.5}),
+                                        cellExtents_[2] * (real_c(c.z()) + real_t{0.5}));
       return aabb_.min() + cc;
    }
 

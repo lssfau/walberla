@@ -66,7 +66,7 @@ void JacobiFixedStencil< Stencil_T >::operator()( IBlock * const block )
    std::array<real_t, Stencil_T::Size> weights;
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
       weights[ dir.toIdx() ] = this->w( dir.toIdx() );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(1) / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t{1} / this->w( Stencil_T::idx[ stencil::C ] ); // center already inverted here!
  
    WALBERLA_FOR_ALL_CELLS_XYZ( sf,
    

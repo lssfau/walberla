@@ -64,10 +64,10 @@ public:
 
    static const int INVALID_SHAPE = -1; ///< Unique *invalid* shape type identifier.\ingroup mesa_pd_shape
 protected:
-   real_t     mass_         = real_t(0);       ///< mass
-   real_t     invMass_      = real_t(0);       ///< inverse mass
-   Mat3       inertiaBF_    = Mat3(real_t(0)); ///< inertia matrix in the body frame
-   Mat3       invInertiaBF_ = Mat3(real_t(0)); ///< inverse inertia matrix in the body frame
+   real_t     mass_         = real_t{0};       ///< mass
+   real_t     invMass_      = real_t{0};       ///< inverse mass
+   Mat3       inertiaBF_    = Mat3(real_t{0}); ///< inertia matrix in the body frame
+   Mat3       invInertiaBF_ = Mat3(real_t{0}); ///< inverse inertia matrix in the body frame
    ShapeTypeT shapeType_    = INVALID_SHAPE;   ///< \ingroup mesa_pd_shape
 };
 

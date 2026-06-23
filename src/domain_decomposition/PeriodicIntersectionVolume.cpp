@@ -27,7 +27,7 @@ namespace domain_decomposition {
 real_t periodicIntersectionVolume( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )
 {
    const auto diagonal = (domain.maxCorner() - domain.minCorner());
-   const auto halfDiagonal = real_t(0.5) * diagonal;
+   const auto halfDiagonal = real_t{0.5} * diagonal;
    const auto center1 = box1.center();
    auto center2 = box2.center();
 

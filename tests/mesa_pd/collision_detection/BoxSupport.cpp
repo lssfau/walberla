@@ -33,38 +33,38 @@ namespace mesa_pd {
 
 void checkContour(const Vec3& pt, const Vec3& edgeLength )
 {
-   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[0]), edgeLength[0] * real_t(0.5), pt);
-   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[1]), edgeLength[1] * real_t(0.5), pt);
-   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[2]), edgeLength[2] * real_t(0.5), pt);
+   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[0]), edgeLength[0] * real_t{0.5}, pt);
+   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[1]), edgeLength[1] * real_t{0.5}, pt);
+   WALBERLA_CHECK_FLOAT_EQUAL(std::abs(pt[2]), edgeLength[2] * real_t{0.5}, pt);
 }
 
 void check( )
 {
    using namespace walberla::mesa_pd::collision_detection;
 
-   Vec3 pos        = Vec3(real_t(1),real_t(2),real_t(3));
-   Vec3 edgeLength = Vec3(real_t(2),real_t(3),real_t(1));
+   Vec3 pos        = Vec3(real_t{1},real_t{2},real_t{3});
+   Vec3 edgeLength = Vec3(real_t{2},real_t{3},real_t{1});
 
    auto bx = data::Box(edgeLength);
    Support b0(pos, Rot3(), bx);
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(+1),real_t(+1))),  Vec3(real_t(2),real_t(3.5),real_t(3.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(-1),real_t(+1),real_t(+1))),  Vec3(real_t(0),real_t(3.5),real_t(3.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(-1),real_t(+1))),  Vec3(real_t(2),real_t(0.5),real_t(3.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(-1),real_t(-1),real_t(+1))),  Vec3(real_t(0),real_t(0.5),real_t(3.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(+1),real_t(-1))),  Vec3(real_t(2),real_t(3.5),real_t(2.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(-1),real_t(+1),real_t(-1))),  Vec3(real_t(0),real_t(3.5),real_t(2.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(-1),real_t(-1))),  Vec3(real_t(2),real_t(0.5),real_t(2.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(-1),real_t(-1),real_t(-1))),  Vec3(real_t(0),real_t(0.5),real_t(2.5)));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(+1),real_t(+1))),  Vec3(real_t{2},real_t{3.5},real_t{3.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t{-1},real_t(+1),real_t(+1))),  Vec3(real_t{0},real_t{3.5},real_t{3.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t{-1},real_t(+1))),  Vec3(real_t{2},real_t{0.5},real_t{3.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t{-1},real_t{-1},real_t(+1))),  Vec3(real_t{0},real_t{0.5},real_t{3.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t(+1),real_t{-1})),  Vec3(real_t{2},real_t{3.5},real_t{2.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t{-1},real_t(+1),real_t{-1})),  Vec3(real_t{0},real_t{3.5},real_t{2.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t(+1),real_t{-1},real_t{-1})),  Vec3(real_t{2},real_t{0.5},real_t{2.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL(b0.support(Vec3(real_t{-1},real_t{-1},real_t{-1})),  Vec3(real_t{0},real_t{0.5},real_t{2.5}));
 
-   checkContour(b0.support(Vec3(real_t(-1),real_t(-2),real_t(-3)).getNormalized()) - pos, edgeLength );
-   checkContour(b0.support(Vec3(real_t(-2),real_t(-3),real_t(-1)).getNormalized()) - pos, edgeLength );
-   checkContour(b0.support(Vec3(real_t(-3),real_t(-1),real_t(-2)).getNormalized()) - pos, edgeLength );
+   checkContour(b0.support(Vec3(real_t{-1},real_t{-2},real_t{-3}).getNormalized()) - pos, edgeLength );
+   checkContour(b0.support(Vec3(real_t{-2},real_t{-3},real_t{-1}).getNormalized()) - pos, edgeLength );
+   checkContour(b0.support(Vec3(real_t{-3},real_t{-1},real_t{-2}).getNormalized()) - pos, edgeLength );
 
-   Rot3 rot = Rot3(Vec3(1,3,2).getNormalized(), real_t(1.56));
+   Rot3 rot = Rot3(Vec3(1,3,2).getNormalized(), real_t{1.56});
    Support b1(pos, rot, bx);
-   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t(-1),real_t(-2),real_t(-3)).getNormalized()) - pos), edgeLength );
-   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t(-2),real_t(-3),real_t(-1)).getNormalized()) - pos), edgeLength );
-   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t(-3),real_t(-1),real_t(-2)).getNormalized()) - pos), edgeLength );
+   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t{-1},real_t{-2},real_t{-3}).getNormalized()) - pos), edgeLength );
+   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t{-2},real_t{-3},real_t{-1}).getNormalized()) - pos), edgeLength );
+   checkContour(rot.getMatrix().getTranspose() * (b1.support(Vec3(real_t{-3},real_t{-1},real_t{-2}).getNormalized()) - pos), edgeLength );
 }
 
 } //namespace mesa_pd

@@ -69,7 +69,7 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest ) {
 
 static uint_t* blockdata23( const IBlock* const /*block*/ ) {
 
-   return new uint_t(23);
+   return new uint_t{23};
 }
 
 static int* blockdata42( const IBlock* const /*block*/ ) {
@@ -421,7 +421,7 @@ static void test() {
    std::mt19937 eng( 23 );
    for( int i = 0; i < 23; ++i )
    {
-      const Vector3<real_t> globalPoint = forest.getDomain().getScaled( real_t(1.25) ).randomPoint( eng );
+      const Vector3<real_t> globalPoint = forest.getDomain().getScaled( real_t{1.25} ).randomPoint( eng );
 
       for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
       {

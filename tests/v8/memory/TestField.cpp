@@ -180,7 +180,7 @@ void testHostLineAlignment()
 
    constexpr size_t expectedAlignment{ memory::MemoryTraits< memtag::host, double >::alignment() };
 
-   for (auto numGhostLayers : std::views::iota(size_t(0), size_t(4)))
+   for (auto numGhostLayers : std::views::iota(size_t{0}, size_t{4}))
    {
       // FZYX: For all values of y, z, and q, address at `x == 0` must be aligned
       {
@@ -194,8 +194,8 @@ void testHostLineAlignment()
                for (cell_idx_t y = 0; y < cell_idx_c(blocks->getNumberOfYCellsPerBlock()); ++y)
                   for (cell_idx_t q = 0; q < 3; ++q)
                   {
-                     const size_t lineStart = (size_t) std::addressof(fView(0, y, z, q));
-                     testing::assert_equal(lineStart % expectedAlignment, size_t(0));
+                     const size_t lineStart = reinterpret_cast< size_t >(std::addressof(fView(0, y, z, q)));
+                     testing::assert_equal(lineStart % expectedAlignment, size_t{0});
                   }
          }
       }

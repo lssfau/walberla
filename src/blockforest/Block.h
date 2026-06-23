@@ -357,7 +357,7 @@ inline const AABB & Block::getNeighborAABB( const uint_t index ) const
 
 inline void Block::setTargetLevel( const uint_t tl )
 {
-   WALBERLA_ASSERT( tl == level_ || tl == (level_ - uint_t(1)) || tl == (level_ + uint_t(1)) );
+   WALBERLA_ASSERT( tl == level_ || tl == (level_ - uint_t{1}) || tl == (level_ + uint_t{1}) );
 
    targetLevel_ = tl;
 }

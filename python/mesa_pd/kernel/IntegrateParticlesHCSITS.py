@@ -24,7 +24,7 @@ class IntegrateParticlesHCSITS():
         self.context = {'properties': [], 'interface': []}
 
         self.context['properties'].append(create_property("speedLimiterActive", "bool", defValue="false"))
-        self.context['properties'].append(create_property("speedLimitFactor", "real_t", defValue="real_t(1.0)"))
+        self.context['properties'].append(create_property("speedLimitFactor", "real_t", defValue="real_t{1.0}"))
 
         self.context['interface'].append(create_access("uid", "walberla::id_t", access="g"))
         self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="gr"))

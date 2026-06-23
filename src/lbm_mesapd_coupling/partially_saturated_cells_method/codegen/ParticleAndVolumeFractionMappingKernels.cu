@@ -50,7 +50,7 @@ __device__ void calculateWeighting< 1 >(real_t* __restrict__ const weighting, co
 template<>
 __device__ void calculateWeighting< 2 >(real_t* __restrict__ const weighting, const real_t& epsilon, const real_t& tau)
 {
-   *weighting = epsilon * (tau - real_t(0.5)) / ((real_t(1) - epsilon) + (tau - real_t(0.5)));
+   *weighting = epsilon * (tau - real_t{0.5}) / ((real_t{1} - epsilon) + (tau - real_t{0.5}));
 }
 
 template< int Weighting_T >
@@ -74,11 +74,11 @@ __global__ void superSampling(walberla::gpu::FieldAccessor< uint_t > nOverlappin
    // Clear the fields
    for (uint i = 0; i < MaxParticlesPerCell; i++)
    {
-      BsField.get(i)  = real_t(0.0);
-      idxField.get(i) = size_t(0);
+      BsField.get(i)  = real_t{0.0};
+      idxField.get(i) = size_t{0};
    }
-   nOverlappingParticlesField.get() = uint_t(0);
-   BField.get()                     = real_t(0.0);
+   nOverlappingParticlesField.get() = uint_t{0};
+   BField.get()                     = real_t{0.0};
 
    double3 sampleDistance = { 1.0 / (nSamples.x + 1) * dx, 1.0 / (nSamples.y + 1) * dx, 1.0 / (nSamples.z + 1) * dx };
    double3 startSamplingPoint = { (blockStart.x + threadIdx.x * dx + sampleDistance.x),
@@ -142,7 +142,7 @@ __global__ void superSampling(walberla::gpu::FieldAccessor< uint_t > nOverlappin
             BsField.get(nOverlappingParticlesField.get()) = overlapFraction;
             BsField.get(nOverlappingParticlesField.get()) *= 1.0 / (nSamples.x * nSamples.y * nSamples.z);
             calculateWeighting< Weighting_T >(&BsField.get(nOverlappingParticlesField.get()),
-                                              BsField.get(nOverlappingParticlesField.get()), real_t(1.0) / omega);
+                                              BsField.get(nOverlappingParticlesField.get()), real_t{1.0} / omega);
             idxField.get(nOverlappingParticlesField.get()) = idxMapped;
             BField.get() += BsField.get(nOverlappingParticlesField.get());
             nOverlappingParticlesField.get() += 1;
@@ -183,11 +183,11 @@ __global__ void
    // Clear the fields
    for (uint i = 0; i < MaxParticlesPerCell; i++)
    {
-      BsField.get(i)  = real_t(0.0);
-      idxField.get(i) = size_t(0);
+      BsField.get(i)  = real_t{0.0};
+      idxField.get(i) = size_t{0};
    }
-   nOverlappingParticlesField.get() = uint_t(0);
-   BField.get()                     = real_t(0.0);
+   nOverlappingParticlesField.get() = uint_t{0};
+   BField.get()                     = real_t{0.0};
 
    const double3 cellCenter   = { (blockStart.x + (threadIdx.x + 0.5) * dx), (blockStart.y + (blockIdx.x + 0.5) * dx),
                                   (blockStart.z + (blockIdx.y + 0.5) * dx) };
@@ -230,7 +230,7 @@ __global__ void
             assert(nOverlappingParticlesField.get() < MaxParticlesPerCell);
             BsField.get(nOverlappingParticlesField.get()) = epsilon;
             calculateWeighting< Weighting_T >(&BsField.get(nOverlappingParticlesField.get()),
-                                              BsField.get(nOverlappingParticlesField.get()), real_t(1.0) / omega);
+                                              BsField.get(nOverlappingParticlesField.get()), real_t{1.0} / omega);
             idxField.get(nOverlappingParticlesField.get()) = idxMapped;
             BField.get() += BsField.get(nOverlappingParticlesField.get());
             nOverlappingParticlesField.get() += 1;
@@ -266,23 +266,23 @@ __global__ void boxMapping(walberla::gpu::FieldAccessor< uint_t > nOverlappingPa
 
    const double3 cellCenter = { (blockStart.x + (threadIdx.x + 0.5) * dx), (blockStart.y + (blockIdx.x + 0.5) * dx),
                                 (blockStart.z + (blockIdx.y + 0.5) * dx) };
-   const double3 cellMin    = { cellCenter.x - dx * real_t(0.5), cellCenter.y - dx * real_t(0.5),
-                                cellCenter.z - dx * real_t(0.5) };
-   const double3 cellMax    = { cellCenter.x + dx * real_t(0.5), cellCenter.y + dx * real_t(0.5),
-                                cellCenter.z + dx * real_t(0.5) };
+   const double3 cellMin    = { cellCenter.x - dx * real_t{0.5}, cellCenter.y - dx * real_t{0.5},
+                                cellCenter.z - dx * real_t{0.5} };
+   const double3 cellMax    = { cellCenter.x + dx * real_t{0.5}, cellCenter.y + dx * real_t{0.5},
+                                cellCenter.z + dx * real_t{0.5} };
 
-   const real_t xOverlap        = max(real_t(0), min(boxPositionMax.x, cellMax.x) - max(boxPositionMin.x, cellMin.x));
-   const real_t yOverlap        = max(real_t(0), min(boxPositionMax.y, cellMax.y) - max(boxPositionMin.y, cellMin.y));
-   const real_t zOverlap        = max(real_t(0), min(boxPositionMax.z, cellMax.z) - max(boxPositionMin.z, cellMin.z));
+   const real_t xOverlap        = max(real_t{0}, min(boxPositionMax.x, cellMax.x) - max(boxPositionMin.x, cellMin.x));
+   const real_t yOverlap        = max(real_t{0}, min(boxPositionMax.y, cellMax.y) - max(boxPositionMin.y, cellMin.y));
+   const real_t zOverlap        = max(real_t{0}, min(boxPositionMax.z, cellMax.z) - max(boxPositionMin.z, cellMin.z));
    const real_t overlapFraction = xOverlap * yOverlap * zOverlap / (dx * dx * dx);
 
-   if (overlapFraction > real_t(0))
+   if (overlapFraction > real_t{0})
    {
       assert(nOverlappingParticlesField.get() < MaxParticlesPerCell);
 
       BsField.get(nOverlappingParticlesField.get()) = overlapFraction;
       calculateWeighting< Weighting_T >(&BsField.get(nOverlappingParticlesField.get()),
-                                        BsField.get(nOverlappingParticlesField.get()), real_t(1.0) / omega);
+                                        BsField.get(nOverlappingParticlesField.get()), real_t{1.0} / omega);
       idxField.get(nOverlappingParticlesField.get()) = idxMapped;
       BField.get() += BsField.get(nOverlappingParticlesField.get());
       nOverlappingParticlesField.get() += 1;

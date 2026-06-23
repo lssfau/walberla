@@ -44,7 +44,7 @@ public:
       SweepBase( uFieldId, fFieldId )
    {
       WALBERLA_ASSERT_EQUAL( weights.size(), Stencil_T::Size );
-      for( uint_t i = uint_t(0); i < Stencil_T::Size; ++i )
+      for( uint_t i = uint_t{0}; i < Stencil_T::Size; ++i )
          w_[i] = weights[i];
    }
 
@@ -53,7 +53,7 @@ public:
       SweepBase( src, dst, fFieldId )
    {
       WALBERLA_ASSERT_EQUAL( weights.size(), Stencil_T::Size );
-      for( uint_t i = uint_t(0); i < Stencil_T::Size; ++i )
+      for( uint_t i = uint_t{0}; i < Stencil_T::Size; ++i )
          w_[i] = weights[i];
    }
 

@@ -53,7 +53,7 @@
 
 namespace walberla
 {
-uint_t numGhostLayers = uint_t(1);
+uint_t numGhostLayers = uint_t{1};
 
 //! [typedefs]
 using LatticeModel_T         = lbm::D3Q27< lbm::collision_model::SRT >;
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
    Vector3< uint_t > domainScaling =
       domainParameters.getParameter< Vector3< uint_t > >("domainScaling", Vector3< uint_t >(1));
 
-   const real_t dx = domainParameters.getParameter< real_t >("dx", real_t(1));
+   const real_t dx = domainParameters.getParameter< real_t >("dx", real_t{1});
    const Vector3< bool > periodicity =
       domainParameters.getParameter< Vector3< bool > >("periodic", Vector3< bool >(true));
    const Vector3< uint_t > cellsPerBlock = domainParameters.getParameter< Vector3< uint_t > >("cellsPerBlock");
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
    // create fields
    LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::SRT(omega));
    BlockDataID pdfFieldId =
-      lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t(1), numGhostLayers);
+      lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t{1}, numGhostLayers);
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", numGhostLayers);
 
    /////////////////////////
@@ -290,8 +290,8 @@ int main(int argc, char** argv)
 
    // add VTK output to time loop
    auto VTKParams = walberlaEnv.config()->getBlock("VTK");
-   uint_t vtkWriteFrequency = VTKParams.getBlock("fluid_field").getParameter("writeFrequency", uint_t(0));
-   auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", vtkWriteFrequency, uint_t(0), false,
+   uint_t vtkWriteFrequency = VTKParams.getBlock("fluid_field").getParameter("writeFrequency", uint_t{0});
+   auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", vtkWriteFrequency, uint_t{0}, false,
                                                    "vtk_out", "simulation_step", false, true, true, false, 0);
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldId);

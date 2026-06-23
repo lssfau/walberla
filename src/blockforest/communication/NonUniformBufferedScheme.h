@@ -266,16 +266,16 @@ void NonUniformBufferedScheme<Stencil>::refresh()
       for( uint_t j = 0; j <= levels; ++j )
          bufferSystem_[i].push_back( make_shared< mpi::OpenMPBufferSystem >( mpi::MPIManager::instance()->comm(), baseTag_ + int_c( i * levels + j ) ) );
 
-                localCommunication_[i].resize( levels + uint_t(1) );
-      threadsafeLocalCommunication_[i].resize( levels + uint_t(1) );
+                localCommunication_[i].resize( levels + uint_t{1} );
+      threadsafeLocalCommunication_[i].resize( levels + uint_t{1} );
 
-                localCommunicationUnpack_[i].resize( levels + uint_t(1) );
-      threadsafeLocalCommunicationUnpack_[i].resize( levels + uint_t(1) );
+                localCommunicationUnpack_[i].resize( levels + uint_t{1} );
+      threadsafeLocalCommunicationUnpack_[i].resize( levels + uint_t{1} );
 
-      localBuffers_[i].resize( levels + uint_t(1) );
+      localBuffers_[i].resize( levels + uint_t{1} );
 
-      setupBeforeNextCommunication_[i].resize( levels + uint_t(1), char(1) );
-      communicationInProgress_[i].resize( levels + uint_t(1), false );
+      setupBeforeNextCommunication_[i].resize( levels + uint_t{1}, char{1} );
+      communicationInProgress_[i].resize( levels + uint_t{1}, false );
    }
    
 #ifndef NDEBUG
@@ -313,7 +313,7 @@ inline void NonUniformBufferedScheme<Stencil>::addPackInfo( const PackInfo & pac
 
    for( uint_t i = 0; i != 3; ++i )
       for(char & level : setupBeforeNextCommunication_[i])
-          level = char(1);
+          level = char{1};
 }
 
 
@@ -381,7 +381,7 @@ inline void NonUniformBufferedScheme<Stencil>::setLocalMode( const LocalCommunic
 
       for( uint_t i = 0; i != 3; ++i )
          for(char & level : setupBeforeNextCommunication_[i])
-             level = char(1);
+             level = char{1};
    }
 }
 
@@ -419,8 +419,8 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateCoarseToFine()
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const auto coarsestLevel = uint_t(0);
-   const uint_t   finestLevel = levelIndex - uint_t(1);
+   const auto coarsestLevel = uint_t{0};
+   const uint_t   finestLevel = levelIndex - uint_t{1};
 
    startCommunicationCoarseToFine( levelIndex, coarsestLevel, finestLevel );
 }
@@ -440,8 +440,8 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateFineToCoarse()
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const auto coarsestLevel = uint_t(0);
-   const uint_t   finestLevel = levelIndex - uint_t(1);
+   const auto coarsestLevel = uint_t{0};
+   const uint_t   finestLevel = levelIndex - uint_t{1};
 
    startCommunicationFineToCoarse( levelIndex, coarsestLevel, finestLevel );
 }
@@ -471,13 +471,13 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateCoarseToFine( con
 {
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t{0} )
    WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const uint_t coarsestLevel = fineLevel - uint_t(1);
+   const uint_t coarsestLevel = fineLevel - uint_t{1};
    const uint_t   finestLevel = fineLevel;
 
    startCommunicationCoarseToFine( fineLevel, coarsestLevel, finestLevel );
@@ -490,13 +490,13 @@ inline void NonUniformBufferedScheme<Stencil>::startCommunicateFineToCoarse( con
 {
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t{0} )
    WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
 
    if( forestModificationStamp_ != forest->getBlockForest().getModificationStamp() )
       refresh();
 
-   const uint_t coarsestLevel = fineLevel - uint_t(1);
+   const uint_t coarsestLevel = fineLevel - uint_t{1};
    const uint_t   finestLevel = fineLevel;
 
    startCommunicationFineToCoarse( fineLevel, coarsestLevel, finestLevel );
@@ -510,7 +510,7 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateEqualLevel()
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[EQUAL_LEVEL].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( EQUAL_LEVEL, levelIndex );
@@ -524,7 +524,7 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateCoarseToFine()
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[COARSE_TO_FINE].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    if( levelIndex == 1 )
@@ -541,7 +541,7 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateFineToCoarse()
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    const uint_t levelIndex = forest->getNumberOfLevels();
-   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( levelIndex, bufferSystem_[FINE_TO_COARSE].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    if( levelIndex == 1 )
@@ -558,7 +558,7 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateEqualLevel  ( cons
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
    WALBERLA_ASSERT_LESS( level, forest->getNumberOfLevels() )
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[EQUAL_LEVEL].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[EQUAL_LEVEL].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( EQUAL_LEVEL, level );
@@ -571,9 +571,9 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateCoarseToFine( cons
 {
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t{0} )
    WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[COARSE_TO_FINE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[COARSE_TO_FINE].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( COARSE_TO_FINE, fineLevel );
@@ -586,9 +586,9 @@ inline void NonUniformBufferedScheme<Stencil>::waitCommunicateFineToCoarse( cons
 {
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( forest, "Trying to access communication for a block storage object that doesn't exist anymore" )
-   WALBERLA_ASSERT_GREATER( fineLevel, uint_t(0) )
+   WALBERLA_ASSERT_GREATER( fineLevel, uint_t{0} )
    WALBERLA_ASSERT_LESS( fineLevel, forest->getNumberOfLevels() )
-   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[FINE_TO_COARSE].size() - uint_t(1) )
+   WALBERLA_ASSERT_EQUAL( forest->getNumberOfLevels(), bufferSystem_[FINE_TO_COARSE].size() - uint_t{1} )
    WALBERLA_ASSERT_EQUAL( forestModificationStamp_, forest->getBlockForest().getModificationStamp() )
 
    wait( FINE_TO_COARSE, fineLevel );
@@ -616,7 +616,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
 
    char & setupBeforeNextCommunication = setupBeforeNextCommunication_[ EQUAL_LEVEL ][ index ];
 
-   if( setupBeforeNextCommunication == char(1) )
+   if( setupBeforeNextCommunication == char{1} )
    {
       localCommunication.clear();
       threadsafeLocalCommunication.clear();
@@ -648,14 +648,14 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
             if( !( block->neighborhoodSectionHasEquallySizedBlock(neighborIdx) ) )
                continue;
 
-            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
+            WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t{1} )
 
-            const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t(0) );
+            const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t{0} );
 
-            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+            if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) )
             {
                auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
                WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
@@ -666,7 +666,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
                   {
                      SendBuffer const buffer;
                      localBuffers.push_back( buffer );
-                     const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
+                     const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t{1};
 
                      VoidFunction pack = [=, this, dir=*dir] { localBufferPacking( EQUAL_LEVEL, index, bufferIndex, std::cref( packInfo ), block, neighbor, dir ); };
 
@@ -691,7 +691,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
             }
             else
             {
-               auto nProcess = block->getNeighborProcess( neighborIdx, uint_t(0) );
+               auto nProcess = block->getNeighborProcess( neighborIdx, uint_t{0} );
 
                if( !packInfos_.empty() )
                   sendFunctions[ nProcess ].emplace_back( [=, dir=*dir] ( SendBuffer & buffer ) { writeHeader( buffer, block->getId(), receiverId, dir ); } );
@@ -713,7 +713,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationEqualLevel( const uint
          bufferSystem->addReceivingFunction( int_c(sender.first), receivingFunc );
       }
 
-      setupBeforeNextCommunication = char(0);
+      setupBeforeNextCommunication = char{0};
    }
 
    start( EQUAL_LEVEL, index );
@@ -741,7 +741,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
 
    char & setupBeforeNextCommunication = setupBeforeNextCommunication_[ COARSE_TO_FINE ][ index ];
 
-   if( setupBeforeNextCommunication == char(1) )
+   if( setupBeforeNextCommunication == char{1} )
    {
       localCommunication.clear();
       threadsafeLocalCommunication.clear();
@@ -792,7 +792,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                         {
                            SendBuffer const buffer;
                            localBuffers.push_back( buffer );
-                           const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
+                           const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t{1};
 
                            VoidFunction pack = [=, this, dir=*dir] { localBufferPacking( COARSE_TO_FINE, index, bufferIndex, std::cref( packInfo ), block, neighbor, dir ); };
 
@@ -835,11 +835,11 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
                if( block->neighborhoodSectionHasLargerBlock(neighborIdx) )
                {
-                  WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
-                  if( block->neighborExistsRemotely( neighborIdx, uint_t(0) ) &&
+                  WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t{1} )
+                  if( block->neighborExistsRemotely( neighborIdx, uint_t{0} ) &&
                       selectable::isSetSelected( block->getNeighborState( neighborIdx, 0 ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                   {
-                     ranksToReceiveFrom.insert( block->getNeighborProcess( neighborIdx, uint_t(0) ) );
+                     ranksToReceiveFrom.insert( block->getNeighborProcess( neighborIdx, uint_t{0} ) );
                   }
                }
             }
@@ -858,7 +858,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationCoarseToFine( const ui
           bufferSystem->addReceivingFunction( int_c(receiver), receivingFunc );
       }
 
-      setupBeforeNextCommunication = char(0);
+      setupBeforeNextCommunication = char{0};
    }
 
    start( COARSE_TO_FINE, index );
@@ -886,7 +886,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
 
    char & setupBeforeNextCommunication = setupBeforeNextCommunication_[ FINE_TO_COARSE ][ index ];
 
-   if( setupBeforeNextCommunication == char(1) )
+   if( setupBeforeNextCommunication == char{1} )
    {
       localCommunication.clear();
       threadsafeLocalCommunication.clear();
@@ -920,14 +920,14 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                if( !( block->neighborhoodSectionHasLargerBlock(neighborIdx) ) )
                   continue;
 
-               WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) )
+               WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t{1} )
 
-               const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t(0) );
+               const BlockID & receiverId = block->getNeighborId( neighborIdx, uint_t{0} );
 
-               if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                   continue;
 
-               if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+               if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) )
                {
                   auto neighbor = dynamic_cast< Block * >( forest->getBlock(receiverId) );
                   WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() )
@@ -938,7 +938,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                      {
                         SendBuffer const buffer;
                         localBuffers.push_back( buffer );
-                        const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t(1);
+                        const uint_t bufferIndex = uint_c( localBuffers.size() ) - uint_t{1};
 
                         VoidFunction pack = [=, this, dir=*dir] { localBufferPacking( FINE_TO_COARSE, index, bufferIndex, std::cref( packInfo ), block, neighbor, dir ); };
 
@@ -963,7 +963,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
                }
                else
                {
-                  auto nProcess = block->getNeighborProcess( neighborIdx, uint_t(0) );
+                  auto nProcess = block->getNeighborProcess( neighborIdx, uint_t{0} );
 
                   if( !packInfos_.empty() )
                      sendFunctions[ nProcess ].emplace_back( [=, dir=*dir] ( SendBuffer & buffer ) { writeHeader( buffer, block->getId(), receiverId, dir ); } );
@@ -1004,7 +1004,7 @@ void NonUniformBufferedScheme<Stencil>::startCommunicationFineToCoarse( const ui
           bufferSystem->addReceivingFunction( int_c(receiver), receivingFunc );
       }
 
-      setupBeforeNextCommunication = char(0);
+      setupBeforeNextCommunication = char{0};
    }
 
    start( FINE_TO_COARSE, index );

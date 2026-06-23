@@ -59,9 +59,9 @@ public:
 
    class Configuration : public BoundaryConfiguration {
    public:
-             Configuration( const Vector3< real_t > & _velocity, const real_t _density = real_t(1) ) :
+             Configuration( const Vector3< real_t > & _velocity, const real_t _density = real_t{1} ) :
                 velocity_( _velocity ), density_( _density ) {}
-             Configuration( const real_t _x, const real_t _y, const real_t _z, const real_t _density = real_t(1) ) :
+             Configuration( const real_t _x, const real_t _y, const real_t _z, const real_t _density = real_t{1} ) :
                 velocity_(_x,_y,_z), density_( _density ) {}
       inline Configuration( const Config::BlockHandle & config );
 
@@ -131,7 +131,7 @@ inline VelocityBoundary< LatticeModel_T, flag_t >::Configuration::Configuration(
    velocity_[0] = ( config && config.isDefined( "x" ) ) ? config.getParameter<real_t>( "x" ) : real_c(0.0);
    velocity_[1] = ( config && config.isDefined( "y" ) ) ? config.getParameter<real_t>( "y" ) : real_c(0.0);
    velocity_[2] = ( config && config.isDefined( "z" ) ) ? config.getParameter<real_t>( "z" ) : real_c(0.0);
-   density_ = ( config && config.isDefined( "rho" ) ) ? config.getParameter<real_t>( "rho" ) : real_t(1);
+   density_ = ( config && config.isDefined( "rho" ) ) ? config.getParameter<real_t>( "rho" ) : real_t{1};
 }
 
 

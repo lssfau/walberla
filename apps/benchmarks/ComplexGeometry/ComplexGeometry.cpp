@@ -140,11 +140,11 @@ int main(int argc, char** argv)
       configBlock.getParameter< Vector3< real_t > >("domainBlowUp", Vector3< real_t >(6));
    const Vector3< uint_t > blockSize =
       configBlock.getParameter< Vector3< uint_t > >("blockSize", Vector3< uint_t >(16));
-   uint_t numLevels                     = configBlock.getParameter< uint_t >("numLevels", uint_t(2));
+   uint_t numLevels                     = configBlock.getParameter< uint_t >("numLevels", uint_t{2});
    const bool WriteDistanceOctree = configBlock.getParameter< bool >("WriteDistanceOctree", false);
    const bool WriteSetupForestAndReturn = configBlock.getParameter< bool >("WriteSetupForestAndReturn", false);
 
-   numLevels = std::max(numLevels, uint_t(1));
+   numLevels = std::max(numLevels, uint_t{1});
    const real_t fineDX = dx / real_c(std::pow(2, numLevels));
 
    // uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() );
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
    bfc.setWorkloadMemorySUIDAssignmentFunction(meshWorkloadMemory);
    bfc.setPeriodicity(Vector3< bool >(true));
    bfc.setRefinementSelectionFunction(
-      makeRefinementSelection(distanceOctree, numLevels - uint_t(1), dx, dx * real_t(1)));
+      makeRefinementSelection(distanceOctree, numLevels - uint_t{1}, dx, dx * real_t{1}));
 
    if (WriteSetupForestAndReturn)
    {
@@ -210,7 +210,7 @@ int main(int argc, char** argv)
    static const uint_t NUM_GHOSTLAYERS = 4;
 
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage(structuredBlockforest, "pdf field", latticeModel,
-                                                      Vector3< real_t >(0), real_t(1), NUM_GHOSTLAYERS, field::fzyx);
+                                                      Vector3< real_t >(0), real_t{1}, NUM_GHOSTLAYERS, field::fzyx);
    BlockDataID flagFieldId =
       field::addFlagFieldToStorage< FlagField_T >(structuredBlockforest, "flag field", NUM_GHOSTLAYERS);
 

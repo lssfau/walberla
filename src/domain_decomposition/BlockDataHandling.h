@@ -260,7 +260,7 @@ public:
       const Set<SUID> selection( block->getState() + state );
       const size_t  numMatches = dataHandling_.get( dataHandling, selection );
 
-      if( numMatches > size_t(1) )
+      if( numMatches > size_t{1} )
       {
          WALBERLA_ABORT( "More than one data handling object found for block data \"" << identifier_ << "\"\n"
                          " - number of matching data handling objects: " << numMatches << "\n"

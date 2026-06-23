@@ -5,7 +5,7 @@ from ..utility import generate_file
 
 class SyncNextNeighborsNoGhosts:
     def __init__(self, particle_storage):
-        particle_storage.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
+        particle_storage.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ALWAYS")
         particle_storage.add_property("owner", "int", defValue="-1", syncMode="ON_GHOST_CREATION")
 
     def generate(self, module):

@@ -324,7 +324,7 @@ int main(int argc, char** argv)
       const Vector3< uint_t > domainScaling = domainParameters.getParameter< Vector3< uint_t > >("domainScaling", Vector3< uint_t >(1));
       const Vector3< bool >   periodicity   = domainParameters.getParameter< Vector3< bool > >("periodic", Vector3< bool >(true));
       const Vector3< uint_t > cellsPerBlock = domainParameters.getParameter< Vector3< uint_t > >("cellsPerBlock");
-      const real_t            dx_SI         = domainParameters.getParameter< real_t >("dx_SI", real_t(1));
+      const real_t            dx_SI         = domainParameters.getParameter< real_t >("dx_SI", real_t{1});
       
       /*-----------------------------------------------------------------------------------------------------*/
       
@@ -364,7 +364,7 @@ int main(int argc, char** argv)
 
       oss   << "\n- Time Parameters:"
             << "\n   + No. Course Timesteps:        " << timesteps
-            << "\n   + Simulation Time (s) [actual/specified]:  [" << real_t(timesteps)*dt_SI <<"/"<<simulationTime<<"]";
+            << "\n   + Simulation Time (s) [actual/specified]:  [" << static_cast< real_t >(timesteps)*dt_SI <<"/"<<simulationTime<<"]";
 
       std::string str = oss.str();
 
@@ -516,7 +516,7 @@ int main(int argc, char** argv)
       #endif
      
       const std::string vtkFlagStr = parameters.getParameter< std::string >("vtkFlagOutputString");
-      auto vtkFlagOutput = vtk::createVTKOutput_BlockData(*blocks, vtkFlagStr, uint_t(1), FieldGhostLayer, false, "vtk_out",
+      auto vtkFlagOutput = vtk::createVTKOutput_BlockData(*blocks, vtkFlagStr, uint_t{1}, FieldGhostLayer, false, "vtk_out",
                                                          "flags", false, true, true, false, 0);
       auto flagWriter = make_shared< field::VTKWriter< FlagField_T > >(flagFieldId, "flag");
       vtkFlagOutput->addCellDataWriter(flagWriter);
@@ -569,7 +569,7 @@ int main(int argc, char** argv)
       {
          const std::string vtkStr = parameters.getParameter< std::string >("vtkOutputString");
 
-         auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, vtkStr, vtkWriteFrequency, uint_t(0), false, "vtk_out",
+         auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, vtkStr, vtkWriteFrequency, uint_t{0}, false, "vtk_out",
                                                          "simulation_step", false, true, true, false, 0);
          
          auto velocityWriter = make_shared< field::VTKWriter< VelocityField_T > >(velocityFieldCpuId, "velocity");

@@ -49,16 +49,16 @@ void createDump()
    auto ss = std::make_shared<data::ShapeStorage>();
 
    auto smallSphere = ss->create<data::Sphere>(radius);
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    // create forest
-   auto forest = blockforest::createBlockForest(math::AABB(real_t(0),
-                                                           real_t(0),
-                                                           real_t(0),
-                                                           real_t(6),
-                                                           real_t(6),
-                                                           real_t(6)),
+   auto forest = blockforest::createBlockForest(math::AABB(real_t{0},
+                                                           real_t{0},
+                                                           real_t{0},
+                                                           real_t{6},
+                                                           real_t{6},
+                                                           real_t{6}),
                                                 Vector3<uint_t>(2, 2, 2),
                                                 Vector3<bool>(true, true, true));
    forest->saveToFile("SerializeDeserialize.sbf");
@@ -72,7 +72,7 @@ void createDump()
    //add one global particle
    {
       auto p = ps->create();
-      p->setPosition(Vec3(real_t(1)));
+      p->setPosition(Vec3(real_t{1}));
       data::particle_flags::set(p->getFlagsRef(), data::particle_flags::GLOBAL);
       data::particle_flags::set(p->getFlagsRef(), data::particle_flags::NON_COMMUNICATING);
       p->setInteractionRadius(radius);
@@ -122,7 +122,7 @@ void checkDump()
    auto ss = std::make_shared<data::ShapeStorage>();
 
    auto smallSphere = ss->create<data::Sphere>(radius);
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    auto forest = make_shared<BlockForest>(uint_c(walberla::mpi::MPIManager::instance()->rank()),
@@ -132,7 +132,7 @@ void checkDump()
    //add one global particle
    {
       auto p = ps->create();
-      p->setPosition(Vec3(real_t(1)));
+      p->setPosition(Vec3(real_t{1}));
       data::particle_flags::set(p->getFlagsRef(), data::particle_flags::GLOBAL);
       data::particle_flags::set(p->getFlagsRef(), data::particle_flags::NON_COMMUNICATING);
       p->setInteractionRadius(radius);

@@ -42,8 +42,8 @@ real_t intersectionRatioSphere( const geometry::Sphere & sphere,
    real_t delta = ( lsqr > rsqr ) ? s - q : s + q;
    delta /= dirLength;
 
-   WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );
+   WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t{ 0 } );
+   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t{ 1 } );
 
    return delta;
 }

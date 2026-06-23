@@ -72,15 +72,15 @@ class GenericFieldPackInfo
       // TODO place mdspan over buffer for md-indexing
       // TODO Honor memory layout of field (fzyx or zyxf)
 
-      sweep::forAllCells(xtag, srcRegion, [=] WALBERLA_HOST_DEVICE (Cell cell) {
+      sweep::forAllCells(xtag, srcRegion, [=] WALBERLA_HOST_DEVICE(Cell cell) {
          const Cell rc{ cell - srcRegion.min() };
          const size_t segmentStart(
-            valuesPerCell * (uint_c(rc.x()) + srcRegion.xSize() * (uint_c(rc.y()) + srcRegion.ySize() * uint_c(rc.z())))
-         );
+            valuesPerCell *
+            (uint_c(rc.x()) + srcRegion.xSize() * (uint_c(rc.y()) + srcRegion.ySize() * uint_c(rc.z()))));
 
-         for (cell_idx_t q = 0; q < cell_idx_t(F_SIZE); ++q)
+         for (cell_idx_t q = 0; q < cell_idx_t{F_SIZE}; ++q)
          {
-            buffer[segmentStart + size_t(q)] = srcView(cell, q);
+            buffer[segmentStart + static_cast< size_t >(q)] = srcView(cell, q);
          }
       });
    }
@@ -92,15 +92,15 @@ class GenericFieldPackInfo
 
       constexpr size_t valuesPerCell{ F_SIZE };
 
-      sweep::forAllCells(xtag, dstRegion, [=] WALBERLA_HOST_DEVICE (Cell cell) {
+      sweep::forAllCells(xtag, dstRegion, [=] WALBERLA_HOST_DEVICE(Cell cell) {
          const Cell rc{ cell - dstRegion.min() };
          const size_t segmentStart(
-            valuesPerCell * (uint_c(rc.x()) + dstRegion.xSize() * (uint_c(rc.y()) + dstRegion.ySize() * uint_c(rc.z())))
-         );
+            valuesPerCell *
+            (uint_c(rc.x()) + dstRegion.xSize() * (uint_c(rc.y()) + dstRegion.ySize() * uint_c(rc.z()))));
 
-         for (cell_idx_t q = 0; q < cell_idx_t(F_SIZE); ++q)
+         for (cell_idx_t q = 0; q < cell_idx_t{F_SIZE}; ++q)
          {
-            dstView(cell, q) = buffer[segmentStart + size_t(q)];
+            dstView(cell, q) = buffer[segmentStart + static_cast< size_t >(q)];
          }
       });
    }
@@ -113,8 +113,8 @@ class GenericFieldPackInfo
       const FieldView dstView{ field_, dstBlock };
       const CellInterval dstRegion{ dstView.slices().ghostSlice(stencil::inverseDir[commDir], numGhostLayers_) };
 
-      sweep::forAllCellPairs(xtag, srcRegion, dstRegion, [=] WALBERLA_HOST_DEVICE (Cell srcCell, Cell dstCell) {
-         for (cell_idx_t q = 0; q < cell_idx_t(F_SIZE); ++q)
+      sweep::forAllCellPairs(xtag, srcRegion, dstRegion, [=] WALBERLA_HOST_DEVICE(Cell srcCell, Cell dstCell) {
+         for (cell_idx_t q = 0; q < cell_idx_t{F_SIZE}; ++q)
          {
             dstView(dstCell, q) = srcView(srcCell, q);
          }
@@ -156,18 +156,18 @@ class GenericStreamPullPackInfo
       const ConstFieldView srcView{ field_, srcBlock };
       const CellInterval srcRegion{ srcView.slices().borderSlice(commDir, 1) };
 
-      sweep::forAllCells(xtag, srcRegion, [=] WALBERLA_HOST_DEVICE (Cell cell) {
+      sweep::forAllCells(xtag, srcRegion, [=] WALBERLA_HOST_DEVICE(Cell cell) {
          const Cell rc{ cell - srcRegion.min() };
 
          const auto subdirs = stencil_ranges::subdirections< Stencil >(commDir);
          const size_t valuesPerCell{ subdirs.size() };
-         const size_t segmentStart{
-            valuesPerCell * size_t(rc.x() + cell_idx_c(srcRegion.xSize()) * (rc.y() + cell_idx_c(srcRegion.ySize()) * rc.z()))
-         };
+         const size_t segmentStart{ valuesPerCell *
+                                    uint_c(rc.x() + cell_idx_c(srcRegion.xSize()) *
+                                                       (rc.y() + cell_idx_c(srcRegion.ySize()) * rc.z())) };
 
          for (size_t i = 0; i < subdirs.size(); ++i)
          {
-            const auto q                     = subdirs[i];
+            const auto q             = subdirs[i];
             buffer[segmentStart + i] = srcView(cell, q);
          }
       });
@@ -178,14 +178,14 @@ class GenericStreamPullPackInfo
       const FieldView dstView{ field_, dstBlock };
       const CellInterval dstRegion{ dstView.slices().ghostSlice(stencil::inverseDir[commDir], 1) };
 
-      sweep::forAllCells(xtag, dstRegion, [=] WALBERLA_HOST_DEVICE (Cell cell) {
+      sweep::forAllCells(xtag, dstRegion, [=] WALBERLA_HOST_DEVICE(Cell cell) {
          const Cell rc{ cell - dstRegion.min() };
 
          const auto subdirs = stencil_ranges::subdirections< Stencil >(commDir);
          const size_t valuesPerCell{ subdirs.size() };
-         const size_t segmentStart{
-            valuesPerCell * size_t(rc.x() + cell_idx_c(dstRegion.xSize()) * (rc.y() + cell_idx_c(dstRegion.ySize()) * rc.z()))
-         };
+         const size_t segmentStart{ valuesPerCell *
+                                    uint_c(rc.x() + cell_idx_c(dstRegion.xSize()) *
+                                                       (rc.y() + cell_idx_c(dstRegion.ySize()) * rc.z())) };
 
          for (size_t i = 0; i < subdirs.size(); ++i)
          {
@@ -203,7 +203,7 @@ class GenericStreamPullPackInfo
       const FieldView dstView{ field_, dstBlock };
       const CellInterval dstRegion{ dstView.slices().ghostSlice(stencil::inverseDir[commDir], 1) };
 
-      sweep::forAllCellPairs(xtag, srcRegion, dstRegion, [=] WALBERLA_HOST_DEVICE (Cell srcCell, Cell dstCell) {
+      sweep::forAllCellPairs(xtag, srcRegion, dstRegion, [=] WALBERLA_HOST_DEVICE(Cell srcCell, Cell dstCell) {
          for (cell_idx_t q : stencil_ranges::subdirections< Stencil >(commDir))
          {
             dstView(dstCell, q) = srcView(srcCell, q);

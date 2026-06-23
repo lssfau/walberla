@@ -39,18 +39,18 @@ int main( int argc, char** argv )
    WALBERLA_UNUSED(walberlaEnv);
 
    std::array< bool, 3 > periodic{{true, true, true}};
-   math::AABB domain(real_t(0),real_t(0),real_t(0),real_t(100),real_t(100),real_t(100));
-   math::AABB box1(real_t(0),real_t(0),real_t(0),real_t(10),real_t(10),real_t(10));
-   math::AABB box2(real_t(0),real_t(0),real_t(0),real_t(10),real_t(10),real_t(10));
+   math::AABB domain(real_t{0},real_t{0},real_t{0},real_t{100},real_t{100},real_t{100});
+   math::AABB box1(real_t{0},real_t{0},real_t{0},real_t{10},real_t{10},real_t{10});
+   math::AABB box2(real_t{0},real_t{0},real_t{0},real_t{10},real_t{10},real_t{10});
 
    for (int multiple = 0; multiple < 3; ++multiple)
    {
       for (auto dir = stencil::D3Q27::beginNoCenter(); dir != stencil::D3Q27::end(); ++dir)
       {
          Vector3<real_t> shift(
-               real_c(dir.cx()) * (real_t(9) + domain.xSize() * real_c(multiple)),
-               real_c(dir.cy()) * (real_t(9) + domain.ySize() * real_c(multiple)),
-               real_c(dir.cz()) * (real_t(9) + domain.zSize() * real_c(multiple)));
+               real_c(dir.cx()) * (real_t{9} + domain.xSize() * real_c(multiple)),
+               real_c(dir.cy()) * (real_t{9} + domain.ySize() * real_c(multiple)),
+               real_c(dir.cz()) * (real_t{9} + domain.zSize() * real_c(multiple)));
          box2.setCenter(shift + box1.center());
          real_t vol = periodicIntersectionVolume(periodic, domain, box1, box2);
 
@@ -64,7 +64,7 @@ int main( int argc, char** argv )
          case stencil::TNW:
          case stencil::TSE:
          case stencil::TSW:
-            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t(1));
+            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t{1});
             break;
          case stencil::BN:
          case stencil::BW:
@@ -78,7 +78,7 @@ int main( int argc, char** argv )
          case stencil::NW:
          case stencil::SE:
          case stencil::SW:
-            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t(10));
+            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t{10});
             break;
          case stencil::B:
          case stencil::T:
@@ -86,7 +86,7 @@ int main( int argc, char** argv )
          case stencil::W:
          case stencil::S:
          case stencil::E:
-            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t(100));
+            WALBERLA_CHECK_FLOAT_EQUAL(vol, real_t{100});
             break;
          default:
             WALBERLA_CHECK(false, "Should not end up here!");

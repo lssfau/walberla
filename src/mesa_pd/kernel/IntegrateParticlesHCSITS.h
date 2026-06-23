@@ -56,7 +56,7 @@ class IntegrateParticlesHCSITS
    // Default constructor sets the default values
    IntegrateParticlesHCSITS() :
    speedLimiterActive_( false ),
-   speedLimitFactor_( real_t(1.0) )
+   speedLimitFactor_( real_t{1.0} )
    {}
 
    // Getter and Setter Functions
@@ -128,7 +128,7 @@ inline void IntegrateParticlesHCSITS::integratePositions(PAccessor& ac, size_t b
          v = v * (edge * getSpeedLimitFactor() / dt / speed);
       }
 
-      const real_t maxPhi = real_t(2) * math::pi * getSpeedLimitFactor();
+      const real_t maxPhi = real_t{2} * math::pi * getSpeedLimitFactor();
       const real_t phi = w.length() * dt;
       if (phi > maxPhi) {
          w = w / phi * maxPhi;

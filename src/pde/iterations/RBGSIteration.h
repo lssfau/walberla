@@ -43,12 +43,12 @@ public:
                   const std::function< void ( IBlock * ) > & redUpdate,
                   const std::function< void ( IBlock * ) > & blackUpdate,
                   const std::function< real_t () > & residualNorm,
-                  const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
+                  const real_t residualNormThreshold = real_t{0}, const uint_t residualCheckFrequency = uint_t{1},
                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), iterations_( iterations ),
       residualNormThreshold_( residualNormThreshold ), residualCheckFrequency_( residualCheckFrequency ),
-      iterationsPerformed_( uint_t(0) ),
+      iterationsPerformed_( uint_t{0} ),
       communication_( communication ), redUpdate_( redUpdate ), blackUpdate_( blackUpdate ), residualNorm_( residualNorm ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}

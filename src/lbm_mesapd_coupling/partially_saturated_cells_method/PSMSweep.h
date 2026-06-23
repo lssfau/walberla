@@ -107,15 +107,15 @@ class PSMSweep : public lbm::SweepBase< LatticeModel_T, Filter_T, DensityVelocit
         particleAndVolumeFractionFieldID_(particleAndVolumeFractionFieldID), blockStorage_(blockStorage), accessor_(ac)
    {}
 
-   void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0))
+   void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0})
    {
       streamCollide(block, numberOfGhostLayersToInclude);
    }
 
-   void streamCollide(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0));
+   void streamCollide(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0});
 
-   void stream(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0));
-   void collide(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0));
+   void stream(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0});
+   void collide(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0});
 
    inline ParticleAndVolumeFractionField_T* getParticleAndVolumeFractionField(IBlock* const block) const
    {
@@ -216,14 +216,14 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   x, y, z, velocity, rho, omega, collisionModel.omega_bulk(), collisionModel.omega_odd());
 
                // check if particle is present
-               if (particleAndVolumeFractionField->get(x, y, z).size() != size_t(0))
+               if (particleAndVolumeFractionField->get(x, y, z).size() != size_t{0})
                {
                   // total coverage ratio in the cell
-                  real_t Bn = real_t(0);
+                  real_t Bn = real_t{0};
 
                   // averaged solid collision operator for all intersecting particles s
                   // = \sum_s B_s * \Omega_s_i
-                  std::vector< real_t > omega_n(Stencil_T::Size, real_t(0));
+                  std::vector< real_t > omega_n(Stencil_T::Size, real_t{0});
 
                   // get center of cell
                   Vector3< real_t > cellCenter = blockStorage_->getBlockLocalCellCenter(*block, Cell(x, y, z));
@@ -393,14 +393,14 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   x, y, z, velocity, rho, omega, collisionModel.omega_bulk(), collisionModel.omega_odd());
 
                // check if a particle is present
-               if (particleAndVolumeFractionField->get(x, y, z).size() != size_t(0))
+               if (particleAndVolumeFractionField->get(x, y, z).size() != size_t{0})
                {
                   // total coverage ratio in the cell
-                  real_t Bn = real_t(0);
+                  real_t Bn = real_t{0};
 
                   // averaged solid collision operator for all intersecting particles s
                   // = \sum_s B_s * \Omega_s_i
-                  std::vector< real_t > omega_n(Stencil_T::Size, real_t(0));
+                  std::vector< real_t > omega_n(Stencil_T::Size, real_t{0});
 
                   // get center of cell
                   Vector3< real_t > cellCenter = blockStorage_->getBlockLocalCellCenter(*block, Cell(x, y, z));

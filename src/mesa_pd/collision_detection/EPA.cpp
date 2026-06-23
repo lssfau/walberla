@@ -73,11 +73,11 @@ EPA::EPA_Triangle::EPA_Triangle( size_t a,
    real_t vc = nT * (A % B);
    real_t va = nT * (B % C);
    real_t vb = nT * (C % A);
-   real_t denom = real_t(1.0) / (va + vb + vc);
+   real_t denom = real_t{1.0} / (va + vb + vc);
 
    bar_[0] = va * denom;
    bar_[1] = vb * denom;
-   bar_[2] = real_t(1.0) - bar_[0] - bar_[1];
+   bar_[2] = real_t{1.0} - bar_[0] - bar_[1];
 
    closest_ = bar_[0] * A + bar_[1] * B + bar_[2] * C;
 
@@ -320,7 +320,7 @@ bool EPA::doEPA( Support &geom1,
 
          real_t farDist = support * normal; //not yet squared
 
-         WALBERLA_ASSERT_GREATER(farDist, real_t(0.0), "EPA support mapping gave invalid point in expansion direction");
+         WALBERLA_ASSERT_GREATER(farDist, real_t{0.0}, "EPA support mapping gave invalid point in expansion direction");
          //std::cerr << "New upper bound: " <<  farDist*farDist << std::endl;
          upperBoundSqr = std::min(upperBoundSqr, farDist*farDist);
 
@@ -335,7 +335,7 @@ bool EPA::doEPA( Support &geom1,
                   epaVolume[(*current)[1]],
                   epaVolume[(*current)[2]],
                   ctr);
-            if(radius2 > real_t(0.0)){ //if a Sphere exists
+            if(radius2 > real_t{0.0}){ //if a Sphere exists
                // std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
                real_t center_len = ctr.length();
                real_t circle_dist = (std::sqrt(radius2) - center_len); //Distance from center to the spheres surface
@@ -343,23 +343,23 @@ bool EPA::doEPA( Support &geom1,
                // Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
                if (circle_dist*circle_dist <= upperBoundSqr &&
                    circle_dist*circle_dist >= lowerBoundSqr &&
-                   (circle_dist*circle_dist) < real_t(1.10) * lowerBoundSqr &&
-                   !floatIsEqual(center_len, real_t(0.0)) &&
-                   circle_dist > real_t(0.0)) // In case of numerical errors, this can be the case
+                   (circle_dist*circle_dist) < real_t{1.10} * lowerBoundSqr &&
+                   !floatIsEqual(center_len, real_t{0.0}) &&
+                   circle_dist > real_t{0.0}) // In case of numerical errors, this can be the case
                {
-                  const auto ilen = real_t(1.0) / center_len;
+                  const auto ilen = real_t{1.0} / center_len;
                   ctr *= -ilen;
                   pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
                   support = epaVolume.back();
                   // Check if support is in expected direction
                   real_t supp_dist = support.length();
-                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0)) &&
+                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t{0.0}) &&
                      supp_dist*supp_dist <= upperBoundSqr &&
                      supp_dist*supp_dist >= lowerBoundSqr)
                   {
                      //Accept sphere
-                     contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
-                     penetrationDepth = -supp_dist + real_t(2.0) * margin;
+                     contactPoint = real_t{0.5} * (supportA.back() + supportB.back());
+                     penetrationDepth = -supp_dist + real_t{2.0} * margin;
                      retNormal = -ctr;
                      
                      return penetrationDepth < contactThreshold;
@@ -375,7 +375,7 @@ bool EPA::doEPA( Support &geom1,
          //terminating criteria's
          //- we found that the two bounds are close enough
          //- the added support point was already in the epaVolume
-         if(upperBoundSqr <= (real_t(1.0)+eps_rel)*(real_t(1.0)+eps_rel)*lowerBoundSqr
+         if(upperBoundSqr <= (real_t{1.0}+eps_rel)*(real_t{1.0}+eps_rel)*lowerBoundSqr
                || support == epaVolume[(*current)[0]]
                || support == epaVolume[(*current)[1]]
                || support == epaVolume[(*current)[2]])
@@ -407,7 +407,7 @@ bool EPA::doEPA( Support &geom1,
          EPA_Triangle* firstTriangle = &(entryBuffer.back());
          //if it is expanding candidate add to heap
          //std::cerr << "Considering Triangle (" << firstTriangle->getSqrDist() << ") {"  << (*firstTriangle)[0] <<  "," << (*firstTriangle)[1] <<  ","<< (*firstTriangle)[2] << "} ("<< epaVolume[(*firstTriangle)[0]] * firstTriangle->getNormal()<< ")" << std::endl;
-         if(epaVolume[(*firstTriangle)[0]] * firstTriangle->getNormal() < real_t(0.0)){
+         if(epaVolume[(*firstTriangle)[0]] * firstTriangle->getNormal() < real_t{0.0}){
             //the whole triangle is on the wrong side of the origin.
             //This is a numerical error and will produce wrong results, if the search is continued. Stop here.
             break;
@@ -436,7 +436,7 @@ bool EPA::doEPA( Support &geom1,
 
             //std::cerr << "Considering Triangle (" << newTriangle->getSqrDist() << ") {"  << (*newTriangle)[0] <<  "," << (*newTriangle)[1] <<  ","<< (*newTriangle)[2] << "} ("<< epaVolume[(*newTriangle)[0]] * newTriangle->getNormal() << ")" << std::endl;
 
-            if(epaVolume[(*newTriangle)[0]] * newTriangle->getNormal() < real_t(0.0)){
+            if(epaVolume[(*newTriangle)[0]] * newTriangle->getNormal() < real_t{0.0}){
                //the whole triangle is on the wrong side of the origin.
                //This is an error.
                break;
@@ -477,10 +477,10 @@ bool EPA::doEPA( Support &geom1,
    //Calculate Witness points
    const Vec3 wittnessA = current->getClosestPoint(supportA);
    const Vec3 wittnessB = current->getClosestPoint(supportB);
-   contactPoint = real_t(0.5) * (wittnessA + wittnessB);
+   contactPoint = real_t{0.5} * (wittnessA + wittnessB);
 
    //Penetration Depth
-   penetrationDepth = -(current->getClosest().length() - real_t(2.0) * margin);
+   penetrationDepth = -(current->getClosest().length() - real_t{2.0} * margin);
 
    /*std::cerr << "normal=" << retNormal <<std::endl;
    std::cerr << "close =" << current->getClosest() << std::endl;
@@ -534,17 +534,17 @@ inline void EPA::createInitialSimplex( size_t numPoints,
 
       Vec3 axis;
       if( abs0 < abs1 && abs0 < abs2) {
-         axis = Vec3(real_t(1.0), real_t(0.0), real_t(0.0));
+         axis = Vec3(real_t{1.0}, real_t{0.0}, real_t{0.0});
       }
       else if( abs1 < abs0 && abs1 < abs2) {
-         axis = Vec3(real_t(0.0), real_t(1.0), real_t(0.0));
+         axis = Vec3(real_t{0.0}, real_t{1.0}, real_t{0.0});
       }
       else {
-         axis = Vec3(real_t(0.0), real_t(0.0), real_t(1.0));
+         axis = Vec3(real_t{0.0}, real_t{0.0}, real_t{1.0});
       }
 
       Vec3 direction1 = (d % axis).getNormalizedIfNotZero();
-      Quat q(d, (real_t(2.0)/real_t(3.0)) * real_t(walberla::math::pi));
+      Quat q(d, (real_t{2.0}/real_t{3.0}) * real_t(walberla::math::pi));
       Mat3 rot = q.toRotationMatrix();
       Vec3 direction2 = (rot*direction1).getNormalizedIfNotZero();
       Vec3 direction3 = (rot*direction2).getNormalizedIfNotZero();
@@ -701,19 +701,19 @@ inline bool EPA::originInTetrahedron( const Vec3& p0, const Vec3& p1, const Vec3
                                       const Vec3& p3 )
 {
    Vec3 normal0T = (p1 -p0) % (p2-p0);
-   if( (normal0T*p0 > real_t(0.0)) == (normal0T*p3 > real_t(0.0)) ) {
+   if( (normal0T*p0 > real_t{0.0}) == (normal0T*p3 > real_t{0.0}) ) {
       return false;
    }
    Vec3 normal1T = (p2 -p1) % (p3-p1);
-   if( (normal1T*p1 > real_t(0.0)) == (normal1T*p0 > real_t(0.0)) ) {
+   if( (normal1T*p1 > real_t{0.0}) == (normal1T*p0 > real_t{0.0}) ) {
       return false;
    }
    Vec3 normal2T = (p3 -p2) % (p0-p2);
-   if( (normal2T*p2 > real_t(0.0)) == (normal2T*p1 > real_t(0.0)) ) {
+   if( (normal2T*p2 > real_t{0.0}) == (normal2T*p1 > real_t{0.0}) ) {
       return false;
    }
    Vec3 normal3T = (p0 -p3) % (p1-p3);
-   return (normal3T*p3 > real_t(0.0)) != (normal3T*p2 > real_t(0.0));
+   return (normal3T*p3 > real_t{0.0}) != (normal3T*p2 > real_t{0.0});
 }
 //*************************************************************************************************
 
@@ -725,18 +725,18 @@ inline bool EPA::originInTetrahedronVolumeMethod( const Vec3& A, const Vec3& B, 
                                                   const Vec3& D )
 {
    const Vec3& aoT = A;
-   if((aoT * (B % C)) <= real_t(0.0)) {
+   if((aoT * (B % C)) <= real_t{0.0}) {
       //if volume of ABC and Origin <0.0 than the origin is on the wrong side of ABC
       //http://mathworld.wolfram.com/Tetrahedron.html volume formula
       return false;
    }
-   if((aoT * (C % D)) <= real_t(0.0)) {
+   if((aoT * (C % D)) <= real_t{0.0}) {
       return false;
    }
-   if((aoT * (D % B)) <= real_t(0.0)) {
+   if((aoT * (D % B)) <= real_t{0.0}) {
       return false;
    }
-   if((B * (D % C)) <= real_t(0.0)) {
+   if((B * (D % C)) <= real_t{0.0}) {
       return false;
    }
    return true;
@@ -816,28 +816,28 @@ inline bool EPA::searchTetrahedron(Support &geom1,
       //of the face. (for all faces)
       Vec3 normal0T = (epaVolume[1] -epaVolume[0]) % (epaVolume[2]-epaVolume[0]);
       real_t dot_val = normal0T*epaVolume[0];
-      if( (normal0T*epaVolume[3] < dot_val) == (dot_val < real_t(0.0)) ) {
+      if( (normal0T*epaVolume[3] < dot_val) == (dot_val < real_t{0.0}) ) {
          pointIndexToRemove = 3;
          newSearchDirection = (normal0T*epaVolume[3] < dot_val) ? normal0T : -normal0T;
       }
 
       Vec3 normal1T = (epaVolume[2] -epaVolume[1]) % (epaVolume[3]-epaVolume[1]);
       dot_val = normal1T*epaVolume[1];
-      if( (normal1T*epaVolume[0] < dot_val) == (dot_val < real_t(0.0)) ) {
+      if( (normal1T*epaVolume[0] < dot_val) == (dot_val < real_t{0.0}) ) {
          pointIndexToRemove = 0;
          newSearchDirection = (normal1T*epaVolume[0] < dot_val) ? normal1T : -normal1T;
       }
 
       Vec3 normal2T = (epaVolume[3] -epaVolume[2]) % (epaVolume[0]-epaVolume[2]);
       dot_val = normal2T*epaVolume[2];
-      if( (normal2T*epaVolume[1] < dot_val) == (dot_val < real_t(0.0)) ) {
+      if( (normal2T*epaVolume[1] < dot_val) == (dot_val < real_t{0.0}) ) {
          pointIndexToRemove = 1;
          newSearchDirection = (normal2T*epaVolume[1] < dot_val) ? normal2T : -normal2T;
       }
 
       Vec3 normal3T = (epaVolume[0] -epaVolume[3]) % (epaVolume[1]-epaVolume[3]);
       dot_val = normal3T*epaVolume[3];
-      if( (normal3T*epaVolume[2] < dot_val) == (dot_val < real_t(0.0)) ) {
+      if( (normal3T*epaVolume[2] < dot_val) == (dot_val < real_t{0.0}) ) {
          pointIndexToRemove = 2;
          newSearchDirection = (normal3T*epaVolume[2] < dot_val) ? normal3T : -normal3T;
       }
@@ -889,17 +889,17 @@ inline real_t EPA::calculateCircle(const Vec3& A, const Vec3& B, const Vec3& C,
 
    // Here we already see if such circle exists.
    const real_t det = n1 * (n2 % n3);
-   if(floatIsEqual(det, real_t(0.0))){
+   if(floatIsEqual(det, real_t{0.0})){
       //no circle exists. Leave center untouched, and return -1.0
-      return real_t(-1.0);
+      return real_t{-1.0};
    }
    const real_t Alen = A.sqrLength();
-   const real_t d1 = (Alen - B.sqrLength())*real_t(0.5);
-   const real_t d2 = (Alen - C.sqrLength())*real_t(0.5);
-   const real_t d3 = (Alen - D.sqrLength())*real_t(0.5);
+   const real_t d1 = (Alen - B.sqrLength())*real_t{0.5};
+   const real_t d2 = (Alen - C.sqrLength())*real_t{0.5};
+   const real_t d3 = (Alen - D.sqrLength())*real_t{0.5};
 
    //Apply solution formula
-   center = (real_t(1.0)/det)*(d1 * (n2 % n3) + d2 * (n3 % n1) + d3 * (n1 % n2));
+   center = (real_t{1.0}/det)*(d1 * (n2 % n3) + d2 * (n3 % n1) + d3 * (n1 % n2));
 
    return (A - center).sqrLength();
 }

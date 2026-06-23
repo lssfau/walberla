@@ -44,9 +44,9 @@ public:
 
    ~LeafNode() override = default;
 
-   uint_t height() const override { return uint_t(0); }
-   uint_t numNodes() const override { return uint_t(0); }
-   uint_t numChildren() const override { return uint_t(0); }
+   uint_t height() const override { return uint_t{0}; }
+   uint_t numNodes() const override { return uint_t{0}; }
+   uint_t numChildren() const override { return uint_t{0}; }
 
    const Node<ContainmentOctreeT> * getChild( const uint_t ) const override { WALBERLA_ABORT("ContainmentOctree: You are requesting access to children of a Leaf Node!"); return 0; }
 };

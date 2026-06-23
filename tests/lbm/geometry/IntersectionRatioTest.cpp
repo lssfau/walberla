@@ -33,29 +33,29 @@ namespace walberla {
 
 void testPointUnitSphere( const math::Vector3<real_t> & p )
 {
-   static const geometry::Sphere UNIT_SPHERE( math::Vector3<real_t>( 0, 0, 0 ), real_t( 1 ) );
-   static const real_t EPSILON = real_t(1e-4);
+   static const geometry::Sphere UNIT_SPHERE( math::Vector3<real_t>( 0, 0, 0 ), real_t{ 1 } );
+   static const real_t EPSILON = real_t{1e-4};
 
    real_t q = lbm::intersectionRatioBisection( UNIT_SPHERE, p, -p, EPSILON );
    
    Vector3<real_t> intersectionPoint = p + (-p) * q;
    real_t intersectionRadius = intersectionPoint.length();
 
-   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t( 1 ) ), EPSILON );
+   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t{ 1 } ), EPSILON );
 
    q = lbm::intersectionRatioSphere( UNIT_SPHERE, p, -p );
    
    intersectionPoint = p + ( -p ) * q;
    intersectionRadius = intersectionPoint.length();
    
-   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t( 1 ) ), EPSILON );
+   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t{ 1 } ), EPSILON );
    
    q = lbm::intersectionRatio( UNIT_SPHERE, p, -p, EPSILON );
    
    intersectionPoint = p + ( -p ) * q;
    intersectionRadius = intersectionPoint.length();
    
-   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t( 1 ) ), EPSILON );
+   WALBERLA_CHECK_LESS( std::fabs( intersectionRadius - real_t{ 1 } ), EPSILON );
 }
 
 void testUnitSphere()
@@ -73,9 +73,9 @@ void testUnitSphere()
 void testAABB()
 {
 
-   static const math::Vector3<real_t> ZERO( real_t( 0 ), real_t( 0 ), real_t( 0 ) );
-   static const math::Vector3<real_t> UNIT( real_t( 1 ), real_t( 1 ), real_t( 1 ) );
-   static const real_t EPSILON = real_t(1e-4);
+   static const math::Vector3<real_t> ZERO( real_t{ 0 }, real_t{ 0 }, real_t{ 0 } );
+   static const math::Vector3<real_t> UNIT( real_t{ 1 }, real_t{ 1 }, real_t{ 1 } );
+   static const real_t EPSILON = real_t{1e-4};
 
    std::mt19937 randomEngine;
 
@@ -86,7 +86,7 @@ void testAABB()
 
    for( auto aabbIt = testAABBs.begin(); aabbIt != testAABBs.end(); ++aabbIt )
    {
-      const math::AABB outerAABB = aabbIt->getScaled( real_t( 2 ) );
+      const math::AABB outerAABB = aabbIt->getScaled( real_t{ 2 } );
       std::vector< std::pair< Vector3<real_t>, Vector3<real_t> > > testPoints;
 
       for( int i = 0; i < 100; ++i )

@@ -328,7 +328,7 @@ GenericRecvBuffer<T>& GenericRecvBuffer<T>::operator=( const GenericSendBuffer<T
 template< typename T >  // Element type
 inline size_t GenericRecvBuffer<T>::maxSize() const
 {
-   return size_t(-1) / sizeof(T);
+   return static_cast< size_t >(-1) / sizeof(T);
 }
 //**********************************************************************************************************************
 

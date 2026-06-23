@@ -109,7 +109,7 @@ void ProcessStatistics<FlagFieldT>::updateOnProcess()
 
    real_t cellCount           = blockStatistics_.numCells().sum();
    real_t liquidCellCount     = blockStatistics_.numLiquidCells().sum();
-   real_t fractionLiquidCells = math::equal( cellCount, real_t(0) ) ? real_c(1) : liquidCellCount / cellCount;
+   real_t fractionLiquidCells = math::equal( cellCount, real_t{0} ) ? real_c(1) : liquidCellCount / cellCount;
    WALBERLA_ASSERT_GREATER_EQUAL( cellCount, liquidCellCount );
 
    numCells_.insert( cellCount );

@@ -196,7 +196,7 @@ public:
          real_t diameter, real_t velocity, real_t forceMag) :
       ac_( ac ), sphereUid_( sphereUid ), fileName_( fileName ), fileIO_(fileIO),
       diameter_( diameter ), velocityRef_(velocity), forceMag_( forceMag ),
-      position_( real_t(0) )
+      position_( real_t{0} )
    {
       if ( fileIO_ )
       {
@@ -212,9 +212,9 @@ public:
 
    void operator()()
    {
-      real_t pos(real_t(0));
-      real_t vel(real_t(0));
-      real_t hydForce(real_t(0));
+      real_t pos(real_t{0});
+      real_t vel(real_t{0});
+      real_t hydForce(real_t{0});
 
       size_t idx = ac_->uidToIdx(sphereUid_);
       if( idx != ac_->getInvalidIdx())
@@ -284,7 +284,7 @@ private:
 };
 
 
-void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, const shared_ptr<mesa_pd::data::ShapeStorage> & ss, const math::AABB & simulationDomain, real_t velocity = real_t(0))
+void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, const shared_ptr<mesa_pd::data::ShapeStorage> & ss, const math::AABB & simulationDomain, real_t velocity = real_t{0})
 {
    mesa_pd::data::Particle p2 = *ps->create(true);
    p2.setPosition(simulationDomain.minCorner());
@@ -292,7 +292,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p2.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(1,0,0) ));
    p2.setOwner(mpi::MPIManager::instance()->rank());
    p2.setType(0);
-   p2.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
+   p2.setLinearVelocity(Vector3<real_t>(real_t{0},real_t{0},velocity));
    mesa_pd::data::particle_flags::set(p2.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p2.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -302,7 +302,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p3.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(-1,0,0) ));
    p3.setOwner(mpi::MPIManager::instance()->rank());
    p3.setType(0);
-   p3.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
+   p3.setLinearVelocity(Vector3<real_t>(real_t{0},real_t{0},velocity));
    mesa_pd::data::particle_flags::set(p3.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p3.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -312,7 +312,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p4.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,1,0) ));
    p4.setOwner(mpi::MPIManager::instance()->rank());
    p4.setType(0);
-   p4.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
+   p4.setLinearVelocity(Vector3<real_t>(real_t{0},real_t{0},velocity));
    mesa_pd::data::particle_flags::set(p4.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p4.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -322,7 +322,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p5.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,-1,0) ));
    p5.setOwner(mpi::MPIManager::instance()->rank());
    p5.setType(0);
-   p5.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
+   p5.setLinearVelocity(Vector3<real_t>(real_t{0},real_t{0},velocity));
    mesa_pd::data::particle_flags::set(p5.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p5.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -332,7 +332,7 @@ template< typename DensityInterpolator_T>
 real_t getDensityAtPosition(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID densityInterpolatorID, Vector3<real_t> position)
 {
 
-   real_t density = real_t(0);
+   real_t density = real_t{0};
    for( auto & block: *blocks)
    {
       if(block.getAABB().contains(position))
@@ -351,7 +351,7 @@ template< typename VelocityInterpolator_T>
 Vector3<real_t> getVelocityAtPosition(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velocityInterpolatorID, Vector3<real_t> position)
 {
 
-   Vector3<real_t> vel(real_t(0));
+   Vector3<real_t> vel(real_t{0});
    for( auto & block: *blocks)
    {
       if(block.getAABB().contains(position))
@@ -369,8 +369,8 @@ Vector3<real_t> getVelocityAtPosition(const shared_ptr<StructuredBlockStorage> &
 template< typename BoundaryHandling_T>
 real_t getAverageDensityInSystem(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID)
 {
-   real_t totalMass = real_t(0);
-   uint_t count = uint_t(0);
+   real_t totalMass = real_t{0};
+   uint_t count = uint_t{0};
    for( auto & block: *blocks)
    {
       auto pdfField = block.getData<PdfField_T>(pdfFieldID);
@@ -394,8 +394,8 @@ template< typename BoundaryHandling_T>
 void evaluateMapping(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID boundaryHandlingID,
                      uint_t & countSolidCells, uint_t & countFluidSolidLinks)
 {
-   countSolidCells = uint_t(0);
-   countFluidSolidLinks = uint_t(0);
+   countSolidCells = uint_t{0};
+   countFluidSolidLinks = uint_t{0};
    for( auto & block: *blocks)
    {
       auto boundaryHandling = block.getData<BoundaryHandling_T>(boundaryHandlingID);
@@ -475,23 +475,23 @@ int main( int argc, char **argv )
    std::string reconstructorType = "Grad"; // Eq, EAN, Ext, Grad
    std::string forceTorqueAveragingType = "runningAvg"; // noAvg, runningAvg, twoLBM,
    std::string boundaryCondition = "CLI"; // SBB, CLI
-   real_t bulkViscRateFactor = real_t(1);
-   real_t magicNumber = real_t(0.1875);
+   real_t bulkViscRateFactor = real_t{1};
+   real_t magicNumber = real_t{0.1875};
    bool useOmegaBulkAdaption = false;
-   real_t adaptionLayerSize = real_t(2);
-   uint_t blocksInX = uint_t(1);
-   uint_t blocksInY = uint_t(1);
-   uint_t blocksInZ = uint_t(4);
-   real_t initialSpherePosition = real_t(0.5); // in ratio to domain height
+   real_t adaptionLayerSize = real_t{2};
+   uint_t blocksInX = uint_t{1};
+   uint_t blocksInY = uint_t{1};
+   uint_t blocksInZ = uint_t{4};
+   real_t initialSpherePosition = real_t{0.5}; // in ratio to domain height
 
    // simulation setup
-   real_t velocity = real_t(0.02);
-   real_t Re = real_t(164);
-   real_t diameter = real_t(20);
-   real_t numberOfTimeStepsNonDim = real_t(20);
-   real_t domainWidthNonDim = real_t(4);
-   real_t domainHeightNonDim = real_t(8);
-   real_t accelerationFactor = real_t(3);
+   real_t velocity = real_t{0.02};
+   real_t Re = real_t{164};
+   real_t diameter = real_t{20};
+   real_t numberOfTimeStepsNonDim = real_t{20};
+   real_t domainWidthNonDim = real_t{4};
+   real_t domainHeightNonDim = real_t{8};
+   real_t accelerationFactor = real_t{3};
    bool usePeriodicSetup = false;
    bool artificiallyAccelerateSphere = false;
    bool fixedSphere = false;
@@ -559,7 +559,7 @@ int main( int argc, char **argv )
 
    real_t viscosity = velocity * diameter / Re;
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
-   const real_t relaxationTime = real_t(1) / omega;
+   const real_t relaxationTime = real_t{1} / omega;
    const real_t omegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
    const real_t tref = diameter / velocity;
 
@@ -601,7 +601,7 @@ int main( int argc, char **argv )
                            "Unmatching domain decomposition in direction " << i << "!");
    }
 
-   real_t dx = real_t(1);
+   real_t dx = real_t{1};
    auto blocks = blockforest::createUniformBlockGrid( numberOfBlocksPerDirection[0], numberOfBlocksPerDirection[1], numberOfBlocksPerDirection[2],
                                                       cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], dx,
                                                       0, false, false,
@@ -635,8 +635,8 @@ int main( int argc, char **argv )
    if(useGalileanInvariantSetup) createPlaneSetup(ps,ss,blocks->getDomain(),-velocity);
 
    // create sphere and store Uid
-   Vector3<real_t> initialPosition( real_t(0.5) * real_c(domainSize[0]), real_t(0.5) * real_c(domainSize[1]), initialSpherePosition * real_c(domainSize[2]));
-   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t(0.5) );
+   Vector3<real_t> initialPosition( real_t{0.5} * real_c(domainSize[0]), real_t{0.5} * real_c(domainSize[1]), initialSpherePosition * real_c(domainSize[2]));
+   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t{0.5} );
    //ss->shapes[sphereShape]->updateMassAndInertia(densityRatio);
 
    walberla::id_t sphereUid = 0;
@@ -644,10 +644,10 @@ int main( int argc, char **argv )
    {
       mesa_pd::data::Particle&& p = *ps->create();
       p.setPosition(initialPosition);
-      p.setInteractionRadius(diameter * real_t(0.5));
+      p.setInteractionRadius(diameter * real_t{0.5});
       p.setOwner(mpi::MPIManager::instance()->rank());
       p.setShapeID(sphereShape);
-      if(!useGalileanInvariantSetup && !artificiallyAccelerateSphere) p.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
+      if(!useGalileanInvariantSetup && !artificiallyAccelerateSphere) p.setLinearVelocity(Vector3<real_t>(real_t{0},real_t{0},velocity));
       sphereUid = p.getUid();
    }
    mpi::allReduceInplace(sphereUid, mpi::SUM);
@@ -672,9 +672,9 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         useGalileanInvariantSetup ? Vector3<real_t>(real_t(0), real_t(0), -velocity) : Vector3< real_t >( real_t(0)),
-                                                                         real_t(1),
-                                                                         uint_t(1), field::fzyx );
+                                                                         useGalileanInvariantSetup ? Vector3<real_t>(real_t{0}, real_t{0}, -velocity) : Vector3< real_t >( real_t{0}),
+                                                                         real_t{1},
+                                                                         uint_t{1}, field::fzyx );
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
@@ -698,7 +698,7 @@ int main( int argc, char **argv )
 
    // set up RPD functionality
    std::function<void(void)> syncCall = [ps,rpdDomain, adaptionLayerSize ](){
-      const real_t overlap = real_t( 1.5 ) + std::max(real_t(0), adaptionLayerSize - real_t(2));
+      const real_t overlap = real_t{ 1.5 } + std::max(real_t{0}, adaptionLayerSize - real_t{2});
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
       syncNextNeighborFunc(*ps, *rpdDomain, overlap);
    };
@@ -746,8 +746,8 @@ int main( int argc, char **argv )
 
    // create the timeloop
 
-   real_t dtSim = real_t(1);
-   if (forceTorqueAveragingType == "twoLBM") dtSim = real_t(2);
+   real_t dtSim = real_t{1};
+   if (forceTorqueAveragingType == "twoLBM") dtSim = real_t{2};
 
    const uint_t timesteps = uint_t( numberOfTimeStepsNonDim * tref);
    WALBERLA_LOG_INFO_ON_ROOT("Running for " << timesteps << " time steps");
@@ -757,7 +757,7 @@ int main( int argc, char **argv )
    timeloop.addFuncBeforeTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
    // vtk output
-   if( vtkIOFreq != uint_t(0) )
+   if( vtkIOFreq != uint_t{0} )
    {
       // spheres
       auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
@@ -782,7 +782,7 @@ int main( int argc, char **argv )
       timeloop.addFuncBeforeTimeStep( vtk::writeFiles( pdfFieldVTK ), "VTK (fluid field data)" );
 
       // omega bulk field
-      timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t(0), false, baseFolder ), "VTK (omega bulk field)" );
+      timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t{0}, false, baseFolder ), "VTK (omega bulk field)" );
 
    }
 
@@ -823,7 +823,7 @@ int main( int argc, char **argv )
 
       //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
-      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
+      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t{3}, useValuesFromGhostLayerForReconstruction);
       auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum);
 
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
@@ -855,14 +855,14 @@ int main( int argc, char **argv )
       // gets easily unstable
       //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
-      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
+      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t{3}, useValuesFromGhostLayerForReconstruction);
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
                                    << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
    } else if( reconstructorType == "ExtNS")
    {
       //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
-      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
+      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t{3}, useValuesFromGhostLayerForReconstruction);
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
                                    << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
    }else {
@@ -873,7 +873,7 @@ int main( int argc, char **argv )
    if(useOmegaBulkAdaption)
    {
       using OmegaBulkAdapter_T = lbm_mesapd_coupling::OmegaBulkAdapter<ParticleAccessor_T, decltype(sphereSelector)>;
-      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
+      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t{1});
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, sphereSelector);
       timeloopAfterParticles.add() << Sweep( makeSharedSweep(omegaBulkAdapter), "Omega Bulk Adapter");
       // initially adapt
@@ -912,7 +912,7 @@ int main( int argc, char **argv )
    {
       WALBERLA_LOG_INFO_ON_ROOT(" - writing logging output to file \"" << loggingFileName << "\"");
    }
-   SpherePropertyLogger<ParticleAccessor_T > logger( accessor, sphereUid, loggingFileName, fileIO, diameter, velocity,  real_t(3) * math::pi * diameter * viscosity * velocity);
+   SpherePropertyLogger<ParticleAccessor_T > logger( accessor, sphereUid, loggingFileName, fileIO, diameter, velocity,  real_t{3} * math::pi * diameter * viscosity * velocity);
 
 
    ////////////////////////
@@ -970,18 +970,18 @@ int main( int argc, char **argv )
          WALBERLA_ABORT("Nan found in force - aborting");
       }
 
-      real_t density1 = real_t(0);
-      real_t density2 = real_t(0);
-      real_t averageDensity = real_t(0);
-      auto movingProbePosition = Vector3<real_t>(real_c(domainSize[0])*real_t(0.75), real_c(domainSize[1])*real_t(0.5), logger.getPosition());
+      real_t density1 = real_t{0};
+      real_t density2 = real_t{0};
+      real_t averageDensity = real_t{0};
+      auto movingProbePosition = Vector3<real_t>(real_c(domainSize[0])*real_t{0.75}, real_c(domainSize[1])*real_t{0.5}, logger.getPosition());
       if(logDensity)
       {
-         density1 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, Vector3<real_t>(real_c(domainSize[0])*real_t(0.25), real_c(domainSize[1])*real_t(0.5), real_c(domainSize[2])*real_t(0.5)));
+         density1 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, Vector3<real_t>(real_c(domainSize[0])*real_t{0.25}, real_c(domainSize[1])*real_t{0.5}, real_c(domainSize[2])*real_t{0.5}));
          density2 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, movingProbePosition);
          averageDensity = getAverageDensityInSystem<BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID);
       }
 
-      Vector3<real_t> velocityAtProbePos(real_t(0));
+      Vector3<real_t> velocityAtProbePos(real_t{0});
       if(logFluidVelocity)
       {
          velocityAtProbePos = getVelocityAtPosition<VelocityInterpolator_T >(blocks, velocityInterpolatorID, movingProbePosition);
@@ -1005,8 +1005,8 @@ int main( int argc, char **argv )
 
          if( artificiallyAccelerateSphere )
          {
-            real_t newSphereVel = - velocity * (std::exp(- real_t(i) * dtSim * accelerationFactor/ tref ) - real_t(1));
-            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t(0), real_t(0), newSphereVel));}, *accessor);
+            real_t newSphereVel = - velocity * (std::exp(- static_cast< real_t >(i) * dtSim * accelerationFactor/ tref ) - real_t{1});
+            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t{0}, real_t{0}, newSphereVel));}, *accessor);
          }
 
          // there is no force acting on sphere
@@ -1030,12 +1030,12 @@ int main( int argc, char **argv )
       vtkFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
       if( useOmegaBulkAdaption ) vtkFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
 
-      auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, vtkFileName, uint_t(1), 0, false, baseFolder );
+      auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, vtkFileName, uint_t{1}, 0, false, baseFolder );
 
       pdfFieldVTK->addBeforeFunction( fullPDFCommunicationScheme );
 
-      AABB sliceAABB( real_t(0), real_c(domainSize[1])*real_t(0.5)-real_t(1), real_t(0),
-                      real_c(domainSize[0]), real_c(domainSize[1])*real_t(0.5)+real_t(1), real_c(domainSize[2]) );
+      AABB sliceAABB( real_t{0}, real_c(domainSize[1])*real_t{0.5}-real_t{1}, real_t{0},
+                      real_c(domainSize[0]), real_c(domainSize[1])*real_t{0.5}+real_t{1}, real_c(domainSize[2]) );
       vtk::AABBCellFilter aabbSliceFilter( sliceAABB );
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
@@ -1055,7 +1055,7 @@ int main( int argc, char **argv )
       auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleLinearVelocity>("velocity");
       particleVtkOutput->setParticleSelector( [sphereShape](const mesa_pd::data::ParticleStorage::iterator& pIt) {return pIt->getShapeID() == sphereShape;} ); //limit output to sphere
-      auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "Particles_final"+fileNamePostFix, uint_t(1), baseFolder);
+      auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "Particles_final"+fileNamePostFix, uint_t{1}, baseFolder);
 
       vtk::writeFiles(particleVtkWriter)();
    }

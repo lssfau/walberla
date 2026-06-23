@@ -44,12 +44,12 @@ void test( const std::string & filename, const Vector3<uint_t> & size, const std
    WALBERLA_LOG_INFO( "Testing unscaled" );
    BinaryRawFile const brf( filename, size, datatype );
 
-   auto blocks = blockforest::createUniformBlockGrid( uint_t(1), uint_t( 1 ), uint_t( 1 ), 
+   auto blocks = blockforest::createUniformBlockGrid( uint_t{1}, uint_t{ 1 }, uint_t{ 1 }, 
       size[0], size[1], size[2], 
-      real_t( 1 ), 
-      uint_t( 1 ), uint_t( 1 ), uint_t( 1 ) );
+      real_t{ 1 }, 
+      uint_t{ 1 }, uint_t{ 1 }, uint_t{ 1 } );
 
-   using ScalarField = GhostLayerField<uint8_t, uint_t(1)>;
+   using ScalarField = GhostLayerField<uint8_t, uint_t{1}>;
 
    BlockDataID scalarFieldID = field::addToStorage<ScalarField>( blocks, "BinaryRawFile" );
 
@@ -79,18 +79,18 @@ void testScaled( const std::string & filename, const Vector3<uint_t> & size, con
    WALBERLA_LOG_INFO( "Testing scaled" );
    BinaryRawFile const brf( filename, size, datatype );
 
-   Vector3<uint_t> scaledSize( std::max( uint_t( 1 ), size[0] / uint_t( 2 ) ),
-                               std::max( uint_t( 1 ), size[1] / uint_t( 3 ) ),
-                               std::max( uint_t( 1 ), size[2] / uint_t( 5 ) ) );
+   Vector3<uint_t> scaledSize( std::max( uint_t{ 1 }, size[0] / uint_t{ 2 } ),
+                               std::max( uint_t{ 1 }, size[1] / uint_t{ 3 } ),
+                               std::max( uint_t{ 1 }, size[2] / uint_t{ 5 } ) );
 
-   auto blocks = blockforest::createUniformBlockGrid( uint_t( 1 ), uint_t( 1 ), uint_t( 1 ),
+   auto blocks = blockforest::createUniformBlockGrid( uint_t{ 1 }, uint_t{ 1 }, uint_t{ 1 },
       scaledSize[0], scaledSize[1], scaledSize[2],
-      real_t( 1 ),
-      uint_t( 1 ), uint_t( 1 ), uint_t( 1 ) );
+      real_t{ 1 },
+      uint_t{ 1 }, uint_t{ 1 }, uint_t{ 1 } );
 
    BinaryRawFileInterpolator const brfi( blocks->getDomain(), brf, BinaryRawFileInterpolator::NEAREST_NEIGHBOR );
 
-   using ScalarField = GhostLayerField<uint8_t, uint_t(1)>;
+   using ScalarField = GhostLayerField<uint8_t, uint_t{1}>;
 
    BlockDataID scalarFieldID = field::addToStorage<ScalarField>( blocks, "BinaryRawFile" );
 

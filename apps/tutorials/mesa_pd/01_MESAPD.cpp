@@ -97,7 +97,7 @@ int main( int argc, char ** argv )
 
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
-   real_t density          = real_t(2707);
+   real_t density          = real_t{2707};
    real_t vMax             = real_c(1.0);
    int    simulationSteps  = 10;
    real_t dt               = real_c(0.01);
@@ -176,10 +176,10 @@ int main( int argc, char ** argv )
    kernel::ExplicitEuler                 explicitEuler( dt );
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem( 2 );
-   auto meffSphereSphere = real_t(0.5) * (real_c(4.0)/real_c(3.0) * math::pi) * radius * radius * radius * density;
-   auto meffSphereWall   = real_t(1.0) * (real_c(4.0)/real_c(3.0) * math::pi) * radius * radius * radius * density;
-   dem.setParametersFromCOR( 0, 0, real_t(0.9), real_t(20) * dt, meffSphereSphere );
-   dem.setParametersFromCOR( 0, 1, real_t(0.9), real_t(20) * dt, meffSphereWall );
+   auto meffSphereSphere = real_t{0.5} * (real_c(4.0)/real_c(3.0) * math::pi) * radius * radius * radius * density;
+   auto meffSphereWall   = real_t{1.0} * (real_c(4.0)/real_c(3.0) * math::pi) * radius * radius * radius * density;
+   dem.setParametersFromCOR( 0, 0, real_t{0.9}, real_t{20} * dt, meffSphereSphere );
+   dem.setParametersFromCOR( 0, 1, real_t{0.9}, real_t{20} * dt, meffSphereWall );
    collision_detection::AnalyticContactDetection              acd;
    kernel::DoubleCast                    double_cast;
    mpi::ContactFilter                    contact_filter;
@@ -227,7 +227,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GETTING STATISTICAL INFORMATION ***");
    //! [PostProcessing]
-   auto meanVelocity = real_t(0);
+   auto meanVelocity = real_t{0};
 
    ps->forEachParticle(true,
                        kernel::SelectLocal(),

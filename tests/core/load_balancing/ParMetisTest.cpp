@@ -72,18 +72,18 @@ int main( int argc, char * argv[] )
    }
 
    int numProcesses = MPIManager::instance()->numProcesses();
-   auto gridSize = math::getFactors( uint_c( numProcesses ), uint_t(2) );
+   auto gridSize = math::getFactors( uint_c( numProcesses ), uint_t{2} );
 
-   auto blocks = blockforest::createUniformBlockGrid( gridSize[0],  gridSize[1], uint_t(1),
-                                                      fieldSize[0], fieldSize[1], uint_t(1),
-                                                      real_t(1),
+   auto blocks = blockforest::createUniformBlockGrid( gridSize[0],  gridSize[1], uint_t{1},
+                                                      fieldSize[0], fieldSize[1], uint_t{1},
+                                                      real_t{1},
                                                       true,
                                                       true, true, false );
 
    using FieldType = field::GhostLayerField< int64_t, 1 >;
 
-   auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t(-1), field::fzyx, uint_t(1) );
-   auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t(-1), field::fzyx, uint_t(1) );
+   auto domainId    = field::addToStorage< FieldType >( blocks, "domain", int64_t{-1}, field::fzyx, uint_t{1} );
+   auto partFieldId = field::addToStorage< FieldType >( blocks, "partitions", int64_t{-1}, field::fzyx, uint_t{1} );
 
    auto & domain    = *( blocks->begin()->getData< FieldType >( domainId    ) );
    auto & partField = *( blocks->begin()->getData< FieldType >( partFieldId ) );
@@ -91,7 +91,7 @@ int main( int argc, char * argv[] )
    WALBERLA_CHECK_EQUAL( std::distance( blocks->begin(), blocks->end() ), 1 );
 
    int64_t ctr = int64_c( fieldSize[0] * fieldSize[1] ) * int64_c( MPIManager::instance()->rank() );
-   Cell c( cell_idx_t(0), cell_idx_t(0), cell_idx_t(0) );
+   Cell c( cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{0} );
    for( c[0] = 0; c[0] < cell_idx_c( domain.xSize() ); ++c[0] )
       for( c[1] = 0; c[1] < cell_idx_c( domain.ySize() ); ++c[1] )
       {
@@ -108,11 +108,11 @@ int main( int argc, char * argv[] )
       vtxdist[i] = int64_c(i) * int64_c(fieldSize[0] * fieldSize[1]);
    }
 
-   int64_t ncon  = int64_t(1);
+   int64_t ncon  = int64_t{1};
    std::vector< int64_t > xadj, adjncy;
-   xadj.push_back( int64_t(0) );
+   xadj.push_back( int64_t{0} );
 
-   c = Cell( cell_idx_t(0), cell_idx_t(0), cell_idx_t(0) );
+   c = Cell( cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{0} );
    for( c[0] = 0; c[0] < cell_idx_c( domain.xSize() ); ++c[0] )
       for( c[1] = 0; c[1] < cell_idx_c( domain.ySize() ); ++c[1] )
       {
@@ -122,8 +122,8 @@ int main( int argc, char * argv[] )
          xadj.push_back( int64_c( adjncy.size() ) );         
       }
 
-   WALBERLA_CHECK_EQUAL( xadj.size(), fieldSize[0] * fieldSize[1] + uint_t(1) );
-   WALBERLA_CHECK_EQUAL( adjncy.size(), fieldSize[0] * fieldSize[1] * uint_t(8) );
+   WALBERLA_CHECK_EQUAL( xadj.size(), fieldSize[0] * fieldSize[1] + uint_t{1} );
+   WALBERLA_CHECK_EQUAL( adjncy.size(), fieldSize[0] * fieldSize[1] * uint_t{8} );
 
    int64_t wgtflag = 0;
    int64_t numflag = 0;
@@ -141,12 +141,12 @@ int main( int argc, char * argv[] )
 
    WALBERLA_CHECK_EQUAL( result, core::METIS_OK );  
 
-   c = Cell( cell_idx_t(0), cell_idx_t(0), cell_idx_t(0) );
+   c = Cell( cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{0} );
    auto it = part.begin();
    for( c[0] = 0; c[0] < cell_idx_c( domain.xSize() ); ++c[0] )
       for( c[1] = 0; c[1] < cell_idx_c( domain.ySize() ); ++c[1] )
       {
-         if( domain.get( c ) == int64_t( -1 ) )
+         if( domain.get( c ) == int64_t{ -1 } )
             continue;
 
          WALBERLA_CHECK_UNEQUAL( it, part.end() );

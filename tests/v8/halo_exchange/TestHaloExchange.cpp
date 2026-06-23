@@ -82,7 +82,7 @@ void testHaloExchangeInterfacesHost()
 
    mpi::MPIManager::instance()->useWorldComm();
 
-   Vector3< size_t > numBlocks = math::getFactors3D(size_t(mpi::MPIManager::instance()->numProcesses()));
+   Vector3< size_t > numBlocks = math::getFactors3D(uint_c(mpi::MPIManager::instance()->numProcesses()));
    auto blocks = blockforest::createUniformBlockGrid(numBlocks[0], numBlocks[1], numBlocks[2], 4, 4, 4, 1.,
                                                      /* oneBlockPerProcess */
                                                      true,
@@ -94,8 +94,8 @@ void testHaloExchangeInterfacesHost()
    he.startCommunication();
    he.wait();
 
-   testing::assert_equal((size_t) TestHostPackInfo::valuesSent, size_t(6 * 3));
-   testing::assert_equal((size_t) TestHostPackInfo::valuesReceived, size_t(6 * 3));
+   testing::assert_equal(size_t{TestHostPackInfo::valuesSent}, size_t{6 * 3});
+   testing::assert_equal(size_t{TestHostPackInfo::valuesReceived}, size_t{6 * 3});
 }
 
 void testHostFieldPackInfo()
@@ -107,7 +107,7 @@ void testHostFieldPackInfo()
 
    mpi::MPIManager::instance()->useWorldComm();
 
-   Vector3< size_t > numBlocks = math::getFactors3D(size_t(mpi::MPIManager::instance()->numProcesses()));
+   Vector3< size_t > numBlocks = math::getFactors3D(uint_c(mpi::MPIManager::instance()->numProcesses()));
    auto blocks = blockforest::createUniformBlockGrid(numBlocks[0], numBlocks[1], numBlocks[2], 4, 4, 4, 1.,
                                                      /* oneBlockPerProcess */
                                                      true,
@@ -161,7 +161,7 @@ void testStreamPullPackInfo()
 
    mpi::MPIManager::instance()->useWorldComm();
 
-   Vector3< size_t > numBlocks = math::getFactors3D(size_t(mpi::MPIManager::instance()->numProcesses()));
+   Vector3< size_t > numBlocks = math::getFactors3D(uint_c(mpi::MPIManager::instance()->numProcesses()));
    auto blocks = blockforest::createUniformBlockGrid(numBlocks[0], numBlocks[1], numBlocks[2], 4, 4, 4, 1.,
                                                      /* oneBlockPerProcess */
                                                      true,
@@ -179,7 +179,7 @@ void testStreamPullPackInfo()
          auto cc = blocks->getBlockLocalCellCenter(block, cell);
          for (auto dir : stencil_ranges::all< Stencil >())
          {
-            fView(cell, cell_idx_t(dir)) = cc.sqrLength() * double(dir);
+            fView(cell, cell_idx_t{dir}) = cc.sqrLength() * static_cast< double >(dir);
          }
       });
    }
@@ -203,11 +203,11 @@ void testStreamPullPackInfo()
             {
                if (std::ranges::find(subdirs, streamingDir) != std::ranges::end(subdirs))
                {
-                  testing::assert_close(fView(cell, cell_idx_t(streamingDir)), cc.sqrLength() * double(streamingDir));
+                  testing::assert_close(fView(cell, cell_idx_t{streamingDir}), cc.sqrLength() * static_cast< double >(streamingDir));
                }
                else
                {
-                  testing::assert_close(fView(cell, cell_idx_t(streamingDir)), -1.);
+                  testing::assert_close(fView(cell, cell_idx_t{streamingDir}), -1.);
                }
             }
          });

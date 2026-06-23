@@ -62,7 +62,7 @@ static std::ostream & printCharValue( std::ostream & os, const T value )
 
 std::ostream & printValue( std::ostream & os, const unsigned char value )
 {
-   return printCharValue( os, char(value) );
+   return printCharValue( os, static_cast< char >(value) );
 }
 
 std::ostream & printValue( std::ostream & os, const char value )

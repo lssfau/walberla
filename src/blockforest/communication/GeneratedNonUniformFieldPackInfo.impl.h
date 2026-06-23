@@ -36,7 +36,7 @@ void GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::packDataEqua
    const Block* sender, stencil::Direction dir, mpi::SendBuffer& buffer) const
 {
    auto field = const_cast< Block* >(sender)->getData< Field_T >(fieldID_);
-   CellInterval packInterval = field::refinement::equalLevelPackInterval( dir, field->xyzSize(), uint_t(1) );
+   CellInterval packInterval = field::refinement::equalLevelPackInterval( dir, field->xyzSize(), uint_t{1} );
    uint_t size = sizeEqualLevelSend(sender, dir);
    auto bufferPtr = buffer.forward(size);
    kernels_.packEqual(field, packInterval, bufferPtr);
@@ -46,7 +46,7 @@ template< typename Field_T, typename PackingKernels_T >
 void GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::unpackDataEqualLevel(Block* receiver, Direction dir, mpi::RecvBuffer& buffer)
 {
    auto field = receiver->getData< Field_T >(fieldID_);
-   CellInterval unpackInterval = field::refinement::equalLevelUnpackInterval(dir, field->xyzSize(), uint_t(1) );
+   CellInterval unpackInterval = field::refinement::equalLevelUnpackInterval(dir, field->xyzSize(), uint_t{1} );
    uint_t size = sizeEqualLevelSend(receiver, dir);
    auto bufferPtr = buffer.skip(size);
    kernels_.unpackEqual(field, unpackInterval, bufferPtr);
@@ -58,8 +58,8 @@ void GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::communicateL
 {
    auto sendField = const_cast< Block* >(sender)->getData< Field_T >(fieldID_);
    auto receiveField = receiver->getData< Field_T >(fieldID_);
-   CellInterval packInterval = field::refinement::equalLevelPackInterval( dir, sendField->xyzSize(), uint_t(1) );
-   CellInterval unpackInterval = field::refinement::equalLevelUnpackInterval(stencil::inverseDir[dir], receiveField->xyzSize(), uint_t(1) );
+   CellInterval packInterval = field::refinement::equalLevelPackInterval( dir, sendField->xyzSize(), uint_t{1} );
+   CellInterval unpackInterval = field::refinement::equalLevelUnpackInterval(stencil::inverseDir[dir], receiveField->xyzSize(), uint_t{1} );
    kernels_.localCopyEqual(sendField, packInterval, receiveField, unpackInterval);
 }
 
@@ -169,7 +169,7 @@ template< typename Field_T, typename PackingKernels_T >
 uint_t GeneratedNonUniformFieldPackInfo< Field_T, PackingKernels_T >::sizeEqualLevelSend( const Block * sender, stencil::Direction dir) const
 {
    auto field = sender->getData< Field_T >(fieldID_);
-   CellInterval ci = field::refinement::equalLevelPackInterval( dir, field->xyzSize(), uint_t(1) );
+   CellInterval ci = field::refinement::equalLevelPackInterval( dir, field->xyzSize(), uint_t{1} );
    return ci.numCells() * field->fSize() * sizeof(value_type);
 }
 

@@ -126,13 +126,13 @@ int main( int argc, char ** argv )
    if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "HeatConduction" );
 
-   const real_t spacing = mainConf.getParameter<real_t>("spacing", real_t(1.0) );
+   const real_t spacing = mainConf.getParameter<real_t>("spacing", real_t{1.0} );
    WALBERLA_LOG_INFO_ON_ROOT("spacing: " << spacing);
 
-   const real_t radius = mainConf.getParameter<real_t>("radius", real_t(0.5) );
+   const real_t radius = mainConf.getParameter<real_t>("radius", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("radius: " << radius);
 
-   const real_t vMax = mainConf.getParameter<real_t>("vMax", real_t(0.5) );
+   const real_t vMax = mainConf.getParameter<real_t>("vMax", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("vMax: " << vMax);
 
    int64_t numOuterIterations = mainConf.getParameter<int64_t>("numOuterIterations", 10 );
@@ -175,7 +175,7 @@ int main( int argc, char ** argv )
    data::LinkedCells     lc(localDomain.getExtended(spacing), spacing+spacing );
 
    auto  smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing))
@@ -218,16 +218,16 @@ int main( int argc, char ** argv )
    kernel::ExplicitEuler                 explicitEuler( dt );
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::HeatConduction                heatConduction(1);
-   heatConduction.setConductance(0, 0, real_t(1));
+   heatConduction.setConductance(0, 0, real_t{1});
    kernel::SpringDashpot                 dem(1);
    dem.setStiffness(0, 0, real_t(8.11e6));
    dem.setDampingN (0, 0, real_t(6.86e1));
    dem.setDampingT (0, 0, real_t(6.86e1));
-   dem.setFriction (0, 0, real_t(1.2));
+   dem.setFriction (0, 0, real_t{1.2});
    kernel::TemperatureIntegration     temperatureIntegration(dt, 1);
-   temperatureIntegration.setInvSpecificHeat(0, real_t(0.05) / dt / ss->shapes[smallSphere]->getInvMass());
+   temperatureIntegration.setInvSpecificHeat(0, real_t{0.05} / dt / ss->shapes[smallSphere]->getInvMass());
    kernel::ThermalExpansion           thermalExpansion(1);
-   thermalExpansion.setLinearExpansionCoefficient(0, real_t(0.0005));
+   thermalExpansion.setLinearExpansionCoefficient(0, real_t{0.0005});
 
    ContactDetection                   acd;
    kernel::DoubleCast                 double_cast;
@@ -247,11 +247,11 @@ int main( int argc, char ** argv )
 
       if (i > visSpacing * 100)
       {
-         auto rad = (real_t(i) - real_t(10000)) * real_t(5e-5) * math::pi;
-         plane->setTemperature(real_t(273) + real_t(300) * std::sin(rad));
+         auto rad = (static_cast< real_t >(i) - real_t{10000}) * real_t{5e-5} * math::pi;
+         plane->setTemperature(real_t{273} + real_t{300} * std::sin(rad));
       }
 
-      ps->forEachParticle(false, kernel::SelectMaster(), accessor, [&](const size_t idx, auto& ac){ac.setForce(idx, Vec3(0,0,real_t(-9.81) ) );}, accessor);
+      ps->forEachParticle(false, kernel::SelectMaster(), accessor, [&](const size_t idx, auto& ac){ac.setForce(idx, Vec3(0,0,real_t{-9.81} ) );}, accessor);
 
       lc.clear();
       ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, lc);

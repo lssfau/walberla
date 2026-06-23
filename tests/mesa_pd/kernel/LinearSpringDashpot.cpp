@@ -49,13 +49,13 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
-   real_t impactAngle = real_t(0);
+   real_t impactAngle = real_t{0};
    real_t dt         = real_c(2e-7);
-   real_t frictionCoeff_s = real_t(0.8);
-   real_t frictionCoeff_d = real_t(0.125);
+   real_t frictionCoeff_s = real_t{0.8};
+   real_t frictionCoeff_d = real_t{0.125};
    std::string filename = "TangentialCollision.txt";
-   real_t collisionDuration = real_t(10);
-   real_t nu = real_t(0.22); //Poissons ratio
+   real_t collisionDuration = real_t{10};
+   real_t nu = real_t{0.22}; //Poissons ratio
    bool useVelocityVerlet = false;
 
    for( int i = 1; i < argc; ++i )
@@ -82,7 +82,7 @@ int main( int argc, char ** argv )
 
    real_t radius     = real_c(0.00159);
    real_t density    = real_c(2500);
-   real_t restitutionCoeff = real_t(0.83);
+   real_t restitutionCoeff = real_t{0.83};
    real_t collisionTime =  collisionDuration * dt;
 
    //init data structures
@@ -94,25 +94,25 @@ int main( int argc, char ** argv )
    auto sphereShape = ss->create<data::Sphere>( radius );
    ss->shapes[sphereShape]->updateMassAndInertia(density);
 
-   const real_t particleMass =  real_t(1) / ss->shapes[sphereShape]->getInvMass();
-   const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
+   const real_t particleMass =  real_t{1} / ss->shapes[sphereShape]->getInvMass();
+   const real_t Mij = particleMass; // * particleMass / ( real_t{2} * particleMass ); // Mij = M for sphere-wall collision
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
 
    // normal material parameters
-   const real_t stiffnessN = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  );
-   const real_t dampingN = - real_t(2) * std::sqrt( Mij * stiffnessN ) *
+   const real_t stiffnessN = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t{1} - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  );
+   const real_t dampingN = - real_t{2} * std::sqrt( Mij * stiffnessN ) *
    ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) );
 
    WALBERLA_LOG_INFO_ON_ROOT("normal: stiffness = " << stiffnessN << ", damping = " << dampingN);
 
    const real_t lnDryResCoeffTangential = lnDryResCoeff; // std::log(0.31); //TODO: was same as in normal direction
-   const real_t kappa = real_t(2) * ( real_t(1) - nu ) / ( real_t(2) - nu ) ;
+   const real_t kappa = real_t{2} * ( real_t{1} - nu ) / ( real_t{2} - nu ) ;
    const real_t stiffnessT = kappa * Mij * math::pi * math::pi / ( collisionTime *  collisionTime );
-   const real_t dampingT = real_t(2) * std::sqrt(Mij * stiffnessT) * ( - lnDryResCoeffTangential ) / ( std::sqrt( math::pi * math::pi + lnDryResCoeffTangential * lnDryResCoeffTangential ));
+   const real_t dampingT = real_t{2} * std::sqrt(Mij * stiffnessT) * ( - lnDryResCoeffTangential ) / ( std::sqrt( math::pi * math::pi + lnDryResCoeffTangential * lnDryResCoeffTangential ));
 
    WALBERLA_LOG_INFO_ON_ROOT("tangential: kappa = " << kappa << ", stiffness T = " << stiffnessT << ", damping T = " << dampingT);
 
-   real_t uNin = real_t(1);
+   real_t uNin = real_t{1};
    real_t uTin = uNin * impactAngle;
 
    // create sphere
@@ -150,7 +150,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_DEVEL("begin: vel = " << p.getLinearVelocity() << ", contact vel: " << getVelocityAtWFPoint(0,*accessor,p.getPosition() + Vec3(0,0,-radius)) );
 
-   real_t maxPenetration = real_t(0);
+   real_t maxPenetration = real_t{0};
    do
    {
       if(useVelocityVerlet) vvPreForce(0,*accessor);
@@ -178,7 +178,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("gamma_in = " << impactAngle);
    WALBERLA_LOG_INFO_ON_ROOT("gamma_out = " << reboundAngle);
 
-   WALBERLA_LOG_INFO_ON_ROOT("Thornton: sliding should occur if " << real_t(2) * impactAngle / ( frictionCoeff_d * ( real_t(1) + restitutionCoeff)) << " >= " << real_t(7) - real_t(1) / kappa );
+   WALBERLA_LOG_INFO_ON_ROOT("Thornton: sliding should occur if " << real_t{2} * impactAngle / ( frictionCoeff_d * ( real_t{1} + restitutionCoeff)) << " >= " << real_t{7} - real_t{1} / kappa );
    WALBERLA_LOG_INFO_ON_ROOT("Max penetration = " << maxPenetration << " -> " << maxPenetration / radius * 100. << "% of radius");
 
    std::ofstream file;

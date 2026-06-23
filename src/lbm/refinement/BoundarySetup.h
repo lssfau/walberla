@@ -168,9 +168,9 @@ void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, co
          Cell coarseCell( globalCell );
          for( uint_t i = 0; i < 3; ++i )
          {
-            if( coarseCell[i] < cell_idx_t(0) )
+            if( coarseCell[i] < cell_idx_t{0} )
             {
-               coarseCell[i] = -( ( cell_idx_t(1) - coarseCell[i] ) >> 1 );
+               coarseCell[i] = -( ( cell_idx_t{1} - coarseCell[i] ) >> 1 );
             }
             else
             {
@@ -179,7 +179,7 @@ void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, co
          }
 
          Vector3< real_t > coarseCenter;
-         blocks.getCellCenter( coarseCenter, coarseCell, level - uint_t(1) );
+         blocks.getCellCenter( coarseCenter, coarseCell, level - uint_t{1} );
          blocks.mapToPeriodicDomain( coarseCenter );
 
          if( isBoundary(coarseCenter) )

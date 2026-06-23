@@ -124,12 +124,12 @@ inline NonLinearSpringDashpot::NonLinearSpringDashpot(const uint_t numParticleTy
 {
    numParticleTypes_ = numParticleTypes;
    
-   lnCORsqr_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   meff_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   stiffnessT_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   dampingT_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   frictionCoefficientStatic_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   frictionCoefficientDynamic_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   lnCORsqr_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   meff_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   stiffnessT_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   dampingT_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   frictionCoefficientStatic_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   frictionCoefficientDynamic_.resize(numParticleTypes * numParticleTypes, real_t{0});
    collisionTime_ = collisionTime;
 }
 
@@ -254,10 +254,10 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
    if (p_idx1 != p_idx2)
    {
 
-      WALBERLA_ASSERT_FLOAT_EQUAL(math::sqrLength(contactNormal), real_t(1));
+      WALBERLA_ASSERT_FLOAT_EQUAL(math::sqrLength(contactNormal), real_t{1});
 
       real_t delta = -penetrationDepth;
-      if (delta < real_t(0)) return;
+      if (delta < real_t{0}) return;
 
 
       const Vec3 relVel ( -(getVelocityAtWFPoint(p_idx1, ac, contactPoint) - getVelocityAtWFPoint(p_idx2, ac, contactPoint)) );
@@ -265,8 +265,8 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
       const Vec3 relVelT( relVel - relVelN );
 
       // get further collision properties from the contact history or initialize them
-      Vec3 tangentialSpringDisplacement( real_t(0) );
-      real_t impactVelocityMagnitude(real_t(0));
+      Vec3 tangentialSpringDisplacement( real_t{0} );
+      real_t impactVelocityMagnitude(real_t{0});
       bool isSticking = false;
       auto contactHistory = ac.getOldContactHistoryRef(p_idx1).find(ac.getUid(p_idx2)); //TODO assert symmetry
       if(contactHistory != ac.getOldContactHistoryRef(p_idx1).end())
@@ -283,25 +283,25 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
       }
 
       // ACTM: adapt collision coefficients
-      const real_t A = real_t(0.716);
-      const real_t B = real_t(0.830);
-      const real_t C = real_t(0.744);
-      const real_t alpha = real_t(1.111);
-      const real_t tau_c0 = real_t(3.218);
+      const real_t A = real_t{0.716};
+      const real_t B = real_t{0.830};
+      const real_t C = real_t{0.744};
+      const real_t alpha = real_t{1.111};
+      const real_t tau_c0 = real_t{3.218};
       const real_t nu = getLnCORsqr(ac.getType(p_idx1), ac.getType(p_idx2));
-      const real_t lambda = (-real_t(0.5) * C * nu + std::sqrt(real_t(0.25) * C * C * nu * nu + alpha * alpha * tau_c0 * tau_c0 * nu)) / (alpha * alpha * tau_c0 * tau_c0);
-      const real_t tStar = std::sqrt(real_t(1) - A * lambda - B * lambda * lambda) * collisionTime_ / tau_c0;
+      const real_t lambda = (-real_t{0.5} * C * nu + std::sqrt(real_t{0.25} * C * C * nu * nu + alpha * alpha * tau_c0 * tau_c0 * nu)) / (alpha * alpha * tau_c0 * tau_c0);
+      const real_t tStar = std::sqrt(real_t{1} - A * lambda - B * lambda * lambda) * collisionTime_ / tau_c0;
       const real_t meff = getMeff(ac.getType(p_idx1), ac.getType(p_idx2));
-      const real_t dn = real_t(2) * lambda * meff / tStar;
-      const real_t kn = meff / std::sqrt(impactVelocityMagnitude * std::pow(tStar, real_t(5)));
+      const real_t dn = real_t{2} * lambda * meff / tStar;
+      const real_t kn = meff / std::sqrt(impactVelocityMagnitude * std::pow(tStar, real_t{5}));
 
       // calculate the normal force based on a non-linear spring-dashpot force model
-      Vec3 fN = kn * std::pow(delta, real_t(3)/real_t(2)) * contactNormal + dn * relVelN;
+      Vec3 fN = kn * std::pow(delta, real_t{3}/real_t{2}) * contactNormal + dn * relVelN;
 
       //TODO: move to own tangential integration kernel?
       Vec3 rotatedTangentialDisplacement = tangentialSpringDisplacement - contactNormal * (contactNormal * tangentialSpringDisplacement);
-      Vec3 newTangentialSpringDisplacement = rotatedTangentialDisplacement.sqrLength() <= real_t(0) ? // avoid division by zero
-                                             Vec3(real_t(0)) :
+      Vec3 newTangentialSpringDisplacement = rotatedTangentialDisplacement.sqrLength() <= real_t{0} ? // avoid division by zero
+                                             Vec3(real_t{0}) :
                                              ( rotatedTangentialDisplacement * std::sqrt((tangentialSpringDisplacement.sqrLength() / rotatedTangentialDisplacement.sqrLength())));
       newTangentialSpringDisplacement = newTangentialSpringDisplacement + dt * relVelT;
 
@@ -317,7 +317,7 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
       const real_t fFrictionAbsStatic = getFrictionCoefficientStatic(ac.getType(p_idx1), ac.getType(p_idx2)) * fN.length(); // sticking, rolling
       const real_t fFrictionAbsDynamic = getFrictionCoefficientDynamic(ac.getType(p_idx1), ac.getType(p_idx2)) * fN.length(); // sliding
 
-      const real_t tangentialVelocityThreshold = real_t(1e-8);
+      const real_t tangentialVelocityThreshold = real_t{1e-8};
 
       real_t fFrictionAbs;
       if( isSticking && relVelT.length() < tangentialVelocityThreshold && fTLS.length() < fFrictionAbsStatic  )
@@ -337,7 +337,7 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
          isSticking = false;
 
          // reset displacement vector
-         if(stiffnessT > real_t(0) ) newTangentialSpringDisplacement = ( fFrictionAbs * t - dampingT * relVelT ) / stiffnessT;
+         if(stiffnessT > real_t{0} ) newTangentialSpringDisplacement = ( fFrictionAbs * t - dampingT * relVelT ) / stiffnessT;
 
          // if tangential force falls below coulomb limit, we are back in sticking
          if( fTLS.length() < fFrictionAbsDynamic )

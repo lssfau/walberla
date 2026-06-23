@@ -39,7 +39,7 @@ void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *
       //check for refinement
       if (infoIt->second.computationalWeight > maxBodies_)
       {
-         minTargetLevel.second = minTargetLevel.first->getLevel() + uint_t(1);
+         minTargetLevel.second = minTargetLevel.first->getLevel() + uint_t{1};
          continue;
       }
 
@@ -48,7 +48,7 @@ void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *
       {
          if (getOrCreateCoarseInfo(minTargetLevel.first->getId())->second.computationalWeight < maxBodies_)
          {
-            minTargetLevel.second = minTargetLevel.first->getLevel() - uint_t(1);
+            minTargetLevel.second = minTargetLevel.first->getLevel() - uint_t{1};
          }
          continue;
       }

@@ -151,9 +151,9 @@ protected:
    size_t idx2_ = std::numeric_limits<size_t>::max();
    Vec3   contactPoint_ = Vec3();
    Vec3   contactNormal_ = Vec3();
-   real_t penetrationDepth_ = real_t(0);
+   real_t penetrationDepth_ = real_t{0};
 
-   real_t contactThreshold_ = real_t(0.0);
+   real_t contactThreshold_ = real_t{0.0};
 };
 
 template <typename GEO1_T, typename GEO2_T, typename Accessor>

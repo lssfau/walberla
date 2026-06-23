@@ -74,7 +74,7 @@ public:
    
    real_t getInvSpecificHeat(const size_t type) const;
 private:
-   real_t dt_ = real_t(0.0);
+   real_t dt_ = real_t{0.0};
 
    uint_t numParticleTypes_;
    
@@ -86,7 +86,7 @@ inline TemperatureIntegration::TemperatureIntegration(const real_t dt, const uin
 {
    numParticleTypes_ = numParticleTypes;
    
-   invSpecificHeat_.resize(numParticleTypes, real_t(0));
+   invSpecificHeat_.resize(numParticleTypes, real_t{0});
 }
 
 
@@ -111,7 +111,7 @@ inline void TemperatureIntegration::operator()(const size_t p_idx,
 
    //formula for heat capacity
    ac.setTemperature(p_idx, getInvSpecificHeat(ac.getType(p_idx)) * ac.getInvMass(p_idx) * ac.getHeatFlux(p_idx) * dt_ + ac.getTemperature(p_idx));
-   ac.setHeatFlux   (p_idx, real_t(0));
+   ac.setHeatFlux   (p_idx, real_t{0});
 }
 
 } //namespace kernel

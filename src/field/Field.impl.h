@@ -279,9 +279,9 @@ namespace field {
         layout_           ( other.layout_ ),
         allocSize_        ( other.allocSize_*fSize_/fSize2 ),
         ffact_            ( other.ffact_ ),
-        xfact_            ( other.xfact_*cell_idx_t(fSize_/fSize2) ),
-        yfact_            ( other.yfact_*cell_idx_t(fSize_/fSize2) ),
-        zfact_            ( other.zfact_*cell_idx_t(fSize_/fSize2) ),
+        xfact_            ( other.xfact_*static_cast< int64_t >(fSize_/fSize2) ),
+        yfact_            ( other.yfact_*static_cast< int64_t >(fSize_/fSize2) ),
+        zfact_            ( other.zfact_*static_cast< int64_t >(fSize_/fSize2) ),
         allocator_        ( std::shared_ptr<FieldAllocator<T>>(other.allocator_, reinterpret_cast<FieldAllocator<T>*>(other.allocator_.get())) )
    {
       WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf)
@@ -351,9 +351,9 @@ namespace field {
                                     std::numeric_limits< int64_t >::max(),
                                     "The data type 'int64_t' is too small for your field size! Your field is too large." );
 
-         ffact_ = int64_t(xAllocSize_) * int64_t(yAllocSize_) * int64_t(zAllocSize_);
-         zfact_ = int64_t(xAllocSize_) * int64_t(yAllocSize_);
-         yfact_ = int64_t(xAllocSize_);
+         ffact_ = static_cast< int64_t >(xAllocSize_) * static_cast< int64_t >(yAllocSize_) * static_cast< int64_t >(zAllocSize_);
+         zfact_ = static_cast< int64_t >(xAllocSize_) * static_cast< int64_t >(yAllocSize_);
+         yfact_ = static_cast< int64_t >(xAllocSize_);
          xfact_ = 1;
       } else {
          values_ = allocator_->allocate(zSize_, ySize_, xSize_, fSize_, yAllocSize_, xAllocSize_, fAllocSize_);
@@ -363,9 +363,9 @@ namespace field {
                                     std::numeric_limits< int64_t >::max(),
                                     "The data type 'int64_t' is too small for your field size! Your field is too large." );
 
-         zfact_ = int64_t (fAllocSize_) * int64_t(xAllocSize_) * int64_t(yAllocSize_);
-         yfact_ = int64_t(fAllocSize_) * int64_t(xAllocSize_);
-         xfact_ = int64_t (fAllocSize_);
+         zfact_ = static_cast< int64_t > (fAllocSize_) * static_cast< int64_t >(xAllocSize_) * static_cast< int64_t >(yAllocSize_);
+         yfact_ = static_cast< int64_t > (fAllocSize_) * static_cast< int64_t >(xAllocSize_);
+         xfact_ = static_cast< int64_t > (fAllocSize_);
          ffact_ = 1;
       }
 
@@ -708,7 +708,7 @@ namespace field {
    {
       assertValidCoordinates( x, y, z, f );
 
-      const int64_t index = f*int64_t(ffact_) + int64_t(x)*int64_t(xfact_) + int64_t(y)*int64_t(yfact_) + int64_t(z)*int64_t(zfact_);
+      const int64_t index = f*ffact_ + int64_t{x}*xfact_ + int64_t{y}*yfact_ + int64_t{z}*zfact_;
 
       WALBERLA_ASSERT_LESS( int64_c(index) + int64_c(valuesWithOffset_ - values_), int64_c(allocSize_) );
       WALBERLA_ASSERT_GREATER_EQUAL( int64_c(index) + int64_c(valuesWithOffset_ - values_), int64_c(0) );
@@ -827,7 +827,7 @@ namespace field {
    template<typename T, uint_t fSize_>
    inline T & Field<T,fSize_>::getNeighbor( cell_idx_t x, cell_idx_t y, cell_idx_t z, stencil::Direction d )
    {
-      return getNeighbor(x,y,z,cell_idx_t(0),d);
+      return getNeighbor(x,y,z,cell_idx_t{0},d);
    }
 
    //*******************************************************************************************************************
@@ -836,7 +836,7 @@ namespace field {
    template<typename T, uint_t fSize_>
    inline const T & Field<T,fSize_>::getNeighbor( cell_idx_t x, cell_idx_t y, cell_idx_t z, stencil::Direction d ) const
    {
-      return getNeighbor(x,y,z,cell_idx_t(0),d);
+      return getNeighbor(x,y,z,cell_idx_t{0},d);
    }
 
    //*******************************************************************************************************************
@@ -1093,7 +1093,7 @@ namespace field {
       xSize_ = xs;
       ySize_ = ys;
       zSize_ = zs;
-      const int64_t offset = int64_t(xOff_)*int64_t(xfact_) + int64_t(yOff_)*int64_t(yfact_) + int64_t(zOff_)*int64_t(zfact_);
+      const int64_t offset = int64_t{xOff_}*xfact_ + int64_t{yOff_}*yfact_ + int64_t{zOff_}*zfact_;
       valuesWithOffset_ = values_ + offset;
    }
 

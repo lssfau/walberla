@@ -322,11 +322,11 @@ int main(int argc, char** argv)
 
    Setup setup;
 
-   setup.length         = uint_t(32);   // length of the cubic domain in lattice cells
+   setup.length         = uint_t{32};   // length of the cubic domain in lattice cells
    const real_t chi     = real_c(0.85); // porosity parameter: diameter / length
    setup.tau            = real_c(1.5);  // relaxation time
    setup.angularVel     = real_c(1e-5); // angular velocity of the sphere
-   setup.checkFrequency = uint_t(100);  // evaluate the torque only every checkFrequency time steps
+   setup.checkFrequency = uint_t{100};  // evaluate the torque only every checkFrequency time steps
    setup.radius         = real_c(0.5) * chi * real_c(setup.length); // sphere radius
    setup.visc           = (setup.tau - real_c(0.5)) / real_c(3);    // viscosity in lattice units
    setup.phi            = real_c(4.0 / 3.0) * math::pi * setup.radius * setup.radius * setup.radius /
@@ -341,9 +341,9 @@ int main(int argc, char** argv)
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const uint_t XBlocks = (processes >= 2) ? uint_t(2) : uint_t(1);
-   const uint_t YBlocks = (processes >= 4) ? uint_t(2) : uint_t(1);
-   const uint_t ZBlocks = (processes == 8) ? uint_t(2) : uint_t(1);
+   const uint_t XBlocks = (processes >= 2) ? uint_t{2} : uint_t{1};
+   const uint_t YBlocks = (processes >= 4) ? uint_t{2} : uint_t{1};
+   const uint_t ZBlocks = (processes == 8) ? uint_t{2} : uint_t{1};
    const uint_t XCells  = setup.length / XBlocks;
    const uint_t YCells  = setup.length / YBlocks;
    const uint_t ZCells  = setup.length / ZBlocks;
@@ -408,7 +408,7 @@ int main(int argc, char** argv)
    // add PDF field ( uInit = <0,0,0>, rhoInit = 1 )
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(
       blocks, "pdf field (fzyx)", latticeModel, Vector3< real_t >(real_c(0), real_c(0), real_c(0)), real_c(1),
-      uint_t(1), field::fzyx);
+      uint_t{1}, field::fzyx);
 
    // add particle and volume fraction field
    BlockDataID particleAndVolumeFractionFieldID =

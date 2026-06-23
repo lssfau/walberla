@@ -61,15 +61,15 @@ void checkSphereSphereCollision( )
    data::ParticleAccessorWithShape ac(ps, ss);
 
    //initialize particles
-   const real_t radius  = real_t(0.5);
+   const real_t radius  = real_t{0.5};
    auto smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    data::Particle&& sp0        = *ps->create();
-   sp0.setPosition( Vec3(real_t(0), real_t(0), real_t(0)) );
+   sp0.setPosition( Vec3(real_t{0}, real_t{0}, real_t{0}) );
    sp0.setShapeID(  smallSphere );
 
-   auto dir = Vec3(real_t(1), real_t(2), real_t(3)).getNormalized();
+   auto dir = Vec3(real_t{1}, real_t{2}, real_t{3}).getNormalized();
    real_t shift = real_c(0.75);
    data::Particle&& sp1        = *ps->create();
    sp1.setPosition( dir * shift );
@@ -85,9 +85,9 @@ void checkSphereSphereCollision( )
    WALBERLA_CHECK( isInContact );
    WALBERLA_CHECK_EQUAL( acd.getIdx1(), 0);
    WALBERLA_CHECK_EQUAL( acd.getIdx2(), 1);
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactPoint(), dir * shift * real_t(0.5));
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactPoint(), dir * shift * real_t{0.5});
    WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactNormal(), -dir );
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), shift - real_t(1) );
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), shift - real_t{1} );
 
    //check order invariance
    collision_detection::AnalyticContactDetection         acd2;
@@ -99,7 +99,7 @@ void checkSphereSphereCollision( )
    WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), acd2.getPenetrationDepth() );
 
    //no collision
-   sp1.setPosition( dir * real_t(1.1) );
+   sp1.setPosition( dir * real_t{1.1} );
    WALBERLA_CHECK( !double_cast(1, 0, ac, acd, ac ) );
 }
 
@@ -111,15 +111,15 @@ void checkSphereHalfSpaceCollision( )
    data::ParticleAccessorWithShape ac(ps, ss);
 
    //initialize particles
-   const real_t radius  = real_t(1.0);
+   const real_t radius  = real_t{1.0};
    auto smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    data::Particle&& sp0        = *ps->create();
-   sp0.setPosition( Vec3(real_t(0), real_t(0), real_t(0)) );
+   sp0.setPosition( Vec3(real_t{0}, real_t{0}, real_t{0}) );
    sp0.setShapeID(  smallSphere );
 
-   auto dir = Vec3(real_t(1), real_t(2), real_t(3)).getNormalized();
+   auto dir = Vec3(real_t{1}, real_t{2}, real_t{3}).getNormalized();
    real_t shift = real_c(0.75);
    auto p1              = ps->create(true);
    p1->setPosition( dir * shift );
@@ -135,20 +135,20 @@ void checkSphereHalfSpaceCollision( )
    WALBERLA_CHECK( isInContact );
    WALBERLA_CHECK_EQUAL( acd.getIdx1(), 0);
    WALBERLA_CHECK_EQUAL( acd.getIdx2(), 1);
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactPoint(), dir * shift * real_t(1.0));
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactPoint(), dir * shift * real_t{1.0});
    WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactNormal(), -dir );
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), shift - real_t(1) );
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), shift - real_t{1} );
 
-   auto pos = Vec3(shift, real_t(0), real_t(0));
+   auto pos = Vec3(shift, real_t{0}, real_t{0});
    p1->setPosition(pos);
-   p1->setShapeID(  ss->create<data::HalfSpace>( -Vec3(real_t(1), real_t(0), real_t(0)) ) );
+   p1->setShapeID(  ss->create<data::HalfSpace>( -Vec3(real_t{1}, real_t{0}, real_t{0}) ) );
    isInContact = double_cast(0, 1, ac, acd, ac );
    WALBERLA_CHECK( isInContact );
    WALBERLA_CHECK_EQUAL( acd.getIdx1(), 0);
    WALBERLA_CHECK_EQUAL( acd.getIdx2(), 1);
    WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactPoint(), pos);
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactNormal(), -Vec3(real_t(1), real_t(0), real_t(0)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), pos[0] - real_t(1) );
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getContactNormal(), -Vec3(real_t{1}, real_t{0}, real_t{0}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( acd.getPenetrationDepth(), pos[0] - real_t{1} );
 }
 
 } //namespace mesa_pd
@@ -162,8 +162,8 @@ int main( int argc, char ** argv )
 
    using namespace walberla;
    using namespace walberla::mesa_pd;
-   walberla::mesa_pd::checkRotation( Vec3(real_t(1), real_t(0), real_t(0)),
-                                     Vec3(real_t(0), real_t(1), real_t(0)) );
+   walberla::mesa_pd::checkRotation( Vec3(real_t{1}, real_t{0}, real_t{0}),
+                                     Vec3(real_t{0}, real_t{1}, real_t{0}) );
    walberla::mesa_pd::checkSphereSphereCollision();
    walberla::mesa_pd::checkSphereHalfSpaceCollision();
 

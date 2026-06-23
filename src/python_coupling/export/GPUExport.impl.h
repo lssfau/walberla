@@ -353,7 +353,7 @@ void exportModuleToPython(py::module_ &m)
          const std::string & blockDataName, uint_t numberOfGhostLayers ) {
          return internal::PackInfoWrapper< GpuFields... >(blocks, blockDataName, numberOfGhostLayers);
       },
-      "blocks"_a, "blockDataName"_a, "numberOfGhostLayers"_a = uint_t(0));
+      "blocks"_a, "blockDataName"_a, "numberOfGhostLayers"_a = uint_t{0});
 
    m2.def(
       "createMPIDatatypeInfo",
@@ -361,7 +361,7 @@ void exportModuleToPython(py::module_ &m)
          const std::string & blockDataName, uint_t numberOfGhostLayers ) {
         return internal::UniformMPIDatatypeInfoWrapper< GpuFields... >(blocks, blockDataName, numberOfGhostLayers);
       },
-      "blocks"_a, "blockDataName"_a, "numberOfGhostLayers"_a = uint_t(0));
+      "blocks"_a, "blockDataName"_a, "numberOfGhostLayers"_a = uint_t{0});
 
 }
 

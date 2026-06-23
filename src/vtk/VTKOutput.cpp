@@ -260,7 +260,7 @@ void VTKOutput::forceWrite( uint_t number, const bool immediatelyWriteCollectors
    }
    else // no MPIIO
    {
-      mpi::Tokenizing tokenizing( simultaneousIOOperations > 0 ? uint_c( simultaneousIOOperations ) : uint_t( 0 ) );
+      mpi::Tokenizing tokenizing( simultaneousIOOperations > 0 ? uint_c( simultaneousIOOperations ) : uint_t{ 0 } );
       tokenizing.pre();
 
       if( outputDomainDecomposition_ )
@@ -293,7 +293,7 @@ void VTKOutput::write( const bool immediatelyWriteCollectors, const int simultan
    if( executionCounter_ <= initialWriteCallsToSkip_ )
       return;
 
-   if( ( writeFrequency_ == uint_t(0) || ( executionCounter_ - initialWriteCallsToSkip_ - uint_c( 1 ) ) % writeFrequency_ != 0 ) && !writeNextStep_ )
+   if( ( writeFrequency_ == uint_t{0} || ( executionCounter_ - initialWriteCallsToSkip_ - uint_c( 1 ) ) % writeFrequency_ != 0 ) && !writeNextStep_ )
       return;
 
    uint_t number = continuousNumbering_ ? ( ( executionCounter_ - initialWriteCallsToSkip_ - uint_c( 1 ) ) / writeFrequency_ ) :
@@ -1196,9 +1196,9 @@ void VTKOutput::writeVTIPiece_sampling( std::ostream& ofs, const IBlock& block )
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
    WALBERLA_ASSERT_EQUAL( ghostLayers_, 0 );
 
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDy_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDz_, real_t{0} );
 
    const AABB&  blockBB = block.getAABB();
    const AABB&  domain = blockStorage_->getDomain();
@@ -1214,9 +1214,9 @@ void VTKOutput::writeVTIPiece_sampling( std::ostream& ofs, const IBlock& block )
    CellVector cells;
    for(auto it : cellBB)
    {
-      Vector3<real_t> world( domain.xMin() + ( real_c( it.x() ) + real_t(0.5) ) * samplingDx_,
-         domain.yMin() + ( real_c( it.y() ) + real_t(0.5) ) * samplingDy_,
-         domain.zMin() + ( real_c( it.z() ) + real_t(0.5) ) * samplingDz_ );
+      Vector3<real_t> world( domain.xMin() + ( real_c( it.x() ) + real_t{0.5} ) * samplingDx_,
+         domain.yMin() + ( real_c( it.y() ) + real_t{0.5} ) * samplingDy_,
+         domain.zMin() + ( real_c( it.z() ) + real_t{0.5} ) * samplingDz_ );
 
       Cell cell;
       blockStorage_->getCell( cell, world[0], world[1], world[2], level );
@@ -2002,9 +2002,9 @@ void VTKOutput::writeVTHB( const uint_t collector ) const
 void VTKOutput::writePVTI_sampled( const uint_t collector ) const
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDy_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDz_, real_t{0} );
 
    std::ostringstream collection;
    collection << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << collector << ".pvti";
@@ -2098,9 +2098,9 @@ bool VTKOutput::writeCombinedVTI( std::string localPart, const uint_t collector 
 bool VTKOutput::writeCombinedVTI_sampled( std::string localPart, const uint_t collector ) const
 {
    WALBERLA_ASSERT_NOT_NULLPTR( blockStorage_ );
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t( 0 ) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t( 0 ) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t( 0 ) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, real_t{ 0 } );
+   WALBERLA_ASSERT_GREATER( samplingDy_, real_t{ 0 } );
+   WALBERLA_ASSERT_GREATER( samplingDz_, real_t{ 0 } );
 
    const MPI_Comm comm    = MPIManager::instance()->comm();
    const int rank         = MPIManager::instance()->rank();
@@ -2309,9 +2309,9 @@ void VTKOutput::writePCellData( std::ofstream& ofs ) const
 
 CellInterval VTKOutput::getSampledCellInterval( const AABB & aabb ) const
 {
-   WALBERLA_ASSERT_GREATER( samplingDx_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDy_, real_t(0) );
-   WALBERLA_ASSERT_GREATER( samplingDz_, real_t(0) );
+   WALBERLA_ASSERT_GREATER( samplingDx_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDy_, real_t{0} );
+   WALBERLA_ASSERT_GREATER( samplingDz_, real_t{0} );
 
    const AABB& domain = blockStorage_->getDomain();
 

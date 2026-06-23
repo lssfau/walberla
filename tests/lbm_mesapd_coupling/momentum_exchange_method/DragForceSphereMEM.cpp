@@ -205,7 +205,7 @@ public:
          real_c(-5.566269)
       };
 
-      for(uint_t s = 0; s <= uint_t(30); ++s){
+      for(uint_t s = 0; s <= uint_t{30}; ++s){
          analyticalDrag += dragCoefficients[s] * tempChiPowS;
          tempChiPowS *= setup->chi;
       }
@@ -266,7 +266,7 @@ private:
    real_t computeDragForce()
    {
       size_t idx = ac_->uidToIdx(sphereID_);
-      real_t force = real_t(0);
+      real_t force = real_t{0};
       if( idx!= ac_->getInvalidIdx())
       {
          force = ac_->getHydrodynamicForce(idx)[0];
@@ -283,7 +283,7 @@ private:
    // calculate the average velocity in forcing direction (here: x) inside the domain (assuming dx=1)
    real_t computeAverageVel()
    {
-      auto velocity_sum = real_t(0);
+      auto velocity_sum = real_t{0};
       // iterate all blocks stored locally on this process
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -409,7 +409,7 @@ int main( int argc, char **argv )
    setup.chi            = real_c( 0.5 );                     // porosity parameter: diameter / length
    setup.tau            = tau;                               // relaxation time
    setup.extForce       = real_c( 1e-7 );                    // constant body force in lattice units
-   setup.checkFrequency = uint_t( 100 );                     // evaluate the drag force only every checkFrequency time steps
+   setup.checkFrequency = uint_t{ 100 };                     // evaluate the drag force only every checkFrequency time steps
    setup.radius         = real_c(0.5) * setup.chi * real_c( setup.length );  // sphere radius
    setup.visc           = ( setup.tau - real_c(0.5) ) / real_c(3);   // viscosity in lattice units
    const real_t omega      = real_c(1) / setup.tau;          // relaxation rate
@@ -421,9 +421,9 @@ int main( int argc, char **argv )
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const uint_t XBlocks = (processes >= 2) ? uint_t( 2 ) : uint_t( 1 );
-   const uint_t YBlocks = (processes >= 4) ? uint_t( 2 ) : uint_t( 1 );
-   const uint_t ZBlocks = (processes == 8) ? uint_t( 2 ) : uint_t( 1 );
+   const uint_t XBlocks = (processes >= 2) ? uint_t{ 2 } : uint_t{ 1 };
+   const uint_t YBlocks = (processes >= 4) ? uint_t{ 2 } : uint_t{ 1 };
+   const uint_t ZBlocks = (processes == 8) ? uint_t{ 2 } : uint_t{ 1 };
    const uint_t XCells = setup.length / XBlocks;
    const uint_t YCells = setup.length / YBlocks;
    const uint_t ZCells = setup.length / ZBlocks;
@@ -451,9 +451,9 @@ int main( int argc, char **argv )
    //////////////////
 
    // connect to pe
-   const real_t overlap = real_t( 1.5 ) * dx;
+   const real_t overlap = real_t{ 1.5 } * dx;
 
-   if( setup.radius > real_c( setup.length ) * real_t(0.5) - overlap )
+   if( setup.radius > real_c( setup.length ) * real_t{0.5} - overlap )
    {
       std::cerr << "Periodic sphere is too large and would lead to incorrect mapping!" << std::endl;
       // solution: create the periodic copies explicitly
@@ -482,8 +482,8 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                         uint_t(1), field::fzyx );
+                                                                         Vector3< real_t >( real_t{0} ), real_t{1},
+                                                                         uint_t{1}, field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );

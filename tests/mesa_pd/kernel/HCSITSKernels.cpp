@@ -57,7 +57,7 @@ template<typename PStorage, typename CStorage, typename PAccessor, typename CAcc
 class TestHCSITSKernel {
 public:
    TestHCSITSKernel(PStorage &ps_, CStorage &cs_, PAccessor &pa_, CAccessor &ca_) : ps(ps_), cs(cs_), pa(pa_), ca(ca_),
-      erp(real_t(1.0)), model(kernel::HCSITSRelaxationStep::RelaxationModel::InelasticFrictionlessContact), contactThreshold(0), globalAcc(0) {}
+      erp(real_t{1.0}), model(kernel::HCSITSRelaxationStep::RelaxationModel::InelasticFrictionlessContact), contactThreshold(0), globalAcc(0) {}
 
    void operator()(real_t dt){
       // Perform Collision detection (call kernel, that stores contacts into cs)
@@ -71,15 +71,15 @@ public:
 
       // Create Kernels
       kernel::InitContactsForHCSITS initContacts(1);
-      initContacts.setFriction(0,0,real_t(0.2));
-      initContacts.setErp(real_t(erp));
+      initContacts.setFriction(0,0,real_t{0.2});
+      initContacts.setErp(static_cast< real_t >(erp));
 
       kernel::InitParticlesForHCSITS initParticles;
       initParticles.setGlobalAcceleration(globalAcc);
 
       kernel::HCSITSRelaxationStep relaxationStep;
       relaxationStep.setRelaxationModel(model);
-      relaxationStep.setCor(real_t(0.6)); // Only effective for PGSM
+      relaxationStep.setCor(real_t{0.6}); // Only effective for PGSM
 
       kernel::IntegrateParticlesHCSITS integration;
 
@@ -90,11 +90,11 @@ public:
       cs.forEachContact(false, kernel::SelectAll(), ca, initContacts, ca, pa);
       ps.forEachParticle(false, kernel::SelectAll(), pa, initParticles, pa, dt);
 
-      VelocityUpdateNotification::Parameters::relaxationParam = real_t(1.0);
+      VelocityUpdateNotification::Parameters::relaxationParam = real_t{1.0};
       reductionKernel.operator()<VelocityCorrectionNotification>(ps);
       broadcastKernel.operator()<VelocityUpdateNotification>(ps);
 
-      VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
+      VelocityUpdateNotification::Parameters::relaxationParam = real_t{0.8};
       for(int i = 0; i < 10; i++){
          cs.forEachContact(false, kernel::SelectAll(), ca, relaxationStep, ca, pa, dt);
          reductionKernel.operator()<VelocityCorrectionNotification>(ps);
@@ -125,8 +125,8 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
-   auto density = real_t(7.874);
-   auto radius = real_t(1.1);
+   auto density = real_t{7.874};
+   auto radius = real_t{1.1};
 
    //Geometries for sphere and half space.
    auto smallSphere = ss->create<data::Sphere>( radius );
@@ -137,16 +137,16 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
 
    // Create four slightly overlapping spheres in a row (located at x=0,2)
    auto p = ps->create();
-   p->getPositionRef()        = Vec3(real_t(0), real_t(0), real_t(0));
+   p->getPositionRef()        = Vec3(real_t{0}, real_t{0}, real_t{0});
    p->getShapeIDRef()         = smallSphere;
    p->getOwnerRef()           = walberla::mpi::MPIManager::instance()->rank();
-   p->getLinearVelocityRef()  = Vec3(real_t(5), real_t(5), real_t(6));
+   p->getLinearVelocityRef()  = Vec3(real_t{5}, real_t{5}, real_t{6});
    p->getTypeRef()            = 0;
    //WALBERLA_LOG_INFO(paccessor.ParticleAccessorWithShape::getInvMass(0));
 
 
    auto p2 = ps->create();
-   p2->getPositionRef()          = Vec3(real_t(5), real_t(5), real_t(5));
+   p2->getPositionRef()          = Vec3(real_t{5}, real_t{5}, real_t{5});
    p2->getShapeIDRef()           = halfSpace;
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    p2->getTypeRef()               = 0;
@@ -163,25 +163,25 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
          // radius 1.1
          p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,0) );
-   testHCSITS( real_c( real_t(1.0) ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(0.1)) );
+   testHCSITS( real_c( real_t{1.0} ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.1}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{0.1}) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 
    p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,0) );
-   testHCSITS.erp = real_t(0.5) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.05)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(0.05)) );
+   testHCSITS.erp = real_t{0.5} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.05}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{0.05}) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 
    p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,0) );
-   testHCSITS.erp = real_t(0.0) ;
-   testHCSITS( real_t(1.0) );
+   testHCSITS.erp = real_t{0.0} ;
+   testHCSITS( real_t{1.0} );
    WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,6) );
    WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,0) );
    WALBERLA_LOG_INFO(p->getPosition());
@@ -189,53 +189,53 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
 
    p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,-1) );
-   testHCSITS.erp = real_t(1.0) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(0.1)) );
+   testHCSITS.erp = real_t{1.0} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.1}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{0.1}) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 
    p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,-1) );
-   testHCSITS.erp = real_t(0.5) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.05)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(0.05)) );
+   testHCSITS.erp = real_t{0.5} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.05}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{0.05}) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 
    p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,-1) );
-   testHCSITS.erp = real_t(0.0) ;
-   testHCSITS( real_t(1.0) );
+   testHCSITS.erp = real_t{0.0} ;
+   testHCSITS( real_t{1.0} );
    WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,6) );
    WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,0) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 
    // No collision
-   p->setPosition(  Vec3(5,5,real_t(6.2)) );
-   p->setLinearVelocity( Vec3(0,0,real_t(-0.2)) );
-   testHCSITS.erp = real_t(1.0) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.0)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(-0.2)) );
+   p->setPosition(  Vec3(5,5,real_t{6.2}) );
+   p->setLinearVelocity( Vec3(0,0,real_t{-0.2}) );
+   testHCSITS.erp = real_t{1.0} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.0}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{-0.2}) );
 
-   testHCSITS.contactThreshold = real_t(1.0);
-   p->setPosition(  Vec3(5,5,real_t(6.2)) );
-   p->setLinearVelocity( Vec3(0,0,real_t(-0.2)) );
-   testHCSITS.erp = real_t(1.0) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(-0.1)) );
+   testHCSITS.contactThreshold = real_t{1.0};
+   p->setPosition(  Vec3(5,5,real_t{6.2}) );
+   p->setLinearVelocity( Vec3(0,0,real_t{-0.2}) );
+   testHCSITS.erp = real_t{1.0} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.1}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{-0.1}) );
 
-   p->setPosition(  Vec3(5,5,real_t(6.1)) );
-   p->setLinearVelocity( Vec3(0,0,real_t(-0.1)) );
-   testHCSITS.erp = real_t(1.0) ;
-   testHCSITS( real_t(1.0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.1)) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t(0)) );
+   p->setPosition(  Vec3(5,5,real_t{6.1}) );
+   p->setLinearVelocity( Vec3(0,0,real_t{-0.1}) );
+   testHCSITS.erp = real_t{1.0} ;
+   testHCSITS( real_t{1.0} );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t{6.1}) );
+   WALBERLA_CHECK_FLOAT_EQUAL( p->getLinearVelocity(), Vec3(0,0,real_t{0}) );
    WALBERLA_LOG_INFO(p->getPosition());
    WALBERLA_LOG_INFO(p->getLinearVelocity());
 }
@@ -255,36 +255,36 @@ void SphereSphereTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
-   auto density = real_t(7.874);
-   auto radius = real_t(1.1);
+   auto density = real_t{7.874};
+   auto radius = real_t{1.1};
 
    auto smallSphere = ss->create<data::Sphere>( radius );
    ss->shapes[smallSphere]->updateMassAndInertia( density );
 
-   auto dt = real_t(1);
+   auto dt = real_t{1};
 
    // Create two slightly overlapping spheres in a row (located at x=0,2)
    auto p = ps->create();
-   p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
+   p->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{0});
    p->getShapeIDRef()           = smallSphere;
    p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-   p->getLinearVelocityRef()    = Vec3(real_t(1), real_t(0), real_t(0));
+   p->getLinearVelocityRef()    = Vec3(real_t{1}, real_t{0}, real_t{0});
    p->getTypeRef()              = 0;
    auto p2 = ps->create();
-   p2->getPositionRef()          = Vec3(real_t(2), real_t(0), real_t(0));
+   p2->getPositionRef()          = Vec3(real_t{2}, real_t{0}, real_t{0});
    p2->getShapeIDRef()           = smallSphere;
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-   p2->getLinearVelocityRef() = Vec3(real_t(-1), real_t(0), real_t(0));
+   p2->getLinearVelocityRef() = Vec3(real_t{-1}, real_t{0}, real_t{0});
    p2->getTypeRef()              = 0;
    TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
    testHCSITS.model = model;
    testHCSITS(dt);
 
-   WALBERLA_CHECK_FLOAT_EQUAL(p->getPosition(), Vec3(real_t(-0.1),0,0));
-   WALBERLA_CHECK_FLOAT_EQUAL(p->getLinearVelocity(), Vec3(real_t(-0.1),0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p->getPosition(), Vec3(real_t{-0.1},0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p->getLinearVelocity(), Vec3(real_t{-0.1},0,0));
    WALBERLA_CHECK_FLOAT_EQUAL(p->getAngularVelocity(), Vec3(0,0,0));
-   WALBERLA_CHECK_FLOAT_EQUAL(p2->getPosition(), Vec3(real_t(2.1),0,0));
-   WALBERLA_CHECK_FLOAT_EQUAL(p2->getLinearVelocity(), Vec3(real_t(0.1),0,0))
+   WALBERLA_CHECK_FLOAT_EQUAL(p2->getPosition(), Vec3(real_t{2.1},0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p2->getLinearVelocity(), Vec3(real_t{0.1},0,0))
          WALBERLA_CHECK_FLOAT_EQUAL(p2->getAngularVelocity(), Vec3(0,0,0));
 
    WALBERLA_LOG_INFO(p->getPosition());
@@ -306,26 +306,26 @@ void SphereSeperationTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
-   auto density = real_t(7.874);
-   auto radius = real_t(1.1);
+   auto density = real_t{7.874};
+   auto radius = real_t{1.1};
 
    auto smallSphere = ss->create<data::Sphere>( radius );
 
    ss->shapes[smallSphere]->updateMassAndInertia( density );
-   auto dt = real_t(0.2);
+   auto dt = real_t{0.2};
 
    // Create two slightly overlapping spheres in a row (located at x=0,2)
    auto p = ps->create();
-   p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
+   p->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{0});
    p->getShapeIDRef()           = smallSphere;
    p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-   p->getLinearVelocityRef()    = Vec3(real_t(1), real_t(0), real_t(0));
+   p->getLinearVelocityRef()    = Vec3(real_t{1}, real_t{0}, real_t{0});
    p->getTypeRef()              = 0;
    auto p2 = ps->create();
-   p2->getPositionRef()          = Vec3(real_t(2.0), real_t(0), real_t(0));
+   p2->getPositionRef()          = Vec3(real_t{2.0}, real_t{0}, real_t{0});
    p2->getShapeIDRef()           = smallSphere;
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-   p2->getLinearVelocityRef()    = Vec3(real_t(-1), real_t(0), real_t(0));
+   p2->getLinearVelocityRef()    = Vec3(real_t{-1}, real_t{0}, real_t{0});
    p2->getTypeRef()              = 0;
    TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
 
@@ -363,25 +363,25 @@ void SlidingSphereFrictionalReactionTest(kernel::HCSITSRelaxationStep::Relaxatio
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
-   auto density = real_t(1);
-   auto radius = real_t(1);
+   auto density = real_t{1};
+   auto radius = real_t{1};
 
    auto smallSphere = ss->create<data::Sphere>( radius );
    auto halfSpace = ss->create<data::HalfSpace>(Vec3(0,0,1));
    ss->shapes[smallSphere]->updateMassAndInertia( density );
    ss->shapes[halfSpace]->updateMassAndInertia( density );
-   auto dt = real_t(0.002);
+   auto dt = real_t{0.002};
 
    // Create a spheres (located at x=0, height = 1)
    auto p = ps->create();
-   p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(1));
+   p->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{1});
    p->getShapeIDRef()           = smallSphere;
    p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-   p->getLinearVelocityRef()    = Vec3(real_t(5), real_t(0), real_t(0));
+   p->getLinearVelocityRef()    = Vec3(real_t{5}, real_t{0}, real_t{0});
    p->getTypeRef()              = 0;
 
    auto p2 = ps->create();
-   p2->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
+   p2->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{0});
    p2->getShapeIDRef()           = halfSpace;
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    p2->getTypeRef()               = 0;
@@ -396,7 +396,7 @@ void SlidingSphereFrictionalReactionTest(kernel::HCSITSRelaxationStep::Relaxatio
 
    // Number of allowed iterations
    int maxIter = 500;
-   while(!walberla::floatIsEqual(p->getAngularVelocity()[1],p->getLinearVelocity()[0], real_t(0.002))){
+   while(!walberla::floatIsEqual(p->getAngularVelocity()[1],p->getLinearVelocity()[0], real_t{0.002})){
       testHCSITS(dt);
       if(solveCount % 50 == 0){
          WALBERLA_LOG_INFO(p->getAngularVelocity());
@@ -411,8 +411,8 @@ void SlidingSphereFrictionalReactionTest(kernel::HCSITSRelaxationStep::Relaxatio
 
    // Check if the value obtained values equal the physically correct values
    // (which can be determined by newtons equation to be 25/7).
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(real_t(25.0/7.0), p->getAngularVelocity()[1], real_t(0.01), "Angular velocity is not physically correct");
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(real_t(25.0/7.0), p->getLinearVelocity()[0], real_t(0.01), "Linear velocity is not physically correct");
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(real_t(25.0/7.0), p->getAngularVelocity()[1], real_t{0.01}, "Angular velocity is not physically correct");
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(real_t(25.0/7.0), p->getLinearVelocity()[0], real_t{0.01}, "Linear velocity is not physically correct");
 }
 
 int main( int argc, char ** argv )

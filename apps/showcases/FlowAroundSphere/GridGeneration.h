@@ -68,7 +68,7 @@ void createSetupBlockForest(SetupBlockForest& setupBfs, const Setup& setup, cons
    setupBfs.addRefinementSelectionFunction(std::function<void(SetupBlockForest &)>(SphereRefinementSelection));
    setupBfs.addBlockExclusionFunction(SphereBlockExclusion);
 
-   const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), setup.domainSize[0], setup.domainSize[1], setup.domainSize[2]);
+   const AABB domain(real_t{0.0}, real_t{0.0}, real_t{0.0}, setup.domainSize[0], setup.domainSize[1], setup.domainSize[2]);
    setupBfs.addWorkloadMemorySUIDAssignmentFunction(blockforest::uniformWorkloadAndMemoryAssignment);
    setupBfs.init(domain, setup.rootBlocks[0], setup.rootBlocks[1], setup.rootBlocks[2],
                          setup.periodic[0], setup.periodic[1], setup.periodic[2]);

@@ -210,9 +210,9 @@ int main(int argc, char **argv)
    BlockDataID srcField = field::addToStorage<PdfField>( blocks,"Src", 0.0, layout );
    BlockDataID dstField = field::addToStorage<PdfField>( blocks,"Dst", 0.0, layout );
 
-   BlockDataID srcFieldGlb = blocks->addBlockData<PdfField>( makeBlockDataInitFunction<GhostLayerField<real_t,19> >(glbCellsX,glbCellsY,glbCellsZ, uint_t(1), layout),
+   BlockDataID srcFieldGlb = blocks->addBlockData<PdfField>( makeBlockDataInitFunction<GhostLayerField<real_t,19> >(glbCellsX,glbCellsY,glbCellsZ, uint_t{1}, layout),
                                                              "Global Src" );
-   BlockDataID dstFieldGlb = blocks->addBlockData<PdfField>( makeBlockDataInitFunction<GhostLayerField<real_t,19> >(glbCellsX,glbCellsY,glbCellsZ, uint_t(1), layout),
+   BlockDataID dstFieldGlb = blocks->addBlockData<PdfField>( makeBlockDataInitFunction<GhostLayerField<real_t,19> >(glbCellsX,glbCellsY,glbCellsZ, uint_t{1}, layout),
                                                              "Global Dst" );
 
    // Init src field with some values
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
       {
          Cell cell = cellIt.cell();
          blocks->transformBlockLocalToGlobalCell(cell, *blockIt);
-         *cellIt = real_c( ( cell[0] + cell[1] + cell[2] + cellIt.f() ) % cell_idx_t(42) );
+         *cellIt = real_c( ( cell[0] + cell[1] + cell[2] + cellIt.f() ) % cell_idx_t{42} );
          dst->get(cellIt) = *cellIt;
       }
 
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
       for(auto cellIt = glbSrc->beginWithGhostLayer(); cellIt != src->end(); ++cellIt )  // over all x,y,z,f
       {
          const Cell & cell = cellIt.cell();
-         *cellIt = real_c( ( cell[0] + cell[1] + cell[2] + cellIt.f() ) % cell_idx_t(42) );
+         *cellIt = real_c( ( cell[0] + cell[1] + cell[2] + cellIt.f() ) % cell_idx_t{42} );
          glbDst->get(cellIt) = *cellIt;
          WALBERLA_CHECK_FLOAT_EQUAL ( (*glbDst)(cell[0],cell[1],cell[2],cellIt.f()), (*glbSrc)(cell[0],cell[1],cell[2],cellIt.f()) )
       }

@@ -48,7 +48,7 @@ class BubbleIDFieldPackInfo : public field::communication::PackInfo< GhostLayerF
 {
  public:
    using CommunicationStencil_T =
-      typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+      typename std::conditional_t< Stencil_T::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
 
    using field_t = GhostLayerField< BubbleID, 1 >;
 

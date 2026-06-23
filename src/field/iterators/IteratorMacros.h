@@ -108,7 +108,7 @@
 //! \code
 //! WALBERLA_FOR_ALL_CELLS_YZ( ptrToField,
 //!
-//!    for( auto x = ::walberla::cell_idx_t(0); x < ::walberla::cell_idx_c( ptrToField->xSize() ); x += ::walberla::cell_idx_t(2) )
+//!    for( auto x = ::walberla::cell_idx_t{0}; x < ::walberla::cell_idx_c( ptrToField->xSize() ); x += ::walberla::cell_idx_t{2} )
 //!       ptrToField->get(x,y,z) += 42;
 //! )
 //! \endcode
@@ -160,8 +160,8 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          auto z = ::walberla::cell_idx_c( iz ); \
-         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
-            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         for( auto y = ::walberla::cell_idx_t{0}; y < ySize__; ++y ) { \
+            for( auto x = ::walberla::cell_idx_t{0}; x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -174,8 +174,8 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          auto y = ::walberla::cell_idx_c( iy ); \
-         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-            for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+         for( auto z = ::walberla::cell_idx_t{0}; z < zSize__; ++z ) { \
+            for( auto x = ::walberla::cell_idx_t{0}; x < xSize__; ++x ) \
             { \
                CODE \
             } \
@@ -228,7 +228,7 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t{0}; ++z ) { \
                for( auto y = -gl__; y < (ySize__ + gl__); ++y ) { \
                   for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
@@ -266,7 +266,7 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t{0}; ++y ) { \
                for( auto z = -gl__; z < (zSize__ + gl__); ++z ) { \
                   for( auto x = -gl__; x < (xSize__ + gl__); ++x ) \
                   { \
@@ -308,7 +308,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          auto z = ::walberla::cell_idx_c( iz ); \
-         for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
+         for( auto y = ::walberla::cell_idx_t{0}; y < ySize__; ++y ) \
          { \
             CODE \
          } \
@@ -320,7 +320,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          auto y = ::walberla::cell_idx_c( iy ); \
-         for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) \
+         for( auto z = ::walberla::cell_idx_t{0}; z < zSize__; ++z ) \
          { \
             CODE \
          } \
@@ -367,7 +367,7 @@
       for( int iz = 0; iz < izSize; ++iz ) { \
          if( iz == 0 ) \
          { \
-            for( auto z = -gl__; z < ::walberla::cell_idx_t(0); ++z ) { \
+            for( auto z = -gl__; z < ::walberla::cell_idx_t{0}; ++z ) { \
                for( auto y = -gl__; y < (ySize__ + gl__); ++y ) \
                { \
                   CODE \
@@ -399,7 +399,7 @@
       for( int iy = 0; iy < iySize; ++iy ) { \
          if( iy == 0 ) \
          { \
-            for( auto y = -gl__; y < ::walberla::cell_idx_t(0); ++y ) { \
+            for( auto y = -gl__; y < ::walberla::cell_idx_t{0}; ++y ) { \
                for( auto z = -gl__; z < (zSize__ + gl__); ++z ) \
                { \
                   CODE \
@@ -437,7 +437,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
@@ -451,7 +451,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
@@ -474,7 +474,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
@@ -490,7 +490,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
@@ -517,7 +517,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -535,7 +535,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -566,7 +566,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -586,7 +586,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -621,7 +621,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -643,7 +643,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -682,7 +682,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -706,7 +706,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -749,7 +749,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -775,7 +775,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -822,7 +822,7 @@
       _Pragma(#omp) \
       for( int iz = 0; iz < izSize; ++iz ) { \
          const auto z = ::walberla::cell_idx_c( iz ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, ::walberla::cell_idx_t{0}, z, xSize__ - ::walberla::cell_idx_t{1}, ySize__ - ::walberla::cell_idx_t{1}, z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -850,7 +850,7 @@
       _Pragma(#omp) \
       for( int iy = 0; iy < iySize; ++iy ) { \
          const auto y = ::walberla::cell_idx_c( iy ); \
-         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         const CellInterval interval( ::walberla::cell_idx_t{0}, y, ::walberla::cell_idx_t{0}, xSize__ - ::walberla::cell_idx_t{1}, y, zSize__ - ::walberla::cell_idx_t{1} ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
@@ -881,9 +881,9 @@
    const auto xSize__ = ::walberla::cell_idx_c( (field)->xSize() ); \
    const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
    const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-      for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) { \
-         for( auto x = ::walberla::cell_idx_t(0); x < xSize__; ++x ) \
+   for( auto z = ::walberla::cell_idx_t{0}; z < zSize__; ++z ) { \
+      for( auto y = ::walberla::cell_idx_t{0}; y < ySize__; ++y ) { \
+         for( auto x = ::walberla::cell_idx_t{0}; x < xSize__; ++x ) \
          { \
             CODE \
          } \
@@ -921,8 +921,8 @@
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    const auto ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
    const auto zSize__ = ::walberla::cell_idx_c( (field)->zSize() ); \
-   for( auto z = ::walberla::cell_idx_t(0); z < zSize__; ++z ) { \
-      for( auto y = ::walberla::cell_idx_t(0); y < ySize__; ++y ) \
+   for( auto z = ::walberla::cell_idx_t{0}; z < zSize__; ++z ) { \
+      for( auto y = ::walberla::cell_idx_t{0}; y < ySize__; ++y ) \
       { \
          CODE \
       } \

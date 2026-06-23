@@ -92,7 +92,7 @@ inline HeatConduction::HeatConduction(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
-   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t{0});
    {%- endfor %}
 }
 

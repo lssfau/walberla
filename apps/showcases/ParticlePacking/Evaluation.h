@@ -122,7 +122,7 @@ struct ContactInfo
       walberla::mpi::allReduceInplace(averagePenetrationDepth, walberla::mpi::SUM);
       walberla::mpi::allReduceInplace(maximumPenetrationDepth, walberla::mpi::MAX);
 
-      if(numContacts > 0) averagePenetrationDepth /= real_t(numContacts);
+      if(numContacts > 0) averagePenetrationDepth /= static_cast< real_t >(numContacts);
    }
 };
 
@@ -230,10 +230,10 @@ public:
                      std::vector<std::tuple<std::string,std::function<real_t(Vec3)>>> shapeEvaluators) :
    sizeBins_(sizeBins), sizeEvaluator_(sizeEvaluator),
    shapeBins_(shapeBins), shapeEvaluators_(shapeEvaluators) {
-      bool areBinsAscending = (sizeBins[1] - sizeBins[0]) > real_t(0);
+      bool areBinsAscending = (sizeBins[1] - sizeBins[0]) > real_t{0};
       if(!areBinsAscending) std::reverse(sizeBins_.begin(), sizeBins_.end());
 
-      massFractionHistogram_ = std::vector<real_t>(sizeBins.size() + 1,real_t(0));
+      massFractionHistogram_ = std::vector<real_t>(sizeBins.size() + 1,real_t{0});
       numberHistogram_ = std::vector<uint_t>(sizeBins.size() + 1,0);
 
       WALBERLA_CHECK_EQUAL(shapeBins.size(), shapeEvaluators.size(), "Different number of shape evaluators and bins!");
@@ -275,14 +275,14 @@ public:
       for(uint_t i = 0; i < shapeHistograms_.size(); ++i) walberla::mpi::reduceInplace(shapeHistograms_[i], walberla::mpi::SUM);
       WALBERLA_ROOT_SECTION()
       {
-         auto total = std::accumulate(massFractionHistogram_.begin(), massFractionHistogram_.end(), real_t(0));
+         auto total = std::accumulate(massFractionHistogram_.begin(), massFractionHistogram_.end(), real_t{0});
          for(auto& h: massFractionHistogram_) h /= total;
       }
    }
 
    void clear()
    {
-      for(auto& h: massFractionHistogram_) h = real_t(0);
+      for(auto& h: massFractionHistogram_) h = real_t{0};
       for(auto& h: numberHistogram_) h = 0;
       for(uint_t i = 0; i < shapeHistograms_.size(); ++i)
       {
@@ -365,13 +365,13 @@ public:
          : layerHeight_(layerHeight)
    {
       if(domainSetup == "container") {
-         layerVolume_ = simulationDomain.xSize() * simulationDomain.xSize() * math::pi / real_t(4) * layerHeight;
+         layerVolume_ = simulationDomain.xSize() * simulationDomain.xSize() * math::pi / real_t{4} * layerHeight;
       }
       else {
          layerVolume_ = simulationDomain.xSize() * simulationDomain.ySize() * layerHeight;
       }
-      porosityPerLayer_ = std::vector<real_t>(uint_c(simulationDomain.zSize() / layerHeight), real_t(0));
-      radiusPerLayer_ = std::vector<real_t>(uint_c(simulationDomain.zSize() / layerHeight), real_t(0));
+      porosityPerLayer_ = std::vector<real_t>(uint_c(simulationDomain.zSize() / layerHeight), real_t{0});
+      radiusPerLayer_ = std::vector<real_t>(uint_c(simulationDomain.zSize() / layerHeight), real_t{0});
    }
 
    template<typename Accessor_T>
@@ -428,7 +428,7 @@ public:
 
          for(uint_t i = 0; i < porosityPerLayer_.size(); ++i)
          {
-            file << layerHeight_ * (real_t(0.5)+real_c(i)) << " " << porosityPerLayer_[i] << " " << radiusPerLayer_[i] << "\n";
+            file << layerHeight_ * (real_t{0.5}+real_c(i)) << " " << porosityPerLayer_[i] << " " << radiusPerLayer_[i] << "\n";
          }
          file.close();
       }
@@ -478,18 +478,18 @@ private:
             return i;
          }
       }
-      return uint_t(0);
+      return uint_t{0};
    }
 
    real_t calculateSphericalSegmentVolume(real_t lowerLayerHeight, real_t upperLayerHeight, real_t radius) const
    {
       real_t r1 = std::max(std::min(lowerLayerHeight,radius),-radius);
       real_t r2 = std::max(std::min(upperLayerHeight,radius),-radius);
-      real_t a1 = std::sqrt(std::max(radius*radius - r1*r1, real_t(0)));
-      real_t a2 = std::sqrt(std::max(radius*radius - r2*r2, real_t(0)));
+      real_t a1 = std::sqrt(std::max(radius*radius - r1*r1, real_t{0}));
+      real_t a2 = std::sqrt(std::max(radius*radius - r2*r2, real_t{0}));
       real_t h = r2-r1;
       // wikipedia Kugelschicht
-      return math::pi * h / real_t(6) * (real_t(3)*a1*a1 + real_t(3)*a2*a2 + h*h);
+      return math::pi * h / real_t{6} * (real_t{3}*a1*a1 + real_t{3}*a2*a2 + h*h);
    }
 
    real_t layerHeight_;
@@ -558,7 +558,7 @@ public:
 
          for(uint_t i = 0; i < contactsPerLayer_.size(); ++i)
          {
-            file << layerHeight_ * (real_t(0.5)+real_c(i)) << " " << contactsPerLayer_[i]
+            file << layerHeight_ * (real_t{0.5}+real_c(i)) << " " << contactsPerLayer_[i]
                  << " " << avgPenetrationPerLayer_[i] << " " << maxPenetrationPerLayer_[i] << "\n";
          }
          file.close();

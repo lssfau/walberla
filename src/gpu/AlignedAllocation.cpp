@@ -60,11 +60,11 @@ namespace gpu
       void *ptr = nullptr;  // pointer to usable aligned memory
 
       WALBERLA_GPU_CHECK( gpuMalloc( &pa, size + alignment ));
-      WALBERLA_CHECK_EQUAL(size_t(pa) % alignment, 0 , "GPU malloc did not return memory with requested alignment");
-      ptr = (void *) ((char *) (pa) + alignment - offset);
+      WALBERLA_CHECK_EQUAL(reinterpret_cast< size_t >(pa) % alignment, 0 , "GPU malloc did not return memory with requested alignment");
+      ptr = static_cast< void * >(static_cast< char * >(pa) + alignment - offset);
       freePointers_[ptr] = pa;
 
-      WALBERLA_ASSERT_EQUAL(((size_t) ptr + offset) % alignment, 0 );
+      WALBERLA_ASSERT_EQUAL((reinterpret_cast< size_t >(ptr) + offset) % alignment, 0 );
       return ptr;
    }
 

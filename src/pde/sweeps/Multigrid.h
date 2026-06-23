@@ -200,7 +200,7 @@ public:
 
    void operator()( IBlock * const block ) const
    {
-      block->getData< Field_T >( fieldId_ )->setWithGhostLayer( real_t(0) );
+      block->getData< Field_T >( fieldId_ )->setWithGhostLayer( real_t{0} );
    }
 
 private:
@@ -277,7 +277,7 @@ public:
     * \param overrelaxFact overrelaxation factor, e.g. 2 for the Poisson equation
     *******************************************************************************************************************/
    CoarsenStencilFieldsGCA( shared_ptr< StructuredBlockForest > blocks,
-                      const uint_t numLvl, const real_t overrelaxFact = real_t(1),
+                      const uint_t numLvl, const real_t overrelaxFact = real_t{1},
                       const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                       const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
          : blocks_( blocks ), numLvl_(numLvl), overrelaxFact_(overrelaxFact),

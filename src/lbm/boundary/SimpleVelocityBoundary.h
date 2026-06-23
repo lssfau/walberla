@@ -60,7 +60,7 @@ public:
 
 
    SimpleVelocityBoundary( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField,
-                           const Vector3< real_t > & velocity, const real_t density = real_t(1) ) :
+                           const Vector3< real_t > & velocity, const real_t density = real_t{1} ) :
       Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
    {
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
@@ -69,7 +69,7 @@ public:
    }
 
    SimpleVelocityBoundary( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField,
-                           const real_t x, const real_t y, const real_t z, const real_t density = real_t(1) ) :
+                           const real_t x, const real_t y, const real_t z, const real_t density = real_t{1} ) :
       Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
    {
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );

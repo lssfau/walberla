@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO("Pitch " << pitch)
 
    char * cptr = reinterpret_cast<char*>( ptr );
-   WALBERLA_CHECK_EQUAL( size_t(cptr + offset) % alignment, 0 );
+   WALBERLA_CHECK_EQUAL( reinterpret_cast< size_t >(cptr + offset) % alignment, 0 );
 
    free_aligned_with_offset( ptr );
 

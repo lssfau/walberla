@@ -112,7 +112,7 @@ Block::Block( BlockForest & forest, const BlockID & id, const AABB & aabb, const
 
    if( processMapping )
    {
-      for( uint_t i = uint_t(0); i != size; ++i )
+      for( uint_t i = uint_t{0}; i != size; ++i )
       {
          BlockID   nId;
          Set<SUID> nState;
@@ -124,7 +124,7 @@ Block::Block( BlockForest & forest, const BlockID & id, const AABB & aabb, const
    }
    else
    {
-      for( uint_t i = uint_t(0); i != size; ++i )
+      for( uint_t i = uint_t{0}; i != size; ++i )
       {
          BlockID   nId;
          Set<SUID> nState;
@@ -135,10 +135,10 @@ Block::Block( BlockForest & forest, const BlockID & id, const AABB & aabb, const
       }
    }
 
-   for( uint_t i = uint_t(0); i != uint_t(26); ++i )
+   for( uint_t i = uint_t{0}; i != uint_t{26}; ++i )
    {
       buffer >> size;
-      for( uint_t j = uint_t(0); j != size; ++j )
+      for( uint_t j = uint_t{0}; j != size; ++j )
       {
          uint8_t index(0);
          buffer >> index;
@@ -155,20 +155,20 @@ void Block::toBuffer( mpi::SendBuffer & buffer ) const
    buffer << this->getState()
           << uint_c( neighborhood_.size() );
 
-   for( uint_t i = uint_t(0); i != neighborhood_.size(); ++i )
+   for( uint_t i = uint_t{0}; i != neighborhood_.size(); ++i )
    {
       buffer << neighborhood_[i].getId()
              << neighborhood_[i].getState()
              << neighborhood_[i].getProcess();
    }
 
-   for( uint_t i = uint_t(0); i != uint_t(26); ++i )
+   for( uint_t i = uint_t{0}; i != uint_t{26}; ++i )
    {
       buffer << uint_c( neighborhoodSection_[i].size() );
-      for( uint_t j = uint_t(0); j != neighborhoodSection_[i].size(); ++j )
+      for( uint_t j = uint_t{0}; j != neighborhoodSection_[i].size(); ++j )
       {
          uint8_t index(0);
-         for( uint_t k = uint_t(0); k != neighborhood_.size() && neighborhoodSection_[i][j] != &(neighborhood_[k]); ++k, ++index ) {}
+         for( uint_t k = uint_t{0}; k != neighborhood_.size() && neighborhoodSection_[i][j] != &(neighborhood_[k]); ++k, ++index ) {}
          WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
          buffer << index;
       }

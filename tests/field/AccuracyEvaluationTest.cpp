@@ -62,10 +62,10 @@ int main( int argc, char** argv )
 
    mpi::Environment mpiEnv( argc, argv );
 
-   auto blocks = blockforest::createUniformBlockGrid( uint_t( 2), uint_t( 1), uint_t( 2), // blocks
-                                                      uint_t(10), uint_t(10), uint_t(10), // cells
-                                                      real_t(1), // dx
-                                                      uint_t( 2), uint_t( 1), uint_t( 2) ); // number of processes
+   auto blocks = blockforest::createUniformBlockGrid( uint_t{ 2}, uint_t{ 1}, uint_t{ 2}, // blocks
+                                                      uint_t{10}, uint_t{10}, uint_t{10}, // cells
+                                                      real_t{1}, // dx
+                                                      uint_t{ 2}, uint_t{ 1}, uint_t{ 2} ); // number of processes
 
    //math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( std::time(0) ) );
    math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
@@ -107,10 +107,10 @@ int main( int argc, char** argv )
    vValues.mpiGatherRoot();
    v2Values.mpiGatherRoot();
 
-   auto sAccuracy = field::makeAccuracyEvaluation< ScalarField_T >( blocks, sId, &scalarSolution, uint_t(0), uint_t(1) );
+   auto sAccuracy = field::makeAccuracyEvaluation< ScalarField_T >( blocks, sId, &scalarSolution, uint_t{0}, uint_t{1} );
    (*sAccuracy)();
 
-   auto vAccuracy = field::makeAccuracyEvaluation< VectorField_T >( blocks, vId, &vectorSolution, uint_t(0), uint_t(1) );
+   auto vAccuracy = field::makeAccuracyEvaluation< VectorField_T >( blocks, vId, &vectorSolution, uint_t{0}, uint_t{1} );
    (*vAccuracy)();
 
    WALBERLA_ROOT_SECTION()

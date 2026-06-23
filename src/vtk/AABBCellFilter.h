@@ -52,7 +52,7 @@ public:
    *   and including cells in and excluding cells from the VTK output, see the documentation of class VTKOutput.
    */
    //*******************************************************************************************************************
-   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t(0) ) const
+   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t{0} ) const
    {
       CellInterval cellBB;
       storage.getCellBBFromAABB( cellBB, aabb_, storage.getLevel(block) );

@@ -118,8 +118,8 @@ class SpherePropertyLogger
                         const std::string& fileName, bool fileIO, real_t dx_SI, real_t dt_SI, real_t diameter,
                         real_t gravitationalForceMag)
       : ac_(ac), sphereUid_(sphereUid), fileName_(fileName), fileIO_(fileIO), dx_SI_(dx_SI), dt_SI_(dt_SI),
-        diameter_(diameter), gravitationalForceMag_(gravitationalForceMag), position_(real_t(0)),
-        maxVelocity_(real_t(0))
+        diameter_(diameter), gravitationalForceMag_(gravitationalForceMag), position_(real_t{0}),
+        maxVelocity_(real_t{0})
    {
       if (fileIO_)
       {
@@ -135,9 +135,9 @@ class SpherePropertyLogger
 
    void operator()(const uint_t timestep)
    {
-      Vector3< real_t > pos(real_t(0));
-      Vector3< real_t > transVel(real_t(0));
-      Vector3< real_t > hydForce(real_t(0));
+      Vector3< real_t > pos(real_t{0});
+      Vector3< real_t > transVel(real_t{0});
+      Vector3< real_t > hydForce(real_t{0});
 
       size_t idx = ac_->uidToIdx(sphereUid_);
       if (idx != ac_->getInvalidIdx())
@@ -189,7 +189,7 @@ class SpherePropertyLogger
          auto normalizedHydForce = hydForce / gravitationalForceMag_;
 
          file << timestep << "\t" << real_c(timestep) * dt_SI_ << "\t" << "\t" << scaledPosition[0] << "\t"
-              << scaledPosition[1] << "\t" << scaledPosition[2] - real_t(0.5) << "\t" << velocity_SI[0] << "\t"
+              << scaledPosition[1] << "\t" << scaledPosition[2] - real_t{0.5} << "\t" << velocity_SI[0] << "\t"
               << velocity_SI[1] << "\t" << velocity_SI[2] << "\t" << normalizedHydForce[0] << "\t"
               << normalizedHydForce[1] << "\t" << normalizedHydForce[2] << "\n";
          file.close();
@@ -298,9 +298,9 @@ int main(int argc, char** argv)
    uint_t fluidType = 1;
 
    // numerical parameters
-   uint_t numberOfCellsInHorizontalDirection = uint_t(135);
+   uint_t numberOfCellsInHorizontalDirection = uint_t{135};
    bool averageForceTorqueOverTwoTimeSteps   = true;
-   uint_t numRPDSubCycles                    = uint_t(1);
+   uint_t numRPDSubCycles                    = uint_t{1};
    bool useVelocityVerlet                    = false;
 
    for (int i = 1; i < argc; ++i)
@@ -372,8 +372,8 @@ int main(int argc, char** argv)
    //////////////////////////////////////
 
    // values are mainly taken from the reference paper
-   const real_t diameter_SI      = real_t(15e-3);
-   const real_t densitySphere_SI = real_t(1120);
+   const real_t diameter_SI      = real_t{15e-3};
+   const real_t densitySphere_SI = real_t{1120};
 
    real_t densityFluid_SI, dynamicViscosityFluid_SI;
    real_t expectedSettlingVelocity_SI;
@@ -381,37 +381,37 @@ int main(int argc, char** argv)
    {
    case 1:
       // Re_p around 1.5
-      densityFluid_SI             = real_t(970);
-      dynamicViscosityFluid_SI    = real_t(373e-3);
-      expectedSettlingVelocity_SI = real_t(0.035986);
+      densityFluid_SI             = real_t{970};
+      dynamicViscosityFluid_SI    = real_t{373e-3};
+      expectedSettlingVelocity_SI = real_t{0.035986};
       break;
    case 2:
       // Re_p around 4.1
-      densityFluid_SI             = real_t(965);
-      dynamicViscosityFluid_SI    = real_t(212e-3);
-      expectedSettlingVelocity_SI = real_t(0.05718);
+      densityFluid_SI             = real_t{965};
+      dynamicViscosityFluid_SI    = real_t{212e-3};
+      expectedSettlingVelocity_SI = real_t{0.05718};
       break;
    case 3:
       // Re_p around 11.6
-      densityFluid_SI             = real_t(962);
-      dynamicViscosityFluid_SI    = real_t(113e-3);
-      expectedSettlingVelocity_SI = real_t(0.087269);
+      densityFluid_SI             = real_t{962};
+      dynamicViscosityFluid_SI    = real_t{113e-3};
+      expectedSettlingVelocity_SI = real_t{0.087269};
       break;
    case 4:
       // Re_p around 31.9
-      densityFluid_SI             = real_t(960);
-      dynamicViscosityFluid_SI    = real_t(58e-3);
-      expectedSettlingVelocity_SI = real_t(0.12224);
+      densityFluid_SI             = real_t{960};
+      dynamicViscosityFluid_SI    = real_t{58e-3};
+      expectedSettlingVelocity_SI = real_t{0.12224};
       break;
    default:
       WALBERLA_ABORT("Only four different fluids are supported! Choose type between 1 and 4.");
    }
    const real_t kinematicViscosityFluid_SI = dynamicViscosityFluid_SI / densityFluid_SI;
 
-   const real_t gravitationalAcceleration_SI = real_t(9.81);
-   Vector3< real_t > domainSize_SI(real_t(100e-3), real_t(100e-3), real_t(160e-3));
+   const real_t gravitationalAcceleration_SI = real_t{9.81};
+   Vector3< real_t > domainSize_SI(real_t{100e-3}, real_t{100e-3}, real_t{160e-3});
    // shift starting gap a bit upwards to match the reported (plotted) values
-   const real_t startingGapSize_SI = real_t(120e-3) + real_t(0.25) * diameter_SI;
+   const real_t startingGapSize_SI = real_t{120e-3} + real_t{0.25} * diameter_SI;
 
    WALBERLA_LOG_INFO_ON_ROOT("Setup (in SI units):");
    WALBERLA_LOG_INFO_ON_ROOT(" - fluid type = " << fluidType);
@@ -429,26 +429,26 @@ int main(int argc, char** argv)
    //////////////////////////
 
    const real_t dx_SI = domainSize_SI[0] / real_c(numberOfCellsInHorizontalDirection);
-   const Vector3< uint_t > domainSize(uint_c(floor(domainSize_SI[0] / dx_SI + real_t(0.5))),
-                                      uint_c(floor(domainSize_SI[1] / dx_SI + real_t(0.5))),
-                                      uint_c(floor(domainSize_SI[2] / dx_SI + real_t(0.5))));
+   const Vector3< uint_t > domainSize(uint_c(floor(domainSize_SI[0] / dx_SI + real_t{0.5})),
+                                      uint_c(floor(domainSize_SI[1] / dx_SI + real_t{0.5})),
+                                      uint_c(floor(domainSize_SI[2] / dx_SI + real_t{0.5})));
    const real_t diameter     = diameter_SI / dx_SI;
-   const real_t sphereVolume = math::pi / real_t(6) * diameter * diameter * diameter;
+   const real_t sphereVolume = math::pi / real_t{6} * diameter * diameter * diameter;
 
-   const real_t expectedSettlingVelocity = real_t(0.01);
+   const real_t expectedSettlingVelocity = real_t{0.01};
    const real_t dt_SI                    = expectedSettlingVelocity / expectedSettlingVelocity_SI * dx_SI;
 
    const real_t viscosity      = kinematicViscosityFluid_SI * dt_SI / (dx_SI * dx_SI);
-   const real_t relaxationTime = real_t(1) / lbm::collision_model::omegaFromViscosity(viscosity);
+   const real_t relaxationTime = real_t{1} / lbm::collision_model::omegaFromViscosity(viscosity);
 
    const real_t gravitationalAcceleration = gravitationalAcceleration_SI * dt_SI * dt_SI / dx_SI;
 
-   const real_t densityFluid  = real_t(1);
+   const real_t densityFluid  = real_t{1};
    const real_t densitySphere = densityFluid * densitySphere_SI / densityFluid_SI;
 
-   const real_t dx = real_t(1);
+   const real_t dx = real_t{1};
 
-   const uint_t timesteps = funcTest ? 1 : (shortrun ? uint_t(200) : uint_t(250000));
+   const uint_t timesteps = funcTest ? 1 : (shortrun ? uint_t{200} : uint_t{250000});
 
    WALBERLA_LOG_INFO_ON_ROOT(" - dx_SI = " << dx_SI << ", dt_SI = " << dt_SI);
    WALBERLA_LOG_INFO_ON_ROOT("Setup (in simulation, i.e. lattice, units):");
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   Vector3< uint_t > numberOfBlocksPerDirection(uint_t(1), uint_t(1), uint_t(MPIManager::instance()->numProcesses()));
+   Vector3< uint_t > numberOfBlocksPerDirection(uint_t{1}, uint_t{1}, uint_t(MPIManager::instance()->numProcesses()));
    Vector3< uint_t > cellsPerBlockPerDirection(domainSize[0] / numberOfBlocksPerDirection[0],
                                                domainSize[1] / numberOfBlocksPerDirection[1],
                                                domainSize[2] / numberOfBlocksPerDirection[2]);
@@ -516,9 +516,9 @@ int main(int argc, char** argv)
    createPlaneSetup(ps, ss, blocks->getDomain());
 
    // create sphere and store Uid
-   Vector3< real_t > initialPosition(real_t(0.5) * real_c(domainSize[0]), real_t(0.5) * real_c(domainSize[1]),
-                                     startingGapSize_SI / dx_SI + real_t(0.5) * diameter);
-   auto sphereShape = ss->create< mesa_pd::data::Sphere >(diameter * real_t(0.5));
+   Vector3< real_t > initialPosition(real_t{0.5} * real_c(domainSize[0]), real_t{0.5} * real_c(domainSize[1]),
+                                     startingGapSize_SI / dx_SI + real_t{0.5} * diameter);
+   auto sphereShape = ss->create< mesa_pd::data::Sphere >(diameter * real_t{0.5});
    ss->shapes[sphereShape]->updateMassAndInertia(densitySphere);
 
    walberla::id_t sphereUid = 0;
@@ -526,7 +526,7 @@ int main(int argc, char** argv)
    {
       mesa_pd::data::Particle&& p = *ps->create();
       p.setPosition(initialPosition);
-      p.setInteractionRadius(diameter * real_t(0.5));
+      p.setInteractionRadius(diameter * real_t{0.5});
       p.setOwner(mpi::MPIManager::instance()->rank());
       p.setShapeID(sphereShape);
       sphereUid = p.getUid();
@@ -540,19 +540,19 @@ int main(int argc, char** argv)
    // add PDF field
    const StorageSpecification_T StorageSpec = StorageSpecification_T();
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
-   BlockDataID pdfFieldID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, uint_t(1));
+   BlockDataID pdfFieldID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, uint_t{1});
    BlockDataID pdfFieldCPUGPUID =
       lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
    BlockDataID densityFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t(1));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t{1});
    BlockDataID velFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t(3));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t{3});
 #else
-   BlockDataID densityFieldID   = field::addToStorage< DensityField_T >(blocks, "Density", real_t(0), field::fzyx);
-   BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field CPU", StorageSpec, uint_t(1));
+   BlockDataID densityFieldID   = field::addToStorage< DensityField_T >(blocks, "Density", real_t{0}, field::fzyx);
+   BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field CPU", StorageSpec, uint_t{1});
 #endif
 
-   BlockDataID velFieldID = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t(0), field::fzyx);
+   BlockDataID velFieldID = field::addToStorage< VelocityField_T >(blocks, "Velocity", real_t{0}, field::fzyx);
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -565,23 +565,23 @@ int main(int argc, char** argv)
 
    syncCall();
 
-   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(real_t(1) / real_t(numRPDSubCycles));
-   mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(real_t(1) / real_t(numRPDSubCycles));
-   mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(real_t(1) / real_t(numRPDSubCycles));
+   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(real_t{1} / static_cast< real_t >(numRPDSubCycles));
+   mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(real_t{1} / static_cast< real_t >(numRPDSubCycles));
+   mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(real_t{1} / static_cast< real_t >(numRPDSubCycles));
 
    mesa_pd::kernel::SpringDashpot collisionResponse(1);
    mesa_pd::mpi::ReduceProperty reduceProperty;
 
    // set up coupling functionality
    lbm_mesapd_coupling::RegularParticlesSelector sphereSelector;
-   Vector3< real_t > gravitationalForce(real_t(0), real_t(0),
+   Vector3< real_t > gravitationalForce(real_t{0}, real_t{0},
                                         -(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume);
    lbm_mesapd_coupling::AddForceOnParticlesKernel addGravitationalForce(gravitationalForce);
    lbm_mesapd_coupling::AddHydrodynamicInteractionKernel addHydrodynamicInteraction;
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
    lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(
-      viscosity, [](real_t r) { return real_t(0.0016) * r; });
+      viscosity, [](real_t r) { return real_t{0.0016} * r; });
 
    ///////////////
    // TIME LOOP //
@@ -611,8 +611,8 @@ int main(int argc, char** argv)
    auto boundariesConfig = boundariesCfgFile.getBlock("Boundaries");
    geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, Fluid_Flag);
-   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, real_t(0), real_t(0),
-                                           real_t(0), real_t(1), real_t(1));
+   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, real_t{0}, real_t{0},
+                                           real_t{0}, real_t{1}, real_t{1});
 
    // add particle and volume fraction data structures
    ParticleAndVolumeFractionSoA_T< 1 > particleAndVolumeFractionSoA(
@@ -626,7 +626,7 @@ int main(int argc, char** argv)
 
    pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                          particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                         real_t(1.0), real_t(0), real_t(0), real_t(0));
+                                         real_t{1.0}, real_t{0}, real_t{0}, real_t{0});
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -666,7 +666,7 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldID);
 #endif
    // vtk output
-   if (vtkIOFreq != uint_t(0))
+   if (vtkIOFreq != uint_t{0})
    {
       // spheres
       auto particleVtkOutput = make_shared< mesa_pd::vtk::ParticleVtkOutput >(ps);
@@ -728,7 +728,7 @@ int main(int argc, char** argv)
 
    WcTimingPool timeloopTiming;
 
-   real_t terminationPosition = real_t(0.51) * diameter; // right before sphere touches the bottom wall
+   real_t terminationPosition = real_t{0.51} * diameter; // right before sphere touches the bottom wall
 
    const bool useOpenMP = false;
 
@@ -756,7 +756,7 @@ int main(int argc, char** argv)
                              *accessor);
       }
 
-      for (auto subCycle = uint_t(0); subCycle < numRPDSubCycles; ++subCycle)
+      for (auto subCycle = uint_t{0}; subCycle < numRPDSubCycles; ++subCycle)
       {
          if (useVelocityVerlet)
          {
@@ -848,7 +848,7 @@ int main(int argc, char** argv)
       WALBERLA_LOG_INFO_ON_ROOT("Relative error: " << relErr);
 
       // the relative error has to be below 10%
-      WALBERLA_CHECK_LESS(relErr, real_t(0.1));
+      WALBERLA_CHECK_LESS(relErr, real_t{0.1});
    }
 
    return EXIT_SUCCESS;

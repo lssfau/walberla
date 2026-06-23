@@ -129,7 +129,7 @@ namespace field {
     {
        gl_ = gl;
        timestepCounter_ = uint8_c(0);
-       uint_t const innerGhostLayerSize = ( l == fzyx ) ? gl : uint_t(0);
+       uint_t const innerGhostLayerSize = ( l == fzyx ) ? gl : uint_t{0};
        Field<T,fSize_>::init( _xSize + 2*gl ,
                               _ySize + 2*gl,
                               _zSize + 2*gl, l, alloc,
@@ -472,7 +472,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                                    ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
+                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t{1} ) );
    }
 
    //*******************************************************************************************************************
@@ -487,7 +487,7 @@ namespace field {
 
       return ForwardFieldIterator<T,fSize_>( this,
                                       ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
+                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t{1} ) );
    }
 
 
@@ -504,7 +504,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                                    ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
+                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t{1} ) );
    }
 
 
@@ -553,7 +553,7 @@ namespace field {
 
       return ForwardFieldIterator<T,fSize_>( this,
                                       ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
+                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t{1} ) );
    }
 
 
@@ -570,7 +570,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                             ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                            ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
+                                            ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t{1} ) );
    }
 
    //*******************************************************************************************************************

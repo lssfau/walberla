@@ -96,7 +96,7 @@ namespace gpu
       cell_idx_t yOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
       cell_idx_t zOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
 
-      cell_idx_t xStride() const { return (layout_ == fzyx) ? cell_idx_t(1) :
+      cell_idx_t xStride() const { return (layout_ == fzyx) ? cell_idx_t{1} :
                                                               cell_idx_c(fAllocSize()); }
       cell_idx_t yStride() const { return (layout_ == fzyx) ? cell_idx_t(xAllocSize()) :
                                                               cell_idx_c(fAllocSize() * xAllocSize()); }

@@ -124,22 +124,22 @@ struct ShearRate
    }
 
    /// For incompressible LB you don't have to pass a value for 'rho' since for incompressible LB 'rho' is not used in this function!
-   static inline real_t get( const std::vector< real_t > & nonEquilibrium, const real_t relaxationParam, const real_t rho = real_t(1) )
+   static inline real_t get( const std::vector< real_t > & nonEquilibrium, const real_t relaxationParam, const real_t rho = real_t{1} )
    {
       WALBERLA_ASSERT_EQUAL( nonEquilibrium.size(), Stencil::Size );
 
-      real_t D2 = real_t(0);
+      real_t D2 = real_t{0};
 
       if( LatticeModel_T::compressible )
       {
          for( uint_t alpha = 0; alpha < 3; ++alpha )
             for( uint_t beta = 0; beta < 3; ++beta )
             {
-               real_t curStrain = real_t(0);
+               real_t curStrain = real_t{0};
                for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
                   curStrain += nonEquilibrium[ d.toIdx() ] * stencil::c[alpha][*d] * stencil::c[beta][*d];
 
-               curStrain *= ( -real_t(3) / ( real_t(2) * rho ) ) * relaxationParam;
+               curStrain *= ( -real_t{3} / ( real_t{2} * rho ) ) * relaxationParam;
                D2 += curStrain * curStrain;
             }
       }
@@ -148,16 +148,16 @@ struct ShearRate
          for( uint_t alpha = 0; alpha < 3; ++alpha )
             for( uint_t beta = 0; beta < 3; ++beta )
             {
-               real_t curStrain = real_t(0);
+               real_t curStrain = real_t{0};
                for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
                   curStrain += nonEquilibrium[ d.toIdx() ] * stencil::c[alpha][*d] * stencil::c[beta][*d];
 
-               curStrain *= ( -real_t(3) / real_t(2) ) * relaxationParam;
+               curStrain *= ( -real_t{3} / real_t{2} ) * relaxationParam;
                D2 += curStrain * curStrain;
             }
       }
 
-      return real_t(2) * std::sqrt( D2 );
+      return real_t{2} * std::sqrt( D2 );
    }
 };
 

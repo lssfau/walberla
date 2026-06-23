@@ -51,7 +51,7 @@ inline ThermalExpansion::ThermalExpansion(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
 
-   linearExpansionCoefficient_.resize(numParticleTypes, real_t(0));
+   linearExpansionCoefficient_.resize(numParticleTypes, real_t{0});
 }
 
 
@@ -74,8 +74,8 @@ inline void ThermalExpansion::operator()(const size_t p_idx,
 {
    static_assert(std::is_base_of_v<data::IAccessor, Accessor>, "please provide a valid accessor");
 
-   const auto Tc = ac.getTemperature(p_idx)-real_t(273);
-   ac.setRadiusAtTemperature(p_idx, ac.getRadius273K(p_idx) * (real_t(1) + Tc * getLinearExpansionCoefficient(ac.getType(p_idx))));
+   const auto Tc = ac.getTemperature(p_idx)-real_t{273};
+   ac.setRadiusAtTemperature(p_idx, ac.getRadius273K(p_idx) * (real_t{1} + Tc * getLinearExpansionCoefficient(ac.getType(p_idx))));
    ac.setInteractionRadius(p_idx, ac.getRadiusAtTemperature(p_idx));
 }
 

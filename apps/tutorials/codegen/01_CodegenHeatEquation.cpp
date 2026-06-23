@@ -98,8 +98,8 @@ int main(int argc, char** argv)
    if (processes != xBlocks * yBlocks)
    { WALBERLA_ABORT("The number of processes must be equal to the number of blocks!"); }
 
-   const real_t dx = xSize / real_c(xBlocks * xCells + uint_t(1));
-   const real_t dy = ySize / real_c(yBlocks * yCells + uint_t(1));
+   const real_t dx = xSize / real_c(xBlocks * xCells + uint_t{1});
+   const real_t dy = ySize / real_c(yBlocks * yCells + uint_t{1});
 
    WALBERLA_CHECK_FLOAT_EQUAL(dx, dy);
 

@@ -48,7 +48,7 @@ void BlockForestDomain::refresh()
    localAABBs_.clear();
    neighborSubdomains_.clear();
    neighborProcesses_.clear();
-   unionOfLocalAABBs_ = math::AABB(Vec3(real_t(0)), Vec3(real_t(0)));
+   unionOfLocalAABBs_ = math::AABB(Vec3(real_t{0}), Vec3(real_t{0}));
 
    if (blockForest_->empty()) return;
 

@@ -33,11 +33,11 @@ namespace geometry {
    
    void Cylinder::update()
    {
-      WALBERLA_ASSERT_GREATER( rad_, real_t(0) );
+      WALBERLA_ASSERT_GREATER( rad_, real_t{0} );
 
       dir_ = end_ - start_;
       len_ = dir_.length();
-      WALBERLA_ASSERT_GREATER( len_, real_t(1e-16) );
+      WALBERLA_ASSERT_GREATER( len_, real_t{1e-16} );
       math::normalize(dir_);
 
       boundingBox_.initMinMaxCorner( std::min( start_[0], end_[0] ) - rad_,
@@ -68,7 +68,7 @@ namespace geometry {
       const real_t ps = ( point - cyl.start() ) * cyl.dir();
 
       // before start point or after end point
-      if( ps < real_t(0) || ps > cyl.length() )
+      if( ps < real_t{0} || ps > cyl.length() )
          return false;
 
       // outside radius

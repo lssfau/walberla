@@ -38,7 +38,7 @@ GJK::GJK()
    , supportB_(4)
    , numPoints_(0)
 {
-   d_ = Vec3(real_t(0.0),real_t(0.6),real_t(0.8)); // just start with any vector of length 1
+   d_ = Vec3(real_t{0.0},real_t{0.6},real_t{0.8}); // just start with any vector of length 1
 }
 
 /**
@@ -59,7 +59,7 @@ Vec3 GJK::putSupport(const Support &geom1,
 {
    supportA[index] = geom1.support(dir);
    supportB[index] = geom2.support(-dir);
-   Vec3 supp = supportA[index]- supportB[index] + (real_t(2.0) * dir * margin);
+   Vec3 supp = supportA[index]- supportB[index] + (real_t{2.0} * dir * margin);
    simplex[index] = supp;
    return supp;
 }
@@ -99,7 +99,7 @@ real_t GJK::doGJK(const Support &geom1, const Support &geom2, Vec3& normal, Vec3
    simplex_[0] = support;
    numPoints_ = 1;
 
-   if(support * d_ < real_t(0.0)){
+   if(support * d_ < real_t{0.0}){
       //we went as far as we could in direction 'd' but not passed the origin
       //this means the bodies don't overlap
       ret = calcDistance(normal, contactPoint);
@@ -121,7 +121,7 @@ real_t GJK::doGJK(const Support &geom1, const Support &geom2, Vec3& normal, Vec3
       //std::cerr << "[GJK] Got Support: " << support << std::endl;
 
       //check if "support" is passed the origin in search direction
-      if(support * d_ < real_t(0.0)){
+      if(support * d_ < real_t{0.0}){
          //we went as far as we could in direction 'd' but not passed the origin
          //this means the bodies don't overlap
          //calc distance simplex to Origin
@@ -328,7 +328,7 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
    {
       //the only point in simplex is closest to Origin
       dist = std::sqrt(A.sqrLength());
-      u = real_t(1.0);
+      u = real_t{1.0};
       break;
    }
    case 2:
@@ -345,10 +345,10 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
       //calc barycentric coordinates
       // compare "Real-Time Collision Detection" by Christer Ericson page 129
       //double t = ac*ab;
-      real_t t     = real_t(-1.0) * (A * ab);
+      real_t t     = real_t{-1.0} * (A * ab);
       real_t denom = std::sqrt(ab.sqrLength());
       u = t / denom;
-      v = real_t(1.0) - u;
+      v = real_t{1.0} - u;
       Vec3 closestPoint = u*A + v*B;
       dist = std::sqrt(closestPoint.sqrLength());
       // compare "Real-Time Collision Detection" by Christer Ericson page 130
@@ -374,10 +374,10 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
       real_t vc = nT * (A % B);
       real_t va = nT * (B % C);
       real_t vb = nT * (C % A);
-      real_t denom = real_t(1.0) / (va + vb + vc);
+      real_t denom = real_t{1.0} / (va + vb + vc);
       u = va * denom;
       v = vb * denom;
-      w = real_t(1.0) - u - v;
+      w = real_t{1.0} - u - v;
       //std::cerr << u << " " << v << " " << w << std::endl;
       Vec3 closestPoint = u*A + v*B + w*C;
       dist = std::sqrt(closestPoint.sqrLength());
@@ -399,7 +399,7 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
    }
 
    normal = (pointOnA - pointOnB).getNormalized();
-   contactPoint = (pointOnA + pointOnB) * real_t(0.5);
+   contactPoint = (pointOnA + pointOnB) * real_t{0.5};
 
 
    return dist;
@@ -445,7 +445,7 @@ bool GJK::simplex2(Vec3& d)
    //if the new search direction has zero length
    //than the origin is on the simplex
    if(zeroLengthVector(d)) {
-      d_ = Vec3(real_t(0.0),real_t(0.6),real_t(0.8)); // give the GJK a chance to rerun
+      d_ = Vec3(real_t{0.0},real_t{0.6},real_t{0.8}); // give the GJK a chance to rerun
       return true;
    }
    return false;
@@ -572,7 +572,7 @@ bool GJK::simplex3(Vec3& d)
    //if the new search direction has zero length
    //than the origin is on the boundary of the simplex
    if(zeroLengthVector(d)) {
-      d_ = Vec3(real_t(0.0),real_t(0.6),real_t(0.8)); // give the GJK a chance to rerun
+      d_ = Vec3(real_t{0.0},real_t{0.6},real_t{0.8}); // give the GJK a chance to rerun
       return true;
    }
    return false;

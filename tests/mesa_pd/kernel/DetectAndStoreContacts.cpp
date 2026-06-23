@@ -51,9 +51,9 @@ int main( int argc, char ** argv )
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape accessor(ps, ss);
 
-   auto  smallSphere = ss->create<data::Sphere>( real_t(1.2) );
+   auto  smallSphere = ss->create<data::Sphere>( real_t{1.2} );
 
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(1));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{1});
 
    domain::InfiniteDomain domain;
 
@@ -61,7 +61,7 @@ int main( int argc, char ** argv )
    for (int i = 0; i < 8; i+=2)
    {
       auto p                       = ps->create();
-      p->getPositionRef()          = Vec3(real_t(i), real_t(0), real_t(0));
+      p->getPositionRef()          = Vec3(static_cast< real_t >(i), real_t{0}, real_t{0});
       p->getShapeIDRef()           = smallSphere;
       p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
       p->getTypeRef()              = 0;
@@ -69,7 +69,7 @@ int main( int argc, char ** argv )
 
 
    Vec3 normal(-1,0,0);
-   auto dist= real_t(-0.4);
+   auto dist= real_t{-0.4};
 
    // Create Contact Storage cs
    data::ContactStorage cs(100);
@@ -89,7 +89,7 @@ int main( int argc, char ** argv )
 
    cs.forEachContact(false, kernel::SelectAll(), cs, [&normal, &dist, &contactCount](size_t idx, data::ContactStorage &css){
       WALBERLA_CHECK_FLOAT_EQUAL(css.getNormal(idx), normal);
-      WALBERLA_CHECK_FLOAT_EQUAL(css.getPosition(idx), Vec3(real_t(2*idx+1), real_t(0), real_t(0)));
+      WALBERLA_CHECK_FLOAT_EQUAL(css.getPosition(idx), Vec3(real_t(2*idx+1), real_t{0}, real_t{0}));
       WALBERLA_CHECK_FLOAT_EQUAL(css.getDistance(idx), dist);
       contactCount++;
    }

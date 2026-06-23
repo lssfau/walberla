@@ -77,14 +77,14 @@ void testTwoElements( const real_t r1, const real_t r2 )
    WALBERLA_CHECK_FLOAT_EQUAL(sample.median(), (r1+r2)/real_c(2));
    real_t mu = sample.mean();
    WALBERLA_CHECK_FLOAT_EQUAL(sample.variance(), ((r1-mu)*(r1-mu) + (r2-mu)*(r2-mu)) / real_c(2) );
-   WALBERLA_CHECK_FLOAT_EQUAL(sample.stdDeviation(), std::fabs(r1 - r2) / real_t(2) );
+   WALBERLA_CHECK_FLOAT_EQUAL(sample.stdDeviation(), std::fabs(r1 - r2) / real_t{2} );
    if( sample.mean() > 1e-12 )
       WALBERLA_CHECK_FLOAT_EQUAL(sample.relativeStdDeviation(), sample.stdDeviation() / sample.mean() );
 
    WALBERLA_CHECK_FLOAT_EQUAL( sample.mad(), real_c( std::fabs( r1 - r2 ) / real_c(2) ) );
 
-   if( minR + maxR > real_t(0) )
-      WALBERLA_CHECK_FLOAT_EQUAL( sample.giniCoefficient(), real_t(2) * maxR / (minR + maxR) - real_t(1) );
+   if( minR + maxR > real_t{0} )
+      WALBERLA_CHECK_FLOAT_EQUAL( sample.giniCoefficient(), real_t{2} * maxR / (minR + maxR) - real_t{1} );
 
    WALBERLA_CHECK_FLOAT_EQUAL(sample.cummulativeDistributionFunction( minR - real_c(1)), real_c(0));
    if(r1 > r2 || r1 < r2)

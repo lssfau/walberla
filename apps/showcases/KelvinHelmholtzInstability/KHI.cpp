@@ -454,7 +454,7 @@ namespace walberla {
 
          std::vector<real_t> planeAverageTKEVector(yMax, 0.0_r);
 
-         const auto idxRem  = int_c(domainSize[parameters_->remAxis] / uint_t(2));
+         const auto idxRem  = int_c(domainSize[parameters_->remAxis] / uint_t{2});
 
          Cell point;
          point[parameters_->remAxis] = idxRem;

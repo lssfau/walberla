@@ -112,7 +112,7 @@ struct testBadAlloc{
 
         testing::throws< std::bad_alloc >([&](){
             //  overflow
-            [[maybe_unused]] T* p = a.allocate(size_t(-1));
+            [[maybe_unused]] T* p = a.allocate(static_cast< size_t >(-1));
         });
 
         testing::throws< std::bad_alloc >([&](){

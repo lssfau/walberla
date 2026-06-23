@@ -53,7 +53,7 @@ int main( int argc, char ** argv )
       {
          for( uint_t f = 0; f < 3; ++f)
          {
-            uint_t val = uint_t(&(*cellIt)[f]);
+            uint_t val = reinterpret_cast< uint_t >(&(*cellIt)[f]);
             (*cellIt)[f] = val;
          }
       }

@@ -117,8 +117,8 @@ namespace geometry   {
       WALBERLA_ASSERT_GREATER_EQUAL( y, 0 );
       WALBERLA_ASSERT_LESS( x, cell_idx_c( size_[0] ) );
       WALBERLA_ASSERT_LESS( y, cell_idx_c( size_[1] ) );
-      const uint_t yFlip = size_[1] - uint_c(y) - uint_t(1);
-      return image_[ uint_t(4) * (yFlip * size_[0] + uint_c(x)) + c ];
+      const uint_t yFlip = size_[1] - uint_c(y) - uint_t{1};
+      return image_[ uint_t{4} * (yFlip * size_[0] + uint_c(x)) + c ];
    }
 
    inline const unsigned char & RGBAImage::getElement ( cell_idx_t x, cell_idx_t y, RGBAImage::Channel c ) const {

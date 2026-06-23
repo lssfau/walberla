@@ -42,8 +42,8 @@
 namespace walberla {
 namespace mesa_pd {
 
-const real_t radius = real_t(0.7);
-const real_t spacing = real_t(1.0);
+const real_t radius = real_t{0.7};
+const real_t spacing = real_t{1.0};
 
 class ParticleAccessorWithShape : public data::ParticleAccessor
 {

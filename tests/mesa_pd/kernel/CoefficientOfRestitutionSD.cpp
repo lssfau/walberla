@@ -57,13 +57,13 @@ int main( int argc, char** argv )
    mpi::MPIManager::instance()->useWorldComm();
 
    // parameters
-   real_t radius = real_t(5);
-   real_t dt = real_t(0.1);
-   real_t restitutionCoeff = real_t(0.83);
-   real_t densitySphere = real_t(1.5);
-   real_t collisionTime = real_t(10);
+   real_t radius = real_t{5};
+   real_t dt = real_t{0.1};
+   real_t restitutionCoeff = real_t{0.83};
+   real_t densitySphere = real_t{1.5};
+   real_t collisionTime = real_t{10};
    bool useVelocityVerlet = false;
-   real_t uIn = real_t(0.1);
+   real_t uIn = real_t{0.1};
 
    for( int i = 1; i < argc; ++i )
    {
@@ -86,11 +86,11 @@ int main( int argc, char** argv )
    auto sphereShape = ss->create<data::Sphere>( radius );
    ss->shapes[sphereShape]->updateMassAndInertia(densitySphere);
 
-   const real_t particleMass = real_t(1) / ss->shapes[sphereShape]->getInvMass();
+   const real_t particleMass = real_t{1} / ss->shapes[sphereShape]->getInvMass();
    const real_t Mij = particleMass; // Mij = M for sphere-wall collision
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t stiffnessN = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  );
-   const real_t dampingN = - real_t(2) * std::sqrt( Mij * stiffnessN ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) );
+   const real_t stiffnessN = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t{1} - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  );
+   const real_t dampingN = - real_t{2} * std::sqrt( Mij * stiffnessN ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) );
 
    WALBERLA_LOG_INFO("dt = " << dt << ", Tc = " << collisionTime << ", coefficient of restitution = " << restitutionCoeff);
    WALBERLA_LOG_INFO(" -> mass " << particleMass << ", collision duration = " << collisionTime / dt << ", stiffness = " << stiffnessN << ", damping = " << dampingN);
@@ -126,7 +126,7 @@ int main( int argc, char** argv )
    dem.setDampingN(0,0,dampingN);
 
    uint_t steps = 0;
-   real_t maxPenetration = real_t(0);
+   real_t maxPenetration = real_t{0};
    do
    {
       if(useVelocityVerlet) vvPreForce(0,*accessor);
@@ -157,11 +157,11 @@ int main( int argc, char** argv )
 
    if( useVelocityVerlet )
    {
-      WALBERLA_CHECK_LESS(relativeError, real_t(0.01), "Error in simulated coefficient of restitution too large: " << simulatedCoefficientOfRestitution << " vs ref " << restitutionCoeff);
+      WALBERLA_CHECK_LESS(relativeError, real_t{0.01}, "Error in simulated coefficient of restitution too large: " << simulatedCoefficientOfRestitution << " vs ref " << restitutionCoeff);
    }
    else
    {
-      WALBERLA_CHECK_LESS(relativeError, real_t(0.03), "Error in simulated coefficient of restitution too large: " << simulatedCoefficientOfRestitution << " vs ref " << restitutionCoeff);
+      WALBERLA_CHECK_LESS(relativeError, real_t{0.03}, "Error in simulated coefficient of restitution too large: " << simulatedCoefficientOfRestitution << " vs ref " << restitutionCoeff);
    }
 
 

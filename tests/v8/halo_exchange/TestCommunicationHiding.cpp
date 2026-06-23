@@ -49,7 +49,7 @@ void TestCommunicationHiding()
 {
    Vector3< uint_t > cellsPerBlock = Vector3< uint_t >(10, 10, 10);
 
-   const uint_t numProcs = uint_t(mpi::MPIManager::instance()->numProcesses());
+   const uint_t numProcs = uint_c(mpi::MPIManager::instance()->numProcesses());
    std::vector< uint_t > blocksVec = math::getFactors( numProcs, 3 );
    Vector3< uint_t > numBlocks     = Vector3< uint_t >(blocksVec[0], blocksVec[1], blocksVec[2]);
 

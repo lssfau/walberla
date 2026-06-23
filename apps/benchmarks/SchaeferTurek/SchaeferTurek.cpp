@@ -164,7 +164,7 @@ struct Types
 using flag_t = walberla::uint16_t;
 using FlagField_T = FlagField<flag_t>;
 
-const uint_t FieldGhostLayers  = uint_t(4);
+const uint_t FieldGhostLayers  = uint_t{4};
 
 ///////////
 // FLAGS //
@@ -324,7 +324,7 @@ public:
    bool contains( const Vector3< real_t > & point ) const;
    bool contains( const AABB & aabb ) const;
    
-   bool intersects( const AABB & aabb, const real_t bufferDistance = real_t(0) ) const;
+   bool intersects( const AABB & aabb, const real_t bufferDistance = real_t{0} ) const;
    
    real_t delta( const Vector3< real_t > & fluid, const Vector3< real_t > & boundary ) const;
 
@@ -346,11 +346,11 @@ bool Cylinder::contains( const Vector3< real_t > & point ) const
       const real_t xd = point[0] - px;
       const real_t yd = point[1] - py;
       const real_t d = xd * xd + yd * yd;
-      return point[2] > real_t(0) && point[2] < H && d <= ( r * r );
+      return point[2] > real_t{0} && point[2] < H && d <= ( r * r );
    }
    else
    {
-      const AABB cylinder( px - r, py - r, real_t(0), px + r, py + r, H );
+      const AABB cylinder( px - r, py - r, real_t{0}, px + r, py + r, H );
       return cylinder.contains( point );
    }
 }
@@ -385,7 +385,7 @@ bool Cylinder::intersects( const AABB & aabb, const real_t bufferDistance ) cons
    
    if( setup_.circularCrossSection )
    {
-      Vector3< real_t > p( px, py, real_t(0) );
+      Vector3< real_t > p( px, py, real_t{0} );
 
       if( p[0] < aabb.xMin() ) p[0] = aabb.xMin();
       else if( p[0] > aabb.xMax() ) p[0] = aabb.xMax();
@@ -400,7 +400,7 @@ bool Cylinder::intersects( const AABB & aabb, const real_t bufferDistance ) cons
    }
    else
    {
-      const AABB cylinder( px - r, py - r, real_t(0), px + r, py + r, setup_.H );
+      const AABB cylinder( px - r, py - r, real_t{0}, px + r, py + r, setup_.H );
       return cylinder.intersects( aabb, bufferDistance );
    }
 }
@@ -418,29 +418,29 @@ real_t Cylinder::delta( const Vector3< real_t > & fluid, const Vector3< real_t >
    {
       // http://devmag.org.za/2009/04/17/basic-collision-detection-in-2d-part-2/
       
-      const Vector3< real_t > circle( px, py, real_t(0) );
+      const Vector3< real_t > circle( px, py, real_t{0} );
       
       const Vector3< real_t > f = fluid - circle;
       const Vector3< real_t > d = ( boundary - circle ) - f;
       
       const real_t a = d[0] * d[0] + d[1] * d[1];
-      const real_t b = real_t(2) * ( d[0] * f[0] + d[1] * f[1] );
+      const real_t b = real_t{2} * ( d[0] * f[0] + d[1] * f[1] );
       const real_t c = f[0] * f[0] + f[1] * f[1] - r * r;
       
-      const real_t bb4ac = b * b - ( real_t(4) * a * c );
-      WALBERLA_CHECK_GREATER_EQUAL( bb4ac, real_t(0) );
+      const real_t bb4ac = b * b - ( real_t{4} * a * c );
+      WALBERLA_CHECK_GREATER_EQUAL( bb4ac, real_t{0} );
       
       const real_t sqrtbb4ac = std::sqrt( bb4ac );
       
-      const real_t alpha = std::min( ( -b + sqrtbb4ac ) / ( real_t(2) * a ), ( -b - sqrtbb4ac ) / ( real_t(2) * a ) );
+      const real_t alpha = std::min( ( -b + sqrtbb4ac ) / ( real_t{2} * a ), ( -b - sqrtbb4ac ) / ( real_t{2} * a ) );
       
-      WALBERLA_CHECK_GREATER_EQUAL( alpha, real_t(0) );
-      WALBERLA_CHECK_LESS_EQUAL( alpha, real_t(1) );
+      WALBERLA_CHECK_GREATER_EQUAL( alpha, real_t{0} );
+      WALBERLA_CHECK_LESS_EQUAL( alpha, real_t{1} );
       
       return alpha;
    }
    
-   const AABB cylinder( px - r, py - r, real_t(0), px + r, py + r, setup_.H );
+   const AABB cylinder( px - r, py - r, real_t{0}, px + r, py + r, setup_.H );
    
    if( fluid[0] <= cylinder.xMin() )
    {
@@ -547,14 +547,14 @@ private:
 // check refinement at inflow/outflow and make sure that ALL blocks at these two boundaries are at the same level!
 void setInflowOutflowToSameLevel( SetupBlockForest & forest, const Setup & setup )
 {
-   uint_t maxInflowLevel( uint_t(0) );
-   uint_t maxOutflowLevel( uint_t(0) );
+   uint_t maxInflowLevel( uint_t{0} );
+   uint_t maxOutflowLevel( uint_t{0} );
 
    for( auto block = forest.begin(); block != forest.end(); ++block )
    {
       if( forest.atDomainXMinBorder(*block) )
       {
-         maxInflowLevel = std::max( maxInflowLevel, block->getLevel() + ( block->isMarked() ? uint_t(1) : uint_t(0) ) );
+         maxInflowLevel = std::max( maxInflowLevel, block->getLevel() + ( block->isMarked() ? uint_t{1} : uint_t{0} ) );
       }
       if( setup.strictlyObeyL )
       {
@@ -564,13 +564,13 @@ void setInflowOutflowToSameLevel( SetupBlockForest & forest, const Setup & setup
          p[0] = setup.L;
          if( aabb.contains(p) )
          {
-            maxOutflowLevel = std::max( maxOutflowLevel, block->getLevel() + ( block->isMarked() ? uint_t(1) : uint_t(0) ) );
+            maxOutflowLevel = std::max( maxOutflowLevel, block->getLevel() + ( block->isMarked() ? uint_t{1} : uint_t{0} ) );
          }
       }
       else
       {
          if( forest.atDomainXMaxBorder(*block) )
-            maxOutflowLevel = std::max( maxOutflowLevel, block->getLevel() + ( block->isMarked() ? uint_t(1) : uint_t(0) ) );
+            maxOutflowLevel = std::max( maxOutflowLevel, block->getLevel() + ( block->isMarked() ? uint_t{1} : uint_t{0} ) );
       }
    }
 
@@ -624,13 +624,13 @@ static void workloadMemoryAndSUIDAssignment( SetupBlockForest & forest, const me
       {
          if( forest.atDomainZMinBorder(*block) )
          {
-            block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
+            block->setWorkload( numeric_cast< workload_t >( uint_t{1} << block->getLevel() ) );
             block->setMemory( memoryPerBlock );
          }
          else
          {
-            block->setWorkload( workload_t(0) );
-            block->setMemory( memory_t(0) );
+            block->setWorkload( workload_t{0} );
+            block->setMemory( memory_t{0} );
             block->addState( Empty );
          }
       }
@@ -639,7 +639,7 @@ static void workloadMemoryAndSUIDAssignment( SetupBlockForest & forest, const me
    {
       for(auto & block : forest)
       {
-         block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+         block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
          block.setMemory( memoryPerBlock );
       }
    }
@@ -655,9 +655,9 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
 {
    shared_ptr< SetupBlockForest > forest = make_shared< SetupBlockForest >();
 
-   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( ( setup.pseudo2D ? uint_t(1) : setup.yzCells ) + uint_t(2) * FieldGhostLayers ) *
-                                                             ( setup.yzCells + uint_t(2) * FieldGhostLayers ) *
-                                                             ( setup.xCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
+   const memory_t memoryPerBlock = numeric_cast< memory_t >( ( ( setup.pseudo2D ? uint_t{1} : setup.yzCells ) + uint_t{2} * FieldGhostLayers ) *
+                                                             ( setup.yzCells + uint_t{2} * FieldGhostLayers ) *
+                                                             ( setup.xCells + uint_t{2} * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
    forest->addWorkloadMemorySUIDAssignmentFunction([memoryPerBlock, setup_cref = std::cref(setup)](SetupBlockForest & sbf) {
@@ -665,14 +665,14 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0),
                        setup.H * ( real_c(setup.xBlocks) * real_c(setup.xCells) ) / ( real_c(setup.yzBlocks) * real_c(setup.yzCells) ), setup.H, setup.H ),
-                 setup.xBlocks, setup.yzBlocks, setup.pseudo2D ? uint_t(1) : setup.yzBlocks, false, false, false );
+                 setup.xBlocks, setup.yzBlocks, setup.pseudo2D ? uint_t{1} : setup.yzBlocks, false, false, false );
 
    MPIManager::instance()->useWorldComm();
 
    if( blocksPerProcess != 0 )
       numberOfProcesses = uint_c( std::ceil( real_c( forest->getNumberOfBlocks() ) / real_c( blocksPerProcess ) ) );
 
-   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalanceWeighted(true), numberOfProcesses, real_t(0), processMemoryLimit, true, false );
+   forest->balanceLoad( blockforest::StaticLevelwiseCurveBalanceWeighted(true), numberOfProcesses, real_t{0}, processMemoryLimit, true, false );
 
    if( outputSetupForest ) 
    {
@@ -702,7 +702,7 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = std::make_shared< StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells );
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t{1} : setup.yzCells );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -711,13 +711,13 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure ..." );
 
    shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup,
-                                                                    uint_c( MPIManager::instance()->numProcesses() ), uint_t(0),
+                                                                    uint_c( MPIManager::instance()->numProcesses() ), uint_t{0},
                                                                     memoryPerCell, processMemoryLimit,
                                                                     configBlock.getParameter< bool >( "outputSetupForest", false ) );
 
    auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), *sforest, false );
 
-   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells );
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t{1} : setup.yzCells );
    sbf->createCellBoundingBoxes();
    
    return sbf;
@@ -742,22 +742,22 @@ public:
    SinusInflowVelocity( const real_t velocity, const real_t raisingTime, const real_t sinPeriod, const real_t H ) :
       raisingTime_( raisingTime ), sinPeriod_( sinPeriod ), H_( H )
    {
-      uTerm_ = Pseudo2D ? ( real_t(4) * velocity ) : ( real_t(16) * velocity );
-      HTerm_ = Pseudo2D ? ( real_t(1) / ( H * H ) ) : ( real_t(1) / ( H * H * H * H ) );
+      uTerm_ = Pseudo2D ? ( real_t{4} * velocity ) : ( real_t{16} * velocity );
+      HTerm_ = Pseudo2D ? ( real_t{1} / ( H * H ) ) : ( real_t{1} / ( H * H * H * H ) );
       tConstTerm_ = uTerm_ * HTerm_;
    }
 
    void operator()( const real_t t )
    {
-      tConstTerm_ = ( sinPeriod_ > real_t(0) ) ? ( std::abs( std::sin( math::pi * t / sinPeriod_ ) ) ) : real_t(1);
+      tConstTerm_ = ( sinPeriod_ > real_t{0} ) ? ( std::abs( std::sin( math::pi * t / sinPeriod_ ) ) ) : real_t{1};
       tConstTerm_ *= uTerm_ * HTerm_;
-      tConstTerm_ *= ( raisingTime_ > real_t(0) ) ? std::min( t / raisingTime_, real_t(1) ) : real_t(1);
+      tConstTerm_ *= ( raisingTime_ > real_t{0} ) ? std::min( t / raisingTime_, real_t{1} ) : real_t{1};
    }
 
    Vector3< real_t > operator()( const Vector3< real_t > & x, const real_t )
    {
       return Vector3< real_t >( Pseudo2D ? ( tConstTerm_ * x[1] * ( H_ - x[1] ) ) :
-                                           ( tConstTerm_ * x[1] * x[2] * ( H_ - x[1] ) * ( H_ - x[2] ) ), real_t(0), real_t(0) );
+                                           ( tConstTerm_ * x[1] * x[2] * ( H_ - x[1] ) * ( H_ - x[2] ) ), real_t{0}, real_t{0} );
    }
 
 private:
@@ -853,7 +853,7 @@ MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
                                 DynamicUBB_T( "velocity bounce back", UBB_Flag, pdfField, timeTracker_, blocks->getLevel(*block), velocity, block->getAABB() ),
                                   Outlet21_T( "outlet (2/1)", Outlet21_Flag, pdfField, flagField, fluid ),
                                   Outlet43_T( "outlet (4/3)", Outlet43_Flag, pdfField, flagField, fluid ),
-                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag, pdfField, real_t(1) ) );
+                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag, pdfField, real_t{1} ) );
 }
 
 
@@ -946,12 +946,12 @@ void BoundarySetter< LatticeModel_T >::operator()()
       const uint_t level = blocks->getLevel(*block);
 
       CellInterval domainBB = blocks->getDomainCellBB( level );
-      domainBB.expand( cell_idx_t(1) );
+      domainBB.expand( cell_idx_t{1} );
       if( setup_.strictlyObeyL )
       {
          CellInterval tempBB;
-         blocks->getCellBBFromAABB( tempBB, AABB( real_t(0), real_t(0), real_t(0), setup_.L, setup_.H, setup_.H ), uint_t(0) );
-         domainBB.xMax() = std::min( ( tempBB.xMax() + cell_idx_t(1) ) << level, domainBB.xMax() );
+         blocks->getCellBBFromAABB( tempBB, AABB( real_t{0}, real_t{0}, real_t{0}, setup_.L, setup_.H, setup_.H ), uint_t{0} );
+         domainBB.xMax() = std::min( ( tempBB.xMax() + cell_idx_t{1} ) << level, domainBB.xMax() );
       }
       blocks->transformGlobalToBlockLocalCellInterval( domainBB, *block );
 
@@ -1066,8 +1066,8 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
                                       std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
                                       const blockforest::BlockForest & forest, const Setup & setup )
 {
-   uint_t maxInflowLevel( uint_t(0) );
-   uint_t maxOutflowLevel( uint_t(0) );
+   uint_t maxInflowLevel( uint_t{0} );
+   uint_t maxOutflowLevel( uint_t{0} );
 
    // In addition to keeping in- and outflow blocks at the same level, this callback also
    // prevents these blocks from coarsening.
@@ -1150,7 +1150,7 @@ void pseudo2DTargetLevelCorrection( std::vector< std::pair< const Block *, uint_
    for(auto & minTargetLevel : minTargetLevels)
    {
       if( ! forest.atDomainZMinBorder( *(minTargetLevel.first ) ) )
-         minTargetLevel.second = uint_t(0);
+         minTargetLevel.second = uint_t{0};
    }
 }
 
@@ -1184,9 +1184,9 @@ public:
       for(auto & it : blockData)
       {
          if( it.first->getState().contains( state_ ) )
-            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(0) : uint8_t(1) );
+            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t{0} : uint8_t{1} );
          else
-            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t(1) : uint8_t(0) );
+            it.second = Pseudo2DPhantomWeight( markEmptyBlocks_ ? uint8_t{1} : uint8_t{0} );
       }
    }
 
@@ -1307,9 +1307,9 @@ public:
       logToStream_( logToStream ), logToFile_( logToFile ), filename_( filename ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {
-      forceSample_.resize( uint_t(2) );
-      coefficients_.resize( uint_t(4) );
-      coefficientExtremas_.resize( uint_t(4) );
+      forceSample_.resize( uint_t{2} );
+      coefficients_.resize( uint_t{4} );
+      coefficientExtremas_.resize( uint_t{4} );
 
       WALBERLA_ROOT_SECTION()
       {
@@ -1398,20 +1398,20 @@ protected:
 template< typename LatticeModel_T >
 void Evaluation< LatticeModel_T >::operator()()
 {
-   if( checkFrequency_ == uint_t(0) )
+   if( checkFrequency_ == uint_t{0} )
       return;
 
    ++executionCounter_;
    if( ( executionCounter_ - uint_c(1) ) % checkFrequency_ != 0 )
       return;
 
-   real_t cDRealArea( real_t(0) );
-   real_t cLRealArea( real_t(0) );
-   real_t cDDiscreteArea( real_t(0) );
-   real_t cLDiscreteArea( real_t(0) );
+   real_t cDRealArea( real_t{0} );
+   real_t cLRealArea( real_t{0} );
+   real_t cDDiscreteArea( real_t{0} );
+   real_t cLDiscreteArea( real_t{0} );
    
-   real_t pressureDifference_L( real_t(0) );
-   real_t pressureDifference( real_t(0) );
+   real_t pressureDifference_L( real_t{0} );
+   real_t pressureDifference( real_t{0} );
       
    evaluate( cDRealArea, cLRealArea, cDDiscreteArea, cLDiscreteArea, pressureDifference_L, pressureDifference );
 
@@ -1420,7 +1420,7 @@ void Evaluation< LatticeModel_T >::operator()()
 
    // Strouhal number (needs vortex shedding frequency)
 
-   real_t vortexVelocity( real_t(0) );
+   real_t vortexVelocity( real_t{0} );
 
    if( setup_.evaluateStrouhal )
    {
@@ -1445,11 +1445,11 @@ void Evaluation< LatticeModel_T >::operator()()
       
       if( coefficients_[0].size() > setup_.nbrOfEvaluationPointsForCoefficientExtremas )
       {
-         for( uint_t i = uint_t(0); i < uint_t(4); ++i )
+         for( uint_t i = uint_t{0}; i < uint_t{4}; ++i )
             coefficients_[i].pop_front();
       }
       
-      for( uint_t i = uint_t(0); i < uint_t(4); ++i )
+      for( uint_t i = uint_t{0}; i < uint_t{4}; ++i )
       {
          coefficientExtremas_[i] = std::make_pair( *(coefficients_[i].begin()), *(coefficients_[i].begin()) );
          for( auto v = coefficients_[i].begin(); v != coefficients_[i].end(); ++v )
@@ -1495,13 +1495,13 @@ void Evaluation< LatticeModel_T >::operator()()
          // If we know the time between a local minimum and a local maximum, we can calculate the frequency.
          // -> "Smooth noise-robust differentiators" (http://www.holoborodko.com/pavel/numerical-methods/numerical-derivative/smooth-low-noise-differentiators/)
 
-         if( strouhalVelocities_.size() < uint_t(11) )
+         if( strouhalVelocities_.size() < uint_t{11} )
          {
             strouhalVelocities_.push_back( vortexVelocity );
          }
          else
          {
-            for( uint_t i = uint_t(0); i < uint_t(10); ++i )
+            for( uint_t i = uint_t{0}; i < uint_t{10}; ++i )
                strouhalVelocities_[i] = strouhalVelocities_[i+1];
             strouhalVelocities_[10] = vortexVelocity;
             
@@ -1513,11 +1513,11 @@ void Evaluation< LatticeModel_T >::operator()()
             
             const real_t diff = ( real_c(322) * f1 + real_c(256) * f2 + real_c(39) * f3 - real_c(32) * f4 - real_c(11) * f5 ) / real_c(1536);
             
-            if( ( diff > real_t(0) ) != strouhalRising_ )
+            if( ( diff > real_t{0} ) != strouhalRising_ )
             {
-               strouhalRising_ = ( diff > real_t(0) );
+               strouhalRising_ = ( diff > real_t{0} );
                
-               if( strouhalTimeStep_.size() < uint_t(3) )
+               if( strouhalTimeStep_.size() < uint_t{3} )
                {
                   strouhalTimeStep_.push_back( executionCounter_ );
                }
@@ -1530,16 +1530,16 @@ void Evaluation< LatticeModel_T >::operator()()
             }
          }
 
-         if( strouhalTimeStep_.size() == uint_t(3) )
+         if( strouhalTimeStep_.size() == uint_t{3} )
          {
             const real_t uMean = Is2D< LatticeModel_T >::value ? ( real_c(2) * setup_.inflowVelocity_L / real_c(3) ) :
                                                                  ( real_c(4) * setup_.inflowVelocity_L / real_c(9) );
-            const real_t D = real_t(2) * setup_.cylinderRadius / setup_.dx;
+            const real_t D = real_t{2} * setup_.cylinderRadius / setup_.dx;
       
             strouhalNumberRealD_     =        D   / ( uMean * real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) );
             strouhalNumberDiscreteD_ = real_c(D_) / ( uMean * real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) );
             
-            strouhalEvaluationExecutionCount_ = executionCounter_ - uint_t(1);
+            strouhalEvaluationExecutionCount_ = executionCounter_ - uint_t{1};
 
             if( logToStream_ )
             {            
@@ -1547,8 +1547,8 @@ void Evaluation< LatticeModel_T >::operator()()
                                             "\n   D/U (in lattice units): " << ( D  / uMean ) << " (\"real\" D), " << ( real_c(D_)  / uMean ) << " (discrete D)"
                                             "\n   T: " << ( real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) * setup_.dt ) << " s ("
                                                        << real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) << ")"
-                                            "\n   f: " << ( real_t(1) / ( real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) * setup_.dt ) ) << " Hz ("
-                                                       << ( real_t(1) / real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) ) << ")"
+                                            "\n   f: " << ( real_t{1} / ( real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) * setup_.dt ) ) << " Hz ("
+                                                       << ( real_t{1} / real_c( strouhalTimeStep_[2] - strouhalTimeStep_[0] ) ) << ")"
                                             "\n   St (\"real\" D):   " << strouhalNumberRealD_ <<
                                             "\n   St (discrete D): " << strouhalNumberDiscreteD_ );
             }
@@ -1558,7 +1558,7 @@ void Evaluation< LatticeModel_T >::operator()()
       if( logToFile_ )
       {
          std::ofstream file( filename_.c_str(), std::ios_base::app );
-         file << executionCounter_ - uint_t(1) << " " << force_[0] << " " << force_[1] << " " << force_[2] <<
+         file << executionCounter_ - uint_t{1} << " " << force_[0] << " " << force_[1] << " " << force_[2] <<
                                                   " " << cDRealArea << " " << cLRealArea << " " << cDDiscreteArea << " " << cLDiscreteArea <<
                                                   " " << pressureDifference_L << " " << pressureDifference <<
                                                   " " << vortexVelocity << " " << strouhalNumberRealD_ << " " << strouhalNumberDiscreteD_ << std::endl;
@@ -1576,15 +1576,15 @@ void Evaluation< LatticeModel_T >::operator()( const uint_t level, const uint_t 
 {
    // Supposed to be used as a post collide function on every level
 
-   if( checkFrequency_ == uint_t(0) || executionCounter_ % checkFrequency_ != 0 || level > uint_t(0) || executionCount != uint_t(0) )
+   if( checkFrequency_ == uint_t{0} || executionCounter_ % checkFrequency_ != 0 || level > uint_t{0} || executionCount != uint_t{0} )
       return;
 
    if( !initialized_ )
       refresh();
 
-   force_[0] = real_t(0);
-   force_[1] = real_t(0);
-   force_[2] = real_t(0);
+   force_[0] = real_t{0};
+   force_[1] = real_t{0};
+   force_[2] = real_t{0};
 
    forceSample_[0].clear();
    forceSample_[1].clear();
@@ -1599,7 +1599,7 @@ void Evaluation< LatticeModel_T >::operator()( IBlock * block, const uint_t leve
 {
    // Supposed to be used as a post boundary handling function on every level
 
-   if( checkFrequency_ == uint_t(0) || executionCounter_ % checkFrequency_ != 0 || math::uintPow2(level) != ( executionCount + uint_t(1) ) )
+   if( checkFrequency_ == uint_t{0} || executionCounter_ % checkFrequency_ != 0 || math::uintPow2(level) != ( executionCount + uint_t{1} ) )
       return;
 
    if( directions_.find( block ) != directions_.end() )
@@ -1612,7 +1612,7 @@ void Evaluation< LatticeModel_T >::operator()( IBlock * block, const uint_t leve
          const Cell cell( pair.first );
          const stencil::Direction direction( pair.second );
 
-         const real_t scaleFactor = real_t(1) / real_c( uint_t(1) << ( (Is2D< LatticeModel_T >::value ? uint_t(1) : uint_t(2)) * level ) );
+         const real_t scaleFactor = real_t{1} / real_c( uint_t{1} << ( (Is2D< LatticeModel_T >::value ? uint_t{1} : uint_t{2}) * level ) );
 
          const real_t boundaryValue = pdfField->get( cell.x() + stencil::cx[direction],
                                                      cell.y() + stencil::cy[direction],
@@ -1640,13 +1640,13 @@ void Evaluation< LatticeModel_T >::operator()( IBlock * block, const uint_t leve
 template< typename LatticeModel_T >
 void Evaluation< LatticeModel_T >::prepareResultsForSQL()
 {
-   real_t cDRealArea( real_t(0) );
-   real_t cLRealArea( real_t(0) );
-   real_t cDDiscreteArea( real_t(0) );
-   real_t cLDiscreteArea( real_t(0) );
+   real_t cDRealArea( real_t{0} );
+   real_t cLRealArea( real_t{0} );
+   real_t cDDiscreteArea( real_t{0} );
+   real_t cLDiscreteArea( real_t{0} );
    
-   real_t pressureDifference_L( real_t(0) );
-   real_t pressureDifference( real_t(0) );
+   real_t pressureDifference_L( real_t{0} );
+   real_t pressureDifference( real_t{0} );
       
    evaluate( cDRealArea, cLRealArea, cDDiscreteArea, cLDiscreteArea, pressureDifference_L, pressureDifference );
 
@@ -1728,13 +1728,13 @@ void Evaluation< LatticeModel_T >::getResultsForSQLOnRoot( std::map< std::string
 template< typename LatticeModel_T >
 void Evaluation< LatticeModel_T >::check( const shared_ptr< Config > & config )
 {
-   real_t cDRealArea( real_t(0) );
-   real_t cLRealArea( real_t(0) );
-   real_t cDDiscreteArea( real_t(0) );
-   real_t cLDiscreteArea( real_t(0) );
+   real_t cDRealArea( real_t{0} );
+   real_t cLRealArea( real_t{0} );
+   real_t cDDiscreteArea( real_t{0} );
+   real_t cLDiscreteArea( real_t{0} );
    
-   real_t pressureDifference_L( real_t(0) );
-   real_t pressureDifference( real_t(0) );
+   real_t pressureDifference_L( real_t{0} );
+   real_t pressureDifference( real_t{0} );
       
    evaluate( cDRealArea, cLRealArea, cDDiscreteArea, cLDiscreteArea, pressureDifference_L, pressureDifference );
 
@@ -1802,7 +1802,7 @@ void Evaluation< LatticeModel_T >::refresh()
 
    if( Is2D< LatticeModel_T >::value )
    {
-      const real_t z = blocks->getDomain().zMin() + real_c(0.5) * blocks->dz( blocks->getNumberOfLevels() - uint_t(1) );
+      const real_t z = blocks->getDomain().zMin() + real_c(0.5) * blocks->dz( blocks->getNumberOfLevels() - uint_t{1} );
       setup_.pAlpha[2] = z;
       setup_.pOmega[2] = z;
       setup_.pStrouhal[2] = z;
@@ -1811,10 +1811,10 @@ void Evaluation< LatticeModel_T >::refresh()
    // Calculate obstacle surface areas required for evaluating drag and lift force
 
    real_t yMin( setup_.H );
-   real_t yMax( real_t(0) );
+   real_t yMax( real_t{0} );
    
-   real_t AD( real_t(0) );
-   real_t AL( real_t(0) );
+   real_t AD( real_t{0} );
+   real_t AL( real_t{0} );
    
    directions_.clear();
 
@@ -1826,7 +1826,7 @@ void Evaluation< LatticeModel_T >::refresh()
       auto obstacle = flagField->getFlag( obstacle_ );
 
       const uint_t level = blocks->getLevel(*block);
-      const real_t area = real_t(1) / real_c( uint_t(1) << ( (Is2D< LatticeModel_T >::value ? uint_t(1) : uint_t(2)) * level ) );
+      const real_t area = real_t{1} / real_c( uint_t{1} << ( (Is2D< LatticeModel_T >::value ? uint_t{1} : uint_t{2}) * level ) );
 
       auto xyzSize = flagField->xyzSize();
 
@@ -1888,10 +1888,10 @@ void Evaluation< LatticeModel_T >::refresh()
 
    WALBERLA_ROOT_SECTION()
    {
-      const Cell yMinCell = blocks->getCell( real_t(0), yMin, real_t(0) );
-      const Cell yMaxCell = blocks->getCell( real_t(0), yMax, real_t(0) );
+      const Cell yMinCell = blocks->getCell( real_t{0}, yMin, real_t{0} );
+      const Cell yMaxCell = blocks->getCell( real_t{0}, yMax, real_t{0} );
       
-      D_ = uint_c( yMaxCell[1] - yMinCell[1] ) + uint_t(1);
+      D_ = uint_c( yMaxCell[1] - yMinCell[1] ) + uint_t{1};
       
       AD_ = AD;
       AL_ = AL;
@@ -1918,7 +1918,7 @@ void Evaluation< LatticeModel_T >::refresh()
          {
             const auto aabb = blocks->getBlockLocalCellAABB( *block, cell );
             const Vector3< real_t > pAlpha = setup_.pAlpha;
-            setup_.pAlpha[0] = aabb.xMin() - aabb.xSize() / real_t(2);
+            setup_.pAlpha[0] = aabb.xMin() - aabb.xSize() / real_t{2};
             WALBERLA_LOG_WARNING( "Cell for evaluating pressure difference at point alpha " << pAlpha << " is not a fluid cell!"
                                   "\nChanging point alpha to " << setup_.pAlpha << " ..." );
          }
@@ -1942,7 +1942,7 @@ void Evaluation< LatticeModel_T >::refresh()
          {
             const auto aabb = blocks->getBlockLocalCellAABB( *block, cell );
             const Vector3< real_t > pOmega = setup_.pOmega;
-            setup_.pOmega[0] = aabb.xMax() + aabb.xSize() / real_t(2);
+            setup_.pOmega[0] = aabb.xMax() + aabb.xSize() / real_t{2};
             WALBERLA_LOG_WARNING( "Cell for evaluating pressure difference at point omega " << pOmega << " is not a fluid cell!"
                                   "\nChanging point omega to " << setup_.pOmega << " ..." );
          }
@@ -2063,8 +2063,8 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
 
    // pressure difference
 
-   real_t pAlpha( real_t(0) );
-   real_t pOmega( real_t(0) );
+   real_t pAlpha( real_t{0} );
+   real_t pOmega( real_t{0} );
 
    auto blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( blocks );
@@ -2098,14 +2098,14 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
       const real_t uMean = Is2D< LatticeModel_T >::value ? ( real_c(2) * setup_.inflowVelocity_L / real_c(3) ) :
                                                            ( real_c(4) * setup_.inflowVelocity_L / real_c(9) );
 
-      const real_t D = real_t(2) * setup_.cylinderRadius / setup_.dx;
+      const real_t D = real_t{2} * setup_.cylinderRadius / setup_.dx;
       const real_t H = setup_.H / setup_.dx;
       
-      cDRealArea = ( real_t(2) * force_[0] ) / ( uMean * uMean * D * (Is2D< LatticeModel_T >::value ? real_t(1) : H) );
-      cLRealArea = ( real_t(2) * force_[1] ) / ( uMean * uMean * D * (Is2D< LatticeModel_T >::value ? real_t(1) : H) );
+      cDRealArea = ( real_t{2} * force_[0] ) / ( uMean * uMean * D * (Is2D< LatticeModel_T >::value ? real_t{1} : H) );
+      cLRealArea = ( real_t{2} * force_[1] ) / ( uMean * uMean * D * (Is2D< LatticeModel_T >::value ? real_t{1} : H) );
       
-      cDDiscreteArea = ( real_t(2) * force_[0] ) / ( uMean * uMean * AD_ );
-      cLDiscreteArea = ( real_t(2) * force_[1] ) / ( uMean * uMean * AL_ );
+      cDDiscreteArea = ( real_t{2} * force_[0] ) / ( uMean * uMean * AD_ );
+      cLDiscreteArea = ( real_t{2} * force_[1] ) / ( uMean * uMean * AL_ );
       
       pressureDifference_L = pAlpha - pOmega;
       pressureDifference   = ( pressureDifference_L * setup_.rho * setup_.dx * setup_.dx ) / ( setup_.dt * setup_.dt );
@@ -2173,7 +2173,7 @@ public:
 
          if( process >= failRangeBegin_ && process <= failRangeEnd_ )
          {
-            for( uint_t i = uint_t(0); i != blocks->numberOfBlockDataItems(); ++i )
+            for( uint_t i = uint_t{0}; i != blocks->numberOfBlockDataItems(); ++i )
                blocks->clearBlockData( BlockDataID(i) );
          }
 
@@ -2187,13 +2187,13 @@ public:
       const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
       const uint_t process = uint_c( mpi::MPIManager::instance()->rank() );
 
-      if( processes > uint_t(1) )
+      if( processes > uint_t{1} )
       {
          auto blocks = blocks_.lock();
          WALBERLA_CHECK_NOT_NULLPTR( blocks );
          WALBERLA_CHECK_EQUAL( blocks->getProcess(), process );
 
-         const uint_t shift = processes / uint_t(2);
+         const uint_t shift = processes / uint_t{2};
 
          sendTo.clear();
          recvFrom.clear();
@@ -2208,7 +2208,7 @@ public:
       if( previousProcess >= failRangeBegin_ && previousProcess <= failRangeEnd_ )
       {
          const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
-         const uint_t shift = processes / uint_t(2);
+         const uint_t shift = processes / uint_t{2};
          return ( previousProcess + shift ) % processes;
       }
 
@@ -2336,7 +2336,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 {
    Config::BlockHandle configBlock = config->getBlock( "SchaeferTurek" );
    
-   setup.viscosity_L = latticeModel.collisionModel().viscosity( uint_t(0) );
+   setup.viscosity_L = latticeModel.collisionModel().viscosity( uint_t{0} );
    setup.dt = ( setup.viscosity_L * setup.dx *setup.dx ) / setup.viscosity; // [s]
    setup.inflowVelocity_L = setup.inflowVelocity * setup.dt / setup.dx;
    setup.raisingTime_L = setup.raisingTime / setup.dt;
@@ -2349,13 +2349,13 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // add pdf field to blocks
 
    const real_t initVelocity = ( configBlock.getParameter< bool >( "initWithVelocity", false ) ) ?
-            ( Is2D< LatticeModel_T >::value ? ( real_t(2) * setup.inflowVelocity_L / real_c(3) ) : ( real_t(4) * setup.inflowVelocity_L / real_c(9) ) ) : real_t(0);
+            ( Is2D< LatticeModel_T >::value ? ( real_t{2} * setup.inflowVelocity_L / real_c(3) ) : ( real_t{4} * setup.inflowVelocity_L / real_c(9) ) ) : real_t{0};
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::fzyx, None, Empty ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
-                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
+                                                              Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
                                                               FieldGhostLayers, field::zyxf, None, Empty );
 
    // add density adaptor
@@ -2403,20 +2403,20 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    if( configBlock.isDefined( "minSimulationTime" ) )
    {
       const uint_t timeSteps = uint_c( configBlock.getParameter< real_t >( "minSimulationTime" ) / setup.dt + real_c(0.5) );
-      if( innerTimeSteps == uint_t(0) )
+      if( innerTimeSteps == uint_t{0} )
       {
-         outerTimeSteps = uint_t(1);
+         outerTimeSteps = uint_t{1};
          innerTimeSteps = timeSteps;
       }
       else
       {
          outerTimeSteps = timeSteps / innerTimeSteps;
-         if( timeSteps % innerTimeSteps != uint_t(0) )
+         if( timeSteps % innerTimeSteps != uint_t{0} )
             ++outerTimeSteps;
       }
    }
 
-   SweepTimeloop timeloop( blocks->getBlockStorage(), ( outerTimeSteps * innerTimeSteps ) + uint_t(1) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), ( outerTimeSteps * innerTimeSteps ) + uint_t{1} );
 
    // VTK
 
@@ -2438,7 +2438,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // evaluation
 
-   const uint_t      evaluationCheckFrequency = configBlock.getParameter< uint_t >( "evaluationCheckFrequency", uint_t(100) );
+   const uint_t      evaluationCheckFrequency = configBlock.getParameter< uint_t >( "evaluationCheckFrequency", uint_t{100} );
    const bool        evaluationLogToStream    = configBlock.getParameter< bool >( "evaluationLogToStream", true );
    const bool        evaluationLogToFile      = configBlock.getParameter< bool >( "evaluationLogToFile", true );
    const std::string evaluationFilename       = configBlock.getParameter< std::string >( "evaluationFilename", std::string("SchaeferTurek.txt") );
@@ -2451,8 +2451,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    auto & blockforest = blocks->getBlockForest();
    
-   const uint_t blockforestRefreshFrequency = configBlock.getParameter< uint_t >( "blockforestRefreshFrequency", uint_t(0) );
-   const bool dynamicBlockStructure = ( blockforestRefreshFrequency != uint_t(0) );
+   const uint_t blockforestRefreshFrequency = configBlock.getParameter< uint_t >( "blockforestRefreshFrequency", uint_t{0} );
+   const bool dynamicBlockStructure = ( blockforestRefreshFrequency != uint_t{0} );
    
    std::string adaptiveRefinementLog;
 
@@ -2469,7 +2469,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          const real_t upperLimit = configBlock.getParameter< real_t >( "curlUpperLimit" );
 
          lbm::refinement::VorticityBasedLevelDetermination< field::FlagFieldEvaluationFilter<FlagField_T>, Is2D<LatticeModel_T>::value > vorticityRefinement(
-            velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t(0) ) );
+            velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t{0} ) );
 
          minTargetLevelDeterminationFunctions.add( vorticityRefinement );
          
@@ -2483,7 +2483,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          const real_t upperLimit = configBlock.getParameter< real_t >( "gradUpperLimit" );
          
          field::GradientRefinement< VelocityField_T, field::FlagFieldEvaluationFilter<FlagField_T>, Is2D< LatticeModel_T >::value > gradientRefinement(
-            velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t(0) ) );
+            velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t{0} ) );
 
          minTargetLevelDeterminationFunctions.add( gradientRefinement );
          
@@ -2510,13 +2510,13 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       timeloop.addFuncBeforeTimeStep( blockforest.getRefreshFunctor( blockforestRefreshFrequency ), "block forest refresh" );
    }
 
-   const uint_t blockforestSnapshotFrequency = configBlock.getParameter< uint_t >( "blockforestSnapshotFrequency", uint_t(0) );
-   if( blockforestSnapshotFrequency != uint_t(0) )
+   const uint_t blockforestSnapshotFrequency = configBlock.getParameter< uint_t >( "blockforestSnapshotFrequency", uint_t{0} );
+   if( blockforestSnapshotFrequency != uint_t{0} )
    {
       blockforest.addCallbackFunctionAfterBlockDataIsRestored( boundarySetter );
       if( dynamicBlockStructure )
          blockforest.addCallbackFunctionAfterBlockDataIsRestored( velocityFieldWriter );
-      if( evaluationCheckFrequency != uint_t(0) )
+      if( evaluationCheckFrequency != uint_t{0} )
          blockforest.addCallbackFunctionAfterBlockDataIsRestored( EvaluationRefresh< LatticeModel_T >( evaluation ) );
 
       const uint_t failAt         = configBlock.getParameter< uint_t >( "failAt" );
@@ -2530,11 +2530,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       timeloop.addFuncBeforeTimeStep( snapshotSimulator, "block forest snapshot (failure simulator)" );
    }
 
-   if( dynamicBlockStructure || blockforestSnapshotFrequency != uint_t(0) )
+   if( dynamicBlockStructure || blockforestSnapshotFrequency != uint_t{0} )
    {
       // set load balancing function
 
-      if( configBlock.getParameter< uint_t >( "dynamicLoadBalancing", uint_t(0) ) == uint_t(0) )
+      if( configBlock.getParameter< uint_t >( "dynamicLoadBalancing", uint_t{0} ) == uint_t{0} )
       {
          const bool hilbert = configBlock.getParameter< bool >( "curveHilbert" );
          const bool allGather = configBlock.getParameter< bool >( "curveAllGather" );
@@ -2582,7 +2582,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       // (re)set velocity field (velocity field data is not migrated!)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( blockforest::BlockForest::RefreshCallbackWrappper( velocityFieldWriter ) );
       // update the state of the evaluation object
-      if( evaluationCheckFrequency != uint_t(0) )
+      if( evaluationCheckFrequency != uint_t{0} )
          blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( EvaluationRefresh< LatticeModel_T >( evaluation ) );
       // log the current state of the block structure (involves allreduce!)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( blockforest::logDuringRefresh );
@@ -2606,7 +2606,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    timeloop.addFuncBeforeTimeStep( SharedFunctor< Evaluation< LatticeModel_T > >(evaluation), "evaluation" );
                                                                                        
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( lbm::makeMassEvaluation< DensityAdaptor_T, FlagField_T, Is2D< LatticeModel_T >::value >(
-            configBlock, blocks, uint_t(0), densityAdaptorId, flagFieldId, Fluid_Flag, "MassEvaluation", None, Empty ) ), "mass evaluation" );
+            configBlock, blocks, uint_t{0}, densityAdaptorId, flagFieldId, Fluid_Flag, "MassEvaluation", None, Empty ) ), "mass evaluation" );
 
    // VTK
 
@@ -2668,7 +2668,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                               "\n   + Reynolds number:     " << Re <<
                               "\n   + dx (coarsest grid):  " << setup.dx << " [m]" <<
                               "\n   + dt (coarsest grid):  " << setup.dt << " [s]" <<
-                              "\n   + #time steps:         " << timeloop.getNrOfTimeSteps() << " (on the coarsest grid, " << ( real_t(1) / setup.dt ) << " for 1s of real time)"
+                              "\n   + #time steps:         " << timeloop.getNrOfTimeSteps() << " (on the coarsest grid, " << ( real_t{1} / setup.dt ) << " for 1s of real time)"
                               "\n   + simulation time:     " << ( real_c( timeloop.getNrOfTimeSteps() ) * setup.dt ) << " [s]"
                               "\n   + adaptive refinement: " << ( dynamicBlockStructure ? "yes" : "no" ) << adaptiveRefinementLog );
 
@@ -2723,7 +2723,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       }
       performance.logResultOnRoot( innerTimeSteps, time );
 
-      if( evaluationCheckFrequency != uint_t(0) )
+      if( evaluationCheckFrequency != uint_t{0} )
          evaluation->prepareResultsForSQL();
 
       if( configBlock.getParameter< bool >( "logToSqlDB", true ) &&
@@ -2781,8 +2781,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             
             integerProperties[ "simulationTimeSteps" ] = int_c( timeloop.getNrOfTimeSteps() );
             
-            realProperties[ "simulationProgress" ] = double_c( ( outerRun + uint_t(1) ) * innerTimeSteps ) / double_c( outerTimeSteps * innerTimeSteps );
-            if( evaluationCheckFrequency != uint_t(0) )
+            realProperties[ "simulationProgress" ] = double_c( ( outerRun + uint_t{1} ) * innerTimeSteps ) / double_c( outerTimeSteps * innerTimeSteps );
+            if( evaluationCheckFrequency != uint_t{0} )
                evaluation->getResultsForSQLOnRoot( realProperties, integerProperties );
 
             auto runId = sqlite::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
@@ -2835,11 +2835,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                               "\n   + Reynolds number:     " << Re <<
                               "\n   + dx (coarsest grid):  " << setup.dx << " [m]" <<
                               "\n   + dt (coarsest grid):  " << setup.dt << " [s]" <<
-                              "\n   + #time steps:         " << timeloop.getNrOfTimeSteps() << " (on the coarsest grid, " << ( real_t(1) / setup.dt ) << " for 1s of real time)"
+                              "\n   + #time steps:         " << timeloop.getNrOfTimeSteps() << " (on the coarsest grid, " << ( real_t{1} / setup.dt ) << " for 1s of real time)"
                               "\n   + simulation time:     " << ( real_c( timeloop.getNrOfTimeSteps() ) * setup.dt ) << " [s]"
                               "\n   + adaptive refinement: " << ( dynamicBlockStructure ? "yes" : "no" ) << adaptiveRefinementLog );
 
-   if( evaluationCheckFrequency != uint_t(0) && configBlock.getParameter< bool >( "check", false ) )
+   if( evaluationCheckFrequency != uint_t{0} && configBlock.getParameter< bool >( "check", false ) )
       evaluation->check( config );
 }
 
@@ -2994,19 +2994,19 @@ int main( int argc, char **argv )
    Setup setup;
    setup.pseudo2D = (lm == LMD2Q9);
 
-   setup.xCells  = configBlock.getParameter< uint_t >( "xCells", uint_t(16) );
-   setup.yzCells = configBlock.getParameter< uint_t >( "yzCells", uint_t(16) );
+   setup.xCells  = configBlock.getParameter< uint_t >( "xCells", uint_t{16} );
+   setup.yzCells = configBlock.getParameter< uint_t >( "yzCells", uint_t{16} );
 
    setup.H = configBlock.getParameter< real_t >( "H", real_c(0.41) ); // [m]
    setup.L = configBlock.getParameter< real_t >( "L", real_c(2.50) ); // [m]
    
    setup.strictlyObeyL = configBlock.getParameter< bool >( "strictlyObeyL", true );
 
-   setup.yzBlocks = configBlock.getParameter< uint_t >( "yzBlocks", uint_t(3) );
+   setup.yzBlocks = configBlock.getParameter< uint_t >( "yzBlocks", uint_t{3} );
    
    const real_t xBlocks = ( setup.L / ( setup.H / ( real_c(setup.yzBlocks) * real_c(setup.yzCells) ) ) ) / real_c(setup.xCells);
    setup.xBlocks = uint_c( xBlocks );
-   if( xBlocks > real_c( setup.xBlocks ) ) setup.xBlocks += uint_t(1);
+   if( xBlocks > real_c( setup.xBlocks ) ) setup.xBlocks += uint_t{1};
    
    setup.cylinderxPosition = configBlock.getParameter< real_t >( "cylinderxPosition", real_c(0.5) ); // [m]
    setup.cylinderyPosition = configBlock.getParameter< real_t >( "cylinderyPosition", real_c(0.2) ); // [m]
@@ -3014,15 +3014,15 @@ int main( int argc, char **argv )
    setup.circularCrossSection = configBlock.getParameter< bool >( "circularCrossSection", true );
 
    setup.viscosity = configBlock.getParameter< real_t >( "kinViscosity", real_c(0.001) ); // [m^2 / s]
-   setup.rho = configBlock.getParameter< real_t >( "rho", real_t(1) ); // [kg / m^3]
-   setup.inflowVelocity = configBlock.getParameter< real_t >( "inflowVelocity", real_t(0.45) ); // [m/s]
-   setup.raisingTime = configBlock.getParameter< real_t >( "raisingTime", real_t(0) ); // [s]
-   setup.sinPeriod = configBlock.getParameter< real_t >( "sinPeriod", real_t(0) ); // [s]
+   setup.rho = configBlock.getParameter< real_t >( "rho", real_t{1} ); // [kg / m^3]
+   setup.inflowVelocity = configBlock.getParameter< real_t >( "inflowVelocity", real_t{0.45} ); // [m/s]
+   setup.raisingTime = configBlock.getParameter< real_t >( "raisingTime", real_t{0} ); // [s]
+   setup.sinPeriod = configBlock.getParameter< real_t >( "sinPeriod", real_t{0} ); // [s]
    setup.dx = setup.H / real_c( setup.yzBlocks * setup.yzCells );
 
    setup.evaluateForceComponents = configBlock.getParameter< bool >( "evaluateForceComponents", false );
-   setup.nbrOfEvaluationPointsForCoefficientExtremas = configBlock.getParameter< uint_t >( "nbrOfEvaluationPointsForCoefficientExtremas", uint_t(100) );
-   setup.nbrOfEvaluationPointsForCoefficientExtremas = std::max( setup.nbrOfEvaluationPointsForCoefficientExtremas, uint_t(1) );
+   setup.nbrOfEvaluationPointsForCoefficientExtremas = configBlock.getParameter< uint_t >( "nbrOfEvaluationPointsForCoefficientExtremas", uint_t{100} );
+   setup.nbrOfEvaluationPointsForCoefficientExtremas = std::max( setup.nbrOfEvaluationPointsForCoefficientExtremas, uint_t{1} );
 
    setup.evaluatePressure = configBlock.getParameter< bool >( "evaluatePressure", false );
    setup.pAlpha = configBlock.getParameter< Vector3<real_t> >( "pAlpha", Vector3<real_t>( real_c(0.45), real_c(0.2), real_c(0.205) ) );
@@ -3032,11 +3032,11 @@ int main( int argc, char **argv )
    setup.pStrouhal = configBlock.getParameter< Vector3<real_t> >( "pStrouhal", Vector3<real_t>( real_c(1), real_c(0.325), real_c(0.205) ) );
 
    // ... in bytes
-   const memory_t memoryPerCell = configBlock.getParameter< memory_t >( "memoryPerCell", memory_t( 19 * 8 + 1 ) );
+   const memory_t memoryPerCell = configBlock.getParameter< memory_t >( "memoryPerCell", memory_t{ 19 * 8 + 1 } );
    // ... in MiB
-   const memory_t processMemoryLimit = configBlock.getParameter< memory_t >( "processMemoryLimit", memory_t( 512 ) ) * memory_t( 1024 * 1024  );
+   const memory_t processMemoryLimit = configBlock.getParameter< memory_t >( "processMemoryLimit", memory_t{ 512 } ) * memory_t{ 1024 * 1024 };
 
-   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t(8) );
+   const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t{8} );
 
    ////////////////////////
    // REFINEMENT REGIONS //
@@ -3052,7 +3052,7 @@ int main( int argc, char **argv )
       if( !configBlock.isDefined("cylinderRefinementLevel")  )
          WALBERLA_ABORT( "You have to specify \'cylinderRefinementLevel\' in the \"SchaeferTurek\" block of the configuration file (" << argv[1] << ")" );
 
-      const real_t cylinderRefinementBuffer = configBlock.getParameter< real_t >( "cylinderRefinementBuffer", real_t(0) );
+      const real_t cylinderRefinementBuffer = configBlock.getParameter< real_t >( "cylinderRefinementBuffer", real_t{0} );
 
       Cylinder cylinder( setup );
       CylinderRefinementSelection cylinderRefinementSelection( cylinder, configBlock.getParameter< uint_t >( "cylinderRefinementLevel" ),
@@ -3086,7 +3086,7 @@ int main( int argc, char **argv )
 
       WALBERLA_LOG_INFO_ON_ROOT( infoString.str() << "Creating the block structure ..." );
 
-      shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup, uint_t(0), blocksPerProcess,
+      shared_ptr< SetupBlockForest > sforest = createSetupBlockForest( refinementSelectionFunctions, setup, uint_t{0}, blocksPerProcess,
                                                                        memoryPerCell, processMemoryLimit,
                                                                        configBlock.getParameter< bool >( "outputSetupForest", true ) );
       sforest->saveToFile( sbffile.c_str() );
@@ -3097,28 +3097,28 @@ int main( int argc, char **argv )
 
    // executing benchmark
 
-   real_t omega = configBlock.getParameter< real_t >( "omega", real_t(1.4) );
+   real_t omega = configBlock.getParameter< real_t >( "omega", real_t{1.4} );
 
-   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t(3) / real_t(16) );
+   const real_t magicNumber = configBlock.getParameter< real_t >( "magicNumber", real_t{3} / real_t{16} );
 
-   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t(1.4) );
-   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t(1.4) );
+   const real_t lambda_e = configBlock.getParameter< real_t >( "lambda_e", real_t{1.4} );
+   const real_t lambda_d = configBlock.getParameter< real_t >( "lambda_d", real_t{1.4} );
 
-   const real_t s1  = configBlock.getParameter< real_t >( "s1",  real_t(1.4) );
-   const real_t s2  = configBlock.getParameter< real_t >( "s2",  real_t(1.4) );
-   const real_t s4  = configBlock.getParameter< real_t >( "s4",  real_t(1.4) );
-   const real_t s9  = configBlock.getParameter< real_t >( "s9",  real_t(1.4) );
-   const real_t s10 = configBlock.getParameter< real_t >( "s10", real_t(1.4) );
-   const real_t s16 = configBlock.getParameter< real_t >( "s16", real_t(1.4) );
+   const real_t s1  = configBlock.getParameter< real_t >( "s1",  real_t{1.4} );
+   const real_t s2  = configBlock.getParameter< real_t >( "s2",  real_t{1.4} );
+   const real_t s4  = configBlock.getParameter< real_t >( "s4",  real_t{1.4} );
+   const real_t s9  = configBlock.getParameter< real_t >( "s9",  real_t{1.4} );
+   const real_t s10 = configBlock.getParameter< real_t >( "s10", real_t{1.4} );
+   const real_t s16 = configBlock.getParameter< real_t >( "s16", real_t{1.4} );
 
-   uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t(0) );
+   uint_t relaxationParametersLevel = configBlock.getParameter< uint_t >( "relaxationParametersLevel", uint_t{0} );
 
    if( configBlock.isDefined("latticeInflowVelocity") )
    {
       const real_t latticeInflowVelocity = configBlock.getParameter< real_t >( "latticeInflowVelocity" );
       const real_t dt = latticeInflowVelocity * setup.dx / setup.inflowVelocity;
-      omega = real_t(1) / ( ( real_c(3) * dt * setup.viscosity ) / ( setup.dx * setup.dx ) + real_c(0.5) );
-      relaxationParametersLevel = uint_t(0);
+      omega = real_t{1} / ( ( real_c(3) * dt * setup.viscosity ) / ( setup.dx * setup.dx ) + real_c(0.5) );
+      relaxationParametersLevel = uint_t{0};
    }
 
    if( collisionModel == CMSRT ) // SRT

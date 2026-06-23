@@ -56,13 +56,13 @@ int main( int argc, char ** argv )
                                                       4, 4, 4,
                                                       1.0);
 
-   BlockDataID fieldID = field::addToStorage<Field_T>( blocks, "Field", Field_T::value_type(0));
+   BlockDataID fieldID = field::addToStorage<Field_T>( blocks, "Field", Field_T::value_type{0});
    SweepTimeloop timeloop(blocks->getBlockStorage(), uint_c(2));
 
    timeloop.add() << Sweep(TestSweep(fieldID), "Test Sweep");
 
    // LBM stability check
-   auto checkFunction = [](Field_T::value_type value) {return value < math::abs(Field_T::value_type(5));};
+   auto checkFunction = [](Field_T::value_type value) {return value < math::abs(Field_T::value_type{5});};
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< Field_T >( blocks, fieldID, uint_c(1), checkFunction) ),"Stability check" );
    timeloop.run();
 

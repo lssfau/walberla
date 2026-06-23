@@ -74,7 +74,7 @@ void SOR< Stencil_T >::update( IBlock * const block, const bool rb )
 {
 #ifndef NDEBUG
    for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
-      WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t(1) ) );
+      WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t{1} ) );
 #endif
 
    Field_T * uf( nullptr );
@@ -84,10 +84,10 @@ void SOR< Stencil_T >::update( IBlock * const block, const bool rb )
 
    WALBERLA_ASSERT_GREATER_EQUAL( uf->nrOfGhostLayers(), 1 );
 
-   const cell_idx_t zero = cell_idx_t(0);
-   const cell_idx_t one  = cell_idx_t(1);
+   const cell_idx_t zero = cell_idx_t{0};
+   const cell_idx_t one  = cell_idx_t{1};
 
-   const real_t omegaInv = real_t(1) - omega_;
+   const real_t omegaInv = real_t{1} - omega_;
 
    Cell cell(zero,zero,zero);
    blocks_->transformBlockLocalToGlobalCell( cell, *block );
@@ -101,7 +101,7 @@ void SOR< Stencil_T >::update( IBlock * const block, const bool rb )
       const cell_idx_t xBegin = ( (((c.x() & one) + (c.y() & one) + (c.z() & one)) & one) == zero ) ? (rb ? zero : one) : (rb ? one : zero);
 
       const cell_idx_t xSize = cell_idx_c( uf->xSize() );
-      for( cell_idx_t x = xBegin; x < xSize; x += cell_idx_t(2) )
+      for( cell_idx_t x = xBegin; x < xSize; x += cell_idx_t{2} )
       {
          real_t value = ff->get(x,y,z);
 

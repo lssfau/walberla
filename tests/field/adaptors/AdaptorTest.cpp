@@ -134,7 +134,7 @@ int main( int argc, char ** argv )
                                     false );            // do NOT keep global information
 
 
-   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( real_t(1.4) ) );
+   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( real_t{1.4} ) );
 
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "PdfField", latticeModel );
 

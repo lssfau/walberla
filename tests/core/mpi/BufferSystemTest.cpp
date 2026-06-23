@@ -334,7 +334,7 @@ void copyTest()
    BufferSystem bs1( MPI_COMM_WORLD, 3 );
    {
       BufferSystem bs2( MPI_COMM_WORLD, 7 );
-      bs2.sendBuffer(rank) << int(42);
+      bs2.sendBuffer(rank) << 42;
       bs2.setReceiverInfoFromSendBufferState( true, false );
       bs2.sendAll();
 
@@ -349,7 +349,7 @@ void copyTest()
 
    }
 
-   bs1.sendBuffer(rank) << int(42);
+   bs1.sendBuffer(rank) << 42;
    bs1.sendAll();
    for ( auto i = bs1.begin(); i != bs1.end(); ++i )
    {

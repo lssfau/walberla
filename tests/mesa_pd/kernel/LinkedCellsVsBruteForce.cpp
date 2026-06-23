@@ -83,16 +83,16 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   data::LinkedCells     lc(blk.getAABB(), real_t(1.1));
+   data::LinkedCells     lc(blk.getAABB(), real_t{1.1});
    std::vector<collision_detection::AnalyticContactDetection> cs1(100);
    std::vector<collision_detection::AnalyticContactDetection> cs2(100);
 
    data::ParticleAccessorWithShape accessor(ps, ss);
 
    //initialize particles
-   const real_t radius  = real_t(0.5);
+   const real_t radius  = real_t{0.5};
    auto smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    for (int i = 0; i < 1000; ++i)
    {

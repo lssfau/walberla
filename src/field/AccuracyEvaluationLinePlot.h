@@ -202,7 +202,7 @@ public:
                                const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( filter ), yAxis_( yAxis ),
-      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
+      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t{1} ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       auto _blocks = blocks_.lock();
@@ -215,7 +215,7 @@ public:
                                const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), fieldId_( fieldId ), solution_( solution ), filter_( Filter_T() ), yAxis_( yAxis ),
-      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
+      relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t{1} ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
       static_assert( (std::is_same_v< Filter_T, DefaultEvaluationFilter >),
@@ -469,7 +469,7 @@ inline void accuracyEvaluationLinePlotConfigParser( const shared_ptr< Config > &
 #define WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER( config ) \
    bool defaultYAxis( true ); \
    Vector3<real_t> defaultRelLinePoint( real_c(0.5) ); \
-   real_t defaultNormalizationFactor( real_t(1) ); \
+   real_t defaultNormalizationFactor( real_t{1} ); \
    auto _blocks = blocks.lock(); \
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to execute 'makeAccuracyEvaluationLinePlot' for a block storage object that doesn't exist anymore" ); \
    math::AABB defaultDomainNormalization( _blocks->getDomain() ); \
@@ -601,14 +601,14 @@ public:
                                   const uint_t evaluationFrequency,
                                   const std::string & filename = internal::accuracyEvaluationLinePlotterFilename,
                                   const std::string & fileExtension = internal::accuracyEvaluationLinePlotterExtension ) :
-      plot_( plot ), executionCounter_( uint_t(0) ), evaluationFrequency_( evaluationFrequency ),
+      plot_( plot ), executionCounter_( uint_t{0} ), evaluationFrequency_( evaluationFrequency ),
       filename_( filename ), fileExtension_( fileExtension )
    {}
 
    void operator()()
    {
       ++executionCounter_;
-      if( evaluationFrequency_ == uint_t(0) || ( executionCounter_ - uint_c(1) ) % evaluationFrequency_ != 0 )
+      if( evaluationFrequency_ == uint_t{0} || ( executionCounter_ - uint_c(1) ) % evaluationFrequency_ != 0 )
          return;
 
       std::ostringstream oss;
@@ -682,7 +682,7 @@ makeAccuracyEvaluationLinePlotter( const Config_T & config,
                                    const shared_ptr< AccuracyEvaluationLinePlot_T > & plot,
                                    const std::string & configBlockName = internal::accuracyEvaluationLinePlotterConfigBlock )
 {
-   uint_t defaultEvaluationFrequency( uint_t(0) );
+   uint_t defaultEvaluationFrequency( uint_t{0} );
    std::string defaultFilename( internal::accuracyEvaluationLinePlotterFilename );
    std::string defaultFileExtension( internal::accuracyEvaluationLinePlotterExtension );
    internal::accuracyEvaluationLinePlotterConfigParser( config, configBlockName, defaultEvaluationFrequency, defaultFilename, defaultFileExtension );

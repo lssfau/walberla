@@ -365,9 +365,9 @@ void BasicVoxelFileReader<T>::close()
       filestream_.close();
       dataBegin_ = std::streampos();
       filename_.clear();
-      xSize_ = std::size_t(0);
-      ySize_ = std::size_t(0);
-      zSize_ = std::size_t(0);
+      xSize_ = std::size_t{0};
+      ySize_ = std::size_t{0};
+      zSize_ = std::size_t{0};
    }
 
    assert(!filestream_.is_open());

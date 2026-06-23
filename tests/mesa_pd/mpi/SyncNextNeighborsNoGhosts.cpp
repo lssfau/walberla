@@ -49,7 +49,7 @@ int main( int argc, char ** argv )
    {
       auto pIt = ps.create();
       pIt->setPosition(pt);
-      pIt->setInteractionRadius(real_t(0));
+      pIt->setInteractionRadius(real_t{0});
       pIt->setOwner(walberla::mpi::MPIManager::instance()->rank());
    }
 

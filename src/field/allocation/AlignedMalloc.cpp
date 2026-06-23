@@ -46,12 +46,12 @@ namespace field {
          return nullptr;
 
       // Find next aligned position, starting at pa+sizeof(void*)-1
-      ptr=(void*)( ((size_t)pa+sizeof(void *)+alignment-1) & ~(alignment-1));
+      ptr=reinterpret_cast< void* >( (reinterpret_cast< size_t >(pa)+sizeof(void *)+alignment-1) & ~(alignment-1));
 
       // Store pointer to real allocated chunk just before usable chunk
-      *((void **)ptr-1)=pa;
+      *(static_cast<void **>(ptr)-1)=pa;
 
-      WALBERLA_ASSERT_EQUAL( ((size_t)ptr) % alignment, 0 );
+      WALBERLA_ASSERT_EQUAL( (reinterpret_cast< size_t >(ptr)) % alignment, 0 );
 
       return ptr;
    }
@@ -78,13 +78,13 @@ namespace field {
          return nullptr;
 
       // Find next aligned position, starting at pa+sizeof(void*)-1
-      ptr=(void*)( ((size_t)pa+sizeof(void *)+alignment-1) & ~(alignment-1));
-      ptr=(void*) ( (char*)(ptr) + alignment - offset);
+      ptr=reinterpret_cast< void* >( (reinterpret_cast< size_t >(pa)+sizeof(void *)+alignment-1) & ~(alignment-1));
+      ptr=reinterpret_cast< void* >( static_cast< char* >(ptr) + alignment - offset);
 
       // Store pointer to real allocated chunk just before usable chunk
-      *((void **)ptr-1)=pa;
+      *(static_cast<void **>(ptr)-1)=pa;
 
-      WALBERLA_ASSERT_EQUAL( ((size_t)ptr+offset) % alignment, 0 );
+      WALBERLA_ASSERT_EQUAL( (reinterpret_cast< size_t >(ptr)+offset) % alignment, 0 );
 
       return ptr;
    }
@@ -95,7 +95,7 @@ namespace field {
       // assume that pointer to real allocated chunk is stored just before
       // chunk that was given to user
       if(ptr)
-         std::free(*((void **)ptr-1));
+         std::free(*(static_cast<void **>(ptr)-1));
    }
 
 } // namespace field

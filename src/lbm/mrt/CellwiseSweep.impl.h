@@ -76,18 +76,18 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
    const real_t s17 = collisionModel.s17();
    const real_t s18 = collisionModel.s18();
 
-   const real_t _1_2  = real_t(1) / real_t(2);
-   const real_t _1_3  = real_t(1) / real_t(3);
-   const real_t _1_4  = real_t(1) / real_t(4);
-   const real_t _1_6  = real_t(1) / real_t(6);
-   const real_t _1_8  = real_t(1) / real_t(8);
-   const real_t _1_12 = real_t(1) / real_t(12);
-   const real_t _1_16 = real_t(1) / real_t(16);
-   const real_t _1_18 = real_t(1) / real_t(18);
-   const real_t _1_24 = real_t(1) / real_t(24);
-   const real_t _1_36 = real_t(1) / real_t(36);
-   const real_t _1_48 = real_t(1) / real_t(48);
-   const real_t _1_72 = real_t(1) / real_t(72);
+   const real_t _1_2  = real_t{1} / real_t{2};
+   const real_t _1_3  = real_t{1} / real_t{3};
+   const real_t _1_4  = real_t{1} / real_t{4};
+   const real_t _1_6  = real_t{1} / real_t{6};
+   const real_t _1_8  = real_t{1} / real_t{8};
+   const real_t _1_12 = real_t{1} / real_t{12};
+   const real_t _1_16 = real_t{1} / real_t{16};
+   const real_t _1_18 = real_t{1} / real_t{18};
+   const real_t _1_24 = real_t{1} / real_t{24};
+   const real_t _1_36 = real_t{1} / real_t{36};
+   const real_t _1_48 = real_t{1} / real_t{48};
+   const real_t _1_72 = real_t{1} / real_t{72};
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -100,38 +100,38 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
 
          const Vector3<real_t> velocity( velX, velY, velZ );
-         this->densityVelocityOut( x, y, z, lm, velocity, rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, velocity, rho + real_t{1} );
 
          const real_t velSqr = velX * velX + velY * velY + velZ * velZ;
 
-         const real_t vel9 = real_t(2) * velX * velX - velY * velY - velZ * velZ;
+         const real_t vel9 = real_t{2} * velX * velX - velY * velY - velZ * velZ;
          const real_t vel11 = velY * velY - velZ * velZ;
          const real_t vel13 = velX * velY;
          const real_t vel14 = velY * velZ;
          const real_t vel15 = velX * velZ;
 
          const real_t mStar0  = rho;
-         const real_t mStar1  = velSqr + ( real_t(1) - s1 ) * ( -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE - velSqr );
-         const real_t mStar2  = ( real_t(1) - s2 ) * ( vC - real_t(2) * ( vN + vS + vW + vE + vT + vB )
+         const real_t mStar1  = velSqr + ( real_t{1} - s1 ) * ( -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE - velSqr );
+         const real_t mStar2  = ( real_t{1} - s2 ) * ( vC - real_t{2} * ( vN + vS + vW + vE + vT + vB )
                                                           + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE );
          const real_t mStar3  = velX;
-         const real_t mStar4  = ( real_t(1) - s4 ) * ( real_t(2) * vW - real_t(2) * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE );
+         const real_t mStar4  = ( real_t{1} - s4 ) * ( real_t{2} * vW - real_t{2} * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE );
          const real_t mStar5  = velY;
-         const real_t mStar6  = ( real_t(1) - s6 ) * ( real_t(-2) * vN + real_t(2) * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS );
+         const real_t mStar6  = ( real_t{1} - s6 ) * ( real_t{-2} * vN + real_t{2} * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS );
          const real_t mStar7  = velZ;
-         const real_t mStar8  = ( real_t(1) - s8 ) * ( real_t(-2) * vT + real_t(2) * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE );
-         const real_t mStar9  = vel9 + ( real_t(1) - s9 ) * ( -vN - vS + real_t(2) * vW + real_t(2) * vE - vT - vB + vNW + vNE + vSW + vSE - real_t(2) * vTN -
-                                                              real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE - vel9 );
-         const real_t mStar10 = ( real_t(1) - s10 ) * ( vN + vS - real_t(2) * vW - real_t(2) * vE + vT + vB + vNW + vNE + vSW + vSE - real_t(2) * vTN -
-                                                        real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE );
-         const real_t mStar11 = vel11 + ( real_t(1) - s11 ) * ( vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE - vel11 );
-         const real_t mStar12 = ( real_t(1) - s12 ) * ( -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE );
-         const real_t mStar13 = vel13 + ( real_t(1) - s13 ) * ( -vNW + vNE + vSW - vSE - vel13 );
-         const real_t mStar14 = vel14 + ( real_t(1) - s14 ) * (  vTN - vTS - vBN + vBS - vel14 );
-         const real_t mStar15 = vel15 + ( real_t(1) - s15 ) * ( -vTW + vTE + vBW - vBE - vel15 );
-         const real_t mStar16 = ( real_t(1) - s16 ) * ( -vNW + vNE - vSW + vSE + vTW - vTE + vBW - vBE );
-         const real_t mStar17 = ( real_t(1) - s17 ) * ( -vNW - vNE + vSW + vSE + vTN - vTS + vBN - vBS );
-         const real_t mStar18 = ( real_t(1) - s18 ) * ( -vTN - vTS + vTW + vTE + vBN + vBS - vBW - vBE );
+         const real_t mStar8  = ( real_t{1} - s8 ) * ( real_t{-2} * vT + real_t{2} * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE );
+         const real_t mStar9  = vel9 + ( real_t{1} - s9 ) * ( -vN - vS + real_t{2} * vW + real_t{2} * vE - vT - vB + vNW + vNE + vSW + vSE - real_t{2} * vTN -
+                                                              real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE - vel9 );
+         const real_t mStar10 = ( real_t{1} - s10 ) * ( vN + vS - real_t{2} * vW - real_t{2} * vE + vT + vB + vNW + vNE + vSW + vSE - real_t{2} * vTN -
+                                                        real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE );
+         const real_t mStar11 = vel11 + ( real_t{1} - s11 ) * ( vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE - vel11 );
+         const real_t mStar12 = ( real_t{1} - s12 ) * ( -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE );
+         const real_t mStar13 = vel13 + ( real_t{1} - s13 ) * ( -vNW + vNE + vSW - vSE - vel13 );
+         const real_t mStar14 = vel14 + ( real_t{1} - s14 ) * (  vTN - vTS - vBN + vBS - vel14 );
+         const real_t mStar15 = vel15 + ( real_t{1} - s15 ) * ( -vTW + vTE + vBW - vBE - vel15 );
+         const real_t mStar16 = ( real_t{1} - s16 ) * ( -vNW + vNE - vSW + vSE + vTW - vTE + vBW - vBE );
+         const real_t mStar17 = ( real_t{1} - s17 ) * ( -vNW - vNE + vSW + vSE + vTN - vTS + vBN - vBS );
+         const real_t mStar18 = ( real_t{1} - s18 ) * ( -vTN - vTS + vTW + vTE + vBN + vBS - vBW - vBE );
 
          dst->get( x, y, z, Stencil_T::idx[C] )  = _1_3  * mStar0  - _1_2  * mStar1  + _1_6  * mStar2;
          dst->get( x, y, z, Stencil_T::idx[N] )  = _1_18 * mStar0  - _1_18 * mStar2  + _1_6  * mStar5  - _1_6  * mStar6  - _1_24 * mStar9  +
@@ -185,9 +185,9 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          
          if (!std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >)
          {
-            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
+            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t{1.0}, collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-               dst->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
+               dst->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t{1.0}, commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
          }
       }
 
@@ -215,18 +215,18 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
    const real_t s17 = collisionModel.s17();
    const real_t s18 = collisionModel.s18();
 
-   const real_t _1_2  = real_t(1) / real_t(2);
-   const real_t _1_3  = real_t(1) / real_t(3);
-   const real_t _1_4  = real_t(1) / real_t(4);
-   const real_t _1_6  = real_t(1) / real_t(6);
-   const real_t _1_8  = real_t(1) / real_t(8);
-   const real_t _1_12 = real_t(1) / real_t(12);
-   const real_t _1_16 = real_t(1) / real_t(16);
-   const real_t _1_18 = real_t(1) / real_t(18);
-   const real_t _1_24 = real_t(1) / real_t(24);
-   const real_t _1_36 = real_t(1) / real_t(36);
-   const real_t _1_48 = real_t(1) / real_t(48);
-   const real_t _1_72 = real_t(1) / real_t(72);
+   const real_t _1_2  = real_t{1} / real_t{2};
+   const real_t _1_3  = real_t{1} / real_t{3};
+   const real_t _1_4  = real_t{1} / real_t{4};
+   const real_t _1_6  = real_t{1} / real_t{6};
+   const real_t _1_8  = real_t{1} / real_t{8};
+   const real_t _1_12 = real_t{1} / real_t{12};
+   const real_t _1_16 = real_t{1} / real_t{16};
+   const real_t _1_18 = real_t{1} / real_t{18};
+   const real_t _1_24 = real_t{1} / real_t{24};
+   const real_t _1_36 = real_t{1} / real_t{36};
+   const real_t _1_48 = real_t{1} / real_t{48};
+   const real_t _1_72 = real_t{1} / real_t{72};
 
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( src, numberOfGhostLayersToInclude,
 
@@ -239,38 +239,38 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          WALBERLA_LBM_CELLWISE_SWEEP_D3Q19_DENSITY_VELOCITY_INCOMP()
          
          const Vector3<real_t> velocity( velX, velY, velZ );
-         this->densityVelocityOut( x, y, z, lm, velocity, rho + real_t(1) );
+         this->densityVelocityOut( x, y, z, lm, velocity, rho + real_t{1} );
 
          const real_t velSqr = velX * velX + velY * velY + velZ * velZ;
 
-         const real_t vel9 = real_t(2) * velX * velX - velY * velY - velZ * velZ;
+         const real_t vel9 = real_t{2} * velX * velX - velY * velY - velZ * velZ;
          const real_t vel11 = velY * velY - velZ * velZ;
          const real_t vel13 = velX * velY;
          const real_t vel14 = velY * velZ;
          const real_t vel15 = velX * velZ;
 
          const real_t mStar0  = rho;
-         const real_t mStar1  = velSqr + ( real_t(1) - s1 ) * ( -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE - velSqr );
-         const real_t mStar2  = ( real_t(1) - s2 ) * ( vC - real_t(2) * ( vN + vS + vW + vE + vT + vB )
+         const real_t mStar1  = velSqr + ( real_t{1} - s1 ) * ( -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE - velSqr );
+         const real_t mStar2  = ( real_t{1} - s2 ) * ( vC - real_t{2} * ( vN + vS + vW + vE + vT + vB )
                                                           + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE );
          const real_t mStar3  = velX;
-         const real_t mStar4  = ( real_t(1) - s4 ) * ( real_t(2) * vW - real_t(2) * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE );
+         const real_t mStar4  = ( real_t{1} - s4 ) * ( real_t{2} * vW - real_t{2} * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE );
          const real_t mStar5  = velY;
-         const real_t mStar6  = ( real_t(1) - s6 ) * ( real_t(-2) * vN + real_t(2) * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS );
+         const real_t mStar6  = ( real_t{1} - s6 ) * ( real_t{-2} * vN + real_t{2} * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS );
          const real_t mStar7  = velZ;
-         const real_t mStar8  = ( real_t(1) - s8 ) * ( real_t(-2) * vT + real_t(2) * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE );
-         const real_t mStar9  = vel9 + ( real_t(1) - s9 ) * ( -vN - vS + real_t(2) * vW + real_t(2) * vE - vT - vB + vNW + vNE + vSW + vSE - real_t(2) * vTN -
-                                                              real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE - vel9 );
-         const real_t mStar10 = ( real_t(1) - s10 ) * ( vN + vS - real_t(2) * vW - real_t(2) * vE + vT + vB + vNW + vNE + vSW + vSE - real_t(2) * vTN -
-                                                        real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE );
-         const real_t mStar11 = vel11 + ( real_t(1) - s11 ) * ( vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE - vel11 );
-         const real_t mStar12 = ( real_t(1) - s12 ) * ( -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE );
-         const real_t mStar13 = vel13 + ( real_t(1) - s13 ) * ( -vNW + vNE + vSW - vSE - vel13 );
-         const real_t mStar14 = vel14 + ( real_t(1) - s14 ) * (  vTN - vTS - vBN + vBS - vel14 );
-         const real_t mStar15 = vel15 + ( real_t(1) - s15 ) * ( -vTW + vTE + vBW - vBE - vel15 );
-         const real_t mStar16 = ( real_t(1) - s16 ) * ( -vNW + vNE - vSW + vSE + vTW - vTE + vBW - vBE );
-         const real_t mStar17 = ( real_t(1) - s17 ) * ( -vNW - vNE + vSW + vSE + vTN - vTS + vBN - vBS );
-         const real_t mStar18 = ( real_t(1) - s18 ) * ( -vTN - vTS + vTW + vTE + vBN + vBS - vBW - vBE );
+         const real_t mStar8  = ( real_t{1} - s8 ) * ( real_t{-2} * vT + real_t{2} * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE );
+         const real_t mStar9  = vel9 + ( real_t{1} - s9 ) * ( -vN - vS + real_t{2} * vW + real_t{2} * vE - vT - vB + vNW + vNE + vSW + vSE - real_t{2} * vTN -
+                                                              real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE - vel9 );
+         const real_t mStar10 = ( real_t{1} - s10 ) * ( vN + vS - real_t{2} * vW - real_t{2} * vE + vT + vB + vNW + vNE + vSW + vSE - real_t{2} * vTN -
+                                                        real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE );
+         const real_t mStar11 = vel11 + ( real_t{1} - s11 ) * ( vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE - vel11 );
+         const real_t mStar12 = ( real_t{1} - s12 ) * ( -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE );
+         const real_t mStar13 = vel13 + ( real_t{1} - s13 ) * ( -vNW + vNE + vSW - vSE - vel13 );
+         const real_t mStar14 = vel14 + ( real_t{1} - s14 ) * (  vTN - vTS - vBN + vBS - vel14 );
+         const real_t mStar15 = vel15 + ( real_t{1} - s15 ) * ( -vTW + vTE + vBW - vBE - vel15 );
+         const real_t mStar16 = ( real_t{1} - s16 ) * ( -vNW + vNE - vSW + vSE + vTW - vTE + vBW - vBE );
+         const real_t mStar17 = ( real_t{1} - s17 ) * ( -vNW - vNE + vSW + vSE + vTN - vTS + vBN - vBS );
+         const real_t mStar18 = ( real_t{1} - s18 ) * ( -vTN - vTS + vTW + vTE + vBN + vBS - vBW - vBE );
 
          src->get( x, y, z, Stencil_T::idx[C] )  = _1_3  * mStar0  - _1_2  * mStar1  + _1_6  * mStar2;
          src->get( x, y, z, Stencil_T::idx[N] )  = _1_18 * mStar0  - _1_18 * mStar2  + _1_6  * mStar5  - _1_6  * mStar6  - _1_24 * mStar9  +
@@ -324,9 +324,9 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          
          if (!std::is_same_v< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >)
          {
-            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
+            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t{1.0}, collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-               src->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
+               src->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t{1.0}, commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
          }
       }
 

@@ -70,7 +70,7 @@ public:
    inline uint_t numTriangles() const override;
    void numTrianglesToStream( std::ostream & os, const uint_t level ) const override;
    inline uint_t height() const override;
-   uint_t numChildren() const override { return uint_t(8); };
+   uint_t numChildren() const override { return uint_t{8}; };
    const Node<MeshType> * getChild( const uint_t idx ) const override { WALBERLA_ASSERT_LESS( idx, 8 ); return children_[idx]; };
 
    BranchNode( const BranchNode & other ) = delete;
@@ -95,7 +95,7 @@ private:
          :child( _child ), intersectsAabb( pe::raytracing::intersects( child->getAABB(), 
                                                                        pe::raytracing::Ray(toWalberla( ray_origin ), (toWalberla( ray_direction )).getNormalized()),
                                                                        parametricDistance,
-                                                                       real_t(0.0), 
+                                                                       real_t{0.0}, 
                                                                        &normal
                                                                      )) {}
 
@@ -121,7 +121,7 @@ private:
                                                         mesh::Ray(
                                                                toWalberla( ray_origin ), 
                                                                (toWalberla( ray_direction )).getNormalized()),
-                                                         distance, real_t(0.0), &ray_normal
+                                                         distance, real_t{0.0}, &ray_normal
                                                       )
                         };
                   
@@ -203,7 +203,7 @@ BranchNode<MeshType>::BranchNode( const shared_ptr< TriangleDistance<MeshType> >
 
       uint_t minIdx = 0;
       Scalar minSqDistance = ( childAABBs[0].center() - toWalberla( centroid ) ).sqrLength();
-      for(uint_t i = 1; i < uint_t( 8 ); ++i)
+      for(uint_t i = 1; i < uint_t{ 8 }; ++i)
       {
          Scalar theSqDistance = ( childAABBs[i].center() - toWalberla( centroid ) ).sqrLength();
          if(theSqDistance < minSqDistance)
@@ -215,7 +215,7 @@ BranchNode<MeshType>::BranchNode( const shared_ptr< TriangleDistance<MeshType> >
       childTriangles[minIdx].push_back( *fhIt );
    }
 
-   for( uint_t i = 0; i < uint_t(8); ++i )
+   for( uint_t i = 0; i < uint_t{8}; ++i )
    {
       if( maxDepth == 0 || childTriangles[i].size() < minNumTriangles || theNumTriangles == childTriangles[i].size() )
          children_[i] = new LeafNode<MeshType>( triDistance, childTriangles[i] );

@@ -185,7 +185,7 @@ real_t Sample::mad() const
       real_t upperMedian = *upperMedianPosition;
       real_t lowerMedian = *std::max_element( deviations.begin(), upperMedianPosition );
       
-      return ( lowerMedian + upperMedian ) / real_t(2);
+      return ( lowerMedian + upperMedian ) / real_t{2};
    }
 }
 
@@ -202,7 +202,7 @@ real_t Sample::mad() const
 real_t Sample::giniCoefficient() const
 {
    WALBERLA_ASSERT_GREATER( size(), 1LU );
-   WALBERLA_ASSERT_GREATER( mean(), real_t(0) );
+   WALBERLA_ASSERT_GREATER( mean(), real_t{0} );
 
    real_t sum0 = 0;
    real_t sum1 = 0;
@@ -210,12 +210,12 @@ real_t Sample::giniCoefficient() const
 
    for(real_t it : *this)
    {
-      sum0 += it * real_t( i++ );
+      sum0 += it * static_cast< real_t >( i++ );
       sum1 += it;
    }
 
    const real_t theSize = real_c( size() );
-   return real_t(1) - ( real_t(2) / ( theSize - real_t(1) ) ) * ( theSize - sum0 / sum1 );
+   return real_t{1} - ( real_t{2} / ( theSize - real_t{1} ) ) * ( theSize - sum0 / sum1 );
 }
 
 /*******************************************************************************************************************//**

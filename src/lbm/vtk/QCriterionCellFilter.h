@@ -40,7 +40,7 @@ public:
          : velocityFieldId_(velocityFieldId), filter_(filter), lowerLimit_(lowerLimit), upperLimit_(upperLimit) {}
 
    void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage,
-         const uint_t ghostLayers = uint_t(0) ) {
+         const uint_t ghostLayers = uint_t{0} ) {
       const VelocityField_T* velocityField = block.getData< VelocityField_T >( velocityFieldId_ );
       WALBERLA_CHECK_NOT_NULLPTR(velocityField);
 

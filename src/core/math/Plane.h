@@ -66,7 +66,7 @@ private:
 };
 
 Plane::Plane() :
-   normal_( Vec3Real( real_t(1), real_t(0), real_t(0) ) ), d_( real_t(0) )
+   normal_( Vec3Real( real_t{1}, real_t{0}, real_t{0} ) ), d_( real_t{0} )
 {
 }
 

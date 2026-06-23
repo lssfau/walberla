@@ -112,7 +112,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
                                                                       const bool keepGlobalBlockInformation )
 {
    const Vector3<bool> periodic = configBlock.getParameter<Vector3<bool> >( "periodic",  Vector3<bool> (false) );
-   const real_t        dx       = configBlock.getParameter<real_t        >( "dx",        real_t(1)             );
+   const real_t        dx       = configBlock.getParameter<real_t        >( "dx",        real_t{1}             );
 
    Vector3<uint_t> cellsPerBlock;
    Vector3<uint_t> blocks;
@@ -157,7 +157,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
                blocks[0],        blocks[1],        blocks[2],         // blocks in x/y/z direction
                cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2],  // cells per block in x/y/z direction
                dx,                                                    // cell size
-               uint_t(0),                                             // maximum number of blocks per process
+               uint_t{0},                                             // maximum number of blocks per process
                true, false,                                           // include but don't force Metis
                periodic[0],      periodic[1],      periodic[2],       // periodicity
                keepGlobalBlockInformation                             // keep global block information
@@ -298,7 +298,7 @@ std::unique_ptr<SetupBlockForest> createSetupBlockForest(const math::AABB& simul
 
    WALBERLA_LOG_INFO_ON_ROOT( "Balancing " << sforest->getNumberOfBlocks() << " blocks for " << numberOfProcesses << " processes...");
 
-   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), memory_t(0), false, true );
+   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t{0}, memory_t{0}, false, true );
    return sforest;
 }
 
@@ -371,7 +371,7 @@ shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& m
    Vector3<bool> isPeriodic         = mainConf.getParameter<Vector3<bool>>("isPeriodic", Vector3<bool>(true, true, true));
    uint_t numberOfProcesses         = mainConf.getParameter<uint_t>( "numberOfProcesses",
                                                                   setupRun ? blocks[0] * blocks[1] * blocks[2] : uint_c(mpi::MPIManager::instance()->numProcesses()) );
-   uint_t initialRefinementLevel = mainConf.getParameter<uint_t>( "initialRefinementLevel", uint_t(0) );
+   uint_t initialRefinementLevel = mainConf.getParameter<uint_t>( "initialRefinementLevel", uint_t{0} );
 
    if( !mainConf.isDefined( "sbfFile" ) )
    {

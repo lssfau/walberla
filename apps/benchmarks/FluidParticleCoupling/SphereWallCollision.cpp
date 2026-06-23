@@ -178,7 +178,7 @@ public:
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
                                   NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
                                   MO_T( "MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
-                                  SimplePressure_T( "SimplePressure", SimplePressure_Flag, pdfField, real_t(1) ) );
+                                  SimplePressure_T( "SimplePressure", SimplePressure_Flag, pdfField, real_t{1} ) );
 
       if(applyOutflowBCAtTop_)
       {
@@ -231,7 +231,7 @@ public:
                          real_t diameter, real_t uIn, uint_t numberOfSubSteps) :
       ac_( ac ), sphereUid_( sphereUid ), fileName_( fileName ), fileIO_(fileIO),
       diameter_( diameter ), uIn_( uIn ), numberOfSubSteps_(numberOfSubSteps),
-      gap_( real_t(0) ), settlingVelocity_( real_t(0) )
+      gap_( real_t{0} ), settlingVelocity_( real_t{0} )
    {
       if ( fileIO_ )
       {
@@ -249,8 +249,8 @@ public:
    {
       real_t curTimestep = real_c(timeStep) + real_c(subStep) / real_c(numberOfSubSteps_);
 
-      Vector3<real_t> pos(real_t(0));
-      Vector3<real_t> transVel(real_t(0));
+      Vector3<real_t> pos(real_t{0});
+      Vector3<real_t> transVel(real_t{0});
 
       size_t idx = ac_->uidToIdx(sphereUid_);
       if( idx != std::numeric_limits<size_t>::max())
@@ -269,7 +269,7 @@ public:
       }
 
       position_ = pos;
-      gap_ = pos[2] - real_t(0.5) * diameter_;
+      gap_ = pos[2] - real_t{0.5} * diameter_;
       settlingVelocity_ = transVel[2];
 
       WALBERLA_ROOT_SECTION()
@@ -312,7 +312,7 @@ public:
          file << "#\t t\t t/tref\t gapSize\t gapSize/D\t velZ\t velZ/uIn\n";
          real_t tref = diameter_ / uIn_;
 
-         for( uint_t i = uint_t(0); i < gapLogging_.size(); ++i)
+         for( uint_t i = uint_t{0}; i < gapLogging_.size(); ++i)
          {
             int timestep = int(i) - int(tImpact);
             file << timestep << "\t" << real_c(timestep) / tref<< "\t"
@@ -454,7 +454,7 @@ template<typename ParticleAccessor_T>
 real_t getForce(walberla::id_t uid, ParticleAccessor_T & ac)
 {
    auto idx = ac.uidToIdx(uid);
-   real_t force = real_t(0);
+   real_t force = real_t{0};
    if(idx != ac.getInvalidIdx())
    {
       force = ac.getForce(idx)[2];
@@ -470,20 +470,20 @@ template< typename DensityInterpolator_T>
 void logDensityToFile(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID densityInterpolatorID, real_t surfaceDistance,
                       Vector3<real_t> spherePosition, real_t diameter, const std::string & fileName, uint_t timestep, real_t averageDensityInSystem )
 {
-   real_t evalRadius = real_t(0.5) * diameter + surfaceDistance;
+   real_t evalRadius = real_t{0.5} * diameter + surfaceDistance;
    std::vector< Vector3<real_t> > evaluationPositions;
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t(0), real_t(0), evalRadius));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t(2))), real_t(0), real_c(evalRadius / sqrt(real_t(2)))));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius, real_t(0), real_t(0)));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t(2))), real_t(0), -evalRadius / real_c(sqrt(real_t(2)))));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t(0), real_t(0), -evalRadius));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t{0}, real_t{0}, evalRadius));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t{2})), real_t{0}, real_c(evalRadius / sqrt(real_t{2}))));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius, real_t{0}, real_t{0}));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t{2})), real_t{0}, -evalRadius / real_c(sqrt(real_t{2}))));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t{0}, real_t{0}, -evalRadius));
 
-   std::vector<real_t> densityAtPos(evaluationPositions.size(), real_t(0));
+   std::vector<real_t> densityAtPos(evaluationPositions.size(), real_t{0});
 
    for( auto & block: *blocks)
    {
       auto densityInterpolator = block.getData<DensityInterpolator_T>(densityInterpolatorID);
-      for(auto i = uint_t(0); i < evaluationPositions.size(); ++i)
+      for(auto i = uint_t{0}; i < evaluationPositions.size(); ++i)
       {
          auto pos = evaluationPositions[i];
          if(block.getAABB().contains(pos))
@@ -493,7 +493,7 @@ void logDensityToFile(const shared_ptr<StructuredBlockStorage> & blocks, BlockDa
       }
    }
 
-   for(auto i = uint_t(0); i < densityAtPos.size(); ++i)
+   for(auto i = uint_t{0}; i < densityAtPos.size(); ++i)
    {
       // reduce to root
       mpi::reduceInplace(densityAtPos[i], mpi::SUM);
@@ -517,8 +517,8 @@ void logDensityToFile(const shared_ptr<StructuredBlockStorage> & blocks, BlockDa
 template< typename BoundaryHandling_T>
 real_t getAverageDensityInSystem(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID)
 {
-   real_t totalMass = real_t(0);
-   uint_t count = uint_t(0);
+   real_t totalMass = real_t{0};
+   uint_t count = uint_t{0};
    for( auto & block: *blocks)
    {
       auto pdfField = block.getData<PdfField_T>(pdfFieldID);
@@ -643,7 +643,7 @@ int main( int argc, char **argv )
    // -> no, this is not a good idea as the sphere in the experiments has in some cases not yet reached the terminal settling velocity
    // thus, it is better to pose the reported resulting Re as an input parameter
    const real_t uIn_SI = Re * kinematicViscosityFluid_SI / diameter_SI;
-   const real_t ug_SI = std::sqrt((densityRatio-real_t(1)) * gravitationalAcceleration_SI * diameter_SI);
+   const real_t ug_SI = std::sqrt((densityRatio-real_t{1}) * gravitationalAcceleration_SI * diameter_SI);
    const real_t Ga = ug_SI * diameter_SI / kinematicViscosityFluid_SI;
 
    //////////////////////////
@@ -651,34 +651,34 @@ int main( int argc, char **argv )
    //////////////////////////
 
    const real_t dx_SI = diameter_SI / diameter;
-   const real_t sphereVolume = math::pi / real_t(6) * diameter * diameter * diameter;
+   const real_t sphereVolume = math::pi / real_t{6} * diameter * diameter * diameter;
    const real_t dt_SI = uIn / uIn_SI * dx_SI;
    const real_t viscosity =  kinematicViscosityFluid_SI * dt_SI / ( dx_SI * dx_SI );
    const real_t gravitationalAcceleration = gravitationalAcceleration_SI * dt_SI * dt_SI / dx_SI;
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
 
    const real_t Re_p = diameter * uIn / viscosity;
-   const real_t St = densityRatio * uIn * diameter / ( real_t(9) * viscosity );
+   const real_t St = densityRatio * uIn * diameter / ( real_t{9} * viscosity );
 
    const real_t omegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
 
-   const real_t densityFluid = real_t(1);
+   const real_t densityFluid = real_t{1};
    const real_t densitySphere = densityRatio;
 
-   const real_t dx = real_t(1);
+   const real_t dx = real_t{1};
 
-   const real_t responseTime = densityRatio * diameter * diameter / ( real_t(18) * viscosity );
-   const real_t accelerationFactor = real_t(1) / (real_t(0.1) * responseTime);
+   const real_t responseTime = densityRatio * diameter * diameter / ( real_t{18} * viscosity );
+   const real_t accelerationFactor = real_t{1} / (real_t{0.1} * responseTime);
    const real_t tref = diameter / uIn;
 
    const real_t particleMass = densityRatio * sphereVolume;
-   const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
+   const real_t Mij = particleMass; // * particleMass / ( real_t{2} * particleMass ); // Mij = M for sphere-wall collision
 
-   const real_t uInCrit = real_t(9) * StCrit * viscosity / ( densityRatio * diameter);
+   const real_t uInCrit = real_t{9} * StCrit * viscosity / ( densityRatio * diameter);
 
    Vector3<uint_t> domainSize( uint_c(domainSizeNonDim[0] * diameter ), uint_c(domainSizeNonDim[1] * diameter ), uint_c(domainSizeNonDim[2] * diameter ) );
 
-   real_t initialSpherePosition = real_c(domainSize[2]) - real_t(1.5) * diameter;
+   real_t initialSpherePosition = real_c(domainSize[2]) - real_t{1.5} * diameter;
 
    if( randomizeInitialSpherePosition )
    {
@@ -686,7 +686,7 @@ int main( int argc, char **argv )
       mpi::broadcastObject(seed1); // root process chooses seed and broadcasts it
       std::mt19937 g1 (static_cast<unsigned int>(seed1));
 
-      real_t initialPositionOffset = real_t(0.5)*math::realRandom<real_t>(real_t(-1), real_t(1), g1);
+      real_t initialPositionOffset = real_t{0.5}*math::realRandom<real_t>(real_t{-1}, real_t{1}, g1);
       initialSpherePosition += initialPositionOffset;
    }
 
@@ -706,7 +706,7 @@ int main( int argc, char **argv )
    if(applyOutflowBCAtTop) WALBERLA_LOG_INFO_ON_ROOT(" - outflow BC at top");
    WALBERLA_LOG_INFO_ON_ROOT(" - sphere: diameter = " << diameter << ", density = " << densitySphere );
    WALBERLA_LOG_INFO_ON_ROOT(" - initial sphere position = " << initialSpherePosition );
-   WALBERLA_LOG_INFO_ON_ROOT(" - fluid: density = " << densityFluid << ", relaxation time (tau) = " << real_t(1) / omega << ", omega = " << omega << ", kin. visc = " << viscosity );
+   WALBERLA_LOG_INFO_ON_ROOT(" - fluid: density = " << densityFluid << ", relaxation time (tau) = " << real_t{1} / omega << ", omega = " << omega << ", kin. visc = " << viscosity );
    WALBERLA_LOG_INFO_ON_ROOT(" - magic number = " << magicNumber);
    WALBERLA_LOG_INFO_ON_ROOT(" - omega bulk = " << omegaBulk << ", bulk visc = " << lbm_mesapd_coupling::bulkViscosityFromOmegaBulk(omegaBulk) << " ( bulk visc rate factor (conste) = " << bulkViscRateFactor << ")");
    if(useOmegaBulkAdaption) WALBERLA_LOG_INFO_ON_ROOT(" - using omega bulk adaption in vicinity of sphere");
@@ -746,7 +746,7 @@ int main( int argc, char **argv )
    if( useLubricationCorrection )
    {
       WALBERLA_LOG_INFO_ON_ROOT("  - lubrication correction cut off = " << lubricationCutOffDistance );
-      WALBERLA_LOG_INFO_ON_ROOT("  - lubrication correction minimal gap size non dim = " << lubricationMinimalGapSizeNonDim  << " ( = " << lubricationMinimalGapSizeNonDim * diameter * real_t(0.5) << " cells )");
+      WALBERLA_LOG_INFO_ON_ROOT("  - lubrication correction minimal gap size non dim = " << lubricationMinimalGapSizeNonDim  << " ( = " << lubricationMinimalGapSizeNonDim * diameter * real_t{0.5} << " cells )");
    }
    WALBERLA_LOG_INFO_ON_ROOT("Coupling properties:" );
    WALBERLA_LOG_INFO_ON_ROOT(" - disable hydrodynamic forces during contact = " << (disableFluidForceDuringContact ? "yes" : "no") );
@@ -868,8 +868,8 @@ int main( int argc, char **argv )
    createPlaneSetup(ps,ss,blocks->getDomain(), applyOutflowBCAtTop);
 
    // create sphere and store Uid
-   Vector3<real_t> initialPosition( real_t(0.5) * real_c(domainSize[0]), real_t(0.5) * real_c(domainSize[1]), initialSpherePosition );
-   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t(0.5) );
+   Vector3<real_t> initialPosition( real_t{0.5} * real_c(domainSize[0]), real_t{0.5} * real_c(domainSize[1]), initialSpherePosition );
+   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t{0.5} );
    ss->shapes[sphereShape]->updateMassAndInertia(densitySphere);
 
    walberla::id_t sphereUid = 0;
@@ -890,11 +890,11 @@ int main( int argc, char **argv )
       {
          mesa_pd::data::Particle&& p = *ps->create();
          p.setPosition(initialPosition);
-         p.setInteractionRadius(diameter * real_t(0.5));
+         p.setInteractionRadius(diameter * real_t{0.5});
          p.setOwner(mpi::MPIManager::instance()->rank());
          p.setShapeID(sphereShape);
          p.setType(0);
-         if( initializeSphereVelocity ) p.setLinearVelocity(Vector3<real_t>(real_t(0), real_t(0), -real_t(0.1) * uIn));
+         if( initializeSphereVelocity ) p.setLinearVelocity(Vector3<real_t>(real_t{0}, real_t{0}, -real_t{0.1} * uIn));
          sphereUid = p.getUid();
       }
    }
@@ -933,16 +933,16 @@ int main( int argc, char **argv )
       WALBERLA_LOG_INFO_ON_ROOT( "Initializing PDF Field from checkpointing file!" );
       shared_ptr< lbm::internal::PdfFieldHandling< LatticeModel_T > > dataHandling =
             make_shared< lbm::internal::PdfFieldHandling< LatticeModel_T > >( blocks, latticeModel, false,
-                                                                              Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                              uint_t(1), field::fzyx );
+                                                                              Vector3< real_t >( real_t{0} ), real_t{1},
+                                                                              uint_t{1}, field::fzyx );
 
       pdfFieldID = blocks->loadBlockData( checkPointFileName+"_lbm.txt", dataHandling, "pdf field" );
 
    } else {
       // add PDF field
       pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field", latticeModel,
-                                                                Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                uint_t(1), field::fzyx );
+                                                                Vector3< real_t >( real_t{0} ), real_t{1},
+                                                                uint_t{1}, field::fzyx );
    }
 
 
@@ -965,21 +965,21 @@ int main( int argc, char **argv )
 
    // set up RPD functionality
    std::function<void(void)> syncCall = [&ps,&rpdDomain](){
-      const real_t overlap = real_t( 1.5 );
+      const real_t overlap = real_t{ 1.5 };
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
       syncNextNeighborFunc(*ps, *rpdDomain, overlap);
    };
 
    syncCall();
 
-   real_t timeStepSizeRPD = real_t(1)/real_t(numRPDSubCycles);
+   real_t timeStepSizeRPD = real_t{1}/static_cast< real_t >(numRPDSubCycles);
    mesa_pd::kernel::ExplicitEuler explEulerIntegrator(timeStepSizeRPD);
    mesa_pd::kernel::VelocityVerletPreForceUpdate  vvIntegratorPreForce(timeStepSizeRPD);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeRPD);
 
    // linear model
    mesa_pd::kernel::LinearSpringDashpot linearCollisionResponse(1);
-   linearCollisionResponse.setStiffnessAndDamping(0,0,restitutionCoeff,collisionTime,real_t(0),Mij); // no response in tangential direction
+   linearCollisionResponse.setStiffnessAndDamping(0,0,restitutionCoeff,collisionTime,real_t{0},Mij); // no response in tangential direction
 
    // nonlinear model for ACTM
    mesa_pd::kernel::NonLinearSpringDashpot nonLinearCollisionResponse(1, collisionTime);
@@ -991,11 +991,11 @@ int main( int argc, char **argv )
    mesa_pd::mpi::ReduceContactHistory reduceAndSwapContactHistory;
 
    // set up coupling functionality
-   Vector3<real_t> gravitationalForce( real_t(0), real_t(0), -(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume );
+   Vector3<real_t> gravitationalForce( real_t{0}, real_t{0}, -(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume );
    lbm_mesapd_coupling::AddForceOnParticlesKernel addGravitationalForce(gravitationalForce);
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
-   lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(viscosity, [lubricationMinimalGapSizeNonDim](real_t r){ return lubricationMinimalGapSizeNonDim * r;}, lubricationCutOffDistance, real_t(0), real_t(0) ); // no tangential components needed
+   lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(viscosity, [lubricationMinimalGapSizeNonDim](real_t r){ return lubricationMinimalGapSizeNonDim * r;}, lubricationCutOffDistance, real_t{0}, real_t{0} ); // no tangential components needed
    lbm_mesapd_coupling::ParticleMappingKernel<BoundaryHandling_T> particleMappingKernel(blocks, boundaryHandlingID);
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
 
@@ -1017,14 +1017,14 @@ int main( int argc, char **argv )
    fullPDFCommunicationScheme.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldID ) ); // full sync
 
    // create the timeloop
-   const uint_t timesteps = uint_c( real_t(3) * initialPosition[2] / uIn);
+   const uint_t timesteps = uint_c( real_t{3} * initialPosition[2] / uIn);
 
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
    timeloop.addFuncBeforeTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
    // vtk output
-   if( vtkIOFreq != uint_t(0) )
+   if( vtkIOFreq != uint_t{0} )
    {
       // sphere
       auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
@@ -1047,8 +1047,8 @@ int main( int argc, char **argv )
 
       pdfFieldVTK->addBeforeFunction( fullPDFCommunicationScheme );
 
-      AABB sliceAABB( real_t(0), real_c(domainSize[1])*real_t(0.5)-real_t(1), real_t(0),
-                      real_c(domainSize[0]), real_c(domainSize[1])*real_t(0.5)+real_t(1), real_c(domainSize[2]) );
+      AABB sliceAABB( real_t{0}, real_c(domainSize[1])*real_t{0.5}-real_t{1}, real_t{0},
+                      real_c(domainSize[0]), real_c(domainSize[1])*real_t{0.5}+real_t{1}, real_c(domainSize[2]) );
       vtk::AABBCellFilter aabbSliceFilter( sliceAABB );
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
@@ -1066,7 +1066,7 @@ int main( int argc, char **argv )
       timeloop.addFuncBeforeTimeStep( vtk::writeFiles( pdfFieldVTK ), "VTK (fluid field data)" );
 
       // omega bulk field
-      //timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t(0), false, baseFolder ), "VTK (omega bulk field)" );
+      //timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t{0}, false, baseFolder ), "VTK (omega bulk field)" );
    }
 
 
@@ -1075,8 +1075,8 @@ int main( int argc, char **argv )
    if(useOmegaBulkAdaption)
    {
       using OmegaBulkAdapter_T = lbm_mesapd_coupling::OmegaBulkAdapter<ParticleAccessor_T, lbm_mesapd_coupling::RegularParticlesSelector>;
-      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
-      real_t adaptionLayerSize = real_t(2);
+      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t{1});
+      real_t adaptionLayerSize = real_t{2};
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, lbm_mesapd_coupling::RegularParticlesSelector());
 
       // initial adaption
@@ -1112,7 +1112,7 @@ int main( int argc, char **argv )
    if( reconstructorType == "EAN" )
    {
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
-      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
+      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t{3}, true);
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
                                    << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum)), "PDF Restore" );
    }else if( reconstructorType == "Grad" )
@@ -1128,7 +1128,7 @@ int main( int argc, char **argv )
    }else if( reconstructorType == "Ext")
    {
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
-      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
+      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t{3}, true);
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
                                    << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
    } else
@@ -1159,21 +1159,21 @@ int main( int argc, char **argv )
    WcTimingPool timeloopTiming;
 
    // evaluation quantities
-   uint_t numBounces = uint_t(0);
-   uint_t tImpact = uint_t(0);
+   uint_t numBounces = uint_t{0};
+   uint_t tImpact = uint_t{0};
    std::vector<uint_t> impactTimes;
 
-   real_t curVel(real_t(0));
-   real_t oldVel(real_t(0));
-   real_t maxSettlingVel(real_t(0));
+   real_t curVel(real_t{0});
+   real_t oldVel(real_t{0});
+   real_t maxSettlingVel(real_t{0});
    std::vector<real_t> maxSettlingVelBetweenBounces;
 
-   real_t minGapSize(real_t(0));
-   real_t maxGapSize(real_t(0));
+   real_t minGapSize(real_t{0});
+   real_t maxGapSize(real_t{0});
    std::vector<real_t> maxGapSizeBetweenBounces;
 
-   real_t actualSt(real_t(0));
-   real_t actualRe(real_t(0));
+   real_t actualSt(real_t{0});
+   real_t actualRe(real_t{0});
 
    WALBERLA_LOG_INFO_ON_ROOT("Running for maximum of " << timesteps << " timesteps!");
    
@@ -1186,8 +1186,8 @@ int main( int argc, char **argv )
    pdfGhostLayerSync.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldID ) );
    pdfFieldVTKCollision->addBeforeFunction( pdfGhostLayerSync );
 
-   AABB boxAABB( initialPosition[0] - diameter, initialPosition[1] - diameter, -real_t(1),
-                 initialPosition[0] + diameter, initialPosition[1] + diameter, real_t(2) * diameter);
+   AABB boxAABB( initialPosition[0] - diameter, initialPosition[1] - diameter, -real_t{1},
+                 initialPosition[0] + diameter, initialPosition[1] + diameter, real_t{2} * diameter);
    vtk::AABBCellFilter aabbBoxFilter( boxAABB );
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
@@ -1221,11 +1221,11 @@ int main( int argc, char **argv )
          ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
-      real_t hydForce(real_t(0));
-      real_t lubForce(real_t(0));
-      real_t collisionForce(real_t(0));
+      real_t hydForce(real_t{0});
+      real_t lubForce(real_t{0});
+      real_t collisionForce(real_t{0});
 
-      for(auto subCycle = uint_t(0); subCycle < numRPDSubCycles; ++subCycle )
+      for(auto subCycle = uint_t{0}; subCycle < numRPDSubCycles; ++subCycle )
       {
 
          timeloopTiming["RPD"].start();
@@ -1243,7 +1243,7 @@ int main( int argc, char **argv )
                if(idx != accessor->getInvalidIdx())
                {
                   oldForce = accessor->getOldForce(idx);
-                  accessor->setOldForce(idx, Vector3<real_t>(real_t(0)));
+                  accessor->setOldForce(idx, Vector3<real_t>(real_t{0}));
                }
             }
 
@@ -1335,8 +1335,8 @@ int main( int argc, char **argv )
          {
             // overwrite velocity of particle with prescribed one
             lbm_mesapd_coupling::RegularParticlesSelector sphereSelector;
-            real_t newSphereVel = uIn * (std::exp(-accelerationFactor * real_t(i) ) - real_t(1));
-            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t(0), real_t(0), newSphereVel));}, *accessor);
+            real_t newSphereVel = uIn * (std::exp(-accelerationFactor * static_cast< real_t >(i) ) - real_t{1});
+            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t{0}, real_t{0}, newSphereVel));}, *accessor);
          }
 
          timeloopTiming["RPD"].end();
@@ -1362,33 +1362,33 @@ int main( int argc, char **argv )
       maxSettlingVel = std::min(maxSettlingVel, curVel);
       minGapSize = std::min(minGapSize, logger.getGapSize());
 
-      if(numBounces >= uint_t(1))
+      if(numBounces >= uint_t{1})
       {
          maxGapSize = std::max(maxGapSize, logger.getGapSize());
       }
 
       // detect a bounce
-      if( oldVel < real_t(0) && curVel > real_t(0) && logger.getGapSize() < real_t(1))
+      if( oldVel < real_t{0} && curVel > real_t{0} && logger.getGapSize() < real_t{1})
       {
 
          ++numBounces;
          WALBERLA_LOG_INFO_ON_ROOT("Detected bounce number " << numBounces);
-         WALBERLA_LOG_INFO_ON_ROOT("Max settling velocity " << maxSettlingVel << " -> St = "  << densityRatio * std::abs(maxSettlingVel) * diameter / ( real_t(9) * viscosity ) );
+         WALBERLA_LOG_INFO_ON_ROOT("Max settling velocity " << maxSettlingVel << " -> St = "  << densityRatio * std::abs(maxSettlingVel) * diameter / ( real_t{9} * viscosity ) );
 
-         if(numBounces == uint_t(1))
+         if(numBounces == uint_t{1})
          {
-            actualSt = densityRatio * std::abs(maxSettlingVel) * diameter / ( real_t(9) * viscosity );
+            actualSt = densityRatio * std::abs(maxSettlingVel) * diameter / ( real_t{9} * viscosity );
             actualRe = std::abs(maxSettlingVel) * diameter / viscosity;
          }
 
          // reset and store quantities
          maxSettlingVelBetweenBounces.push_back(maxSettlingVel);
-         maxSettlingVel = real_t(0);
+         maxSettlingVel = real_t{0};
 
-         if(numBounces > uint_t(1))
+         if(numBounces > uint_t{1})
          {
             maxGapSizeBetweenBounces.push_back(maxGapSize);
-            maxGapSize = real_t(0);
+            maxGapSize = real_t{0};
          }
 
          if( numBounces >= numberOfBouncesUntilTermination )
@@ -1398,7 +1398,7 @@ int main( int argc, char **argv )
       }
 
       // impact times are measured when the contact between sphere and wall is broken up again
-      if( tImpact == uint_t(0) && numBounces == uint_t(1) && logger.getGapSize() > real_t(0) )
+      if( tImpact == uint_t{0} && numBounces == uint_t{1} && logger.getGapSize() > real_t{0} )
       {
          tImpact = i;
          WALBERLA_LOG_INFO_ON_ROOT("Detected impact time at time step " << tImpact);
@@ -1407,7 +1407,7 @@ int main( int argc, char **argv )
          if(vtkOutputOnCollision) vtkOutputOnCollision = false;
       }
 
-      if( numBounces > impactTimes.size() && logger.getGapSize() > real_t(0))
+      if( numBounces > impactTimes.size() && logger.getGapSize() > real_t{0})
       {
          impactTimes.push_back(i);
       }
@@ -1416,7 +1416,7 @@ int main( int argc, char **argv )
       if(fileIO)
       {
          std::string densityLoggingFileName(baseFolder + "/DensityLogging.txt");
-         if(i == uint_t(0))
+         if(i == uint_t{0})
          {
             WALBERLA_ROOT_SECTION()
             {
@@ -1427,14 +1427,14 @@ int main( int argc, char **argv )
             }
          }
 
-         real_t surfaceDistance = real_t(2);
+         real_t surfaceDistance = real_t{2};
          real_t avgDensity = getAverageDensityInSystem<BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID);
          logDensityToFile<DensityInterpolator_T>(blocks, densityInterpolatorID, surfaceDistance, logger.getPosition(), diameter, densityLoggingFileName, i, avgDensity);
       }
 
 
       // check if sphere is close to bottom plane
-      if( logger.getGapSize() < real_t(1) * diameter ) {
+      if( logger.getGapSize() < real_t{1} * diameter ) {
 
          // write a single checkpointing file before any collision relevant parameters take effect
          if( writeCheckPointFile )
@@ -1452,7 +1452,7 @@ int main( int argc, char **argv )
 
       }
 
-      if(vtkOutputOnCollision && logger.getGapSize() < real_t(0))
+      if(vtkOutputOnCollision && logger.getGapSize() < real_t{0})
       {
          pdfFieldVTKCollision->write();
       }
@@ -1463,7 +1463,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("Maximum settling velocities: " );
    for( auto vel : maxSettlingVelBetweenBounces)
    {
-      WALBERLA_LOG_INFO_ON_ROOT(" - vel = " << vel << " -> St = "  << densityRatio * std::abs(vel) * diameter / ( real_t(9) * viscosity ) << ", Re = " << std::abs(vel) * diameter / viscosity );
+      WALBERLA_LOG_INFO_ON_ROOT(" - vel = " << vel << " -> St = "  << densityRatio * std::abs(vel) * diameter / ( real_t{9} * viscosity ) << ", Re = " << std::abs(vel) * diameter / viscosity );
    }
    WALBERLA_LOG_INFO_ON_ROOT("Maximum gap sizes between bounces:")
    for( auto gapSize : maxGapSizeBetweenBounces)
@@ -1508,20 +1508,20 @@ int main( int argc, char **argv )
       file << "actual St = " << actualSt << "\n";
       file << "actual Re = " << actualRe << "\n";
       file << "impact times:\n";
-      uint_t bounce = uint_t(0);
+      uint_t bounce = uint_t{0};
       for( auto impact : impactTimes)
       {
          file << " - " << bounce++ << ": impact time = " << impact << "\n";
       }
       file << "settling velocities:\n";
-      bounce = uint_t(0);
+      bounce = uint_t{0};
       for( auto vel : maxSettlingVelBetweenBounces)
       {
-        file << " - " << bounce++ << ": vel = " << vel << " -> St = "  << densityRatio * std::abs(vel) * diameter / ( real_t(9) * viscosity ) << ", Re = " << std::abs(vel) * diameter / viscosity << "\n";
+        file << " - " << bounce++ << ": vel = " << vel << " -> St = "  << densityRatio * std::abs(vel) * diameter / ( real_t{9} * viscosity ) << ", Re = " << std::abs(vel) * diameter / viscosity << "\n";
       }
-      file << "maximal overlap = " << std::abs(minGapSize) << " (" << std::abs(minGapSize)/diameter * real_t(100) << "%)\n";
+      file << "maximal overlap = " << std::abs(minGapSize) << " (" << std::abs(minGapSize)/diameter * real_t{100} << "%)\n";
       file << "maximum gap sizes:\n";
-      bounce = uint_t(1);
+      bounce = uint_t{1};
       for( auto gapSize : maxGapSizeBetweenBounces)
       {
          file << " - " << bounce++ << ": gap size = " << gapSize << ", gap size / diameter = "  << gapSize / diameter << "\n";

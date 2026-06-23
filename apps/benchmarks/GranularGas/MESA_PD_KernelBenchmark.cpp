@@ -212,7 +212,7 @@ int main( int argc, char ** argv )
    data::LinkedCells     lc(localDomain.getExtended(params.spacing), params.spacing );
 
    auto  smallSphere = ss->create<data::Sphere>( params.radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(),
@@ -228,7 +228,7 @@ int main( int argc, char ** argv )
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
 
-   auto shift = (params.spacing - params.radius - params.radius) * real_t(0.5);
+   auto shift = (params.spacing - params.radius - params.radius) * real_t{0.5};
    auto confiningDomain = simulationDomain.getExtended(shift);
 
    if (!forest->isPeriodic(0))
@@ -266,13 +266,13 @@ int main( int argc, char ** argv )
    kernel::AssocToBlock                  assoc(forest);
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 sd(1);
-   sd.setDampingT (0, 0, real_t(0));
-   sd.setFriction (0, 0, real_t(0));
-   sd.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
+   sd.setDampingT (0, 0, real_t{0});
+   sd.setFriction (0, 0, real_t{0});
+   sd.setParametersFromCOR(0, 0, real_t{0.9}, params.dt*real_t{20}, ss->shapes[smallSphere]->getMass() * real_t{0.5});
    kernel::SpringDashpotSpring           sds(1);
-   sds.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
-   sds.setCoefficientOfFriction(0,0,real_t(0.4));
-   sds.setStiffnessT(0,0,real_t(0.9) * sds.getStiffnessN(0,0));
+   sds.setParametersFromCOR(0, 0, real_t{0.9}, params.dt*real_t{20}, ss->shapes[smallSphere]->getMass() * real_t{0.5});
+   sds.setCoefficientOfFriction(0,0,real_t{0.4});
+   sds.setStiffnessT(0,0,real_t{0.9} * sds.getStiffnessN(0,0));
 
    mpi::ReduceProperty                   RP;
    mpi::SyncNextNeighbors                SNN;

@@ -89,7 +89,7 @@ inline ForceLJ::ForceLJ(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
-   {{param}}.resize(numParticleTypes * numParticleTypes, real_t(0));
+   {{param}}.resize(numParticleTypes * numParticleTypes, real_t{0});
    {%- endfor %}
 }
 
@@ -124,10 +124,10 @@ inline void ForceLJ::operator()(const size_t p_idx, const size_t np_idx, Accesso
    {
       Vec3 dir = ac.getPosition(p_idx) - ac.getPosition(np_idx);
       const real_t rsq = sqrLength(dir);
-      const real_t sr2 = real_t(1.0) / rsq;
+      const real_t sr2 = real_t{1.0} / rsq;
       const real_t sr2sigma = sr2 * getSigma(ac.getType(p_idx), ac.getType(np_idx)) * getSigma(ac.getType(p_idx), ac.getType(np_idx));
       const real_t sr6 = sr2sigma * sr2sigma * sr2sigma;
-      const real_t force = real_t(48) * sr6 * ( sr6 - real_t(0.5) ) * sr2 * getEpsilon(ac.getType(p_idx), ac.getType(np_idx));
+      const real_t force = real_t{48} * sr6 * ( sr6 - real_t{0.5} ) * sr2 * getEpsilon(ac.getType(p_idx), ac.getType(np_idx));
       const Vec3 f = force * dir;
 
       // Add normal force at contact point

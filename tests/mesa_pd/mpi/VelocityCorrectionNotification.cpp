@@ -64,14 +64,14 @@ int main( int argc, char ** argv )
    const auto linVel = Vec3(1,2,3);
    const auto angVel = Vec3(-1,-2,-3);
 
-   Vec3 pt(real_t(0.1), real_t(0.1),real_t(0.1));
+   Vec3 pt(real_t{0.1}, real_t{0.1},real_t{0.1});
 
    for (auto& iBlk : *forest)
    {
       if(iBlk.getAABB().contains(pt)) {
          auto p                       = ps.create();
          p->getPositionRef()          = pt;
-         p->getInteractionRadiusRef() = real_t(1.0);
+         p->getInteractionRadiusRef() = real_t{1.0};
          p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
          p->getTypeRef()              = 0;
          p->getLinearVelocityRef()    = linVel;
@@ -84,7 +84,7 @@ int main( int argc, char ** argv )
    mesa_pd::mpi::SyncNextNeighbors snn;
    snn(ps, domain);
 
-   auto relax_param = real_t(0.8);
+   auto relax_param = real_t{0.8};
    VelocityUpdateNotification::Parameters::relaxationParam = relax_param;
    mesa_pd::mpi::ReduceProperty reductionKernel;
    mesa_pd::mpi::BroadcastProperty broadcastKernel;
@@ -93,8 +93,8 @@ int main( int argc, char ** argv )
 
    // Reduce dv
    // dv per process
-   auto dvprocess = Vec3(real_t(0.1),real_t(0.1),real_t(0.1));
-   auto dwprocess = Vec3(real_t(0.05),real_t(0.1),real_t(0.15));
+   auto dvprocess = Vec3(real_t{0.1},real_t{0.1},real_t{0.1});
+   auto dwprocess = Vec3(real_t{0.05},real_t{0.1},real_t{0.15});
    ps.setDv(0, dvprocess);
    ps.setDw(0, dwprocess);
    reductionKernel.operator()<VelocityCorrectionNotification>(ps);
@@ -104,8 +104,8 @@ int main( int argc, char ** argv )
       if(iBlk.getAABB().contains(pt)) {
          WALBERLA_CHECK_FLOAT_EQUAL(ps.getLinearVelocity(0), linVel);
          WALBERLA_CHECK_FLOAT_EQUAL(ps.getAngularVelocity(0), angVel);
-         WALBERLA_CHECK_FLOAT_EQUAL(ps.getDv(0), real_t(np) * dvprocess);
-         WALBERLA_CHECK_FLOAT_EQUAL(ps.getDw(0), real_t(np) * dwprocess);
+         WALBERLA_CHECK_FLOAT_EQUAL(ps.getDv(0), static_cast< real_t >(np) * dvprocess);
+         WALBERLA_CHECK_FLOAT_EQUAL(ps.getDw(0), static_cast< real_t >(np) * dwprocess);
       }
    }
 
@@ -115,13 +115,13 @@ int main( int argc, char ** argv )
    // Broadcast v
    reductionKernel.operator()<VelocityCorrectionNotification>(ps);
    if(np > 1){
-      WALBERLA_CHECK_FLOAT_EQUAL(ps.getLinearVelocity(0), linVel + relax_param * real_t(np) * dvprocess);
-      WALBERLA_CHECK_FLOAT_EQUAL(ps.getAngularVelocity(0), angVel + relax_param * real_t(np) * dwprocess);
+      WALBERLA_CHECK_FLOAT_EQUAL(ps.getLinearVelocity(0), linVel + relax_param * static_cast< real_t >(np) * dvprocess);
+      WALBERLA_CHECK_FLOAT_EQUAL(ps.getAngularVelocity(0), angVel + relax_param * static_cast< real_t >(np) * dwprocess);
       WALBERLA_CHECK_FLOAT_EQUAL(ps.getDv(0), Vec3());
       WALBERLA_CHECK_FLOAT_EQUAL(ps.getDw(0), Vec3());
    }else{
-      WALBERLA_CHECK_FLOAT_EQUAL(ps.getLinearVelocity(0) + ps.getDv(0), linVel + real_t(np) * dvprocess);
-      WALBERLA_CHECK_FLOAT_EQUAL(ps.getAngularVelocity(0) + ps.getDw(0), angVel + real_t(np) * dwprocess);
+      WALBERLA_CHECK_FLOAT_EQUAL(ps.getLinearVelocity(0) + ps.getDv(0), linVel + static_cast< real_t >(np) * dvprocess);
+      WALBERLA_CHECK_FLOAT_EQUAL(ps.getAngularVelocity(0) + ps.getDw(0), angVel + static_cast< real_t >(np) * dwprocess);
    }
 
    return EXIT_SUCCESS;

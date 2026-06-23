@@ -31,7 +31,7 @@ namespace data {
 class Ellipsoid : public BaseShape
 {
 public:
-   explicit Ellipsoid(const Vec3& semiAxes = Vec3(real_t(1)))
+   explicit Ellipsoid(const Vec3& semiAxes = Vec3(real_t{1}))
       : BaseShape(Ellipsoid::SHAPE_TYPE)
       , semiAxes_(semiAxes)
    {}
@@ -62,7 +62,7 @@ void Ellipsoid::updateMassAndInertia(const real_t density)
          real_c(0.2) * m * (semiAxes_[0] * semiAxes_[0] + semiAxes_[1] * semiAxes_[1]));
 
    mass_         = m;
-   invMass_      = real_t(1.0) / m;
+   invMass_      = real_t{1.0} / m;
    inertiaBF_    = I;
    invInertiaBF_ = I.getInverse();
 }
@@ -72,7 +72,7 @@ Vec3 Ellipsoid::support( const Vec3& d_loc ) const
 {
    Vec3 norm_vec(d_loc[0] * semiAxes_[0], d_loc[1] * semiAxes_[1], d_loc[2] * semiAxes_[2]);
    real_t norm_length = norm_vec.length();
-   Vec3 local_support = (real_t(1.0) / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
+   Vec3 local_support = (real_t{1.0} / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
          semiAxes_[1] * semiAxes_[1] * d_loc[1],
          semiAxes_[2] * semiAxes_[2] * d_loc[2]);
    return local_support;

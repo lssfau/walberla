@@ -47,12 +47,12 @@ std::vector<T> parseStringToVector(std::string inputStr)
 
 real_t radiusFromSphereVolume(real_t volume)
 {
-   return std::cbrt(real_t(3) / ( real_t(4) * math::pi) * volume);
+   return std::cbrt(real_t{3} / ( real_t{4} * math::pi) * volume);
 }
 
 real_t diameterFromSphereVolume(real_t volume)
 {
-   return real_t(2) * radiusFromSphereVolume(volume);
+   return real_t{2} * radiusFromSphereVolume(volume);
 }
 
 uint_t getIndexOfSecondSemiAxis(Vector3<real_t> semiAxes)
@@ -99,10 +99,10 @@ std::vector<real_t> getMeanDiametersFromSieveSizes(const std::vector<real_t>& si
 // if totalMass and density are given actual numbers, the resulting particle numbers are a good estimate for the actual numbers
 // else, the resulting numbers are directly proportional to the actual ones, which is sufficient to define the distributions
 std::vector<real_t> transferMassFractionsToParticleNumbersFromAvgVolumes(const std::vector<real_t>& massFractions, const std::vector<real_t>& avgVolumePerSizeFraction,
-                                                                         real_t totalMass = real_t(1), real_t density = real_t(1) )
+                                                                         real_t totalMass = real_t{1}, real_t density = real_t{1} )
 {
    WALBERLA_CHECK_EQUAL(avgVolumePerSizeFraction.size(), massFractions.size(), "Number of entries in volume and mass-fraction array has to be the same!");
-   std::vector<real_t> particleNumbers(massFractions.size(), real_t(0));
+   std::vector<real_t> particleNumbers(massFractions.size(), real_t{0});
    for(uint_t n = 0; n < massFractions.size(); ++n )
    {
       if(avgVolumePerSizeFraction[n] > 0_r) particleNumbers[n] = totalMass * massFractions[n] / (density * avgVolumePerSizeFraction[n]);
@@ -112,10 +112,10 @@ std::vector<real_t> transferMassFractionsToParticleNumbersFromAvgVolumes(const s
 
 // note: normalVolume is the volume of a typical particle with diameter = 1. For sphere: PI / 6
 std::vector<real_t> transferMassFractionsToParticleNumbers(const std::vector<real_t>& massFractions, const std::vector<real_t>& diameters,
-                                                           real_t normalVolume = math::pi / real_t(6), real_t totalMass = real_t(1), real_t density = real_t(1) )
+                                                           real_t normalVolume = math::pi / real_t{6}, real_t totalMass = real_t{1}, real_t density = real_t{1} )
 {
    WALBERLA_CHECK_EQUAL(diameters.size(), massFractions.size(), "Number of entries in diameter and mass-fraction array has to be the same!");
-   std::vector<real_t> avgVolumePerSizeFraction(massFractions.size(), real_t(0));
+   std::vector<real_t> avgVolumePerSizeFraction(massFractions.size(), real_t{0});
    for(uint_t n = 0; n < massFractions.size(); ++n )
    {
       avgVolumePerSizeFraction[n] = normalVolume * diameters[n] * diameters[n] * diameters[n];
@@ -169,7 +169,7 @@ auto createPlane( std::shared_ptr<data::ParticleStorage> particleStorage,
    auto p = particleStorage->create(true);
    p->setPosition( pos );
    p->setBaseShape( std::make_shared<data::HalfSpace>( normal ) );
-   p->getBaseShapeRef()->updateMassAndInertia(real_t(1));
+   p->getBaseShapeRef()->updateMassAndInertia(real_t{1});
    p->setOwner( walberla::mpi::MPIManager::instance()->rank() );
    p->setType( 0 );
    p->setInteractionRadius(std::numeric_limits<real_t>::infinity());
@@ -187,7 +187,7 @@ auto createCylindricalBoundary( std::shared_ptr<data::ParticleStorage> particleS
    auto p = particleStorage->create(true);
    p->setPosition( pos );
    p->setBaseShape( std::make_shared<data::CylindricalBoundary>( radius, axis ) );
-   p->getBaseShapeRef()->updateMassAndInertia(real_t(1));
+   p->getBaseShapeRef()->updateMassAndInertia(real_t{1});
    p->setOwner( walberla::mpi::MPIManager::instance()->rank() );
    p->setType( 0 );
    p->setInteractionRadius(std::numeric_limits<real_t>::infinity());
@@ -218,7 +218,7 @@ void writeParticleInformationToFile(const std::string& filename, const std::stri
 template< typename ParticleAccessor_T>
 void fixParticlesBelowFixingHeight(ParticleAccessor_T & ac, real_t particleFixingHeight)
 {
-   for(uint_t i = uint_t(0); i < ac.size(); ++i) {
+   for(uint_t i = uint_t{0}; i < ac.size(); ++i) {
       if( !data::particle_flags::isSet(ac.getFlagsRef(i), data::particle_flags::GLOBAL) )
       {
          auto posZ = ac.getPosition(i)[2];

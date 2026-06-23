@@ -190,7 +190,7 @@ namespace walberla {
 
          WALBERLA_ASSERT_NOT_IDENTICAL(wallAxis, flowAxis, "Wall and flow axis must be different.")
 
-         const auto sizeFactor = channelHalfWidth / uint_t(10);
+         const auto sizeFactor = channelHalfWidth / uint_t{10};
          if( !sizeFlowAxis) sizeFlowAxis = sizeFactor * 64;
          if( !sizeRemainingAxis) sizeRemainingAxis = sizeFactor * 32;
 
@@ -201,7 +201,7 @@ namespace walberla {
          periodicity[wallAxis] = false;
 
          boundaryCondition = config.getParameter<std::string>("wall_boundary_condition", "WFB");
-         velocityFilterWidth = targetFrictionVelocity / real_t(channelHalfWidth);
+         velocityFilterWidth = targetFrictionVelocity / static_cast< real_t >(channelHalfWidth);
          WALBERLA_LOG_INFO_ON_ROOT("velocity filter width = " << velocityFilterWidth)
          samplingShift = config.getParameter<uint_t>("sampling_shift", 0);
 
@@ -506,8 +506,8 @@ namespace walberla {
          std::vector<real_t> tkeResolvedVector(parameters_->channelHalfWidth, 0_r);
          std::vector<real_t> reynoldsStressVector(parameters_->channelHalfWidth * TensorField_T::F_SIZE, 0_r);
 
-         const auto idxFlow = int_c(parameters_->domainSize[parameters_->flowAxis] / uint_t(2));
-         const auto idxRem = int_c(parameters_->domainSize[3 - parameters_->flowAxis - parameters_->wallAxis] / uint_t(2));
+         const auto idxFlow = int_c(parameters_->domainSize[parameters_->flowAxis] / uint_t{2});
+         const auto idxRem = int_c(parameters_->domainSize[3 - parameters_->flowAxis - parameters_->wallAxis] / uint_t{2});
 
          Cell point;
          point[parameters_->flowAxis] = idxFlow;

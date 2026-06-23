@@ -42,7 +42,7 @@ public:
     {
        {% if kind == 'pull' %}
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeSliceBeforeGhostlayerXYZ(
-                *getField( block ), dir, uint_t( 1 ), getOptimizedCommunicationIndices( dir ), false ) );
+                *getField( block ), dir, uint_t{ 1 }, getOptimizedCommunicationIndices( dir ), false ) );
        {% else %}
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeGhostLayerOnlyXYZ(
                 *getField( block ), dir, false, getOptimizedCommunicationIndices( dir ) ) );
@@ -56,7 +56,7 @@ public:
                 *getField( block ), dir, false, getOptimizedCommunicationIndices( stencil::inverseDir[dir] ) ) );
         {% else %}
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeSliceBeforeGhostlayerXYZ(
-                *getField( block ), dir, uint_t( 1 ), getOptimizedCommunicationIndices( stencil::inverseDir[dir] ), false ) );
+                *getField( block ), dir, uint_t{ 1 }, getOptimizedCommunicationIndices( stencil::inverseDir[dir] ), false ) );
         {% endif %}
     }
 

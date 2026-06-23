@@ -100,27 +100,27 @@ void testOctantCopy( const SourceField & src, TargetField & dst )
 
    const CellInterval fullInterval = src.xyzSize();
 
-   cell_idx_t xMid = fullInterval.xMin() + cell_idx_t( fullInterval.xSize() ) / cell_idx_t( 2 );
-   cell_idx_t yMid = fullInterval.yMin() + cell_idx_t( fullInterval.ySize() ) / cell_idx_t( 2 );
-   cell_idx_t zMid = fullInterval.zMin() + cell_idx_t( fullInterval.ySize() ) / cell_idx_t( 2 );
+   cell_idx_t xMid = fullInterval.xMin() + cell_idx_c( fullInterval.xSize() ) / cell_idx_t{ 2 };
+   cell_idx_t yMid = fullInterval.yMin() + cell_idx_c( fullInterval.ySize() ) / cell_idx_t{ 2 };
+   cell_idx_t zMid = fullInterval.zMin() + cell_idx_c( fullInterval.ySize() ) / cell_idx_t{ 2 };
 
    std::array<CellInterval, 8> octants = {
       CellInterval( fullInterval.xMin(),  fullInterval.yMin(),  fullInterval.zMin(),  xMid,                 yMid,                 zMid                ),
-      CellInterval( fullInterval.xMin(),  fullInterval.yMin(),  zMid + cell_idx_t(1), xMid,                 yMid,                 fullInterval.zMax() ),
-      CellInterval( fullInterval.xMin(),  yMid + cell_idx_t(1), fullInterval.zMin(),  xMid,                 fullInterval.yMax(),  zMid                ),
-      CellInterval( fullInterval.xMin(),  yMid + cell_idx_t(1), zMid + cell_idx_t(1), xMid,                 fullInterval.yMax(),  fullInterval.zMax() ),
-      CellInterval( xMid + cell_idx_t(1), fullInterval.yMin(),  fullInterval.zMin(),  fullInterval.xMax(),  yMid,                 zMid                ),
-      CellInterval( xMid + cell_idx_t(1), fullInterval.yMin(),  zMid + cell_idx_t(1), fullInterval.xMax(),  yMid,                 fullInterval.zMax() ),
-      CellInterval( xMid + cell_idx_t(1), yMid + cell_idx_t(1), fullInterval.zMin(),  fullInterval.xMax(),  fullInterval.yMax(),  zMid                ),
-      CellInterval( xMid + cell_idx_t(1), yMid + cell_idx_t(1), zMid + cell_idx_t(1), fullInterval.xMax(),  fullInterval.yMax(),  fullInterval.zMax() )
+      CellInterval( fullInterval.xMin(),  fullInterval.yMin(),  zMid + cell_idx_t{1}, xMid,                 yMid,                 fullInterval.zMax() ),
+      CellInterval( fullInterval.xMin(),  yMid + cell_idx_t{1}, fullInterval.zMin(),  xMid,                 fullInterval.yMax(),  zMid                ),
+      CellInterval( fullInterval.xMin(),  yMid + cell_idx_t{1}, zMid + cell_idx_t{1}, xMid,                 fullInterval.yMax(),  fullInterval.zMax() ),
+      CellInterval( xMid + cell_idx_t{1}, fullInterval.yMin(),  fullInterval.zMin(),  fullInterval.xMax(),  yMid,                 zMid                ),
+      CellInterval( xMid + cell_idx_t{1}, fullInterval.yMin(),  zMid + cell_idx_t{1}, fullInterval.xMax(),  yMid,                 fullInterval.zMax() ),
+      CellInterval( xMid + cell_idx_t{1}, yMid + cell_idx_t{1}, fullInterval.zMin(),  fullInterval.xMax(),  fullInterval.yMax(),  zMid                ),
+      CellInterval( xMid + cell_idx_t{1}, yMid + cell_idx_t{1}, zMid + cell_idx_t{1}, fullInterval.xMax(),  fullInterval.yMax(),  fullInterval.zMax() )
    };
 
    WALBERLA_CHECK( src != dst );
 
    for( const auto& it : octants )
    {
-      MPI_Datatype srcType = mpiDatatypeSliceXYZ( src, it, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
-      MPI_Datatype dstType = mpiDatatypeSliceXYZ( dst, it, cell_idx_t( 0 ), cell_idx_c( dst.fSize() ) - cell_idx_t( 1 ) );
+      MPI_Datatype srcType = mpiDatatypeSliceXYZ( src, it, cell_idx_t{ 0 }, cell_idx_c( src.fSize() ) - cell_idx_t{ 1 } );
+      MPI_Datatype dstType = mpiDatatypeSliceXYZ( dst, it, cell_idx_t{ 0 }, cell_idx_c( dst.fSize() ) - cell_idx_t{ 1 } );
 
       MPI_Type_commit( &srcType );
       MPI_Type_commit( &dstType );
@@ -170,7 +170,7 @@ void testSlicedFCopy( const SourceField & src, TargetField & dst )
 
    for( cell_idx_t f = 0; f < cell_idx_c( src.fSize() ); ++f )
    {
-      if( f % cell_idx_t( 2 ) == 0 )
+      if( f % cell_idx_t{ 2 } == 0 )
          evenFs.insert( f );
       else
          oddFs.insert( f );
@@ -251,7 +251,7 @@ void testIntervalCopy( const SourceField & src, TargetField & dst )
       CellInterval testInterval = fieldInterval;
       testInterval.xMin() = testInterval.xMax() = x;
 
-      testIntervalCopy( src, dst, testInterval, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
+      testIntervalCopy( src, dst, testInterval, cell_idx_t{ 0 }, cell_idx_c( src.fSize() ) - cell_idx_t{ 1 } );
    }
 
    for( cell_idx_t y = fieldInterval.yMin(); y <= fieldInterval.yMax(); ++y )
@@ -259,7 +259,7 @@ void testIntervalCopy( const SourceField & src, TargetField & dst )
       CellInterval testInterval = fieldInterval;
       testInterval.yMin() = testInterval.yMax() = y;
 
-      testIntervalCopy( src, dst, testInterval, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
+      testIntervalCopy( src, dst, testInterval, cell_idx_t{ 0 }, cell_idx_c( src.fSize() ) - cell_idx_t{ 1 } );
    }
 
    for( cell_idx_t z = fieldInterval.zMin(); z <= fieldInterval.zMax(); ++z )
@@ -267,7 +267,7 @@ void testIntervalCopy( const SourceField & src, TargetField & dst )
       CellInterval testInterval = fieldInterval;
       testInterval.zMin() = testInterval.zMax() = z;
 
-      testIntervalCopy( src, dst, testInterval, cell_idx_t( 0 ), cell_idx_c( src.fSize() ) - cell_idx_t( 1 ) );
+      testIntervalCopy( src, dst, testInterval, cell_idx_t{ 0 }, cell_idx_c( src.fSize() ) - cell_idx_t{ 1 } );
    }
 
    for( cell_idx_t f = 0; f < cell_idx_c( src.fSize() ); ++f )
@@ -283,7 +283,7 @@ void runTests( SourceField & srcField, TargetField & dstField )
    dstField.set( 0.0 );
    testFullCopy( srcField, dstField );
 
-   if( srcField.xSize() > uint_t( 1 ) && srcField.ySize() > uint_t( 1 ) && srcField.zSize() > uint_t( 1 ) )
+   if( srcField.xSize() > uint_t{ 1 } && srcField.ySize() > uint_t{ 1 } && srcField.zSize() > uint_t{ 1 } )
    {
       dstField.set( 0.0 );
       testOctantCopy( srcField, dstField );

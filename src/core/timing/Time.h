@@ -107,7 +107,7 @@ inline std::string timeToString(real_t time)
       time -= tmp * sPerMin;
    }
 
-   result << std::floor(time + real_t(0.5)) << "s ";
+   result << std::round(time) << "s ";
 
    return result.str();
 }

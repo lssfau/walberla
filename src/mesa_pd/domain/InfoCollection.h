@@ -84,7 +84,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, blockforest::In
       const blockforest::Block* block   = static_cast<const blockforest::Block*> (&(*blockIt));
 
       BlockInfo& info = ic[block->getId()];
-      for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+      for( uint_t nb = uint_t{0}; nb < block->getNeighborhoodSize(); ++nb )
       {
          bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), info);
       }
@@ -95,7 +95,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, blockforest::In
 
          BlockInfo& childInfo = ic[childID];
 
-         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+         for( uint_t nb = uint_t{0}; nb < block->getNeighborhoodSize(); ++nb )
          {
             bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, childInfo);
          }

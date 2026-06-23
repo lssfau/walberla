@@ -70,7 +70,7 @@ public:
    {}
 
    // for LBM refinement time step callback (post stream function)
-   void operator()( IBlock * block, const uint_t level, const uint_t = uint_t(0) );
+   void operator()( IBlock * block, const uint_t level, const uint_t = uint_t{0} );
 
    // can be used as a pre collide or post stream function for standard LBM without refinement
    void operator()()
@@ -118,10 +118,10 @@ void SmagorinskyLES< LatticeModel_T, Filter_T >::operator()( IBlock * block, con
       WALBERLA_ASSERT_EQUAL( level, blocks->getLevel(*block) );
    }
 
-   const real_t tau = real_t(1) / lbm::collision_model::levelDependentRelaxationParameter( level,
-                                                                                           lbm::collision_model::omegaFromViscosity( kinematicViscosity_ ), uint_t(0) );
+   const real_t tau = real_t{1} / lbm::collision_model::levelDependentRelaxationParameter( level,
+                                                                                           lbm::collision_model::omegaFromViscosity( kinematicViscosity_ ), uint_t{0} );
 
-   const real_t factor = real_t(18) * std::sqrt( real_t(2) ) * smagorinskyConstant_ * smagorinskyConstant_;
+   const real_t factor = real_t{18} * std::sqrt( real_t{2} ) * smagorinskyConstant_ * smagorinskyConstant_;
 
    filter_( *block );
 
@@ -138,21 +138,21 @@ void SmagorinskyLES< LatticeModel_T, Filter_T >::operator()( IBlock * block, con
          for( uint_t i = 0; i != Stencil_T::Size; ++i )
             nonEquilibrium[i] = pdfField->get(x,y,z,i) - equilibrium[i];
 
-         real_t filteredMeanMomentum = real_t(0);
+         real_t filteredMeanMomentum = real_t{0};
          for( uint_t alpha = 0; alpha < 3; ++alpha ) {
             for( uint_t beta = 0; beta < 3; ++beta )
             {
-               real_t qij = real_t(0);
+               real_t qij = real_t{0};
                for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
                   qij += nonEquilibrium[ d.toIdx() ] * real_c(stencil::c[alpha][*d]) * real_c(stencil::c[beta][*d]);
                filteredMeanMomentum += qij * qij;
             }
          }
 
-         const real_t tauTurbulent = LatticeModel_T::compressible ? ( real_t(0.5) * ( std::sqrt( tau * tau + (factor / rho) * std::sqrt( real_t(2) * filteredMeanMomentum ) ) - tau ) ) :
-                                                                    ( real_t(0.5) * ( std::sqrt( tau * tau + factor * std::sqrt( real_t(2) * filteredMeanMomentum ) ) - tau ) );
+         const real_t tauTurbulent = LatticeModel_T::compressible ? ( real_t{0.5} * ( std::sqrt( tau * tau + (factor / rho) * std::sqrt( real_t{2} * filteredMeanMomentum ) ) - tau ) ) :
+                                                                    ( real_t{0.5} * ( std::sqrt( tau * tau + factor * std::sqrt( real_t{2} * filteredMeanMomentum ) ) - tau ) );
 
-         omegaField->get(x,y,z) = real_t(1) / ( tau + tauTurbulent );
+         omegaField->get(x,y,z) = real_t{1} / ( tau + tauTurbulent );
       }
    )
 }

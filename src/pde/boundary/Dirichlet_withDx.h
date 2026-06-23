@@ -133,7 +133,7 @@ inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUI
 
    WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
 
-   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::fzyx );
+   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t{1}, field::fzyx );
 
    for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
       dx_[d.toIdx()] = Vector3<real_t>(stencil::cx[d.toIdx()]*blocks.dx(), stencil::cy[d.toIdx()]*blocks.dy(), stencil::cz[d.toIdx()]*blocks.dz() ).sqrLength();
@@ -275,7 +275,7 @@ inline void Dirichlet< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x,
                                                              // current implementation of this boundary condition (Dirichlet)
 
    // Adapt RHS to Dirichlet BC //
-   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t(2) * dx_[ Stencil_T::idx[dir] ] * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t{2} * dx_[ Stencil_T::idx[dir] ] * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
 
    // WALBERLA_LOG_DEVEL("Adapt RHS to Dirichlet value " << dirichletBC_->get( nx, ny, nz ) << " on cell " << Cell(x,y,z) << " for stencil entry " << stencilField_->get( x, y, z, Stencil_T::idx[dir] ) );
 

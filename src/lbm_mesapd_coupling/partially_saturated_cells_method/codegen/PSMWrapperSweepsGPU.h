@@ -80,14 +80,14 @@ class SetParticleVelocitiesSweep
          if (mappingParticleSelector_(idx, *ac_)) { numMappedParticles++; }
       }
 
-      if (numMappedParticles == uint_t(0)) return;
+      if (numMappedParticles == uint_t{0}) return;
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
       // Allocate memory for the particle information required for computing the velocity at a WF point (used in
       // the solid collision operator)
-      real_t* linearVelocities_h  = (real_t*) malloc(arraySizes);
-      real_t* angularVelocities_h = (real_t*) malloc(arraySizes);
+      real_t* linearVelocities_h  = static_cast< real_t* > (malloc(arraySizes));
+      real_t* angularVelocities_h = static_cast< real_t* > (malloc(arraySizes));
 
       // Store particle information inside memory to communicate information to the GPU
       size_t idxMapped = 0;
@@ -175,7 +175,7 @@ class ReduceParticleForcesSweep
          if (mappingParticleSelector_(idx, *ac_)) { numMappedParticles++; }
       }
 
-      if (numMappedParticles == uint_t(0)) return;
+      if (numMappedParticles == uint_t{0}) return;
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
@@ -212,10 +212,10 @@ class ReduceParticleForcesSweep
 
       WALBERLA_GPU_CHECK(gpuDeviceSynchronize());
 
-      real_t* hydrodynamicForces_h = (real_t*) malloc(arraySizes);
+      real_t* hydrodynamicForces_h = static_cast< real_t* > (malloc(arraySizes));
       WALBERLA_GPU_CHECK(gpuMemcpy(hydrodynamicForces_h, hydrodynamicForces, arraySizes, gpuMemcpyDeviceToHost));
 
-      real_t* hydrodynamicTorques_h = (real_t*) malloc(arraySizes);
+      real_t* hydrodynamicTorques_h = static_cast< real_t* > (malloc(arraySizes));
       WALBERLA_GPU_CHECK(gpuMemcpy(hydrodynamicTorques_h, hydrodynamicTorques, arraySizes, gpuMemcpyDeviceToHost));
 
       // Copy forces and torques of particles from GPU to CPU

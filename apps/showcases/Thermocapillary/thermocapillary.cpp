@@ -999,7 +999,7 @@ int main(int argc, char** argv)
       {
          timeloop.addFuncAfterTimeStep(
             [&]() {
-               if (timeloop.getCurrentTimeStep() % uint_t(meshWriteFrequency) == 0)
+               if (timeloop.getCurrentTimeStep() % static_cast< uint_t >(meshWriteFrequency) == 0)
                {
                   auto mesh = postprocessing::realFieldToSurfaceMesh< ScalarField_T >(blocks, phase_field_ID, 0.5, 0, true,
                                                                                       targetRank, MPI_COMM_WORLD);

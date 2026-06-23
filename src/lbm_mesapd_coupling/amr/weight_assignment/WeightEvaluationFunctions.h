@@ -28,7 +28,7 @@ namespace amr {
 
 inline real_t defaultWeightEvaluationFunction(const PhantomBlock * /*block*/)
 {
-   return real_t(1);
+   return real_t{1};
 }
 
 } // namespace amr

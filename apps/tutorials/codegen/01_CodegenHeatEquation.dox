@@ -170,8 +170,8 @@ const real_t ySize = real_c(1.0);
 const uint_t xBlocks = uint_c(1);
 const uint_t yBlocks = uint_c(1);
 
-const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
-const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
+const real_t dx = xSize / real_c( xBlocks * xCells + uint_t{1} );
+const real_t dy = ySize / real_c( yBlocks * yCells + uint_t{1} );
 
 WALBERLA_CHECK_FLOAT_EQUAL(dx, dy);
 

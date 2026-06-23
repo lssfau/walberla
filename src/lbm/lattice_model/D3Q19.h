@@ -71,51 +71,51 @@ protected:
 template< typename CM, bool C, typename FM, int EAO > const char*  D3Q19<CM,C,FM,EAO>::NAME = "D3Q19";
 
 
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_0 = real_t(1.0) / real_t( 3.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_1 = real_t(1.0) / real_t(18.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_2 = real_t(1.0) / real_t(36.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_0 = real_t{1.0} / real_t{ 3.0};
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_1 = real_t{1.0} / real_t{18.0};
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w_2 = real_t{1.0} / real_t{36.0};
 
 // must match with the static array 'dir' in stencil::D3Q19
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w[19] = { real_t(1.0) / real_t( 3.0),   // C
-                                                                                                 real_t(1.0) / real_t(18.0),   // N
-                                                                                                 real_t(1.0) / real_t(18.0),   // S
-                                                                                                 real_t(1.0) / real_t(18.0),   // W
-                                                                                                 real_t(1.0) / real_t(18.0),   // E
-                                                                                                 real_t(1.0) / real_t(18.0),   // T
-                                                                                                 real_t(1.0) / real_t(18.0),   // B
-                                                                                                 real_t(1.0) / real_t(36.0),   // NW
-                                                                                                 real_t(1.0) / real_t(36.0),   // NE
-                                                                                                 real_t(1.0) / real_t(36.0),   // SW
-                                                                                                 real_t(1.0) / real_t(36.0),   // SE
-                                                                                                 real_t(1.0) / real_t(36.0),   // TN
-                                                                                                 real_t(1.0) / real_t(36.0),   // TS
-                                                                                                 real_t(1.0) / real_t(36.0),   // TW
-                                                                                                 real_t(1.0) / real_t(36.0),   // TE
-                                                                                                 real_t(1.0) / real_t(36.0),   // BN
-                                                                                                 real_t(1.0) / real_t(36.0),   // BS
-                                                                                                 real_t(1.0) / real_t(36.0),   // BW
-                                                                                                 real_t(1.0) / real_t(36.0) }; // BE
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::w[19] = { real_t{1.0} / real_t{ 3.0},   // C
+                                                                                                 real_t{1.0} / real_t{18.0},   // N
+                                                                                                 real_t{1.0} / real_t{18.0},   // S
+                                                                                                 real_t{1.0} / real_t{18.0},   // W
+                                                                                                 real_t{1.0} / real_t{18.0},   // E
+                                                                                                 real_t{1.0} / real_t{18.0},   // T
+                                                                                                 real_t{1.0} / real_t{18.0},   // B
+                                                                                                 real_t{1.0} / real_t{36.0},   // NW
+                                                                                                 real_t{1.0} / real_t{36.0},   // NE
+                                                                                                 real_t{1.0} / real_t{36.0},   // SW
+                                                                                                 real_t{1.0} / real_t{36.0},   // SE
+                                                                                                 real_t{1.0} / real_t{36.0},   // TN
+                                                                                                 real_t{1.0} / real_t{36.0},   // TS
+                                                                                                 real_t{1.0} / real_t{36.0},   // TW
+                                                                                                 real_t{1.0} / real_t{36.0},   // TE
+                                                                                                 real_t{1.0} / real_t{36.0},   // BN
+                                                                                                 real_t{1.0} / real_t{36.0},   // BS
+                                                                                                 real_t{1.0} / real_t{36.0},   // BW
+                                                                                                 real_t{1.0} / real_t{36.0} }; // BE
 
 // must match with the static array 'dir' in stencil::D3Q19
-template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::wInv[19] = { real_t( 3.0),   // C
-                                                                                                    real_t(18.0),   // N
-                                                                                                    real_t(18.0),   // S
-                                                                                                    real_t(18.0),   // W
-                                                                                                    real_t(18.0),   // E
-                                                                                                    real_t(18.0),   // T
-                                                                                                    real_t(18.0),   // B
-                                                                                                    real_t(36.0),   // NW
-                                                                                                    real_t(36.0),   // NE
-                                                                                                    real_t(36.0),   // SW
-                                                                                                    real_t(36.0),   // SE
-                                                                                                    real_t(36.0),   // TN
-                                                                                                    real_t(36.0),   // TS
-                                                                                                    real_t(36.0),   // TW
-                                                                                                    real_t(36.0),   // TE
-                                                                                                    real_t(36.0),   // BN
-                                                                                                    real_t(36.0),   // BS
-                                                                                                    real_t(36.0),   // BW
-                                                                                                    real_t(36.0) }; // BE
+template< typename CM, bool C, typename FM, int EAO > const real_t D3Q19<CM,C,FM,EAO>::wInv[19] = { real_t{ 3.0},   // C
+                                                                                                    real_t{18.0},   // N
+                                                                                                    real_t{18.0},   // S
+                                                                                                    real_t{18.0},   // W
+                                                                                                    real_t{18.0},   // E
+                                                                                                    real_t{18.0},   // T
+                                                                                                    real_t{18.0},   // B
+                                                                                                    real_t{36.0},   // NW
+                                                                                                    real_t{36.0},   // NE
+                                                                                                    real_t{36.0},   // SW
+                                                                                                    real_t{36.0},   // SE
+                                                                                                    real_t{36.0},   // TN
+                                                                                                    real_t{36.0},   // TS
+                                                                                                    real_t{36.0},   // TW
+                                                                                                    real_t{36.0},   // TE
+                                                                                                    real_t{36.0},   // BN
+                                                                                                    real_t{36.0},   // BS
+                                                                                                    real_t{36.0},   // BW
+                                                                                                    real_t{36.0} }; // BE
 
 
 

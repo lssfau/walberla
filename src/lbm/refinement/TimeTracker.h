@@ -36,10 +36,10 @@ class TimeTracker
 {
 public:
 
-   TimeTracker( const uint_t initialTime = uint_t(0) )
+   TimeTracker( const uint_t initialTime = uint_t{0} )
    {
       fractionCounter_.push_back( initialTime );
-      fractionBase_.push_back( uint_t(1) );
+      fractionBase_.push_back( uint_t{1} );
       time_.push_back( real_c( initialTime ) );
    }
 
@@ -49,7 +49,7 @@ public:
       WALBERLA_ASSERT_GREATER( fractionCounter_.size(), 0 );
       WALBERLA_ASSERT_GREATER( fractionBase_.size(), 0 );
       WALBERLA_ASSERT_GREATER( time_.size(), 0 );
-      fractionCounter_[0] += uint_t(1);
+      fractionCounter_[0] += uint_t{1};
       time_[0] = real_c( fractionCounter_[0] );
    }
 
@@ -63,12 +63,12 @@ public:
       checkLevel( level );
 
       WALBERLA_ASSERT_EQUAL( fractionCounter_[ level ] % fractionBase_[ level ], executionCount );
-      fractionCounter_[ level ] += uint_t(1);
+      fractionCounter_[ level ] += uint_t{1};
 
       time_[ level ] = real_c( fractionCounter_[ level ] ) / real_c( fractionBase_[ level ] );
    }
 
-   real_t getTime( const uint_t level = uint_t(0) )
+   real_t getTime( const uint_t level = uint_t{0} )
    {
       checkLevel( level );
 
@@ -83,9 +83,9 @@ private:
       {
          const uint_t previousSize = time_.size();
 
-         fractionCounter_.resize( level + uint_t(1) );
-         fractionBase_.resize( level + uint_t(1) );
-         time_.resize( level + uint_t(1) );
+         fractionCounter_.resize( level + uint_t{1} );
+         fractionBase_.resize( level + uint_t{1} );
+         time_.resize( level + uint_t{1} );
 
          for( uint_t i = previousSize; i <= level; ++i )
          {

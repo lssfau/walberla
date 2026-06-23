@@ -40,8 +40,8 @@ const std::string Logging::PROGRESS_TAG = std::string( "[PROGRESS]" );
 const std::string Logging::DETAIL_TAG   = std::string( "[DETAIL  ]" );
 const std::string Logging::TRACING_TAG  = std::string( "[TRACING ]" );
 
-const uint_t Logging::TAG_WIDTH       = uint_t(10);
-const uint_t Logging::TIMESTAMP_WIDTH = uint_t(17);
+const uint_t Logging::TAG_WIDTH       = uint_t{10};
+const uint_t Logging::TIMESTAMP_WIDTH = uint_t{17};
 
 void Logging::setStreamLogLevel( LogLevel logLevel )
 {

@@ -67,7 +67,7 @@ std::vector< math::Vector3<uint_t> > generateHilbertCurve(const uint_t size)
    std::stack< uint_t > orientation;
 
    stack.emplace( size, math::Vector3<uint_t>(size) );
-   orientation.push( uint_t(0) );
+   orientation.push( uint_t{0} );
 
    while( !stack.empty() )
    {
@@ -101,9 +101,9 @@ HilbertCompareFunctor::HilbertCompareFunctor(const math::AABB& domain, const uin
    , hilbertLookup_(cells_ * cells_ * cells_)
 {
    WALBERLA_CHECK(math::uintIsPowerOfTwo(cells));
-   inverse_dx[0] = real_t(1.0) / (domain_.xSize() / real_c(cells_));
-   inverse_dx[1] = real_t(1.0) / (domain_.ySize() / real_c(cells_));
-   inverse_dx[2] = real_t(1.0) / (domain_.zSize() / real_c(cells_));
+   inverse_dx[0] = real_t{1.0} / (domain_.xSize() / real_c(cells_));
+   inverse_dx[1] = real_t{1.0} / (domain_.ySize() / real_c(cells_));
+   inverse_dx[2] = real_t{1.0} / (domain_.zSize() / real_c(cells_));
    initializeLookup();
 }
 

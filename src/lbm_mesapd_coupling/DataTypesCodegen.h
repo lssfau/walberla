@@ -89,26 +89,26 @@ struct ParticleAndVolumeFractionSoA_T
    {
 #ifdef WALBERLA_BUILD_WITH_GPU_SUPPORT
       nOverlappingParticlesFieldID = walberla::gpu::addGPUFieldToStorage< nOverlappingParticlesFieldGPU_T >(
-         bs, "number of overlapping particles field GPU", uint_t(1), field::fzyx, uint_t(1), true);
+         bs, "number of overlapping particles field GPU", uint_t{1}, field::fzyx, uint_t{1}, true);
       BsFieldID  = walberla::gpu::addGPUFieldToStorage< BsFieldGPU_T >(bs, "Bs field GPU", MaxParticlesPerCell,
-                                                                       field::fzyx, uint_t(1), true);
+                                                                       field::fzyx, uint_t{1}, true);
       idxFieldID = walberla::gpu::addGPUFieldToStorage< idxFieldGPU_T >(bs, "idx field GPU", MaxParticlesPerCell,
-                                                                        field::fzyx, uint_t(1), true);
-      BFieldID = walberla::gpu::addGPUFieldToStorage< BFieldGPU_T >(bs, "B field GPU", 1, field::fzyx, uint_t(1), true);
+                                                                        field::fzyx, uint_t{1}, true);
+      BFieldID = walberla::gpu::addGPUFieldToStorage< BFieldGPU_T >(bs, "B field GPU", 1, field::fzyx, uint_t{1}, true);
       particleVelocitiesFieldID = walberla::gpu::addGPUFieldToStorage< particleVelocitiesFieldGPU_T >(
-         bs, "particle velocities field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
+         bs, "particle velocities field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t{1}, true);
       particleForcesFieldID = walberla::gpu::addGPUFieldToStorage< particleForcesFieldGPU_T >(
-         bs, "particle forces field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t(1), true);
+         bs, "particle forces field GPU", MaxParticlesPerCell * 3, field::fzyx, uint_t{1}, true);
 #else
       nOverlappingParticlesFieldID = field::addToStorage< nOverlappingParticlesField_T >(
-         bs, "number of overlapping particles field CPU", uint_t(0), field::fzyx, uint_t(1), true);
-      BsFieldID  = field::addToStorage< BsField_T >(bs, "Bs field CPU", real_t(0), field::fzyx, uint_t(1), true);
-      idxFieldID = field::addToStorage< idxField_T >(bs, "idx field CPU", uint_t(0), field::fzyx, uint_t(1), true);
-      BFieldID   = field::addToStorage< BField_T >(bs, "B field CPU", real_t(0), field::fzyx, uint_t(1), true);
+         bs, "number of overlapping particles field CPU", uint_t{0}, field::fzyx, uint_t{1}, true);
+      BsFieldID  = field::addToStorage< BsField_T >(bs, "Bs field CPU", real_t{0}, field::fzyx, uint_t{1}, true);
+      idxFieldID = field::addToStorage< idxField_T >(bs, "idx field CPU", uint_t{0}, field::fzyx, uint_t{1}, true);
+      BFieldID   = field::addToStorage< BField_T >(bs, "B field CPU", real_t{0}, field::fzyx, uint_t{1}, true);
       particleVelocitiesFieldID = field::addToStorage< particleVelocitiesField_T >(
-         bs, "particle velocities field CPU", real_t(0), field::fzyx, uint_t(1), true);
-      particleForcesFieldID = field::addToStorage< particleForcesField_T >(bs, "particle forces field CPU", real_t(0),
-                                                                           field::fzyx, uint_t(1), true);
+         bs, "particle velocities field CPU", real_t{0}, field::fzyx, uint_t{1}, true);
+      particleForcesFieldID = field::addToStorage< particleForcesField_T >(bs, "particle forces field CPU", real_t{0},
+                                                                           field::fzyx, uint_t{1}, true);
 #endif
       omega_ = omega;
    }

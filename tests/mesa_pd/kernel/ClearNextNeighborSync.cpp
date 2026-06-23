@@ -36,7 +36,7 @@
 namespace walberla {
 namespace mesa_pd {
 
-const real_t radius = real_t(1);
+const real_t radius = real_t{1};
 
 void createSphere(data::ParticleStorage& ps, domain::IDomain& domain, const Vec3& pos)
 {
@@ -75,8 +75,8 @@ int main( int argc, char ** argv )
    data::ParticleAccessor ac(ps);
 
    //initialize particle
-   createSphere(*ps, domain, Vec3(real_t(4.5),3,3));
-   createSphere(*ps, domain, Vec3(real_t(5.5),3,3));
+   createSphere(*ps, domain, Vec3(real_t{4.5},3,3));
+   createSphere(*ps, domain, Vec3(real_t{5.5},3,3));
 
    //init kernels
    mpi::ClearNextNeighborSync CNNS;

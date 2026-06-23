@@ -46,7 +46,7 @@ public:
     shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir ) override
     {
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeSliceBeforeGhostlayerXYZ(
-                *getField( block ), dir, uint_t( 1 ), getOptimizedCommunicationIndices( dir ), false ) );
+                *getField( block ), dir, uint_t{ 1 }, getOptimizedCommunicationIndices( dir ), false ) );
     }
 
     shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir ) override

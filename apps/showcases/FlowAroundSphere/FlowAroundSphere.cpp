@@ -467,7 +467,7 @@ int main(int argc, char** argv)
 
    // LBM stability check
    auto CheckerParameters      = config->getOneBlock("StabilityChecker");
-   const uint_t checkFrequency = CheckerParameters.getParameter< uint_t >("checkFrequency", uint_t(0));
+   const uint_t checkFrequency = CheckerParameters.getParameter< uint_t >("checkFrequency", uint_t{0});
    if (checkFrequency > 0)
    {
       auto checkFunction = [](PdfField_T::value_type value) {  return value < math::abs(PdfField_T::value_type(10)); };

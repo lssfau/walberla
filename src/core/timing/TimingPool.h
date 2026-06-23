@@ -396,16 +396,16 @@ void TimingPool<TP>::print( std::ostream & os ) const
    for ( const auto &[name, timer] : timerMap_ )
    {
       const uint_t count = timer.getCounter();
-      const double percentage = ( count == uint_t(0) ) ? 0.0 : ( timer.total() / totalTime * 100.0 );
+      const double percentage = ( count == uint_t{0} ) ? 0.0 : ( timer.total() / totalTime * 100.0 );
 
       os << setw(firstColumn-1) << std::left  << name  << " "       << "|";
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentage << "% |";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.total() )    << "|";
-      os << setw(OTHER_COLUMNS) << std::right << std::setprecision(3) << ( ( count == uint_t(0) ) ? 0.0 : timer.average() )  << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t{0} ) ? 0.0 : timer.total() )    << "|";
+      os << setw(OTHER_COLUMNS) << std::right << std::setprecision(3) << ( ( count == uint_t{0} ) ? 0.0 : timer.average() )  << "|";
       os << setw(OTHER_COLUMNS) << std::right << timer.getCounter() << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.min() )      << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.max() )      << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : timer.variance() ) << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t{0} ) ? 0.0 : timer.min() )      << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t{0} ) ? 0.0 : timer.max() )      << "|";
+      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t{0} ) ? 0.0 : timer.variance() ) << "|";
       os << endl;
    }
 }

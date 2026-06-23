@@ -63,7 +63,7 @@ int main( const int particlesPerAxisPerProcess = 2 )
 
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * walberla::mpi::MPIManager::instance()->worldRank()) );
 
-   const real_t radius = real_t(0.9);
+   const real_t radius = real_t{0.9};
    const real_t generationSpacing = 1_r;
    const int linkedCellMultipleOfGenerationSpacing = 2;
    WALBERLA_CHECK_EQUAL(particlesPerAxisPerProcess % linkedCellMultipleOfGenerationSpacing, 0, "Only a multiple of " << linkedCellMultipleOfGenerationSpacing << " is allowed");
@@ -85,9 +85,9 @@ int main( const int particlesPerAxisPerProcess = 2 )
    Vector3<uint_t>blocksPerDirection (2,2,2);
    int numBlocks = int(blocksPerDirection[0] * blocksPerDirection[1] * blocksPerDirection[2]);
    Vector3<bool> periodicity(true, true, true);
-   auto forest = blockforest::createBlockForest( math::AABB(real_t(0),
-                                                            real_t(0),
-                                                            real_t(0),
+   auto forest = blockforest::createBlockForest( math::AABB(real_t{0},
+                                                            real_t{0},
+                                                            real_t{0},
                                                             real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[0]),
                                                             real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[1]),
                                                             real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[2])).getTranslated(Vec3(eps,eps,eps)),
@@ -107,7 +107,7 @@ int main( const int particlesPerAxisPerProcess = 2 )
    data::LinkedCells lc(localDomain.getExtended(linkedCellSize), linkedCellSize );
 
    auto  smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(generationSpacing, generationSpacing, generationSpacing) * real_c(0.5), generationSpacing))

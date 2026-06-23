@@ -58,7 +58,7 @@ public:
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask ),
      nearestNeighborInterpolator_( blockStorage, block, baseField, flagField, evaluationMask )
    {
-      WALBERLA_ASSERT(baseField.nrOfGhostLayers() > uint_t(0), "field for trilinear interpolation needs at least one ghost layer");
+      WALBERLA_ASSERT(baseField.nrOfGhostLayers() > uint_t{0}, "field for trilinear interpolation needs at least one ghost layer");
    }
 
 
@@ -88,11 +88,11 @@ public:
       Vector3<real_t> containingCellCenter = blockStorage->getBlockLocalCellCenter( block_, containingCell );
 
       const cell_idx_t xNeighbor1 = cell_idx_c( floor( x - containingCellCenter[0] ) );
-      const cell_idx_t xNeighbor2 = xNeighbor1 + cell_idx_t(1);
+      const cell_idx_t xNeighbor2 = xNeighbor1 + cell_idx_t{1};
       const cell_idx_t yNeighbor1 = cell_idx_c( floor( y - containingCellCenter[1] ) );
-      const cell_idx_t yNeighbor2 = yNeighbor1 + cell_idx_t(1);
+      const cell_idx_t yNeighbor2 = yNeighbor1 + cell_idx_t{1};
       const cell_idx_t zNeighbor1 = cell_idx_c( floor( z - containingCellCenter[2] ) );
-      const cell_idx_t zNeighbor2 = zNeighbor1 + cell_idx_t(1);
+      const cell_idx_t zNeighbor2 = zNeighbor1 + cell_idx_t{1};
 
       // define the 8 nearest cells required for the trilinear interpolation
       // the cell 'ccc' is the one with the smallest x-, y-, and z-indices
@@ -117,7 +117,7 @@ public:
       {
          // trilinear interpolation can be applied
 
-         const real_t inv_totalVolume = real_t(1) / ( dx * dy * dz );
+         const real_t inv_totalVolume = real_t{1} / ( dx * dy * dz );
          Vector3<real_t> cccCellCenter = blockStorage->getBlockLocalCellCenter( block_, ccc );
 
          // weighting = volume of opposing volume element / total volume
@@ -168,7 +168,7 @@ private:
    template< typename ForwardIterator_T >
    void addWeightedCellValue( ForwardIterator_T interpolationResultBegin, const Cell & curCell, const real_t & weighting )
    {
-      for( uint_t f = uint_t(0); f < F_SIZE; ++f )
+      for( uint_t f = uint_t{0}; f < F_SIZE; ++f )
       {
          WALBERLA_ASSERT( !math::isnan(baseField_( curCell, f)), "NaN found in component " << f << " when interpolating from cell " << curCell );
 

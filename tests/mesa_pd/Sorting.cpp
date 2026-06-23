@@ -35,46 +35,46 @@ int main()
 {
    auto ps = std::make_shared<data::ParticleStorage>(100);
 
-   const math::AABB domain(real_t(0), real_t(0), real_t(0),
-                           real_t(2), real_t(2), real_t(2));
-   for (auto pt : grid_generator::SCGrid(domain, Vec3(real_c(0.5)), real_t(1)))
+   const math::AABB domain(real_t{0}, real_t{0}, real_t{0},
+                           real_t{2}, real_t{2}, real_t{2});
+   for (auto pt : grid_generator::SCGrid(domain, Vec3(real_c(0.5)), real_t{1}))
    {
       auto p                       = ps->create();
       p->getPositionRef()          = pt;
    }
 
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(1.5)));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{1.5}));
 
    sorting::HilbertCompareFunctor hilbert(domain, 2);
    ps->sort(hilbert);
 
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(1.5)));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{1.5}));
 
    sorting::LinearizedCompareFunctor linear(domain, Vector3<uint_t>(2,2,2));
    ps->sort(linear);
 
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(0.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t(0.5), real_t(0.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t(1.5), real_t(0.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t(0.5), real_t(1.5), real_t(1.5)));
-   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t(1.5), real_t(1.5), real_t(1.5)));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[0].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[1].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[2].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[3].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{0.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[4].getPosition(), Vec3(real_t{0.5}, real_t{0.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[5].getPosition(), Vec3(real_t{1.5}, real_t{0.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[6].getPosition(), Vec3(real_t{0.5}, real_t{1.5}, real_t{1.5}));
+   WALBERLA_CHECK_FLOAT_EQUAL((*ps)[7].getPosition(), Vec3(real_t{1.5}, real_t{1.5}, real_t{1.5}));
 
    return EXIT_SUCCESS;
 }

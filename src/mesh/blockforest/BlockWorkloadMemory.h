@@ -99,8 +99,8 @@ void walberla::mesh::MeshWorkloadMemory<DistanceObject>::countCells( const math:
 {
    using Box = math::GenericAABB< Scalar >;
 
-   numCellsInside = uint_t(0);
-   numCellsOutside = uint_t(0);
+   numCellsInside = uint_t{0};
+   numCellsOutside = uint_t{0};
 
     if( aabb.empty() )
       return;
@@ -108,7 +108,7 @@ void walberla::mesh::MeshWorkloadMemory<DistanceObject>::countCells( const math:
    std::queue< Box > boxQueue;
    boxQueue.push( aabb );
 
-   Vector3<Scalar> levelCellSize = cellSize_ / numeric_cast<Scalar>( uint_t(1) << level );
+   Vector3<Scalar> levelCellSize = cellSize_ / numeric_cast<Scalar>( uint_t{1} << level );
 
    while( !boxQueue.empty() )
    {
@@ -131,7 +131,7 @@ void walberla::mesh::MeshWorkloadMemory<DistanceObject>::countCells( const math:
 
       const Scalar sqSignedDistance = distanceObject_->sqSignedDistance( toOpenMesh( curAabb.center() ) );
 
-      if( ci.numCells() == uint_t(1) )
+      if( ci.numCells() == uint_t{1} )
       {
          boxQueue.pop();
          sqSignedDistance < Scalar(0) ? ++numCellsInside : ++numCellsOutside;
@@ -158,9 +158,9 @@ void walberla::mesh::MeshWorkloadMemory<DistanceObject>::countCells( const math:
       const auto &    min = curAabb.minCorner();
       const auto &    max = curAabb.maxCorner();
 
-      const Vector3< Scalar > center( curAabb.xMin() + numeric_cast<Scalar>( ci.xSize() / uint_t(2) ) * levelCellSize[0],
-                                      curAabb.yMin() + numeric_cast<Scalar>( ci.ySize() / uint_t(2) ) * levelCellSize[1],
-                                      curAabb.zMin() + numeric_cast<Scalar>( ci.zSize() / uint_t(2) ) * levelCellSize[2] );
+      const Vector3< Scalar > center( curAabb.xMin() + numeric_cast<Scalar>( ci.xSize() / uint_t{2} ) * levelCellSize[0],
+                                      curAabb.yMin() + numeric_cast<Scalar>( ci.ySize() / uint_t{2} ) * levelCellSize[1],
+                                      curAabb.zMin() + numeric_cast<Scalar>( ci.zSize() / uint_t{2} ) * levelCellSize[2] );
 
       boxQueue.push( Box::createFromMinMaxCorner(    min[0],    min[1],    min[2], center[0], center[1], center[2] ) );
       boxQueue.push( Box::createFromMinMaxCorner(    min[0],    min[1], center[2], center[0], center[1],    max[2] ) );
@@ -202,9 +202,9 @@ inline void walberla::mesh::MeshWorkloadMemory<DistanceObject>::operator()( bloc
 
    // GCC-14 doesn't accept initialization in constructor here
    std::vector<uint_t> insideCells;
-   insideCells.resize( numBlocks, uint_t( 0 ) );
+   insideCells.resize( numBlocks, uint_t{ 0 } );
    std::vector<uint_t> outsideCells;
-   outsideCells.resize( numBlocks, uint_t( 0 ) );
+   outsideCells.resize( numBlocks, uint_t{ 0 } );
 
    #ifdef _OPENMP
    #pragma omp parallel for schedule( dynamic )
@@ -225,14 +225,14 @@ inline void walberla::mesh::MeshWorkloadMemory<DistanceObject>::operator()( bloc
       blockforest::workload_t workload = blockforest::workload_c( insideCells[i] ) * insideCellWorkload_ + blockforest::workload_c( outsideCells[i] ) * outsideCellWorkload_;
       blocks[i]->setWorkload( workload );
 
-      blockforest::memory_t memory = blockforest::memory_t( 0 );
+      blockforest::memory_t memory = blockforest::memory_t{ 0 };
       
-      if( !forceZeroMemoryOnZeroWorkload_ || !floatIsEqual( workload, blockforest::workload_t(0) ) )
+      if( !forceZeroMemoryOnZeroWorkload_ || !floatIsEqual( workload, blockforest::workload_t{0} ) )
          memory = blockforest::memory_c( insideCells[i] ) * insideCellMemoryConsumption_ + blockforest::memory_c( outsideCells[i] ) * outsideCellMemoryConsumption_;
 
       blocks[i]->setMemory( memory );
 
-      if( zeroWorkloadSUID_ && floatIsEqual( workload, blockforest::workload_t(0) ) )
+      if( zeroWorkloadSUID_ && floatIsEqual( workload, blockforest::workload_t{0} ) )
          blocks[i]->setState( *zeroWorkloadSUID_ );
    }
 }

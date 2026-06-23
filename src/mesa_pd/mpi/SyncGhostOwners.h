@@ -57,7 +57,7 @@ class SyncGhostOwners
 public:
    void operator()( data::ParticleStorage& ps,
                     const domain::IDomain& domain,
-                    const real_t dx = real_t(0),
+                    const real_t dx = real_t{0},
                     const bool syncNonCommunicatingBodies = false ) const;
 
    int64_t getBytesSent() const { return bytesSent_; }

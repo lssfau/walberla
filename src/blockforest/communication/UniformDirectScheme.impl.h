@@ -121,18 +121,18 @@ void UniformDirectScheme<Stencil>::setup()
       {
          const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
 
-         if( block->getNeighborhoodSectionSize(neighborIdx) == uint_t(0) )
+         if( block->getNeighborhoodSectionSize(neighborIdx) == uint_t{0} )
             continue;
 
          WALBERLA_ASSERT( block->neighborhoodSectionHasEquallySizedBlock(neighborIdx) );
-         WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( block->getNeighborhoodSectionSize(neighborIdx), uint_t{1} );
 
-         const BlockID & nBlockId = block->getNeighborId( neighborIdx, uint_t(0) );
+         const BlockID & nBlockId = block->getNeighborId( neighborIdx, uint_t{0} );
 
-         if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+         if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t{0} ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
             continue;
 
-         auto nProcess = block->getNeighborProcess( neighborIdx, uint_t( 0 ) );
+         auto nProcess = block->getNeighborProcess( neighborIdx, uint_t{ 0 } );
 
          for( uint_t dataIdx = 0; dataIdx < dataInfos_.size(); ++dataIdx )
          {

@@ -51,7 +51,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    blocks_( *blocks ), weights_(numLvl,weights), iterations_(iterations), numLvl_(numLvl), preSmoothingIters_(preSmoothingIters),
    postSmoothingIters_(postSmoothingIters), coarseIters_(coarseIters),
    residualNormThreshold_( residualNormThreshold ), residualCheckFrequency_( residualCheckFrequency ),
-   iterationsPerformed_( uint_t(0) ), thresholdReached_( false ), residualNorm_( residualNorm ), convergenceRate_(), stencilId_(),
+   iterationsPerformed_( uint_t{0} ), thresholdReached_( false ), residualNorm_( residualNorm ), convergenceRate_(), stencilId_(),
    requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
 {
 
@@ -60,7 +60,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    // Set up fields for finest level
    uId_.push_back( uFieldId );
    fId_.push_back( fFieldId );
-   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::fzyx, uint_t(1) ) );
+   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t{0}, field::fzyx, uint_t{1} ) );
 
    // Check that coarsest grid has more than one cell per dimension
    auto   block = blocks->begin();
@@ -70,44 +70,44 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    for( uint_t i = 1; i<numLvl; ++i ){
 
-      if( xLvl % 2 != 0 || yLvl % 2 != 0 || (Stencil_T::D == uint_t(3) && zLvl % 2 != 0) )
+      if( xLvl % 2 != 0 || yLvl % 2 != 0 || (Stencil_T::D == uint_t{3} && zLvl % 2 != 0) )
          WALBERLA_ABORT("Number of multigrid levels is too high, not possible to further refine for CCMG!")
 
       xLvl = (xLvl+1)/2;
       yLvl = (yLvl+1)/2;
-      if( Stencil_T::D == uint_t(3) )
+      if( Stencil_T::D == uint_t{3} )
          zLvl = (zLvl+1)/2;
 
       WALBERLA_LOG_DEVEL_ON_ROOT("Setting up coarser grid (level " << i << ") with size "<< xLvl << "x" << yLvl << "x" << zLvl );
 
-      if( xLvl < 2 || yLvl < 2|| (Stencil_T::D == uint_t(3) && zLvl< 2) )
+      if( xLvl < 2 || yLvl < 2|| (Stencil_T::D == uint_t{3} && zLvl< 2) )
          WALBERLA_ABORT("Points per dimension on multigrid level " << i << " is lower than 2");
 
    }
 
-   real_t scalingFactor = real_t(0.25); // scaling by ( 1/h^2 )^lvl
+   real_t scalingFactor = real_t{0.25}; // scaling by ( 1/h^2 )^lvl
 
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
       auto getSize = [lvl](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
          return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(lvl, bs, b); };
-      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
-      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
-      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
+      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
+      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
 
       for ( auto & w: weights_[lvl] )
       {
          w *= scalingFactor;
       }
-      scalingFactor *= real_t(0.25);
+      scalingFactor *= real_t{0.25};
    }
 
    // Set up fields for CG on coarsest level
    auto getFineSize = [finestLvl = numLvl-1](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
       return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(finestLvl, bs, b); };
-   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
-   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
+   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t{0}, field::fzyx, uint_t{1} );
+   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t{0}, field::fzyx, uint_t{1} );
 
    // Set up communication
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
@@ -129,7 +129,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    {
       RBGSFixedSweeps_.emplace_back( walberla::make_shared<RBGSFixedStencil< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], weights_[lvl] ) );
       RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
-                                RBGSFixedSweeps_.back()->getRedSweep(), RBGSFixedSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
+                                RBGSFixedSweeps_.back()->getRedSweep(), RBGSFixedSweeps_.back()->getBlackSweep(), [](){ return real_t{1.0}; }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
    }
 
@@ -144,7 +144,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    // Set up CG coarse-grid iteration
    CGIteration_ = CGFixedStencilIteration< Stencil_T >( blocks->getBlockStorage(), uId_.back(), rId_.back(), dId_, zId_, fId_.back(), weights_.back(),
-                                                        coarseIters_, communication_.back(), real_t(10)*math::Limits<real_t>::epsilon(),
+                                                        coarseIters_, communication_.back(), real_t{10}*math::Limits<real_t>::epsilon(),
                                                         requiredSelectors, incompatibleSelectors );
 }
 
@@ -163,13 +163,13 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    blocks_( *blocks ), weights_(), iterations_(iterations), numLvl_(numLvl), preSmoothingIters_(preSmoothingIters),
    postSmoothingIters_(postSmoothingIters), coarseIters_(coarseIters),
    residualNormThreshold_( residualNormThreshold ), residualCheckFrequency_( residualCheckFrequency ),
-   iterationsPerformed_( uint_t(0) ), thresholdReached_( false ), residualNorm_( residualNorm ), convergenceRate_(),
+   iterationsPerformed_( uint_t{0} ), thresholdReached_( false ), residualNorm_( residualNorm ), convergenceRate_(),
    requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
 {
    // Set up fields for finest level
    uId_.push_back( uFieldId );
    fId_.push_back( fFieldId );
-   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t(0), field::fzyx, uint_t(1) ) );
+   rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_0", real_t{0}, field::fzyx, uint_t{1} ) );
    stencilId_.push_back( stencilFieldId );
 
    // Check that coarsest grid has more than one cell per dimension
@@ -180,17 +180,17 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    for( uint_t i = 1; i<numLvl; ++i ){
 
-      if( xLvl % 2 != 0 || yLvl % 2 != 0 || (Stencil_T::D == uint_t(3) && zLvl % 2 != 0) )
+      if( xLvl % 2 != 0 || yLvl % 2 != 0 || (Stencil_T::D == uint_t{3} && zLvl % 2 != 0) )
          WALBERLA_ABORT("Number of multigrid levels is too high, not possible to further refine for CCMG!")
 
       xLvl = (xLvl+1)/2;
       yLvl = (yLvl+1)/2;
-      if( Stencil_T::D == uint_t(3) )
+      if( Stencil_T::D == uint_t{3} )
          zLvl = (zLvl+1)/2;
 
       WALBERLA_LOG_DEVEL_ON_ROOT("Setting up coarser grid (level " << i << ") with size "<< xLvl << "x" << yLvl << "x" << zLvl );
 
-      if( xLvl < 2 || yLvl < 2|| (Stencil_T::D == uint_t(3) && zLvl< 2) )
+      if( xLvl < 2 || yLvl < 2|| (Stencil_T::D == uint_t{3} && zLvl< 2) )
          WALBERLA_ABORT("Points per dimension on multigrid level " << i << " is lower than 2");
 
    }
@@ -200,22 +200,22 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    {
       auto getSize = [lvl](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
          return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(lvl, bs, b); };
-      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
-      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
-      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
-      stencilId_.push_back( field::addToStorage< StencilField_T >( blocks, "w_"+std::to_string(lvl), getSize, real_t(0), field::fzyx, uint_t(1) ) );
+      uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
+      fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
+      rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
+      stencilId_.push_back( field::addToStorage< StencilField_T >( blocks, "w_"+std::to_string(lvl), getSize, real_t{0}, field::fzyx, uint_t{1} ) );
    }
 
-   // CoarsenStencilFieldsDCA<Stencil_T>( blocks, stencilId_, numLvl, uint_t(2)) ();  // scaling by ( 1/h^2 )^lvl
-   // CoarsenStencilFieldsGCA<Stencil_T>( blocks, stencilId_, numLvl, real_t(2)) ();
+   // CoarsenStencilFieldsDCA<Stencil_T>( blocks, stencilId_, numLvl, uint_t{2}) ();  // scaling by ( 1/h^2 )^lvl
+   // CoarsenStencilFieldsGCA<Stencil_T>( blocks, stencilId_, numLvl, real_t{2}) ();
    operatorCoarsening(stencilId_);
 
    // Set up fields for CG on coarsest level
    auto getFineSize = [finestLvl = numLvl-1](const shared_ptr< StructuredBlockStorage > & bs, IBlock * const b) {
       return VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel(finestLvl, bs, b);
    };
-   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::fzyx, uint_t(1) );
-   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::fzyx, uint_t(1) );
+   dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t{0}, field::fzyx, uint_t{1} );
+   zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t{0}, field::fzyx, uint_t{1} );
 
    // Set up communication
    for ( uint_t lvl = 0; lvl < numLvl-1; ++lvl )
@@ -237,7 +237,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
    {
       RBGSSweeps_.emplace_back( walberla::make_shared<RBGS< Stencil_T > >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl] ) );
       RBGSIteration_.emplace_back(RBGSIteration(blocks->getBlockStorage(), preSmoothingIters_, communication_[lvl],
-                                RBGSSweeps_.back()->getRedSweep(), RBGSSweeps_.back()->getBlackSweep(), [](){ return real_t(1.0); }, 0, 1,
+                                RBGSSweeps_.back()->getRedSweep(), RBGSSweeps_.back()->getBlackSweep(), [](){ return real_t{1.0}; }, 0, 1,
                                 requiredSelectors, incompatibleSelectors ) );
    }
 
@@ -252,7 +252,7 @@ VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::
 
    // Set up CG coarse-grid iteration
    CGIteration_ = CGIteration< Stencil_T >( blocks->getBlockStorage(), uId_.back(), rId_.back(), dId_, zId_, fId_.back(), stencilId_.back(),
-                                            coarseIters_, communication_.back(), real_t(10)*math::Limits<real_t>::epsilon(),
+                                            coarseIters_, communication_.back(), real_t{10}*math::Limits<real_t>::epsilon(),
                                             requiredSelectors, incompatibleSelectors );
 }
 
@@ -264,14 +264,14 @@ void VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_
    WALBERLA_LOG_PROGRESS_ON_ROOT( "Starting VCycle iteration with a maximum number of " << iterations_ << " cycles and " << numLvl_ << " levels" );
    thresholdReached_ = false;
 
-   real_t residualNorm_old = real_t(1);
+   real_t residualNorm_old = real_t{1};
 
    for( uint_t i = 0; i < iterations_; ++i )
    {
       // compute L2 norm of residual as termination criterion
-      if( residualNormThreshold_ > real_t(0) && residualCheckFrequency_ > uint_t(0) )
+      if( residualNormThreshold_ > real_t{0} && residualCheckFrequency_ > uint_t{0} )
       {
-         if( (i % residualCheckFrequency_) == uint_t(0) )
+         if( (i % residualCheckFrequency_) == uint_t{0} )
          {
             communication_[0]();
             const real_t residualNorm = residualNorm_();
@@ -371,14 +371,14 @@ Vector3<uint_t> VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, Prolongate
    if( level == 0 )
       return cells;
 
-   WALBERLA_ASSERT_EQUAL(cells[0] % (uint_t(2) << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
-   WALBERLA_ASSERT_EQUAL(cells[1] % (uint_t(2) << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
+   WALBERLA_ASSERT_EQUAL(cells[0] % (uint_t{2} << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
+   WALBERLA_ASSERT_EQUAL(cells[1] % (uint_t{2} << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
 
    cells[0] = (cells[0] >> level);
    cells[1] = (cells[1] >> level);
    if( Stencil_T::D == 3 )
    {
-      WALBERLA_ASSERT_EQUAL(cells[2] % (uint_t(2) << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
+      WALBERLA_ASSERT_EQUAL(cells[2] % (uint_t{2} << uint_c(level-1)), 0, "can only coarsen an even number of cells!");
       cells[2] = (cells[2] >> level);
    }
 

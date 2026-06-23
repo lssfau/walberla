@@ -70,7 +70,7 @@ static void refinementSelectionFunctionRandom( SetupBlockForest& forest ) {
    const uint_t max = blocks.size() >> 3;
 
    for( uint_t i = 0; i != max; ++i ) {
-      SetupBlock* const block = blocks[ math::intRandom( uint_t(0), uint_c( blocks.size()-1 ) ) ];
+      SetupBlock* const block = blocks[ math::intRandom( uint_t{0}, uint_c( blocks.size()-1 ) ) ];
       if( block->getLevel() < 4 ) block->setMarker( true );
    }
 }
@@ -116,7 +116,7 @@ static memory_t communicationCalculationFunction( const SetupBlock* const a, con
 
 static uint_t* blockdata23( const IBlock* const /*block*/ ) {
 
-   return new uint_t(23);
+   return new uint_t{23};
 }
 
 
@@ -130,7 +130,7 @@ static int* blockdata42( const IBlock* const /*block*/ ) {
 
 static uint_t* blockdata5( const IBlock* const /*block*/ ) {
 
-   return new uint_t(5);
+   return new uint_t{5};
 }
 
 
@@ -206,9 +206,9 @@ static void test() {
 
    AABB domain( xmin, ymin, zmin, xmax, ymax, zmax );
 #ifdef NDEBUG
-   const uint_t xSize = math::intRandom( uint_t(4), uint_t(8) );
-   const uint_t ySize = math::intRandom( uint_t(4), uint_t(8) );
-   const uint_t zSize = math::intRandom( uint_t(4), uint_t(8) );
+   const uint_t xSize = math::intRandom( uint_t{4}, uint_t{8} );
+   const uint_t ySize = math::intRandom( uint_t{4}, uint_t{8} );
+   const uint_t zSize = math::intRandom( uint_t{4}, uint_t{8} );
 #else
    const uint_t xSize = uint_c(3);
    const uint_t ySize = uint_c(3);

@@ -75,7 +75,7 @@ public:
    SimplePAB( const BoundaryUID& boundaryUID, const FlagUID & uid, PDFField * const pdfField,
               FlagFieldT * const flagField, const real_t latticeDensity, const real_t omega, FlagUID domain, FlagUID noSlip )
       : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfs_( pdfField ), flags_(flagField),
-        latticeDensity_( latticeDensity ), omega_( omega ), tau_( real_t(1) / omega )
+        latticeDensity_( latticeDensity ), omega_( omega ), tau_( real_t{1} / omega )
    {
       WALBERLA_ASSERT_NOT_NULLPTR( pdfs_  );
       WALBERLA_ASSERT_NOT_NULLPTR( flags_ );
@@ -93,18 +93,18 @@ public:
       WALBERLA_ASSERT_UNEQUAL( domainFlag_, 0 );
       WALBERLA_ASSERT_UNEQUAL( noSlipFlag_, 0 );
 
-      if( omega_ <= real_t(0) && omega_ >= real_t(2) )
+      if( omega_ <= real_t{0} && omega_ >= real_t{2} )
       {
          WALBERLA_ABORT( "You are trying to use the simplePAB boundary condition with an omega of " << omega_ << ". "
                          "Omega has to be in the open interval (0,2)." );
       }
-      else if( omega_ > real_t(0.99) && omega_ < real_t(1.01) )
+      else if( omega_ > real_t{0.99} && omega_ < real_t{1.01} )
       {
          WALBERLA_ABORT( "You are trying to use the simplePAB boundary condition with an omega of " << omega_ << ". "
                          "With an omega that close to 1, the pre collision PDFs can not be restored and SimplePAB will "
                          "not work!" );
       }
-      else if( omega_ > real_t(0.9) && omega_ < real_t(1.1) )
+      else if( omega_ > real_t{0.9} && omega_ < real_t{1.1} )
       {
          WALBERLA_LOG_WARNING( "You are trying to use the simplePAB boundary condition with an omega of " << omega_ << ". "
                                "With an omega that close to 1, the pre collision PDFs can not be restored accurately and "
@@ -176,13 +176,13 @@ public:
 
       if( flags_->get(nfx, nfy, nfz) & domainFlag_ )
       {
-         wu = u + real_t(0.5) * (u - nfu);
+         wu = u + real_t{0.5} * (u - nfu);
       }
       else // Check whether we can get the velocity from a BC
       {
          if( flags_->get(nfx, nfy, nfz) & noSlipFlag_ )
          {
-            wu = real_t(2.0) * u; // NoSlip: u at boundary is 0
+            wu = real_t{2.0} * u; // NoSlip: u at boundary is 0
          }
          else if( flags_->get(nfx, nfy, nfz) & this->mask_ )
          {
@@ -203,8 +203,8 @@ public:
       real_t f2 = pdfs_->get( x, y, z, Stencil::idx[inverseDir[dir]] );
       real_t f1_eq = EquilibriumDistribution<LatticeModel_T>::get(            dir , u, rho);
       real_t f2_eq = EquilibriumDistribution<LatticeModel_T>::get( inverseDir[dir], u, rho );
-      real_t f1_pc = ( tau_ * f1 - f1_eq ) / ( tau_ - real_t(1) );
-      real_t f2_pc = ( tau_ * f2 - f2_eq ) / ( tau_ - real_t(1) );
+      real_t f1_pc = ( tau_ * f1 - f1_eq ) / ( tau_ - real_t{1} );
+      real_t f2_pc = ( tau_ * f2 - f2_eq ) / ( tau_ - real_t{1} );
       real_t symDistFunc_pc = real_c( 0.5 ) * ( f1_pc + f2_pc );
 
       ////////////////////////////////////////////////////
@@ -214,8 +214,8 @@ public:
       // result will be streamed to (x,y,z, stencil::inverseDir[d]) during sweep
       pdfs_->get(nx, ny, nz, Stencil::invDirIdx(dir)) =
          - pdfs_->get(x, y, z, Stencil::idx[dir])                                                                                    //anti-bounce-back
-         + real_t(2.0) * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, wu, latticeDensity_ )                       //pressure term
-         + ( real_t(2.0) - omega_ ) * ( symDistFunc_pc - EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u, rho ) ); //error correction
+         + real_t{2.0} * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, wu, latticeDensity_ )                       //pressure term
+         + ( real_t{2.0} - omega_ ) * ( symDistFunc_pc - EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u, rho ) ); //error correction
    }
 
 protected:

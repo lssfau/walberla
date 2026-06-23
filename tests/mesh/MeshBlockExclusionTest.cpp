@@ -80,7 +80,7 @@ void test(const shared_ptr< DistanceOctree< MeshType > > & distanceOctree, const
       domainAABB.ySize() / real_c(numBlocks[1]),
       domainAABB.zSize() / real_c(numBlocks[2]));
 
-   real_t maxError = blockSize.min() / real_t(10);
+   real_t maxError = blockSize.min() / real_t{10};
 
    SetupBlockForest setupBlockforest;
    setupBlockforest.addRootBlockExclusionFunction(F(distanceOctree, maxError));

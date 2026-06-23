@@ -70,9 +70,9 @@ void initScalarField(std::shared_ptr< StructuredBlockForest >& blocks, const Blo
    for (auto& block : *blocks)
    {
       Type_T val;
-      if (blocks->atDomainXMinBorder(block)) { val = Type_T(-1); }
-      else if (blocks->atDomainXMaxBorder(block)) { val = Type_T(1); }
-      else { val = Type_T(0); }
+      if (blocks->atDomainXMinBorder(block)) { val = Type_T{-1}; }
+      else if (blocks->atDomainXMaxBorder(block)) { val = Type_T{1}; }
+      else { val = Type_T{0}; }
 
       auto* field = block.getData< ScalarField_T >(fieldID);
       WALBERLA_ASSERT_NOT_NULLPTR(field)
@@ -98,9 +98,9 @@ std::shared_ptr< StructuredBlockForest >
 
    sforest.addWorkloadMemorySUIDAssignmentFunction(suidAssignmentFunction);
 
-   AABB const domainAABB{ real_c(0),
-                          real_c(0),
-                          real_c(0),
+   AABB const domainAABB{ real_t{0},
+                          real_t{0},
+                          real_t{0},
                           dx * real_c(numberOfXBlocks * numberOfXCellsPerBlock),
                           dx * real_c(numberOfYBlocks * numberOfYCellsPerBlock),
                           dx * real_c(numberOfZBlocks * numberOfZCellsPerBlock) };
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
    auto blocks = createSelectorBlockGrid(nBlocks[0], nBlocks[1], nBlocks[2], cells[0], cells[1], cells[2], 1, false,
                                          true, true, true);
 
-   BlockDataID const fieldID = field::addToStorage< ScalarField_T >(blocks, "scalar", Type_T(0), field::fzyx, uint_t(1));
+   BlockDataID const fieldID = field::addToStorage< ScalarField_T >(blocks, "scalar", Type_T{0}, field::fzyx, uint_t{1});
    initScalarField(blocks, fieldID);
 
    BlockDataID const gpuFieldID = gpu::addGPUFieldToStorage< ScalarField_T >(blocks, fieldID, "GPU scalar");

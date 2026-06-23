@@ -129,24 +129,24 @@ int main( int argc, char ** argv )
    if( processes != 1 && processes != 2 && processes != 4 && processes != 8 )
       WALBERLA_ABORT( "The number of processes must be equal to either 1, 2, 4, or 8!" );
    
-   const uint_t xBlocks = ( processes == 8 ) ? uint_t(2) : uint_t(1);
-   const uint_t yBlocks = ( processes >= 4 ) ? uint_t(2) : uint_t(1);
-   const uint_t zBlocks = ( processes >= 2 ) ? uint_t(2) : uint_t(1);
+   const uint_t xBlocks = ( processes == 8 ) ? uint_t{2} : uint_t{1};
+   const uint_t yBlocks = ( processes >= 4 ) ? uint_t{2} : uint_t{1};
+   const uint_t zBlocks = ( processes >= 2 ) ? uint_t{2} : uint_t{1};
 
-   const uint_t L = uint_t(16);
+   const uint_t L = uint_t{16};
    
    auto blocks = blockforest::createUniformBlockGrid( xBlocks, yBlocks, zBlocks,
                                                      L / xBlocks,
                                                      L / yBlocks,
                                                      L / zBlocks,
-                                                     real_t(1),
+                                                     real_t{1},
                                                      true,
                                                      true, true, false);
    
    const real_t omega = real_c(1);
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
    
-   const Vector3<real_t> velocity(real_t(0.01), real_t(0), real_t(0));
+   const Vector3<real_t> velocity(real_t{0.01}, real_t{0}, real_t{0});
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
    BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldId, pdfFieldId, velocity ),
@@ -177,7 +177,7 @@ int main( int argc, char ** argv )
    timeloop.run();
    
    // get the force acting on the walls
-   real_t fXBottom = real_t(0), fXTop = real_t(0);
+   real_t fXBottom = real_t{0}, fXTop = real_t{0};
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
       FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId );
@@ -221,8 +221,8 @@ int main( int argc, char ** argv )
    real_t errorTop = std::fabs( ( std::fabs(fXTop) - analyticalForce ) / analyticalForce );
    real_t errorBottom = std::fabs( ( std::fabs(fXBottom) - analyticalForce ) / analyticalForce );
 
-   WALBERLA_LOG_RESULT_ON_ROOT("Relative error top: " << (real_t(100)*errorTop) << " %");
-   WALBERLA_LOG_RESULT_ON_ROOT("Relative error bottom: " << (real_t(100)*errorBottom) << " %");
+   WALBERLA_LOG_RESULT_ON_ROOT("Relative error top: " << (real_t{100}*errorTop) << " %");
+   WALBERLA_LOG_RESULT_ON_ROOT("Relative error bottom: " << (real_t{100}*errorBottom) << " %");
 
 
    if( timeSteps > 100 )

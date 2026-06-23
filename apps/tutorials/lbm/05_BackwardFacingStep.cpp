@@ -104,7 +104,7 @@ public:
                blocks_->transformBlockLocalToGlobalCell( currentPosition, *block );
 
                // only consider the bottom row
-               if(currentPosition[1] == uint_t(0))
+               if(currentPosition[1] == uint_t{0})
                {
                   Vector3< real_t > velocity;
                   Vector3< real_t > vel_left;
@@ -182,7 +182,7 @@ int main( int argc, char ** argv )
 
    // create fields
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
-   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, inletVelocity, real_t(1) );
+   BlockDataID pdfFieldID = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, inletVelocity, real_t{1} );
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // create and initialize boundary handling

@@ -50,9 +50,9 @@ struct Stream // streaming (stream pull) performed only for cells marked as 'LBM
    using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
-                        const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+                        const uint_t numberOfGhostLayersToInclude = uint_t{0} );
    static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
-                        const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+                        const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> );
 
 };
@@ -143,8 +143,8 @@ struct StreamEverything // streaming performed for all cells
    using PdfField_T = PdfField<LatticeModel_T>;
    using Stencil = typename LatticeModel_T::Stencil;
 
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+   static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> );
 };
 
@@ -168,7 +168,7 @@ void StreamEverything< LatticeModel_T >::execute( PdfField_T * src, PdfField_T *
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ
@@ -207,7 +207,7 @@ requires( std::is_same_v< typename LatticeModel_T::Stencil, stencil::D3Q19> )
          {
             real_t * srcPtr = &src->get( -cell_idx_c( numberOfGhostLayersToInclude )-d.cx(), y-d.cy(), z-d.cz(), d.toIdx() );
             real_t * dstPtr = &dst->get( -cell_idx_c( numberOfGhostLayersToInclude ), y, z, d.toIdx() );
-            std::copy( srcPtr, srcPtr + xSize + cell_idx_t(2) * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
+            std::copy( srcPtr, srcPtr + xSize + cell_idx_t{2} * cell_idx_c( numberOfGhostLayersToInclude ), dstPtr );
          }
 
       ) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ

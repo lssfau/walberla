@@ -36,16 +36,16 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.sorting = cfg.getParameter<std::string>("sorting", "none" );
    WALBERLA_LOG_INFO_ON_ROOT("sorting: " << params.sorting);
    
-   params.normal = cfg.getParameter<Vec3>("normal", Vec3(real_t(1.0), real_t(1.0), real_t(1.0)) );
+   params.normal = cfg.getParameter<Vec3>("normal", Vec3(real_t{1.0}, real_t{1.0}, real_t{1.0}) );
    WALBERLA_LOG_INFO_ON_ROOT("normal: " << params.normal);
    
-   params.spacing = cfg.getParameter<real_t>("spacing", real_t(1.0) );
+   params.spacing = cfg.getParameter<real_t>("spacing", real_t{1.0} );
    WALBERLA_LOG_INFO_ON_ROOT("spacing: " << params.spacing);
    
-   params.shift = cfg.getParameter<Vec3>("shift", Vec3(real_t(0.1), real_t(0.1), real_t(0.1)) );
+   params.shift = cfg.getParameter<Vec3>("shift", Vec3(real_t{0.1}, real_t{0.1}, real_t{0.1}) );
    WALBERLA_LOG_INFO_ON_ROOT("shift: " << params.shift);
    
-   params.radius = cfg.getParameter<real_t>("radius", real_t(0.5) );
+   params.radius = cfg.getParameter<real_t>("radius", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("radius: " << params.radius);
    
    params.bBarrier = cfg.getParameter<bool>("bBarrier", false );
@@ -66,7 +66,7 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.simulationSteps = cfg.getParameter<int64_t>("simulationSteps", 10 );
    WALBERLA_LOG_INFO_ON_ROOT("simulationSteps: " << params.simulationSteps);
    
-   params.dt = cfg.getParameter<real_t>("dt", real_t(0.01) );
+   params.dt = cfg.getParameter<real_t>("dt", real_t{0.01} );
    WALBERLA_LOG_INFO_ON_ROOT("dt: " << params.dt);
    
    params.visSpacing = cfg.getParameter<int64_t>("visSpacing", 1000 );
@@ -108,10 +108,10 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.maxBlocksPerProcess = cfg.getParameter<int>("maxBlocksPerProcess", int_c(1000) );
    WALBERLA_LOG_INFO_ON_ROOT("maxBlocksPerProcess: " << params.maxBlocksPerProcess);
    
-   params.baseWeight = cfg.getParameter<real_t>("baseWeight", real_t(10.0) );
+   params.baseWeight = cfg.getParameter<real_t>("baseWeight", real_t{10.0} );
    WALBERLA_LOG_INFO_ON_ROOT("baseWeight: " << params.baseWeight);
    
-   params.metisipc2redist = cfg.getParameter<real_t>("metisipc2redist", real_t(1000.0) );
+   params.metisipc2redist = cfg.getParameter<real_t>("metisipc2redist", real_t{1000.0} );
    WALBERLA_LOG_INFO_ON_ROOT("metisipc2redist: " << params.metisipc2redist);
    
    params.LBAlgorithm = cfg.getParameter<std::string>("LBAlgorithm", "Hilbert" );

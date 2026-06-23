@@ -99,7 +99,7 @@ public:
                                        const size_t type2,
                                        const real_t meff)
    {
-      auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
+      auto a = real_t{0.5} * getDampingN(type1, type2) / meff;
       return std::exp(-a * math::pi / std::sqrt(getStiffness(type1, type2) / meff - a*a));
    }
 
@@ -108,7 +108,7 @@ public:
                             const size_t type2,
                             const real_t meff)
    {
-      auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
+      auto a = real_t{0.5} * getDampingN(type1, type2) / meff;
       return math::pi / std::sqrt( getStiffness(type1, type2)/meff - a*a);
    }
 
@@ -120,8 +120,8 @@ public:
                              const real_t meff)
    {
       const real_t lnDryResCoeff = std::log(cor);
-      setStiffness(type1, type2, math::pi * math::pi * meff / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  ));
-      setDampingN( type1, type2, - real_t(2) * std::sqrt( meff * getStiffness(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) ));
+      setStiffness(type1, type2, math::pi * math::pi * meff / ( collisionTime * collisionTime * ( real_t{1} - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  ));
+      setDampingN( type1, type2, - real_t{2} * std::sqrt( meff * getStiffness(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) ));
    }
 private:
    uint_t numParticleTypes_;
@@ -136,10 +136,10 @@ inline SpringDashpot::SpringDashpot(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    
-   stiffness_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   dampingN_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   dampingT_.resize(numParticleTypes * numParticleTypes, real_t(0));
-   friction_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   stiffness_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   dampingN_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   dampingT_.resize(numParticleTypes * numParticleTypes, real_t{0});
+   friction_.resize(numParticleTypes * numParticleTypes, real_t{0});
 }
 
 
@@ -226,7 +226,7 @@ inline void SpringDashpot::operator()(const size_t p_idx1,
       const Vec3& gpos( contactPoint );
       // The absolute value of the penetration length
       real_t delta = -penetrationDepth;
-      if (delta < real_t(0)) return;
+      if (delta < real_t{0}) return;
 
       const Vec3   relVel ( -(getVelocityAtWFPoint(p_idx1, ac, gpos) - getVelocityAtWFPoint(p_idx2, ac, gpos)) );
       const real_t relVelN( math::dot(relVel, contactNormal) );

@@ -95,7 +95,7 @@ inline void VelocityVerletPreForceUpdate::operator()(const size_t idx, Accessor&
    {
       ac.setPosition(idx, ac.getPosition(idx) +
                             ac.getLinearVelocity(idx) * dt_ +
-                            real_t(0.5) * ac.getInvMass(idx) * ac.getOldForce(idx) * dt_ * dt_);
+                            real_t{0.5} * ac.getInvMass(idx) * ac.getOldForce(idx) * dt_ * dt_);
 
       {%- if bIntegrateRotation %}
       {%- if bUseFullAngularMomentumEquation %}
@@ -115,7 +115,7 @@ inline void VelocityVerletPreForceUpdate::operator()(const size_t idx, Accessor&
 
 
       // Calculating the rotation angle
-      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
+      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + real_t{0.5} * wdot * dt_ * dt_);
 
       // Calculating the new orientation
       auto rotation = ac.getRotation(idx);
@@ -133,7 +133,7 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t idx, Accessor
    if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
       ac.setLinearVelocity(idx, ac.getLinearVelocity(idx) +
-                                  real_t(0.5) * ac.getInvMass(idx) * (ac.getOldForce(idx) + ac.getForce(idx)) * dt_);
+                                  real_t{0.5} * ac.getInvMass(idx) * (ac.getOldForce(idx) + ac.getForce(idx)) * dt_);
 
       {%- if bIntegrateRotation %}
       {%- if bUseFullAngularMomentumEquation %}
@@ -153,11 +153,11 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t idx, Accessor
    }
 
    ac.setOldForce(idx,       ac.getForce(idx));
-   ac.setForce(idx,          Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setForce(idx,          Vec3(real_t{0}, real_t{0}, real_t{0}));
 
    {%- if bIntegrateRotation %}
    ac.setOldTorque(idx,      ac.getTorque(idx));
-   ac.setTorque(idx,         Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setTorque(idx,         Vec3(real_t{0}, real_t{0}, real_t{0}));
    {%- endif %}
 }
 

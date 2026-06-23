@@ -69,7 +69,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          for(auto cell : xyz)
          {
             const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
-            u->get( cell ) = std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+            u->get( cell ) = std::sin( real_t{2} * math::pi * p[0] ) * std::sinh( real_t{2} * math::pi * p[1] );
          }
       }
    }
@@ -86,7 +86,7 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       for(auto cell : xyz)
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
-         f->get( cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+         f->get( cell ) = real_t{4} * math::pi * math::pi * std::sin( real_t{2} * math::pi * p[0] ) * std::sinh( real_t{2} * math::pi * p[1] );
       }
    }
 }
@@ -126,7 +126,7 @@ int main( int argc, char** argv )
    mpi::Environment env( argc, argv );
 
    const uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
-   if( processes != uint_t(1) && processes != uint_t(4) && processes != uint_t(8) )
+   if( processes != uint_t{1} && processes != uint_t{4} && processes != uint_t{8} )
       WALBERLA_ABORT( "The number of processes must be equal to 1, 4, or 8!" );
 
    logging::Logging::printHeaderOnStream();
@@ -136,48 +136,48 @@ int main( int argc, char** argv )
    for( int i = 1; i < argc; ++i )
       if( std::strcmp( argv[i], "--shortrun" ) == 0 ) shortrun = true;
 
-   const uint_t xBlocks = ( processes == uint_t(1) ) ? uint_t(1) : ( ( processes == uint_t(4) ) ? uint_t(2) : uint_t(4) );
-   const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t xCells = ( processes == uint_t(1) ) ? uint_t(200) : ( ( processes == uint_t(4) ) ? uint_t(100) : uint_t(50) );
-   const uint_t yCells = ( processes == uint_t(1) ) ? uint_t(100) : uint_t(50);
-   const real_t xSize = real_t(2);
-   const real_t ySize = real_t(1);
-   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
-   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0),
-                                                                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, dx ),
-                                                      xBlocks, yBlocks, uint_t(1),
-                                                      xCells, yCells, uint_t(1),
+   const uint_t xBlocks = ( processes == uint_t{1} ) ? uint_t{1} : ( ( processes == uint_t{4} ) ? uint_t{2} : uint_t{4} );
+   const uint_t yBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t xCells = ( processes == uint_t{1} ) ? uint_t{200} : ( ( processes == uint_t{4} ) ? uint_t{100} : uint_t{50} );
+   const uint_t yCells = ( processes == uint_t{1} ) ? uint_t{100} : uint_t{50};
+   const real_t xSize = real_t{2};
+   const real_t ySize = real_t{1};
+   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t{1} );
+   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t{1} );
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t{0.5} * dx, real_t{0.5} * dy, real_t{0},
+                                                                  xSize - real_t{0.5} * dx, ySize - real_t{0.5} * dy, dx ),
+                                                      xBlocks, yBlocks, uint_t{1},
+                                                      xCells, yCells, uint_t{1},
                                                       true,
                                                       false, false, false );
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t{0}, field::fzyx, uint_t{1} );
 
    initU( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t{0}, field::fzyx, uint_t{1} );
 
    initF( blocks, fId );   
 
-   SweepTimeloop timeloop( blocks, uint_t(1) );
+   SweepTimeloop timeloop( blocks, uint_t{1} );
 
    blockforest::communication::UniformBufferedScheme< Stencil_T > communication( blocks );
    communication.addPackInfo( make_shared< field::communication::PackInfo< PdeField_T > >( uId ) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(4) * math::pi * math::pi;
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t{2} / ( blocks->dx() * blocks->dx() ) + real_t{2} / ( blocks->dy() * blocks->dy() ) + real_t{4} * math::pi * math::pi;
+   weights[ Stencil_T::idx[ stencil::N ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
 
    auto RBGSFixedSweep = pde::RBGSFixedStencil< Stencil_T >( blocks, uId, fId, weights );
 
-   timeloop.addFuncBeforeTimeStep( pde::RBGSIteration( blocks->getBlockStorage(), shortrun ? uint_t(10) : uint_t(10000),
+   timeloop.addFuncBeforeTimeStep( pde::RBGSIteration( blocks->getBlockStorage(), shortrun ? uint_t{10} : uint_t{10000},
                                                        communication,
                                                        RBGSFixedSweep.getRedSweep(), RBGSFixedSweep.getBlackSweep(),
                                                        pde::ResidualNorm< Stencil_T >( blocks->getBlockStorage(), uId, fId, weights ),
-                                                       real_c(1e-6), uint_t(100) ), "Red-Black Gauss-Seidel iteration" );
+                                                       real_c(1e-6), uint_t{100} ), "Red-Black Gauss-Seidel iteration" );
 
    timeloop.run();
    
@@ -188,17 +188,17 @@ int main( int argc, char** argv )
    
    BlockDataID stencilId = field::addToStorage< StencilField_T >( blocks, "w" );
    
-   SweepTimeloop timeloop2( blocks, uint_t(1) );
+   SweepTimeloop timeloop2( blocks, uint_t{1} );
    
    copyWeightsToStencilField( blocks, weights, stencilId );
    
    auto RBGSSweep = pde::RBGS< Stencil_T >( blocks, uId, fId, stencilId );
    
-   timeloop2.addFuncBeforeTimeStep( pde::RBGSIteration( blocks->getBlockStorage(), shortrun ? uint_t(10) : uint_t(10000),
+   timeloop2.addFuncBeforeTimeStep( pde::RBGSIteration( blocks->getBlockStorage(), shortrun ? uint_t{10} : uint_t{10000},
                                                         communication,
                                                         RBGSSweep.getRedSweep(), RBGSSweep.getBlackSweep(),
                                                         pde::ResidualNormStencilField< Stencil_T >( blocks->getBlockStorage(), uId, fId, stencilId ),
-                                                        real_c(1e-6), uint_t(100) ), "Red-Black Gauss-Seidel iteration" );
+                                                        real_c(1e-6), uint_t{100} ), "Red-Black Gauss-Seidel iteration" );
    
    timeloop2.run();
 

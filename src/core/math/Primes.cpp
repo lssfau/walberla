@@ -146,7 +146,7 @@ std::vector<uint_t> getPrimeFactors( const uint_t n )
  **********************************************************************************************************************/
 std::set<uint_t> getDevisors( const uint_t n )
 {
-   if( n == uint_t(0) )
+   if( n == uint_t{0} )
       return {};
 
    std::vector<uint_t> factors = getPrimeFactors( n );
@@ -154,8 +154,8 @@ std::set<uint_t> getDevisors( const uint_t n )
    std::set<uint_t> devisors;
    std::vector<uint_t> tmpDevisors;
 
-   devisors.insert( uint_t(1) );
-   tmpDevisors.reserve( ( size_t(1) << factors.size() ) - size_t(1) );
+   devisors.insert( uint_t{1} );
+   tmpDevisors.reserve( ( size_t{1} << factors.size() ) - size_t{1} );
 
    for(const uint_t factor : factors)
    {

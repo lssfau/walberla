@@ -34,7 +34,7 @@ namespace geometry {
 
    void Sphere::updateBoxes()
    {
-      static const real_t oneOverSqrt3 = real_t(1) / std::sqrt( real_t(3) );
+      static const real_t oneOverSqrt3 = real_t{1} / std::sqrt( real_t{3} );
 
       boundingBox_ = AABB::createFromMinMaxCorner( midpoint_[0] - radius_, midpoint_[1] - radius_, midpoint_[2] - radius_,
                                                    midpoint_[0] + radius_, midpoint_[1] + radius_, midpoint_[2] + radius_ );
@@ -65,7 +65,7 @@ namespace geometry {
    template<>
    FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
    {
-      static const real_t sqrt3half = std::sqrt( real_t(3) ) / real_t(2);
+      static const real_t sqrt3half = std::sqrt( real_t{3} ) / real_t{2};
 
       const real_t midPointDistSq = (sphere.midpoint() - cellMidpoint).sqrLength();
 

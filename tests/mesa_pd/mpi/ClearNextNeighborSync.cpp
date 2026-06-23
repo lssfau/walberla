@@ -51,16 +51,16 @@ int main(int argc, char **argv)
    auto ss = std::make_shared<data::ShapeStorage>();
 
    auto smallSphere = ss->create<data::Sphere>(radius);
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    // create forest
-   auto forest = blockforest::createBlockForest(math::AABB(real_t(0),
-                                                           real_t(0),
-                                                           real_t(0),
-                                                           real_t(6),
-                                                           real_t(6),
-                                                           real_t(6)),
+   auto forest = blockforest::createBlockForest(math::AABB(real_t{0},
+                                                           real_t{0},
+                                                           real_t{0},
+                                                           real_t{6},
+                                                           real_t{6},
+                                                           real_t{6}),
                                                 Vector3<uint_t>(2, 2, 2),
                                                 Vector3<bool>(true, true, true));
    domain::BlockForestDomain domain(forest);

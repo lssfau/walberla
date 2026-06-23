@@ -68,7 +68,7 @@ template < typename Stencil_T >
 Vector3<cell_idx_t> findCorrespondingLatticeDirection( const Vector3<real_t> & direction )
 {
    stencil::Direction correspondingDirection = stencil::C;
-   real_t innerProduct = real_t(0);
+   real_t innerProduct = real_t{0};
    for( auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d )
    {
       // compute inner product <dir,c_i>

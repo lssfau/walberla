@@ -63,7 +63,7 @@ void createSetupBlockForest(SetupBlockForest& setupBfs,
 
    auto refSelection = ldc.refinementSelector();
    setupBfs.addRefinementSelectionFunction(std::function<void(SetupBlockForest &)>(refSelection));
-   const AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), domainSize[0], domainSize[1], domainSize[2]);
+   const AABB domain(real_t{0.0}, real_t{0.0}, real_t{0.0}, domainSize[0], domainSize[1], domainSize[2]);
    setupBfs.addWorkloadMemorySUIDAssignmentFunction(blockforest::uniformWorkloadAndMemoryAssignment);
    setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
    setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalanceWeighted(), numProcesses);

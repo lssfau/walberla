@@ -157,7 +157,7 @@ struct MacroscopicForceCorrection< LatticeModel_T >
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity();
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -184,7 +184,7 @@ struct MacroscopicForceCorrection< LatticeModel_T >
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity();
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -196,7 +196,7 @@ struct MacroscopicForceCorrection< LatticeModel_T >
    static void apply( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity(it.x(), it.y(), it.z());
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -206,7 +206,7 @@ struct MacroscopicForceCorrection< LatticeModel_T >
    static void apply( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity(x,y,z);
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -245,7 +245,7 @@ struct EquilibriumForceCorrection< LatticeModel_T >
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity();
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -272,7 +272,7 @@ struct EquilibriumForceCorrection< LatticeModel_T >
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity();
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -284,7 +284,7 @@ struct EquilibriumForceCorrection< LatticeModel_T >
    static void apply( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity(it.x(), it.y(), it.z());
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];
@@ -294,7 +294,7 @@ struct EquilibriumForceCorrection< LatticeModel_T >
    static void apply( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
       const auto & force = latticeModel.forceModel().forceDensity(x,y,z);
-      const real_t dt_2 = real_t(0.5);
+      const real_t dt_2 = real_t{0.5};
 
       momentumDensity[0] += dt_2 * force[0];
       momentumDensity[1] += dt_2 * force[1];

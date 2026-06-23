@@ -49,8 +49,8 @@ public:
       auto hydForce = ac.getHydrodynamicForce(idx);
       auto hydTorque = ac.getHydrodynamicTorque(idx);
 
-      auto averageForce = real_t(0.5) * ( hydForce + ac.getOldHydrodynamicForce(idx) );
-      auto averageTorque = real_t(0.5) * ( hydTorque + ac.getOldHydrodynamicTorque(idx) );
+      auto averageForce = real_t{0.5} * ( hydForce + ac.getOldHydrodynamicForce(idx) );
+      auto averageTorque = real_t{0.5} * ( hydTorque + ac.getOldHydrodynamicTorque(idx) );
 
       // swap old values with new ones
       ac.setOldHydrodynamicForce( idx, hydForce );

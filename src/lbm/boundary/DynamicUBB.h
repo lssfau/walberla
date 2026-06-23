@@ -71,7 +71,7 @@ public:
    DynamicUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
                const shared_ptr< TimeTracker > & timeTracker, const uint_t level, const VelocityFunctor_T & velocity, const AABB & aabb ) :
       Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ),
-      timeTracker_( timeTracker ), time_( real_t(0) ), level_( level ), velocity_( velocity )
+      timeTracker_( timeTracker ), time_( real_t{0} ), level_( level ), velocity_( velocity )
    {
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
       dx_[0] = aabb.xSize() / real_c( pdfField_->xSize() );
@@ -156,7 +156,7 @@ public:
       }
       else
       {
-         const auto vel = AdaptVelocityToExternalForce ? lbm::internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity, real_t(1) ) :
+         const auto vel = AdaptVelocityToExternalForce ? lbm::internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity, real_t{1} ) :
                                                          velocity;
 
          pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) = pdfField_->get( x, y, z, Stencil::idx[dir] ) -

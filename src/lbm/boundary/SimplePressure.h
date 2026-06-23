@@ -111,7 +111,7 @@ public:
       // result will be streamed to (x,y,z, stencil::inverseDir[d]) during sweep
       pdfs_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) =
          - pdfs_->get( x, y, z, Stencil::idx[dir] )                   //anti-bounce-back
-         + real_t(2) * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u, latticeDensity_ ); //pressure term
+         + real_t{2} * EquilibriumDistribution<LatticeModel_T>::getSymmetricPart( dir, u, latticeDensity_ ); //pressure term
    }
 
 protected:

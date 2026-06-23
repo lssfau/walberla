@@ -145,12 +145,12 @@ void ellipsoidTest( StructuredBlockStorage & storage,
                     initializer::InitializationManager & manager,
                     initializer::OverlapFieldFromBody & initializer )
 {
-   const Vector3<real_t> midpoint ( real_t(15), real_t(15), real_t(15) );
-   const Vector3<real_t> radii (  real_t(5), real_t(3), real_t(4) );
-   const Vector3<real_t> axis1 (  real_t(1), real_t(1), real_t(0) );
-   const Vector3<real_t> axis2 ( -real_t(1), real_t(1), real_t(0) );
+   const Vector3<real_t> midpoint ( real_t{15}, real_t{15}, real_t{15} );
+   const Vector3<real_t> radii (  real_t{5}, real_t{3}, real_t{4} );
+   const Vector3<real_t> axis1 (  real_t{1}, real_t{1}, real_t{0} );
+   const Vector3<real_t> axis2 ( -real_t{1}, real_t{1}, real_t{0} );
 
-   const real_t expectedVolume = real_t(4) / real_t(3) * radii[0] * radii[1] * radii[2] * math::pi;
+   const real_t expectedVolume = real_t{4} / real_t{3} * radii[0] * radii[1] * radii[2] * math::pi;
 
    resetField( storage, fieldID );
 
@@ -201,9 +201,9 @@ void sphereTest( StructuredBlockStorage & storage,
                  initializer::InitializationManager & manager,
                  initializer::OverlapFieldFromBody & initializer )
 {
-   const Vector3<real_t> midpoint ( real_t(15), real_t(15), real_t(15) );
-   const real_t radius = real_t(5);
-   const real_t expectedVolume = real_t(4) / real_t(3) * radius * radius * radius * math::pi;
+   const Vector3<real_t> midpoint ( real_t{15}, real_t{15}, real_t{15} );
+   const real_t radius = real_t{5};
+   const real_t expectedVolume = real_t{4} / real_t{3} * radius * radius * radius * math::pi;
 
    resetField( storage, fieldID );
 

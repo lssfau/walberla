@@ -76,7 +76,7 @@ public:
                                        const size_t type2,
                                        const real_t meff)
    {
-      auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
+      auto a = real_t{0.5} * getDampingN(type1, type2) / meff;
       return std::exp(-a * math::pi / std::sqrt(getStiffnessN(type1, type2) / meff - a*a));
    }
 
@@ -85,7 +85,7 @@ public:
                             const size_t type2,
                             const real_t meff)
    {
-      auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
+      auto a = real_t{0.5} * getDampingN(type1, type2) / meff;
       return math::pi / std::sqrt( getStiffnessN(type1, type2)/meff - a*a);
    }
 
@@ -97,8 +97,8 @@ public:
                              const real_t meff)
    {
       const real_t lnDryResCoeff = std::log(cor);
-      setStiffnessN(type1, type2, math::pi * math::pi * meff / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  ));
-      setDampingN( type1, type2, - real_t(2) * std::sqrt( meff * getStiffnessN(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) ));
+      setStiffnessN(type1, type2, math::pi * math::pi * meff / ( collisionTime * collisionTime * ( real_t{1} - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  ));
+      setDampingN( type1, type2, - real_t{2} * std::sqrt( meff * getStiffnessN(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) ));
    }
 private:
    uint_t numParticleTypes_;
@@ -111,7 +111,7 @@ inline SpringDashpotSpring::SpringDashpotSpring(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
-   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t{0});
    {%- endfor %}
 }
 
@@ -152,7 +152,7 @@ inline void SpringDashpotSpring::operator()(const size_t p_idx1,
    {
       // skip if no penetration is present
       real_t delta = -penetrationDepth;
-      if (delta < real_t(0)) return;
+      if (delta < real_t{0}) return;
 
       // calculate relative velocities
       const Vec3   relVel ( -(getVelocityAtWFPoint(p_idx1, ac, contactPoint) - getVelocityAtWFPoint(p_idx2, ac, contactPoint)) );
@@ -165,7 +165,7 @@ inline void SpringDashpotSpring::operator()(const size_t p_idx1,
       const Vec3 fN = fNabs * contactNormal;
 
       // get tangential displacement from contact history
-      auto tangentialDisplacement = Vec3(real_t(0));
+      auto tangentialDisplacement = Vec3(real_t{0});
       auto contactHistory = ac.getOldContactHistoryRef(p_idx1).find(ac.getUid(p_idx2));
       if(contactHistory != ac.getOldContactHistoryRef(p_idx1).end())
       {

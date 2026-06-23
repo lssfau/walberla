@@ -62,7 +62,7 @@ int main(int argc, char** argv)
    quiet   = false;
    size_t n = 9000u;
    size_t s =    0u;
-   walberla::real_t o = walberla::real_t(0);
+   walberla::real_t o = walberla::real_t{0};
 
    if( argc > 3 ) {
       for( walberla::uint_t i = 1; i < walberla::uint_c(argc-2); ++i ) {
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 
       PRINT_VER( "Remove Duplicate Vertices ... \n" )
       size_t removed;
-      if( o > walberla::real_t(0) )
+      if( o > walberla::real_t{0} )
          removed = mesh.removeDuplicateVertices( o );
       else
          removed = mesh.removeDuplicateVertices( );

@@ -100,7 +100,7 @@ void writeMPITextFile(const std::string& filename, const std::string& processLoc
          size_t exscanResult;
          size_t input = processLocalPart.size();
          MPI_Exscan(&input, &exscanResult, 1, MPITrait< size_t >::type(), MPI_SUM, comm);
-         if (rank == 0) exscanResult = size_t(0);
+         if (rank == 0) exscanResult = size_t{0};
 
          const MPI_Offset offset = numeric_cast< MPI_Offset >(exscanResult);
 

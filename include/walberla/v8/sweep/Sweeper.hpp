@@ -165,7 +165,7 @@ template< ExecTag XTag, CellFunction Func >
 void forAllCells(const XTag& exTag, const StructuredBlockForest& blocks, Func&& func)
 {
    CellInterval ci {
-      Cell { cell_idx_t(0), cell_idx_t(0), cell_idx_t(0)  },
+      Cell { 0, 0, 0  },
       Cell {
          cell_idx_c(blocks.getNumberOfXCellsPerBlock() - 1),
          cell_idx_c(blocks.getNumberOfYCellsPerBlock() - 1),
@@ -212,11 +212,11 @@ inline void forAllCellPairs(XTag xtag, const CellInterval& firstCi, const CellIn
       }
    }
 
-   const CellInterval referenceInterval{ { cell_idx_t(0), cell_idx_t(0), cell_idx_t(0) },
+   const CellInterval referenceInterval{ { 0, 0, 0 },
                                          {
-                                            firstCi.xSize() - cell_idx_t(1),
-                                            firstCi.ySize() - cell_idx_t(1),
-                                            firstCi.zSize() - cell_idx_t(1),
+                                            firstCi.xSize() - 1,
+                                            firstCi.ySize() - 1,
+                                            firstCi.zSize() - 1,
                                          } };
 
    forAllCells(xtag, referenceInterval, [firstCi, secondCi, func] WALBERLA_HOST_DEVICE(Cell offsets) {

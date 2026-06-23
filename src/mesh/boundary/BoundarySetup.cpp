@@ -27,7 +27,7 @@
 namespace walberla::mesh {
 
 BoundarySetup::BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers, const bool doRefinementCorrection)
-   : structuredBlockStorage_( structuredBlockStorage ), distanceFunction_( distanceFunction ), numGhostLayers_( numGhostLayers ), cellVectorChunkSize_( size_t(1000) )
+   : structuredBlockStorage_( structuredBlockStorage ), distanceFunction_( distanceFunction ), numGhostLayers_( numGhostLayers ), cellVectorChunkSize_( size_t{1000} )
 {
    voxelize();
 
@@ -44,9 +44,9 @@ void BoundarySetup::divideAndPushCellInterval( const CellInterval & ci, std::que
 {
    WALBERLA_ASSERT( !ci.empty() )
 
-   Cell newMax( ci.xMin() + std::max( cell_idx_c( ci.xSize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ),
-                ci.yMin() + std::max( cell_idx_c( ci.ySize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ),
-                ci.zMin() + std::max( cell_idx_c( ci.zSize() ) / cell_idx_t(2) - cell_idx_t(1), cell_idx_t(0) ) );
+   Cell newMax( ci.xMin() + std::max( cell_idx_c( ci.xSize() ) / cell_idx_t{2} - cell_idx_t{1}, cell_idx_t{0} ),
+                ci.yMin() + std::max( cell_idx_c( ci.ySize() ) / cell_idx_t{2} - cell_idx_t{1}, cell_idx_t{0} ),
+                ci.zMin() + std::max( cell_idx_c( ci.zSize() ) / cell_idx_t{2} - cell_idx_t{1}, cell_idx_t{0} ) );
 
    WALBERLA_ASSERT( ci.contains( newMax ) )
 
@@ -82,12 +82,12 @@ void BoundarySetup::allocateOrResetVoxelizationField()
       for( auto & block : *structuredBlockStorage_ )
       {
          VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
-         voxelizationField->setWithGhostLayer( uint8_t(0) );
+         voxelizationField->setWithGhostLayer( uint8_t{0} );
       }
    }
    else
    {
-      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t(0), field::fzyx, numGhostLayers_ ) );
+      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t{0}, field::fzyx, numGhostLayers_ ) );
    }
 
    WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ )
@@ -133,20 +133,20 @@ void BoundarySetup::voxelize()
          structuredBlockStorage_->mapToPeriodicDomain( cellCenter );
          const real_t sqSignedDistance = distanceFunction_( cellCenter );
 
-         if( curCi.numCells() == uint_t(1) )
+         if( curCi.numCells() == uint_t{1} )
          {
-            if( ( sqSignedDistance < real_t(0) ) )
+            if( ( sqSignedDistance < real_t{0} ) )
             {
                Cell localCell;
                structuredBlockStorage_->transformGlobalToBlockLocalCell( localCell, block, curCi.min() );
-               voxelizationField->get( localCell ) = uint8_t(1);
+               voxelizationField->get( localCell ) = uint8_t{1};
             }
 
             ciQueue.pop();
             continue;
          }
 
-         const real_t circumRadius = curAABB.sizes().length() * real_t(0.5);
+         const real_t circumRadius = curAABB.sizes().length() * real_t{0.5};
          const real_t sqCircumRadius = circumRadius * circumRadius;
 
          if( sqSignedDistance < -sqCircumRadius )
@@ -154,7 +154,7 @@ void BoundarySetup::voxelize()
             // clearly the cell interval is fully covered by the mesh
             CellInterval localCi;
             structuredBlockStorage_->transformGlobalToBlockLocalCellInterval( localCi, block, curCi );
-            std::fill( voxelizationField->beginSliceXYZ( localCi ), voxelizationField->end(), uint8_t(1) );
+            std::fill( voxelizationField->beginSliceXYZ( localCi ), voxelizationField->end(), uint8_t{1} );
 
             ciQueue.pop();
             continue;
@@ -168,7 +168,7 @@ void BoundarySetup::voxelize()
             continue;
          }
 
-         WALBERLA_ASSERT_GREATER( curCi.numCells(), uint_t(1) )
+         WALBERLA_ASSERT_GREATER( curCi.numCells(), uint_t{1} )
          divideAndPushCellInterval( curCi, ciQueue );
 
          ciQueue.pop();
@@ -178,9 +178,9 @@ void BoundarySetup::voxelize()
 
 void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
 {
-   if(    blockForest.getNumberOfXCellsPerBlock() < uint_t( 16 )
-       || blockForest.getNumberOfYCellsPerBlock() < uint_t( 16 )
-       || blockForest.getNumberOfZCellsPerBlock() < uint_t( 16 ) )
+   if(    blockForest.getNumberOfXCellsPerBlock() < uint_t{ 16 }
+       || blockForest.getNumberOfYCellsPerBlock() < uint_t{ 16 }
+       || blockForest.getNumberOfZCellsPerBlock() < uint_t{ 16 } )
    {
       WALBERLA_ABORT( "The mesh boundary setup requires a block size of at least 16 in each dimension, when refinement is used!" )
    }
@@ -229,9 +229,9 @@ void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
             Cell coarseCell( globalCell );
             for( uint_t i = 0; i < 3; ++i )
             {
-               if( coarseCell[i] < cell_idx_t(0) )
+               if( coarseCell[i] < cell_idx_t{0} )
                {
-                  coarseCell[i] = -( ( cell_idx_t(1) - coarseCell[i] ) >> 1 );
+                  coarseCell[i] = -( ( cell_idx_t{1} - coarseCell[i] ) >> 1 );
                }
                else
                {
@@ -240,10 +240,10 @@ void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
             }
 
             Vector3< real_t > coarseCenter;
-            structuredBlockStorage_->getCellCenter( coarseCenter, coarseCell, level - uint_t(1) );
+            structuredBlockStorage_->getCellCenter( coarseCenter, coarseCell, level - uint_t{1} );
             structuredBlockStorage_->mapToPeriodicDomain( coarseCenter );
 
-            voxelizationField->get( cell ) =  distanceFunction_( coarseCenter ) < real_t(0) ? uint8_t(1) : uint8_t(0);
+            voxelizationField->get( cell ) =  distanceFunction_( coarseCenter ) < real_t{0} ? uint8_t{1} : uint8_t{0};
          }
    }
 }
@@ -254,7 +254,7 @@ void BoundarySetup::writeVTKVoxelfile( const std::string & identifier, bool writ
    WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ )
    WALBERLA_ASSERT_NOT_NULLPTR( structuredBlockStorage_ )
 
-   field::createVTKOutput< VoxelizationField >( *voxelizationFieldId_, *structuredBlockStorage_, identifier, uint_t(1), writeGhostLayers ? numGhostLayers_ : uint_t(0), false, baseFolder, executionFolder )();
+   field::createVTKOutput< VoxelizationField >( *voxelizationFieldId_, *structuredBlockStorage_, identifier, uint_t{1}, writeGhostLayers ? numGhostLayers_ : uint_t{0}, false, baseFolder, executionFolder )();
 }
 
 

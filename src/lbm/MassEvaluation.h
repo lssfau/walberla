@@ -68,7 +68,7 @@ inline Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockSt
 *
 *   \code
 *   makeSharedFunctor( lbm::makeMassEvaluation< lbm::Adaptor<LatticeModel_T>::Density >( config, blocks,
-*                                                                                        uint_t(0), densityId ) )
+*                                                                                        uint_t{0}, densityId ) )
 *   \endcode
 *
 *   Note that for this example the plot and log frequency can be controlled via the configuration file. In this example,
@@ -77,7 +77,7 @@ inline Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockSt
 *
 *   \code
 *   makeSharedFunctor( lbm::makeMassEvaluation< lbm::Adaptor<LatticeModel_T>::Density, FlagField_T >(
-                          config, blocks, uint_t(0), densityId, flagFieldId, fluidFlagUID ) )
+                          config, blocks, uint_t{0}, densityId, flagFieldId, fluidFlagUID ) )
 *   \endcode
 */
 //**********************************************************************************************************************
@@ -187,8 +187,8 @@ makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const u
 ///////////////////////////////////////////////////////
 
 #define WALBERLA_LBM_MAKE_MASS_EVALUATION_CONFIG_PARSER( config ) \
-   uint_t defaultPlotFrequency = uint_t(0); \
-   uint_t defaultLogFrequency = uint_t(0); \
+   uint_t defaultPlotFrequency = uint_t{0}; \
+   uint_t defaultLogFrequency = uint_t{0}; \
    std::string defaultFilename = walberla::field::internal::massEvaluationFilename; \
    Vector3<real_t> defaultDomainNormalization( internal::massEvaluationDomain( blocks, level ) ); \
    walberla::field::internal::massEvaluationConfigParser( config, configBlockName, defaultPlotFrequency, defaultLogFrequency, defaultFilename, defaultDomainNormalization );

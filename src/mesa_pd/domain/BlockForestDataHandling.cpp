@@ -121,7 +121,7 @@ void BlockForestDataHandling::serializeCoarseToFine( Block * const block, const 
    // get child aabb
    const auto childID   = BlockID(block->getId(), child);
    const auto childAABB = block->getForest().getAABBFromBlockId(childID);
-   //WALBERLA_LOG_DEVEL( (child & uint_t(1)) << (child & uint_t(2)) << (child & uint_t(4)) << "\naabb: " << aabb << "\nchild: " << childAABB );
+   //WALBERLA_LOG_DEVEL( (child & uint_t{1}) << (child & uint_t{2}) << (child & uint_t{4}) << "\naabb: " << aabb << "\nchild: " << childAABB );
 
    decltype(ps_->size()) numOfParticles = 0;
 

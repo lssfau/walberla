@@ -85,7 +85,7 @@ inline HeatConduction::HeatConduction(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    
-   conductance_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   conductance_.resize(numParticleTypes * numParticleTypes, real_t{0});
 }
 
 

@@ -41,7 +41,7 @@ class CurlMagnitudeVTKWriter : public vtk::BlockCellDataWriter< OutputType, 1 >
 {
 public:
    CurlMagnitudeVTKWriter(const shared_ptr<StructuredBlockStorage> blockStorage, Filter_T & filter,
-         const ConstBlockDataID & velocityFieldId, const std::string & id, const real_t lengthScaleWeight = real_t(-1)) :
+         const ConstBlockDataID & velocityFieldId, const std::string & id, const real_t lengthScaleWeight = real_t{-1}) :
          vtk::BlockCellDataWriter< OutputType, 1 >(id), blockStorage_(blockStorage), filter_(filter),
          velocityFieldId_(velocityFieldId), velocityField_(nullptr), lengthScaleWeight_(lengthScaleWeight) {}
 
@@ -62,15 +62,15 @@ protected:
 
       filter_(*this->block_);
 
-      const auto one = cell_idx_t(1);
+      const auto one = cell_idx_t{1};
 
-      const auto halfInvDx = real_t(0.5) * real_t(1) / dx;
-      const auto halfInvDy = real_t(0.5) * real_t(1) / dy;
-      const auto halfInvDz = real_t(0.5) * real_t(1) / dz;
+      const auto halfInvDx = real_t{0.5} * real_t{1} / dx;
+      const auto halfInvDy = real_t{0.5} * real_t{1} / dy;
+      const auto halfInvDz = real_t{0.5} * real_t{1} / dz;
 
       const real_t lengthScale = std::cbrt(dx*dy*dz);
-      const real_t weightedLengthScale = !realIsIdentical(lengthScaleWeight_, real_t(-1)) ?
-            std::pow(lengthScale, (lengthScaleWeight_+1)/lengthScaleWeight_) : real_t(1);
+      const real_t weightedLengthScale = !realIsIdentical(lengthScaleWeight_, real_t{-1}) ?
+            std::pow(lengthScale, (lengthScaleWeight_+1)/lengthScaleWeight_) : real_t{1};
 
       if(filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z)
          && filter_(x,y-one,z) && filter_(x,y,z+one) && filter_(x,y,z-one)) {

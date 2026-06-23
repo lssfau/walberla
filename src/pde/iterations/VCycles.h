@@ -85,7 +85,7 @@ public:
             const uint_t iterations, const uint_t numLvl,
             const uint_t preSmoothingIters, const uint_t postSmoothingIters,
             const uint_t coarseIters, const std::function< real_t () > & residualNorm,
-            const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
+            const real_t residualNormThreshold = real_t{0}, const uint_t residualCheckFrequency = uint_t{1},
             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
 
@@ -111,7 +111,7 @@ public:
             const uint_t iterations, const uint_t numLvl,
             const uint_t preSmoothingIters, const uint_t postSmoothingIters,
             const uint_t coarseIters, const std::function< real_t () > & residualNorm,
-            const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
+            const real_t residualNormThreshold = real_t{0}, const uint_t residualCheckFrequency = uint_t{1},
             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
 

@@ -129,7 +129,7 @@ int main(int argc, char ** argv )
    auto  blocks = createUniformBlockGrid( 4, 2, 1,       // blocks in x,y,z
                                           10u, 10u, 10u, // nr of cells per block
                                           1.0,           // dx
-                                          uint_t(4), uint_t(1), uint_t(1)    // nr of processes in x,y,z
+                                          uint_t{4}, uint_t{1}, uint_t{1}    // nr of processes in x,y,z
                                           );
    /*
    auto blocks = createUniformBlockGrid( 4,2,1,

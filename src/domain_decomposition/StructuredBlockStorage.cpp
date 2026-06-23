@@ -43,10 +43,10 @@ void StructuredBlockStorage::mapToPeriodicDomain( Cell& cell, const uint_t level
 
          const cell_idx_t width = cell_idx_c( getNumberOfCells( i, level ) );
 
-         if( cell[i] >= cell_idx_t(0) )
+         if( cell[i] >= cell_idx_t{0} )
             cell[i] = cell[i] % width;
          else
-            cell[i] = ( width - cell_idx_t(1) ) - ( ( -( cell[i] + cell_idx_t(1) ) ) % width );
+            cell[i] = ( width - cell_idx_t{1} ) - ( ( -( cell[i] + cell_idx_t{1} ) ) % width );
 
          WALBERLA_ASSERT_GREATER_EQUAL( cell[i], domainCellBB_[level].min()[i] );
          WALBERLA_ASSERT_LESS_EQUAL(    cell[i], domainCellBB_[level].max()[i] );

@@ -31,20 +31,20 @@ namespace lbm_mesapd_coupling {
 
 inline real_t bulkViscosityFromOmegaBulk(real_t omegaBulk)
 {
-   return real_t(2) / real_t(9) * ( real_t(1) / omegaBulk - real_t(0.5) );
+   return real_t{2} / real_t{9} * ( real_t{1} / omegaBulk - real_t{0.5} );
 }
 
 
 inline real_t omegaBulkFromBulkViscosity(real_t bulkViscosity)
 {
-   return real_t(2) / ( real_t(9) * bulkViscosity + real_t(1) );
+   return real_t{2} / ( real_t{9} * bulkViscosity + real_t{1} );
 }
 
 // see Khirevich et al. - Coarse- and fine-grid numerical behavior of MRT/TRT lattice-Boltzmann schemes in regular and random sphere packings
 // LambdaBulk is the "magic parameter" here, i.e. the ratio between Lambda_e and Lambda_nu, Eq. 19
-inline real_t omegaBulkFromOmega(real_t omega, real_t LambdaBulk = real_t(1))
+inline real_t omegaBulkFromOmega(real_t omega, real_t LambdaBulk = real_t{1})
 {
-   return real_t(1) / (LambdaBulk * ( real_t(1) / omega - real_t(1)/ real_t(2) ) + real_t(1)/ real_t(2) );
+   return real_t{1} / (LambdaBulk * ( real_t{1} / omega - real_t{1}/ real_t{2} ) + real_t{1}/ real_t{2} );
 }
 
 /*
@@ -99,7 +99,7 @@ public:
             auto particlePosition = ac_->getPosition(particleIdx);
             auto particleInteractionRadius = ac_->getInteractionRadius(particleIdx);
             auto extendedParticleAABB = mesa_pd::getAABBFromInteractionRadius(particlePosition, particleInteractionRadius).getExtended(adaptionLayerSize_);
-            auto cellBB = getCellBBFromAABB( extendedParticleAABB, false, *block, *blockStorage_, uint_t(0));
+            auto cellBB = getCellBBFromAABB( extendedParticleAABB, false, *block, *blockStorage_, uint_t{0});
             // no ghost layers are included -> omega field has to be communicated afterwards if ghost layer values are needed in LBM sweep
 
             auto adaptionRadius = particleInteractionRadius + adaptionLayerSize_;

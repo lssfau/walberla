@@ -65,7 +65,7 @@ class LegacyGpuPackInfoWrapper : public gpu::GeneratedGPUPackInfo
       WALBERLA_DEBUG_SECTION()
       {
          const size_t expectedAlignment{ alignof(value_type) };
-         if (std::ptrdiff_t(rawBuffer) % expectedAlignment != 0)
+         if (reinterpret_cast< std::ptrdiff_t >(rawBuffer) % expectedAlignment != 0)
          {
             throw std::runtime_error{ std::format(
                "Buffer alignment did not match requirements of message data type.\n"
@@ -88,7 +88,7 @@ class LegacyGpuPackInfoWrapper : public gpu::GeneratedGPUPackInfo
       WALBERLA_DEBUG_SECTION()
       {
          const size_t expectedAlignment{ alignof(value_type) };
-         if (std::ptrdiff_t(rawBuffer) % expectedAlignment != 0)
+         if (reinterpret_cast< std::ptrdiff_t >(rawBuffer) % expectedAlignment != 0)
          {
             throw std::runtime_error{ std::format(
                "Buffer alignment did not match requirements of message data type.\n"

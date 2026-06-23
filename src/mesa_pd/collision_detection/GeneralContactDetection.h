@@ -131,7 +131,7 @@ bool GeneralContactDetection::operator()(const size_t idx1,
    { //We have a collision
       contactNormal_ = support_dir;
       penetrationDepth_ = pdepth;
-      contactPoint_ = contactp + real_t(0.5) * penetrationDepth_ * contactNormal_;
+      contactPoint_ = contactp + real_t{0.5} * penetrationDepth_ * contactNormal_;
       return true;
    } else
    { //No collision
@@ -161,7 +161,7 @@ bool GeneralContactDetection::operator()(const size_t idx1,
 
    Support sup(ac.getPosition(idx2), ac.getRotation(idx2), geo2);
 
-   WALBERLA_CHECK_FLOAT_EQUAL(geo1.getAxis().sqrLength(), real_t(1));
+   WALBERLA_CHECK_FLOAT_EQUAL(geo1.getAxis().sqrLength(), real_t{1});
 
    auto d = ac.getPosition(idx2) - (dot((ac.getPosition(idx2) - ac.getPosition(idx1)), geo1.getAxis()) * geo1.getAxis() + ac.getPosition(idx1));
    Vec3 farestP = sup.support(d);
@@ -173,7 +173,7 @@ bool GeneralContactDetection::operator()(const size_t idx1,
       penetrationDepth_ = geo1.getRadius() - std::sqrt(dist);
       normalize(d2);
       contactNormal_ = d2;
-      contactPoint_ = farestP + d2 * penetrationDepth_ * real_t(0.5);
+      contactPoint_ = farestP + d2 * penetrationDepth_ * real_t{0.5};
       return true;
    } else
    { //No collision
@@ -193,7 +193,7 @@ bool GeneralContactDetection::operator()(const size_t idx1,
 
 inline bool GeneralContactDetection::collideGJKEPA(Support& geom0, Support& geom1)
 {
-   real_t margin = real_t(1e-4);
+   real_t margin = real_t{1e-4};
    GJK gjk;
    if(gjk.doGJKmargin(geom0, geom1, margin))
    {

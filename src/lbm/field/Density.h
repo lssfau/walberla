@@ -56,7 +56,7 @@ struct Density< LatticeModel_T >
          rho += it[i];
       return rho;
 
-      //real_t rho = real_t(0.0);
+      //real_t rho = real_t{0.0};
       //for( auto i = LatticeModel_T::Stencil::begin(); i != LatticeModel_T::Stencil::end(); ++i )
       //   rho += it[ i.toIdx() ];
       //return rho;
@@ -87,12 +87,12 @@ struct Density< LatticeModel_T >
    template< typename FieldPtrOrIterator >
    static inline real_t get( const LatticeModel_T & /*latticeModel*/, const FieldPtrOrIterator & it )
    {
-      real_t rho = it[0] + real_t(1.0);
+      real_t rho = it[0] + real_t{1.0};
       for( uint_t i = 1; i != LatticeModel_T::Stencil::Size; ++i )
          rho += it[i];
       return rho;
 
-      //real_t rho = real_t(1.0);
+      //real_t rho = real_t{1.0};
       //for( auto i = LatticeModel_T::Stencil::begin(); i != LatticeModel_T::Stencil::end(); ++i )
       //   rho += it[ i.toIdx() ];
       //return rho;
@@ -103,7 +103,7 @@ struct Density< LatticeModel_T >
                              const PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
    {
       const real_t & xyz0 = pdf(x,y,z,0);
-      real_t rho = xyz0 + real_t(1.0);
+      real_t rho = xyz0 + real_t{1.0};
       for( uint_t i = 1; i != LatticeModel_T::Stencil::Size; ++i )
          rho += pdf.getF( &xyz0, i );
       return rho;

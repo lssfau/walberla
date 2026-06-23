@@ -46,7 +46,7 @@ namespace lbm {
 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 inline void setDensityAndVelocity( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel,
-                                   const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                                   const Vector3< real_t > & velocity = Vector3< real_t >( real_t{0.0} ), const real_t rho = real_t{1.0} );
 
 /////////////////
 // EQUILIBRIUM //
@@ -54,7 +54,7 @@ inline void setDensityAndVelocity( FieldPtrOrIterator & it, const LatticeModel_T
 
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 inline void setToEquilibrium( FieldPtrOrIterator & it,
-                              const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) );
+                              const Vector3< real_t > & velocity = Vector3< real_t >( real_t{0.0} ), const real_t rho = real_t{1.0} );
 
 /////////////
 // DENSITY //
@@ -263,7 +263,7 @@ inline void getVelocity( Vector3< real_t > & velocity, const LatticeModel_T & la
    if( LatticeModel_T::compressible )
    {
       const real_t rho = getDensityAndMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = real_t{1.0} / rho;
       velocity *= invRho;
    }
    else
@@ -290,7 +290,7 @@ inline void getEquilibriumVelocity( Vector3< real_t > & velocity, const LatticeM
    if( LatticeModel_T::compressible )
    {
       const real_t rho = getDensityAndEquilibriumMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = real_t{1.0} / rho;
       velocity *= invRho;
    }
    else
@@ -363,7 +363,7 @@ inline real_t getDensityAndVelocity( Vector3< real_t > & velocity, const Lattice
    const real_t rho = getDensityAndMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = real_t{1.0} / rho;
       velocity *= invRho;
    }
    return rho;
@@ -377,7 +377,7 @@ inline real_t getDensityAndEquilibriumVelocity( Vector3< real_t > & velocity, co
    const real_t rho = getDensityAndEquilibriumMomentumDensity< LatticeModel_T >( velocity, latticeModel, it );
    if( LatticeModel_T::compressible )
    {
-      const real_t invRho = real_t(1.0) / rho;
+      const real_t invRho = real_t{1.0} / rho;
       velocity *= invRho;
    }
    return rho;
@@ -438,14 +438,14 @@ inline void getPressureTensor( Matrix3< real_t > & pressureTensor, const Lattice
 template< typename VelocityField_T, typename Filter_T >
 inline real_t getQCriterion(const VelocityField_T &velocityField, const Filter_T &filter,
                             const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                            real_t dx = real_t(1), real_t dy = real_t(1), real_t dz = real_t(1)) {
+                            real_t dx = real_t{1}, real_t dy = real_t{1}, real_t dz = real_t{1}) {
    return QCriterion::get(velocityField, filter, x, y, z, dx, dy, dz);
 }
 
 template< typename VelocityField_T, typename Filter_T >
 inline Vector3<real_t> getVorticity(const VelocityField_T &velocityField, const Filter_T &filter,
                                     const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                                    real_t dx = real_t(1), real_t dy = real_t(1), real_t dz = real_t(1)) {
+                                    real_t dx = real_t{1}, real_t dy = real_t{1}, real_t dz = real_t{1}) {
    return Vorticity::get(velocityField, filter, x, y, z, dx, dy, dz);
 }
 

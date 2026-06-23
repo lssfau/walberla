@@ -182,7 +182,7 @@ public:
    bool isXPeriodic() const { return periodic_[0]; }
    bool isYPeriodic() const { return periodic_[1]; }
    bool isZPeriodic() const { return periodic_[2]; }
-   bool isPeriodic( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t(3) ); return periodic_[index]; }
+   bool isPeriodic( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, uint_t{3} ); return periodic_[index]; }
 
    void mapToPeriodicDomain( real_t & x, real_t & y, real_t & z ) const; // -> for documentation of this function see BlockStorage.cpp
    void mapToPeriodicDomain( Vector3< real_t > & p ) const { mapToPeriodicDomain( p[0], p[1], p[2] ); }
@@ -637,7 +637,7 @@ inline bool BlockStorage::atDomainZMaxBorder( const IBlock & block ) const
 
 inline bool BlockStorage::atDomainMinBorder( const uint_t index, const IBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) );
+   WALBERLA_ASSERT_LESS( index, uint_t{3} );
    WALBERLA_ASSERT_EQUAL( this, &block.getBlockStorage() );
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.min( index ), domain_.min( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index) ) );
@@ -647,7 +647,7 @@ inline bool BlockStorage::atDomainMinBorder( const uint_t index, const IBlock & 
 
 inline bool BlockStorage::atDomainMaxBorder( const uint_t index, const IBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) );
+   WALBERLA_ASSERT_LESS( index, uint_t{3} );
    WALBERLA_ASSERT_EQUAL( this, &block.getBlockStorage() );
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.max( index ), domain_.max( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index ) ) );

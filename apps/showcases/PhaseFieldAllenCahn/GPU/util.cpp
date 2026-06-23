@@ -140,8 +140,8 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
          }
       }
    }
-   center_of_mass[0] = center_of_mass[0] / real_t(nrOfCells);
-   center_of_mass[1] = center_of_mass[1] / real_t(nrOfCells);
-   center_of_mass[2] = center_of_mass[2] / real_t(nrOfCells);
+   center_of_mass[0] = center_of_mass[0] / static_cast< real_t >(nrOfCells);
+   center_of_mass[1] = center_of_mass[1] / static_cast< real_t >(nrOfCells);
+   center_of_mass[2] = center_of_mass[2] / static_cast< real_t >(nrOfCells);
 }
 } // namespace walberla

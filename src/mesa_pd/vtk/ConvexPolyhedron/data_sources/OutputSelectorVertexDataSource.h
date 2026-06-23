@@ -37,7 +37,7 @@ public:
    OutputSelectorVertexDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
    virtual uint_t numComponents() {
-      return uint_t(1);
+      return uint_t{1};
    }
 
    using Base::getData;
@@ -72,7 +72,7 @@ public:
    OutputSelectorVertexDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
    virtual uint_t numComponents() {
-      return uint_t(3);
+      return uint_t{3};
    }
 
    using Base::getData;

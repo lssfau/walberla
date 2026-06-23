@@ -304,7 +304,7 @@ namespace field {
    {
       WALBERLA_ASSERT( math::uintIsPowerOfTwo( flag ) );
 
-      uint_t bitNr = math::uintMSBPosition( flag ) - uint_t(1);
+      uint_t bitNr = math::uintMSBPosition( flag ) - uint_t{1};
 
       WALBERLA_ASSERT_LESS( bitNr, data_->flagToUID.size() );
 

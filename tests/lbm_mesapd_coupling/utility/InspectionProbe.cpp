@@ -151,17 +151,17 @@ int main( int argc, char **argv )
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
-   const uint_t length = uint_t(32);
-   const real_t radius = real_t(5);
+   const uint_t length = uint_t{32};
+   const real_t radius = real_t{5};
 
-   const uint_t XBlocks = uint_t( 1 );
-   const uint_t YBlocks = uint_t( 1 );
-   const uint_t ZBlocks = uint_t( 1 );
+   const uint_t XBlocks = uint_t{ 1 };
+   const uint_t YBlocks = uint_t{ 1 };
+   const uint_t ZBlocks = uint_t{ 1 };
    const uint_t XCells = length / XBlocks;
    const uint_t YCells = length / YBlocks;
    const uint_t ZCells = length / ZBlocks;
 
-   auto blocks = blockforest::createUniformBlockGrid( XBlocks, YBlocks, ZBlocks, XCells, YCells, ZCells, uint_t(1), true,
+   auto blocks = blockforest::createUniformBlockGrid( XBlocks, YBlocks, ZBlocks, XCells, YCells, ZCells, uint_t{1}, true,
                                                       true, true, true );
 
 
@@ -183,11 +183,11 @@ int main( int argc, char **argv )
 
    }
 
-   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( real_t(1) ) );
+   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( real_t{1} ) );
 
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                         uint_t(1), field::fzyx );
+                                                                         Vector3< real_t >( real_t{0} ), real_t{1},
+                                                                         uint_t{1}, field::fzyx );
 
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
@@ -200,17 +200,17 @@ int main( int argc, char **argv )
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
    ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_Flag);
 
-   Vector3<real_t> probeLocation = centerPosition - Vector3<real_t>(radius + real_t(1), real_t(0), real_t(0));
+   Vector3<real_t> probeLocation = centerPosition - Vector3<real_t>(radius + real_t{1}, real_t{0}, real_t{0});
    lbm_mesapd_coupling::InspectionProbe<PdfField_T, BoundaryHandling_T, ParticleAccessor_T> probe(probeLocation, blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, printToScreen, printSurroundingState, outputFileName );
 
    real_t rhoAtLocation;
    Vector3<real_t> velocityAtLocation;
    probe(rhoAtLocation, velocityAtLocation);
 
-   WALBERLA_ASSERT_FLOAT_EQUAL(rhoAtLocation, real_t(1));
-   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[0], real_t(0));
-   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[1], real_t(0));
-   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[2], real_t(0));
+   WALBERLA_ASSERT_FLOAT_EQUAL(rhoAtLocation, real_t{1});
+   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[0], real_t{0});
+   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[1], real_t{0});
+   WALBERLA_ASSERT_FLOAT_EQUAL(velocityAtLocation[2], real_t{0});
 
    return EXIT_SUCCESS;
 }

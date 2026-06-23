@@ -38,10 +38,10 @@ namespace lbm_mesapd_coupling {
  * estimators need to be supplied.
  *
  * This kernel requires the following particle attributes:
- *  ps.addProperty("virtualMass",       "walberla::real_t",        defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.addProperty("virtualInertiaBF",  "walberla::mesa_pd::Mat3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.add_property("oldLinearAcceleration",  "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
- *  ps.add_property("oldAngularAcceleration", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("virtualMass",       "walberla::real_t",        defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.addProperty("virtualInertiaBF",  "walberla::mesa_pd::Mat3", defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.add_property("oldLinearAcceleration",  "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
+ *  ps.add_property("oldAngularAcceleration", "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ON_OWNERSHIP_CHANGE")
  */
 class AddVirtualForceTorqueKernel
 {
@@ -52,7 +52,7 @@ public:
    void operator()(const size_t idx, Accessor_T& ac) {
       static_assert(std::is_base_of_v<mesa_pd::data::IAccessor, Accessor_T>, "please provide a valid accessor");
 
-      WALBERLA_CHECK_FLOAT_UNEQUAL(ac.getVirtualMass(idx), real_t(0.),
+      WALBERLA_CHECK_FLOAT_UNEQUAL(ac.getVirtualMass(idx), real_t{0.},
                                    "No virtual mass set on body. Was the virtualMass kernel not called before?");
 
       //// force

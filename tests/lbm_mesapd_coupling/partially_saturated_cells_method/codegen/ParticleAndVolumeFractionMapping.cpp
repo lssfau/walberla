@@ -254,7 +254,7 @@ int main(int argc, char** argv)
 #endif
 
    // dummy value for omega since it is not use because Weighting_T == 1
-   real_t omega = real_t(42.0);
+   real_t omega = real_t{42.0};
    ParticleAndVolumeFractionSoA_T< 1 > particleAndVolumeFractionSoA(blocks, omega);
 
    // calculate fraction

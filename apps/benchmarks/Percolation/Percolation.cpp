@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 
    const bool periodicInX                     = false;
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
-      numXBlocks, numYBlocks, numZBlocks, numXCellsPerBlock, numYCellsPerBlock, numZCellsPerBlock, real_t(1), uint_t(0),
+      numXBlocks, numYBlocks, numZBlocks, numXCellsPerBlock, numYCellsPerBlock, numZCellsPerBlock, real_t{1}, uint_t{0},
       false, false, periodicInX, periodicInY, periodicInZ, // periodicity
       false);
 
@@ -195,42 +195,42 @@ int main(int argc, char** argv)
    auto ss                  = walberla::make_shared< mesa_pd::data::ShapeStorage >();
    using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithShape;
    auto accessor            = walberla::make_shared< ParticleAccessor_T >(ps, ss);
-   auto sphereShape         = ss->create< mesa_pd::data::Sphere >(particleDiameter * real_t(0.5));
+   auto sphereShape         = ss->create< mesa_pd::data::Sphere >(particleDiameter * real_t{0.5});
 
    // Create spheres
-   if (useParticles && particleGenerationSpacing > real_t(0))
+   if (useParticles && particleGenerationSpacing > real_t{0})
    {
       // Ensure that generation domain is computed correctly
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.xMin(), real_t(0));
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.yMin(), real_t(0));
-      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.zMin(), real_t(0));
+      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.xMin(), real_t{0});
+      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.yMin(), real_t{0});
+      WALBERLA_CHECK_FLOAT_EQUAL(simulationDomain.zMin(), real_t{0});
 
       auto generationDomain = math::AABB::createFromMinMaxCorner(
-         math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) - generationDomainFraction[0]) / real_t(2),
-                                 simulationDomain.yMax() * (real_t(1) - generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) - generationDomainFraction[2]) / real_t(2)) +
+         math::Vector3< real_t >(simulationDomain.xMax() * (real_t{1} - generationDomainFraction[0]) / real_t{2},
+                                 simulationDomain.yMax() * (real_t{1} - generationDomainFraction[1]) / real_t{2},
+                                 simulationDomain.zMax() * (real_t{1} - generationDomainFraction[2]) / real_t{2}) +
             generationDomainOffset,
-         math::Vector3< real_t >(simulationDomain.xMax() * (real_t(1) + generationDomainFraction[0]) / real_t(2),
-                                 simulationDomain.yMax() * (real_t(1) + generationDomainFraction[1]) / real_t(2),
-                                 simulationDomain.zMax() * (real_t(1) + generationDomainFraction[2]) / real_t(2)) +
+         math::Vector3< real_t >(simulationDomain.xMax() * (real_t{1} + generationDomainFraction[0]) / real_t{2},
+                                 simulationDomain.yMax() * (real_t{1} + generationDomainFraction[1]) / real_t{2},
+                                 simulationDomain.zMax() * (real_t{1} + generationDomainFraction[2]) / real_t{2}) +
             generationDomainOffset);
-      real_t particleOffset = particleGenerationSpacing / real_t(2);
+      real_t particleOffset = particleGenerationSpacing / real_t{2};
       for (auto pt :
            grid_generator::SCGrid(generationDomain, generationDomain.center() + generationPointOfReferenceOffset,
                                   particleGenerationSpacing))
       {
          // Offset every second particle layer in flow direction to avoid channels in flow direction
          if (useParticleOffset &&
-             uint_t(round(math::abs(generationDomain.center()[0] - pt[0]) / (particleGenerationSpacing))) % uint_t(2) !=
-                uint_t(0))
+             uint_t(round(math::abs(generationDomain.center()[0] - pt[0]) / (particleGenerationSpacing))) % uint_t{2} !=
+                uint_t{0})
          {
-            pt = pt + Vector3(real_t(0), particleOffset, particleOffset);
+            pt = pt + Vector3(real_t{0}, particleOffset, particleOffset);
          }
          if (rpdDomain->isContainedInProcessSubdomain(uint_c(mpi::MPIManager::instance()->rank()), pt))
          {
             mesa_pd::data::Particle&& p = *ps->create();
             p.setPosition(pt);
-            p.setInteractionRadius(particleDiameter * real_t(0.5));
+            p.setInteractionRadius(particleDiameter * real_t{0.5});
             p.setOwner(mpi::MPIManager::instance()->rank());
             p.setShapeID(sphereShape);
             p.setType(0);
@@ -251,14 +251,14 @@ int main(int argc, char** argv)
    BlockDataID pdfFieldCPUGPUID =
       lbm_generated::addGPUPdfFieldToStorage< PdfField_T >(blocks, pdfFieldID, StorageSpec, "pdf field GPU");
    BlockDataID densityFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t(1));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "density field GPU", uint_t{1});
    BlockDataID velFieldGPUID =
-      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t(3));
+      walberla::gpu::addGPUFieldToStorage< walberla::gpu::GPUField< real_t > >(blocks, "velocity field GPU", uint_t{3});
 #else
    BlockDataID pdfFieldCPUGPUID = lbm_generated::addPdfFieldToStorage(blocks, "pdf field (fzyx)", StorageSpec, 1);
 #endif
-   BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "density field", real_t(0), field::fzyx);
-   BlockDataID velFieldID  = field::addToStorage< VelocityField_T >(blocks, "velocity field", real_t(0), field::fzyx);
+   BlockDataID densityFieldID = field::addToStorage< DensityField_T >(blocks, "density field", real_t{0}, field::fzyx);
+   BlockDataID velFieldID  = field::addToStorage< VelocityField_T >(blocks, "velocity field", real_t{0}, field::fzyx);
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    // Synchronize particles between the blocks for the correct mapping of ghost particles
@@ -297,8 +297,8 @@ int main(int argc, char** argv)
    auto boundariesConfig = boundariesCfgFile.getBlock("Boundaries");
    geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, Fluid_Flag);
-   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, uInflow, real_t(0),
-                                           real_t(0), real_t(1), real_t(1));
+   BoundaryCollection_T boundaryCollection(blocks, flagFieldID, pdfFieldCPUGPUID, Fluid_Flag, uInflow, real_t{0},
+                                           real_t{0}, real_t{1}, real_t{1});
 
    ///////////////
    // TIME LOOP //
@@ -315,7 +315,7 @@ int main(int argc, char** argv)
                                  relaxationRate, frameWidth);
    pystencils::PSM_MacroSetter pdfSetter(particleAndVolumeFractionSoA.BsFieldID, particleAndVolumeFractionSoA.BFieldID,
                                          particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID,
-                                         real_t(1.0), real_t(0), real_t(0), real_t(0));
+                                         real_t{1.0}, real_t{0}, real_t{0}, real_t{0});
 
    if (useParticles)
    {
@@ -360,7 +360,7 @@ int main(int argc, char** argv)
       particleAndVolumeFractionSoA.particleVelocitiesFieldID, pdfFieldCPUGPUID, velFieldID);
 #endif
    // VTK output
-   if (vtkSpacing != uint_t(0))
+   if (vtkSpacing != uint_t{0})
    {
       // Spheres
       auto particleVtkOutput = make_shared< mesa_pd::vtk::ParticleVtkOutput >(ps);
@@ -403,7 +403,7 @@ int main(int argc, char** argv)
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
    }
 
-   if (vtkSpacing != uint_t(0)) { vtk::writeDomainDecomposition(blocks, "domain_decomposition", vtkFolder); }
+   if (vtkSpacing != uint_t{0}) { vtk::writeDomainDecomposition(blocks, "domain_decomposition", vtkFolder); }
 
    // Add performance logging
    lbm::PerformanceLogger< FlagField_T > performanceLogger(blocks, flagFieldID, Fluid_Flag, performanceLogFrequency);

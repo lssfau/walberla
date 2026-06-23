@@ -68,8 +68,8 @@ inline CellInterval getCellBBFromAABB( const math::AABB & aabb, bool AABBIsInfin
 
    WALBERLA_ASSERT( !cellBB.empty() );
 
-   cellBB.xMin() -= cell_idx_t(1); cellBB.yMin() -= cell_idx_t(1); cellBB.zMin() -= cell_idx_t(1);
-   cellBB.xMax() += cell_idx_t(1); cellBB.yMax() += cell_idx_t(1); cellBB.zMax() += cell_idx_t(1);
+   cellBB.xMin() -= cell_idx_t{1}; cellBB.yMin() -= cell_idx_t{1}; cellBB.zMin() -= cell_idx_t{1};
+   cellBB.xMax() += cell_idx_t{1}; cellBB.yMax() += cell_idx_t{1}; cellBB.zMax() += cell_idx_t{1};
 
    CellInterval blockBB = blockStorage.getBlockCellBB( block );
 

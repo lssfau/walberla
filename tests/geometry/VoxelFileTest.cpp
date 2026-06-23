@@ -286,19 +286,19 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    WALBERLA_CHECK( std::equal(reference.begin(), reference.end(), data.begin()) );
 
    std::vector<size_t> blockSizesX;
-   blockSizesX.push_back(std::max(xSize / 2, size_t(1)));
-   if( xSize > size_t(1) )
-      blockSizesX.push_back(std::max(xSize / 2 - 1, size_t(1)));
+   blockSizesX.push_back(std::max(xSize / 2, size_t{1}));
+   if( xSize > size_t{1} )
+      blockSizesX.push_back(std::max(xSize / 2 - 1, size_t{1}));
 
    std::vector<size_t> blockSizesY;
-   blockSizesY.push_back(std::max(ySize / 2, size_t(1)));
-   if( ySize > size_t( 1 ) )
-      blockSizesY.push_back(std::max(ySize / 2 - 1, size_t(1)));
+   blockSizesY.push_back(std::max(ySize / 2, size_t{1}));
+   if( ySize > size_t{ 1 } )
+      blockSizesY.push_back(std::max(ySize / 2 - 1, size_t{1}));
 
    std::vector<size_t> blockSizesZ;
-   blockSizesZ.push_back(std::max(zSize / 2, size_t(1)));
-   if( zSize > size_t( 1 ) )
-      blockSizesZ.push_back(std::max(zSize / 2 - 1, size_t(1)));
+   blockSizesZ.push_back(std::max(zSize / 2, size_t{1}));
+   if( zSize > size_t{ 1 } )
+      blockSizesZ.push_back(std::max(zSize / 2 - 1, size_t{1}));
 
    for(unsigned long const blockSizeX : blockSizesX) { for(unsigned long const blockSizeY : blockSizesY) { for(unsigned long const blockSizeZ : blockSizesZ) { for(size_t zz = 0; zz <= (zSize - 1) / blockSizeZ; ++zz) {
                for(size_t yy = 0; yy <= (ySize - 1) / blockSizeY; ++yy) {

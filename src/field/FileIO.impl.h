@@ -411,7 +411,7 @@ MPI_Offset FieldWriter< FieldT >::computeProcessByteOffset(uint_t processNumElem
    uint_t exscanResult;
    MPI_Exscan(&processNumElements, &exscanResult, 1, MPITrait< uint_t >::type(), MPI_SUM,
               MPIManager::instance()->comm());
-   if (MPIManager::instance()->rank() == 0) exscanResult = uint_t(0);
+   if (MPIManager::instance()->rank() == 0) exscanResult = uint_t{0};
 
    return numeric_cast< MPI_Offset >(exscanResult * sizeof(typename FieldT::value_type));
 }

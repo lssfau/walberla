@@ -58,7 +58,7 @@ public:
    void operator()(data::ParticleStorage& ps,
                    const std::shared_ptr<blockforest::BlockForest>& blockforest,
                    const std::shared_ptr<domain::BlockForestDomain>& domain,
-                   const real_t dx = real_t(0)) const;
+                   const real_t dx = real_t{0}) const;
 
    int64_t getBytesSent() const { return bytesSent_; }
    int64_t getBytesReceived() const { return bytesReceived_; }

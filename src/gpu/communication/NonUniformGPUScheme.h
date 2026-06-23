@@ -211,7 +211,7 @@ void NonUniformGPUScheme< Stencil >::refresh()
       bufferSystemGPU_[i].clear();
       localBuffer_[i].clear();
       headers_[i].clear();
-      headers_[i].resize(size_t(levels + uint_t(1)));
+      headers_[i].resize(levels + uint_t{1});
 
       for (uint_t j = 0; j <= levels; ++j)
       {
@@ -221,7 +221,7 @@ void NonUniformGPUScheme< Stencil >::refresh()
          localBuffer_[i].emplace_back();
       }
 
-      communicationInProgress_[i].resize(size_t(levels + uint_t(1)), false);
+      communicationInProgress_[i].resize(levels + uint_t{1}, false);
    }
 
 #ifndef NDEBUG
@@ -275,13 +275,13 @@ inline void NonUniformGPUScheme< Stencil >::startCommunicateCoarseToFine(const u
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR(forest,
                               "Trying to access communication for a block storage object that doesn't exist anymore")
-   WALBERLA_ASSERT_GREATER(fineLevel, uint_t(0))
+   WALBERLA_ASSERT_GREATER(fineLevel, uint_t{0})
    WALBERLA_ASSERT_LESS(fineLevel, forest->getNumberOfLevels())
 
    if (forestModificationStamp_ != forest->getBlockForest().getModificationStamp()) refresh();
    if (setupBeforeNextCommunication_) setupCommunication();
 
-   const uint_t coarsestLevel = fineLevel - uint_t(1);
+   const uint_t coarsestLevel = fineLevel - uint_t{1};
 
    startCommunicationCoarseToFine(fineLevel, coarsestLevel);
 }
@@ -292,7 +292,7 @@ inline void NonUniformGPUScheme< Stencil >::startCommunicateFineToCoarse(const u
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR(forest,
                               "Trying to access communication for a block storage object that doesn't exist anymore")
-   WALBERLA_ASSERT_GREATER(fineLevel, uint_t(0))
+   WALBERLA_ASSERT_GREATER(fineLevel, uint_t{0})
    WALBERLA_ASSERT_LESS(fineLevel, forest->getNumberOfLevels())
 
    if (forestModificationStamp_ != forest->getBlockForest().getModificationStamp()) refresh();
@@ -348,13 +348,13 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
 
          if (!(senderBlock->neighborhoodSectionHasEquallySizedBlock(neighborIdx)))
             continue;
-         WALBERLA_ASSERT_EQUAL(senderBlock->getNeighborhoodSectionSize(neighborIdx), uint_t(1))
-         if (!selectable::isSetSelected(senderBlock->getNeighborState(neighborIdx, uint_t(0)),requiredBlockSelectors_, incompatibleBlockSelectors_))
+         WALBERLA_ASSERT_EQUAL(senderBlock->getNeighborhoodSectionSize(neighborIdx), uint_t{1})
+         if (!selectable::isSetSelected(senderBlock->getNeighborState(neighborIdx, uint_t{0}),requiredBlockSelectors_, incompatibleBlockSelectors_))
             continue;
 
-         if( senderBlock->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+         if( senderBlock->neighborExistsLocally( neighborIdx, uint_t{0} ) )
          {
-            auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t(0) )) );
+            auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( senderBlock->getNeighborId( neighborIdx, uint_t{0} )) );
             for (auto& pi : packInfos_)
             {
                pi->communicateLocalEqualLevel(senderBlock, receiverBlock, *dir, streams_[Stencil::idx[*dir]]);
@@ -362,7 +362,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationEqualLevel(const uint_t i
          }
          else
          {
-            auto nProcess              = mpi::MPIRank(senderBlock->getNeighborProcess(neighborIdx, uint_t(0)));
+            auto nProcess              = mpi::MPIRank(senderBlock->getNeighborProcess(neighborIdx, uint_t{0}));
             GpuBuffer_T& gpuDataBuffer = bufferSystemGPU_[EQUAL_LEVEL][index].sendBuffer(nProcess);
 
             for (auto& pi : packInfos_)
@@ -437,7 +437,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationCoarseToFine(const uint_t
       {
          const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex(*dir);
 
-         if (coarseBlock->getNeighborhoodSectionSize(neighborIdx) == uint_t(0)) continue;
+         if (coarseBlock->getNeighborhoodSectionSize(neighborIdx) == uint_t{0}) continue;
          if (!(coarseBlock->neighborhoodSectionHasSmallerBlocks(neighborIdx))) continue;
 
          for (uint_t n = 0; n != coarseBlock->getNeighborhoodSectionSize(neighborIdx); ++n)
@@ -542,15 +542,15 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
       {
          const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex(*dir);
 
-         if (fineBlock->getNeighborhoodSectionSize(neighborIdx) == uint_t(0)) continue;
+         if (fineBlock->getNeighborhoodSectionSize(neighborIdx) == uint_t{0}) continue;
          if (!(fineBlock->neighborhoodSectionHasLargerBlock(neighborIdx))) continue;
-         WALBERLA_ASSERT_EQUAL(fineBlock->getNeighborhoodSectionSize(neighborIdx), uint_t(1))
+         WALBERLA_ASSERT_EQUAL(fineBlock->getNeighborhoodSectionSize(neighborIdx), uint_t{1})
 
-         const BlockID& coarseReceiverId = fineBlock->getNeighborId(neighborIdx, uint_t(0));
-         if (!selectable::isSetSelected(fineBlock->getNeighborState(neighborIdx, uint_t(0)), requiredBlockSelectors_,
+         const BlockID& coarseReceiverId = fineBlock->getNeighborId(neighborIdx, uint_t{0});
+         if (!selectable::isSetSelected(fineBlock->getNeighborState(neighborIdx, uint_t{0}), requiredBlockSelectors_,
                                         incompatibleBlockSelectors_))
             continue;
-         if( fineBlock->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+         if( fineBlock->neighborExistsLocally( neighborIdx, uint_t{0} ) )
          {
             auto coarseReceiverBlock = dynamic_cast< Block * >( forest->getBlock( coarseReceiverId ) );
             GpuBuffer_T& gpuDataBuffer = localBuffer_[FINE_TO_COARSE][index];
@@ -564,7 +564,7 @@ void NonUniformGPUScheme< Stencil >::startCommunicationFineToCoarse(const uint_t
          }
          else
          {
-            auto nProcess              = mpi::MPIRank(fineBlock->getNeighborProcess(neighborIdx, uint_t(0)));
+            auto nProcess              = mpi::MPIRank(fineBlock->getNeighborProcess(neighborIdx, uint_t{0}));
             GpuBuffer_T& gpuDataBuffer = bufferSystemGPU_[FINE_TO_COARSE][index].sendBuffer(nProcess);
             for (auto& pi : packInfos_)
             {
@@ -673,7 +673,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateCoarseToFine(const uint_t fi
 {
    if (!communicationInProgress_[COARSE_TO_FINE][fineLevel] || packInfos_.empty()) return;
 
-   WALBERLA_ASSERT_GREATER(fineLevel, uint_t(0))
+   WALBERLA_ASSERT_GREATER(fineLevel, uint_t{0})
 
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR(forest,
@@ -733,7 +733,7 @@ void NonUniformGPUScheme< Stencil >::waitCommunicateFineToCoarse(const uint_t fi
 {
    if (!communicationInProgress_[FINE_TO_COARSE][fineLevel] || packInfos_.empty()) return;
 
-   WALBERLA_ASSERT_GREATER(fineLevel, uint_t(0))
+   WALBERLA_ASSERT_GREATER(fineLevel, uint_t{0})
 
    auto forest = blockForest_.lock();
    WALBERLA_CHECK_NOT_NULLPTR(forest,
@@ -827,9 +827,9 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
       headerExchangeBs[COARSE_TO_FINE].push_back(make_shared< mpi::BufferSystem >(mpi::MPIManager::instance()->comm(), 123));
       headerExchangeBs[FINE_TO_COARSE].push_back(make_shared< mpi::BufferSystem >(mpi::MPIManager::instance()->comm(), 123));
 
-      localBufferSize[EQUAL_LEVEL].push_back(mpi::MPISize(0));
-      localBufferSize[COARSE_TO_FINE].push_back(mpi::MPISize(0));
-      localBufferSize[FINE_TO_COARSE].push_back(mpi::MPISize(0));
+      localBufferSize[EQUAL_LEVEL].push_back(mpi::MPISize{0});
+      localBufferSize[COARSE_TO_FINE].push_back(mpi::MPISize{0});
+      localBufferSize[FINE_TO_COARSE].push_back(mpi::MPISize{0});
    }
 
    for (auto& iBlock : *forest)
@@ -844,26 +844,26 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
       {
          // skip if block has no neighbors in this direction
          const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex(*dir);
-         if (block->getNeighborhoodSectionSize(neighborIdx) == uint_t(0)) continue;
+         if (block->getNeighborhoodSectionSize(neighborIdx) == uint_t{0}) continue;
 
          // EQUAL_LEVEL communication
          if (block->neighborhoodSectionHasEquallySizedBlock(neighborIdx))
          {
-            WALBERLA_ASSERT_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t(1))
-            if (!selectable::isSetSelected(block->getNeighborState(neighborIdx, uint_t(0)), requiredBlockSelectors_,
+            WALBERLA_ASSERT_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t{1})
+            if (!selectable::isSetSelected(block->getNeighborState(neighborIdx, uint_t{0}), requiredBlockSelectors_,
                                            incompatibleBlockSelectors_))
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) ){
-               auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( block->getNeighborId( neighborIdx, uint_t(0) )) );
+            if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) ){
+               auto receiverBlock = dynamic_cast< Block * >( forest->getBlock( block->getNeighborId( neighborIdx, uint_t{0} )) );
                for (auto& pi : packInfos_){
                   pi->addForLocalEqualLevelComm(block, receiverBlock, *dir);
                }
                continue;
             }
 
-            const BlockID& receiverId = block->getNeighborId(neighborIdx, uint_t(0));
-            auto nProcess             = mpi::MPIRank(block->getNeighborProcess(neighborIdx, uint_t(0)));
+            const BlockID& receiverId = block->getNeighborId(neighborIdx, uint_t{0});
+            auto nProcess             = mpi::MPIRank(block->getNeighborProcess(neighborIdx, uint_t{0}));
 
             for (auto& pi : packInfos_)
             {
@@ -910,21 +910,21 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
          }
          else if (block->neighborhoodSectionHasLargerBlock(neighborIdx))
          {
-            WALBERLA_ASSERT_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t(1))
-            const BlockID& receiverId = block->getNeighborId(neighborIdx, uint_t(0));
+            WALBERLA_ASSERT_EQUAL(block->getNeighborhoodSectionSize(neighborIdx), uint_t{1})
+            const BlockID& receiverId = block->getNeighborId(neighborIdx, uint_t{0});
 
-            if (!selectable::isSetSelected(block->getNeighborState(neighborIdx, uint_t(0)), requiredBlockSelectors_,
+            if (!selectable::isSetSelected(block->getNeighborState(neighborIdx, uint_t{0}), requiredBlockSelectors_,
                                            incompatibleBlockSelectors_))
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+            if( block->neighborExistsLocally( neighborIdx, uint_t{0} ) )
             {
                for (auto& pi : packInfos_)
                   localBufferSize[FINE_TO_COARSE][level] += mpi::MPISize(pi->sizeFineToCoarseSend(block, *dir));
                continue;
             }
 
-            auto nProcess = mpi::MPIRank(block->getNeighborProcess(neighborIdx, uint_t(0)));
+            auto nProcess = mpi::MPIRank(block->getNeighborProcess(neighborIdx, uint_t{0}));
             for (auto& pi : packInfos_)
                senderInfo[FINE_TO_COARSE][level][nProcess] += mpi::MPISize(pi->sizeFineToCoarseSend(block, *dir));
 
@@ -963,11 +963,11 @@ void NonUniformGPUScheme< Stencil >::setupCommunication()
          bufferSystemGPU_[i][j].setReceiverInfo(receiverInfo[i][j], false);
          for (auto it : senderInfo[i][j])
          {
-            bufferSystemCPU_[i][j].sendBuffer(it.first).resize(size_t(it.second));
-            bufferSystemGPU_[i][j].sendBuffer(it.first).resize(size_t(it.second));
+            bufferSystemCPU_[i][j].sendBuffer(it.first).resize(static_cast< size_t >(it.second));
+            bufferSystemGPU_[i][j].sendBuffer(it.first).resize(static_cast< size_t >(it.second));
          }
          if (localBufferSize[i][j] > 0)
-            localBuffer_[i][j].resize(size_t(localBufferSize[i][j]));
+            localBuffer_[i][j].resize(static_cast< size_t >(localBufferSize[i][j]));
       }
    }
    forestModificationStamp_      = forest->getBlockForest().getModificationStamp();

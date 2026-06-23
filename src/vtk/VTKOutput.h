@@ -522,7 +522,7 @@ inline void VTKOutput::setSamplingResolution( const real_t dx, const real_t dy, 
 
 inline uint_t determineWriteFrequency( const real_t dt_SI, const uint_t fps )
 {
-   return uint_c( real_c(1.0) / ( dt_SI * real_c(fps) ) + real_t(0.5) );
+   return uint_c( real_c(1.0) / ( dt_SI * real_c(fps) ) + real_t{0.5} );
 }
 
 

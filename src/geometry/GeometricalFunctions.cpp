@@ -87,7 +87,7 @@ void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& 
                                   sign[2]*( R[2]*tmp[0] + R[5]*tmp[1] + R[8]*tmp[2] ) };
 
    // Calculating the half lengths of the box
-   const std::array<real_t, 3> h{ real_t(0.5)*side[0], real_t(0.5)*side[1], real_t(0.5)*side[2] };
+   const std::array<real_t, 3> h{ real_t{0.5}*side[0], real_t{0.5}*side[1], real_t{0.5}*side[2] };
 
 
    // Estimating the region of the starting point depending on which side of the
@@ -160,13 +160,13 @@ void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& 
          // Finding the t value for the next clip plane/line intersection
          real_t next_t( 1 );
 
-         if( ( tanchor[0] > t ) && ( tanchor[0] < real_t(1) ) && ( tanchor[0] < next_t ) ) {
+         if( ( tanchor[0] > t ) && ( tanchor[0] < real_t{1} ) && ( tanchor[0] < next_t ) ) {
             next_t = tanchor[0];
          }
-         if( ( tanchor[1] > t ) && ( tanchor[1] < real_t(1) ) && ( tanchor[1] < next_t ) ) {
+         if( ( tanchor[1] > t ) && ( tanchor[1] < real_t{1} ) && ( tanchor[1] < next_t ) ) {
             next_t = tanchor[1];
          }
-         if( ( tanchor[2] > t ) && ( tanchor[2] < real_t(1) ) && ( tanchor[2] < next_t ) ) {
+         if( ( tanchor[2] > t ) && ( tanchor[2] < real_t{1} ) && ( tanchor[2] < next_t ) ) {
             next_t = tanchor[2];
          }
 
@@ -206,11 +206,11 @@ void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& 
          t = next_t;
          dd2dt = next_dd2dt;
       }
-      while( t < real_t(1) );
+      while( t < real_t{1} );
    }
 
-   WALBERLA_ASSERT_GREATER_EQUAL( t, real_t(0), "Invalid line point" );
-   WALBERLA_ASSERT_LESS_EQUAL( t, real_t(1), "Invalid line point" );
+   WALBERLA_ASSERT_GREATER_EQUAL( t, real_t{0}, "Invalid line point" );
+   WALBERLA_ASSERT_LESS_EQUAL( t, real_t{1}, "Invalid line point" );
 
    // Computing the closest point on the line
    lret = p1 + t * l;
@@ -349,8 +349,8 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const real_t scale( a1a2 * b1b2 );
    real_t div( la * lb - math::sq(scale) );
 
-   WALBERLA_ASSERT_GREATER( div, real_t(0), std::setprecision(16) << "Invalid division\n" << a1 << "\n" << a2 << "\n" << b1 << "\n" << b2 );
-   div = real_t(1) / div;
+   WALBERLA_ASSERT_GREATER( div, real_t{0}, std::setprecision(16) << "Invalid division\n" << a1 << "\n" << a2 << "\n" << b1 << "\n" << b2 );
+   div = real_t{1} / div;
 
    const real_t s( ( lb    * da1 - scale * db1 ) * div );
    const real_t t( ( scale * da1 - la    * db1 ) * div );
@@ -388,12 +388,12 @@ void intersectLines( const Vector3<real_t>& o1, const Vector3<real_t>& d1, const
 
    if( floatIsEqual(sqrlen, 0) )
    {
-      s = real_t(0);
-      t = real_t(0);
+      s = real_t{0};
+      t = real_t{0};
    }
    else
    {
-      const real_t isqrlen( real_t(1) / sqrlen );
+      const real_t isqrlen( real_t{1} / sqrlen );
       const Vector3<real_t> p( o2 - o1 );
       const real_t dot(  d1 * d2 );
       const real_t a  (  d1 * p  );

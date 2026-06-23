@@ -100,19 +100,19 @@ int main( int argc, char** argv )
    {
       real_t delta = 0;
 
-      delta = real_t(0.9);
+      delta = real_t{0.9};
       box2 = box1;
       box2.translate( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( box1.intersects( box2 ), box1 << "\n" << box2 );
       WALBERLA_CHECK( box1.intersects( box2, dx ), box1 << "\n" << box2 );
 
-      delta = real_t(1.05);
+      delta = real_t{1.05};
       box2 = box1;
       box2.translate( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( !box1.intersects( box2 ), box1 << "\n" << box2 );
       WALBERLA_CHECK( box1.intersects( box2, dx ), box1 << "\n" << box2 );
 
-      delta = real_t(1.15);
+      delta = real_t{1.15};
       box2 = box1;
       box2.translate( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( !box1.intersects( box2 ), box1 << "\n" << box2 );
@@ -126,19 +126,19 @@ int main( int argc, char** argv )
    {
       real_t delta = 0;
 
-      delta = real_t(3);
+      delta = real_t{3};
       box1 = temp.getTranslated( -math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       box2 = temp.getTranslated( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( !forest->periodicIntersect(box1, box2), box1 << "\n" << box2 );
       WALBERLA_CHECK( !forest->periodicIntersect(box1, box2, dx), box1 << "\n" << box2 );
 
-      delta = real_t(3.9);
+      delta = real_t{3.9};
       box1 = temp.getTranslated( -math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       box2 = temp.getTranslated( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( !forest->periodicIntersect(box1, box2), box1 << "\n" << box2 );
       WALBERLA_CHECK( forest->periodicIntersect(box1, box2, dx), box1 << "\n" << box2 );
 
-      delta = real_t(4.1);
+      delta = real_t{4.1};
       box1 = temp.getTranslated( -math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       box2 = temp.getTranslated( math::Vector3<real_t> (real_c(dir.cx()) * delta, real_c(dir.cy()) * delta, real_c(dir.cz()) * delta));
       WALBERLA_CHECK( forest->periodicIntersect(box1, box2), box1 << "\n" << box2 );

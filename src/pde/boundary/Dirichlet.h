@@ -167,7 +167,7 @@ inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUI
    )
 #endif
 
-   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::fzyx );
+   dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t{1}, field::fzyx );
 
 }
 
@@ -315,7 +315,7 @@ inline void Dirichlet< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x,
                                                              // current implementation of this boundary condition (Dirichlet)
 
    // Adapt RHS to Dirichlet BC //
-   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t(2) * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t{2} * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
 
    // Adapt Stencils to BCs (former adaptStencilsBC) //
    // Only required if any new BC cell was added or the BC type of any former BC cell has been changed

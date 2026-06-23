@@ -225,7 +225,7 @@ public:
                                        real_c(-2.865924), real_c(-4.709215), real_c(-6.870076), real_c(0.1455304),  real_c(12.51891),   real_c(9.742811),
                                        real_c(-5.566269)};
 
-      for(uint_t s = 0; s <= uint_t(30); ++s){
+      for(uint_t s = 0; s <= uint_t{30}; ++s){
          analyticalDrag += dragCoefficients[s] * tempChiPowS;
          tempChiPowS *= setup->chi;
       }
@@ -293,7 +293,7 @@ private:
    real_t computeDragForce()
    {
       size_t idx = ac_->uidToIdx(sphereID_);
-      real_t force = real_t(0);
+      real_t force = real_t{0};
       if( idx!= ac_->getInvalidIdx())
       {
          force = ac_->getHydrodynamicForce(idx)[0];
@@ -310,7 +310,7 @@ private:
    // calculate the average velocity in forcing direction (here: x) inside the domain (assuming dx=1)
    real_t computeAverageVel()
    {
-      auto velocity_sum = real_t(0);
+      auto velocity_sum = real_t{0};
       // iterate all blocks stored locally on this process
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -413,16 +413,16 @@ int main( int argc, char **argv )
    std::string baseFolder = "vtk_out_DragForceSphere";
 
    real_t tau     = real_c( 1.5 );
-   real_t externalForcing = real_t(1e-8);
+   real_t externalForcing = real_t{1e-8};
    uint_t length  = uint_c( 40 );
 
    MEMVariant method = MEMVariant::CLI;
-   real_t bulkViscRateFactor = real_t(1); // ratio between bulk and shear viscosity related relaxation factors, 1 = TRT, > 1 for stability with MRT
+   real_t bulkViscRateFactor = real_t{1}; // ratio between bulk and shear viscosity related relaxation factors, 1 = TRT, > 1 for stability with MRT
    // see Khirevich - Coarse- and fine-grid numerical behavior of MRT/TRT lattice-Boltzmann schemes in regular and random sphere packings
    bool useSRT = false;
-   real_t magicNumber = real_t(3) / real_t(16);
+   real_t magicNumber = real_t{3} / real_t{16};
    bool useOmegaBulkAdaption = false;
-   real_t adaptionLayerSize = real_t(2);
+   real_t adaptionLayerSize = real_t{2};
 
 
    for( int i = 1; i < argc; ++i )
@@ -454,16 +454,16 @@ int main( int argc, char **argv )
    setup.chi            = real_c( 0.5 );                     // porosity parameter: diameter / length
    setup.tau            = tau;                               // relaxation time
    setup.extForce       = externalForcing;                   // constant body force in lattice units
-   setup.checkFrequency = uint_t( 100 );                     // evaluate the drag force only every checkFrequency time steps
+   setup.checkFrequency = uint_t{ 100 };                     // evaluate the drag force only every checkFrequency time steps
    setup.radius         = real_c(0.5) * setup.chi * real_c( setup.length );  // sphere radius
    setup.visc           = ( setup.tau - real_c(0.5) ) / real_c(3);   // viscosity in lattice units
    const real_t omega      = real_c(1) / setup.tau;          // relaxation rate
    const real_t dx         = real_c(1);                      // lattice dx
-   const real_t convergenceLimit = real_t(0.1) * setup.extForce;           // tolerance for relative change in drag force
+   const real_t convergenceLimit = real_t{0.1} * setup.extForce;           // tolerance for relative change in drag force
    const uint_t timesteps  =  funcTest ? 1 : ( shortrun ? uint_c(150) : uint_c( 100000 ) );  // maximum number of time steps for the whole simulation
 
    WALBERLA_LOG_INFO_ON_ROOT("tau = " << tau);
-   WALBERLA_LOG_INFO_ON_ROOT("diameter = " << real_t(2) * setup.radius);
+   WALBERLA_LOG_INFO_ON_ROOT("diameter = " << real_t{2} * setup.radius);
    WALBERLA_LOG_INFO_ON_ROOT("viscosity = " << setup.visc);
    WALBERLA_LOG_INFO_ON_ROOT("MEM variant = " << MEMVariant_to_string(method));
    WALBERLA_LOG_INFO_ON_ROOT("external forcing = " << setup.extForce);
@@ -472,9 +472,9 @@ int main( int argc, char **argv )
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   const uint_t XBlocks = (processes >= 2) ? uint_t( 2 ) : uint_t( 1 );
-   const uint_t YBlocks = (processes >= 4) ? uint_t( 2 ) : uint_t( 1 );
-   const uint_t ZBlocks = (processes == 8) ? uint_t( 2 ) : uint_t( 1 );
+   const uint_t XBlocks = (processes >= 2) ? uint_t{ 2 } : uint_t{ 1 };
+   const uint_t YBlocks = (processes >= 4) ? uint_t{ 2 } : uint_t{ 1 };
+   const uint_t ZBlocks = (processes == 8) ? uint_t{ 2 } : uint_t{ 1 };
    const uint_t XCells = setup.length / XBlocks;
    const uint_t YCells = setup.length / YBlocks;
    const uint_t ZCells = setup.length / ZBlocks;
@@ -502,9 +502,9 @@ int main( int argc, char **argv )
    //////////////////
 
    // connect to pe
-   const real_t overlap = real_t( 1.5 ) * dx;
+   const real_t overlap = real_t{ 1.5 } * dx;
 
-   if( setup.radius > real_c( setup.length ) * real_t(0.5) - overlap )
+   if( setup.radius > real_c( setup.length ) * real_t{0.5} - overlap )
    {
       std::cerr << "Periodic sphere is too large and would lead to incorrect mapping!" << std::endl;
       // solution: create the periodic copies explicitly
@@ -567,8 +567,8 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
-                                                                         uint_t(1), field::fzyx );
+                                                                         Vector3< real_t >( real_t{0} ), real_t{1},
+                                                                         uint_t{1}, field::fzyx );
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
@@ -609,14 +609,14 @@ int main( int argc, char **argv )
    if(useOmegaBulkAdaption)
    {
       using OmegaBulkAdapter_T = lbm_mesapd_coupling::OmegaBulkAdapter<ParticleAccessor_T, mesa_pd::kernel::SelectAll>;
-      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
+      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t{1});
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, mesa_pd::kernel::SelectAll());
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
          (*omegaBulkAdapter)(blockIt.get());
       }
    }
 
-   if( vtkIOFreq != uint_t(0) )
+   if( vtkIOFreq != uint_t{0} )
    {
 
       // spheres
@@ -638,7 +638,7 @@ int main( int argc, char **argv )
       timeloop.addFuncBeforeTimeStep( vtk::writeFiles( pdfFieldVTK ), "VTK (fluid field data)" );
 
       // omega bulk field
-      timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t(0), false, baseFolder ), "VTK (omega bulk field)" );
+      timeloop.addFuncBeforeTimeStep( field::createVTKOutput<ScalarField_T, float>( omegaBulkFieldID, *blocks, "omega_bulk_field", vtkIOFreq, uint_t{0}, false, baseFolder ), "VTK (omega bulk field)" );
    }
 
 
@@ -712,7 +712,7 @@ int main( int argc, char **argv )
    }
 
    WALBERLA_LOG_INFO_ON_ROOT("Final drag force: " << forceEval->getDragForce());
-   WALBERLA_LOG_INFO_ON_ROOT("Re = " << forceEval->getAverageVel() * setup.radius * real_t(2) / setup.visc);
+   WALBERLA_LOG_INFO_ON_ROOT("Re = " << forceEval->getAverageVel() * setup.radius * real_t{2} / setup.visc);
 
    timeloopTiming.logResultOnRoot();
 

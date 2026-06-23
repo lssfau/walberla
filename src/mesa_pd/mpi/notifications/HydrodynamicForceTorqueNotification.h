@@ -59,8 +59,8 @@ public:
 template <>
 inline void reset<HydrodynamicForceTorqueNotification>(data::Particle& p)
 {
-   p.setHydrodynamicForce( Vec3(real_t(0)) );
-   p.setHydrodynamicTorque( Vec3(real_t(0)) );
+   p.setHydrodynamicForce( Vec3(real_t{0}) );
+   p.setHydrodynamicTorque( Vec3(real_t{0}) );
 }
 
 inline void reduce(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)

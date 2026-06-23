@@ -201,8 +201,8 @@ public:
    void operator()(const uint_t timestep)
    {
 
-      Vector3<real_t> force(real_t(0));
-      Vector3<real_t> torque(real_t(0));
+      Vector3<real_t> force(real_t{0});
+      Vector3<real_t> torque(real_t{0});
 
       size_t idx = ac_->uidToIdx(sphereUid_);
       if( idx != ac_->getInvalidIdx())
@@ -319,7 +319,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p1.setType(0);
    mesa_pd::data::particle_flags::set(p1.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p1.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
-   p1.setLinearVelocity(Vector3<real_t>(wallVelocity, real_t(0), real_t(0))); //moving wall
+   p1.setLinearVelocity(Vector3<real_t>(wallVelocity, real_t{0}, real_t{0})); //moving wall
 
 }
 
@@ -389,25 +389,25 @@ int main( int argc, char **argv )
    std::string baseFolderLogging = ".";
 
    // physical setup
-   real_t diameter = real_t(20); // cells per diameter -> determines overall resolution
-   real_t normalizedWallDistance = real_t(1); // distance of the sphere center to the bottom wall, normalized by the diameter
-   real_t ReynoldsNumberShear = real_t(1); // = shearRate * wallDistance * diameter / viscosity
+   real_t diameter = real_t{20}; // cells per diameter -> determines overall resolution
+   real_t normalizedWallDistance = real_t{1}; // distance of the sphere center to the bottom wall, normalized by the diameter
+   real_t ReynoldsNumberShear = real_t{1}; // = shearRate * wallDistance * diameter / viscosity
 
    //numerical parameters
-   real_t maximumNonDimTimesteps = real_t(100); // maximum number of non-dimensional time steps
-   real_t xOffsetOfSpherePosition = real_t(0); // offset in x-direction of sphere position
-   real_t yOffsetOfSpherePosition = real_t(0); // offset in y-direction of sphere position
-   real_t bulkViscRateFactor = real_t(1);
-   real_t magicNumber = real_t(3)/real_t(16);
-   real_t wallVelocity = real_t(0.1);
+   real_t maximumNonDimTimesteps = real_t{100}; // maximum number of non-dimensional time steps
+   real_t xOffsetOfSpherePosition = real_t{0}; // offset in x-direction of sphere position
+   real_t yOffsetOfSpherePosition = real_t{0}; // offset in y-direction of sphere position
+   real_t bulkViscRateFactor = real_t{1};
+   real_t magicNumber = real_t{3}/real_t{16};
+   real_t wallVelocity = real_t{0.1};
 
    bool initializeVelocityProfile = false;
    bool useOmegaBulkAdaption = false;
-   real_t adaptionLayerSize = real_t(2);
+   real_t adaptionLayerSize = real_t{2};
    std::string boundaryCondition = "CLI"; // SBB, CLI
 
-   real_t relativeChangeConvergenceEps = real_t(1e-5);
-   real_t physicalCheckingFrequency = real_t(0.1);
+   real_t relativeChangeConvergenceEps = real_t{1e-5};
+   real_t physicalCheckingFrequency = real_t{0.1};
 
    // command line arguments
    for( int i = 1; i < argc; ++i )
@@ -434,18 +434,18 @@ int main( int argc, char **argv )
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
-   WALBERLA_CHECK_GREATER_EQUAL(normalizedWallDistance, real_t(0.5));
-   WALBERLA_CHECK_GREATER_EQUAL(ReynoldsNumberShear, real_t(0));
-   WALBERLA_CHECK_GREATER_EQUAL(diameter, real_t(0));
+   WALBERLA_CHECK_GREATER_EQUAL(normalizedWallDistance, real_t{0.5});
+   WALBERLA_CHECK_GREATER_EQUAL(ReynoldsNumberShear, real_t{0});
+   WALBERLA_CHECK_GREATER_EQUAL(diameter, real_t{0});
    WALBERLA_CHECK(boundaryCondition == "SBB" || boundaryCondition == "CLI");
 
    //////////////////////////
    // NUMERICAL PARAMETERS //
    //////////////////////////
 
-   const real_t domainLength = real_t(48) * diameter; //x
-   const real_t domainWidth  = real_t(16) * diameter; //y
-   const real_t domainHeight = real_t( 8) * diameter; //z
+   const real_t domainLength = real_t{48} * diameter; //x
+   const real_t domainWidth  = real_t{16} * diameter; //y
+   const real_t domainHeight = real_t{ 8} * diameter; //z
 
    Vector3<uint_t> domainSize( uint_c( std::ceil(domainLength)), uint_c( std::ceil(domainWidth)), uint_c( std::ceil(domainHeight)) );
 
@@ -455,20 +455,20 @@ int main( int argc, char **argv )
    const real_t velAtSpherePosition = shearRate * wallDistance;
    const real_t viscosity = velAtSpherePosition * diameter / ReynoldsNumberShear;
 
-   const real_t relaxationTime = real_t(1) / lbm::collision_model::omegaFromViscosity(viscosity);
+   const real_t relaxationTime = real_t{1} / lbm::collision_model::omegaFromViscosity(viscosity);
 
-   const real_t densityFluid = real_t(1);
+   const real_t densityFluid = real_t{1};
 
-   const real_t dx = real_t(1);
+   const real_t dx = real_t{1};
 
    const real_t physicalTimeScale = diameter / velAtSpherePosition;
    const uint_t timesteps = uint_c(maximumNonDimTimesteps * physicalTimeScale);
 
-   const real_t omega = real_t(1) / relaxationTime;
+   const real_t omega = real_t{1} / relaxationTime;
    const real_t omegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
 
-   Vector3<real_t> initialPosition( domainLength * real_t(0.5) + xOffsetOfSpherePosition,
-                                    domainWidth * real_t(0.5) + yOffsetOfSpherePosition,
+   Vector3<real_t> initialPosition( domainLength * real_t{0.5} + xOffsetOfSpherePosition,
+                                    domainWidth * real_t{0.5} + yOffsetOfSpherePosition,
                                     wallDistance );
 
    WALBERLA_LOG_INFO_ON_ROOT("Setup:");
@@ -500,7 +500,7 @@ int main( int argc, char **argv )
                                     domainSize[1] / ( blocksPerDirection[1]  ),
                                     domainSize[2] / ( blocksPerDirection[2] ) );
 
-   AABB simulationDomain( real_t(0), real_t(0), real_t(0), real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
+   AABB simulationDomain( real_t{0}, real_t{0}, real_t{0}, real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
    auto blocks = blockforest::createUniformBlockGrid( blocksPerDirection[0], blocksPerDirection[1], blocksPerDirection[2],
                                                       blockSizeInCells[0], blockSizeInCells[1], blockSizeInCells[2], dx,
                                                       0, false, false,
@@ -533,14 +533,14 @@ int main( int argc, char **argv )
    createPlaneSetup(ps,ss,blocks->getDomain(), wallVelocity);
 
    // create sphere and store Uid
-   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t(0.5) );
+   auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t{0.5} );
 
    walberla::id_t sphereUid = 0;
    if (rpdDomain->isContainedInProcessSubdomain( uint_c(mpi::MPIManager::instance()->rank()), initialPosition ))
    {
       mesa_pd::data::Particle&& p = *ps->create();
       p.setPosition(initialPosition);
-      p.setInteractionRadius(diameter * real_t(0.5));
+      p.setInteractionRadius(diameter * real_t{0.5});
       p.setOwner(mpi::MPIManager::instance()->rank());
       p.setShapeID(sphereShape);
       sphereUid = p.getUid();
@@ -549,7 +549,7 @@ int main( int argc, char **argv )
 
    // set up RPD functionality
    std::function<void(void)> syncCall = [ps,rpdDomain](){
-      const real_t overlap = real_t( 1.5 );
+      const real_t overlap = real_t{ 1.5 };
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
       syncNextNeighborFunc(*ps, *rpdDomain, overlap);
    };
@@ -578,7 +578,7 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
+                                                                         Vector3< real_t >( real_t{0} ), real_t{1},
                                                                          FieldGhostLayers, field::fzyx );
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
@@ -622,7 +622,7 @@ int main( int argc, char **argv )
    if(useOmegaBulkAdaption)
    {
       using OmegaBulkAdapter_T = lbm_mesapd_coupling::OmegaBulkAdapter<ParticleAccessor_T, lbm_mesapd_coupling::RegularParticlesSelector>;
-      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
+      real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t{1});
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, lbm_mesapd_coupling::RegularParticlesSelector());
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
          (*omegaBulkAdapter)(blockIt.get());
@@ -642,10 +642,10 @@ int main( int argc, char **argv )
 
    timeloop.addFuncBeforeTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
-   if( vtkIOFreq != uint_t(0) )
+   if( vtkIOFreq != uint_t{0} )
    {
 
-      auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, "fluid_field", vtkIOFreq, uint_t(0), false, baseFolderVTK );
+      auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, "fluid_field", vtkIOFreq, uint_t{0}, false, baseFolderVTK );
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
       fluidFilter.addFlag( Fluid_Flag );
@@ -673,11 +673,11 @@ int main( int argc, char **argv )
 #endif
 
    // add force evaluation and logging
-   real_t normalizationFactor = math::pi / real_t(8) * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter ;
+   real_t normalizationFactor = math::pi / real_t{8} * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter ;
    std::string loggingFileName( baseFolderLogging + "/LoggingForcesNearPlane");
    loggingFileName += "_D" + std::to_string(uint_c(diameter));
    loggingFileName += "_Re" + std::to_string(uint_c(ReynoldsNumberShear));
-   loggingFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t(1000)));
+   loggingFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t{1000}));
    loggingFileName += "_" + boundaryCondition;
    loggingFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
    if(useOmegaBulkAdaption) loggingFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
@@ -688,22 +688,22 @@ int main( int argc, char **argv )
 
    // compute reference values from literature
 
-   const real_t normalizedGapSize = normalizedWallDistance - real_t(0.5);
+   const real_t normalizedGapSize = normalizedWallDistance - real_t{0.5};
 
    // drag correlation for the drag coefficient
-   const real_t standardDragCorrelation = real_t(24) / ReynoldsNumberShear * (real_t(1) + real_t(0.15) * std::pow(ReynoldsNumberShear, real_t(0.687))); // Schiller-Naumann correlation
-   const real_t dragCorrelationWithGapSizeStokes = real_t(24) / ReynoldsNumberShear * (real_t(1) + real_t(0.138) * std::exp(real_t(-2) * normalizedGapSize) + real_t(9)/( real_t(16) * (real_t(1) + real_t(2) * normalizedGapSize) ) ); // Goldman et al. (1967)
-   const real_t alphaDragS = real_t(0.15) - real_t(0.046) * ( real_t(1) - real_t(0.16) * normalizedGapSize * normalizedGapSize ) * std::exp( -real_t(0.7) *  normalizedGapSize);
-   const real_t betaDragS = real_t(0.687) + real_t(0.066)*(real_t(1) - real_t(0.76) * normalizedGapSize * normalizedGapSize) * std::exp( - std::pow( normalizedGapSize, real_t(0.9) ) );
-   const real_t dragCorrelationZeng = dragCorrelationWithGapSizeStokes * ( real_t(1) + alphaDragS * std::pow( ReynoldsNumberShear, betaDragS ) ); // Zeng et al. (2009) - Eqs. (13) and (14)
+   const real_t standardDragCorrelation = real_t{24} / ReynoldsNumberShear * (real_t{1} + real_t{0.15} * std::pow(ReynoldsNumberShear, real_t{0.687})); // Schiller-Naumann correlation
+   const real_t dragCorrelationWithGapSizeStokes = real_t{24} / ReynoldsNumberShear * (real_t{1} + real_t{0.138} * std::exp(real_t{-2} * normalizedGapSize) + real_t{9}/( real_t{16} * (real_t{1} + real_t{2} * normalizedGapSize) ) ); // Goldman et al. (1967)
+   const real_t alphaDragS = real_t{0.15} - real_t{0.046} * ( real_t{1} - real_t{0.16} * normalizedGapSize * normalizedGapSize ) * std::exp( -real_t{0.7} *  normalizedGapSize);
+   const real_t betaDragS = real_t{0.687} + real_t{0.066}*(real_t{1} - real_t{0.76} * normalizedGapSize * normalizedGapSize) * std::exp( - std::pow( normalizedGapSize, real_t{0.9} ) );
+   const real_t dragCorrelationZeng = dragCorrelationWithGapSizeStokes * ( real_t{1} + alphaDragS * std::pow( ReynoldsNumberShear, betaDragS ) ); // Zeng et al. (2009) - Eqs. (13) and (14)
 
    // lift correlations for the lift coefficient
-   const real_t liftCorrelationZeroGapStokes = real_t(5.87); // Leighton, Acrivos (1985)
-   const real_t liftCorrelationZeroGap = real_t(3.663) / std::pow( ReynoldsNumberShear * ReynoldsNumberShear + real_t(0.1173), real_t(0.22) ); //  Zeng et al. (2009) - Eq. (19)
-   const real_t alphaLiftS = - std::exp( -real_t(0.3) + real_t(0.025) * ReynoldsNumberShear);
-   const real_t betaLiftS = real_t(0.8) + real_t(0.01) * ReynoldsNumberShear;
-   const real_t lambdaLiftS = ( real_t(1) - std::exp(-normalizedGapSize)) * std::pow( ReynoldsNumberShear / real_t(250), real_t(5) / real_t(2) );
-   const real_t liftCorrelationZeng = liftCorrelationZeroGap * std::exp( - real_t(0.5) * normalizedGapSize * std::pow( ReynoldsNumberShear / real_t(250), real_t(4)/real_t(3))) *
+   const real_t liftCorrelationZeroGapStokes = real_t{5.87}; // Leighton, Acrivos (1985)
+   const real_t liftCorrelationZeroGap = real_t{3.663} / std::pow( ReynoldsNumberShear * ReynoldsNumberShear + real_t{0.1173}, real_t{0.22} ); //  Zeng et al. (2009) - Eq. (19)
+   const real_t alphaLiftS = - std::exp( -real_t{0.3} + real_t{0.025} * ReynoldsNumberShear);
+   const real_t betaLiftS = real_t{0.8} + real_t{0.01} * ReynoldsNumberShear;
+   const real_t lambdaLiftS = ( real_t{1} - std::exp(-normalizedGapSize)) * std::pow( ReynoldsNumberShear / real_t{250}, real_t{5} / real_t{2} );
+   const real_t liftCorrelationZeng = liftCorrelationZeroGap * std::exp( - real_t{0.5} * normalizedGapSize * std::pow( ReynoldsNumberShear / real_t{250}, real_t{4}/real_t{3})) *
                                       ( std::exp( alphaLiftS * std::pow( normalizedGapSize, betaLiftS ) ) - lambdaLiftS ); // Zeng et al. (2009) - Eqs. (28) and (29)
 
    ////////////////////////
@@ -764,7 +764,7 @@ int main( int argc, char **argv )
       real_t liftDiffCurrentCheckingPeriod = std::fabs(maxLiftCurrentCheckingPeriod - minLiftCurrentCheckingPeriod)/std::fabs(maxLiftCurrentCheckingPeriod);
 
       // continuous output during simulation
-      if( timestep % (checkingFrequency * uint_t(10)) == 0)
+      if( timestep % (checkingFrequency * uint_t{10}) == 0)
       {
          WALBERLA_LOG_INFO_ON_ROOT("Drag: current C_D = " << curDrag );
          WALBERLA_LOG_INFO_ON_ROOT(" - standard C_D = " <<  standardDragCorrelation );
@@ -806,7 +806,7 @@ int main( int argc, char **argv )
    std::string resultFileName( baseFolderLogging + "/ResultForcesNearPlane");
    resultFileName += "_D" + std::to_string(uint_c(diameter));
    resultFileName += "_Re" + std::to_string(uint_c(ReynoldsNumberShear));
-   resultFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t(1000)));
+   resultFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t{1000}));
    resultFileName += "_" + boundaryCondition;
    resultFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
    if(useOmegaBulkAdaption) resultFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));

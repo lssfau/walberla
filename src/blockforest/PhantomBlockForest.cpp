@@ -43,7 +43,7 @@ namespace blockforest {
 
 
 PhantomBlockForest::PhantomBlockForest( BlockForest & blockforest ) :
-   blockforest_( blockforest ), depth_( uint_t(0) ), neighborhood_( blockforest.getNeighborhood() )
+   blockforest_( blockforest ), depth_( uint_t{0} ), neighborhood_( blockforest.getNeighborhood() )
 {}
 
 
@@ -80,7 +80,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
          auto cstate = function ? function( std::vector< std::pair< BlockID, Set<SUID> > >( 1, std::make_pair( id, state ) ), id ) : state;
 
          auto phantom = std::make_shared< PhantomBlock >( *this, id, cstate, aabb, targetLevel, level,
-                                                                      std::vector< uint_t >( uint_t(1), process ), process );
+                                                                      std::vector< uint_t >( uint_t{1}, process ), process );
          blocks_[ phantom->getId() ] = phantom;
 
          block.addTargetProcess( process );
@@ -89,7 +89,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       }
       else if( targetLevel > level )
       {
-         WALBERLA_ASSERT_EQUAL( targetLevel, (level + uint_t(1)) );
+         WALBERLA_ASSERT_EQUAL( targetLevel, (level + uint_t{1}) );
 
          const real_t xMid = ( aabb.xMin() + aabb.xMax() ) / real_c(2);
          const real_t yMid = ( aabb.yMin() + aabb.yMax() ) / real_c(2);
@@ -109,30 +109,30 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
                         ( ( c & 4 ) ? aabb.zMax() : zMid ) );
 
             auto phantom = std::make_shared< PhantomBlock >( *this, cid, cstate, caabb, targetLevel, level,
-                                                                         std::vector< uint_t >( uint_t(1), process ), process );
+                                                                         std::vector< uint_t >( uint_t{1}, process ), process );
             blocks_[ phantom->getId() ] = phantom;
 
             block.addTargetProcess( process );
 
             blockNeighborhood[ process ][ cid ] = std::make_pair( process, cstate );
          }
-         WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t(8) );
+         WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t{8} );
       }
       else
       {
-         WALBERLA_ASSERT_EQUAL( targetLevel, (level - uint_t(1)) );
+         WALBERLA_ASSERT_EQUAL( targetLevel, (level - uint_t{1}) );
 
          BlockID fid = id.getFatherId();
          const uint_t branchId = id.getBranchId();
 
-         if( branchId == uint_t(0) )
+         if( branchId == uint_t{0} )
          {
             std::vector< std::pair< BlockID, Set<SUID> > > sourceStates( 8, std::make_pair( id, state ) );
 
             AABB faabb;
             aabbReconstruction( faabb, fid );
 
-            std::vector< uint_t > sourceProcesses( uint_t(8), process );
+            std::vector< uint_t > sourceProcesses( uint_t{8}, process );
             const auto & neighborhood = block.getNeighborhood();
             for(const auto & neighbor : neighborhood)
             {
@@ -161,9 +161,9 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
             for(const auto & neighbor : neighborhood)
             {
                const auto & nid = neighbor.getId();
-               if( blockforest_.getLevelFromBlockId( nid ) == level && nid.getFatherId() == fid && nid.getBranchId() == uint_t(0) )
+               if( blockforest_.getLevelFromBlockId( nid ) == level && nid.getFatherId() == fid && nid.getBranchId() == uint_t{0} )
                {
-                  WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t(0) );
+                  WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t{0} );
                   block.addTargetProcess( neighbor.getProcess() );
 #ifdef NDEBUG
                   break;
@@ -171,7 +171,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
                }
             }
          }
-         WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( block.getTargetProcess().size(), uint_t{1} );
       }
 
       const auto & neighborhood = block.getNeighborhood();
@@ -189,7 +189,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       depth_ = blockforest_.getDepth();
 
 #ifdef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
-   WALBERLA_CHECK_LESS_EQUAL( blockforest_.getTreeIdDigits() + depth_ * uint_t(3), math::UINT_BITS );
+   WALBERLA_CHECK_LESS_EQUAL( blockforest_.getTreeIdDigits() + depth_ * uint_t{3}, math::UINT_BITS );
 #endif
 
    // phantom block neighborhood construction
@@ -382,27 +382,27 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
 
          if( pBlock->getSourceLevel() == pBlock->getLevel() )
          {
-            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t(1) );
-            buffer << int8_t(0) << uint32_c( pBlock->getSourceProcess()[0] );
+            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t{1} );
+            buffer << int8_t{0} << uint32_c( pBlock->getSourceProcess()[0] );
          }
          else if( pBlock->getSourceLevel() > pBlock->getLevel() )
          {
-            WALBERLA_ASSERT_EQUAL( pBlock->getSourceLevel(), pBlock->getLevel() + uint_t(1) );
-            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t(8) );
-            buffer << int8_t(1) << uint32_c( pBlock->getSourceProcess()[0] ) << uint32_c( pBlock->getSourceProcess()[1] )
+            WALBERLA_ASSERT_EQUAL( pBlock->getSourceLevel(), pBlock->getLevel() + uint_t{1} );
+            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t{8} );
+            buffer << int8_t{1} << uint32_c( pBlock->getSourceProcess()[0] ) << uint32_c( pBlock->getSourceProcess()[1] )
                                 << uint32_c( pBlock->getSourceProcess()[2] ) << uint32_c( pBlock->getSourceProcess()[3] )
                                 << uint32_c( pBlock->getSourceProcess()[4] ) << uint32_c( pBlock->getSourceProcess()[5] )
                                 << uint32_c( pBlock->getSourceProcess()[6] ) << uint32_c( pBlock->getSourceProcess()[7] );
          }
          else
          {
-            WALBERLA_ASSERT_EQUAL( pBlock->getSourceLevel(), pBlock->getLevel() - uint_t(1) );
-            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t(1) );
-            buffer << int8_t(-1) << uint32_c( pBlock->getSourceProcess()[0] );
+            WALBERLA_ASSERT_EQUAL( pBlock->getSourceLevel(), pBlock->getLevel() - uint_t{1} );
+            WALBERLA_ASSERT_EQUAL( pBlock->getSourceProcess().size(), uint_t{1} );
+            buffer << int8_t{-1} << uint32_c( pBlock->getSourceProcess()[0] );
          }
 
          buffer << uint8_c( pBlock->getNeighborhoodSize() );
-         for( uint_t n = uint_t(0); n != pBlock->getNeighborhoodSize(); ++n )
+         for( uint_t n = uint_t{0}; n != pBlock->getNeighborhoodSize(); ++n )
             buffer << pBlock->getNeighborId(n) << uint32_c( pBlock->getNeighborProcess(n) ) << pBlock->getNeighborState(n);
 
          if( packBlockData )
@@ -430,7 +430,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
       WALBERLA_ASSERT_UNEQUAL( uint_c( recvIt.rank() ), process );
       auto & buffer = recvIt.buffer();
 
-      uint_t nBlocks( uint_t(0) );
+      uint_t nBlocks( uint_t{0} );
       buffer >> nBlocks;
       for( uint_t i = 0; i != nBlocks; ++ i )
       {
@@ -444,20 +444,20 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
          int8_t offset(0);
          buffer >> offset;
          std::vector< uint_t > sp;
-         if( offset == int8_t(0) || offset == int8_t(-1) )
+         if( offset == int8_t{0} || offset == int8_t{-1} )
          {
-            uint32_t s( uint32_t(0) );
+            uint32_t s( uint32_t{0} );
             buffer >> s;
             sp.push_back( s );
-            if( offset == int8_t(-1) )
+            if( offset == int8_t{-1} )
             {
-               WALBERLA_ASSERT_GREATER( sourceLevel, uint_t(0) );
+               WALBERLA_ASSERT_GREATER( sourceLevel, uint_t{0} );
                --sourceLevel;
             }
          }
          else
          {
-            WALBERLA_ASSERT_EQUAL( offset, int8_t(1) );
+            WALBERLA_ASSERT_EQUAL( offset, int8_t{1} );
 
             uint32_t s0(0);
             uint32_t s1(0);
@@ -479,7 +479,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
          phantom->clearNeighborhood();
          uint8_t neighbors(0);
          buffer >> neighbors;
-         for( auto n = uint8_t(0); n != neighbors; ++n )
+         for( auto n = uint8_t{0}; n != neighbors; ++n )
          {
             BlockID nId;
             uint32_t nProcess;
@@ -584,7 +584,7 @@ void PhantomBlockForest::prepareMigration()
          if( neighbor.getProcess() != process )
             ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >( neighbor.getProcess() ) );
    }
-   WALBERLA_ASSERT( ( blocks_.empty() && blockProcessMap.empty() ) || ( blockProcessMap.size() == uint_t(1) ) );
+   WALBERLA_ASSERT( ( blocks_.empty() && blockProcessMap.empty() ) || ( blockProcessMap.size() == uint_t{1} ) );
 
    // TODO: use OpenMP buffer system?
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1943 ); // phantomblockforest = 112 104 97 110 116 111 109 98 108 111 99 107 102 111 114 101 115 116 + 2
@@ -608,7 +608,7 @@ void PhantomBlockForest::prepareMigration()
    for(auto & it : blocks_)
    {
       auto & block = it.second;
-      for( uint_t n = uint_t(0); n != block->getNeighborhoodSize(); ++n )
+      for( uint_t n = uint_t{0}; n != block->getNeighborhoodSize(); ++n )
       {
          const uint_t p = block->getNeighborProcess(n);
          WALBERLA_ASSERT( blockProcessMap.find(p) != blockProcessMap.end() );
@@ -644,21 +644,21 @@ void PhantomBlockForest::prepareMigration()
 
       if( block->sourceBlockHasTheSameSize() )
       {
-         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t{1} );
          if( sources[0] != process )
          {
-            linkBufferSystem.sendBuffer( sources[0] ) << id << uint8_t(0) << block->getTargetProcess();
+            linkBufferSystem.sendBuffer( sources[0] ) << id << uint8_t{0} << block->getTargetProcess();
          }
          else
          {
             WALBERLA_ASSERT( blocks.find(id) != blocks.end() );
-            WALBERLA_ASSERT_EQUAL( blocks.find(id)->second->getTargetProcess().size(), uint_t(1) );
-            blocks.find(id)->second->setTargetProcess( uint_t(0), block->getTargetProcess() );
+            WALBERLA_ASSERT_EQUAL( blocks.find(id)->second->getTargetProcess().size(), uint_t{1} );
+            blocks.find(id)->second->setTargetProcess( uint_t{0}, block->getTargetProcess() );
          }
       }
       else if( block->sourceBlockIsLarger() )
       {
-         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t{1} );
          if( sources[0] != process )
          {
             linkBufferSystem.sendBuffer( sources[0] ) << id.getFatherId() << uint8_c( id.getBranchId() ) << block->getTargetProcess();
@@ -666,25 +666,25 @@ void PhantomBlockForest::prepareMigration()
          else
          {
             WALBERLA_ASSERT( blocks.find( id.getFatherId() ) != blocks.end() );
-            WALBERLA_ASSERT_EQUAL( blocks.find( id.getFatherId() )->second->getTargetProcess().size(), uint_t(8) );
+            WALBERLA_ASSERT_EQUAL( blocks.find( id.getFatherId() )->second->getTargetProcess().size(), uint_t{8} );
             blocks.find( id.getFatherId() )->second->setTargetProcess( id.getBranchId(), block->getTargetProcess() );
          }
       }
       else
       {
          WALBERLA_ASSERT( block->sourceBlockIsSmaller() );
-         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t(8) );
-         for( uint_t i = uint_t(0); i != uint_t(8); ++i )
+         WALBERLA_ASSERT_EQUAL( sources.size(), uint_t{8} );
+         for( uint_t i = uint_t{0}; i != uint_t{8}; ++i )
          {
             if( sources[i] != process )
             {
-               linkBufferSystem.sendBuffer( sources[i] ) << BlockID( id, i ) << uint8_t(0) << block->getTargetProcess();
+               linkBufferSystem.sendBuffer( sources[i] ) << BlockID( id, i ) << uint8_t{0} << block->getTargetProcess();
             }
             else
             {
                WALBERLA_ASSERT( blocks.find( BlockID( id, i ) ) != blocks.end() );
-               WALBERLA_ASSERT_EQUAL( blocks.find( BlockID( id, i ) )->second->getTargetProcess().size(), uint_t(1) );
-               blocks.find( BlockID( id, i ) )->second->setTargetProcess( uint_t(0), block->getTargetProcess() );
+               WALBERLA_ASSERT_EQUAL( blocks.find( BlockID( id, i ) )->second->getTargetProcess().size(), uint_t{1} );
+               blocks.find( BlockID( id, i ) )->second->setTargetProcess( uint_t{0}, block->getTargetProcess() );
             }
          }
       }

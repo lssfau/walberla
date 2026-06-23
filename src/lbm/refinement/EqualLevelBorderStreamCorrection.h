@@ -94,7 +94,7 @@ bool EqualLevelBorderStreamCorrection< LatticeModel_T >::finerNeighborExistsInVi
       if( stencil::c[i][dir] == -1 ) max[i] = 0;
       if( stencil::c[i][dir] ==  1 ) min[i] = 0;
    }
-   if( LatticeModel_T::Stencil::D == uint_t(2) )
+   if( LatticeModel_T::Stencil::D == uint_t{2} )
       min[2] = max[2] = 0;
 
    for( int z = min[2]; z <= max[2]; ++z ) {
@@ -126,15 +126,15 @@ void EqualLevelBorderStreamCorrection< LatticeModel_T >::helper( Block * block, 
           finerNeighborExistsInVicinity( block, *dir ) )
       {
          CellInterval region( xyzSize );
-         region.expand( cell_idx_t(1) );
+         region.expand( cell_idx_t{1} );
          for( uint_t i = 0; i < 3; ++i )
          {
             if( stencil::c[i][*dir] == -1 ) region.max()[i] = region.min()[i];
             else if( stencil::c[i][*dir] == 1 ) region.min()[i] = region.max()[i];
             else
             {
-               region.min()[i] += cell_idx_t(1);
-               region.max()[i] -= cell_idx_t(1);
+               region.min()[i] += cell_idx_t{1};
+               region.max()[i] -= cell_idx_t{1};
             }
          }
 

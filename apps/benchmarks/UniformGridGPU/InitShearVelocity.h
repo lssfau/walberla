@@ -6,7 +6,7 @@ namespace walberla {
 
 
 inline void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velFieldID,
-                              const real_t xMagnitude=real_t(0.005), const real_t fluctuationMagnitude=real_t(0.05) )
+                              const real_t xMagnitude=real_t{0.005}, const real_t fluctuationMagnitude=real_t{0.05} )
 {
     math::seedRandomGenerator(0);
     auto halfZ = blocks->getDomainCellBB().zMax() / 2;
@@ -17,7 +17,7 @@ inline void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks,
                                                          Cell globalCell;
         blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
         const real_t randomReal = xMagnitude * math::realRandom<real_t>(-fluctuationMagnitude, fluctuationMagnitude);
-        velField->get(x, y, z, 1) = real_t(0);
+        velField->get(x, y, z, 1) = real_t{0};
         velField->get(x, y, z, 2) = randomReal;
 
         if( globalCell[2] >= halfZ ) {

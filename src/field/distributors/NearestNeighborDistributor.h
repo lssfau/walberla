@@ -81,7 +81,7 @@ public:
 
       if( flagField_.isPartOfMaskSet( nearestCell, evaluationMask_ ) )
       {
-         for( uint_t f = uint_t(0); f < F_SIZE; ++f )
+         for( uint_t f = uint_t{0}; f < F_SIZE; ++f )
          {
             baseField_( nearestCell, f) += *distributeValueBegin;
             ++distributeValueBegin;
@@ -103,18 +103,18 @@ public:
          const cell_idx_t yMin = nearestCell.y() + yNeighbor;
          const cell_idx_t zMin = nearestCell.z() + zNeighbor;
 
-         for( cell_idx_t zC = zMin; zC <= zMin + cell_idx_t(1); ++zC)
+         for( cell_idx_t zC = zMin; zC <= zMin + cell_idx_t{1}; ++zC)
          {
-            for( cell_idx_t yC = yMin; yC <= yMin + cell_idx_t(1); ++yC)
+            for( cell_idx_t yC = yMin; yC <= yMin + cell_idx_t{1}; ++yC)
             {
-               for( cell_idx_t xC = xMin; xC <= xMin + cell_idx_t(1); ++xC)
+               for( cell_idx_t xC = xMin; xC <= xMin + cell_idx_t{1}; ++xC)
                {
                   Cell curCell(xC,yC,zC);
                   if( fieldXYZSize.contains(curCell) )
                   {
                      if (flagField_.isPartOfMaskSet(curCell, evaluationMask_))
                      {
-                        for (uint_t f = uint_t(0); f < F_SIZE; ++f)
+                        for (uint_t f = uint_t{0}; f < F_SIZE; ++f)
                         {
                            baseField_(curCell, f) += *distributeValueBegin;
                            ++distributeValueBegin;

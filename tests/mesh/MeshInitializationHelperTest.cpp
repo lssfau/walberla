@@ -61,9 +61,9 @@ void testHelperFunctions( const std::string & meshFile, const uint_t numTotalBlo
 
    const real_t meshVolume  = real_c( computeVolume( *mesh ) );
    const real_t blockVolume = meshVolume / real_c( numTotalBlocks );
-   static const real_t cellsPersBlock = real_t(1000);
+   static const real_t cellsPersBlock = real_t{1000};
    const real_t cellVolume = blockVolume / cellsPersBlock;
-   const real_t dx = std::pow( cellVolume, real_t(1) / real_t(3) );
+   const real_t dx = std::pow( cellVolume, real_t{1} / real_t{3} );
 
    WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
    auto sbf0 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, numTotalBlocks );
@@ -72,7 +72,7 @@ void testHelperFunctions( const std::string & meshFile, const uint_t numTotalBlo
    Vector3<uint_t> blockSize( sbf0->getNumberOfXCells(), sbf0->getNumberOfYCells(), sbf0->getNumberOfZCells() );
    auto sbf1 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, blockSize );
 
-   auto exteriorAabb = computeAABB( *mesh ).getScaled( real_t(2) );
+   auto exteriorAabb = computeAABB( *mesh ).getScaled( real_t{2} );
 
    WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
    auto sbf2 = mesh::createStructuredBlockStorageOutsideMesh( exteriorAabb, distanceOctree, dx, numTotalBlocks );

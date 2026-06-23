@@ -86,7 +86,7 @@ void updateAndSyncInfoCollection(BlockForest& bf, const BlockDataID boundaryHand
 
       ic.insert( infoCollectionEntry );
 
-      for( auto nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+      for( auto nb = uint_t{0}; nb < block->getNeighborhoodSize(); ++nb )
       {
          bs.sendBuffer( block->getNeighborProcess(nb) ) << infoCollectionEntry;
       }
@@ -134,7 +134,7 @@ void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_pt
       WALBERLA_CHECK_UNEQUAL( infoIt, ic->end(), "Father block with ID " << block->getId().getFatherId() << " not found in info collection!" );
 
       // check the above mentioned assumptions
-      WALBERLA_ASSERT_EQUAL(infoIt->second.numberOfLocalParticles, uint_t(0));
+      WALBERLA_ASSERT_EQUAL(infoIt->second.numberOfLocalParticles, uint_t{0});
 
       blockInfo = infoIt->second;
    }
@@ -169,12 +169,12 @@ void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_pt
          numNearBoundaryCells += childIt->second.numberOfNearBoundaryCells;
 
          // check above mentioned assumptions
-         WALBERLA_ASSERT_EQUAL(childIt->second.numberOfLocalParticles, uint_t(0));
+         WALBERLA_ASSERT_EQUAL(childIt->second.numberOfLocalParticles, uint_t{0});
       }
       // total number of cells remains unchanged
-      combinedInfo.numberOfFluidCells = uint_c(numFluidCells / uint_t(8)); //average
-      combinedInfo.numberOfNearBoundaryCells = uint_c( numNearBoundaryCells / uint_t(8) ); //average
-      combinedInfo.numberOfLocalParticles = uint_t(0);
+      combinedInfo.numberOfFluidCells = uint_c(numFluidCells / uint_t{8}); //average
+      combinedInfo.numberOfNearBoundaryCells = uint_c( numNearBoundaryCells / uint_t{8} ); //average
+      combinedInfo.numberOfLocalParticles = uint_t{0};
       // number of rpd sub cycles stays the same
 
       blockInfo = combinedInfo;

@@ -40,7 +40,7 @@ void testSweepCollection()
    uint_t zSize = 20;
    // Create blocks
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
-           uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
+           uint_t{1} , uint_t{1},  uint_t{1},  // number of blocks in x,y,z direction
            xSize, ySize, zSize,            // how many cells per block (x,y,z)
            real_c(1.0),                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
@@ -59,7 +59,7 @@ void testSweepCollection()
    SweepCollection_T sweepCollection(blocks, field1ID, field2ID, field3ID, a);
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(100);
+   const uint_t numberOfTimesteps = uint_t{100};
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

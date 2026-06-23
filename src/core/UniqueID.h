@@ -117,13 +117,13 @@ inline id_t UniqueID<T>::create()
    id_t id( counter_++ );
 
    if( MPIManager::instance()->bitsNeededToRepresentRank() > 0 ) {
-      const size_t shift( sizeof(id_t)*size_t(8) - MPIManager::instance()->bitsNeededToRepresentRank() );
-      WALBERLA_ASSERT( shift < sizeof(id_t)*size_t(8), "Invalid shift detected" );
+      const size_t shift( sizeof(id_t)*size_t{8} - MPIManager::instance()->bitsNeededToRepresentRank() );
+      WALBERLA_ASSERT( shift < sizeof(id_t)*size_t{8}, "Invalid shift detected" );
 
       const int rank ( MPIManager::instance()->worldRank() );
       WALBERLA_ASSERT( rank >= 0, "MPI system is not initialized" );
 
-      if( counter_ >= ( id_t(1) << shift ) ) {
+      if( counter_ >= ( id_t{1} << shift ) ) {
          // Revert overflow of counter
          --counter_;
          throw std::runtime_error( "Unable to create unique ID" );
@@ -131,7 +131,7 @@ inline id_t UniqueID<T>::create()
 
       id |= ( static_cast<id_t>( rank ) << shift );
    }
-   else if( counter_ == size_t(0) ) {
+   else if( counter_ == size_t{0} ) {
       // Revert overflow of counter
       --counter_;
       throw std::runtime_error( "Unable to create unique ID" );
@@ -152,13 +152,13 @@ inline id_t UniqueID<T>::createGlobal()
    id_t id( globalCounter_++ );
 
    if( MPIManager::instance()->bitsNeededToRepresentRank() > 0 ) {
-      const size_t shift( sizeof(id_t)*size_t(8) - MPIManager::instance()->bitsNeededToRepresentRank() );
-      WALBERLA_ASSERT( shift < sizeof(id_t)*size_t(8), "Invalid shift detected" );
+      const size_t shift( sizeof(id_t)*size_t{8} - MPIManager::instance()->bitsNeededToRepresentRank() );
+      WALBERLA_ASSERT( shift < sizeof(id_t)*size_t{8}, "Invalid shift detected" );
 
       const int size( MPIManager::instance()->numProcesses() );
       WALBERLA_ASSERT( size >= 0, "MPI system is not initialized" );
 
-      if( globalCounter_ >= ( id_t(1) << shift ) ) {
+      if( globalCounter_ >= ( id_t{1} << shift ) ) {
          // Revert overflow of counter
          --globalCounter_;
          throw std::runtime_error( "Unable to create unique ID" );
@@ -166,7 +166,7 @@ inline id_t UniqueID<T>::createGlobal()
 
       id |= ( static_cast<id_t>( size ) << shift );
    }
-   else if( globalCounter_ == size_t(0) ) {
+   else if( globalCounter_ == size_t{0} ) {
       // Revert overflow of counter
       --globalCounter_;
       throw std::runtime_error( "Unable to create unique ID" );

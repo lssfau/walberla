@@ -61,11 +61,11 @@ namespace initializer {
          if ( initialFill == addKeyword_ )
          {
             for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
-               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t(1.0) );
+               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t{1.0} );
          }
          else if ( initialFill == subtractKeyword_ ) {
             for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
-               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t(0.0) );
+               blockIt->getData<GhostLayerField<real_t,1> > ( scalarFieldID_ )->setWithGhostLayer( real_t{0.0} );
          }
          else {
             WALBERLA_ABORT("Unknown value of initialFill. Valid values are " << addKeyword_ << "," << subtractKeyword_ );
@@ -88,7 +88,7 @@ namespace initializer {
 
          std::string const shape = subBlock.getParameter<std::string>("shape");
 
-         uint_t const superSamplingDepth = subBlock.getParameter<uint_t>("superSamplingDepth", uint_t(4) );
+         uint_t const superSamplingDepth = subBlock.getParameter<uint_t>("superSamplingDepth", uint_t{4} );
 
          if      ( string_icompare( shape, "Sphere"   ) == 0 )  init ( sphereFromConfig   ( subBlock ), addOrSubtract, superSamplingDepth );
          else if ( string_icompare( shape, "Cylinder" ) == 0 )  init ( cylinderFromConfig ( subBlock ), addOrSubtract, superSamplingDepth );

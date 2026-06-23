@@ -43,7 +43,7 @@ public:
    {
    }
 
-   virtual uint_t numComponents() { return uint_t(1); }
+   virtual uint_t numComponents() { return uint_t{1}; }
    virtual void   getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data )
    {
       data.reserve( faces.size() );

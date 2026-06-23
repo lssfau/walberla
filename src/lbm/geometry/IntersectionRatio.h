@@ -74,7 +74,7 @@ real_t intersectionRatio( const Body & body,
 inline real_t intersectionRatio( const geometry::Sphere & sphere,
                                  const Vector3<real_t> & fluidPoint,
                                  const Vector3<real_t> & direction,
-                                 const real_t /*epsilon*/ = real_t(0) )
+                                 const real_t /*epsilon*/ = real_t{0} )
 {
    return intersectionRatioSphere( sphere, fluidPoint, direction );
 }

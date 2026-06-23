@@ -84,8 +84,8 @@ public:
 
    void operator()( IBlock * const block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
 };
 
 template< typename LatticeModel_T >
@@ -108,11 +108,11 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
 
    const real_t omega = src->latticeModel().collisionModel().omega();
 
-   const real_t omega_trm( real_t(1) - omega );
-   const real_t  omega_w0( real_t(3) * ( real_t(1) / real_t( 3) ) * omega );
-   const real_t  omega_w1( real_t(3) * ( real_t(1) / real_t(18) ) * omega );
-   const real_t  omega_w2( real_t(3) * ( real_t(1) / real_t(36) ) * omega );
-   const real_t one_third( real_t(1) / real_t(3) );
+   const real_t omega_trm( real_t{1} - omega );
+   const real_t  omega_w0( real_t{3} * ( real_t{1} / real_t{ 3} ) * omega );
+   const real_t  omega_w1( real_t{3} * ( real_t{1} / real_t{18} ) * omega );
+   const real_t  omega_w2( real_t{3} * ( real_t{1} / real_t{36} ) * omega );
+   const real_t one_third( real_t{1} / real_t{3} );
 
    // loop constants
 
@@ -448,7 +448,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
                                                                 >
    >::collide( IBlock * const block, [[maybe_unused]] const uint_t numberOfGhostLayersToInclude )
 {
-   WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t(0) ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
+   WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t{0} ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
 
    PdfField_T * src = this->getSrcField( block );
 
@@ -458,11 +458,11 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
 
    const real_t omega = src->latticeModel().collisionModel().omega();
 
-   const real_t omega_trm( real_t(1) - omega );
-   const real_t  omega_w0( real_t(3) * ( real_t(1) / real_t( 3) ) * omega );
-   const real_t  omega_w1( real_t(3) * ( real_t(1) / real_t(18) ) * omega );
-   const real_t  omega_w2( real_t(3) * ( real_t(1) / real_t(36) ) * omega );
-   const real_t one_third( real_t(1) / real_t(3) );
+   const real_t omega_trm( real_t{1} - omega );
+   const real_t  omega_w0( real_t{3} * ( real_t{1} / real_t{ 3} ) * omega );
+   const real_t  omega_w1( real_t{3} * ( real_t{1} / real_t{18} ) * omega );
+   const real_t  omega_w2( real_t{3} * ( real_t{1} / real_t{36} ) * omega );
+   const real_t one_third( real_t{1} / real_t{3} );
 
    // loop constants
 
@@ -775,8 +775,8 @@ public:
 
    void operator()( IBlock * const block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
 };
 
 template< typename LatticeModel_T >
@@ -799,11 +799,11 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
 
    const real_t omega = src->latticeModel().collisionModel().omega();
 
-   const real_t omega_trm( real_t(1) - omega );
-   const real_t  omega_w0( real_t(3) * ( real_t(1) / real_t( 3) ) * omega );
-   const real_t  omega_w1( real_t(3) * ( real_t(1) / real_t(18) ) * omega );
-   const real_t  omega_w2( real_t(3) * ( real_t(1) / real_t(36) ) * omega );
-   const real_t one_third( real_t(1) / real_t(3) );
+   const real_t omega_trm( real_t{1} - omega );
+   const real_t  omega_w0( real_t{3} * ( real_t{1} / real_t{ 3} ) * omega );
+   const real_t  omega_w1( real_t{3} * ( real_t{1} / real_t{18} ) * omega );
+   const real_t  omega_w2( real_t{3} * ( real_t{1} / real_t{36} ) * omega );
+   const real_t one_third( real_t{1} / real_t{3} );
 
    // loop constants
 
@@ -858,7 +858,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
               const real_t velZ_trm = pT[x] + pTS[x] + pTW[x];
 
               rho[x] = pC[x] + pS[x] + pW[x] + pB[x] + pSW[x] + pBS[x] + pBW[x] + velX_trm + velY_trm + velZ_trm;
-              const real_t rho_inv = real_t(1) / rho[x];
+              const real_t rho_inv = real_t{1} / rho[x];
 
               velX[x] = rho_inv * ( velX_trm - pW[x]  - pNW[x] - pSW[x] - pTW[x] - pBW[x] );
               velY[x] = rho_inv * ( velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x] );
@@ -1010,7 +1010,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
             const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
             rho[x] = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-            const real_t rho_inv = real_t(1) / rho[x];
+            const real_t rho_inv = real_t{1} / rho[x];
 
             velX[x] = rho_inv * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
             velY[x] = rho_inv * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );
@@ -1141,7 +1141,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
                                                                 >
    >::collide( IBlock * const block, [[maybe_unused]] const uint_t numberOfGhostLayersToInclude )
 {
-   WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t(0) ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
+   WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t{0} ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
 
    PdfField_T * src = this->getSrcField( block );
 
@@ -1151,11 +1151,11 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
 
    const real_t omega = src->latticeModel().collisionModel().omega();
 
-   const real_t omega_trm( real_t(1) - omega );
-   const real_t  omega_w0( real_t(3) * ( real_t(1) / real_t( 3) ) * omega );
-   const real_t  omega_w1( real_t(3) * ( real_t(1) / real_t(18) ) * omega );
-   const real_t  omega_w2( real_t(3) * ( real_t(1) / real_t(36) ) * omega );
-   const real_t one_third( real_t(1) / real_t(3) );
+   const real_t omega_trm( real_t{1} - omega );
+   const real_t  omega_w0( real_t{3} * ( real_t{1} / real_t{ 3} ) * omega );
+   const real_t  omega_w1( real_t{3} * ( real_t{1} / real_t{18} ) * omega );
+   const real_t  omega_w2( real_t{3} * ( real_t{1} / real_t{36} ) * omega );
+   const real_t one_third( real_t{1} / real_t{3} );
 
    // loop constants
 
@@ -1208,7 +1208,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
             const real_t velZ_trm = pT[x] + pTS[x] + pTW[x];
 
             rho[x] = pC[x] + pS[x] + pW[x] + pB[x] + pSW[x] + pBS[x] + pBW[x] + velX_trm + velY_trm + velZ_trm;
-            const real_t rho_inv = real_t(1) / rho[x];
+            const real_t rho_inv = real_t{1} / rho[x];
 
             velX[x] = rho_inv * ( velX_trm - pW[x]  - pNW[x] - pSW[x] - pTW[x] - pBW[x] );
             velY[x] = rho_inv * ( velY_trm + pNE[x] - pS[x]  - pSW[x] - pSE[x] - pTS[x] - pBS[x] );
@@ -1332,7 +1332,7 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if_t< std::is_same_v< 
             const real_t velZ_trm = dd_tmp_T + dd_tmp_TS + dd_tmp_TW;
 
             rho[x] = dd_tmp_C + dd_tmp_S + dd_tmp_W + dd_tmp_B + dd_tmp_SW + dd_tmp_BS + dd_tmp_BW + velX_trm + velY_trm + velZ_trm;
-            const real_t rho_inv = real_t(1) / rho[x];
+            const real_t rho_inv = real_t{1} / rho[x];
 
             velX[x] = rho_inv * ( velX_trm - dd_tmp_W  - dd_tmp_NW - dd_tmp_SW - dd_tmp_TW - dd_tmp_BW );
             velY[x] = rho_inv * ( velY_trm + dd_tmp_NE - dd_tmp_S  - dd_tmp_SW - dd_tmp_SE - dd_tmp_TS - dd_tmp_BS );

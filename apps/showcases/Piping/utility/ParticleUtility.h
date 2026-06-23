@@ -61,12 +61,12 @@ void writeSphereInformationToFile(const std::string& filename, walberla::mesa_pd
 bool sphereBoxOverlap(const mesa_pd::Vec3& spherePosition, const real_t sphereRadius, const mesa_pd::Vec3& boxPosition,
                       const mesa_pd::Vec3& boxEdgeLength)
 {
-   if ((spherePosition[0] + sphereRadius < boxPosition[0] - boxEdgeLength[0] / real_t(2)) ||
-       (spherePosition[1] + sphereRadius < boxPosition[1] - boxEdgeLength[1] / real_t(2)) ||
-       (spherePosition[2] + sphereRadius < boxPosition[2] - boxEdgeLength[2] / real_t(2)) ||
-       (spherePosition[0] - sphereRadius > boxPosition[0] + boxEdgeLength[0] / real_t(2)) ||
-       (spherePosition[1] - sphereRadius > boxPosition[1] + boxEdgeLength[1] / real_t(2)) ||
-       (spherePosition[2] - sphereRadius > boxPosition[2] + boxEdgeLength[2] / real_t(2)))
+   if ((spherePosition[0] + sphereRadius < boxPosition[0] - boxEdgeLength[0] / real_t{2}) ||
+       (spherePosition[1] + sphereRadius < boxPosition[1] - boxEdgeLength[1] / real_t{2}) ||
+       (spherePosition[2] + sphereRadius < boxPosition[2] - boxEdgeLength[2] / real_t{2}) ||
+       (spherePosition[0] - sphereRadius > boxPosition[0] + boxEdgeLength[0] / real_t{2}) ||
+       (spherePosition[1] - sphereRadius > boxPosition[1] + boxEdgeLength[1] / real_t{2}) ||
+       (spherePosition[2] - sphereRadius > boxPosition[2] + boxEdgeLength[2] / real_t{2}))
    {
       return false;
    }
@@ -108,7 +108,7 @@ void initSpheresFromFile(const std::string& fileName, walberla::mesa_pd::data::P
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(scalingFactor)
 
    real_t minParticleDiameter = std::numeric_limits< real_t >::max();
-   real_t maxParticleDiameter = real_t(0);
+   real_t maxParticleDiameter = real_t{0};
 
    while (std::getline(fileIss, line))
    {
@@ -134,8 +134,8 @@ void initSpheresFromFile(const std::string& fileName, walberla::mesa_pd::data::P
       pIt->setOwner(rank);
       pIt->setType(0);
 
-      minParticleDiameter = std::min(real_t(2) * radius, minParticleDiameter);
-      maxParticleDiameter = std::max(real_t(2) * radius, maxParticleDiameter);
+      minParticleDiameter = std::min(real_t{2} * radius, minParticleDiameter);
+      maxParticleDiameter = std::max(real_t{2} * radius, maxParticleDiameter);
 
       WALBERLA_CHECK_EQUAL(iss.tellg(), -1);
    }
@@ -152,9 +152,9 @@ template< typename ParticleAccessor_T >
 void getParticleVelocities(const ParticleAccessor_T& ac, uint_t& numParticles, real_t& maxVelocity,
                            real_t& averageVelocity)
 {
-   maxVelocity     = real_t(0);
-   averageVelocity = real_t(0);
-   numParticles    = uint_t(0);
+   maxVelocity     = real_t{0};
+   averageVelocity = real_t{0};
+   numParticles    = uint_t{0};
 
    for (uint_t i = 0; i < ac.size(); ++i)
    {
@@ -174,7 +174,7 @@ void getParticleVelocities(const ParticleAccessor_T& ac, uint_t& numParticles, r
       walberla::mpi::allReduceInplace(numParticles, walberla::mpi::SUM);
    }
 
-   averageVelocity /= real_t(numParticles);
+   averageVelocity /= static_cast< real_t >(numParticles);
 }
 
 auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, const mesa_pd::Vec3& normal)
@@ -183,7 +183,7 @@ auto createPlane(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, c
    p0->setPosition(pos);
    p0->setBaseShape(std::make_shared< mesa_pd::data::HalfSpace >(normal));
    // Mass is set to infinity internally for HalfSpace (independent of the density that is set here)
-   p0->getBaseShapeRef()->updateMassAndInertia(real_t(1));
+   p0->getBaseShapeRef()->updateMassAndInertia(real_t{1});
    p0->setOwner(walberla::mpi::MPIManager::instance()->rank());
    p0->setType(1);
    p0->setInteractionRadius(std::numeric_limits< real_t >::infinity());
@@ -203,7 +203,7 @@ auto createBox(mesa_pd::data::ParticleStorage& ps, const mesa_pd::Vec3& pos, con
    if (movingBucket)
    {
       // TODO: replace the density of 2.0
-      p0->getBaseShapeRef()->updateMassAndInertia(real_t(2.0));
+      p0->getBaseShapeRef()->updateMassAndInertia(real_t{2.0});
    }
    else
    {
@@ -226,7 +226,7 @@ void settleParticles(const uint_t numTimeSteps, const shared_ptr< ParticleAccess
                      const real_t& particleDensityRatio, const real_t& gravitationalAcceleration, const bool& useOpenMP)
 {
    // Increase the settling speed
-   const real_t timeStepSizeParticles = real_t(10);
+   const real_t timeStepSizeParticles = real_t{10};
    mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(timeStepSizeParticles);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeParticles);
    mesa_pd::mpi::ReduceProperty reduceProperty;
@@ -235,7 +235,7 @@ void settleParticles(const uint_t numTimeSteps, const shared_ptr< ParticleAccess
 
    WALBERLA_LOG_INFO_ON_ROOT("Starting initial particle settling...")
 
-   for (uint_t t = uint_t(0); t < numTimeSteps; ++t)
+   for (uint_t t = uint_t{0}; t < numTimeSteps; ++t)
    {
       ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, vvIntegratorPreForce, *accessor);
       syncNextNeighborFunc(*ps, domain);
@@ -268,7 +268,7 @@ void settleParticles(const uint_t numTimeSteps, const shared_ptr< ParticleAccess
          [particleDensityRatio, gravitationalAcceleration](const size_t idx, auto& ac) {
             mesa_pd::addForceAtomic(
                idx, ac,
-               Vector3< real_t >(real_t(0), real_t(0),
+               Vector3< real_t >(real_t{0}, real_t{0},
                                  -(particleDensityRatio - real_c(1)) * ac.getVolume(idx) * gravitationalAcceleration));
          },
          *accessor);
@@ -278,7 +278,7 @@ void settleParticles(const uint_t numTimeSteps, const shared_ptr< ParticleAccess
       ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, vvIntegratorPostForce, *accessor);
       syncNextNeighborFunc(*ps, domain);
 
-      if (t % (numTimeSteps / uint_t(10)) == 0)
+      if (t % (numTimeSteps / uint_t{10}) == 0)
       {
          real_t maxVelocity;
          real_t averageVelocity;
@@ -295,8 +295,8 @@ void settleParticles(const uint_t numTimeSteps, const shared_ptr< ParticleAccess
    ps->forEachParticle(
       useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor,
       [](const size_t idx, auto& ac) {
-         ac.setLinearVelocity(idx, Vector3(real_t(0)));
-         ac.setAngularVelocity(idx, Vector3(real_t(0)));
+         ac.setLinearVelocity(idx, Vector3(real_t{0}));
+         ac.setAngularVelocity(idx, Vector3(real_t{0}));
       },
       *accessor);
    syncNextNeighborFunc(*ps, domain);

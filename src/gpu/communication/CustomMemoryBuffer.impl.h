@@ -85,7 +85,7 @@ namespace communication {
 
          // memcpy: If either dest or src is an invalid or null pointer, the behavior is undefined, even if count is zero. 
          if(begin_) {
-             Allocator::memcpy( newBegin, begin_, size_t(end_ - begin_) );
+             Allocator::memcpy( newBegin, begin_, static_cast< size_t >(end_ - begin_) );
          }
 
          std::swap( begin_, newBegin );

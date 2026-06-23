@@ -51,8 +51,8 @@ static void workloadMemorySUIDAssignmentFunction(SetupBlockForest& forest)
 {
    for (auto & block : forest)
    {
-      block.setMemory(memory_t(1));
-      block.setWorkload(workload_t(1));
+      block.setMemory(memory_t{1});
+      block.setWorkload(workload_t{1});
       if (block.getAABB().contains(Vector3< real_t >(real_c(25.0)))) block.addState(Empty);
    }
 }
@@ -79,7 +79,7 @@ void test(const bool forceSerialIO)
    blockforest::BlockForestEvaluation evaluation(sbf->getBlockForest());
    WALBERLA_LOG_INFO_ON_ROOT("BlockForest:\n" << evaluation.toString())
 
-   // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::fzyx, uint_t(3), false,
+   // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::fzyx, uint_t{3}, false,
    // None, Empty );
    auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_c(3), 0.0, field::fzyx);
    auto originalFieldId = sbf->addBlockData(dataHandling, "OriginalField", None, Empty);

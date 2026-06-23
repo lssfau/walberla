@@ -106,9 +106,9 @@ template<typename Field_T>
 MPI_Datatype mpiDatatype( const Field_T & field )
 {
    return mpiDatatypeSlice( field,
-                            cell_idx_t( 0 ), cell_idx_t( 0 ), cell_idx_t( 0 ), cell_idx_t( 0 ),
-                            cell_idx_t( field.xSize() ) - cell_idx_t( 1 ), cell_idx_t( field.ySize() ) - cell_idx_t( 1 ),
-                            cell_idx_t( field.zSize() ) - cell_idx_t( 1 ), cell_idx_t( field.fSize() ) - cell_idx_t( 1 ) );
+                            cell_idx_t{ 0 }, cell_idx_t{ 0 }, cell_idx_t{ 0 }, cell_idx_t{ 0 },
+                            cell_idx_t( field.xSize() ) - cell_idx_t{ 1 }, cell_idx_t( field.ySize() ) - cell_idx_t{ 1 },
+                            cell_idx_t( field.zSize() ) - cell_idx_t{ 1 }, cell_idx_t( field.fSize() ) - cell_idx_t{ 1 } );
 }
 
 
@@ -178,7 +178,7 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
       MPI_Type_create_subarray( 3, sizes.data(), subsizes.data(), starts.data(), MPI_ORDER_C, MPITrait<T>::type(), &tmpType );
 
       int const count = int_c( fs.size() );
-      std::vector<int> displacements( std::max( fs.size(), size_t( 1 ) ) ); // if "fs" is empty create a dummy vector from so that we can take an address to the first element
+      std::vector<int> displacements( std::max( fs.size(), size_t{ 1 } ) ); // if "fs" is empty create a dummy vector from so that we can take an address to the first element
       std::ranges::transform( fs, displacements.begin(), int_c<cell_idx_t> );
       
       MPI_Type_create_indexed_block( count, 1, &( displacements.front() ), tmpType, &newType );
@@ -191,7 +191,7 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
 
       MPI_Datatype tmpType = MPI_DATATYPE_NULL;
       int count = int_c( fs.size() );
-      std::vector<int> displacements( std::max( fs.size(), size_t(1) ) ); // if "fs" is empty create a dummy vector from so that we can take an address to the first element
+      std::vector<int> displacements( std::max( fs.size(), size_t{1} ) ); // if "fs" is empty create a dummy vector from so that we can take an address to the first element
       std::ranges::transform( fs, displacements.begin(), int_c<cell_idx_t> );
 
       MPI_Type_create_indexed_block( count, 1, &( displacements.front() ), MPITrait<T>::type(), &tmpType );
@@ -221,12 +221,12 @@ MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField_T & field, const u
    const cell_idx_t xBeg = - cell_idx_c( numGhostLayers );
    const cell_idx_t yBeg = - cell_idx_c( numGhostLayers );
    const cell_idx_t zBeg = - cell_idx_c( numGhostLayers );
-   const cell_idx_t fBeg = cell_idx_t( 0 );
+   const cell_idx_t fBeg = cell_idx_t{ 0 };
 
-   const cell_idx_t xEnd = cell_idx_c( field.xSize() + numGhostLayers ) - cell_idx_t(1);
-   const cell_idx_t yEnd = cell_idx_c( field.ySize() + numGhostLayers ) - cell_idx_t(1);
-   const cell_idx_t zEnd = cell_idx_c( field.zSize() + numGhostLayers ) - cell_idx_t(1);
-   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t(1);
+   const cell_idx_t xEnd = cell_idx_c( field.xSize() + numGhostLayers ) - cell_idx_t{1};
+   const cell_idx_t yEnd = cell_idx_c( field.ySize() + numGhostLayers ) - cell_idx_t{1};
+   const cell_idx_t zEnd = cell_idx_c( field.zSize() + numGhostLayers ) - cell_idx_t{1};
+   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t{1};
 
    return mpiDatatypeSlice( field,
                             xBeg, yBeg, zBeg, fBeg,
@@ -246,8 +246,8 @@ MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField_T & field, const u
    CellInterval ci;
    field.getGhostRegion( dir, ci, cell_idx_c( thickness ), fullSlice );
 
-   const cell_idx_t fBeg = cell_idx_t( 0 );
-   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t( 1 );
+   const cell_idx_t fBeg = cell_idx_t{ 0 };
+   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t{ 1 };
 
    return mpiDatatypeSliceXYZ( field, ci, fBeg, fEnd );
 }
@@ -286,8 +286,8 @@ MPI_Datatype mpiDatatypeSliceBeforeGhostlayer( const GhostLayerField_T & field, 
    CellInterval ci;
    field.getSliceBeforeGhostLayer( dir, ci, cell_idx_c( thickness ), fullSlice );
 
-   const cell_idx_t fBeg = cell_idx_t( 0 );
-   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t( 1 );
+   const cell_idx_t fBeg = cell_idx_t{ 0 };
+   const cell_idx_t fEnd = cell_idx_c( field.fSize() ) - cell_idx_t{ 1 };
 
    return mpiDatatypeSliceXYZ( field, ci, fBeg, fEnd );
 }

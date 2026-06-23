@@ -84,7 +84,7 @@ Moreover, we define some variables
 \endif
 \code
 // number of ghost layers
-const uint_t FieldGhostLayers = uint_t(1);
+const uint_t FieldGhostLayers = uint_t{1};
 
 // unique identifiers for flags
 const FlagUID FluidFlagUID("Fluid Flag");

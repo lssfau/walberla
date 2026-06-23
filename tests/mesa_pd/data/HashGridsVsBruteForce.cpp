@@ -58,7 +58,7 @@ bool areOverlapping(Vec3 pos1, real_t radius1, Vec3 pos2, real_t radius2)
 
 void checkTestScenario( real_t radiusRatio )
 {
-   const real_t radius  = real_t(0.5);
+   const real_t radius  = real_t{0.5};
    const real_t radiusMax = std::sqrt(radiusRatio) * radius;
    const real_t radiusMin = radius / std::sqrt(radiusRatio);
 
@@ -235,10 +235,10 @@ int main( int argc, char ** argv ) {
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
    WALBERLA_LOG_DEVEL_ON_ROOT("Checking monodisperse case");
-   checkTestScenario(walberla::real_t(1.01)); // monodisperse
+   checkTestScenario(walberla::real_t{1.01}); // monodisperse
 
    WALBERLA_LOG_DEVEL_ON_ROOT("Checking polydisperse case");
-   checkTestScenario(walberla::real_t(10)); // polydisperse
+   checkTestScenario(walberla::real_t{10}); // polydisperse
 
    return EXIT_SUCCESS;
 }

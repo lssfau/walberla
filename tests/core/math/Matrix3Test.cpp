@@ -56,7 +56,7 @@ void rotationTest()
    // also checking WALBERLA_CHECK_FLOAT_EQUAL for matrices
    Matrix3< real_t > cmp(2, 0, 0, 0, 4, 0, 0, 0, 6);
    WALBERLA_CHECK_FLOAT_EQUAL(result, cmp);
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(result, cmp, real_t(1e-5));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(result, cmp, real_t{1e-5});
 }
 
 void RARTTest()

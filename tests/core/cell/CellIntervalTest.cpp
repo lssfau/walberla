@@ -37,7 +37,7 @@ CellInterval makeRandomInterval(uint_t maxSize)
 {
    static mt11213b rng;
    std::uniform_int_distribution<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min(), std::numeric_limits<cell_idx_t>::max() - cell_idx_c( maxSize ) );
-   std::uniform_int_distribution<uint_t> dist2( uint_t(0), maxSize );
+   std::uniform_int_distribution<uint_t> dist2( uint_t{0}, maxSize );
 
    cell_idx_t xMin = dist(rng);
    cell_idx_t yMin = dist(rng);
@@ -54,8 +54,8 @@ CellInterval makeRandomEmptyInterval(uint_t maxSize)
 {
    static mt11213b rng;
    std::uniform_int_distribution<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min() + cell_idx_c( maxSize ), std::numeric_limits<cell_idx_t>::max() - cell_idx_c( maxSize ) );
-   std::uniform_int_distribution<uint_t> dist2( uint_t(1), maxSize );
-   std::uniform_int_distribution<uint_t> dist3( uint_t(0), uint_t(1) );
+   std::uniform_int_distribution<uint_t> dist2( uint_t{1}, maxSize );
+   std::uniform_int_distribution<uint_t> dist3( uint_t{0}, uint_t{1} );
 
    cell_idx_t xMin = dist(rng);
    cell_idx_t yMin = dist(rng);

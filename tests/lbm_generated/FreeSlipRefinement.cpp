@@ -138,7 +138,7 @@ static void createSetupBlockForest(SetupBlockForest& setupBfs, const Config::Blo
 
    auto refSelection = setup.refinementSelector();
    setupBfs.addRefinementSelectionFunction(std::function< void(SetupBlockForest&) >(refSelection));
-   AABB domain(real_t(0.0), real_t(0.0), real_t(0.0), domainSize[0], domainSize[1], domainSize[2]);
+   AABB domain(real_t{0.0}, real_t{0.0}, real_t{0.0}, domainSize[0], domainSize[1], domainSize[2]);
    setupBfs.init(domain, rootBlocks[0], rootBlocks[1], rootBlocks[2], periodic[0], periodic[1], periodic[2]);
    setupBfs.balanceLoad(blockforest::StaticLevelwiseCurveBalance(true), uint_c(MPIManager::instance()->numProcesses()));
 }

@@ -84,20 +84,20 @@ namespace gpu
       // This is always true for this specific field indexing class.
       __device__ __forceinline__ bool isValidPosition()  { return true; }
 
-      __device__ T & get()       { return * (T*)(ptr_);                }
-      __device__ T & get( uint_t f) { return * (T*)(ptr_ + f * fOffset_); }
+      __device__ T & get()       { return * reinterpret_cast< T* >(ptr_);                }
+      __device__ T & get( uint_t f) { return * reinterpret_cast< T* >(ptr_ + f * fOffset_); }
 
 
       __device__ T & getNeighbor( int cx, int cy, int cz ) const
       {
-         return * (T*)( ptr_ + cx * xOffset_ +
+         return * reinterpret_cast< T* >( ptr_ + cx * xOffset_ +
                                cy * yOffset_ +
                                cz * zOffset_ );
       }
 
       __device__ T & getNeighbor( int cx, int cy, int cz, uint_t cf )
       {
-         return * (T*)( ptr_ + cx * xOffset_ +
+         return * reinterpret_cast< T* >( ptr_ + cx * xOffset_ +
                                cy * yOffset_ +
                                cz * zOffset_ +
                                cf * fOffset_ );

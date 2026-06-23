@@ -67,7 +67,7 @@ public:
    using HydroPdfField_T = PdfField<LM_Hydro>;
    using Stencil = typename LM_AdvDiff::Stencil;
 
-   AdvectionDiffusionCellOperation() : omega_( real_t(0) ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
+   AdvectionDiffusionCellOperation() : omega_( real_t{0} ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
 
    void configure( const LM_AdvDiff & advDiffLatticeModel, const LM_Hydro & hydroLatticeModel )
    {
@@ -88,7 +88,7 @@ public:
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
+         dst->get( x, y, z, d.toIdx() ) = ( real_t{1.0} - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
             omega_ * EquilibriumDistribution< LM_AdvDiff >::get( *d, velocity, scalar );
       }
    }
@@ -106,7 +106,7 @@ public:
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst[ d.toIdx() ] = ( real_t(1.0) - omega_ ) * dst[ d.toIdx() ] +
+         dst[ d.toIdx() ] = ( real_t{1.0} - omega_ ) * dst[ d.toIdx() ] +
             omega_   * EquilibriumDistribution< LM_AdvDiff >::get( *d, velocity, scalar );
       }
    }
@@ -142,7 +142,7 @@ public:
    using HydroPdfField_T = PdfField<LM_Hydro>;
    using Stencil = typename LM_AdvDiff::Stencil;
 
-   AdvectionDiffusionCellOperation() : omega_( real_t(0) ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
+   AdvectionDiffusionCellOperation() : omega_( real_t{0} ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
 
    void configure( const LM_AdvDiff & advDiffLatticeModel, const LM_Hydro & hydroLatticeModel )
    {
@@ -159,12 +159,12 @@ public:
 
       Vector3<real_t> velocity = hydro->getVelocity( x, y, z );
       real_t scalar = dst->getDensity( x, y, z );
-      dtsv *= real_t(3) - real_c(1.5)*omega_;
+      dtsv *= real_t{3} - real_c(1.5)*omega_;
 
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
+         dst->get( x, y, z, d.toIdx() ) = ( real_t{1.0} - omega_ ) * dst->get( x, y, z, d.toIdx() ) +
                                                           omega_   * EquilibriumDistribution< LM_AdvDiff >::get( *d, velocity, scalar ) +
                                                                      LM_AdvDiff::w[ d.toIdx() ] * ( d.cx()*dtsv[0] + d.cy()*dtsv[1] + d.cz()*dtsv[2] );
       }
@@ -179,12 +179,12 @@ public:
 
       Vector3<real_t> velocity = getVelocity( *hydroLatticeModel_, hydro );
       real_t scalar = getDensity( *advDiffLatticeModel_, dst );
-      dtsv *= real_t(3) - real_c(1.5)*omega_;
+      dtsv *= real_t{3} - real_c(1.5)*omega_;
 
       // collide
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
-         dst[ d.toIdx() ] = ( real_t(1.0) - omega_ ) * dst[ d.toIdx() ] +
+         dst[ d.toIdx() ] = ( real_t{1.0} - omega_ ) * dst[ d.toIdx() ] +
                                             omega_   * EquilibriumDistribution< LM_AdvDiff >::get( *d, velocity, scalar ) +
                                                        LM_AdvDiff::w[ d.toIdx() ] * ( d.cx()*dtsv[0] + d.cy()*dtsv[1] + d.cz()*dtsv[2] );
       }

@@ -58,7 +58,7 @@ public:
 template <>
 inline void reset<ElectrostaticForceNotification>(data::Particle& p)
 {
-   p.setElectrostaticForce( Vec3(real_t(0)) );
+   p.setElectrostaticForce( Vec3(real_t{0}) );
 }
 
 inline void reduce(data::Particle&& p, const ElectrostaticForceNotification::Parameters& objparam)

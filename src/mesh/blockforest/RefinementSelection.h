@@ -90,7 +90,7 @@ inline void walberla::mesh::RefinementSelection<DistanceObject>::operator()( blo
    std::mt19937 g( 42 );
    std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-   std::vector<uint8_t> refine( numBlocks, uint_t( 0 ) );
+   std::vector<uint8_t> refine( numBlocks, uint_t{ 0 } );
    
    #ifdef _OPENMP
    #pragma omp parallel for schedule( dynamic )
@@ -104,14 +104,14 @@ inline void walberla::mesh::RefinementSelection<DistanceObject>::operator()( blo
 
       std::optional< bool > intersects = intersectsSurface( *distanceObject_, blocks[ shuffle[ii] ]->getAABB(), maxError_, distance_ );
       if( !intersects || intersects.value() )
-         refine[ shuffle[ ii ] ] = uint8_t( 1 );
+         refine[ shuffle[ ii ] ] = uint8_t{ 1 };
    }
 
    allReduceInplace( refine, mpi::LOGICAL_OR );
 
    for( uint_t i = 0; i != blocks.size(); ++i )
    {
-      blocks[i]->setMarker( refine[ i ] ==  uint8_t( 1 ) );
+      blocks[i]->setMarker( refine[ i ] ==  uint8_t{ 1 } );
    }
 }
 

@@ -326,12 +326,12 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
       sqlite3_bind_int64 ( stmt, 1, int64_c(runId) );
       sqlite3_bind_text  ( stmt, 2, timingPoolName.c_str() , -1, SQLITE_STATIC );
       sqlite3_bind_text  ( stmt, 3, i.first.c_str() , -1, SQLITE_STATIC );
-      sqlite3_bind_double( stmt, 4, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.average() ) ) );
-      sqlite3_bind_double( stmt, 5, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.min() ) ) );
-      sqlite3_bind_double( stmt, 6, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.max() ) ) );
+      sqlite3_bind_double( stmt, 4, ( ( i.second.getCounter() == uint_t{0} ) ? 0.0 : double_c( i.second.average() ) ) );
+      sqlite3_bind_double( stmt, 5, ( ( i.second.getCounter() == uint_t{0} ) ? 0.0 : double_c( i.second.min() ) ) );
+      sqlite3_bind_double( stmt, 6, ( ( i.second.getCounter() == uint_t{0} ) ? 0.0 : double_c( i.second.max() ) ) );
       sqlite3_bind_int64 ( stmt, 7, int64_c   ( i.second.getCounter() ));
-      sqlite3_bind_double( stmt, 8, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.variance() ) ) );
-      sqlite3_bind_double( stmt, 9, ( ( i.second.getCounter() == uint_t(0) ) ? 0.0 : double_c( i.second.total() / totalTime ) ) );
+      sqlite3_bind_double( stmt, 8, ( ( i.second.getCounter() == uint_t{0} ) ? 0.0 : double_c( i.second.variance() ) ) );
+      sqlite3_bind_double( stmt, 9, ( ( i.second.getCounter() == uint_t{0} ) ? 0.0 : double_c( i.second.total() / totalTime ) ) );
 
       sqlite3_step ( stmt );  // execute statement
       sqlite3_reset ( stmt ); // undo binding
@@ -419,12 +419,12 @@ void SQLiteDB::storeTimingNode ( const uint_t runId,
    sqlite3_bind_text  ( stmt, 2, timingTreeName.c_str() , -1, SQLITE_STATIC );
    sqlite3_bind_int64 ( stmt, 3, parentId );
    sqlite3_bind_text  ( stmt, 4, sweep.c_str() , -1, SQLITE_STATIC );
-   sqlite3_bind_double( stmt, 5, ( ( tn.timer_.getCounter() == uint_t(0) ) ? 0.0 : double_c( tn.timer_.average() ) ) );
-   sqlite3_bind_double( stmt, 6, ( ( tn.timer_.getCounter() == uint_t(0) ) ? 0.0 : double_c( tn.timer_.min() ) ) );
-   sqlite3_bind_double( stmt, 7, ( ( tn.timer_.getCounter() == uint_t(0) ) ? 0.0 : double_c( tn.timer_.max() ) ) );
+   sqlite3_bind_double( stmt, 5, ( ( tn.timer_.getCounter() == uint_t{0} ) ? 0.0 : double_c( tn.timer_.average() ) ) );
+   sqlite3_bind_double( stmt, 6, ( ( tn.timer_.getCounter() == uint_t{0} ) ? 0.0 : double_c( tn.timer_.min() ) ) );
+   sqlite3_bind_double( stmt, 7, ( ( tn.timer_.getCounter() == uint_t{0} ) ? 0.0 : double_c( tn.timer_.max() ) ) );
    sqlite3_bind_int64 ( stmt, 8, int64_c   ( tn.timer_.getCounter() ));
-   sqlite3_bind_double( stmt, 9, ( ( tn.timer_.getCounter() == uint_t(0) ) ? 0.0 : double_c( tn.timer_.variance() ) ) );
-   sqlite3_bind_double( stmt,10, ( ( tn.timer_.getCounter() == uint_t(0) ) ? 0.0 : double_c( tn.timer_.total() / totalTime ) ) );
+   sqlite3_bind_double( stmt, 9, ( ( tn.timer_.getCounter() == uint_t{0} ) ? 0.0 : double_c( tn.timer_.variance() ) ) );
+   sqlite3_bind_double( stmt,10, ( ( tn.timer_.getCounter() == uint_t{0} ) ? 0.0 : double_c( tn.timer_.total() / totalTime ) ) );
 
    sqlite3_step ( stmt );  // execute statement
    sqlite3_reset ( stmt ); // undo binding

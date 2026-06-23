@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
    math::Sample sample;
    math::DistributedSample disSample;
 
-   for( uint_t i = 0; i < uint_t(1000); ++i )
+   for( uint_t i = 0; i < uint_t{1000}; ++i )
    {
       real_t value = math::realRandom( real_c( -100 ), real_c( 100 ) );
       sample.insert( value );
@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
    sample.clear();
    disSample.clear();
 
-   for( uint_t i = 0; i < uint_t(1000); ++i )
+   for( uint_t i = 0; i < uint_t{1000}; ++i )
    {
       real_t value = math::realRandom( real_c( 10 ), real_c( 100 ) );
       sample.insert( value );
@@ -95,8 +95,8 @@ int main(int argc, char * argv[])
    
    WALBERLA_ROOT_SECTION()
    {
-      WALBERLA_CHECK_EQUAL( sample.size(), uint_t(0) );
-      WALBERLA_CHECK_EQUAL( disSample.size(), uint_t(0) );
+      WALBERLA_CHECK_EQUAL( sample.size(), uint_t{0} );
+      WALBERLA_CHECK_EQUAL( disSample.size(), uint_t{0} );
    }
    
    sample.clear();
@@ -105,8 +105,8 @@ int main(int argc, char * argv[])
    sample.mpiAllGather();
    disSample.mpiAllGather();
    
-   WALBERLA_CHECK_EQUAL( sample.size(), uint_t(0) );
-   WALBERLA_CHECK_EQUAL( disSample.size(), uint_t(0) );
+   WALBERLA_CHECK_EQUAL( sample.size(), uint_t{0} );
+   WALBERLA_CHECK_EQUAL( disSample.size(), uint_t{0} );
    
    if( MPIManager::instance()->numProcesses() > 1 )
    {
@@ -115,7 +115,7 @@ int main(int argc, char * argv[])
       
       WALBERLA_NON_ROOT_SECTION()
       {
-         for( uint_t i = 0; i < uint_t(1000); ++i )
+         for( uint_t i = 0; i < uint_t{1000}; ++i )
          {
             real_t value = math::realRandom( real_c( -100 ), real_c( -10 ) );
             sample.insert( value );
@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
       
       WALBERLA_NON_ROOT_SECTION()
       {
-         for( uint_t i = 0; i < uint_t(1000); ++i )
+         for( uint_t i = 0; i < uint_t{1000}; ++i )
          {
             real_t value = math::realRandom( real_c( -100 ), real_c( 100 ) );
             sample.insert( value );

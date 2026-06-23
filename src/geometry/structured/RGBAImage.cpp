@@ -84,8 +84,8 @@ namespace geometry   {
 
    void RGBAImage::setElement( cell_idx_t x, cell_idx_t y, RGBAImage::Channel c, real_t val)
    {
-      WALBERLA_ASSERT_LESS_EQUAL   ( val, real_t(1.0) );
-      WALBERLA_ASSERT_GREATER_EQUAL( val, real_t(0.0) );
+      WALBERLA_ASSERT_LESS_EQUAL   ( val, real_t{1.0} );
+      WALBERLA_ASSERT_GREATER_EQUAL( val, real_t{0.0} );
       getElement(x,y,c) = static_cast<unsigned char> ( real_c( std::numeric_limits<unsigned char>::max() ) * val );
    }
 

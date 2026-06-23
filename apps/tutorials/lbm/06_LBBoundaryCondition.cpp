@@ -45,7 +45,7 @@ using FlagField_T = FlagField< flag_t >;
 
 //! [variableDefines]
 // number of ghost layers
-const uint_t FieldGhostLayers = uint_t(1);
+const uint_t FieldGhostLayers = uint_t{1};
 
 // unique identifiers for flags
 const FlagUID FluidFlagUID("Fluid Flag");
@@ -97,17 +97,17 @@ class VelocityFunctor
    VelocityFunctor(const Vector3< real_t >& velocity, real_t period, real_t H)
       : velocity_(velocity), period_(period), H_(H)
    {
-      constantTerm_ = real_t(4) * velocity_[0] / (H_ * H_);
+      constantTerm_ = real_t{4} * velocity_[0] / (H_ * H_);
    }
 
    void operator()(const real_t time)
    {
-      amplitude_ = constantTerm_ * real_t(0.5) * (real_t(1) - std::cos(real_t(2) * math::pi * time / period_));
+      amplitude_ = constantTerm_ * real_t{0.5} * (real_t{1} - std::cos(real_t{2} * math::pi * time / period_));
    }
 
    Vector3< real_t > operator()(const Vector3< real_t >& pos, const real_t)
    {
-      return Vector3< real_t >(amplitude_ * pos[1] * (H_ - pos[1]), real_t(0), real_t(0));
+      return Vector3< real_t >(amplitude_ * pos[1] * (H_ - pos[1]), real_t{0}, real_t{0});
    }
 
  private:
@@ -222,7 +222,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    //! [domainBB]
 
    //! [westBoundary]
-   cell_idx_t ghost = cell_idx_t(FieldGhostLayers);
+   cell_idx_t ghost = FieldGhostLayers;
 
    domainBB.xMin() -= ghost;
    domainBB.xMax() += ghost;
@@ -251,7 +251,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
          const real_t y = real_c(globalCell[1]);
 
          Vector3< real_t > ubbVel(0);
-         ubbVel[0] = -real_t(4) * y * (y - H) / (H * H) * setup_.inflowVelocity[0];
+         ubbVel[0] = -real_t{4} * y * (y - H) / (H * H) * setup_.inflowVelocity[0];
 
          handling->forceBoundary(UBBFlagUID, cellIt.x(), cellIt.y(), cellIt.z(), UBB_T::Velocity(ubbVel));
       }
@@ -305,7 +305,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
          const real_t y = real_c(globalCell[1]);
 
          real_t local_density =
-            setup_.outflowPressure * (real_t(1.0) + real_t(0.01) * std::sin(real_t(2.0 * 3.1415926538) * y / H));
+            setup_.outflowPressure * (real_t{1.0} + real_t{0.01} * std::sin(real_t{2.0 * 3.1415926538} * y / H));
 
          handling->forceBoundary(PressureFlagUID, cellIt.x(), cellIt.y(), cellIt.z(),
                                  Pressure_T::LatticeDensity(local_density));
@@ -387,7 +387,7 @@ int main(int argc, char** argv)
 
    // create fields
    LatticeModel_T const latticeModel = LatticeModel_T(lbm::collision_model::SRT(omega));
-   BlockDataID const pdfFieldID  = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t(1));
+   BlockDataID const pdfFieldID  = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t{1});
    BlockDataID const flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", FieldGhostLayers);
 
    // create and initialize boundary handling
@@ -399,9 +399,9 @@ int main(int argc, char** argv)
    setup.inflowType      = boundariesConfig.getParameter< std::string >("inflowType", "SimpleUBB");
    setup.outflowType     = boundariesConfig.getParameter< std::string >("outflowType", "SimplePressure");
    setup.inflowVelocity  = boundariesConfig.getParameter< Vector3< real_t > >("inflowVelocity", Vector3< real_t >());
-   setup.outflowPressure = boundariesConfig.getParameter< real_t >("outflowPressure", real_t(1));
+   setup.outflowPressure = boundariesConfig.getParameter< real_t >("outflowPressure", real_t{1});
 
-   setup.period = boundariesConfig.getParameter< real_t >("period", real_t(100));
+   setup.period = boundariesConfig.getParameter< real_t >("period", real_t{100});
 
    if (setup.inflowType == "ParserUBB") setup.parser = boundariesConfig.getBlock("Parser");
 
@@ -452,7 +452,7 @@ int main(int argc, char** argv)
 
    auto vtkConfig = walberlaEnv.config()->getBlock("VTK");
 
-   uint_t const writeFrequency = vtkConfig.getBlock("fluid_field").getParameter< uint_t >("writeFrequency", uint_t(100));
+   uint_t const writeFrequency = vtkConfig.getBlock("fluid_field").getParameter< uint_t >("writeFrequency", uint_t{100});
 
    auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", writeFrequency, FieldGhostLayers, false,
                                                    "vtk_out", "simulation_step", false, true, true, false, 0);

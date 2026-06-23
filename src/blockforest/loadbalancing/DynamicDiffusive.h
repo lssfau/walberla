@@ -159,7 +159,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    auto & blockforest = phantomForest.getBlockForest();
    auto & neighborhood = phantomForest.getNeighborhood();
    
-   const uint_t levels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+   const uint_t levels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t{1};
    
    // determine process weight (for every level)
 
@@ -172,7 +172,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    //find maxBlockWeight per level
    for(auto & targetProces : targetProcess)
    {
-      const uint_t level = levelwise_ ? targetProces.first->getLevel() : uint_t(0);
+      const uint_t level = levelwise_ ? targetProces.first->getLevel() : uint_t{0};
       const auto blockWeight = weight( targetProces.first );
       WALBERLA_ASSERT_LESS( level, levels );
       WALBERLA_CHECK_GREATER_EQUAL( blockWeight, 0.0 );
@@ -193,7 +193,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       mpi::allReduceInplace( maxBlockWeight, mpi::MAX, MPIManager::instance()->comm() );
    }
    
-   for( uint_t l = uint_t(0); l != levels; ++l )
+   for( uint_t l = uint_t{0}; l != levels; ++l )
    {
       if( defineProcessWeightLimitByMultipleOfMaxBlockWeight_ ) // calculate process weight limit as multiple of max block weight
       {
@@ -211,23 +211,23 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    std::vector< bool > processLevel( levels, true ); // determines whether the corresponding level must be processed
    if( checkForEarlyAbort_ )
    {
-      for( uint_t l = uint_t(0); l != levels; ++l )
+      for( uint_t l = uint_t{0}; l != levels; ++l )
          processLevel[l] = ( processWeight[l] > processWeightLimit[l] * abortThreshold_ );
       mpi::allReduceInplace( processLevel, mpi::BITWISE_OR, MPIManager::instance()->comm() );
       
       // If no level needs processing, we can perform an early abort of the load balancing step.
       
       bool abort( true );
-      for( uint_t l = uint_t(0); l != levels; ++l )
+      for( uint_t l = uint_t{0}; l != levels; ++l )
       {
          abort = ( abort && !(processLevel[l]) );
          if( !(processLevel[l]) )
-            levelsToProcess -= uint_t(1);
+            levelsToProcess -= uint_t{1};
       }
       if( abort )
          return false;
    }
-   WALBERLA_ASSERT_GREATER( levelsToProcess, uint_t(0) );
+   WALBERLA_ASSERT_GREATER( levelsToProcess, uint_t{0} );
    WALBERLA_ASSERT_LESS_EQUAL( levelsToProcess, levels );
 
    // alpha exchange
@@ -283,15 +283,15 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    
    auto flowIterations( double_c( flowIterations_ ) );
    if( iteration >= flowIterationsIncreaseStart_ )
-      flowIterations += double_c( iteration + uint_t(1) - flowIterationsIncreaseStart_ ) * flowIterationsIncrease_;
+      flowIterations += double_c( iteration + uint_t{1} - flowIterationsIncreaseStart_ ) * flowIterationsIncrease_;
    
    const auto iterations = uint_c( flowIterations + 0.5 );
-   for( uint_t i = uint_t(0); i < iterations; ++i )
+   for( uint_t i = uint_t{0}; i < iterations; ++i )
    {
       WALBERLA_ASSERT_EQUAL( localWeight.size(), levels );
 
       for(auto & rank : ranksToRecvFrom)
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
             if( processLevel[l] )
                bufferSystem.sendBuffer( rank.first ) << localWeight[l];
       
@@ -302,7 +302,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       for( auto recvIt = bufferSystem.begin(); recvIt != bufferSystem.end(); ++recvIt )
       {
          const uint_t np = uint_c( recvIt.rank() );
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
          {
             if( processLevel[l] )
             {
@@ -325,13 +325,13 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    for(auto & targetProces : targetProcess)
       targetProces.second = blockforest.getProcess();
    
-   if( mode_ == DIFFUSION_PUSH || ( mode_ == DIFFUSION_PUSHPULL && (iteration & uint_t(1)) == uint_t(0) ) )  // sending processes decide which blocks are exchanged
+   if( mode_ == DIFFUSION_PUSH || ( mode_ == DIFFUSION_PUSHPULL && (iteration & uint_t{1}) == uint_t{0} ) )  // sending processes decide which blocks are exchanged
    {      
       // calculate accumulated outflow for every level
       
       std::vector< double > outflow( levels, 0.0 );
       for(auto & it : flow)
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
             outflow[l] += std::max( it.second[l], 0.0 );
       
       // use global information to adapt outflow
@@ -340,11 +340,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       {
          std::vector< double > inflow( levels, 0.0 );
          for(auto & it : flow)
-            for( uint_t l = uint_t(0); l < levels; ++l )
+            for( uint_t l = uint_t{0}; l < levels; ++l )
                inflow[l] += std::min( it.second[l], 0.0 );
 
          std::vector< double > flowScaleFactor( levels, 1.0 );
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
          {
             //if( processLevel[l] && avgProcessWeight[l] < (0.99 * processWeightLimit[l]) )
             //{
@@ -361,7 +361,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                flowScaleFactor[l] = correctedOutflow / outflow[l];
                if (std::isnan(flowScaleFactor[l]))
                {
-                  flowScaleFactor[l] = real_t(1);
+                  flowScaleFactor[l] = real_t{1};
                   continue;
                }
                outflow[l] = correctedOutflow;
@@ -369,14 +369,14 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
          }
 
          for(auto & it : flow)
-            for( uint_t l = uint_t(0); l < levels; ++l )
+            for( uint_t l = uint_t{0}; l < levels; ++l )
                if( it.second[l] > 0.0 )
                   it.second[l] *= flowScaleFactor[l];
       }
       
       // determine which blocks are send to which process
 
-      for( uint_t l = uint_t(0); l < levels; ++l )
+      for( uint_t l = uint_t{0}; l < levels; ++l )
       {
          outflow[l] = std::min( outflow[l], processWeight[l] );
          const double outflowExcess = ( outflowExceedFactor_ - 1.0 ) * outflow[l];
@@ -410,18 +410,18 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                   std::vector< std::set< uint_t > > connectionType( 8 ); // 0 = full face (same level), 1 = full face (different level), 2 = part face,
                                                                          // 3 = full edge (same level), 4 = full edge (different level), 5 = part edge,
                                                                          // 6 = corner (same level), 7 = corner (different level)
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
                      const auto * block = targetProcess[i].first;
-                     const uint_t level = levelwise_ ? block->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? block->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() )
                      {
                         auto faces = blockforest::getFaceNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != faces.size(); ++j )
+                        for( uint_t j = uint_t{0}; j != faces.size(); ++j )
                         {
                            const uint_t sectionIndex = faces[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                           for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                           for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                            {
                               if( block->getNeighborProcess( sectionIndex, s ) == pickedProcess )
                               {
@@ -435,11 +435,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                            }
                         }
                         auto edges = blockforest::getEdgeNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != edges.size(); ++j )
+                        for( uint_t j = uint_t{0}; j != edges.size(); ++j )
                         {
                            const uint_t sectionIndex = edges[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                           for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                           for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                            {
                               if( block->getNeighborProcess( sectionIndex, s ) == pickedProcess )
                               {
@@ -453,11 +453,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                            }
                         }
                         auto corners = blockforest::getCornerNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != corners.size(); ++j )
+                        for( uint_t j = uint_t{0}; j != corners.size(); ++j )
                         {
                            const uint_t sectionIndex = corners[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                           for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                           for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                            {
                               if( block->getNeighborProcess( sectionIndex, s ) == pickedProcess )
                               {
@@ -485,9 +485,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                   /*
                   std::set< uint_t > assigned;
                   // no distinction between different connection types (face,edge,corner)
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
-                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() )
                      {
                         bool connectedToPickedProcess( false );
@@ -503,9 +503,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                   }
                   */
                   // blocks of this level, not yet assigned to another process and not only connected to other blocks of this process (= no 'inner' block)
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
-                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() &&
                          assigned.find(i) == assigned.end() )
                      {
@@ -521,9 +521,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      }
                   }
                   // all blocks of this level, not yet assigned to another process and still assigned to this process
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
-                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() &&
                          assigned.find(i) == assigned.end() )
                         candidates.push_back( i );
@@ -532,24 +532,24 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                else
                {
                   std::vector< uint_t > blocksToPick;
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
-                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() )
                         blocksToPick.push_back( i );
                   }
                   while( ! blocksToPick.empty() )
                   {
-                     const uint_t pickedBlock = random_( uint_t(0), uint_c( blocksToPick.size() ) - uint_t(1) );
+                     const uint_t pickedBlock = random_( uint_t{0}, uint_c( blocksToPick.size() ) - uint_t{1} );
                      WALBERLA_ASSERT_LESS( pickedBlock, blocksToPick.size() );
                      candidates.push_back( blocksToPick[ pickedBlock ] );
                      blocksToPick[ pickedBlock ] = blocksToPick.back();
                      blocksToPick.pop_back();
                   }
                   /*
-                  for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+                  for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
                   {
-                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t{0};
                      if( level == l && targetProcess[i].second == blockforest.getProcess() )
                         candidates.push_back( i );
                   }
@@ -569,9 +569,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                if( ! viableCandidates.empty() )
                {
                   // the block that comes closest to the edge flow of the picked neighbor process is the final candidate for moving to this process
-                  uint_t finalCandidate( uint_t(0) );
+                  uint_t finalCandidate( uint_t{0} );
                   double diff = std::abs( edgeFlow - weight( targetProcess[ viableCandidates[0] ].first ) );
-                  for( uint_t i = uint_t(1); i != viableCandidates.size(); ++i )
+                  for( uint_t i = uint_t{1}; i != viableCandidates.size(); ++i )
                   {
                      double d = std::abs( edgeFlow - weight( targetProcess[ viableCandidates[i] ].first ) );
                      if( d < diff )
@@ -601,13 +601,13 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    }
    else // receiving processes decide which blocks are exchanged
    {      
-      WALBERLA_ASSERT( mode_ == DIFFUSION_PULL || ( mode_ == DIFFUSION_PUSHPULL && (iteration & uint_t(1)) == uint_t(1) ) );
+      WALBERLA_ASSERT( mode_ == DIFFUSION_PULL || ( mode_ == DIFFUSION_PUSHPULL && (iteration & uint_t{1}) == uint_t{1} ) );
    
       // calculate accumulated inflow for every level
       
       std::vector< double > inflow( levels, 0.0 ); // inflow is saved as a positive number!
       for(auto & it : flow)
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
             inflow[l] -= std::min( it.second[l], 0.0 );
       
       // use global information to adapt inflow
@@ -616,11 +616,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       {
          std::vector< double > outflow( levels, 0.0 );
          for(auto & it : flow)
-            for( uint_t l = uint_t(0); l < levels; ++l )
+            for( uint_t l = uint_t{0}; l < levels; ++l )
                outflow[l] += std::max( it.second[l], 0.0 );
 
          std::vector< double > flowScaleFactor( levels, 1.0 );
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
          {
             if( processLevel[l] )
             {
@@ -628,7 +628,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                flowScaleFactor[l] = correctedInflow / inflow[l];
                if (std::isnan(flowScaleFactor[l]))
                {
-                  flowScaleFactor[l] = real_t(1);
+                  flowScaleFactor[l] = real_t{1};
                   continue;
                }
                inflow[l] = correctedInflow;
@@ -636,7 +636,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
          }
 
          for(auto & it : flow)
-            for( uint_t l = uint_t(0); l < levels; ++l )
+            for( uint_t l = uint_t{0}; l < levels; ++l )
                if( it.second[l] < 0.0 )
                   it.second[l] *= flowScaleFactor[l];
       }
@@ -651,7 +651,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       for(uint_t n : neighborhood)
       {
          blocksForNeighbors[n].resize( levels );
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
             blocksForNeighbors[n][l].resize( 8 ); // 0 = full face (same level), 1 = full face (different level), 2 = part face,
                                                    // 3 = full edge (same level), 4 = full edge (different level), 5 = part edge,
                                                    // 6 = corner (same level), 7 = corner (different level)
@@ -659,20 +659,20 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       blocksConnectedToOtherProcesses.resize( levels );
       allBlocks.resize( levels );
       
-      for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
+      for( uint_t i = uint_t{0}; i != targetProcess.size(); ++i )
       {
          const auto * block = targetProcess[i].first;
-         const uint_t level = levelwise_ ? block->getLevel() : uint_t(0);
+         const uint_t level = levelwise_ ? block->getLevel() : uint_t{0};
          if( processLevel[level] )
          {
             if( regardConnectivity_ && iteration < disregardConnectivityStart_ )
             {
                auto faces = blockforest::getFaceNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != faces.size(); ++j )
+               for( uint_t j = uint_t{0}; j != faces.size(); ++j )
                {
                   const uint_t sectionIndex = faces[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                  for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                  for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                   {
                      const uint_t np = block->getNeighborProcess( sectionIndex, s );
                      if( np != blockforest.getProcess() )
@@ -688,11 +688,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                   }
                }
                auto edges = blockforest::getEdgeNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != edges.size(); ++j )
+               for( uint_t j = uint_t{0}; j != edges.size(); ++j )
                {
                   const uint_t sectionIndex = edges[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                  for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                  for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                   {
                      const uint_t np = block->getNeighborProcess( sectionIndex, s );
                      if( np != blockforest.getProcess() )
@@ -708,11 +708,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                   }
                }
                auto corners = blockforest::getCornerNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != corners.size(); ++j )
+               for( uint_t j = uint_t{0}; j != corners.size(); ++j )
                {
                   const uint_t sectionIndex = corners[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
-                  for( uint_t s = uint_t(0); s != sectionSize; ++s )
+                  for( uint_t s = uint_t{0}; s != sectionSize; ++s )
                   {
                      const uint_t np = block->getNeighborProcess( sectionIndex, s );
                      if( np != blockforest.getProcess() )
@@ -741,7 +741,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       for( auto &[np, list] : blocksForNeighbors )
       {
          WALBERLA_ASSERT_EQUAL( list.size(), levels );
-         for( uint_t l = uint_t(0); l < levels; ++l )
+         for( uint_t l = uint_t{0}; l < levels; ++l )
          {
             if( processLevel[l] )
             {
@@ -785,7 +785,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      blocksToPick.push_back( index );
                   while( ! blocksToPick.empty() )
                   {
-                     const uint_t pickedBlock = random_( uint_t(0), uint_c( blocksToPick.size() ) - uint_t(1) );
+                     const uint_t pickedBlock = random_( uint_t{0}, uint_c( blocksToPick.size() ) - uint_t{1} );
                      WALBERLA_ASSERT_LESS( pickedBlock, blocksToPick.size() );
                      const auto * block = targetProcess[ blocksToPick[ pickedBlock ] ].first;
                      blocksForNeighborsUnsorted[np].push_back( std::make_pair( block->getId(), weight(block) ) );
@@ -833,7 +833,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
          blocksFromNeighbors[ np ].resize( levels );
          for( auto &pr : list )
          {
-            const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( pr.first ) : uint_t(0);
+            const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( pr.first ) : uint_t{0};
             WALBERLA_ASSERT_LESS( level, blocksFromNeighbors[ np ].size() );
             blocksFromNeighbors[ np ][ level ].push_back( pr );
          }
@@ -844,7 +844,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       std::map< uint_t, std::vector< BlockID > > blocksToFetch;
       std::set< BlockID > pickedBlocks;
 
-      for( uint_t l = uint_t(0); l < levels; ++l )
+      for( uint_t l = uint_t{0}; l < levels; ++l )
       {
          const double inflowExcess = ( inflowExceedFactor_ - 1.0 ) * inflow[l];
 
@@ -886,9 +886,9 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                if( ! viableCandidates.empty() )
                {
                   // the block that comes closest to the edge flow of the picked neighbor process is the final candidate for moving to this process
-                  uint_t finalCandidate( uint_t(0) );
+                  uint_t finalCandidate( uint_t{0} );
                   double diff = std::abs( edgeFlow + viableCandidates[finalCandidate].second );
-                  for( uint_t i = uint_t(1); i != viableCandidates.size(); ++i )
+                  for( uint_t i = uint_t{1}; i != viableCandidates.size(); ++i )
                   {
                      double d = std::abs( edgeFlow + viableCandidates[i].second );
                      if( d < diff )
@@ -945,13 +945,13 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       
       for( const auto &[id, pickedProcesses] : processToSendTo )
       {
-         uint_t index( uint_t(0) );
+         uint_t index( uint_t{0} );
          while( index < targetProcess.size() && targetProcess[ index ].first->getId() != id )
          {
             ++index;
          }
          WALBERLA_ASSERT( index < targetProcess.size() && targetProcess[ index ].first->getId() == id );
-         const uint_t level = levelwise_ ? targetProcess[ index ].first->getLevel() : uint_t(0);
+         const uint_t level = levelwise_ ? targetProcess[ index ].first->getLevel() : uint_t{0};
          
          auto p = pickedProcesses.begin();
          auto pickedProcess = *p;
@@ -970,11 +970,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
 
    std::map< uint_t, uint8_t > sendBlocksToNeighbor;
    for(uint_t n : neighborhood)
-      sendBlocksToNeighbor[n] = uint8_t(0);
+      sendBlocksToNeighbor[n] = uint8_t{0};
 
    for(auto & targetProces : targetProcess)
       if( targetProces.second != blockforest.getProcess() )
-         sendBlocksToNeighbor[ targetProces.second ] = uint8_t(1);
+         sendBlocksToNeighbor[ targetProces.second ] = uint8_t{1};
 
    std::map< mpi::MPIRank, mpi::MPISize > blocksRanksToRecvFrom;
    for(uint_t n : neighborhood)
@@ -999,11 +999,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
       WALBERLA_ASSERT_UNEQUAL( np, blockforest.getProcess() );
       uint8_t boolean;
       recvIt.buffer() >> boolean;
-      if( boolean == uint8_t(1) )
+      if( boolean == uint8_t{1} )
          processesToRecvFrom.insert(np);
    }
 
-   return ( iteration + uint_t(1) ) < maxIterations_;
+   return ( iteration + uint_t{1} ) < maxIterations_;
 }
 
 template< typename PhantomData_T >

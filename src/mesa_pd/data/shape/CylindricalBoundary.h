@@ -31,13 +31,13 @@ namespace data {
 class CylindricalBoundary : public BaseShape
 {
 public:
-   explicit CylindricalBoundary(const real_t& radius = real_t(1),
-                                const Vec3& axis = Vec3(real_t(1), real_t(0), real_t(0)))
+   explicit CylindricalBoundary(const real_t& radius = real_t{1},
+                                const Vec3& axis = Vec3(real_t{1}, real_t{0}, real_t{0}))
       : BaseShape(CylindricalBoundary::SHAPE_TYPE)
       , radius_(radius)
       , axis_(axis)
    {
-      WALBERLA_CHECK_FLOAT_EQUAL(axis.sqrLength(), real_t(1.0), "Axis has to be normalized!");
+      WALBERLA_CHECK_FLOAT_EQUAL(axis.sqrLength(), real_t{1.0}, "Axis has to be normalized!");
    }
 
    const real_t& getRadius() const { return radius_; }
@@ -60,10 +60,10 @@ inline
 void CylindricalBoundary::updateMassAndInertia(const real_t /*density*/)
 {
    mass_         = std::numeric_limits<real_t>::infinity();
-   invMass_      = real_t(0);
+   invMass_      = real_t{0};
 
    inertiaBF_    = Mat3(std::numeric_limits<real_t>::infinity());
-   invInertiaBF_ = Mat3(real_t(0));
+   invInertiaBF_ = Mat3(real_t{0});
 }
 
 inline

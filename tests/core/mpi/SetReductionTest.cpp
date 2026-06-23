@@ -99,7 +99,7 @@ void testStrings()
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
    
    std::vector< std::string > values;
-   values.push_back( FRUITS[size_t(rank % NUM_FRUITS)] );
+   values.push_back( FRUITS[static_cast< size_t >(rank % NUM_FRUITS)] );
 
    std::vector< std::string > reducedValuesUnion = mpi::allReduceSet( values, mpi::UNION );
 

@@ -113,7 +113,7 @@ FieldIndexing<T> FieldIndexing<T>::interval ( const GPUField<T> & f, const CellI
       zOffset = yOffset * f.yAllocSize();
       fOffset = zOffset * f.zAllocSize();
    }
-   char * data = (char*)f.pitchedPtr().ptr;
+   char * data = reinterpret_cast< char * >(f.pitchedPtr().ptr);
 
    // Jump over ghost cells to first inner cell
    cell_idx_t gl = cell_idx_c( f.nrOfGhostLayers() );
@@ -128,14 +128,14 @@ FieldIndexing<T> FieldIndexing<T>::interval ( const GPUField<T> & f, const CellI
    if ( f.layout() == fzyx )
    {
       firstCoord = FieldAccessor<T>::FZYX;
-      blockDim = dim3 ( (unsigned int)ci.xSize(), 1, 1 );
-      gridDim  = dim3 ( (unsigned int)ci.ySize(), (unsigned int)ci.zSize(), (unsigned int)( fEnd - fBegin) );
+      blockDim = dim3 ( static_cast< unsigned int >(ci.xSize()), 1, 1 );
+      gridDim  = dim3 ( static_cast< unsigned int >(ci.ySize()), static_cast< unsigned int >(ci.zSize()), static_cast< unsigned int >( fEnd - fBegin) );
    }
    else
    {
       firstCoord = FieldAccessor<T>::ZYXF;
-      blockDim = dim3 ( (unsigned int)(fEnd - fBegin), 1, 1 );
-      gridDim  = dim3 ( (unsigned int)ci.xSize(), (unsigned int)ci.ySize(), (unsigned int)ci.zSize() );
+      blockDim = dim3 ( static_cast< unsigned int >(fEnd - fBegin), 1, 1 );
+      gridDim  = dim3 ( static_cast< unsigned int >(ci.xSize()), static_cast< unsigned int >(ci.ySize()), static_cast< unsigned int >(ci.zSize()) );
    }
 
    shiftCoordinatesWhileFastestCoordHasSizeOne<T>( firstCoord, gridDim, blockDim );

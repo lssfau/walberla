@@ -137,7 +137,7 @@ public:
    MappingChecker(const shared_ptr< StructuredBlockStorage > & blocks,
                   const BlockDataID & boundaryHandlingID, real_t sphereRadius) :
          blocks_( blocks ), boundaryHandlingID_( boundaryHandlingID ),
-         sphereRadius_( sphereRadius ), sphereVolume_( math::pi * real_t(4) / real_t(3) * sphereRadius * sphereRadius * sphereRadius )
+         sphereRadius_( sphereRadius ), sphereVolume_( math::pi * real_t{4} / real_t{3} * sphereRadius * sphereRadius * sphereRadius )
    {
       WALBERLA_ASSERT(blocks->isXPeriodic());
    }
@@ -145,7 +145,7 @@ public:
    // check the mapping in the inner domain of the block and check mapped volume against real sphere volume
    void operator()(std::string & testIdentifier, const Vector3<real_t> & pos, bool periodic )
    {
-      uint_t cellCounter( uint_t(0) );
+      uint_t cellCounter( uint_t{0} );
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
          auto * boundaryHandling = blockIt->getData< BoundaryHandling_T >( boundaryHandlingID_ );
@@ -185,7 +185,7 @@ public:
 
       // mapped volume has to be - approximately - the same as the real volume
       real_t mappedVolume = real_c(cellCounter); // dx=1
-      WALBERLA_CHECK(std::fabs( mappedVolume - sphereVolume_ ) / sphereVolume_ <= real_t(0.1),
+      WALBERLA_CHECK(std::fabs( mappedVolume - sphereVolume_ ) / sphereVolume_ <= real_t{0.1},
                      "Mapped volume " << mappedVolume << " does not fit to real sphere volume " << sphereVolume_ << ".");
    }
 
@@ -318,16 +318,16 @@ int main( int argc, char **argv )
    ///////////////////////////
 
    bool writeVTK = false;
-   const real_t omega  = real_t(1);
-   const real_t dx     = real_t(1);
-   const real_t radius = real_t(5);
+   const real_t omega  = real_t{1};
+   const real_t dx     = real_t{1};
+   const real_t radius = real_t{5};
 
    ///////////////////////////
    // DATA STRUCTURES SETUP //
    ///////////////////////////
 
-   Vector3<uint_t> blocksPerDirection(uint_t(3), uint_t(1), uint_t(1));
-   Vector3<uint_t> cellsPerBlock(uint_t(20), uint_t(20), uint_t(20));
+   Vector3<uint_t> blocksPerDirection(uint_t{3}, uint_t{1}, uint_t{1});
+   Vector3<uint_t> cellsPerBlock(uint_t{20}, uint_t{20}, uint_t{20});
    Vector3<bool> periodicity(true, false, false);
 
    auto blocks = blockforest::createUniformBlockGrid( blocksPerDirection[0], blocksPerDirection[1], blocksPerDirection[2],
@@ -342,7 +342,7 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3<real_t>(real_t(0)), real_t(1),
+                                                                         Vector3<real_t>(real_t{0}), real_t{1},
                                                                          FieldGhostLayers, field::fzyx );
 
    // add flag field
@@ -360,7 +360,7 @@ int main( int argc, char **argv )
    mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
 
    // coupling
-   const real_t overlap = real_t( 1.5 ) * dx;
+   const real_t overlap = real_t{ 1.5 } * dx;
 
    // add particle field
    BlockDataID particleFieldID = field::addToStorage<lbm_mesapd_coupling::ParticleField_T>( blocks, "particle field", accessor->getInvalidUid(), field::fzyx, FieldGhostLayers );
@@ -384,9 +384,9 @@ int main( int argc, char **argv )
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
 
    // sphere positions for test scenarios
-   Vector3<real_t> positionInsideBlock(real_t(10), real_t(10), real_t(10));
-   Vector3<real_t> positionAtBlockBoarder(real_t(19), real_t(10), real_t(10));
-   Vector3<real_t> positionAtPeriodicBoarder(real_t(1), real_t(10), real_t(10));
+   Vector3<real_t> positionInsideBlock(real_t{10}, real_t{10}, real_t{10});
+   Vector3<real_t> positionAtBlockBoarder(real_t{19}, real_t{10}, real_t{10});
+   Vector3<real_t> positionAtPeriodicBoarder(real_t{1}, real_t{10}, real_t{10});
 
    //////////////////////////
    // MOVING BODY MAPPING //

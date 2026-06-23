@@ -49,28 +49,28 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
-   real_t uNin_SI = real_t(1.7); // m/s
-   real_t diameter_SI = real_t(0.00318); // m
-   //real_t density_SI = real_t(2500); // kg/m**3, not used
+   real_t uNin_SI = real_t{1.7}; // m/s
+   real_t diameter_SI = real_t{0.00318}; // m
+   //real_t density_SI = real_t{2500}; // kg/m**3, not used
 
-   real_t uNin       = real_t(0.02);
-   real_t diameter   = real_t(20);
-   real_t radius     = real_t(0.5) * diameter;
+   real_t uNin       = real_t{0.02};
+   real_t diameter   = real_t{20};
+   real_t radius     = real_t{0.5} * diameter;
    real_t density    = real_c(2.5);
 
    // these values have actually no influence here and are just computed for completeness
    [[maybe_unused]] real_t dx_SI = diameter_SI / diameter;
    [[maybe_unused]] real_t dt_SI = uNin / uNin_SI * dx_SI;
 
-   real_t impactAngle       = real_t(0);
-   real_t dt                = real_t(0.1); // = (1 / #sub steps)
-   real_t frictionCoeff_s   = real_t(0.8); // no influence
-   real_t frictionCoeff_d   = real_t(0.12); // paper: 0.125+-0.007
+   real_t impactAngle       = real_t{0};
+   real_t dt                = real_t{0.1}; // = (1 / #sub steps)
+   real_t frictionCoeff_s   = real_t{0.8}; // no influence
+   real_t frictionCoeff_d   = real_t{0.12}; // paper: 0.125+-0.007
    std::string filename     = "TangentialCollision.txt";
-   real_t collisionTime     = real_t(80);
-   real_t nu                = real_t(0.22); //Poissons ratio
+   real_t collisionTime     = real_t{80};
+   real_t nu                = real_t{0.22}; //Poissons ratio
    bool useVelocityVerlet   = false;
-   real_t restitutionCoeff  = real_t(0.83);
+   real_t restitutionCoeff  = real_t{0.83};
 
    for( int i = 1; i < argc; ++i )
    {
@@ -109,9 +109,9 @@ int main( int argc, char ** argv )
    auto sphereShape = ss->create<data::Sphere>( radius );
    ss->shapes[sphereShape]->updateMassAndInertia(density);
 
-   const real_t particleMass =  real_t(1) / ss->shapes[sphereShape]->getInvMass();
-   const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
-   const real_t kappa = real_t(2) * ( real_t(1) - nu ) / ( real_t(2) - nu ) ;    // from Thornton et al
+   const real_t particleMass =  real_t{1} / ss->shapes[sphereShape]->getInvMass();
+   const real_t Mij = particleMass; // * particleMass / ( real_t{2} * particleMass ); // Mij = M for sphere-wall collision
+   const real_t kappa = real_t{2} * ( real_t{1} - nu ) / ( real_t{2} - nu ) ;    // from Thornton et al
 
    real_t uTin = uNin * impactAngle;
 
@@ -150,7 +150,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_DEVEL("begin: vel = " << p.getLinearVelocity() << ", contact vel: " << getVelocityAtWFPoint(0,*accessor,p.getPosition() + Vec3(0,0,-radius)) );
 
    uint_t steps = 0;
-   real_t maxPenetration = real_t(0);
+   real_t maxPenetration = real_t{0};
    do
    {
       if(useVelocityVerlet) vvPreForce(0,*accessor);
@@ -182,7 +182,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("gamma_in = " << impactAngle);
    WALBERLA_LOG_INFO_ON_ROOT("gamma_out = " << reboundAngle);
 
-   WALBERLA_LOG_INFO_ON_ROOT("Thornton: sliding should occur if " << real_t(2) * impactAngle / ( frictionCoeff_d * ( real_t(1) + restitutionCoeff)) << " >= " << real_t(7) - real_t(1) / kappa );
+   WALBERLA_LOG_INFO_ON_ROOT("Thornton: sliding should occur if " << real_t{2} * impactAngle / ( frictionCoeff_d * ( real_t{1} + restitutionCoeff)) << " >= " << real_t{7} - real_t{1} / kappa );
    WALBERLA_LOG_INFO_ON_ROOT("Max penetration = " << maxPenetration << " -> " << maxPenetration / radius * 100. << "% of radius");
 
    std::ofstream file;

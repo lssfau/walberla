@@ -88,7 +88,7 @@ int main(int argc, char** argv)
    real_t bottomLayerOffsetFactor = bedGenerationConf.getParameter< real_t >("bottomLayerOffsetFactor");
 
    // BlockForest
-   math::AABB simulationDomain_SI(real_t(0.0), real_t(0.0), real_t(0.0), domainSize_SI[0], domainSize_SI[1],
+   math::AABB simulationDomain_SI(real_t{0.0}, real_t{0.0}, real_t{0.0}, domainSize_SI[0], domainSize_SI[1],
                                   domainSize_SI[2]);
    Vector3< bool > isPeriodic{ true, true, false };
 
@@ -100,8 +100,8 @@ int main(int argc, char** argv)
    data::ParticleAccessorWithBaseShape accessor(ps);
 
    // Init spheres
-   real_t minDiameter_SI = diameter_SI * real_t(0.9);
-   real_t maxDiameter_SI = diameter_SI * real_t(1.1);
+   real_t minDiameter_SI = diameter_SI * real_t{0.9};
+   real_t maxDiameter_SI = diameter_SI * real_t{1.1};
 
    math::AABB generationDomain_SI(simulationDomain_SI.xMin(), simulationDomain_SI.yMin(),
                                   simulationDomain_SI.zMin() + diameter_SI, simulationDomain_SI.xMax(),
@@ -112,15 +112,15 @@ int main(int argc, char** argv)
    {
       auto diameter = math::realRandom< real_t >(minDiameter_SI, maxDiameter_SI);
 
-      if (!domain->isContainedInLocalSubdomain(pt, real_t(0))) continue;
+      if (!domain->isContainedInLocalSubdomain(pt, real_t{0})) continue;
       auto p                       = ps->create();
       p->getPositionRef()          = pt;
-      p->getInteractionRadiusRef() = diameter * real_t(0.5);
+      p->getInteractionRadiusRef() = diameter * real_t{0.5};
       p->getBaseShapeRef()         = std::make_shared< data::Sphere >(p->getInteractionRadius());
       p->getBaseShapeRef()->updateMassAndInertia(densityParticle_SI);
 
-      p->setLinearVelocity(Vec3(real_t(0.1) * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
-                                real_t(0.1) * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
+      p->setLinearVelocity(Vec3(real_t{0.1} * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
+                                real_t{0.1} * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
                                 -initialVelocity_SI));
       p->getOwnerRef() = walberla::mpi::MPIManager::instance()->rank();
       p->getTypeRef()  = 0;
@@ -142,13 +142,13 @@ int main(int argc, char** argv)
    for (auto pt : grid_generator::HCPGrid(bottomLayerDomain_SI, Vec3(diameter_SI) * real_c(0.5), bottomLayerSpacing))
    {
       auto diameter = math::realRandom< real_t >(minDiameter_SI, maxDiameter_SI);
-      auto zCoord   = math::realRandom< real_t >(real_t(1e-10), diameter_SI * bottomLayerOffsetFactor);
+      auto zCoord   = math::realRandom< real_t >(real_t{1e-10}, diameter_SI * bottomLayerOffsetFactor);
       Vec3 position{ pt[0], pt[1] * bottomLayerYStretchFactor, zCoord };
 
-      if (!domain->isContainedInLocalSubdomain(position, real_t(0))) continue;
+      if (!domain->isContainedInLocalSubdomain(position, real_t{0})) continue;
       auto p                       = ps->create();
       p->getPositionRef()          = position;
-      p->getInteractionRadiusRef() = diameter * real_t(0.5);
+      p->getInteractionRadiusRef() = diameter * real_t{0.5};
       p->getBaseShapeRef()         = std::make_shared< data::Sphere >(p->getInteractionRadius());
       p->getBaseShapeRef()->updateMassAndInertia(densityParticle_SI);
 
@@ -157,8 +157,8 @@ int main(int argc, char** argv)
       mesa_pd::data::particle_flags::set(p->getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
    }
 
-   createPlane(*ps, simulationDomain_SI.minCorner(), Vec3(real_t(0), real_t(0), real_t(1)));
-   createPlane(*ps, simulationDomain_SI.maxCorner(), Vec3(real_t(0), real_t(0), real_t(-1)));
+   createPlane(*ps, simulationDomain_SI.minCorner(), Vec3(real_t{0}, real_t{0}, real_t{1}));
+   createPlane(*ps, simulationDomain_SI.maxCorner(), Vec3(real_t{0}, real_t{0}, real_t{-1}));
 
    // VTK
    auto vtkDomainOutput =
@@ -179,7 +179,7 @@ int main(int argc, char** argv)
    kernel::ExplicitEuler explicitEulerWithShape(dt_SI);
    kernel::LinearSpringDashpot dem(1);
    dem.setFrictionCoefficientDynamic(0, 0, frictionCoefficient);
-   real_t kappa = real_t(2) * (real_t(1) - poissonsRatio) / (real_t(2) - poissonsRatio); // from Thornton et al
+   real_t kappa = real_t{2} * (real_t{1} - poissonsRatio) / (real_t{2} - poissonsRatio); // from Thornton et al
 
    kernel::AssocToBlock assoc(forest);
    mesa_pd::mpi::ReduceProperty RP;
@@ -190,10 +190,10 @@ int main(int argc, char** argv)
    // initial sync
    SNN(*ps, forest, domain);
 
-   real_t averageVelocity     = real_t(0);
+   real_t averageVelocity     = real_t{0};
    uint_t currentNumParticles = 0;
-   real_t maxVelocity         = real_t(0);
-   real_t maxHeight           = real_t(0);
+   real_t maxVelocity         = real_t{0};
+   real_t maxHeight           = real_t{0};
 
    real_t linkedCellWidth = 1.01_r * maxDiameter_SI;
    data::LinkedCells linkedCells(domain->getUnionOfLocalAABBs().getExtended(linkedCellWidth), linkedCellWidth);
@@ -230,7 +230,7 @@ int main(int argc, char** argv)
             {
                if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
                {
-                  auto meff = real_t(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
+                  auto meff = real_t{1} / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
                   dem.setStiffnessAndDamping(0, 0, restitutionCoefficient, collisionTime_SI, kappa, meff);
                   dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(),
                       acd.getPenetrationDepth(), dt_SI);

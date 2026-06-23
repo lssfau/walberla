@@ -70,8 +70,8 @@ inline void reduce(data::Particle&& p, const VelocityCorrectionNotification::Par
 template<>
 inline void reset<VelocityCorrectionNotification>(data::Particle& p )
 {
-   p.setDv( Vec3(real_t(0)) );
-   p.setDw( Vec3(real_t(0)) );
+   p.setDv( Vec3(real_t{0}) );
+   p.setDw( Vec3(real_t{0}) );
 }
 
 }  // namespace mesa_pd

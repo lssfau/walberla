@@ -268,14 +268,14 @@ BlockForest::BlockForest( const uint_t process, const SetupBlockForest& forest, 
    BlockStorage( forest.getDomain(), forest.isXPeriodic(), forest.isYPeriodic(), forest.isZPeriodic() ),
 
    process_( process ), processIdBytes_( forest.getProcessIdBytes() ), depth_( forest.getDepth() ), treeIdDigits_( forest.getTreeIdDigits() ),
-   insertBuffersIntoProcessNetwork_( forest.insertBuffersIntoProcessNetwork() ), modificationStamp_( uint_t(0) ),
+   insertBuffersIntoProcessNetwork_( forest.insertBuffersIntoProcessNetwork() ), modificationStamp_( uint_t{0} ),
    recalculateBlockLevelsInRefresh_( true ), alwaysRebalanceInRefresh_( false ), allowMultipleRefreshCycles_( true ),
    reevaluateMinTargetLevelsAfterForcedRefinement_( false ),
    checkForEarlyOutInRefresh_( true ), checkForLateOutInRefresh_( true ), allowChangingDepth_( true ), checkForEarlyOutAfterLoadBalancing_( false ),
-   phantomBlockMigrationIterations_( uint_t(0) ),
-   nextCallbackBeforeBlockDataIsPackedHandle_( uint_t(0) ), nextCallbackBeforeBlockDataIsUnpackedHandle_( uint_t(0) ),
-   nextCallbackAfterBlockDataIsUnpackedHandle_( uint_t(0) ),
-   snapshotExists_( false ), snapshotDepth_( uint_t(0) ), snapshotBlockDataItems_( uint_t(0) )
+   phantomBlockMigrationIterations_( uint_t{0} ),
+   nextCallbackBeforeBlockDataIsPackedHandle_( uint_t{0} ), nextCallbackBeforeBlockDataIsUnpackedHandle_( uint_t{0} ),
+   nextCallbackAfterBlockDataIsUnpackedHandle_( uint_t{0} ),
+   snapshotExists_( false ), snapshotDepth_( uint_t{0} ), snapshotBlockDataItems_( uint_t{0} )
 {
    blockInformation_ = make_shared< BlockInformation >( *this );
 
@@ -343,14 +343,14 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
 
    BlockStorage( AABB(), false, false, false ),
 
-   process_( process ),  modificationStamp_( uint_t(0) ),
+   process_( process ),  modificationStamp_( uint_t{0} ),
    recalculateBlockLevelsInRefresh_( true ), alwaysRebalanceInRefresh_( false ), allowMultipleRefreshCycles_( true ),
    reevaluateMinTargetLevelsAfterForcedRefinement_( false ),
    checkForEarlyOutInRefresh_( true ), checkForLateOutInRefresh_( true ), allowChangingDepth_( true ), checkForEarlyOutAfterLoadBalancing_( false ),
-   phantomBlockMigrationIterations_( uint_t(0) ),
-   nextCallbackBeforeBlockDataIsPackedHandle_( uint_t(0) ), nextCallbackBeforeBlockDataIsUnpackedHandle_( uint_t(0) ),
-   nextCallbackAfterBlockDataIsUnpackedHandle_( uint_t(0) ),
-   snapshotExists_( false ), snapshotDepth_( uint_t(0) ), snapshotBlockDataItems_( uint_t(0) )
+   phantomBlockMigrationIterations_( uint_t{0} ),
+   nextCallbackBeforeBlockDataIsPackedHandle_( uint_t{0} ), nextCallbackBeforeBlockDataIsUnpackedHandle_( uint_t{0} ),
+   nextCallbackAfterBlockDataIsUnpackedHandle_( uint_t{0} ),
+   snapshotExists_( false ), snapshotDepth_( uint_t{0} ), snapshotBlockDataItems_( uint_t{0} )
 {
    blockInformation_ = make_shared< BlockInformation >( *this );
 
@@ -956,7 +956,7 @@ void BlockForest::refresh()
 
             WALBERLA_LOG_PROGRESS( "BlockForest refresh: performing phantom block redistribution/load balancing" );
 
-            uint_t iteration = uint_t(0);
+            uint_t iteration = uint_t{0};
             bool runAgain( true );
             while( runAgain )
             {
@@ -1053,7 +1053,7 @@ void BlockForest::createSnapshot( const std::vector<uint_t> & sendTo, const std:
 
    std::vector< uint_t > msgSize( recvFrom.size() );
 
-   for( uint_t i = uint_t(0); i != recvFrom.size(); ++i )
+   for( uint_t i = uint_t{0}; i != recvFrom.size(); ++i )
    {
       MPI_Irecv( static_cast< void * >(&(msgSize[i])), 1, MPITrait< uint_t >::type(), int_c(recvFrom[i]), 880, // snapshot = 115 110 097 112 115 104 111 116
                  mpi::MPIManager::instance()->comm(), &(request[i]) );
@@ -1142,7 +1142,7 @@ void BlockForest::createSnapshot( const std::vector<uint_t> & sendTo, const std:
    mpi::RecvBuffer processBuffer( buffer );
    snapshot_[ process_ ] = processBuffer;
 
-   for( uint_t i = uint_t(0); i != recvFrom.size(); ++i )
+   for( uint_t i = uint_t{0}; i != recvFrom.size(); ++i )
    {
       snapshot_[ recvFrom[i] ] = recvBuffer[i];
       recvBuffer[i].reset();
@@ -1258,7 +1258,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMappin
 
             WALBERLA_LOG_PROGRESS( "BlockForest refresh: performing phantom block redistribution/load balancing" );
 
-            uint_t iteration = uint_t(0);
+            uint_t iteration = uint_t{0};
             bool runAgain( true );
             while( runAgain )
             {
@@ -1566,14 +1566,14 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       if( block->getTargetLevel() > block->getLevel() )
       {
-         WALBERLA_ASSERT_EQUAL( block->getTargetLevel(), block->getLevel() + uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( block->getTargetLevel(), block->getLevel() + uint_t{1} );
          blocksAlreadyMarkedForRefinement.push_back( block.get() );
          mapping.push_back(1);
       }
       else
       {
          WALBERLA_ASSERT( block->getTargetLevel() == block->getLevel() ||
-                          ( block->getTargetLevel() + uint_t(1) ) == block->getLevel() );
+                          ( block->getTargetLevel() + uint_t{1} ) == block->getLevel() );
          minTargetLevelsCallback.emplace_back( block.get(), block->getTargetLevel() );
          mapping.push_back(0);
       }
@@ -1602,7 +1602,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          WALBERLA_ASSERT_EQUAL( m, 1 );
          WALBERLA_CHECK( it1 != blocksAlreadyMarkedForRefinement.end() );
          WALBERLA_CHECK_NOT_NULLPTR( *it1 );
-         WALBERLA_CHECK_EQUAL( (*it1)->getTargetLevel(), (*it1)->getLevel() + uint_t(1) );
+         WALBERLA_CHECK_EQUAL( (*it1)->getTargetLevel(), (*it1)->getLevel() + uint_t{1} );
          minTargetLevelsAllBlocks.emplace_back( *it1, (*it1)->getTargetLevel() );
          it1++;
       }
@@ -1621,7 +1621,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       WALBERLA_CHECK( bit != blocks_.end() );
       WALBERLA_CHECK_EQUAL( bit->second.get(), block );
       if( !allowMultipleRefreshCycles_ )
-         WALBERLA_CHECK_LESS_EQUAL( minTargetLevel, block->getLevel() + uint_t(1) );
+         WALBERLA_CHECK_LESS_EQUAL( minTargetLevel, block->getLevel() + uint_t{1} );
       if( !allowChangingDepth_ )
          WALBERLA_CHECK_LESS_EQUAL( minTargetLevel, depth_ );
 
@@ -1657,17 +1657,17 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
       if( allowMultipleRefreshCycles_ )
       {
-         if( minTargetLevel > ( level + uint_t(1) ) )
+         if( minTargetLevel > ( level + uint_t{1} ) )
          {
             additionalRefreshCycleRequired = true;
-            minTargetLevel = level + uint_t(1);
+            minTargetLevel = level + uint_t{1};
             minTargetLevels[id] = minTargetLevel;
          }
       }
 #ifndef NDEBUG
       else
       {
-         WALBERLA_ASSERT_LESS_EQUAL( minTargetLevel, level + uint_t(1) );
+         WALBERLA_ASSERT_LESS_EQUAL( minTargetLevel, level + uint_t{1} );
       }
 #endif
 
@@ -1702,7 +1702,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
    bool forcedRefinement( false );
    for( uint_t i = 0; i != depth_; ++i )
    {
-      WALBERLA_LOG_PROGRESS( "BlockForest refresh: - starting split iteration " << (i+uint_t(1)) );
+      WALBERLA_LOG_PROGRESS( "BlockForest refresh: - starting split iteration " << (i+uint_t{1}) );
       WALBERLA_LOG_PROGRESS( "BlockForest refresh:   + sending local block target levels to neighbors" );
 
       for( const auto &[neighborProcess, neighborTargetLevels] : localTargetLevelsForNeighbors )
@@ -1734,7 +1734,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
             const uint_t p = block->getNeighborProcess(n);
             const auto & id = block->getNeighborId(n);
 
-            uint_t neighborTargetLevel( uint_t(0) );
+            uint_t neighborTargetLevel( uint_t{0} );
             if( p == process_ )
             {
                WALBERLA_ASSERT( blocks_.find(id) != blocks_.end() );
@@ -1748,11 +1748,11 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
                neighborTargetLevel = targetLevelsFromNeighbors[p][id];
             }
 
-            if( neighborTargetLevel > (block->getTargetLevel() + uint_t(1)) )
+            if( neighborTargetLevel > (block->getTargetLevel() + uint_t{1}) )
             {
-               WALBERLA_ASSERT_EQUAL( neighborTargetLevel, block->getTargetLevel() + uint_t(2) );
+               WALBERLA_ASSERT_EQUAL( neighborTargetLevel, block->getTargetLevel() + uint_t{2} );
 
-               const uint_t targetLevel = block->getTargetLevel() + uint_t(1);
+               const uint_t targetLevel = block->getTargetLevel() + uint_t{1};
                block->setTargetLevel( targetLevel );
                forcedRefinement = true;
 
@@ -1795,14 +1795,14 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
       WALBERLA_ASSERT( minTargetLevels.find(id) != minTargetLevels.end() );
 
-      if( block->getLevel() > uint_t(0) && block->getTargetLevel() == block->getLevel() && minTargetLevels[id] < block->getLevel() )
+      if( block->getLevel() > uint_t{0} && block->getTargetLevel() == block->getLevel() && minTargetLevels[id] < block->getLevel() )
       {
          const auto fatherId = id.getFatherId();
          std::map< BlockID, uint_t > octetMembers;
          for( uint_t n = 0; n != block->getNeighborhoodSize(); ++n )
          {
             const auto & nId = block->getNeighborId(n);
-            if( getLevelFromBlockId( nId ) > uint_t(0) && nId.getFatherId() == fatherId )
+            if( getLevelFromBlockId( nId ) > uint_t{0} && nId.getFatherId() == fatherId )
                octetMembers[ nId ] = block->getNeighborProcess(n);
          }
          if( octetMembers.size() == uint_c(7) )
@@ -1819,7 +1819,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
    for( uint_t i = 0; i != depth_; ++i )
    {
-      WALBERLA_LOG_PROGRESS( "BlockForest refresh: - starting merge iteration " << (i+uint_t(1)) );
+      WALBERLA_LOG_PROGRESS( "BlockForest refresh: - starting merge iteration " << (i+uint_t{1}) );
       WALBERLA_LOG_PROGRESS( "BlockForest refresh:   + sending local block target levels to neighbors" );
 
       for( const auto &[neighborProcess, targetLevels] : localTargetLevelsForNeighbors )
@@ -1855,7 +1855,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
             const uint_t np = block->getNeighborProcess(n);
             const auto & nId = block->getNeighborId(n);
 
-            uint_t neighborTargetLevel( uint_t(0) );
+            uint_t neighborTargetLevel( uint_t{0} );
             if( np == process_ )
             {
                WALBERLA_ASSERT( blocks_.find(nId) != blocks_.end() );
@@ -1875,7 +1875,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
             intentToMerge[ process_ ].insert( block->getId() );
       }
 
-      WALBERLA_ASSERT_LESS_EQUAL( intentToMerge.size(), uint_t(1) );
+      WALBERLA_ASSERT_LESS_EQUAL( intentToMerge.size(), uint_t{1} );
       WALBERLA_ASSERT_EQUAL( ranksToRecvFrom.size(), localTargetLevelsForNeighbors.size() );
 
       WALBERLA_LOG_PROGRESS( "BlockForest refresh:   + tell neighbors about blocks that can get merged" );
@@ -1907,7 +1907,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          {
             WALBERLA_ASSERT( octetMember.find(id) != octetMember.end() );
             const std::map< BlockID, uint_t > & octetMembers = octetMember[id];
-            WALBERLA_ASSERT( octetMembers.size() == uint_t(7) );
+            WALBERLA_ASSERT( octetMembers.size() == uint_t{7} );
             bool mergePossible( true );
             for( auto oit = octetMembers.begin(); mergePossible && oit != octetMembers.end(); ++oit )
             {
@@ -1922,16 +1922,16 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
                WALBERLA_ASSERT_NOT_NULLPTR( blocks_[id] );
                auto & block = blocks_[id];
 
-               WALBERLA_ASSERT( block->getTargetLevel() > uint_t(0) );
+               WALBERLA_ASSERT( block->getTargetLevel() > uint_t{0} );
                WALBERLA_ASSERT( block->getTargetLevel() == block->getLevel() );
                WALBERLA_ASSERT( minTargetLevels.find(id) != minTargetLevels.end() );
                WALBERLA_ASSERT( minTargetLevels[id] < block->getTargetLevel() );
 
-               const uint_t targetLevel = block->getTargetLevel() - uint_t(1);
+               const uint_t targetLevel = block->getTargetLevel() - uint_t{1};
                block->setTargetLevel( targetLevel );
 
 #ifdef NDEBUG
-               if( i < ( depth_ - uint_t(1) ) )
+               if( i < ( depth_ - uint_t{1} ) )
                {
 #endif
                   for( uint_t n = 0; n != block->getNeighborhoodSize(); ++n )
@@ -1974,8 +1974,8 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       WALBERLA_ASSERT_NOT_NULLPTR( it.second );
       const auto & block = it.second;
       WALBERLA_ASSERT( block->getTargetLevel() == block->getLevel() ||
-                       block->getTargetLevel() == ( block->getLevel() - uint_t(1) ) ||
-                       block->getTargetLevel() == ( block->getLevel() + uint_t(1) ) );
+                       block->getTargetLevel() == ( block->getLevel() - uint_t{1} ) ||
+                       block->getTargetLevel() == ( block->getLevel() + uint_t{1} ) );
       WALBERLA_ASSERT( minTargetLevels.find( block->getId() ) != minTargetLevels.end() );
       WALBERLA_ASSERT( block->getTargetLevel() >= minTargetLevels[ block->getId() ] );
       for( uint_t n = 0; n != block->getNeighborhoodSize(); ++n )
@@ -1996,7 +1996,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
             WALBERLA_ASSERT( targetLevelsFromNeighbors[np].find(nId) != targetLevelsFromNeighbors[np].end() );
             ntl = targetLevelsFromNeighbors[np][nId];
          }
-         WALBERLA_ASSERT( tl == ntl || tl == (ntl + uint_t(1)) || tl == (ntl - uint_t(1)) );
+         WALBERLA_ASSERT( tl == ntl || tl == (ntl + uint_t{1}) || tl == (ntl - uint_t{1}) );
       }
    }
 #endif
@@ -2053,7 +2053,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
             if( sourceProcess != process_ )
             {
                if( numberOfBlocksToRecv.find( sourceProcess ) == numberOfBlocksToRecv.end() )
-                  numberOfBlocksToRecv[sourceProcess] = uint_t(1);
+                  numberOfBlocksToRecv[sourceProcess] = uint_t{1};
                else
                   ++(numberOfBlocksToRecv[sourceProcess]);
             }
@@ -2068,7 +2068,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    for( auto const &[sourceProcess, size] : numberOfBlocksToRecv )
    {
-      WALBERLA_ASSERT_GREATER( size, uint_t(0) );
+      WALBERLA_ASSERT_GREATER( size, uint_t{0} );
       recvBufferSizes[ sourceProcess ].resize( size );
    }
 
@@ -2098,7 +2098,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       auto & targetProcesses = block->getTargetProcess();
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
-         WALBERLA_ASSERT( targetProcesses.size() == uint_t(1) || targetProcesses.size() == uint_t(8) );
+         WALBERLA_ASSERT( targetProcesses.size() == uint_t{1} || targetProcesses.size() == uint_t{8} );
          for(auto targetProcess : targetProcesses)
             if( targetProcess != process_ )
                ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >(targetProcess) );
@@ -2166,7 +2166,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       auto & targetProcesses = block->getTargetProcess();
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
-         WALBERLA_ASSERT( targetProcesses.size() == uint_t(1) || targetProcesses.size() == uint_t(8) );
+         WALBERLA_ASSERT( targetProcesses.size() == uint_t{1} || targetProcesses.size() == uint_t{8} );
          blocksToPack.emplace_back( block.get(), std::vector< mpi::SendBuffer >( targetProcesses.size() ) );
       }
    }
@@ -2196,9 +2196,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       if( block->targetBlockHasTheSameSize() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
          WALBERLA_ASSERT( buffers[0].isEmpty() );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{1} );
 
          buffers[0] << id << id;
 
@@ -2212,9 +2212,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       }
       else if( block->targetBlockIsLarger() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
          WALBERLA_ASSERT( buffers[0].isEmpty() );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{1} );
 
          auto fid = id.getFatherId();
          buffers[0] << id << fid;
@@ -2230,8 +2230,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       else
       {
          WALBERLA_ASSERT( block->targetBlockIsSmaller() );
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(8) );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(8) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{8} );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{8} );
          for( uint_t c = 0; c != 8; ++c )
          {
             WALBERLA_ASSERT( buffers[c].isEmpty() );
@@ -2258,9 +2258,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       if( block->targetBlockHasTheSameSize() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(1) );
-         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{1} );
+         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t{1} );
 
          for(auto & dataItem : blockDataItem_)
          {
@@ -2271,9 +2271,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       }
       else if( block->targetBlockIsLarger() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(1) );
-         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{1} );
+         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t{1} );
 
          for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
          {
@@ -2297,13 +2297,13 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       else
       {
          WALBERLA_ASSERT( block->targetBlockIsSmaller() );
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(8) );
-         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(8) );
-         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t(8) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{8} );
+         WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t{8} );
+         WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t{8} );
 
          for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
          {
-            for( auto c = uint_t(0); c != uint_t(8); ++c )
+            for( auto c = uint_t{0}; c != uint_t{8}; ++c )
             {
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block, targetState[c] );
                if( blockDataHandlingWrapper )
@@ -2357,7 +2357,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - sending block data" );
 
-   i = uint_t(0);
+   i = uint_t{0};
    for( auto &[targetProcess, buffers] : processesToSendTo )
    {
       WALBERLA_ASSERT( sendBufferSizes.find( targetProcess ) != sendBufferSizes.end() );
@@ -2455,7 +2455,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       auto & requests = blockDataRecvRequests[ sourceProcess ];
       WALBERLA_ASSERT_EQUAL( buffers.size(), sizes.size() );
       WALBERLA_ASSERT_EQUAL( requests.size(), sizes.size() );
-      for( i = uint_t(0); i != buffers.size(); ++i )
+      for( i = uint_t{0}; i != buffers.size(); ++i )
       {
          buffers[i].resize( sizes[i] );
          MPI_Irecv( static_cast< void * >( buffers[i].ptr() ), int_c( sizes[i] ), MPITrait< mpi::RecvBuffer::ElementType >::type(),
@@ -2546,8 +2546,8 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          {
             auto & bufferPtrs = blocksToUnpack[ block ];
             if( bufferPtrs.empty() )
-               bufferPtrs.resize( uint_t(8), std::make_pair( Set<SUID>::emptySet(), static_cast< mpi::RecvBuffer * >(nullptr) ) );
-            WALBERLA_ASSERT_EQUAL( sId.getUsedBits(), rId.getUsedBits() + uint_t(3) );
+               bufferPtrs.resize( uint_t{8}, std::make_pair( Set<SUID>::emptySet(), static_cast< mpi::RecvBuffer * >(nullptr) ) );
+            WALBERLA_ASSERT_EQUAL( sId.getUsedBits(), rId.getUsedBits() + uint_t{3} );
             bufferPtrs[ sId.getBranchId() ] = std::make_pair( state, &buffer );
          }
       }
@@ -2619,7 +2619,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       if( phantom->sourceBlockHasTheSameSize() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
 
          for(auto & dataItem : blockDataItem_)
          {
@@ -2644,7 +2644,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       }
       else if( phantom->sourceBlockIsLarger() )
       {
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(1) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{1} );
 
          for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
          {
@@ -2692,7 +2692,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       else
       {
          WALBERLA_ASSERT( phantom->sourceBlockIsSmaller() );
-         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(8) );
+         WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t{8} );
 
          for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
          {
@@ -2717,7 +2717,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                   addBlockData( block, dataItem->getId(), nullptr );
             }
             // fill with sent data
-            for( uint_t c = uint_t(0); c != uint_t(8); ++c )
+            for( uint_t c = uint_t{0}; c != uint_t{8}; ++c )
             {
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block, buffers[c].first );
                if( blockDataHandlingWrapper )
@@ -2765,13 +2765,13 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
    const uint_t blockIdBytes = getBlockIdBytes();
 
-   uint_t dataSize = uint_t(2) + blocks_.size() * ( blockIdBytes + suidBytes ) + uint_t(2) + neighborhood_.size() * processIdBytes_;
+   uint_t dataSize = uint_t{2} + blocks_.size() * ( blockIdBytes + suidBytes ) + uint_t{2} + neighborhood_.size() * processIdBytes_;
    if( MPIManager::instance()->rank() == 0 )
    {
       dataSize += internal::FILE_HEADER_SIZE; // header
       ++dataSize; // number of SUIDs
       for(const auto & suid : suidMap)
-         dataSize += uint_t(1) + uint_c( suid.first.getIdentifier().length() );
+         dataSize += uint_t{1} + uint_c( suid.first.getIdentifier().length() );
    }
 
    std::vector< uint8_t > processDataBuffer( dataSize );
@@ -2788,7 +2788,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
       for(const auto & suid : suidMap)
       {
-         for( uint_t i = uint_t(0); i != suids.size(); ++i )
+         for( uint_t i = uint_t{0}; i != suids.size(); ++i )
          {
             if( suid.second[i] )
             {
@@ -2823,8 +2823,8 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    }
 
    // number of blocks (can be '0' -> buffer process!)
-   uintToByteArray( uint_c( blocks_.size() ), processDataBuffer, offset, uint_t(2) );
-   offset += uint_t(2);
+   uintToByteArray( uint_c( blocks_.size() ), processDataBuffer, offset, uint_t{2} );
+   offset += uint_t{2};
 
    for( auto &[id, block] : blocks_ )
    {
@@ -2855,8 +2855,8 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    }
 
    // process neighborhood
-   uintToByteArray( uint_c( neighborhood_.size() ), processDataBuffer, offset, uint_t(2) );
-   offset += uint_t(2);
+   uintToByteArray( uint_c( neighborhood_.size() ), processDataBuffer, offset, uint_t{2} );
+   offset += uint_t{2};
 
    for(uint_t neighbor : neighborhood_)
    {
@@ -2893,7 +2893,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
       uint_t exscanResult;
       MPI_Exscan( &dataSize, &exscanResult, 1, MPITrait<uint_t>::type(), MPI_SUM, MPIManager::instance()->comm() );
       if( MPIManager::instance()->rank() == 0 )
-         exscanResult = uint_t( 0 );
+         exscanResult = uint_t{ 0 };
 
       MPI_Datatype arraytype;
       MPI_Type_contiguous( int_c( dataSize ), MPITrait< uint8_t >::type(), &arraytype );

@@ -86,7 +86,7 @@ namespace force_model {
 *                       equilibrium distribution, commonTerms = direction-independent terms calculated by function
 *                       "directionIndependentTerms" (see 9), w = lattice model weighting factor, (cx,cy,cz) = lattice
 *                       direction, omega = relaxation parameter that corresponds to the lattice viscosity
-*   11. "bool setConstantBodyForceIfPossible( const Vector3<real_t> & forceDensity, const uint_t level = uint_t(0) )":
+*   11. "bool setConstantBodyForceIfPossible( const Vector3<real_t> & forceDensity, const uint_t level = uint_t{0} )":
 *        -> Must return true if a constant force density can be set. In that case, the force density passed in must be set.
 *           'level' is the grid level 'forceDensity' corresponds to.
 *
@@ -124,16 +124,16 @@ struct NoDirectionIndependentTerms {};
 /// Returns the body force density for level 'targetLevel' given the body force density 'forceDensity_level' on level 'level'
 inline Vector3< real_t > levelDependentBodyForce( const uint_t targetLevel, const Vector3< real_t > & forceDensity_level, const uint_t level )
 {
-   const real_t powTwoTarget = real_c( uint_t(1) << targetLevel );
-   const real_t powTwoLevel  = real_c( uint_t(1) << level );
+   const real_t powTwoTarget = real_c( uint_t{1} << targetLevel );
+   const real_t powTwoLevel  = real_c( uint_t{1} << level );
    return forceDensity_level * ( powTwoLevel / powTwoTarget );
 }
 
 /// Returns the acceleration for level 'targetLevel' given the acceleration 'acceleration_level' on level 'level'
 inline Vector3< real_t > levelDependentAcceleration( const uint_t targetLevel, const Vector3< real_t > & acceleration_level, const uint_t level )
 {
-   const real_t powTwoTarget = real_c( uint_t(1) << targetLevel );
-   const real_t powTwoLevel  = real_c( uint_t(1) << level );
+   const real_t powTwoTarget = real_c( uint_t{1} << targetLevel );
+   const real_t powTwoLevel  = real_c( uint_t{1} << level );
    return acceleration_level * ( powTwoLevel / powTwoTarget );
 }
 
@@ -167,9 +167,9 @@ public:
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t /*w*/,
-                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const { return real_t(0); }
+                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const { return real_t{0}; }
 
-   bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t(0) ) { return false; }
+   bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t{0} ) { return false; }
 };
 
 
@@ -188,9 +188,9 @@ public:
 
    static const bool constant = true;
 
-   SimpleConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t(0) ) :
+   SimpleConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t{0} ) :
       bodyForceDensity_( bodyForceDensity ), level_( level ) {}
-   SimpleConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t(0) ) :
+   SimpleConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t{0} ) :
       bodyForceDensity_(vx,vy,vz), level_( level ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << bodyForceDensity_ << level_; }
@@ -204,7 +204,7 @@ public:
    }
 
    /// "forceDensity_level" is the level that corresponds to "acceleration"
-   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       bodyForceDensity_ = levelDependentBodyForce( level_, bodyForceDensity, forceDensity_level );
    }
@@ -222,11 +222,11 @@ public:
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t w,
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
-      return real_t(3.0) * w * ( cx * bodyForceDensity_[0] + cy * bodyForceDensity_[1] + cz * bodyForceDensity_[2] );
+      return real_t{3.0} * w * ( cx * bodyForceDensity_[0] + cy * bodyForceDensity_[1] + cz * bodyForceDensity_[2] );
    }
 
    /// "forceDensity_level" is the level that corresponds to "acceleration"
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       reset( bodyForceDensity, forceDensity_level );
       return true;
@@ -250,13 +250,13 @@ private:
    template< typename LatticeModel_T >
    struct DirectionIndependentTerm
    {
-      static real_t get( const real_t ) { return real_t(0); }
+      static real_t get( const real_t ) { return real_t{0}; }
    };
    template< typename LatticeModel_T >
    requires( LatticeModel_T::compressible )
    struct DirectionIndependentTerm< LatticeModel_T >
    {
-      static real_t get( const real_t rho ) { return real_t(1) / rho; }
+      static real_t get( const real_t rho ) { return real_t{1} / rho; }
    };
 
    template< typename LatticeModel_T >
@@ -322,7 +322,7 @@ public:
                - EquilibriumDistribution< LatticeModel_T >::get( cx, cy, cz, w, velocity, rho );
    }
 
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t(0) ) { return false; }
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t{0} ) { return false; }
 
 private:
 
@@ -347,9 +347,9 @@ public:
 
    static const bool constant = true;
 
-   LuoConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t(0) ) :
+   LuoConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t{0} ) :
       bodyForceDensity_( bodyForceDensity ), level_( level ) {}
-   LuoConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t(0) ) :
+   LuoConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t{0} ) :
       bodyForceDensity_(vx,vy,vz), level_( level ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << bodyForceDensity_ << level_; }
@@ -363,7 +363,7 @@ public:
    }
 
    /// "forceDensity_level" is the level that corresponds to "bodyForceDensity"
-   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       bodyForceDensity_ = levelDependentBodyForce( level_, bodyForceDensity, forceDensity_level );
    }
@@ -382,11 +382,11 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForceDensity_ );
+      return real_t{3} * w * ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * bodyForceDensity_ );
    }
 
    /// "forceDensity_level" is the level that corresponds to "bodyForceDensity"
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       reset( bodyForceDensity, forceDensity_level );
       return true;
@@ -442,10 +442,10 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * forceDensity(x,y,z) );
+      return real_t{3} * w * ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * forceDensity(x,y,z) );
    }
 
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t(0) ) { return false; }
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t{0} ) { return false; }
 
 private:
 
@@ -470,9 +470,9 @@ public:
 
    static const bool constant = true;
 
-   GuoConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t(0) ) :
+   GuoConstant( const Vector3< real_t > & bodyForceDensity, const uint_t level = uint_t{0} ) :
       bodyForceDensity_( bodyForceDensity ), level_( level ) {}
-   GuoConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t(0) ) :
+   GuoConstant( const real_t vx, const real_t vy, const real_t vz, const uint_t level = uint_t{0} ) :
       bodyForceDensity_(vx,vy,vz), level_( level ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << bodyForceDensity_ << level_; }
@@ -486,7 +486,7 @@ public:
    }
 
    /// "forceDensity_level" is the level that corresponds to "bodyForceDensity"
-   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   void reset( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       bodyForceDensity_ = levelDependentBodyForce( level_, bodyForceDensity, forceDensity_level );
    }
@@ -500,13 +500,13 @@ public:
    {
       if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
-         const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
+         const real_t one_over_d  = real_t{1} / real_t(LatticeModel_T::Stencil::D);
 
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * bodyForceDensity_ );
          return (tensorProduct( velocity, bodyForceDensity_ ) +
                  tensorProduct( bodyForceDensity_, velocity ) -
-                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
-                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
+                 common * (real_t{2}*one_over_d) ) * real_t{0.5} * ( real_t{2} - omega )
+                + common * ( one_over_d * ( real_t{2} - omega_bulk ) );
       }
       else
       {
@@ -523,26 +523,26 @@ public:
       const Vector3<real_t> c( cx, cy, cz );
       if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = real_t{1} / real_t{3};
 
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
-         return real_t(3.0) * w * ( bodyForceDensity_ * c + real_t(1.5) * common);
+         return real_t{3.0} * w * ( bodyForceDensity_ * c + real_t{1.5} * common);
       }
       else if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >)
       {
-         return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
-                                    ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForceDensity_ ) +
-                                    ( omega - omega_odd ) * real_t(0.5) * (c * bodyForceDensity_) );
+         return real_t{3.0} * w * ( ( real_t{1} - real_t{0.5} * omega ) *
+                                    ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * bodyForceDensity_ ) +
+                                    ( omega - omega_odd ) * real_t{0.5} * (c * bodyForceDensity_) );
       }
       else
       {
-         return real_t(3.0) * w * ( real_t(1) - real_t(0.5) * omega ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForceDensity_ );
+         return real_t{3.0} * w * ( real_t{1} - real_t{0.5} * omega ) *
+                                  ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * bodyForceDensity_ );
       }
    }
 
    /// "forceDensity_level" is the level that corresponds to "bodyForceDensity"
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t(0) )
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > & bodyForceDensity, const uint_t forceDensity_level = uint_t{0} )
    {
       reset( bodyForceDensity, forceDensity_level );
       return true;
@@ -593,13 +593,13 @@ public:
    {
       if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
-         const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
+         const real_t one_over_d  = real_t{1} / real_t(LatticeModel_T::Stencil::D);
 
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * forceDensity(x,y,z) );
          return (tensorProduct( velocity, forceDensity(x,y,z) ) +
                  tensorProduct( forceDensity(x,y,z), velocity ) -
-                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
-                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
+                 common * (real_t{2}*one_over_d) ) * real_t{0.5} * ( real_t{2} - omega )
+                + common * ( one_over_d * ( real_t{2} - omega_bulk ) );
       }
       else
       {
@@ -616,25 +616,25 @@ public:
       const Vector3<real_t> c( cx, cy, cz );
       if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_third  = real_t{1} / real_t{3};
 
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
-         return real_t(3.0) * w * ( forceDensity(x,y,z) * c + real_t(1.5) * common);
+         return real_t{3.0} * w * ( forceDensity(x,y,z) * c + real_t{1.5} * common);
       }
       else if (std::is_same_v< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >)
       {
-         return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
-                                    ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * forceDensity(x,y,z) ) +
-                                    ( omega - omega_odd ) * real_t(0.5) * (c * forceDensity(x,y,z)) );
+         return real_t{3.0} * w * ( ( real_t{1} - real_t{0.5} * omega ) *
+                                    ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * forceDensity(x,y,z) ) +
+                                    ( omega - omega_odd ) * real_t{0.5} * (c * forceDensity(x,y,z)) );
       }
       else
       {
-         return real_t(3.0) * w * ( real_t(1) - real_t(0.5) * omega ) *
-                                  ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * forceDensity(x,y,z) );
+         return real_t{3.0} * w * ( real_t{1} - real_t{0.5} * omega ) *
+                                  ( ( c - velocity + ( real_t{3} * ( c * velocity ) * c ) ) * forceDensity(x,y,z) );
       }
    }
 
-   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t(0) ) { return false; }
+   bool setConstantBodyForceIfPossible( const Vector3< real_t > &, const uint_t = uint_t{0} ) { return false; }
 
 private:
 
@@ -659,7 +659,7 @@ public:
    static const bool constant = true;
 
    Correction( const BlockDataID & previousRhoVelocityId ) :
-      forceDensity_( real_t(0) ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(nullptr) {}
+      forceDensity_( real_t{0} ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(nullptr) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << forceDensity_ << previousRhoVelocityId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> forceDensity_ >> previousRhoVelocityId_; }
@@ -690,7 +690,7 @@ public:
       return w * ( cx * commonTerm[0] + cy * commonTerm[1] + cz * commonTerm[2] );
    }
 
-   bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t(0) ) { return false; }
+   bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t{0} ) { return false; }
 
 private:
 

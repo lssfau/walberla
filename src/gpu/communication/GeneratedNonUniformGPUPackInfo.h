@@ -96,11 +96,11 @@ if( constantDataExchange() )
 {
       auto & blockMap = bufferSize_[ sender ];
       auto & sizeMap  = blockMap[ dir ];
-      auto dirEntry = sizeMap.find( uint_t(0) );
+      auto dirEntry = sizeMap.find( uint_t{0} );
       if( dirEntry == sizeMap.end() )
-         sizeMap[ uint_t(0) ] = sizeAfter - sizeBefore;
+         sizeMap[ uint_t{0} ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) )
+         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t{0} ], (sizeAfter - sizeBefore) )
 }
 #endif
 }
@@ -146,11 +146,11 @@ if( constantDataExchange() )
 {
       auto & blockMap = bufferSize_[ fineSender ];
       auto & sizeMap  = blockMap[ dir ];
-      auto dirEntry = sizeMap.find( uint_t(0) );
+      auto dirEntry = sizeMap.find( uint_t{0} );
       if( dirEntry == sizeMap.end() )
-         sizeMap[ uint_t(0) ] = sizeAfter - sizeBefore;
+         sizeMap[ uint_t{0} ] = sizeAfter - sizeBefore;
       else
-         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t(0) ], (sizeAfter - sizeBefore) )
+         WALBERLA_ASSERT_EQUAL( sizeMap[ uint_t{0} ], (sizeAfter - sizeBefore) )
 }
 #endif
 }

@@ -61,7 +61,7 @@ class SurfaceGeometryHandler
    // explicitly use either D2Q9 or D3Q27 here, as the geometry operations require (or are most accurate with) the full
    // neighborhood;
    using Stencil_T =
-      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+      typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
    using Communication_T = blockforest::SimpleCommunication< Stencil_T >;
    using StateSweep      = BlockStateDetectorSweep< FlagField_T >; // used in friend classes
 
@@ -85,7 +85,7 @@ class SurfaceGeometryHandler
 
       obstacleFlagIDSet_ = freeSurfaceBoundaryHandling_->getFlagInfo().getObstacleIDSet();
 
-      if (LatticeModel_T::Stencil::D == uint_t(2))
+      if (LatticeModel_T::Stencil::D == uint_t{2})
       {
          WALBERLA_LOG_INFO_ON_ROOT(
             "IMPORTANT REMARK: You are using a D2Q9 stencil in SurfaceGeometryHandler. Be aware that the "

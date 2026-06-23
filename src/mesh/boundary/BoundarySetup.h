@@ -46,7 +46,7 @@ namespace walberla::mesh {
 class BoundarySetup
 {
 public:
-   using VoxelizationField = field::GhostLayerField<uint8_t, uint_t(1)>;
+   using VoxelizationField = field::GhostLayerField<uint8_t, uint_t{1}>;
 
    using DistanceFunction = std::function<real_t (const Vector3<real_t> &)>;
 
@@ -106,7 +106,7 @@ void BoundarySetup::setDomainCells( const BlockDataID boundaryHandlingId, const 
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, boundaryHandling->getFlagField()->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
                                  << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" )
 
-      const uint8_t domainValue = domainLocation == INSIDE ? uint8_t(1) : uint8_t(0);
+      const uint8_t domainValue = domainLocation == INSIDE ? uint8_t{1} : uint8_t{0};
 
       std::vector<Cell> domainCells;
 
@@ -139,7 +139,7 @@ void BoundarySetup::setFlag( const BlockDataID flagFieldID, field::FlagUID flagU
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, flagField->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
                                  << numGhostLayers_ << " but your flag field has only " << flagField->nrOfGhostLayers() << " ghost layers!" )
 
-      const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
+      const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t{0} : uint8_t{1};
 
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
          if (voxelizationField->get(x, y, z) != domainValue) { flagField->addFlag(x, y, z, flag); }
@@ -166,7 +166,7 @@ void BoundarySetup::setBoundaryFlag(const BlockDataID flagFieldID, field::FlagUI
                                    << flagField->nrOfGhostLayers() << " ghost layers!")
 
       // get where the (fluid) domain is located (on the inside/outside of the mesh)
-      const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
+      const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t{0} : uint8_t{1};
 
       // get the cell interval covering the whole block
       const CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
@@ -217,7 +217,7 @@ void BoundarySetup::setBoundaries( const BlockDataID boundaryHandlingID, const B
       WALBERLA_CHECK_LESS_EQUAL( numGhostLayers_, boundaryHandling->getFlagField()->nrOfGhostLayers(), "You want to use mesh boundary setup with " \
                                  << numGhostLayers_ << " but your flag field has only " << boundaryHandling->getFlagField()->nrOfGhostLayers() << " ghost layers!" )
 
-      const uint8_t domainValue   = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
+      const uint8_t domainValue   = boundaryLocation == INSIDE ? uint8_t{0} : uint8_t{1};
 
       const CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
 

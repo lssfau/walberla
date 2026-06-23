@@ -52,8 +52,8 @@ int main( int argc, char ** argv )
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
 
-   auto smallSphere = ss->create<data::Sphere>( real_t(2) );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2500));
+   auto smallSphere = ss->create<data::Sphere>( real_t{2} );
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2500});
 
    mesa_pd::data::ParticleAccessorWithShape ac(ps, ss);
 
@@ -73,7 +73,7 @@ int main( int argc, char ** argv )
    sd.setStiffness(0, 0, real_t(8.11e6));
    sd.setDampingN (0, 0, real_t(6.86e1));
    sd.setDampingT (0, 0, real_t(6.86e1));
-   sd.setFriction (0, 0, real_t(1.2));
+   sd.setFriction (0, 0, real_t{1.2});
 
    collision_detection::AnalyticContactDetection contact;
    kernel::DoubleCast       double_cast;
@@ -88,14 +88,14 @@ int main( int argc, char ** argv )
       contact.getPenetrationDepth());
    std::for_each(ps->begin(), ps->end(), [](data::Particle&& p){ WALBERLA_LOG_DEVEL(p); });
    WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), -ps->getForce(1) );
-   WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), Vec3(1,1,1).getNormalized() * ((std::sqrt(real_t(12)) - 4) * sd.getStiffness(0, 0)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), Vec3(1,1,1).getNormalized() * ((std::sqrt(real_t{12}) - 4) * sd.getStiffness(0, 0)) );
 
-   auto cor  = real_t(0.87);
-   auto ct   = real_t(0.17);
-   auto meff = real_t(0.65);
+   auto cor  = real_t{0.87};
+   auto ct   = real_t{0.17};
+   auto meff = real_t{0.65};
    sd.setParametersFromCOR(0, 0, cor, ct, meff);
    //WALBERLA_CHECK_FLOAT_EQUAL(sd.getStiffness(0,0), (math::pi*math::pi - std::log(cor)*std::log(cor)) / (ct*ct) * meff);
-   //WALBERLA_CHECK_FLOAT_EQUAL(sd.getDampingN(0,0),  -real_t(2)*std::log(cor)/ct*meff);
+   //WALBERLA_CHECK_FLOAT_EQUAL(sd.getDampingN(0,0),  -real_t{2}*std::log(cor)/ct*meff);
    WALBERLA_CHECK_FLOAT_EQUAL(sd.calcCoefficientOfRestitution(0, 0, meff), cor);
    WALBERLA_CHECK_FLOAT_EQUAL(sd.calcCollisionTime(0, 0, meff), ct);
 

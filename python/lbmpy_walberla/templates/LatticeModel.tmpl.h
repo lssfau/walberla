@@ -109,12 +109,12 @@ public:
     public:
         Sweep( BlockDataID _pdfsID ) : pdfsID(_pdfsID) {}
 
-        //void stream       ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-        void collide      ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-        void streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
-        void stream       ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
+        //void stream       ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+        void collide      ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+        void streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
+        void stream       ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} );
 
-        void operator() ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+        void operator() ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
         {
             streamCollide( block, numberOfGhostLayersToInclude );
         }
@@ -161,9 +161,9 @@ private:
         {
             {{dtype}} level_scale_factor(1);
             if( currentLevel < targetLevel )
-               level_scale_factor = {{dtype}}( uint_t(1) << ( targetLevel - currentLevel ) );
+               level_scale_factor = {{dtype}}( uint_t{1} << ( targetLevel - currentLevel ) );
             else // currentLevel > targetLevel
-               level_scale_factor = {{dtype}}(1) / {{dtype}}( uint_t(1) << ( currentLevel - targetLevel ) );
+               level_scale_factor = {{dtype}}(1) / {{dtype}}( uint_t{1} << ( currentLevel - targetLevel ) );
 
             {% for scalingType, name, expression in refinement_scaling_info -%}
             {% if scalingType == 'normal' %}

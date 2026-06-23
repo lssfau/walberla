@@ -85,7 +85,7 @@ FieldIndexing3D<T> FieldIndexing3D<T>::interval( const GPUField<T> & f, const Ce
    zOffset = yOffset * f.yAllocSize();
    fOffset = zOffset * f.zAllocSize();
 
-   char * data = (char*)f.pitchedPtr().ptr;
+   char * data = reinterpret_cast< char * >(f.pitchedPtr().ptr);
 
    // position data according to ci
    cell_idx_t const gl = cell_idx_c( f.nrOfGhostLayers() );
@@ -94,7 +94,7 @@ FieldIndexing3D<T> FieldIndexing3D<T>::interval( const GPUField<T> & f, const Ce
            ( ci.zMin() + gl ) * cell_idx_c(zOffset);
 
 
-   dim3 const idxDim( (unsigned int)ci.xSize(), (unsigned int)ci.ySize(), (unsigned int)ci.zSize() );
+   dim3 const idxDim( static_cast< unsigned int >(ci.xSize()), static_cast< unsigned int >(ci.ySize()), static_cast< unsigned int >(ci.zSize()) );
    unsigned int const bx = std::min( preferredBlockDim_.x, idxDim.x );
    unsigned int const by = std::min( preferredBlockDim_.y, idxDim.y );
    unsigned int const bz = std::min( preferredBlockDim_.z, idxDim.z );

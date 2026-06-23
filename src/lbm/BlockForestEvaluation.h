@@ -106,24 +106,24 @@ private:
 
    uint64_t allFineCells( const shared_ptr< StructuredBlockForest > & blocks ) const
    {
-      uint64_t c( uint64_t(0) );
+      uint64_t c( uint64_t{0} );
       if( Pseudo2D )
       {
-         for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
-            c += cells_.numberOfCells(i) * uint64_c( math::uintPow4( blocks->getNumberOfLevels() - uint_t(1) - i ) );
+         for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
+            c += cells_.numberOfCells(i) * uint64_c( math::uintPow4( blocks->getNumberOfLevels() - uint_t{1} - i ) );
       }
       else
       {
-         for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
-            c += cells_.numberOfCells(i) * uint64_c( math::uintPow8( blocks->getNumberOfLevels() - uint_t(1) - i ) );
+         for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
+            c += cells_.numberOfCells(i) * uint64_c( math::uintPow8( blocks->getNumberOfLevels() - uint_t{1} - i ) );
       }
       return c;
    }
 
    real_t space( const shared_ptr< StructuredBlockForest > & blocks, const uint_t level ) const
    {
-      return ( Pseudo2D ? ( real_c(100) * real_c( cells_.numberOfCells(level) * uint64_c( math::uintPow4( blocks->getNumberOfLevels() - uint_t(1) - level ) ) ) ) :
-                          ( real_c(100) * real_c( cells_.numberOfCells(level) * uint64_c( math::uintPow8( blocks->getNumberOfLevels() - uint_t(1) - level ) ) ) ) ) /
+      return ( Pseudo2D ? ( real_c(100) * real_c( cells_.numberOfCells(level) * uint64_c( math::uintPow4( blocks->getNumberOfLevels() - uint_t{1} - level ) ) ) ) :
+                          ( real_c(100) * real_c( cells_.numberOfCells(level) * uint64_c( math::uintPow8( blocks->getNumberOfLevels() - uint_t{1} - level ) ) ) ) ) /
              real_c( allFineCells( blocks ) );
    }
 
@@ -134,8 +134,8 @@ private:
 
    real_t totalWorkload( const shared_ptr< StructuredBlockForest > & blocks ) const
    {
-      real_t work( real_t(0) );
-      for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
+      real_t work( real_t{0} );
+      for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
          work += real_c( cells_.numberOfCells(i) * uint64_c( math::uintPow2(i) ) );
       return work;
    }
@@ -147,11 +147,11 @@ private:
 
    real_t allFineWorkload( const shared_ptr< StructuredBlockForest > & blocks ) const
    {
-      real_t work( real_t(0) );
-      for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
-         work += real_c( cells_.numberOfCells(i) * uint64_c( Pseudo2D ? math::uintPow4( blocks->getNumberOfLevels() - uint_t(1) - i ) :
-                                                                        math::uintPow8( blocks->getNumberOfLevels() - uint_t(1) - i ) ) ) *
-                 real_c( math::uintPow2( blocks->getNumberOfLevels() - uint_t(1) ) );
+      real_t work( real_t{0} );
+      for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
+         work += real_c( cells_.numberOfCells(i) * uint64_c( Pseudo2D ? math::uintPow4( blocks->getNumberOfLevels() - uint_t{1} - i ) :
+                                                                        math::uintPow8( blocks->getNumberOfLevels() - uint_t{1} - i ) ) ) *
+                 real_c( math::uintPow2( blocks->getNumberOfLevels() - uint_t{1} ) );
       return work;
    }
 
@@ -212,19 +212,19 @@ void BlockForestEvaluationBase< CellCounter_T, FluidCellCounter_T, Pseudo2D >::r
    auto blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'BlockForestEvaluationBase' for a block storage object that doesn't exist anymore" );
 
-   std::vector< uint_t > processBlocks( blocks->getNumberOfLevels() + uint_t(1), uint_t(0) );
+   std::vector< uint_t > processBlocks( blocks->getNumberOfLevels() + uint_t{1}, uint_t{0} );
 
    for( auto block = blocks->begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks->end(); ++block )
    {
       const auto level = blocks->getLevel( *block );
 
-      processBlocks[ level ] += uint_t(1);
-      processBlocks.back()   += uint_t(1);
+      processBlocks[ level ] += uint_t{1};
+      processBlocks.back()   += uint_t{1};
    }
 
-   blockStatistics_.resize( blocks->getNumberOfLevels() + uint_t(1) );
+   blockStatistics_.resize( blocks->getNumberOfLevels() + uint_t{1} );
 
-   for( uint_t i = uint_t(0); i < (blocks->getNumberOfLevels() + uint_t(1)); ++i )
+   for( uint_t i = uint_t{0}; i < (blocks->getNumberOfLevels() + uint_t{1}); ++i )
    {
       math::DistributedSample sample;
 
@@ -280,7 +280,7 @@ void BlockForestEvaluationBase< CellCounter_T, FluidCellCounter_T, Pseudo2D >::g
    integerProperties[ "zCells" ] = int_c( blocks->getNumberOfZCellsPerBlock() );
 
    realProperties[ "cells" ] = double_c( cells_.numberOfCells() );
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
       realProperties[ "refinementCellsReduction" ] = double_c( allFineCells( blocks ) ) / real_c( cells_.numberOfCells() );
    realProperties[ "fluidCells" ] = double_c( fluidCells_.numberOfCells() );
    stringProperties[ "pseudo2D" ] = ( Pseudo2D ? "yes" : "no" );
@@ -294,9 +294,9 @@ void BlockForestEvaluationBase< CellCounter_T, FluidCellCounter_T, Pseudo2D >::g
    integerProperties[ "minBlocksPerProcess" ] = int_c( blockStatistics_.back().min );
    integerProperties[ "maxBlocksPerProcess" ] = int_c( blockStatistics_.back().max );
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
    {
-      for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
+      for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
       {
          std::ostringstream blocksOnLevel_i;
          std::ostringstream cells_i;
@@ -353,26 +353,26 @@ std::string BlockForestEvaluationBase< CellCounter_T, FluidCellCounter_T, Pseudo
        << "\n   + AABB:        " << blocks->getDomain()
        << "\n   + forest size: " << blocks->getXSize() << " x " << blocks->getYSize() << " x " << blocks->getZSize() << " blocks";
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
       oss << " (on the coarsest grid)";
 
    oss << "\n   + periodicity: " << ( blocks->isXPeriodic() ? "true" : "false" ) << " x "
                                  << ( blocks->isYPeriodic() ? "true" : "false" ) << " x "
                                  << ( blocks->isZPeriodic() ? "true" : "false" );
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
       oss << "\n   + levels:      " << blocks->getNumberOfLevels();
 
    oss << "\n   + blocks:      " << counter_.numberOfBlocks();
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
       oss << " (in total on all grids)";
 
    oss << "\n   + block size:  " << blocks->getNumberOfXCellsPerBlock() << " x " << blocks->getNumberOfYCellsPerBlock() << " x "
                                  << blocks->getNumberOfZCellsPerBlock() << " cells"
        << "\n   + cells:       " << cells_.numberOfCells();
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
    {
       oss << " (" << allFineCells(blocks) << " if everything were fine -> data reduction by factor of "
           << ( real_c( allFineCells(blocks) ) / real_c( cells_.numberOfCells() ) ) << ")";
@@ -395,11 +395,11 @@ std::string BlockForestEvaluationBase< CellCounter_T, FluidCellCounter_T, Pseudo
           << "\n   + relStdDev = " << blockStatistics_.back().relStdDev;
    }
 
-   if( blocks->getNumberOfLevels() > uint_t(1) )
+   if( blocks->getNumberOfLevels() > uint_t{1} )
    {
       oss << "\n- distribution of space/memory/work to different grid levels:";
 
-      for( uint_t i = uint_t(0); i < blocks->getNumberOfLevels(); ++i )
+      for( uint_t i = uint_t{0}; i < blocks->getNumberOfLevels(); ++i )
       {
          oss << "\n   + level " << i
              << "\n      - " << counter_.numberOfBlocks(i) << " blocks ..."

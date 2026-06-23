@@ -41,7 +41,7 @@ real_t intersectionRatioBisection( const Body & body,
 
    while( qDelta * qDelta * sqDirectionLength >= sqEpsilon )
    {
-      qDelta *= real_t( 0.5 );
+      qDelta *= real_t{ 0.5 };
       Vector3<real_t> p = fluidPoint + q * direction;
       if( geometry::contains( body, p ) )
       {
@@ -53,8 +53,8 @@ real_t intersectionRatioBisection( const Body & body,
       }
    }
 
-   WALBERLA_ASSERT_GREATER_EQUAL( q, real_t( 0 ) );
-   WALBERLA_ASSERT_LESS_EQUAL( q, real_t( 1 ) );
+   WALBERLA_ASSERT_GREATER_EQUAL( q, real_t{ 0 } );
+   WALBERLA_ASSERT_LESS_EQUAL( q, real_t{ 1 } );
 
    return q;
 }

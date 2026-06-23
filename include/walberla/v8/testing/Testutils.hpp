@@ -49,36 +49,36 @@ namespace walberla::v8::testing
 /**
  * @defgroup v8core-testutils Testsuite Utilities (v8::testing)
  * @brief Unit testing toolkit for waLBerla
- * 
+ *
  * This toolkit of test utilities is designed to facilitate unit testing
  * of the waLBerla framework.
- * 
+ *
  * See also [Testing in the V8 core contributors guide](#v8-contrib-testing).
- * 
+ *
  * ## Creating a Test Executable
- * 
+ *
  * Tests are grouped into test executables. We thematically group as many tests
  * as sensible into a single executable to accelerate compilation times.
  * Test executables follow the naming scheme `TestX.cpp`.
  * To register a test executable with CMake, use the `waLBerla_add_test_executable`
  * function:
- * 
+ *
  * ```
  * waLBerla_add_test_executable( TestX TestX.cpp )
  * ```
- * 
+ *
  * ## Registering Tests
- * 
+ *
  * Every test executable must include the following scaffolding, where the tests are registered
  * with a `TestsRunner` instance:
- * 
+ *
  * ```
  * #include "walberla/v8/Testing.hpp"
- * 
+ *
  * int main(int argc, char** argv) {
  *    walberla::mpi::Environment env{ argc, argv };
- * 
- *    return walberla::v8::testing::TestsRunner({ 
+ *
+ *    return walberla::v8::testing::TestsRunner({
  *         // TEST FUNCTIONS
  *         {"MyTest1", &myTest1},
  *         {"MyTest2", &myTest2},
@@ -86,21 +86,21 @@ namespace walberla::v8::testing
  *    }).run(argc, argv);
  * }
  * ```
- * 
+ *
  * The individual tests (`MyTest1`, `MyTest2`, ...) are zero-argument `void` functions.
  * To automatically run the tests, they must further be registered with `CTest` in the `CMakeLists.txt`,
  * using `walberla_v8_add_tests`:
- * 
+ *
  * ```
  * walberla_v8_add_tests( TestX IDS MyTest1 MyTest2 ... )
  * ```
- * 
+ *
  * Here, `TestX` is the name of the test application, the `IDS` are the test names as passed to the `TestsRunner`.
- * 
+ *
  * ## Writing Tests
- * 
+ *
  * Tests should be written using the assertion functions from this module, listed below.
- * 
+ *
  */
 
 namespace printing
@@ -189,7 +189,8 @@ class TestsRunner
                       << "    in function `" << loc.function_name() << "`" << "\n";
             auto logMessage = errStream.str();
 
-            walberla::Abort::instance()->abort(logMessage, err.location().file_name(), (int) err.location().line());
+            walberla::Abort::instance()->abort(logMessage, err.location().file_name(),
+                                               static_cast< int >(err.location().line()));
             return 1;
          }
       }
@@ -205,7 +206,7 @@ class TestsRunner
     */
    int run(int argc, char** argv)
    {
-      const std::span< char* > args(argv, size_t(argc));
+      const std::span< char* > args(argv, static_cast< size_t >(argc));
 
       if (args.size() < 2)
       {
@@ -224,10 +225,11 @@ class TestsRunner
 /**
  * @brief Create and obtain a unique temporary directory.
  * @ingroup v8core-testutils
- * 
+ *
  * @note To override the location where temporary directories are placed,
  *       set the `TMPDIR` environment variable.
- *       See also [`std::filesystem::temp_directory_path`](https://en.cppreference.com/w/cpp/filesystem/temp_directory_path.html)
+ *       See also
+ * [`std::filesystem::temp_directory_path`](https://en.cppreference.com/w/cpp/filesystem/temp_directory_path.html)
  */
 inline std::filesystem::path tmp_dir()
 {
@@ -259,12 +261,12 @@ inline void assert_false(bool cond, const std::source_location loc = std::source
 /**
  * @brief Check if the given callback function raises an expected exception type.
  * @ingroup v8core-testutils
- * 
+ *
  * Example:
- * 
+ *
  * ```
- * throws< std::invalid_argument >([&](){ 
- *    // code that should throw ... 
+ * throws< std::invalid_argument >([&](){
+ *    // code that should throw ...
  * });
  * ```
  */
@@ -421,13 +423,13 @@ void assert_range_inequal(R1 actual, R2 desired, const std::source_location loc 
 /**
  * @brief Floating-point near-equality assertions with given tolerances
  * @ingroup v8core-testutils
- * 
+ *
  * For given `atol` and `rtol` values, `is_close(actual, desired)` succeeds according to:
  * ```
  * tolerance = atol + rtol * abs(desired);
  * success = abs(actual - desired) <= tolerance;
  * ```
- * 
+ *
  * Example:
  * ```
  * with_tolerance(1e-12, 1e-6).assert_close(actual, desired);
@@ -510,7 +512,7 @@ class with_tolerance
    {
       bool do_fail{ false };
 
-      for (auto& actualValue: actual)
+      for (auto& actualValue : actual)
       {
          do_fail = do_fail || !this->isclose(actualValue, desired);
 
@@ -567,9 +569,7 @@ class with_tolerance
  */
 template< std::floating_point T >
 inline void assert_close(T actual, T desired, const std::source_location loc = std::source_location::current())
-{
-   with_tolerance(0.0, 1e-7).assert_close(actual, desired, loc);
-}
+{ with_tolerance(0.0, 1e-7).assert_close(actual, desired, loc); }
 
 /**
  * See `with_tolerance::assert_allclose`.
@@ -579,9 +579,7 @@ template< std::ranges::range R1, std::ranges::range R2 >
             std::same_as< std::ranges::range_value_t< R1 >, std::ranges::range_value_t< R2 > >)
 void assert_allclose(const R1& actual, const R2& desired,
                      const std::source_location loc = std::source_location::current())
-{
-   with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, loc);
-}
+{ with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, loc); }
 
 /**
  * See `with_tolerance::assert_allclose`.
@@ -590,9 +588,7 @@ template< std::ranges::sized_range R1 >
    requires(std::floating_point< std::ranges::range_value_t< R1 > >)
 void assert_allclose(const R1& actual, std::ranges::range_value_t< R1 > desired,
                      const std::source_location loc = std::source_location::current())
-{
-   with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, loc);
-}
+{ with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, loc); }
 
 /**
  * See `with_tolerance::assert_allclose`.
@@ -600,8 +596,6 @@ void assert_allclose(const R1& actual, std::ranges::range_value_t< R1 > desired,
 template< memory::IFieldView TFieldView >
 void assert_allclose(const TFieldView& actual, const TFieldView& desired, bool withGhostLayers = false,
                      const std::source_location loc = std::source_location::current())
-{
-   with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, withGhostLayers, loc);
-}
+{ with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, withGhostLayers, loc); }
 
 } // namespace walberla::v8::testing

@@ -67,7 +67,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, cell );
          math::seedRandomGenerator( static_cast<unsigned int>( (p[0] * real_t(blocks->getNumberOfXCells()) + p[1]) * real_t(blocks->getNumberOfYCells()) + p[2] ) );
-         u->get( cell ) = math::realRandom( real_t(-10), real_t(10) );
+         u->get( cell ) = math::realRandom( real_t{-10}, real_t{10} );
          sum += u->get( cell );
       }
    }
@@ -126,7 +126,7 @@ void checkProlongateRestrict( const shared_ptr< StructuredBlockStorage > & block
       
       coarse->set( orig );
       c2f( &*block );
-      coarse->set( real_t(0.0) );
+      coarse->set( real_t{0.0} );
       f2c( &*block );
       
       CellInterval xyz = coarse->xyzSize();
@@ -151,7 +151,7 @@ int main( int argc, char** argv )
    mpi::Environment env( argc, argv );
 
    const uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
-   if( processes != uint_t(1) && processes != uint_t(8) )
+   if( processes != uint_t{1} && processes != uint_t{8} )
       WALBERLA_ABORT( "The number of processes must be equal to 1 or 8!" );
 
    logging::Logging::printHeaderOnStream();
@@ -161,22 +161,22 @@ int main( int argc, char** argv )
    for( int i = 1; i < argc; ++i )
       if( std::strcmp( argv[i], "--shortrun" ) == 0 ) shortrun = true;
 
-   const uint_t numLvl = shortrun ? uint_t(3) : uint_t(5);
+   const uint_t numLvl = shortrun ? uint_t{3} : uint_t{5};
 
-   const uint_t xBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t zBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
-   const uint_t xCells = uint_t(128)/xBlocks;
-   const uint_t yCells = uint_t(128)/yBlocks;
-   const uint_t zCells = uint_t(128)/zBlocks;
+   const uint_t xBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t yBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t zBlocks = ( processes == uint_t{1} ) ? uint_t{1} : uint_t{2};
+   const uint_t xCells = uint_t{128}/xBlocks;
+   const uint_t yCells = uint_t{128}/yBlocks;
+   const uint_t zCells = uint_t{128}/zBlocks;
    const real_t xSize = real_t(xCells * xBlocks);
    const real_t ySize = real_t(yCells * yBlocks);
    const real_t zSize = real_t(zCells * zBlocks);
-   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t(1) );
-   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t(1) );
-   const real_t dz =  zSize / real_c( zBlocks * zCells + uint_t(1) );
-   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0.5) * dz,
-                                                                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, zSize - real_t(0.5) * dz ),
+   const real_t dx = xSize / real_c( xBlocks * xCells + uint_t{1} );
+   const real_t dy = ySize / real_c( yBlocks * yCells + uint_t{1} );
+   const real_t dz =  zSize / real_c( zBlocks * zCells + uint_t{1} );
+   auto blocks = blockforest::createUniformBlockGrid( math::AABB( real_t{0.5} * dx, real_t{0.5} * dy, real_t{0.5} * dz,
+                                                                  xSize - real_t{0.5} * dx, ySize - real_t{0.5} * dy, zSize - real_t{0.5} * dz ),
                                                       xBlocks, yBlocks, zBlocks,
                                                       xCells, yCells, zCells,
                                                       true,
@@ -187,25 +187,25 @@ int main( int argc, char** argv )
 
    // run the main test
 
-   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID uId = field::addToStorage< PdeField_T >( blocks, "u", real_t{0}, field::fzyx, uint_t{1} );
 
    initU( blocks, uId );
 
-   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t(0), field::fzyx, uint_t(1) );
+   BlockDataID fId = field::addToStorage< PdeField_T >( blocks, "f", real_t{0}, field::fzyx, uint_t{1} );
 
-   SweepTimeloop timeloop( blocks, uint_t(1) );
+   SweepTimeloop timeloop( blocks, uint_t{1} );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(2) / ( blocks->dz() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
-   weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::W ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );
-   weights[ Stencil_T::idx[ stencil::T ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
-   weights[ Stencil_T::idx[ stencil::B ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t{2} / ( blocks->dx() * blocks->dx() ) + real_t{2} / ( blocks->dy() * blocks->dy() ) + real_t{2} / ( blocks->dz() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::N ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::S ] ] = real_t{-1} / ( blocks->dy() * blocks->dy() );
+   weights[ Stencil_T::idx[ stencil::E ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::W ] ] = real_t{-1} / ( blocks->dx() * blocks->dx() );
+   weights[ Stencil_T::idx[ stencil::T ] ] = real_t{-1} / ( blocks->dx() * blocks->dz() );
+   weights[ Stencil_T::idx[ stencil::B ] ] = real_t{-1} / ( blocks->dx() * blocks->dz() );
 
    auto solverDCA = walberla::make_shared<pde::VCycles< Stencil_T > >( blocks, uId, fId, weights,
-                                                                       shortrun ? uint_t(1) : uint_t(20),                                              // iterations
+                                                                       shortrun ? uint_t{1} : uint_t{20},                                              // iterations
                                                                        numLvl,                                               							// levels
                                                                        3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
                                                                        pde::ResidualNorm< Stencil_T >( blocks->getBlockStorage(), uId, fId, weights ), // residual norm functor
@@ -220,7 +220,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], real_t{0.1});
       }
 
       vtk::writeDomainDecomposition( blocks );
@@ -234,15 +234,15 @@ int main( int argc, char** argv )
 
    BlockDataID stencilId = field::addToStorage< StencilField_T >( blocks, "w" );
 
-   SweepTimeloop timeloop2( blocks, uint_t(1) );
+   SweepTimeloop timeloop2( blocks, uint_t{1} );
 
    copyWeightsToStencilField( blocks, weights, stencilId );
 
-   pde::CoarsenStencilFieldsDCA<Stencil_T>  coarsenWithDCA( blocks, numLvl, uint_t(2));		// Set up DCA object with operator order 2 (Laplace)
+   pde::CoarsenStencilFieldsDCA<Stencil_T>  coarsenWithDCA( blocks, numLvl, uint_t{2});		// Set up DCA object with operator order 2 (Laplace)
 
    solverDCA = walberla::make_shared<pde::VCycles< Stencil_T, decltype(coarsenWithDCA) > >(
 		   	   	   	   	   	   	   	   	   	   	   	   	   	  blocks, uId, fId, stencilId, coarsenWithDCA,
-                                                              shortrun ? uint_t(1) : uint_t(20),                                              	// iterations
+                                                              shortrun ? uint_t{1} : uint_t{20},                                              	// iterations
                                                               numLvl,                                               							// levels
                                                               3, 3, 10,                                                                       	// pre-smoothing, post-smoothing, coarse-grid iterations
                                                               pde::ResidualNormStencilField< Stencil_T >( blocks->getBlockStorage(), uId, fId, stencilId ), // residual norm functor
@@ -257,7 +257,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], real_t{0.1});
       }
    }
 
@@ -266,13 +266,13 @@ int main( int argc, char** argv )
    clearField<PdeField_T>( blocks, uId);
    initU( blocks, uId );
 
-   SweepTimeloop timeloop3( blocks, uint_t(1) );
+   SweepTimeloop timeloop3( blocks, uint_t{1} );
 
-   pde::CoarsenStencilFieldsGCA<Stencil_T>  coarsenWithGCA( blocks, numLvl, real_t(2));		// Set up GCA object with overrelaxation factor 2 (only valid for Poisson equation)
+   pde::CoarsenStencilFieldsGCA<Stencil_T>  coarsenWithGCA( blocks, numLvl, real_t{2});		// Set up GCA object with overrelaxation factor 2 (only valid for Poisson equation)
 
    auto solverGCA = walberla::make_shared<pde::VCycles< Stencil_T, decltype(coarsenWithGCA) > >(
 		                                                      blocks, uId, fId, stencilId, coarsenWithGCA,
-                                                              shortrun ? uint_t(1) : uint_t(20),                                            // iterations
+                                                              shortrun ? uint_t{1} : uint_t{20},                                            // iterations
                                                               numLvl,                                               						// levels
                                                               3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
                                                               pde::ResidualNormStencilField< Stencil_T >( blocks->getBlockStorage(), uId, fId, stencilId ), // residual norm functor
@@ -287,7 +287,7 @@ int main( int argc, char** argv )
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
-         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+         WALBERLA_CHECK_LESS(convrate[i], real_t{0.1});
       }
    }
 

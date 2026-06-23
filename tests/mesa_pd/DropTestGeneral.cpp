@@ -59,9 +59,9 @@ int main( int argc, char ** argv )
    mesa_pd::data::ParticleAccessorWithShape accessor(ps, ss);
 
    auto p                       = ps->create();
-   p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
+   p->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{0});
    p->getInteractionRadiusRef() = std::numeric_limits<real_t>::infinity();
-   p->getShapeIDRef()           = ss->create<data::HalfSpace>( Vec3(real_t(0), real_t(0), real_t(1)) );
+   p->getShapeIDRef()           = ss->create<data::HalfSpace>( Vec3(real_t{0}, real_t{0}, real_t{1}) );
    p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    p->getTypeRef()              = 0;
    using namespace walberla::mesa_pd::data::particle_flags;
@@ -70,45 +70,45 @@ int main( int argc, char ** argv )
    set(p->getFlagsRef(), GLOBAL);
 
    auto sp                       = ps->create();
-   sp->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0.01));
-   sp->getInteractionRadiusRef() = real_t(1);
-   sp->getShapeIDRef()           = ss->create<data::Sphere>( real_t(0.004) );
-   ss->shapes[sp->getShapeID()]->updateMassAndInertia(real_t(2707));
+   sp->getPositionRef()          = Vec3(real_t{0}, real_t{0}, real_t{0.01});
+   sp->getInteractionRadiusRef() = real_t{1};
+   sp->getShapeIDRef()           = ss->create<data::Sphere>( real_t{0.004} );
+   ss->shapes[sp->getShapeID()]->updateMassAndInertia(real_t{2707});
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[sp->getShapeID()]->getInvMass());
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[sp->getShapeID()]->getInvInertiaBF());
    sp->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    sp->getTypeRef()              = 0;
 
    auto bx                       = ps->create();
-   bx->getPositionRef()          = Vec3(real_t(1), real_t(0), real_t(0.01));
-   bx->getInteractionRadiusRef() = real_t(1);
+   bx->getPositionRef()          = Vec3(real_t{1}, real_t{0}, real_t{0.01});
+   bx->getInteractionRadiusRef() = real_t{1};
    bx->getShapeIDRef()           = ss->create<data::Box>( Vec3(real_t(0.008*0.8)) );
-   ss->shapes[bx->getShapeID()]->updateMassAndInertia(real_t(2707));
+   ss->shapes[bx->getShapeID()]->updateMassAndInertia(real_t{2707});
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[bx->getShapeID()]->getInvMass());
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[bx->getShapeID()]->getInvInertiaBF());
    bx->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    bx->getTypeRef()              = 0;
 
    auto el                       = ps->create();
-   el->getPositionRef()          = Vec3(real_t(2), real_t(0), real_t(0.01));
-   el->getInteractionRadiusRef() = real_t(1);
-   el->getShapeIDRef()           = ss->create<data::Ellipsoid>( Vec3(real_t(0.004)) );
-   ss->shapes[el->getShapeID()]->updateMassAndInertia(real_t(2707));
+   el->getPositionRef()          = Vec3(real_t{2}, real_t{0}, real_t{0.01});
+   el->getInteractionRadiusRef() = real_t{1};
+   el->getShapeIDRef()           = ss->create<data::Ellipsoid>( Vec3(real_t{0.004}) );
+   ss->shapes[el->getShapeID()]->updateMassAndInertia(real_t{2707});
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[el->getShapeID()]->getInvMass());
    WALBERLA_LOG_DEVEL_VAR(ss->shapes[el->getShapeID()]->getInvInertiaBF());
    el->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    el->getTypeRef()              = 0;
 
    int64_t simulationSteps = 200000;
-   real_t dt = real_t(0.00001);
+   real_t dt = real_t{0.00001};
 
    // Init kernels
    kernel::SemiImplicitEuler             implEuler( dt );
    kernel::SpringDashpot                 dem(1);
-   auto meff = real_t(1.0) / ss->shapes[sp->getShapeID()]->getInvMass();
-   dem.setParametersFromCOR(0,0,real_t(0.9), dt * real_t(20), meff);
+   auto meff = real_t{1.0} / ss->shapes[sp->getShapeID()]->getInvMass();
+   dem.setParametersFromCOR(0,0,real_t{0.9}, dt * real_t{20}, meff);
    dem.setDampingT (0, 0, real_t(6.86e1));
-   dem.setFriction (0, 0, real_t(1.2));
+   dem.setFriction (0, 0, real_t{1.2});
    WALBERLA_LOG_DEVEL_VAR(dem.getStiffness(0,0));
    WALBERLA_LOG_DEVEL_VAR(dem.getDampingN(0,0));
    WALBERLA_LOG_DEVEL_VAR(dem.calcCollisionTime(0,0,meff));
@@ -125,8 +125,8 @@ int main( int argc, char ** argv )
                           [&](const size_t idx, auto& ac)
       {
          ac.setForce(idx,
-                     Vec3(real_t(0), real_t(0), real_t(-9.81)) *
-                     real_t(1.0) / ss->shapes[ac.getShapeID(idx)]->getInvMass() );
+                     Vec3(real_t{0}, real_t{0}, real_t{-9.81}) *
+                     real_t{1.0} / ss->shapes[ac.getShapeID(idx)]->getInvMass() );
       }, accessor);
 
       ps->forEachParticlePairHalf(false,
@@ -138,13 +138,13 @@ int main( int argc, char ** argv )
          {
             if (ss->shapes[ac.getShapeID(idx1)]->getShapeType() == data::HalfSpace::SHAPE_TYPE)
             {
-               meff = real_t(1.0) / ss->shapes[ac.getShapeID(idx2)]->getInvMass();
+               meff = real_t{1.0} / ss->shapes[ac.getShapeID(idx2)]->getInvMass();
             } else
             {
-               meff = real_t(1.0) / ss->shapes[ac.getShapeID(idx1)]->getInvMass();
+               meff = real_t{1.0} / ss->shapes[ac.getShapeID(idx1)]->getInvMass();
             }
 
-            dem.setParametersFromCOR(0,0,real_t(0.9), dt * real_t(20), meff);
+            dem.setParametersFromCOR(0,0,real_t{0.9}, dt * real_t{20}, meff);
             dem(gcd.getIdx1(), gcd.getIdx2(), ac, gcd.getContactPoint(), gcd.getContactNormal(), gcd.getPenetrationDepth());
          }
       },
@@ -160,9 +160,9 @@ int main( int argc, char ** argv )
 //         WALBERLA_LOG_DEVEL_VAR(sp->getPosition()[2]);
    }
 
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(sp->getPosition()[2], real_t(0.004),     real_t(1e-7));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(bx->getPosition()[2], real_t(0.004*0.8), real_t(1e-7));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(el->getPosition()[2], real_t(0.004),     real_t(1e-7));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(sp->getPosition()[2], real_t{0.004},     real_t{1e-7});
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(bx->getPosition()[2], real_t(0.004*0.8), real_t{1e-7});
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(el->getPosition()[2], real_t{0.004},     real_t{1e-7});
 
    return EXIT_SUCCESS;
 }

@@ -43,7 +43,7 @@ void testCell( cell_idx_t x, cell_idx_t y, cell_idx_t z )
    WALBERLA_CHECK_EQUAL( c[1], y );
    WALBERLA_CHECK_EQUAL( c[2], z );
 
-   WALBERLA_CHECK_EQUAL( c.positiveIndicesOnly(), x >= cell_idx_t(0) && y >= cell_idx_t(0) && z >= cell_idx_t(0) );
+   WALBERLA_CHECK_EQUAL( c.positiveIndicesOnly(), x >= cell_idx_t{0} && y >= cell_idx_t{0} && z >= cell_idx_t{0} );
 
    Cell sum = c + c;
    WALBERLA_CHECK_EQUAL( sum.x(), x + x );
@@ -54,9 +54,9 @@ void testCell( cell_idx_t x, cell_idx_t y, cell_idx_t z )
    WALBERLA_CHECK_EQUAL( tmp, sum );
 
    Cell difference = c - c; // NOLINT: represent zero difference
-   WALBERLA_CHECK_EQUAL( difference.x(), cell_idx_t(0) );
-   WALBERLA_CHECK_EQUAL( difference.y(), cell_idx_t(0) );
-   WALBERLA_CHECK_EQUAL( difference.z(), cell_idx_t(0) );
+   WALBERLA_CHECK_EQUAL( difference.x(), cell_idx_t{0} );
+   WALBERLA_CHECK_EQUAL( difference.y(), cell_idx_t{0} );
+   WALBERLA_CHECK_EQUAL( difference.z(), cell_idx_t{0} );
    tmp = c;
    tmp -= c;
    WALBERLA_CHECK_EQUAL( tmp, difference);

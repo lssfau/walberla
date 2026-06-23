@@ -18,15 +18,15 @@ if __name__ == '__main__':
 
     ps.set_shapes("Sphere", "HalfSpace", "Box", "CylindricalBoundary")
 
-    ps.add_property("position",         "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-    ps.add_property("linearVelocity",   "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-    ps.add_property("invMass",          "walberla::real_t",        defValue="real_t(1)", syncMode="ON_GHOST_CREATION")
-    ps.add_property("force",            "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+    ps.add_property("position",         "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ALWAYS")
+    ps.add_property("linearVelocity",   "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ALWAYS")
+    ps.add_property("invMass",          "walberla::real_t",        defValue="real_t{1}", syncMode="ON_GHOST_CREATION")
+    ps.add_property("force",            "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="NEVER")
 
     ps.add_property("shapeID",          "size_t",                  defValue="",          syncMode="ON_GHOST_CREATION")
     ps.add_property("rotation",         "walberla::mesa_pd::Rot3", defValue="",          syncMode="ALWAYS")
-    ps.add_property("angularVelocity",  "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-    ps.add_property("torque",           "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+    ps.add_property("angularVelocity",  "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ALWAYS")
+    ps.add_property("torque",           "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="NEVER")
 
     ps.add_property("type",             "uint_t",                  defValue="0",         syncMode="ON_GHOST_CREATION")
 

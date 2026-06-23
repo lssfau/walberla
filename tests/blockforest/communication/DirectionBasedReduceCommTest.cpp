@@ -58,13 +58,13 @@ class SumSweep
          if( init_ ){
             auto itSum0 = sumField->beginGhostLayerOnly(stencil::T);
             for( ; itSum0 != sumField->end(); ++itSum0 )
-               *itSum0 = real_t(0);
+               *itSum0 = real_t{0};
          }
 
          auto itVal = valField->rbegin();
          auto itSum = sumField->rbegin();
          for( ; itVal != valField->rend(); ++itVal, ++itSum )
-            *itSum = *itVal + itSum.neighbor( cell_idx_t(0), cell_idx_t(0), cell_idx_t(1) );
+            *itSum = *itVal + itSum.neighbor( cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{1} );
       }
 
    protected:
@@ -88,9 +88,9 @@ class CompareSweep
          WALBERLA_ASSERT_NOT_NULLPTR( bf )
 
          const AABB & bb = block->getAABB();
-         const std::array< cell_idx_t, 3 > offset = { cell_idx_c(bb.min(uint_t(0u))),
-                                         cell_idx_c(bb.min(uint_t(1u))),
-                                         cell_idx_c(bb.min(uint_t(2u))) };
+         const std::array< cell_idx_t, 3 > offset = { cell_idx_c(bb.min(uint_t{0u})),
+                                         cell_idx_c(bb.min(uint_t{1u})),
+                                         cell_idx_c(bb.min(uint_t{2u})) };
 
          for(ScalarField::iterator i = sf->begin(); i != sf->end(); ++i )
          {
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
    debug::enterTestMode();
    mpi::Environment env( argc, argv );
 
-   const std::array< uint_t, 3 > cells = { uint_t(5u), uint_t(2u), uint_t(7u) };
-   const std::array< uint_t, 3 > blockCount = { uint_t(1u), uint_t(1u), uint_c( MPIManager::instance()->numProcesses() ) };
-   const uint_t nrOfTimeSteps = uint_t(3u);
+   const std::array< uint_t, 3 > cells = { uint_t{5u}, uint_t{2u}, uint_t{7u} };
+   const std::array< uint_t, 3 > blockCount = { uint_t{1u}, uint_t{1u}, uint_c( MPIManager::instance()->numProcesses() ) };
+   const uint_t nrOfTimeSteps = uint_t{3u};
    bool periodic = false;
    const field::Layout layout = field::fzyx;
 
@@ -135,15 +135,15 @@ int main(int argc, char **argv)
 
    // In addition to the normal GhostLayerField's  we allocated additionally a field containing the whole global simulation domain for each block
    // we can then check if the GhostLayer communication is correct, by comparing the small field to the corresponding part of the big field
-   BlockDataID valFieldLoc = field::addToStorage<ScalarField>(blocks, "Val", real_t(1) );
-   BlockDataID sumFieldLoc = field::addToStorage<ScalarField>(blocks, "Sum", real_t(0) );
+   BlockDataID valFieldLoc = field::addToStorage<ScalarField>(blocks, "Val", real_t{1} );
+   BlockDataID sumFieldLoc = field::addToStorage<ScalarField>(blocks, "Sum", real_t{0} );
 
-   BlockDataID valFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), real_t(1), layout), "Global Src" );
-   BlockDataID sumFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t(1), real_t(0), layout), "Global Dst" );
+   BlockDataID valFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t{1}, real_t{1}, layout), "Global Src" );
+   BlockDataID sumFieldGlb = blocks->addBlockData<ScalarField>( makeBlockDataInitFunction<ScalarField>( glbCellsX, glbCellsY, glbCellsZ, uint_t{1}, real_t{0}, layout), "Global Dst" );
 
    // small local fields
    blockforest::DirectionBasedReduceScheme<stencil::B> schemeB( blocks );
-   schemeB.addPackInfo( make_shared<field::communication::ReducePackInfo< std::plus, ScalarField > >( sumFieldLoc, real_t(0) ) );
+   schemeB.addPackInfo( make_shared<field::communication::ReducePackInfo< std::plus, ScalarField > >( sumFieldLoc, real_t{0} ) );
 
    // Create TimeLoop
    SweepTimeloop timeLoop (blocks->getBlockStorage(), nrOfTimeSteps);

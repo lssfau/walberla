@@ -203,7 +203,7 @@ int main( int argc, char ** argv )
 
    auto center = forest->getDomain().center();
    auto  smallSphere = ss->create<data::Sphere>( params.radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(),
@@ -238,10 +238,10 @@ int main( int argc, char ** argv )
    kernel::ExplicitEuler                 explicitEuler( params.dt );
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem(1);
-   dem.setStiffness(0, 0, real_t(0));
-   dem.setDampingN (0, 0, real_t(0));
-   dem.setDampingT (0, 0, real_t(0));
-   dem.setFriction (0, 0, real_t(0));
+   dem.setStiffness(0, 0, real_t{0});
+   dem.setDampingN (0, 0, real_t{0});
+   dem.setDampingT (0, 0, real_t{0});
+   dem.setFriction (0, 0, real_t{0});
    collision_detection::AnalyticContactDetection              acd;
    kernel::AssocToBlock                  assoc(forest);
    kernel::DoubleCast                    double_cast;

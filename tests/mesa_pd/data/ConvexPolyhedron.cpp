@@ -73,7 +73,7 @@ int main( int argc, char** argv )
    WALBERLA_LOG_INFO("PACK - UNPACK");
 
    shared_ptr<mesa_pd::data::BaseShape> bs0 = make_shared<mesa_pd::data::ConvexPolyhedron>(bunnyMesh);
-   mesh1ParticleShape->updateMassAndInertia(real_t(1));
+   mesh1ParticleShape->updateMassAndInertia(real_t{1});
    std::shared_ptr<mesa_pd::data::BaseShape> bs1 = nullptr;
 
    WALBERLA_LOG_INFO("Packing mesh shape");
@@ -105,7 +105,7 @@ int main( int argc, char** argv )
 
    real_t cubeVolume = mesh::computeVolume(cubeMesh);
    real_t cubeSideLen = std::cbrt(cubeVolume);
-   auto cubeDensity = real_t(123);
+   auto cubeDensity = real_t{123};
    mesa_pd::data::Box boxCubeShape((Vector3<real_t>(cubeSideLen)));
    boxCubeShape.updateMassAndInertia(cubeDensity);
 
@@ -129,7 +129,7 @@ int main( int argc, char** argv )
 
    WALBERLA_CHECK_FLOAT_EQUAL(boxCubeShape.getInertiaBF(), massPropInertia);
    WALBERLA_CHECK_FLOAT_EQUAL(boxCubeShape.getMass(), massPropMass);
-   WALBERLA_CHECK_FLOAT_EQUAL(massPropCentroid, Vector3<real_t>(real_t(0)))
+   WALBERLA_CHECK_FLOAT_EQUAL(massPropCentroid, Vector3<real_t>(real_t{0}))
 
    // Test new mesh ops inertia calculation against old one
 
@@ -138,7 +138,7 @@ int main( int argc, char** argv )
 
    /// Interaction radius
    // for a cube: space diagonal length = side lengths * sqrt(3) -> bounding sphere radius = space diagonal / 2
-   WALBERLA_CHECK_FLOAT_EQUAL(meshCubeShape.getBoundingSphereRadius(), real_t(1) * std::sqrt(real_t(3)) * real_t(0.5));
+   WALBERLA_CHECK_FLOAT_EQUAL(meshCubeShape.getBoundingSphereRadius(), real_t{1} * std::sqrt(real_t{3}) * real_t{0.5});
 
    auto bunnyShape = dynamic_cast<mesa_pd::data::ConvexPolyhedron*>(ss->shapes[bunnyShapeID].get());
    real_t bunnyRadius = bunnyShape->getBoundingSphereRadius();
@@ -151,7 +151,7 @@ int main( int argc, char** argv )
          maxSqRadius = centroidToVSqr;
       }
    }
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(bunnyRadius, std::sqrt(maxSqRadius), real_t(1e-4));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(bunnyRadius, std::sqrt(maxSqRadius), real_t{1e-4});
 
    /// Support
    WALBERLA_LOG_INFO("SUPPORT");
@@ -159,13 +159,13 @@ int main( int argc, char** argv )
    for (int x = -1; x <= 1; x+=2) {
       for (int y = -1; y <= 1; y+=2) {
          for (int z = -1; z <= 1; z+=2) {
-            Vector3<real_t> d((real_t(x)), real_t(y), real_t(z));
+            Vector3<real_t> d((static_cast< real_t >(x)), static_cast< real_t >(y), static_cast< real_t >(z));
             WALBERLA_CHECK_FLOAT_EQUAL(boxCubeShape.support(d), meshCubeShape.support(d));
          }
       }
    }
 
-   AABB supportTestAABB(mesa_pd::Vec3(real_t(-1)), mesa_pd::Vec3(real_t(1)));
+   AABB supportTestAABB(mesa_pd::Vec3(real_t{-1}), mesa_pd::Vec3(real_t{1}));
    std::mt19937 rng;
    for(uint_t i = 0; i < 500; ++i) {
       auto rndPoint = supportTestAABB.randomPoint(rng);

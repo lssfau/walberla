@@ -59,22 +59,22 @@ int main( int argc, char ** argv )
    pythonManager->triggerInitialization();
 
 
-   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid( 1,1,1, 20,20,1, real_t(1.0), false, true,true,true );
+   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid( 1,1,1, 20,20,1, real_t{1.0}, false, true,true,true );
 
-   auto srcIntFieldID = field::addToStorage< GhostLayerField<int, 3> >( blocks, "srcIntFieldID", int(0), field::fzyx, 1 );
-   auto dstIntFieldID = field::addToStorage< GhostLayerField<int, 3> >( blocks, "dstIntFieldID", int(0), field::fzyx, 1 );
+   auto srcIntFieldID = field::addToStorage< GhostLayerField<int, 3> >( blocks, "srcIntFieldID", 0, field::fzyx, 1 );
+   auto dstIntFieldID = field::addToStorage< GhostLayerField<int, 3> >( blocks, "dstIntFieldID", 0, field::fzyx, 1 );
 
-   auto srcDoubleFieldID = field::addToStorage< GhostLayerField<real_t, 3> >( blocks, "srcDoubleFieldID", real_t(0.0), field::fzyx, 1 );
-   auto dstDoubleFieldID = field::addToStorage< GhostLayerField<real_t, 3> >( blocks, "dstDoubleFieldID", real_t(0.0), field::fzyx, 1 );
+   auto srcDoubleFieldID = field::addToStorage< GhostLayerField<real_t, 3> >( blocks, "srcDoubleFieldID", real_t{0.0}, field::fzyx, 1 );
+   auto dstDoubleFieldID = field::addToStorage< GhostLayerField<real_t, 3> >( blocks, "dstDoubleFieldID", real_t{0.0}, field::fzyx, 1 );
    // random init
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto srcIntField = blockIt->getData<GhostLayerField<int, 3> >( srcIntFieldID );
       auto srcDoubleField = blockIt->getData<GhostLayerField<real_t, 3> >( srcDoubleFieldID );
       for( auto cellIt = srcIntField->begin(); cellIt != srcIntField->end(); ++cellIt )
-         *cellIt = math::intRandom( int(0), int(42) );
+         *cellIt = math::intRandom( 0, 42 );
       for( auto cellIt = srcDoubleField->begin(); cellIt != srcDoubleField->end(); ++cellIt )
-         *cellIt = math::realRandom( real_t(0.0), real_t(42.0) );
+         *cellIt = math::realRandom( real_t{0.0}, real_t{42.0} );
    }
 
    python_coupling::PythonCallback cb ( pythonFile, "theCallback" );

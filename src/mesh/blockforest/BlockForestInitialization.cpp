@@ -48,8 +48,8 @@ namespace {
 }
 
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb )
-   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ), maxBlockSkewness_(2.0),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
      targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
@@ -61,8 +61,8 @@ ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB
 }
 
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
-   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ), rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ), maxBlockSkewness_(2.0),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ), rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
      targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
@@ -74,8 +74,8 @@ ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB
 }
 
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction )
-   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ), maxBlockSkewness_(2.0),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ),
      rootBlockExclusionFunction_ ( rootBlockExclusionFunction ), blockExclusionFunction_( blockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
@@ -91,7 +91,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 {
    std::set< uint_t > blockGridSizeTested;
 
-   uint_t sizeBlockGrid = targetNumRootBlocks * uint_t(2);
+   uint_t sizeBlockGrid = targetNumRootBlocks * uint_t{2};
 
    uint_t          bestSizeBlockGrid = sizeBlockGrid;
    uint_t          bestNumRootBlocks = std::numeric_limits<uint_t>::max();
@@ -112,9 +112,9 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
          case DOWN: --sizeBlockGrid; break;
          }
 
-         if( sizeBlockGrid == uint_t(0) )
+         if( sizeBlockGrid == uint_t{0} )
          {
-            sizeBlockGrid = uint_t(1);
+            sizeBlockGrid = uint_t{1};
             dir = UP;
          }
       }
@@ -140,18 +140,18 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 
       const real_t factor = real_c( numRootBlocks ) / real_c( targetNumRootBlocks );
 
-      if( std::fabs( factor - real_t(1) ) < acceptableRelativeError_ )
+      if( std::fabs( factor - real_t{1} ) < acceptableRelativeError_ )
       {
          break;
       }
       if( numRootBlocks < targetNumRootBlocks )
       {
-         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t(0.5) );
+         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t{0.5} );
          dir = UP;
       }
       else if( numRootBlocks > targetNumRootBlocks )
       {
-         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t(0.5) );
+         sizeBlockGrid = uint_c( real_c( sizeBlockGrid ) / factor + real_t{0.5} );
          dir = DOWN;
       }
       else
@@ -174,7 +174,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 
    setupBlockForest->init( aabb_, bestSizeBlockGrid3D[0], bestSizeBlockGrid3D[1], bestSizeBlockGrid3D[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t{0}, processMemoryLimit_, true, false );
 
    return setupBlockForest;
 }
@@ -185,10 +185,10 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 {
    Vector3<uint_t> numBlocks;
 
-   for( uint_t i = uint_t(0); i < uint_t(3); ++i )
+   for( uint_t i = uint_t{0}; i < uint_t{3}; ++i )
       numBlocks[i] = uint_c( std::ceil( aabb_.size( i ) / blockSize[i] ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( real_t{0}, real_t{0}, real_t{0},
                  real_c( numBlocks[0] ) * blockSize[0], real_c( numBlocks[1] ) * blockSize[1], real_c( numBlocks[2] ) * blockSize[2] );
 
    newAABB.translate( aabb_.center() - newAABB.center() );
@@ -203,7 +203,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
 
    setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t{0}, processMemoryLimit_, true, false );
 
    return setupBlockForest;
 }
@@ -259,8 +259,8 @@ uint_t ComplexGeometryBlockforestCreator::findNumBlocks( const Vector3<uint_t> &
 
 
 ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize )
-   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
      targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
@@ -271,8 +271,8 @@ ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockfores
 }
 
 ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
-   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ),
      rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
@@ -284,8 +284,8 @@ ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockfores
 }
 
 ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction  )
-   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
-     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t{0.1} ),
+     processMemoryLimit_( real_t{ 0.0 } ), periodicity_( false, false, false ),
      rootBlockExclusionFunction_ ( rootBlockExclusionFunction ), blockExclusionFunction_(blockExclusionFunction),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
@@ -305,7 +305,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
    std::set< uint_t > blockSizeTested;
 
-   uint_t blockSize = uint_c( std::pow( domainVolume / ( real_t(2) * real_t( targetNumRootBlocks ) ), real_t(1) / real_t(3) ) + 0.5 );
+   uint_t blockSize = uint_c( std::pow( domainVolume / ( real_t{2} * static_cast< real_t >( targetNumRootBlocks ) ), real_t{1} / real_t{3} ) + 0.5 );
 
    uint_t          bestBlockSize = blockSize;
    uint_t          bestNumRootBlocks = std::numeric_limits<uint_t>::max();
@@ -325,9 +325,9 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
          case DOWN: --blockSize; break;
          }
 
-         if( blockSize == uint_t(0) )
+         if( blockSize == uint_t{0} )
          {
-            blockSize = uint_t(1);
+            blockSize = uint_t{1};
             dir = UP;
          }
       }
@@ -344,18 +344,18 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
       const real_t factor = real_c( numRootBlocks ) / real_c( targetNumRootBlocks );
 
-      if( std::fabs( factor - real_t(1) ) < acceptableRelativeError_ )
+      if( std::fabs( factor - real_t{1} ) < acceptableRelativeError_ )
       {
          break;
       }
       if( numRootBlocks < targetNumRootBlocks )
       {
-         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t(1) / real_t(3) ) + real_t(0.5) );
+         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t{1} / real_t{3} ) + real_t{0.5} );
          dir = UP;
       }
       else if( numRootBlocks > targetNumRootBlocks )
       {
-         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t(1) / real_t(3) ) + real_t(0.5) );
+         blockSize = uint_c( real_c( blockSize ) * std::pow( factor, real_t{1} / real_t{3} ) + real_t{0.5} );
          dir = DOWN;
       }
       else
@@ -372,7 +372,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( bestBlockSize ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( bestBlockSize ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( real_t{0}, real_t{0}, real_t{0},
                  real_c( numBlocks[0] * bestBlockSize ) * cellSize_[0],
                  real_c( numBlocks[1] * bestBlockSize ) * cellSize_[1],
                  real_c( numBlocks[2] * bestBlockSize ) * cellSize_[2] );
@@ -392,7 +392,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
    setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t{0}, processMemoryLimit_, true, false );
 
    return setupBlockForest;
 }
@@ -407,7 +407,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( blockSize[1] ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( blockSize[2] ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( real_t{0}, real_t{0}, real_t{0},
                  real_c( numBlocks[0] * blockSize[0] ) * cellSize_[0],
                  real_c( numBlocks[1] * blockSize[1] ) * cellSize_[1],
                  real_c( numBlocks[2] * blockSize[2] ) * cellSize_[2] );
@@ -427,7 +427,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
    setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t{0}, processMemoryLimit_, true, false );
 
    return setupBlockForest;
 }
@@ -437,7 +437,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
    uint_t const numProcesses = numBlocks[0] * numBlocks[1] * numBlocks[2];
 
 
-   AABB newAABB(real_t(0), real_t(0), real_t(0), real_c(numBlocks[0] * cellsPerBlock[0]) * cellSize_[0],
+   AABB newAABB(real_t{0}, real_t{0}, real_t{0}, real_c(numBlocks[0] * cellsPerBlock[0]) * cellSize_[0],
                 real_c(numBlocks[1] * cellsPerBlock[1]) * cellSize_[1], real_c(numBlocks[2] * cellsPerBlock[2]) * cellSize_[2]);
 
    newAABB.translate( aabb_.center() - newAABB.center() );
@@ -455,7 +455,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
 
    setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t{0}, processMemoryLimit_, true, false );
 
    return setupBlockForest;
 }
@@ -468,7 +468,7 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
                                 setupBlockForest->getRootBlockYSize(),
                                 setupBlockForest->getRootBlockZSize() );
 
-   Vector3<uint_t> blockSizeCells( uint_c( blockSize[0] / cellSize_[0] + real_t(0.5) ), uint_c( blockSize[1] / cellSize_[1] + real_t(0.5) ), uint_c( blockSize[2] / cellSize_[2] + real_t(0.5) ) );
+   Vector3<uint_t> blockSizeCells( uint_c( blockSize[0] / cellSize_[0] + real_t{0.5} ), uint_c( blockSize[1] / cellSize_[1] + real_t{0.5} ), uint_c( blockSize[2] / cellSize_[2] + real_t{0.5} ) );
 
    WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[0] / cellSize_[0], real_c( blockSizeCells[0] ) )
    WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[1] / cellSize_[1], real_c( blockSizeCells[1] ) )
@@ -521,7 +521,7 @@ uint_t ComplexGeometryStructuredBlockforestCreator::findNumBlocks( const Vector3
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( blockSize[1] ) ) ),
                               uint_c( std::ceil( real_c( numCells[2] ) / real_c( blockSize[2] ) ) ) );
 
-   AABB newAABB( real_t(0), real_t(0), real_t(0),
+   AABB newAABB( real_t{0}, real_t{0}, real_t{0},
                  real_c( numBlocks[0] * blockSize[0] ) * cellSize_[0],
                  real_c( numBlocks[1] * blockSize[1] ) * cellSize_[1],
                  real_c( numBlocks[2] * blockSize[2] ) * cellSize_[2] );

@@ -89,19 +89,19 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
 
 void testPoisson()
 {
-   const uint_t xCells = uint_t(200);
-   const uint_t yCells = uint_t(100);
+   const uint_t xCells = uint_t{200};
+   const uint_t yCells = uint_t{100};
    const real_t xSize = real_c(2.0);
    const real_t ySize = real_c(1.0);
-   const real_t dx = xSize / real_c( xCells + uint_t(1) );
-   const real_t dy = ySize / real_c( yCells + uint_t(1) );
+   const real_t dx = xSize / real_c( xCells + uint_t{1} );
+   const real_t dy = ySize / real_c( yCells + uint_t{1} );
 
    // Create blocks
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
       math::AABB( real_c(0.5) * dx, real_c(0.5) * dy, real_c(0.0),
                   xSize - real_c(0.5) * dx, ySize - real_c(0.5) * dy, dx ),
-      uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
-      xCells, yCells, uint_t(1),          // how many cells per block (x,y,z)
+      uint_t{1} , uint_t{1},  uint_t{1},  // number of blocks in x,y,z direction
+      xCells, yCells, uint_t{1},          // how many cells per block (x,y,z)
       false,                              // one block per process - "false" means all blocks to one process
       false, false, false );              // no periodicity
 
@@ -118,7 +118,7 @@ void testPoisson()
    commScheme.addDataToCommunicate( make_shared<Packing>(gpuField) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(10000);
+   const uint_t numberOfTimesteps = uint_t{10000};
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep

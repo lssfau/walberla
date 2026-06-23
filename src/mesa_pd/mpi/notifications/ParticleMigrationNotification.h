@@ -46,22 +46,22 @@ public:
    struct Parameters {
       id_t uid_;
       std::unordered_set<walberla::mpi::MPIRank> ghostOwners_ {};
-      walberla::mesa_pd::Vec3 oldForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldTorque_ {real_t(0)};
-      walberla::mesa_pd::Vec3 hydrodynamicForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 hydrodynamicTorque_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldHydrodynamicForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldHydrodynamicTorque_ {real_t(0)};
-      walberla::mesa_pd::Vec3 electrostaticForce_ {real_t(0)};
-      walberla::real_t totalDisplacement_ {real_t(0)};
-      walberla::real_t collisionForceNorm_ {real_t(0)};
-      walberla::real_t virtualMass_ {real_t(0)};
-      walberla::real_t invMassIncludingVirtual_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldLinearAcceleration_ {real_t(0)};
-      walberla::mesa_pd::Mat3 invInertiaBF_ {real_t(0)};
-      walberla::mesa_pd::Mat3 virtualInertiaBF_ {real_t(0)};
-      walberla::mesa_pd::Mat3 invInertiaBFIncludingVirtual_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldAngularAcceleration_ {real_t(0)};
+      walberla::mesa_pd::Vec3 oldForce_ {real_t{0}};
+      walberla::mesa_pd::Vec3 oldTorque_ {real_t{0}};
+      walberla::mesa_pd::Vec3 hydrodynamicForce_ {real_t{0}};
+      walberla::mesa_pd::Vec3 hydrodynamicTorque_ {real_t{0}};
+      walberla::mesa_pd::Vec3 oldHydrodynamicForce_ {real_t{0}};
+      walberla::mesa_pd::Vec3 oldHydrodynamicTorque_ {real_t{0}};
+      walberla::mesa_pd::Vec3 electrostaticForce_ {real_t{0}};
+      walberla::real_t totalDisplacement_ {real_t{0}};
+      walberla::real_t collisionForceNorm_ {real_t{0}};
+      walberla::real_t virtualMass_ {real_t{0}};
+      walberla::real_t invMassIncludingVirtual_ {real_t{0}};
+      walberla::mesa_pd::Vec3 oldLinearAcceleration_ {real_t{0}};
+      walberla::mesa_pd::Mat3 invInertiaBF_ {real_t{0}};
+      walberla::mesa_pd::Mat3 virtualInertiaBF_ {real_t{0}};
+      walberla::mesa_pd::Mat3 invInertiaBFIncludingVirtual_ {real_t{0}};
+      walberla::mesa_pd::Vec3 oldAngularAcceleration_ {real_t{0}};
    };
 
    inline explicit ParticleMigrationNotification( const data::Particle& particle ) : particle_(particle) {}

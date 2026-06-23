@@ -105,7 +105,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    void PerformanceMeter::addMeasurement ( const std::string & name, real_t scaling )
    {
-      measurements_.emplace_back( CountFunction(), name, scaling, uint_t(0) );
+      measurements_.emplace_back( CountFunction(), name, scaling, uint_t{0} );
 
       uint_t cellsOnProcess = 0;
       for( const auto &block : blockStorage_ )
@@ -278,8 +278,8 @@ namespace timeloop {
 
             measurement.counts += 1;
             real_t rCounts = real_c( measurement.counts );
-            measurement.avgCellsPerTimeStep = (rCounts - real_t(1.0) ) / rCounts * measurement.avgCellsPerTimeStep +
-                                                        real_t(1.0)   / rCounts * cellsLastTimeStep;
+            measurement.avgCellsPerTimeStep = (rCounts - real_t{1.0} ) / rCounts * measurement.avgCellsPerTimeStep +
+                                                        real_t{1.0}   / rCounts * cellsLastTimeStep;
          }
       }
    }

@@ -134,7 +134,7 @@ int main( int argc, char ** argv )
    const uint_t yBlocks = ( processes >= 4 ) ? uint_c(2) : uint_c(1);
    const uint_t zBlocks = ( processes >= 2 ) ? uint_c(2) : uint_c(1);
 
-   const uint_t L = uint_t(64);
+   const uint_t L = uint_t{64};
    
    auto blocks = blockforest::createUniformBlockGrid( xBlocks, yBlocks, zBlocks,
                                                      L / xBlocks,
@@ -147,7 +147,7 @@ int main( int argc, char ** argv )
    const real_t omega = real_c(0.06);
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
    
-   const Vector3<real_t> velocity(real_t(0), real_t(0), real_t(0.01));
+   const Vector3<real_t> velocity(real_t{0}, real_t{0}, real_t{0.01});
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
    BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldId, pdfFieldId, velocity ),
@@ -155,7 +155,7 @@ int main( int argc, char ** argv )
    
    // set boundary conditions
    geometry::initializer::BoundaryFromBody< BoundaryHandling_T > bodyInitializer( *blocks, boundaryHandlingId );
-   const real_t R = real_t(5.4);
+   const real_t R = real_t{5.4};
    geometry::Sphere sphere( Vector3<real_t>( real_t(L/2), real_t(L/2), real_t(L/2) ), R );
    bodyInitializer.template init< geometry::Sphere >( sphere, UBB_Sphere_Flag );
    geometry::initializer::BoundaryFromDomainBorder< BoundaryHandling_T > borderInitializer( *blocks, boundaryHandlingId );
@@ -183,7 +183,7 @@ int main( int argc, char ** argv )
    timeloop.run();
    
    // get the force acting on the sphere
-   real_t fx = real_t(0), fy = real_t(0), fz = real_t(0);
+   real_t fx = real_t{0}, fy = real_t{0}, fz = real_t{0};
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
       FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId );
@@ -214,7 +214,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_RESULT_ON_ROOT("Expected force: " << stokes);
    WALBERLA_LOG_RESULT_ON_ROOT("Actual force: " << force);
    real_t err = (force-stokes).length() / stokes.length();
-   WALBERLA_LOG_RESULT_ON_ROOT("Relative error: " << (real_t(100)*err) << " %");
+   WALBERLA_LOG_RESULT_ON_ROOT("Relative error: " << (real_t{100}*err) << " %");
    
    if( timeSteps > 100 )
    {

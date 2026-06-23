@@ -41,7 +41,7 @@ public:
    ///Convenience typedef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    using PhantomBlockWeightPackUnpackFunctor = walberla::blockforest::PODPhantomWeightPackUnpack<double>;
 
-   WeightAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
+   WeightAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t{10.0} ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData, const PhantomBlockForest & )
    {
@@ -64,7 +64,7 @@ private:
    shared_ptr<blockforest::InfoCollection> ic_;
 
    ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
-   double baseWeight_ = real_t(10.0);
+   double baseWeight_ = real_t{10.0};
 };
 
 }

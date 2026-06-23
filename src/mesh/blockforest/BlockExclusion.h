@@ -110,7 +110,7 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       std::mt19937 g( 42 );
       std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-      std::ranges::fill( excludeBlock, uint8_t( 0 ) );
+      std::ranges::fill( excludeBlock, uint8_t{ 0 } );
 
       #ifdef _OPENMP
       #pragma omp parallel for schedule( dynamic )
@@ -119,7 +119,7 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       {
          auto intersectionDefined = isIntersecting( *distanceObject_, aabb( shuffle[i] ), maxError_ );
          if( intersectionDefined && !intersectionDefined.value() )
-            excludeBlock[ shuffle[i] ] = uint8_t( 1 );
+            excludeBlock[ shuffle[i] ] = uint8_t{ 1 };
       }
 
       allReduceInplace( excludeBlock, mpi::LOGICAL_OR );
@@ -150,7 +150,7 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
    std::mt19937 g( 42 );
    std::shuffle( shuffle.begin(), shuffle.end(), g );
 
-   std::ranges::fill( excludeBlock, uint8_t( 0 ) );
+   std::ranges::fill( excludeBlock, uint8_t{ 0 } );
 
 #ifdef _OPENMP
 #pragma omp parallel for schedule( dynamic )
@@ -160,7 +160,7 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
       auto is = numeric_cast<size_t>( i );
       auto fullCoveringAABBDefined = fullyCoversAABB( *distanceObject_, aabb( shuffle[is] ), maxError_ );
       if( fullCoveringAABBDefined && fullCoveringAABBDefined.value() )
-         excludeBlock[ shuffle[is] ] = uint8_t( 1 );
+         excludeBlock[ shuffle[is] ] = uint8_t{ 1 };
    }
 
    allReduceInplace( excludeBlock, mpi::LOGICAL_OR );

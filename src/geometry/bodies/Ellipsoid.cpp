@@ -48,9 +48,9 @@ namespace geometry {
       }
 
       Matrix3<real_t> diagonalMatrix ( 0.0 );
-      diagonalMatrix(0,0) = real_t(1) / ( radii_[0] * radii_[0] );
-      diagonalMatrix(1,1) = real_t(1) / ( radii_[1] * radii_[1] );
-      diagonalMatrix(2,2) = real_t(1) / ( radii_[2] * radii_[2] );
+      diagonalMatrix(0,0) = real_t{1} / ( radii_[0] * radii_[0] );
+      diagonalMatrix(1,1) = real_t{1} / ( radii_[1] * radii_[1] );
+      diagonalMatrix(2,2) = real_t{1} / ( radii_[2] * radii_[2] );
 
 
       mat_ = rotationMatrix_ *  diagonalMatrix * rotationMatrix_.getTranspose() ;
@@ -103,15 +103,15 @@ namespace geometry {
    template<>
    FastOverlapResult fastOverlapCheck ( const Ellipsoid & ellipsoid, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
    {
-      AABB const box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
-                                               cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
+      AABB const box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t{0.5}*dx[0], cellMidpoint[1] - real_t{0.5}*dx[1], cellMidpoint[2] - real_t{0.5}*dx[2],
+                                               cellMidpoint[0] + real_t{0.5}*dx[0], cellMidpoint[1] + real_t{0.5}*dx[1], cellMidpoint[2] + real_t{0.5}*dx[2]);
 
       if ( ! ellipsoid.boundingBox().intersects( box ) )
          return COMPLETELY_OUTSIDE;
 
 
       // Check against inner circle
-      static const real_t sqrt3half = std::sqrt( real_t(3) ) / real_t(2);
+      static const real_t sqrt3half = std::sqrt( real_t{3} ) / real_t{2};
 
       const real_t midPointDistSq = (ellipsoid.midpoint() - cellMidpoint).sqrLength();
 

@@ -90,7 +90,7 @@ void BoundaryFromBody<BoundaryHandlerT>::init( const Body & body, BoundarySetter
       structuredBlockStorage_.getBlockLocalCellAABB( *block, ff->beginWithGhostLayer().cell(), firstCellBB );
       Vector3<real_t> firstCellMidpoint;
       for( uint_t i = 0; i < 3; ++i )
-         firstCellMidpoint[i] = firstCellBB.min(i) + real_t(0.5) * firstCellBB.size(i);
+         firstCellMidpoint[i] = firstCellBB.min(i) + real_t{0.5} * firstCellBB.size(i);
 
       Vector3<real_t> currentMidpoint;
       currentMidpoint[2] = firstCellMidpoint[2];

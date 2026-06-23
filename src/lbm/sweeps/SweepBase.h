@@ -150,7 +150,7 @@ SweepBase< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T >
    
    // take care of proper thread<->memory assignment (first-touch allocation policy !)
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( dst,
-      for( uint_t f = uint_t(0); f < LatticeModel_T::Stencil::Size; ++f )
+      for( uint_t f = uint_t{0}; f < LatticeModel_T::Stencil::Size; ++f )
          dst->get(x,y,z,f) = std::numeric_limits< typename PdfField_T::value_type >::quiet_NaN();
    )
    dstFields_.insert( dst );

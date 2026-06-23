@@ -56,12 +56,12 @@ public:
 
    CurlBasedLevelDetermination(const ConstBlockDataID & fieldID, const StructuredBlockForest & structuredBlockForest,
          const Filter_T & filter, const uint_t maxLevel,
-         const real_t upperLimit, const real_t lowerLimit, const real_t lengthScaleWeight = real_t(2)) :
+         const real_t upperLimit, const real_t lowerLimit, const real_t lengthScaleWeight = real_t{2}) :
          fieldID_(fieldID), structuredBlockForest_(structuredBlockForest), filter_(filter), maxLevel_(maxLevel),
          upperLimitSqr_(upperLimit*upperLimit), lowerLimitSqr_(lowerLimit*lowerLimit),
          lengthScaleWeight_(lengthScaleWeight)
    {
-      WALBERLA_CHECK_FLOAT_UNEQUAL(lengthScaleWeight_, real_t(0)); // else std::pow(x, y/0) is calculated further below
+      WALBERLA_CHECK_FLOAT_UNEQUAL(lengthScaleWeight_, real_t{0}); // else std::pow(x, y/0) is calculated further below
    }
 
    void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
@@ -92,25 +92,25 @@ void CurlBasedLevelDetermination< Filter_T >::operator()( std::vector< std::pair
       const VectorField_T * u = block->template getData< VectorField_T >(fieldID_);
 
       if(u == nullptr) {
-         minTargetLevel.second = uint_t(0);
+         minTargetLevel.second = uint_t{0};
          continue;
       }
 
-      WALBERLA_ASSERT_GREATER_EQUAL(u->nrOfGhostLayers(), uint_t(1));
+      WALBERLA_ASSERT_GREATER_EQUAL(u->nrOfGhostLayers(), uint_t{1});
 
       CellInterval interval = u->xyzSize();
       Cell expand(cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(-1));
       interval.expand(expand);
 
-      const auto one = cell_idx_t(1);
+      const auto one = cell_idx_t{1};
 
       const real_t dx = structuredBlockForest_.dx(forest.getLevel(*block));
       const real_t dy = structuredBlockForest_.dy(forest.getLevel(*block));
       const real_t dz = structuredBlockForest_.dz(forest.getLevel(*block));
 
-      const auto halfInvDx = real_t(0.5) * real_t(1) / dx;
-      const auto halfInvDy = real_t(0.5) * real_t(1) / dy;
-      const auto halfInvDz = real_t(0.5) * real_t(1) / dz;
+      const auto halfInvDx = real_t{0.5} * real_t{1} / dx;
+      const auto halfInvDy = real_t{0.5} * real_t{1} / dy;
+      const auto halfInvDz = real_t{0.5} * real_t{1} / dz;
 
       bool refine = false;
       bool coarsen = true;
@@ -125,9 +125,9 @@ void CurlBasedLevelDetermination< Filter_T >::operator()( std::vector< std::pair
       const real_t weightedLengthScale = std::pow(lengthScale, (lengthScaleWeight_+1)/lengthScaleWeight_);
       const real_t weightedLengthScaleSqr = weightedLengthScale*weightedLengthScale;
 
-      for (auto z = cell_idx_t(0); z < zSize; ++z) {
-         for (auto y = cell_idx_t(0); y < ySize; ++y) {
-            for (auto x = cell_idx_t(0); x < xSize; ++x) {
+      for (auto z = cell_idx_t{0}; z < zSize; ++z) {
+         for (auto y = cell_idx_t{0}; y < ySize; ++y) {
+            for (auto x = cell_idx_t{0}; x < xSize; ++x) {
                if (filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z) && filter_(x,y-one,z)
                   && filter_(x,y,z+one) && filter_(x,y,z-one)) {
                   const Vector3< real_t > xa = u->get(x+one,y,z);
@@ -164,11 +164,11 @@ void CurlBasedLevelDetermination< Filter_T >::operator()( std::vector< std::pair
 
       if (refine && block->getLevel() < maxLevel_) {
          WALBERLA_ASSERT(!coarsen);
-         minTargetLevel.second = block->getLevel() + uint_t(1);
+         minTargetLevel.second = block->getLevel() + uint_t{1};
       }
-      if (coarsen && block->getLevel() > uint_t(0)) {
+      if (coarsen && block->getLevel() > uint_t{0}) {
          WALBERLA_ASSERT(!refine);
-         minTargetLevel.second = block->getLevel() - uint_t(1);
+         minTargetLevel.second = block->getLevel() - uint_t{1};
       }
    }
 }

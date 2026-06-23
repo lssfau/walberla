@@ -45,7 +45,7 @@ public:
 
    void addFlag( const FlagUID& flag ) { filteredFlags_.push_back( flag ); }
 
-   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t(0) ) const
+   void operator()( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers = uint_t{0} ) const
    {
       const auto* flagField = block.getData< FlagField_T >( flagField_ );
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );

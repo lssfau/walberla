@@ -216,7 +216,7 @@ void Poiseuille<BH_T,LM,SP,UBB>::initVelocityBoundary( Scenario scenario, Axis f
       auto pdfField = blockIt->template getData< lbm::PdfField<LM> > ( pdfFieldID_ );
 
       SP & pressure = handling->template getBoundaryCondition< SP >( handling->getBoundaryUID( pressureFlag1_ ) );
-      pressure.setLatticeDensity( real_t(1) );
+      pressure.setLatticeDensity( real_t{1} );
 
       if ( storage_.atDomainMinBorder( flowAxis, *blockIt) )
       {
@@ -269,10 +269,10 @@ void Poiseuille<BH_T,LM,SP,UBB>::initPressureBoundary( Axis flowAxis, real_t pre
       SP & pressure1 = handling->template getBoundaryCondition< SP >( handling->getBoundaryUID( pressureFlag1_ ) );
       SP & pressure2 = handling->template getBoundaryCondition< SP >( handling->getBoundaryUID( pressureFlag2_ ) );
 
-      const real_t densityDiff = real_t(3) * pressureDiff;
+      const real_t densityDiff = real_t{3} * pressureDiff;
 
-      pressure1.setLatticeDensity ( real_t(1) + densityDiff / real_t(2) );
-      pressure2.setLatticeDensity ( real_t(1) - densityDiff / real_t(2) );
+      pressure1.setLatticeDensity ( real_t{1} + densityDiff / real_t{2} );
+      pressure2.setLatticeDensity ( real_t{1} - densityDiff / real_t{2} );
    }
 }
 
@@ -360,7 +360,7 @@ real_t Poiseuille<BH_T,LM,SP,UBB>::getVelocity( const Cell & globalCell, Scenari
    {
       const real_t x   = real_c( globalCell[ parabolaAxis] );
       const real_t max = maxPoint_   [ parabolaAxis ];
-      return - real_t(4) * x * (x-max) / ( max * max) * maxVelocity;
+      return - real_t{4} * x * (x-max) / ( max * max) * maxVelocity;
    }
    else if ( scenario == PIPE ) // pipe setup
    {
@@ -370,7 +370,7 @@ real_t Poiseuille<BH_T,LM,SP,UBB>::getVelocity( const Cell & globalCell, Scenari
       const real_t dist = std::sqrt( distSq );
       const real_t pipeRadius = getPipeRadius( scenario, flowAxis, parabolaAxis );
       if ( distSq < pipeRadius * pipeRadius )
-         return - real_t(4) * dist * (dist - pipeRadius) / ( pipeRadius * pipeRadius) * maxVelocity;
+         return - real_t{4} * dist * (dist - pipeRadius) / ( pipeRadius * pipeRadius) * maxVelocity;
       else  // outside pipe
          return 0;
    }
@@ -396,7 +396,7 @@ real_t Poiseuille<BH_T,LM,SP,UBB>::velocityFromPressureDiff( Scenario scenario, 
 {
    const real_t pipeRadius = getPipeRadius( scenario, flowAxis, parabolaAxis );
    real_t acceleration = pressureDiff / real_c( storage_.getNumberOfCells( flowAxis ) );
-   real_t geometryFactor = (scenario == PIPE) ? real_t(4) : real_t(2);
+   real_t geometryFactor = (scenario == PIPE) ? real_t{4} : real_t{2};
    return acceleration / ( geometryFactor * latticeViscosity_ ) * pipeRadius * pipeRadius;
 }
 
@@ -404,7 +404,7 @@ template< typename BH_T, typename LM, typename SP, typename UBB >
 real_t Poiseuille<BH_T,LM,SP,UBB>::pressureDiffFromVelocity( Scenario scenario, real_t velocity, Axis flowAxis, Axis parabolaAxis )
 {
    const real_t pipeRadius = getPipeRadius( scenario, flowAxis, parabolaAxis );
-   real_t geometryFactor = (scenario == PIPE) ? real_t(4) : real_t(2);
+   real_t geometryFactor = (scenario == PIPE) ? real_t{4} : real_t{2};
    real_t acceleration = ( geometryFactor * velocity * latticeViscosity_ ) / ( pipeRadius * pipeRadius );
    return acceleration * real_c( storage_.getNumberOfCells( flowAxis ) );
 }

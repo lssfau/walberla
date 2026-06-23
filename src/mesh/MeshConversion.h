@@ -93,7 +93,7 @@ void convertWalberlaToOpenMesh( const geometry::TriangleMesh & wbMesh, OpenMeshT
       indexToOmVertexHandles[ ctr++ ] = omMesh.add_vertex( typename OpenMeshType::Point( toOpenMesh( v_it ) ) );
    }
 
-   WALBERLA_ASSERT_EQUAL( wbMesh.getVertexIndices().size() % size_t(3), size_t(0) );
+   WALBERLA_ASSERT_EQUAL( wbMesh.getVertexIndices().size() % size_t{3}, size_t{0} );
    auto vi_it = wbMesh.getVertexIndices().begin();
    while( vi_it != wbMesh.getVertexIndices().end() )
    {

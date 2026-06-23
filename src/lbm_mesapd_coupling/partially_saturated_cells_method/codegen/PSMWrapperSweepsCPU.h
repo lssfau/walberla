@@ -73,15 +73,15 @@ class SetParticleVelocitiesSweep
          if (mappingParticleSelector_(idx, *ac_)) { numMappedParticles++; }
       }
 
-      if (numMappedParticles == uint_t(0)) return;
+      if (numMappedParticles == uint_t{0}) return;
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
       // Allocate unified memory for the particle information required for computing the velocity at a WF point (used in
       // the solid collision operator)
-      real_t* linearVelocities = (real_t*) malloc(arraySizes);
+      real_t* linearVelocities = static_cast< real_t* > (malloc(arraySizes));
       memset(linearVelocities, 0, arraySizes);
-      real_t* angularVelocities = (real_t*) malloc(arraySizes);
+      real_t* angularVelocities = static_cast< real_t* > (malloc(arraySizes));
       memset(angularVelocities, 0, arraySizes);
 
       // Store particle information inside memory
@@ -110,14 +110,14 @@ class SetParticleVelocitiesSweep
       WALBERLA_FOR_ALL_CELLS_XYZ(
          particleVelocitiesField,
          for (uint_t i = 0; i < MaxParticlesPerCell; i++) {
-            particleVelocitiesField->get(x, y, z, i * 3 + 0) = real_t(0.0);
-            particleVelocitiesField->get(x, y, z, i * 3 + 1) = real_t(0.0);
-            particleVelocitiesField->get(x, y, z, i * 3 + 2) = real_t(0.0);
+            particleVelocitiesField->get(x, y, z, i * 3 + 0) = real_t{0.0};
+            particleVelocitiesField->get(x, y, z, i * 3 + 1) = real_t{0.0};
+            particleVelocitiesField->get(x, y, z, i * 3 + 2) = real_t{0.0};
          }
 
          const Vector3< real_t >
-            cellCenter = Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
-                                           real_t(z) + real_t(0.5) * dx) +
+            cellCenter = Vector3< real_t >(static_cast< real_t >(x) + real_t{0.5} * dx, static_cast< real_t >(y) + real_t{0.5} * dx,
+                                           static_cast< real_t >(z) + real_t{0.5} * dx) +
                          block->getAABB().minCorner();
          for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++) {
             Vector3< real_t > particleVelocityAtWFPoint =
@@ -177,14 +177,14 @@ class ReduceParticleForcesSweep
          if (mappingParticleSelector_(idx, *ac_)) { numMappedParticles++; }
       }
 
-      if (numMappedParticles == uint_t(0)) return;
+      if (numMappedParticles == uint_t{0}) return;
 
       size_t arraySizes = numMappedParticles * sizeof(real_t) * 3;
 
       // Allocate memory for the reduction of the particle forces and torques
-      real_t* hydrodynamicForces = (real_t*) malloc(arraySizes);
+      real_t* hydrodynamicForces = static_cast< real_t* > (malloc(arraySizes));
       memset(hydrodynamicForces, 0, arraySizes);
-      real_t* hydrodynamicTorques = (real_t*) malloc(arraySizes);
+      real_t* hydrodynamicTorques = static_cast< real_t* > (malloc(arraySizes));
       memset(hydrodynamicTorques, 0, arraySizes);
 
       auto nOverlappingParticlesField =
@@ -200,15 +200,15 @@ class ReduceParticleForcesSweep
 #ifdef WALBERLA_BUILD_WITH_OPENMP
 #   pragma omp parallel for schedule(static)
 #endif
-      for (cell_idx_t z = cell_idx_t(0); z < cell_idx_t(particleForcesField->zSize()); ++z)
+      for (cell_idx_t z = cell_idx_t{0}; z < cell_idx_t(particleForcesField->zSize()); ++z)
       {
-         for (cell_idx_t y = cell_idx_t(0); y < cell_idx_t(particleForcesField->ySize()); ++y)
+         for (cell_idx_t y = cell_idx_t{0}; y < cell_idx_t(particleForcesField->ySize()); ++y)
          {
-            for (cell_idx_t x = cell_idx_t(0); x < cell_idx_t(particleForcesField->xSize()); ++x)
+            for (cell_idx_t x = cell_idx_t{0}; x < cell_idx_t(particleForcesField->xSize()); ++x)
             {
                const Vector3< real_t > cellCenter =
-                  Vector3< real_t >(real_t(x) + real_t(0.5) * dx, real_t(y) + real_t(0.5) * dx,
-                                    real_t(z) + real_t(0.5) * dx) +
+                  Vector3< real_t >(static_cast< real_t >(x) + real_t{0.5} * dx, static_cast< real_t >(y) + real_t{0.5} * dx,
+                                    static_cast< real_t >(z) + real_t{0.5} * dx) +
                   block->getAABB().minCorner();
                for (uint_t p = 0; p < nOverlappingParticlesField->get(x, y, z); p++)
                {

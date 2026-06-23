@@ -44,20 +44,20 @@ namespace gpu
                  _blockIdx.y  * zOffset_ ;
       }
 
-      __device__ T & get()       { return * (T*)(ptr_);                }
-      __device__ T & get( int f) { return * (T*)(ptr_ + f * fOffset_); }
+      __device__ T & get()       { return * static_cast< T* >(ptr_);                }
+      __device__ T & get( int f) { return * static_cast< T* >(ptr_ + f * fOffset_); }
 
 
       __device__ T & getNeighbor( int cx, int cy, int cz ) const
       {
-         return * (T*)( ptr_ + cx * (int)(xOffset_) +
+         return * static_cast< T* >( ptr_ + cx * (int)(xOffset_) +
                                cy * (int)(yOffset_) +
                                cz * (int)(zOffset_) );
       }
 
       __device__ T & getNeighbor( int cx, int cy, int cz, int cf )
       {
-         return * (T*)( ptr_ + cx * (int)(xOffset_) +
+         return * static_cast< T* >( ptr_ + cx * (int)(xOffset_) +
                                cy * (int)(yOffset_) +
                                cz * (int)(zOffset_) +
                                cf * (int)(fOffset_) );

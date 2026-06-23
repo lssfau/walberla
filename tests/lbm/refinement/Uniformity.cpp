@@ -108,24 +108,24 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 {
    const AABB & domain = forest.getDomain();
 
-   const real_t xSpan = domain.xSize() / real_t(32);
-   const real_t ySpan = domain.ySize() / real_t(32);
-   const real_t zSpan = domain.zSize() / real_t(64);
+   const real_t xSpan = domain.xSize() / real_t{32};
+   const real_t ySpan = domain.ySize() / real_t{32};
+   const real_t zSpan = domain.zSize() / real_t{64};
 
-   const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t(2);
-   const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t(2);
-   const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t(2);
+   const real_t xMiddle = ( domain.xMin() + domain.xMax() ) / real_t{2};
+   const real_t yMiddle = ( domain.yMin() + domain.yMax() ) / real_t{2};
+   const real_t zMiddle = ( domain.zMin() + domain.zMax() ) / real_t{2};
 
    AABB middleBox( xMiddle - xSpan, yMiddle - ySpan, zMiddle +             zSpan,
-                   xMiddle + xSpan, yMiddle + ySpan, zMiddle + real_t(3) * zSpan );
+                   xMiddle + xSpan, yMiddle + ySpan, zMiddle + real_t{3} * zSpan );
 
    AABB shiftedBox( xMiddle +             xSpan, yMiddle +             ySpan, zMiddle +             zSpan,
-                    xMiddle + real_t(3) * xSpan, yMiddle + real_t(3) * ySpan, zMiddle + real_t(3) * zSpan );
+                    xMiddle + real_t{3} * xSpan, yMiddle + real_t{3} * ySpan, zMiddle + real_t{3} * zSpan );
 
    for( auto & block : forest )
    {
       if( block.getAABB().intersects( middleBox ) || block.getAABB().intersects( shiftedBox ) )
-         if( block.getLevel() < ( levels - uint_t(1) ) )
+         if( block.getLevel() < ( levels - uint_t{1} ) )
             block.setMarker( true );
    }
 }
@@ -134,7 +134,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 {
    for( auto & block : forest )
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
@@ -159,7 +159,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // calculate process distribution
    const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t{0}, memoryLimit, true );
 
    WALBERLA_LOG_INFO_ON_ROOT( sforest );
 
@@ -217,7 +217,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
 #ifdef TEST_USES_VTK_OUTPUT
 shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & pdfFieldId )
 {
-   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t(500), uint_t(0) );
+   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "fluid_field", uint_t{500}, uint_t{0} );
 
 #ifndef TEST_BASED_ON_UNIFORM_GRID
    blockforest::communication::NonUniformBufferedScheme< stencil::D3Q27 > pdfGhostLayerSync( blocks );
@@ -226,7 +226,7 @@ shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlo
 #endif
 
    const auto & aabb = blocks->getDomain();
-   vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t(19), aabb.zMin(), aabb.xMax(), real_t(20), aabb.zMax() ) );
+   vtk::AABBCellFilter aabbFilter( AABB( aabb.xMin(), real_t{19}, aabb.zMin(), aabb.xMax(), real_t{20}, aabb.zMax() ) );
    pdfFieldVTKWriter->addCellInclusionFilter( aabbFilter );
 
    auto velocityWriter = make_shared< lbm::VelocityVTKWriter< LatticeModel_T, float > >( pdfFieldId, "VelocityFromPDF" );
@@ -306,15 +306,15 @@ int main( int argc, char ** argv )
 
    logging::Logging::printHeaderOnStream();
 
-   const uint_t levels = uint_t(4);
+   const uint_t levels = uint_t{4};
 
-   const uint_t xBlocks = uint_t(4);
-   const uint_t yBlocks = uint_t(4);
-   const uint_t zBlocks = uint_t(4);
+   const uint_t xBlocks = uint_t{4};
+   const uint_t yBlocks = uint_t{4};
+   const uint_t zBlocks = uint_t{4};
 
-   const uint_t xCells = shortrun ? uint_t(4) : uint_t(10);
-   const uint_t yCells = shortrun ? uint_t(4) : uint_t(10);
-   const uint_t zCells = shortrun ? uint_t(4) : uint_t(10);
+   const uint_t xCells = shortrun ? uint_t{4} : uint_t{10};
+   const uint_t yCells = shortrun ? uint_t{4} : uint_t{10};
+   const uint_t zCells = shortrun ? uint_t{4} : uint_t{10};
 
    auto blocks = createBlockStructure( levels, xBlocks, yBlocks, zBlocks, xCells, yCells, zCells, true, true, true );
 
@@ -326,7 +326,7 @@ int main( int argc, char ** argv )
                               "\n   - " << xCells << " x " << yCells << " x " << zCells << " cells per block"
                               "\n   - " << levels << " levels"
                               "\n   - omega (coarsest grid): " << omega <<
-                              "\n   - omega (finest grid): " << lbm::collision_model::levelDependentRelaxationParameter( levels - uint_t(1), omega, uint_t(0) ) <<
+                              "\n   - omega (finest grid): " << lbm::collision_model::levelDependentRelaxationParameter( levels - uint_t{1}, omega, uint_t{0} ) <<
                               "\n   - velocity: " << velocity );
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
@@ -336,7 +336,7 @@ int main( int argc, char ** argv )
    //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT::constructTRT( omega, lbm::collision_model::TRT::lambda_d( omega ) ) );
    //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT( 1.19, 1.4, 1.2, omega, 1.4, 1.98 ) );
 
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, velocity, real_t(1), FieldGhostLayers );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, velocity, real_t{1}, FieldGhostLayers );
    BlockDataID tmpFieldId = lbm::addPdfFieldToStorage( blocks, "tmp field", latticeModel, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
@@ -358,7 +358,7 @@ int main( int argc, char ** argv )
 
    BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldId, pdfFieldId ), "dummy boundary handling" );
 
-   const uint_t timeSteps = shortrun ? uint_t(2) : uint_t(1001);
+   const uint_t timeSteps = shortrun ? uint_t{2} : uint_t{1001};
    SweepTimeloop timeloop( blocks->getBlockStorage(), timeSteps );
 
    auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, tmpFieldId, flagFieldId, Fluid_Flag );
@@ -368,10 +368,10 @@ int main( int argc, char ** argv )
 
    if( !shortrun )
    {
-      timeloop.addFuncAfterTimeStep( AccuracyChecker( blocks, pdfFieldId, velocity, uint_t(50) ), "accuracy checker" );
+      timeloop.addFuncAfterTimeStep( AccuracyChecker( blocks, pdfFieldId, velocity, uint_t{50} ), "accuracy checker" );
 
       timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >( blocks, pdfFieldId, flagFieldId, Fluid_Flag,
-                                                                                                                                     uint_t(1), false, true ) ),
+                                                                                                                                     uint_t{1}, false, true ) ),
                                      "LBM stability check" );
    }
 
@@ -384,7 +384,7 @@ int main( int argc, char ** argv )
 
 #ifdef TEST_USES_VTK_OUTPUT
    vtk::writeDomainDecomposition( blocks );
-   field::createVTKOutput< FlagField_T >( flagFieldId, *blocks, "flag_field", uint_t(1), uint_t(1) )();
+   field::createVTKOutput< FlagField_T >( flagFieldId, *blocks, "flag_field", uint_t{1}, uint_t{1} )();
 #endif
 
    WcTimingPool timeloopTiming;
@@ -394,7 +394,7 @@ int main( int argc, char ** argv )
    // check constant velocity
 
    //using ErrorField = GhostLayerField<real_t,1>;
-   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t(0), field::fzyx, FieldGhostLayers );
+   //BlockDataID errorFieldId = field::addToStorage< ErrorField >( blocks, "error field", real_t{0}, field::fzyx, FieldGhostLayers );
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
@@ -406,7 +406,7 @@ int main( int argc, char ** argv )
          Vector3< real_t > cellVelocity = pdfField->getVelocity( cell.x(), cell.y(), cell.z() );
          Vector3< real_t > diff = cellVelocity - velocity;
 
-         WALBERLA_CHECK_FLOAT_EQUAL( diff.length() / velocity.length(), real_t(0) );
+         WALBERLA_CHECK_FLOAT_EQUAL( diff.length() / velocity.length(), real_t{0} );
 
          //errorField->get( cell.x(), cell.y(), cell.z() ) = diff.length() / velocity.length();
       }

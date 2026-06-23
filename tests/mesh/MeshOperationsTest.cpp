@@ -92,9 +92,9 @@ void testCube()
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[2], aabbCenter[2] );
 
    Matrix3<Scalar> inertiaTensor = computeInertiaTensor(mesh);
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / ( real_t(12) * aabb.volume() ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / ( real_t(12) * aabb.volume() ) );
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / ( real_t(12) * aabb.volume() ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / ( real_t{12} * aabb.volume() ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / ( real_t{12} * aabb.volume() ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / ( real_t{12} * aabb.volume() ) );
 
    scale( mesh, Vector3<Scalar>( Scalar(2), Scalar(3), Scalar(0.5) ) );
    aabb = computeAABB( mesh );
@@ -117,9 +117,9 @@ void testCube()
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[2], aabbCenter[2] );
 
    inertiaTensor = computeInertiaTensor(mesh);
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), aabb.volume() * ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
-   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / real_t(12) );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), aabb.volume() * ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / real_t{12} );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / real_t{12} );
+   WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / real_t{12} );
 
 
    rotate(mesh, Vector3<Scalar>{0, 0, 1}, static_cast<Scalar>(M_PI_2), Vector3<Scalar>{-4, 0, 0});

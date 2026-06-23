@@ -159,19 +159,19 @@ int main( int argc, char ** argv )
    if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "MIXER" );
 
-   const real_t spacing = mainConf.getParameter<real_t>("spacing", real_t(1.0) );
+   const real_t spacing = mainConf.getParameter<real_t>("spacing", real_t{1.0} );
    WALBERLA_LOG_INFO_ON_ROOT("spacing: " << spacing);
 
-   const real_t radius = mainConf.getParameter<real_t>("radius", real_t(0.5) );
+   const real_t radius = mainConf.getParameter<real_t>("radius", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("radius: " << radius);
 
-   const real_t vMax = mainConf.getParameter<real_t>("vMax", real_t(0.5) );
+   const real_t vMax = mainConf.getParameter<real_t>("vMax", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("vMax: " << vMax);
 
-   const real_t rotationSpeed = mainConf.getParameter<real_t>("rotationSpeed", real_t(0.5) );
+   const real_t rotationSpeed = mainConf.getParameter<real_t>("rotationSpeed", real_t{0.5} );
    WALBERLA_LOG_INFO_ON_ROOT("rotationSpeed: " << rotationSpeed);
 
-   const Vec3 gravity = mainConf.getParameter<Vec3>("gravity", Vec3(0, 0, real_t(9.81)));
+   const Vec3 gravity = mainConf.getParameter<Vec3>("gravity", Vec3(0, 0, real_t{9.81}));
    WALBERLA_LOG_INFO_ON_ROOT("rotationSpeed: " << rotationSpeed);
 
    int64_t simulationSteps = mainConf.getParameter<int64_t>("simulationSteps", 1000 );
@@ -229,9 +229,9 @@ int main( int argc, char ** argv )
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
-         auto maxDist = real_t(simulationDomain.xSize()) * real_t(0.5) - spacing;
+         auto maxDist = real_t(simulationDomain.xSize()) * real_t{0.5} - spacing;
          auto dist = (pt - simulationDomain.center());
-         dist[2] = real_t(0);
+         dist[2] = real_t{0};
          if (dist.sqrLength() > maxDist*maxDist) continue;
 
          auto p                       = ps->create();
@@ -250,10 +250,10 @@ int main( int argc, char ** argv )
    auto boundary = createBoundary(ps,
                                   ss,
                                   simulationDomain.center(),
-                                  real_t(simulationDomain.xSize()) * real_t(0.5),
+                                  real_t(simulationDomain.xSize()) * real_t{0.5},
                                   Vec3(0,0,1));
    WALBERLA_UNUSED(boundary);
-   //boundary->setAngularVelocity(Vec3(real_t(0), real_t(0), rotationSpeed));
+   //boundary->setAngularVelocity(Vec3(real_t{0}, real_t{0}, rotationSpeed));
    createPlane(ps, ss, simulationDomain.minCorner(), Vec3(0,0,1));
    createPlane(ps, ss, simulationDomain.maxCorner(), Vec3(0,0,-1));
 
@@ -264,7 +264,7 @@ int main( int argc, char ** argv )
    auto mixingBlade = ss->create<data::Box>( Vec3(0.009_r, simulationDomain.ySize(), simulationDomain.zSize()) );
    ss->shapes[mixingBlade]->updateMassAndInertia(std::numeric_limits<real_t>::infinity());
    auto box0                       = ps->create();
-   box0->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t(0.5),0.0,0.0);
+   box0->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t{0.5},0.0,0.0);
    box0->setShapeID( mixingBlade );
    box0->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    box0->getTypeRef()              = 0;
@@ -276,7 +276,7 @@ int main( int argc, char ** argv )
 //   box0->getRotationRef().rotate(Vec3(0,0,1), -math::pi * 0.15 );
 
    auto box1                       = ps->create();
-   box1->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t(0.5),0.0,0.0);
+   box1->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t{0.5},0.0,0.0);
    box1->setShapeID( mixingBlade );
    box1->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    box1->getTypeRef()              = 0;
@@ -287,12 +287,12 @@ int main( int argc, char ** argv )
    box1->getRotationRef().rotate(Vec3(0,1,0), math::pi * 0.15 );
 //   box1->getRotationRef().rotate(Vec3(0,0,1), -math::pi * 0.15 );
    dp = ( box1->getPosition() - origin );
-   dRot = Rot3(Vec3(real_t(0), real_t(0), math::pi * 0.5));
+   dRot = Rot3(Vec3(real_t{0}, real_t{0}, math::pi * 0.5));
    box1->setPosition( origin + dRot.getMatrix() * dp );
    box1->getRotationRef().rotate(dRot);
 
    auto box2                       = ps->create();
-   box2->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t(0.5),0.0,0.0);
+   box2->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t{0.5},0.0,0.0);
    box2->setShapeID( mixingBlade );
    box2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    box2->getTypeRef()              = 0;
@@ -303,12 +303,12 @@ int main( int argc, char ** argv )
    box2->getRotationRef().rotate(Vec3(0,1,0), math::pi * 0.15 );
 //   box2->getRotationRef().rotate(Vec3(0,0,1), -math::pi * 0.15 );
    dp = ( box2->getPosition() - origin );
-   dRot = Rot3(Vec3(real_t(0), real_t(0), math::pi));
+   dRot = Rot3(Vec3(real_t{0}, real_t{0}, math::pi));
    box2->setPosition( origin + dRot.getMatrix() * dp );
    box2->getRotationRef().rotate(dRot);
 
    auto box3                       = ps->create();
-   box3->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t(0.5),0.0,0.0);
+   box3->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t{0.5},0.0,0.0);
    box3->setShapeID( mixingBlade );
    box3->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    box3->getTypeRef()              = 0;
@@ -319,7 +319,7 @@ int main( int argc, char ** argv )
    box3->getRotationRef().rotate(Vec3(0,1,0), math::pi * 0.15_r );
 //   box3->getRotationRef().rotate(Vec3(0,0,1), -math::pi * 0.15 );
    dp = ( box3->getPosition() - origin );
-   dRot = Rot3(Vec3(real_t(0), real_t(0), math::pi * 1.5_r));
+   dRot = Rot3(Vec3(real_t{0}, real_t{0}, math::pi * 1.5_r));
    box3->setPosition( origin + dRot.getMatrix() * dp );
    box3->getRotationRef().rotate(dRot);
 
@@ -345,11 +345,11 @@ int main( int argc, char ** argv )
    kernel::SpringDashpot                 dem(1);
    const auto ct  = dt * ct_in_dt;
    const auto stiffness = (math::pi*math::pi + std::log(cor)*std::log(cor)) / (ct*ct);
-   const auto damping   = (real_t(2) * std::log(cor)) / (ct);
+   const auto damping   = (real_t{2} * std::log(cor)) / (ct);
    dem.setStiffness(0, 0, real_t(8.11e6));
    dem.setDampingN (0, 0, real_t(6.86e1));
    dem.setDampingT (0, 0, real_t(6.86e1));
-   dem.setFriction (0, 0, real_t(0.4));
+   dem.setFriction (0, 0, real_t{0.4});
 
    collision_detection::AnalyticContactDetection acd;
    kernel::DoubleCast                 double_cast;
@@ -365,7 +365,7 @@ int main( int argc, char ** argv )
    {
       fout.open("timings.txt");
    }
-   dRot = Rot3(Vec3(real_t(0), real_t(0), rotationSpeed) * dt);
+   dRot = Rot3(Vec3(real_t{0}, real_t{0}, rotationSpeed) * dt);
    for (int64_t i=0; i < simulationSteps; ++i)
    {
       if (i % visSpacing == 0)
@@ -416,7 +416,7 @@ int main( int argc, char ** argv )
                {
                   if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), domain))
                   {
-                     auto meff = real_t(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
+                     auto meff = real_t{1} / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
                      dem.setStiffness(0, 0, stiffness * meff);
                      dem.setDampingN(0, 0, damping * meff);
                      dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());

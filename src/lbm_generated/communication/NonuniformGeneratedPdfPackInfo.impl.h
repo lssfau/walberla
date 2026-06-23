@@ -275,14 +275,14 @@ NonuniformGeneratedPdfPackInfo< PdfField_T >::getNeighborShift(const BlockID& fi
 
    uint_t const branchId = fineBlock.getBranchId();
 
-   shift[0] = (stencil::cx[dir] == 0) ? (((branchId & uint_t(1)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-              cell_idx_t(0);
-   shift[1] = (stencil::cy[dir] == 0) ? (((branchId & uint_t(2)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-              cell_idx_t(0);
-   shift[2] = (Stencil::D == uint_t(3)) ?
-              ((stencil::cz[dir] == 0) ? (((branchId & uint_t(4)) == uint_t(0)) ? cell_idx_t(-1) : cell_idx_t(1)) :
-               cell_idx_t(0)) :
-              cell_idx_t(0);
+   shift[0] = (stencil::cx[dir] == 0) ? (((branchId & uint_t{1}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+              cell_idx_t{0};
+   shift[1] = (stencil::cy[dir] == 0) ? (((branchId & uint_t{2}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+              cell_idx_t{0};
+   shift[2] = (Stencil::D == uint_t{3}) ?
+              ((stencil::cz[dir] == 0) ? (((branchId & uint_t{4}) == uint_t{0}) ? cell_idx_t{-1} : cell_idx_t{1}) :
+               cell_idx_t{0}) :
+              cell_idx_t{0};
 
    return shift;
 }
@@ -303,12 +303,12 @@ inline CellInterval NonuniformGeneratedPdfPackInfo< PdfField_T >::intervalHullIn
    {
       if (dirVec[i] == 1)
       {
-         result.min()[i] = result.max()[i] + cell_idx_t(1);
+         result.min()[i] = result.max()[i] + cell_idx_t{1};
          result.max()[i] += width;
       }
       if (dirVec[i] == -1)
       {
-         result.max()[i] = result.min()[i] - cell_idx_t(1);
+         result.max()[i] = result.min()[i] - cell_idx_t{1};
          result.min()[i] -= width;
       }
    }
@@ -360,15 +360,15 @@ inline void NonuniformGeneratedPdfPackInfo< PdfField_T >::getCoarseBlockCommInte
    // In all directions, restrict the slice to the lower or upper half, depending on neighbor shift
    for (uint_t i = 0; i != Stencil::D; ++i)
    {
-      if (shift[i] == cell_idx_t(-1))
+      if (shift[i] == cell_idx_t{-1})
       {
          WALBERLA_ASSERT_EQUAL(mainSlice.size(i) & 1, 0)
-         mainSlice.max()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t(2)) - cell_idx_t(1);
+         mainSlice.max()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t{2}) - cell_idx_t{1};
       }
-      if (shift[i] == cell_idx_t(1))
+      if (shift[i] == cell_idx_t{1})
       {
          WALBERLA_ASSERT_EQUAL(mainSlice.size(i) & 1, 0)
-         mainSlice.min()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t(2));
+         mainSlice.min()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t{2});
       }
    }
 
@@ -378,7 +378,7 @@ inline void NonuniformGeneratedPdfPackInfo< PdfField_T >::getCoarseBlockCommInte
 
    // Get extended slices in all tangential directions for the diagonal part of communication
    forEachSubdirection(-shift, [&](Vector3< cell_idx_t > t) {
-     CellInterval hullInterval = intervalHullInDirection(mainSlice, t, cell_idx_t(1));
+     CellInterval hullInterval = intervalHullInDirection(mainSlice, t, cell_idx_t{1});
      Direction subCommDir      = stencil::vectorToDirection(commDirVec - t);
      if(CommunicationStencil::containsDir(subCommDir)){
         intervals.emplace_back(subCommDir, hullInterval);
@@ -409,7 +409,7 @@ inline void NonuniformGeneratedPdfPackInfo< PdfField_T >::getFineBlockCommInterv
    Vector3< cell_idx_t > const commDirVec{ stencil::cx[dir], stencil::cy[dir], stencil::cz[dir] };
 
    forEachSubdirection(-shift, [&](Vector3< cell_idx_t > t) {
-     CellInterval hullInterval = intervalHullInDirection(mainSlice, t, cell_idx_t(2));
+     CellInterval hullInterval = intervalHullInDirection(mainSlice, t, cell_idx_t{2});
      Direction subCommDir      = stencil::vectorToDirection(commDirVec + t);
      if(CommunicationStencil::containsDir(subCommDir)){
         intervals.emplace_back(subCommDir, hullInterval);
@@ -465,15 +465,15 @@ CellInterval NonuniformGeneratedPdfPackInfo< PdfField_T >::getCoarseBlockCoalesc
    // In all directions, restrict the slice to the lower or upper half, depending on neighbor shift
    for (uint_t i = 0; i != Stencil::D; ++i)
    {
-      if (shift[i] == cell_idx_t(-1))
+      if (shift[i] == cell_idx_t{-1})
       {
          WALBERLA_ASSERT_EQUAL(mainSlice.size(i) & 1, 0)
-         mainSlice.max()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t(2)) - cell_idx_t(1);
+         mainSlice.max()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t{2}) - cell_idx_t{1};
       }
-      if (shift[i] == cell_idx_t(1))
+      if (shift[i] == cell_idx_t{1})
       {
          WALBERLA_ASSERT_EQUAL(mainSlice.size(i) & 1, 0)
-         mainSlice.min()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t(2));
+         mainSlice.min()[i] = mainSlice.min()[i] + cell_idx_c(mainSlice.size(i) / uint_t{2});
       }
    }
 

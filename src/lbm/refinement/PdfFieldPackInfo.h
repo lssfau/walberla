@@ -150,20 +150,20 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataEqualLevelI
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
    const bool optimizedCommunication = ( optimizedEqualLevelCommunication_ && !coarserNeighborExistsInVicinity( sender, dir ) );
 
-   if( optimizedCommunication && Stencil::d_per_d_length[dir] == uint_t(0) )
+   if( optimizedCommunication && Stencil::d_per_d_length[dir] == uint_t{0} )
       return;
 
    const PdfField_T * field = sender->getData< PdfField_T >( pdfFieldId_ );
 
    if( optimizedCommunication )
    {
-      CellInterval packingInterval = equalLevelPackInterval( dir, field->xyzSize(), uint_t(1) );
+      CellInterval packingInterval = equalLevelPackInterval( dir, field->xyzSize(), uint_t{1} );
 
       for( auto cell = field->beginSliceXYZ( packingInterval ); cell != field->end(); ++cell )
          for( uint_t d = 0; d < Stencil::d_per_d_length[dir]; ++d )
@@ -189,7 +189,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataEqualLevelI
    {
       CellInterval packingInterval = equalLevelPackInterval( dir, field->xyzSize(), equalLevelCells_ );
 
-      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t(3) )
+      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t{3} )
       {
          WALBERLA_ASSERT( equalLevelFaceIntervalSplitable( packingInterval, dir ) );
 
@@ -203,7 +203,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataEqualLevelI
                   buffer << cell.getF( d );
          }
 
-         if( Stencil::d_per_d_length[dir] > uint_t(0) )
+         if( Stencil::d_per_d_length[dir] > uint_t{0} )
             for( auto cell = field->beginSliceXYZ( intervals[4] ); cell != field->end(); ++cell )
                for( uint_t d = 0; d < Stencil::d_per_d_length[dir]; ++d )
                   buffer << cell.getF( Stencil::idx[ Stencil::d_per_d[dir][d] ] );
@@ -245,7 +245,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataEqualLeve
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
@@ -253,14 +253,14 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataEqualLeve
 
    const auto invDir = stencil::inverseDir[dir];
 
-   if( optimizedCommunication && Stencil::d_per_d_length[invDir] == uint_t(0) )
+   if( optimizedCommunication && Stencil::d_per_d_length[invDir] == uint_t{0} )
       return;
 
    PdfField_T * field = receiver->getData< PdfField_T >( pdfFieldId_ );
 
    if( optimizedCommunication )
    {
-      CellInterval unpackingInterval = equalLevelUnpackInterval( dir, field->xyzSize(), uint_t(1) );
+      CellInterval unpackingInterval = equalLevelUnpackInterval( dir, field->xyzSize(), uint_t{1} );
 
       for( auto cell = field->beginSliceXYZ( unpackingInterval ); cell != field->end(); ++cell )
          for( uint_t d = 0; d < Stencil::d_per_d_length[invDir]; ++d )
@@ -286,7 +286,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataEqualLeve
    {
       CellInterval unpackingInterval = equalLevelUnpackInterval( dir, field->xyzSize(), equalLevelCells_ );
 
-      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t(3) )
+      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t{3} )
       {
          WALBERLA_ASSERT( equalLevelFaceIntervalSplitable( unpackingInterval, invDir ) );
 
@@ -300,7 +300,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataEqualLeve
                   buffer >> cell.getF( d );
          }
 
-         if( Stencil::d_per_d_length[invDir] > uint_t(0) )
+         if( Stencil::d_per_d_length[invDir] > uint_t{0} )
             for( auto cell = field->beginSliceXYZ( intervals[4] ); cell != field->end(); ++cell )
                for( uint_t d = 0; d < Stencil::d_per_d_length[invDir]; ++d )
                   buffer >> cell.getF( Stencil::idx[ Stencil::d_per_d[invDir][d] ] );
@@ -341,13 +341,13 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalEqu
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
    const bool optimizedCommunication = ( optimizedEqualLevelCommunication_ && !coarserNeighborExistsInVicinity( sender, dir ) );
 
-   if( optimizedCommunication && Stencil::d_per_d_length[dir] == uint_t(0) )
+   if( optimizedCommunication && Stencil::d_per_d_length[dir] == uint_t{0} )
       return;
 
    const PdfField_T * sf =   sender->getData< PdfField_T >( pdfFieldId_ );
@@ -357,8 +357,8 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalEqu
 
    if( optimizedCommunication )
    {
-      CellInterval   packingInterval = equalLevelPackInterval( dir, sf->xyzSize(), uint_t(1) );
-      CellInterval unpackingInterval = equalLevelUnpackInterval( stencil::inverseDir[dir], rf->xyzSize(), uint_t(1) );
+      CellInterval   packingInterval = equalLevelPackInterval( dir, sf->xyzSize(), uint_t{1} );
+      CellInterval unpackingInterval = equalLevelUnpackInterval( stencil::inverseDir[dir], rf->xyzSize(), uint_t{1} );
 
       WALBERLA_ASSERT_EQUAL( packingInterval.xSize(), unpackingInterval.xSize() );
       WALBERLA_ASSERT_EQUAL( packingInterval.ySize(), unpackingInterval.ySize() );
@@ -406,7 +406,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalEqu
       WALBERLA_ASSERT_EQUAL( packingInterval.ySize(), unpackingInterval.ySize() );
       WALBERLA_ASSERT_EQUAL( packingInterval.zSize(), unpackingInterval.zSize() );
 
-      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t(3) )
+      if( optimizedEqualLevelCommunication_ && isFaceDirection( dir ) && Stencil::D == uint_t{3} )
       {
          WALBERLA_ASSERT( equalLevelFaceIntervalSplitable(   packingInterval, dir ) );
          WALBERLA_ASSERT( equalLevelFaceIntervalSplitable( unpackingInterval, dir ) );
@@ -433,7 +433,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalEqu
             WALBERLA_ASSERT( rCell == rf->end() );
          }
 
-         if( Stencil::d_per_d_length[dir] > uint_t(0) )
+         if( Stencil::d_per_d_length[dir] > uint_t{0} )
          {
             auto sCell = sf->beginSliceXYZ( pIntervals[4] );
             auto rCell = rf->beginSliceXYZ( uIntervals[4] );
@@ -505,7 +505,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataCoarseToFin
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
@@ -549,7 +549,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataCoarseToF
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
@@ -559,9 +559,9 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataCoarseToF
 
    if( optimizedForLinearExplosion_ )
    {
-      for( cell_idx_t z = unpackingInterval.zMin(); z <= unpackingInterval.zMax(); z += cell_idx_t(2) ) {
-         for( cell_idx_t y = unpackingInterval.yMin(); y <= unpackingInterval.yMax(); y += cell_idx_t(2) ) {
-            for( cell_idx_t x = unpackingInterval.xMin(); x <= unpackingInterval.xMax(); x += cell_idx_t(2) ) {
+      for( cell_idx_t z = unpackingInterval.zMin(); z <= unpackingInterval.zMax(); z += cell_idx_t{2} ) {
+         for( cell_idx_t y = unpackingInterval.yMin(); y <= unpackingInterval.yMax(); y += cell_idx_t{2} ) {
+            for( cell_idx_t x = unpackingInterval.xMin(); x <= unpackingInterval.xMax(); x += cell_idx_t{2} ) {
                for( uint_t idx = 0; idx < Stencil::Size; ++idx )
                {
                   typename PdfField_T::value_type value;
@@ -574,9 +574,9 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataCoarseToF
    }
    else
    {
-      for( cell_idx_t z = unpackingInterval.zMin(); z <= unpackingInterval.zMax(); z += cell_idx_t(2) ) {
-         for( cell_idx_t y = unpackingInterval.yMin(); y <= unpackingInterval.yMax(); y += cell_idx_t(2) ) {
-            for( cell_idx_t x = unpackingInterval.xMin(); x <= unpackingInterval.xMax(); x += cell_idx_t(2) ) {
+      for( cell_idx_t z = unpackingInterval.zMin(); z <= unpackingInterval.zMax(); z += cell_idx_t{2} ) {
+         for( cell_idx_t y = unpackingInterval.yMin(); y <= unpackingInterval.yMax(); y += cell_idx_t{2} ) {
+            for( cell_idx_t x = unpackingInterval.xMin(); x <= unpackingInterval.xMax(); x += cell_idx_t{2} ) {
                for( uint_t idx = 0; idx < Stencil::Size; ++idx )
              //for( uint_t d = 0; d < Stencil::d_per_d_length[ stencil::inverseDir[dir] ]; ++d )
                {
@@ -586,15 +586,15 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataCoarseToF
                 //const auto idx = Stencil::idx[ Stencil::d_per_d[ stencil::inverseDir[dir] ][d] ];
 
                   field->get( x,                 y,                 z,                 idx ) = value;
-                  field->get( x + cell_idx_t(1), y,                 z,                 idx ) = value;
-                  field->get( x,                 y + cell_idx_t(1), z,                 idx ) = value;
-                  field->get( x + cell_idx_t(1), y + cell_idx_t(1), z,                 idx ) = value;
-                  if( Stencil::D == uint_t(3) )
+                  field->get( x + cell_idx_t{1}, y,                 z,                 idx ) = value;
+                  field->get( x,                 y + cell_idx_t{1}, z,                 idx ) = value;
+                  field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z,                 idx ) = value;
+                  if( Stencil::D == uint_t{3} )
                   {
-                     field->get( x,                 y,                 z + cell_idx_t(1), idx ) = value;
-                     field->get( x + cell_idx_t(1), y,                 z + cell_idx_t(1), idx ) = value;
-                     field->get( x,                 y + cell_idx_t(1), z + cell_idx_t(1), idx ) = value;
-                     field->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1), idx ) = value;
+                     field->get( x,                 y,                 z + cell_idx_t{1}, idx ) = value;
+                     field->get( x + cell_idx_t{1}, y,                 z + cell_idx_t{1}, idx ) = value;
+                     field->get( x,                 y + cell_idx_t{1}, z + cell_idx_t{1}, idx ) = value;
+                     field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1}, idx ) = value;
                   }
                }
             }
@@ -615,7 +615,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
@@ -631,11 +631,11 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
    CellInterval   packingInterval = coarseToFinePackInterval( dir, sf->xyzSize(), fineReceiver->getId() );
    CellInterval unpackingInterval = coarseToFineUnpackInterval( stencil::inverseDir[dir], rf->xyzSize(), fineReceiver->getId() );
 
-   WALBERLA_ASSERT_EQUAL( packingInterval.xSize() * uint_t(2), unpackingInterval.xSize() );
-   WALBERLA_ASSERT_EQUAL( packingInterval.ySize() * uint_t(2), unpackingInterval.ySize() );
-   if( Stencil::D == uint_t(3) )
+   WALBERLA_ASSERT_EQUAL( packingInterval.xSize() * uint_t{2}, unpackingInterval.xSize() );
+   WALBERLA_ASSERT_EQUAL( packingInterval.ySize() * uint_t{2}, unpackingInterval.ySize() );
+   if( Stencil::D == uint_t{3} )
    {
-      WALBERLA_ASSERT_EQUAL( packingInterval.zSize() * uint_t(2), unpackingInterval.zSize() );
+      WALBERLA_ASSERT_EQUAL( packingInterval.zSize() * uint_t{2}, unpackingInterval.zSize() );
    }
    else
    {
@@ -661,21 +661,21 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
                   WALBERLA_ASSERT( !math::isnan( sf->get( sx, sy, sz, idx ) ), sx << ", " << sy << ", " << sz << ", " << idx << " coarse sender block = " << coarseSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
 #endif
                }
-               rx += cell_idx_t(2);
+               rx += cell_idx_t{2};
             }
-            ry += cell_idx_t(2);
-            WALBERLA_ASSERT_EQUAL( rx, unpackingInterval.xMax() + cell_idx_t(1) );
+            ry += cell_idx_t{2};
+            WALBERLA_ASSERT_EQUAL( rx, unpackingInterval.xMax() + cell_idx_t{1} );
          }
-         rz += cell_idx_t(2);
-         WALBERLA_ASSERT_EQUAL( ry, unpackingInterval.yMax() + cell_idx_t(1) );
+         rz += cell_idx_t{2};
+         WALBERLA_ASSERT_EQUAL( ry, unpackingInterval.yMax() + cell_idx_t{1} );
       }
-      if( Stencil::D == uint_t(3) )
+      if( Stencil::D == uint_t{3} )
       {
-         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t(1) );
+         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t{1} );
       }
       else
       {
-         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t(2) );
+         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t{2} );
       }
    }
    else
@@ -701,32 +701,32 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
 #endif
 
                   rf->get( rx,                 ry,                 rz,                 idx ) = value;
-                  rf->get( rx + cell_idx_t(1), ry,                 rz,                 idx ) = value;
-                  rf->get( rx,                 ry + cell_idx_t(1), rz,                 idx ) = value;
-                  rf->get( rx + cell_idx_t(1), ry + cell_idx_t(1), rz,                 idx ) = value;
-                  if( Stencil::D == uint_t(3) )
+                  rf->get( rx + cell_idx_t{1}, ry,                 rz,                 idx ) = value;
+                  rf->get( rx,                 ry + cell_idx_t{1}, rz,                 idx ) = value;
+                  rf->get( rx + cell_idx_t{1}, ry + cell_idx_t{1}, rz,                 idx ) = value;
+                  if( Stencil::D == uint_t{3} )
                   {
-                     rf->get( rx,                 ry,                 rz + cell_idx_t(1), idx ) = value;
-                     rf->get( rx + cell_idx_t(1), ry,                 rz + cell_idx_t(1), idx ) = value;
-                     rf->get( rx,                 ry + cell_idx_t(1), rz + cell_idx_t(1), idx ) = value;
-                     rf->get( rx + cell_idx_t(1), ry + cell_idx_t(1), rz + cell_idx_t(1), idx ) = value;
+                     rf->get( rx,                 ry,                 rz + cell_idx_t{1}, idx ) = value;
+                     rf->get( rx + cell_idx_t{1}, ry,                 rz + cell_idx_t{1}, idx ) = value;
+                     rf->get( rx,                 ry + cell_idx_t{1}, rz + cell_idx_t{1}, idx ) = value;
+                     rf->get( rx + cell_idx_t{1}, ry + cell_idx_t{1}, rz + cell_idx_t{1}, idx ) = value;
                   }
                }
-               rx += cell_idx_t(2);
+               rx += cell_idx_t{2};
             }
-            ry += cell_idx_t(2);
-            WALBERLA_ASSERT_EQUAL( rx, unpackingInterval.xMax() + cell_idx_t(1) );
+            ry += cell_idx_t{2};
+            WALBERLA_ASSERT_EQUAL( rx, unpackingInterval.xMax() + cell_idx_t{1} );
          }
-         rz += cell_idx_t(2);
-         WALBERLA_ASSERT_EQUAL( ry, unpackingInterval.yMax() + cell_idx_t(1) );
+         rz += cell_idx_t{2};
+         WALBERLA_ASSERT_EQUAL( ry, unpackingInterval.yMax() + cell_idx_t{1} );
       }
-      if( Stencil::D == uint_t(3) )
+      if( Stencil::D == uint_t{3} )
       {
-         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t(1) );
+         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t{1} );
       }
       else
       {
-         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t(2) );
+         WALBERLA_ASSERT_EQUAL( rz, unpackingInterval.zMax() + cell_idx_t{2} );
       }
    }
 }
@@ -748,11 +748,11 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataFineToCoars
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
-   if( Stencil::d_per_d_length[dir] == uint_t(0) )
+   if( Stencil::d_per_d_length[dir] == uint_t{0} )
       return;
 
    if( ( ( isEdgeDirection(dir) || isCornerDirection(dir) ) && blocksConnectedByFaces( fineSender, coarseReceiver ) ) ||
@@ -767,11 +767,11 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataFineToCoars
 
    CellInterval packingInterval = fineToCoarsePackInterval( dir, field->xyzSize() );
 
-   const real_t factor = ( Stencil::D == uint_t(3) ) ? real_t( 0.125 ) : real_t( 0.25 );
+   const real_t factor = ( Stencil::D == uint_t{3} ) ? real_t{ 0.125 } : real_t{ 0.25 };
 
-   for( cell_idx_t z = packingInterval.zMin(); z <= packingInterval.zMax(); z += cell_idx_t(2) ) {
-      for( cell_idx_t y = packingInterval.yMin(); y <= packingInterval.yMax(); y += cell_idx_t(2) ) {
-         for( cell_idx_t x = packingInterval.xMin(); x <= packingInterval.xMax(); x += cell_idx_t(2) ) {
+   for( cell_idx_t z = packingInterval.zMin(); z <= packingInterval.zMax(); z += cell_idx_t{2} ) {
+      for( cell_idx_t y = packingInterval.yMin(); y <= packingInterval.yMax(); y += cell_idx_t{2} ) {
+         for( cell_idx_t x = packingInterval.xMin(); x <= packingInterval.xMax(); x += cell_idx_t{2} ) {
             for( uint_t d = 0; d < Stencil::d_per_d_length[dir]; ++d )
             {
                const auto idx = Stencil::idx[ Stencil::d_per_d[dir][d] ];
@@ -780,29 +780,29 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataFineToCoars
                if( boundaryHandling->isDomain(x,y,z) )
                {
                   WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z,                 idx ) ), x << ", " << y << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z,                 idx ) ), x + cell_idx_t(1) << ", " << y << ", " << z << ", " << idx <<" fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
-                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z,                 idx ) ), x << ", " << y + cell_idx_t(1) << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
-                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z,                 idx ) ), x + cell_idx_t(1) << ", " << y + cell_idx_t(1) << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
-                  if( Stencil::D == uint_t(3) )
+                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t{1}, y,                 z,                 idx ) ), x + cell_idx_t{1} << ", " << y << ", " << z << ", " << idx <<" fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t{1}, z,                 idx ) ), x << ", " << y + cell_idx_t{1} << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z,                 idx ) ), x + cell_idx_t{1} << ", " << y + cell_idx_t{1} << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                  if( Stencil::D == uint_t{3} )
                   {
-                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z + cell_idx_t(1), idx ) ), x << ", " << y << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> "  );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z + cell_idx_t(1), idx ) ), x + cell_idx_t(1) << ", " << y << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z + cell_idx_t(1), idx ) ), x << ", " << y + cell_idx_t(1) << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1), idx ) ), x + cell_idx_t(1) << ", " << y + cell_idx_t(1) << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z + cell_idx_t{1}, idx ) ), x << ", " << y << ", " << z + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> "  );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t{1}, y,                 z + cell_idx_t{1}, idx ) ), x + cell_idx_t{1} << ", " << y << ", " << z + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t{1}, z + cell_idx_t{1}, idx ) ), x << ", " << y + cell_idx_t{1} << ", " << z + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1}, idx ) ), x + cell_idx_t{1} << ", " << y + cell_idx_t{1} << ", " << z + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
                   }
                }
 #endif
 
                typename PdfField_T::value_type value  = field->get( x,                 y,                 z,                 idx );
-                                               value += field->get( x + cell_idx_t(1), y,                 z,                 idx );
-                                               value += field->get( x,                 y + cell_idx_t(1), z,                 idx );
-                                               value += field->get( x + cell_idx_t(1), y + cell_idx_t(1), z,                 idx );
-               if( Stencil::D == uint_t(3) )
+                                               value += field->get( x + cell_idx_t{1}, y,                 z,                 idx );
+                                               value += field->get( x,                 y + cell_idx_t{1}, z,                 idx );
+                                               value += field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z,                 idx );
+               if( Stencil::D == uint_t{3} )
                {
-                                               value += field->get( x,                 y,                 z + cell_idx_t(1), idx );
-                                               value += field->get( x + cell_idx_t(1), y,                 z + cell_idx_t(1), idx );
-                                               value += field->get( x,                 y + cell_idx_t(1), z + cell_idx_t(1), idx );
-                                               value += field->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1), idx );
+                                               value += field->get( x,                 y,                 z + cell_idx_t{1}, idx );
+                                               value += field->get( x + cell_idx_t{1}, y,                 z + cell_idx_t{1}, idx );
+                                               value += field->get( x,                 y + cell_idx_t{1}, z + cell_idx_t{1}, idx );
+                                               value += field->get( x + cell_idx_t{1}, y + cell_idx_t{1}, z + cell_idx_t{1}, idx );
                }
 
                buffer << ( factor * value );
@@ -825,12 +825,12 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::unpackDataFineToCoa
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
    auto invDir = stencil::inverseDir[dir];
-   if( Stencil::d_per_d_length[invDir] == uint_t(0) )
+   if( Stencil::d_per_d_length[invDir] == uint_t{0} )
       return;
 
    if( ( ( isEdgeDirection(dir) || isCornerDirection(dir) ) && blocksConnectedByFaces( coarseReceiver, fineSender ) ) ||
@@ -874,11 +874,11 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalFin
 #endif
 {
 #ifndef NDEBUG
-   if( Stencil::D == uint_t(2) )
+   if( Stencil::D == uint_t{2} )
       WALBERLA_ASSERT_EQUAL( stencil::cz[dir], 0 );
 #endif
 
-   if( Stencil::d_per_d_length[dir] == uint_t(0) )
+   if( Stencil::d_per_d_length[dir] == uint_t{0} )
       return;
 
    if( ( ( isEdgeDirection(dir) || isCornerDirection(dir) ) && blocksConnectedByFaces( fineSender, coarseReceiver->getId() ) ) ||
@@ -897,18 +897,18 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalFin
    CellInterval   packingInterval = fineToCoarsePackInterval( dir, sf->xyzSize() );
    CellInterval unpackingInterval = fineToCoarseUnpackInterval( stencil::inverseDir[dir], rf->xyzSize(), fineSender->getId() );
 
-   WALBERLA_ASSERT_EQUAL( packingInterval.xSize(), unpackingInterval.xSize() * uint_t(2) );
-   WALBERLA_ASSERT_EQUAL( packingInterval.ySize(), unpackingInterval.ySize() * uint_t(2) );
-   if( Stencil::D == uint_t(3) )
+   WALBERLA_ASSERT_EQUAL( packingInterval.xSize(), unpackingInterval.xSize() * uint_t{2} );
+   WALBERLA_ASSERT_EQUAL( packingInterval.ySize(), unpackingInterval.ySize() * uint_t{2} );
+   if( Stencil::D == uint_t{3} )
    {
-      WALBERLA_ASSERT_EQUAL( packingInterval.zSize(), unpackingInterval.zSize() * uint_t(2) );
+      WALBERLA_ASSERT_EQUAL( packingInterval.zSize(), unpackingInterval.zSize() * uint_t{2} );
    }
    else
    {
       WALBERLA_ASSERT_EQUAL( packingInterval.zSize(), unpackingInterval.zSize() );
    }
 
-   const real_t factor = ( Stencil::D == uint_t(3) ) ? real_t( 0.125 ) : real_t( 0.25 );
+   const real_t factor = ( Stencil::D == uint_t{3} ) ? real_t{ 0.125 } : real_t{ 0.25 };
 
    cell_idx_t sz = packingInterval.zMin();
    for( cell_idx_t rz = unpackingInterval.zMin(); rz <= unpackingInterval.zMax(); ++rz )
@@ -926,48 +926,48 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalFin
                if( boundaryHandling->isDomain(sx,sy,sz) )
                {
                   WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz,                 idx ) ), sx << ", " << sy << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz,                 idx ) ), sx + cell_idx_t(1) << ", " << sy << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz,                 idx ) ), sx << ", " << sy + cell_idx_t(1) << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz,                 idx ) ), sx + cell_idx_t(1) << ", " << sy + cell_idx_t(1) << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                  if( Stencil::D == uint_t(3) )
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t{1}, sy,                 sz,                 idx ) ), sx + cell_idx_t{1} << ", " << sy << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t{1}, sz,                 idx ) ), sx << ", " << sy + cell_idx_t{1} << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t{1}, sy + cell_idx_t{1}, sz,                 idx ) ), sx + cell_idx_t{1} << ", " << sy + cell_idx_t{1} << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  if( Stencil::D == uint_t{3} )
                   {
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz + cell_idx_t(1), idx ) ), sx << ", " << sy << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz + cell_idx_t(1), idx ) ), sx + cell_idx_t(1) << ", " << sy << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ), sx << ", " << sy + cell_idx_t(1) << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ), sx + cell_idx_t(1) << ", " << sy + cell_idx_t(1) << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz + cell_idx_t{1}, idx ) ), sx << ", " << sy << ", " << sz + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t{1}, sy,                 sz + cell_idx_t{1}, idx ) ), sx + cell_idx_t{1} << ", " << sy << ", " << sz + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t{1}, sz + cell_idx_t{1}, idx ) ), sx << ", " << sy + cell_idx_t{1} << ", " << sz + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t{1}, sy + cell_idx_t{1}, sz + cell_idx_t{1}, idx ) ), sx + cell_idx_t{1} << ", " << sy + cell_idx_t{1} << ", " << sz + cell_idx_t{1} << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
                   }
                }
 #endif
 
                typename PdfField_T::value_type value  = sf->get( sx,                 sy,                 sz,                 idx );
-                                               value += sf->get( sx + cell_idx_t(1), sy,                 sz,                 idx );
-                                               value += sf->get( sx,                 sy + cell_idx_t(1), sz,                 idx );
-                                               value += sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz,                 idx );
-               if( Stencil::D == uint_t(3) )
+                                               value += sf->get( sx + cell_idx_t{1}, sy,                 sz,                 idx );
+                                               value += sf->get( sx,                 sy + cell_idx_t{1}, sz,                 idx );
+                                               value += sf->get( sx + cell_idx_t{1}, sy + cell_idx_t{1}, sz,                 idx );
+               if( Stencil::D == uint_t{3} )
                {
-                                               value += sf->get( sx,                 sy,                 sz + cell_idx_t(1), idx );
-                                               value += sf->get( sx + cell_idx_t(1), sy,                 sz + cell_idx_t(1), idx );
-                                               value += sf->get( sx,                 sy + cell_idx_t(1), sz + cell_idx_t(1), idx );
-                                               value += sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz + cell_idx_t(1), idx );
+                                               value += sf->get( sx,                 sy,                 sz + cell_idx_t{1}, idx );
+                                               value += sf->get( sx + cell_idx_t{1}, sy,                 sz + cell_idx_t{1}, idx );
+                                               value += sf->get( sx,                 sy + cell_idx_t{1}, sz + cell_idx_t{1}, idx );
+                                               value += sf->get( sx + cell_idx_t{1}, sy + cell_idx_t{1}, sz + cell_idx_t{1}, idx );
                }
 
                rf->get( rx, ry, rz, idx ) = factor * value;
             }
-            sx += cell_idx_t(2);
+            sx += cell_idx_t{2};
          }
-         sy += cell_idx_t(2);
-         WALBERLA_ASSERT_EQUAL( sx, packingInterval.xMax() + cell_idx_t(1) );
+         sy += cell_idx_t{2};
+         WALBERLA_ASSERT_EQUAL( sx, packingInterval.xMax() + cell_idx_t{1} );
       }
-      sz += cell_idx_t(2);
-      WALBERLA_ASSERT_EQUAL( sy, packingInterval.yMax() + cell_idx_t(1) );
+      sz += cell_idx_t{2};
+      WALBERLA_ASSERT_EQUAL( sy, packingInterval.yMax() + cell_idx_t{1} );
    }
-   if( Stencil::D == uint_t(3) )
+   if( Stencil::D == uint_t{3} )
    {
-      WALBERLA_ASSERT_EQUAL( sz, packingInterval.zMax() + cell_idx_t(1) );
+      WALBERLA_ASSERT_EQUAL( sz, packingInterval.zMax() + cell_idx_t{1} );
    }
    else
    {
-      WALBERLA_ASSERT_EQUAL( sz, packingInterval.zMax() + cell_idx_t(2) );
+      WALBERLA_ASSERT_EQUAL( sz, packingInterval.zMax() + cell_idx_t{2} );
    }
 }
 
@@ -1022,7 +1022,7 @@ CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::equalLevelU
       else if( c == 1 ) interval.min()[i] = interval.max()[i] - cell_idx_c( numberOfLayers - 1 );
       else
       {
-         WALBERLA_ASSERT_EQUAL( c, cell_idx_t(0) );
+         WALBERLA_ASSERT_EQUAL( c, cell_idx_t{0} );
          interval.min()[i] += cell_idx_c( numberOfLayers );
          interval.max()[i] -= cell_idx_c( numberOfLayers );
       }
@@ -1048,7 +1048,7 @@ inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::equalLevelFa
 
       WALBERLA_ASSERT_EQUAL( interval.xSize(), equalLevelCells_ );
 
-      return interval.ySize() > uint_t(2) && interval.zSize() > uint_t(2);
+      return interval.ySize() > uint_t{2} && interval.zSize() > uint_t{2};
    }
    else if( stencil::cy[dir] != 0 )
    {
@@ -1057,7 +1057,7 @@ inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::equalLevelFa
 
       WALBERLA_ASSERT_EQUAL( interval.ySize(), equalLevelCells_ );
 
-      return interval.xSize() > uint_t(2) && interval.zSize() > uint_t(2);
+      return interval.xSize() > uint_t{2} && interval.zSize() > uint_t{2};
    }
 
    WALBERLA_ASSERT_UNEQUAL( stencil::cz[dir], 0 );
@@ -1066,7 +1066,7 @@ inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::equalLevelFa
 
    WALBERLA_ASSERT_EQUAL( interval.zSize(), equalLevelCells_ );
 
-   return interval.xSize() > uint_t(2) && interval.ySize() > uint_t(2);
+   return interval.xSize() > uint_t{2} && interval.ySize() > uint_t{2};
 }
 
 
@@ -1092,16 +1092,16 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMax(),
                                          interval.xMax(), interval.yMax(), interval.zMax() );
-      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMin(), interval.zMax() - cell_idx_t(1) );
-      intervals.emplace_back( interval.xMin(), interval.yMax(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t{1},
+                                         interval.xMax(), interval.yMin(), interval.zMax() - cell_idx_t{1} );
+      intervals.emplace_back( interval.xMin(), interval.yMax(), interval.zMin() + cell_idx_t{1},
+                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t{1} );
       intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin(),
                                          interval.xMax(), interval.yMax(), interval.zMin() );
 
       const cell_idx_t x = ( stencil::cx[dir] > 0 ) ? interval.xMax() : interval.xMin();
-      intervals.emplace_back( x, interval.yMin() + cell_idx_t(1), interval.zMin() + cell_idx_t(1),
-                                         x, interval.yMax() - cell_idx_t(1), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( x, interval.yMin() + cell_idx_t{1}, interval.zMin() + cell_idx_t{1},
+                                         x, interval.yMax() - cell_idx_t{1}, interval.zMax() - cell_idx_t{1} );
    }
    else if( stencil::cy[dir] != 0 )
    {
@@ -1112,16 +1112,16 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMax(),
                                          interval.xMax(), interval.yMax(), interval.zMax() );
-      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMin(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
-      intervals.emplace_back( interval.xMax(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t{1},
+                                         interval.xMin(), interval.yMax(), interval.zMax() - cell_idx_t{1} );
+      intervals.emplace_back( interval.xMax(), interval.yMin(), interval.zMin() + cell_idx_t{1},
+                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t{1} );
       intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin(),
                                          interval.xMax(), interval.yMax(), interval.zMin() );
 
       const cell_idx_t y = ( stencil::cy[dir] > 0 ) ? interval.yMax() : interval.yMin();
-      intervals.emplace_back( interval.xMin() + cell_idx_t(1), y, interval.zMin() + cell_idx_t(1),
-                                         interval.xMax() - cell_idx_t(1), y, interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin() + cell_idx_t{1}, y, interval.zMin() + cell_idx_t{1},
+                                         interval.xMax() - cell_idx_t{1}, y, interval.zMax() - cell_idx_t{1} );
    }
    else
    {
@@ -1133,16 +1133,16 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       intervals.emplace_back( interval.xMin(), interval.yMax(),                 interval.zMin(),
                                          interval.xMax(), interval.yMax(),                 interval.zMax() );
-      intervals.emplace_back( interval.xMin(), interval.yMin() + cell_idx_t(1), interval.zMin(),
-                                         interval.xMin(), interval.yMax() - cell_idx_t(1), interval.zMax() );
-      intervals.emplace_back( interval.xMax(), interval.yMin() + cell_idx_t(1), interval.zMin(),
-                                         interval.xMax(), interval.yMax() - cell_idx_t(1), interval.zMax() );
+      intervals.emplace_back( interval.xMin(), interval.yMin() + cell_idx_t{1}, interval.zMin(),
+                                         interval.xMin(), interval.yMax() - cell_idx_t{1}, interval.zMax() );
+      intervals.emplace_back( interval.xMax(), interval.yMin() + cell_idx_t{1}, interval.zMin(),
+                                         interval.xMax(), interval.yMax() - cell_idx_t{1}, interval.zMax() );
       intervals.emplace_back( interval.xMin(), interval.yMin(),                 interval.zMin(),
                                          interval.xMax(), interval.yMin(),                 interval.zMax() );
 
       const cell_idx_t z = ( stencil::cz[dir] > 0 ) ? interval.zMax() : interval.zMin();
-      intervals.emplace_back( interval.xMin() + cell_idx_t(1), interval.yMin() + cell_idx_t(1), z,
-                                         interval.xMax() - cell_idx_t(1), interval.yMax() - cell_idx_t(1), z );
+      intervals.emplace_back( interval.xMin() + cell_idx_t{1}, interval.yMin() + cell_idx_t{1}, z,
+                                         interval.xMax() - cell_idx_t{1}, interval.yMax() - cell_idx_t{1}, z );
    }
 
    return intervals;
@@ -1163,10 +1163,10 @@ inline Vector3< cell_idx_t > PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_
 
    uint_t branchId = smallBlock.getBranchId();
 
-   shift[0] = ( stencil::cx[dir] == 0 ) ? ( ( ( branchId & uint_t(1) ) == uint_t(0) ) ? cell_idx_t(-1) : cell_idx_t(1) ) : cell_idx_t(0);
-   shift[1] = ( stencil::cy[dir] == 0 ) ? ( ( ( branchId & uint_t(2) ) == uint_t(0) ) ? cell_idx_t(-1) : cell_idx_t(1) ) : cell_idx_t(0);
-   shift[2] = ( Stencil::D == uint_t(3) ) ?
-            ( ( stencil::cz[dir] == 0 ) ? ( ( ( branchId & uint_t(4) ) == uint_t(0) ) ? cell_idx_t(-1) : cell_idx_t(1) ) : cell_idx_t(0) ) : cell_idx_t(0);
+   shift[0] = ( stencil::cx[dir] == 0 ) ? ( ( ( branchId & uint_t{1} ) == uint_t{0} ) ? cell_idx_t{-1} : cell_idx_t{1} ) : cell_idx_t{0};
+   shift[1] = ( stencil::cy[dir] == 0 ) ? ( ( ( branchId & uint_t{2} ) == uint_t{0} ) ? cell_idx_t{-1} : cell_idx_t{1} ) : cell_idx_t{0};
+   shift[2] = ( Stencil::D == uint_t{3} ) ?
+            ( ( stencil::cz[dir] == 0 ) ? ( ( ( branchId & uint_t{4} ) == uint_t{0} ) ? cell_idx_t{-1} : cell_idx_t{1} ) : cell_idx_t{0} ) : cell_idx_t{0};
 
    return shift;
 }
@@ -1183,8 +1183,8 @@ CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::coarseToFin
                                                                                                const BlockID & smallBlock )
 #endif
 {
-   CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t(2) );
- //CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t(1) );
+   CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t{2} );
+ //CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t{1} );
 
    Vector3< cell_idx_t > shift = getNeighborShift( smallBlock, dir );
 
@@ -1192,12 +1192,12 @@ CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::coarseToFin
 
    for( uint_t i = 0; i != Stencil::D; ++i )
    {
-      if( shift[i] == cell_idx_t(-1) )
-         interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t(2) ) + cell_idx_t(1);
-       //interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t(2) );
-      if( shift[i] == cell_idx_t( 1) )
-         interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t(2) ) - cell_idx_t(1);
-       //interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t(2) );
+      if( shift[i] == cell_idx_t{-1} )
+         interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t{2} ) + cell_idx_t{1};
+       //interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t{2} );
+      if( shift[i] == cell_idx_t{ 1} )
+         interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t{2} ) - cell_idx_t{1};
+       //interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t{2} );
    }
 
    WALBERLA_ASSERT( cellBB.contains( interval ) );
@@ -1217,24 +1217,24 @@ CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::coarseToFin
                                                                                                  const BlockID & smallBlock )
 #endif
 {
-   CellInterval interval = equalLevelUnpackInterval( dir, cellBB, uint_t(4) );
- //CellInterval interval = equalLevelUnpackInterval( dir, cellBB, uint_t(2) );
+   CellInterval interval = equalLevelUnpackInterval( dir, cellBB, uint_t{4} );
+ //CellInterval interval = equalLevelUnpackInterval( dir, cellBB, uint_t{2} );
 
    Vector3< cell_idx_t > shift = getNeighborShift( smallBlock, dir );
 
    for( uint_t i = 0; i != Stencil::D; ++i )
    {
-      if( shift[i] == cell_idx_t(-1) )
-         interval.max()[i] += cell_idx_t(4);
-       //interval.max()[i] += cell_idx_t(2);
-      if( shift[i] == cell_idx_t( 1) )
-         interval.min()[i] -= cell_idx_t(4);
-       //interval.min()[i] -= cell_idx_t(2);
+      if( shift[i] == cell_idx_t{-1} )
+         interval.max()[i] += cell_idx_t{4};
+       //interval.max()[i] += cell_idx_t{2};
+      if( shift[i] == cell_idx_t{ 1} )
+         interval.min()[i] -= cell_idx_t{4};
+       //interval.min()[i] -= cell_idx_t{2};
    }
 
 #ifndef NDEBUG
    CellInterval expandedCellBB( cellBB );
-   expandedCellBB.expand( cell_idx_t(4) );
+   expandedCellBB.expand( cell_idx_t{4} );
    WALBERLA_ASSERT( expandedCellBB.contains( interval ) );
 #endif
 
@@ -1251,7 +1251,7 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::fineToCoarsePackInterval( stencil::Direction dir, const CellInterval & cellBB )
 #endif
 {
-   return equalLevelUnpackInterval( dir, cellBB, uint_t(2) );
+   return equalLevelUnpackInterval( dir, cellBB, uint_t{2} );
 }
 
 
@@ -1266,17 +1266,17 @@ CellInterval PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::fineToCoars
                                                                                                  const BlockID & smallBlock )
 #endif
 {
-   CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t(1) );
+   CellInterval interval = equalLevelPackInterval( dir, cellBB, uint_t{1} );
    Vector3< cell_idx_t > shift = getNeighborShift( smallBlock, dir );
 
    WALBERLA_ASSERT( divisibleByTwo( cellBB ) );
 
    for( uint_t i = 0; i != Stencil::D; ++i )
    {
-      if( shift[i] == cell_idx_t(-1) )
-         interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t(2) ) - cell_idx_t(1);
-      if( shift[i] == cell_idx_t( 1) )
-         interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t(2) ) + cell_idx_t(1);
+      if( shift[i] == cell_idx_t{-1} )
+         interval.max()[i] = interval.min()[i] + cell_idx_c( cellBB.size(i) / uint_t{2} ) - cell_idx_t{1};
+      if( shift[i] == cell_idx_t{ 1} )
+         interval.min()[i] = interval.max()[i] - cell_idx_c( cellBB.size(i) / uint_t{2} ) + cell_idx_t{1};
    }
 
    WALBERLA_ASSERT( cellBB.contains( interval ) );
@@ -1301,9 +1301,9 @@ inline uint_t PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::equalLevel
    if( Stencil::containsDir( stencil::TNE ) || Stencil::containsDir( stencil::TNW ) || Stencil::containsDir( stencil::TSE ) ||
        Stencil::containsDir( stencil::TSW ) || Stencil::containsDir( stencil::BNE ) || Stencil::containsDir( stencil::BNW ) ||
        Stencil::containsDir( stencil::BSE ) || Stencil::containsDir( stencil::BSW ) )
-      return uint_t(3);
+      return uint_t{3};
       
-   return uint_t(2);
+   return uint_t{2};
 }
 
 
@@ -1359,7 +1359,7 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::blocksConnectedByFaces( const Block * block, const BlockID & neighbor )
 #endif
 {
-   const uint_t faces[] = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
+   const uint_t faces[] = { uint_t{4}, uint_t{10}, uint_t{12}, uint_t{13}, uint_t{15}, uint_t{21} };
    for( uint_t face : faces )
    {
       for( uint_t n = 0; n != block->getNeighborhoodSectionSize( face ); ++n )
@@ -1379,8 +1379,8 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::blocksConnectedByEdges( const Block * block, const BlockID & neighbor )
 #endif
 {
-   const uint_t faces[] = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
-                            uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
+   const uint_t faces[] = { uint_t{ 1}, uint_t{ 3}, uint_t{ 5}, uint_t{ 7}, uint_t{ 9}, uint_t{11},
+                            uint_t{14}, uint_t{16}, uint_t{18}, uint_t{20}, uint_t{22}, uint_t{24} };
 
    for( uint_t face : faces )
    {
@@ -1401,9 +1401,9 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 inline bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::divisibleByTwo( const CellInterval & cellBB )
 #endif
 {
-   return ( ( cellBB.xSize() & uint_t(1) ) == uint_t(0) ) &&
-          ( ( cellBB.ySize() & uint_t(1) ) == uint_t(0) ) &&
-          ( ( Stencil::D == uint_t(2) && cellBB.zSize() == uint_t(1) ) || ( Stencil::D == uint_t(3) && ( cellBB.zSize() & uint_t(1) ) == uint_t(0) ) );
+   return ( ( cellBB.xSize() & uint_t{1} ) == uint_t{0} ) &&
+          ( ( cellBB.ySize() & uint_t{1} ) == uint_t{0} ) &&
+          ( ( Stencil::D == uint_t{2} && cellBB.zSize() == uint_t{1} ) || ( Stencil::D == uint_t{3} && ( cellBB.zSize() & uint_t{1} ) == uint_t{0} ) );
 }
 
 
@@ -1416,7 +1416,7 @@ template< typename LatticeModel_T, typename BoundaryHandling_T >
 bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::coarserNeighborExistsInVicinity( const Block * block, stencil::Direction dir )
 #endif
 {
-   if( block->getLevel() == uint_t(0) )
+   if( block->getLevel() == uint_t{0} )
       return false;
 
    Vector3<int> min( -1 );
@@ -1427,7 +1427,7 @@ bool PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::coarserNeighborExis
       if( stencil::c[i][dir] == -1 ) max[i] = 0;
       if( stencil::c[i][dir] ==  1 ) min[i] = 0;
    }
-   if( LatticeModel_T::Stencil::D == uint_t(2) )
+   if( LatticeModel_T::Stencil::D == uint_t{2} )
       min[2] = max[2] = 0;
 
    for( int z = min[2]; z <= max[2]; ++z ) {

@@ -58,7 +58,7 @@ public:
 
 private:
    WeightEvaluationFct weightEvaluationFct_;
-   real_t blockBaseWeight_ = real_t(1);
+   real_t blockBaseWeight_ = real_t{1};
 };
 
 

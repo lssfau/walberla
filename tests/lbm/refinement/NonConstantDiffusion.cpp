@@ -109,14 +109,14 @@ static void refinementSelection( SetupBlockForest& forest, const uint_t levels )
 {
    const AABB & domain = forest.getDomain();
 
-   const real_t domainxMax = domain.xMax() / real_c( pow( real_t(2), int_c( levels - uint_t(1u) ) ) );
+   const real_t domainxMax = domain.xMax() / real_c( pow( real_t{2}, int_c( levels - uint_t{1u} ) ) );
 
    AABB left( domain.xMin(), domain.yMin(), domain.zMin(),
               domainxMax,    domain.yMax(), domain.zMax() );
 
    for( auto &block : forest )
       if( block.getAABB().intersects( left ) )
-         if( block.getLevel() < ( levels - uint_t(1u) ) )
+         if( block.getLevel() < ( levels - uint_t{1u} ) )
             block.setMarker( true );
 
 }
@@ -125,7 +125,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest ) {
 
    for( auto &block : forest )
    {
-      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setWorkload( numeric_cast< workload_t >( uint_t{1} << block.getLevel() ) );
       block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
@@ -137,12 +137,12 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     SetupBlockForest sforest;
 
     uint_t cells[]  = { length, width, width  };
-    uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
+    uint_t blocks[] = { uint_t{1u}, uint_t{1u}, uint_t{1u} };
     sforest.addRefinementSelectionFunction( [=] (auto &forest) { refinementSelection( forest, refinement ); } );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(
-       AABB( real_t(0),        real_t(0),        real_t(0),             // blocks/processes in x/y/z direction
+       AABB( real_t{0},        real_t{0},        real_t{0},             // blocks/processes in x/y/z direction
              real_c(cells[0]), real_c(cells[1]), real_c(cells[2]) ),    // cells per block in x/y/z direction
              blocks[0]  , blocks[1]  , blocks[2],                       // one block per process
              false      , true       , true);                           // periodicity
@@ -150,7 +150,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
     // calculate process distribution
     const memory_t memoryLimit = math::Limits< memory_t >::inf();
 
-    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t(0), memoryLimit, true );
+    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), uint_c( MPIManager::instance()->numProcesses() ), real_t{0}, memoryLimit, true );
 
     MPIManager::instance()->useWorldComm();
 
@@ -179,7 +179,7 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       CellInterval domainBB = blocks->getDomainCellBB( level );
       blocks->transformGlobalToBlockLocalCellInterval( domainBB, *block );
 
-      //const cell_idx_t width = cell_idx_c( uint_t(1) << level ) - cell_idx_t(1);
+      //const cell_idx_t width = cell_idx_c( uint_t{1} << level ) - cell_idx_t{1};
 
       domainBB.xMin() -= cell_idx_c( 1 );
       domainBB.xMax() += cell_idx_c( 1 );
@@ -260,15 +260,15 @@ int main( int argc, char **argv )
    mpi::Environment env( argc, argv );
    logging::Logging::printHeaderOnStream();
 
-   uint_t length = uint_t( 16u  );
-   uint_t width  = uint_t( 16u  );
-   uint_t time   = uint_t( 10u  );
-   real_t dv     = real_t(  1   );
-   real_t v      = real_t(  1   );
-   real_t domega = real_t(  0.8 );
-   real_t omega  = real_t(  1.1 );
+   uint_t length = uint_t{ 16u  };
+   uint_t width  = uint_t{ 16u  };
+   uint_t time   = uint_t{ 10u  };
+   real_t dv     = real_t{  1   };
+   real_t v      = real_t{  1   };
+   real_t domega = real_t{  0.8 };
+   real_t omega  = real_t{  1.1 };
    bool   closed = false;
-   uint_t levels = uint_t(  1u );
+   uint_t levels = uint_t{  1u };
 
    bool useVTK = false;
 
@@ -292,11 +292,11 @@ int main( int argc, char **argv )
       }
    }
 
-   uint_t ghostLayers = uint_t(4u);
-   if(closed || levels == uint_t(1u))
+   uint_t ghostLayers = uint_t{4u};
+   if(closed || levels == uint_t{1u})
    {
-      levels      = uint_t(1u);
-      ghostLayers = uint_t(1u);
+      levels      = uint_t{1u};
+      ghostLayers = uint_t{1u};
    }
 
    auto blockStorage = makeStructuredBlockStorage( length, width, levels);
@@ -315,7 +315,7 @@ int main( int argc, char **argv )
 
    SweepTimeloop timeloop( blockStorage->getBlockStorage(), time );
 
-   if( levels == uint_t(1u) )
+   if( levels == uint_t{1u} )
    {
       blockforest::communication::UniformBufferedScheme< Stencil > scheme( blockStorage );
       scheme.addPackInfo( make_shared< field::communication::PackInfo< MyPdfField > >( advDiffFieldID ) );
@@ -341,14 +341,14 @@ int main( int argc, char **argv )
 
    if( useVTK )
    {
-      auto vtkOut = vtk::createVTKOutput_BlockData( *blockStorage, "block_data", uint_t(1u), uint_t(0u), false, "vtk_out/NonConstantDiffusion" );
+      auto vtkOut = vtk::createVTKOutput_BlockData( *blockStorage, "block_data", uint_t{1u}, uint_t{0u}, false, "vtk_out/NonConstantDiffusion" );
       auto densityWriter  = make_shared< lbm::DensityVTKWriter<LM> >( advDiffFieldID, "E" );
       auto omegaWriter    = make_shared< field::VTKWriter<ScalarField>              >( omegaFieldID,   "omega" );
       vtkOut->addCellDataWriter( densityWriter );
       vtkOut->addCellDataWriter( omegaWriter   );
       vtkOut->write();
       vtk::writeDomainDecomposition( blockStorage, "domain_decomposition", "vtk_out/NonConstantDiffusion" );
-      field::createVTKOutput<MyFlagField>( flagFieldID, *blockStorage, "flag_field", uint_t(1u), uint_t(1u), false, "vtk_out/NonConstantDiffusion" )();
+      field::createVTKOutput<MyFlagField>( flagFieldID, *blockStorage, "flag_field", uint_t{1u}, uint_t{1u}, false, "vtk_out/NonConstantDiffusion" )();
    }
 
    logging::Logging::printFooterOnStream();

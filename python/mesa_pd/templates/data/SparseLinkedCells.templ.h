@@ -156,18 +156,18 @@ SparseLinkedCells::SparseLinkedCells(const math::AABB& domain, const Vec3& cellD
    , cellDiameter_( domain.sizes()[0] / real_c(numCellsPerDim_[0]),
      domain.sizes()[1] / real_c(numCellsPerDim_[1]),
      domain.sizes()[2] / real_c(numCellsPerDim_[2]) )
-   , invCellDiameter_( real_t(1) / cellDiameter_[0], real_t(1) / cellDiameter_[1], real_t(1) / cellDiameter_[2] )
+   , invCellDiameter_( real_t{1} / cellDiameter_[0], real_t{1} / cellDiameter_[1], real_t{1} / cellDiameter_[2] )
    , cells_(uint_c(numCellsPerDim_[0]*numCellsPerDim_[1]*numCellsPerDim_[2]))
    , nonEmptyCells_(uint_c(numCellsPerDim_[0]*numCellsPerDim_[1]*numCellsPerDim_[2]))
 {
    //precondition
    {%- for dim in range(3) %}
-   WALBERLA_CHECK_GREATER_EQUAL(cellDiameter[{{dim}}], real_t(0));
+   WALBERLA_CHECK_GREATER_EQUAL(cellDiameter[{{dim}}], real_t{0});
    {%- endfor %}
 
    //postcondition
    {%- for dim in range(3) %}
-   WALBERLA_CHECK_GREATER_EQUAL(cellDiameter_[{{dim}}], real_t(0));
+   WALBERLA_CHECK_GREATER_EQUAL(cellDiameter_[{{dim}}], real_t{0});
    WALBERLA_CHECK_LESS_EQUAL(cellDiameter_[{{dim}}], cellDiameter[{{dim}}]);
 
    WALBERLA_CHECK_GREATER_EQUAL(numCellsPerDim_[{{dim}}], 0);

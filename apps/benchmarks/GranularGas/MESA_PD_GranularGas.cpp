@@ -79,13 +79,13 @@ public:
    : dt_(dt)
    , domain_(domain)
    {
-      sd_.setDampingT(0, 0, real_t(0));
-      sd_.setFriction(0, 0, real_t(0));
-      sd_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
+      sd_.setDampingT(0, 0, real_t{0});
+      sd_.setFriction(0, 0, real_t{0});
+      sd_.setParametersFromCOR(0, 0, real_t{0.9}, dt*real_t{20}, mass * real_t{0.5});
 
-      sds_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
-      sds_.setCoefficientOfFriction(0,0,real_t(0.4));
-      sds_.setStiffnessT(0,0,real_t(0.9) * sds_.getStiffnessN(0,0));
+      sds_.setParametersFromCOR(0, 0, real_t{0.9}, dt*real_t{20}, mass * real_t{0.5});
+      sds_.setCoefficientOfFriction(0,0,real_t{0.4});
+      sds_.setStiffnessT(0,0,real_t{0.9} * sds_.getStiffnessN(0,0));
    }
 
    inline
@@ -197,7 +197,7 @@ int main( int argc, char ** argv )
    data::LinkedCells     lc(localDomain.getExtended(params.spacing), params.spacing );
 
    auto  smallSphere = ss->create<data::Sphere>( params.radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(),
@@ -212,7 +212,7 @@ int main( int argc, char ** argv )
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
 
-   auto shift = (params.spacing - params.radius - params.radius) * real_t(0.5);
+   auto shift = (params.spacing - params.radius - params.radius) * real_t{0.5};
    auto confiningDomain = simulationDomain.getExtended(shift);
 
    if (!forest->isPeriodic(0))

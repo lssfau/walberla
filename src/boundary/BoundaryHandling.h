@@ -912,7 +912,7 @@ bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::checkConsistency( 
             return false;
 
          // ... exactly one boundary condition must match
-         WALBERLA_CHECK_EQUAL( numberOfMatchingBoundaryConditions( *cell ), uint_t(1) );
+         WALBERLA_CHECK_EQUAL( numberOfMatchingBoundaryConditions( *cell ), uint_t{1} );
          if( numberOfMatchingBoundaryConditions( *cell ) != 1 )
             return false;
 
@@ -935,7 +935,7 @@ bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::checkConsistency( 
             if( isPartOfMaskSet( nMask, boundary_ ) )
             {
                // if a neighbor is marked as a boundary cell, exactly one boundary condition must match
-               WALBERLA_CHECK_EQUAL( numberOfMatchingBoundaryConditions( nMask ), uint_t(1) );
+               WALBERLA_CHECK_EQUAL( numberOfMatchingBoundaryConditions( nMask ), uint_t{1} );
                if( numberOfMatchingBoundaryConditions( nMask ) != 1 )
                   return false;
                boundaryNeighbor = true;
@@ -1000,7 +1000,7 @@ template< typename FlagField_T, typename Stencil, typename... Boundaries >
 void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refreshOutermostLayer( cell_idx_t thickness )
 {
    uint_t extent = std::min( { innerBB_.xSize(), innerBB_.ySize(), innerBB_.zSize() } );
-   WALBERLA_ASSERT_GREATER( extent, uint_t(0) );
+   WALBERLA_ASSERT_GREATER( extent, uint_t{0} );
 
    if( extent == 1 )
    {
@@ -1008,8 +1008,8 @@ void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refreshOutermostLa
       return;
    }
 
-   WALBERLA_ASSERT_GREATER_EQUAL( thickness, cell_idx_t(1) );
-   WALBERLA_ASSERT_LESS_EQUAL( thickness, cell_idx_c( extent ) / cell_idx_t(2) );
+   WALBERLA_ASSERT_GREATER_EQUAL( thickness, cell_idx_t{1} );
+   WALBERLA_ASSERT_LESS_EQUAL( thickness, cell_idx_c( extent ) / cell_idx_t{2} );
 
    const cell_idx_t one = numeric_cast<cell_idx_t>(1);
    thickness -= one;
@@ -1333,7 +1333,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
    WALBERLA_ASSERT( field::isFlag( flag ) );
-   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t{1} );
 
    if( outerBB_.contains(x,y,z) )
       setBoundaryHelper( boundaryConditions_, flag, x, y, z, parameter );
@@ -1358,7 +1358,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
    WALBERLA_ASSERT( field::isFlag( flag ) );
-   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t{1} );
 
    CellInterval localCells( outerBB_ );
    localCells.intersect( cells );
@@ -1390,7 +1390,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
    WALBERLA_ASSERT( field::isFlag( flag ) );
-   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t{1} );
 
    CellVector localCells;
    for( auto cell = begin; cell != end; ++cell )
@@ -2177,7 +2177,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()(
                for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
                   if( field::isPartOfMaskSet( cell.neighbor( *d ), boundary_ ) )
                   {
-                     uint_t index( uint_t(0) );
+                     uint_t index( uint_t{0} );
                      for( auto mask = bcMaskMapping_.begin(); mask != bcMaskMapping_.end(); ++mask, ++index )
                         if( field::isPartOfMaskSet( cell.neighbor( *d ), *mask ) )
                         {
@@ -2192,7 +2192,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()(
       WALBERLA_ASSERT( checkFlagField( numberOfGhostLayersToInclude ) );
 
       if( !cellDirectionPairs.empty() )
-         treatDirection( boundaryConditions_, uint_t(0), cellDirectionPairs );
+         treatDirection( boundaryConditions_, uint_t{0}, cellDirectionPairs );
    }
    else
    {
@@ -2936,7 +2936,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirect
       boundaryCondition.treatDirection( x, y, z, direction, nx, ny, nz, flagField_->get(nx,ny,nz) );
    }
 
-   treatDirection< BoundariesTuple, N-1 >( boundaryConditions, index + uint_t(1), cellDirectionPairs );
+   treatDirection< BoundariesTuple, N-1 >( boundaryConditions, index + uint_t{1}, cellDirectionPairs );
 }
 
 
@@ -3079,7 +3079,7 @@ CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getPacking
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
 CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getUnpackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const
 {
-   WALBERLA_ASSERT_GREATER_EQUAL( numberOfLayers, uint_t(1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( numberOfLayers, uint_t{1} );
    WALBERLA_ASSERT( stencil::cx[direction] == 0 || outerBB_.xSize() >= ( uint_c(4) * numberOfLayers ) );
    WALBERLA_ASSERT( stencil::cy[direction] == 0 || outerBB_.ySize() >= ( uint_c(4) * numberOfLayers ) );
    WALBERLA_ASSERT( stencil::cz[direction] == 0 || outerBB_.zSize() >= ( uint_c(4) * numberOfLayers ) );
@@ -3155,7 +3155,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBound
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
    WALBERLA_ASSERT( field::isFlag( flag ) );
-   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t(1) );
+   WALBERLA_ASSERT_EQUAL( numberOfMatchingBoundaryConditions( flag ), uint_t{1} );
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
 
    unpackBoundary( boundaryConditions_, buffer, flag, x, y, z );

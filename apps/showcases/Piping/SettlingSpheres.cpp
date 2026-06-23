@@ -99,7 +99,7 @@ int main(int argc, char** argv)
    bool useOpenMP = false;
 
    // BlockForest
-   const math::AABB simulationDomain_SI(real_t(0.0), real_t(0.0), real_t(0.0), domainSize_SI[0], domainSize_SI[1],
+   const math::AABB simulationDomain_SI(real_t{0.0}, real_t{0.0}, real_t{0.0}, domainSize_SI[0], domainSize_SI[1],
                                         domainSize_SI[2]);
    const Vector3< bool > isPeriodic{ periodicInX, periodicInY, false };
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
    // Init spheres
    // Use offset to domain boundary to prevent the spheres from touching in the beginning
-   const real_t domainOffset = maxDiameter_SI / real_t(2);
+   const real_t domainOffset = maxDiameter_SI / real_t{2};
    const math::AABB generationDomain_SI(
       simulationDomain_SI.xMin() + domainOffset, simulationDomain_SI.yMin() + domainOffset,
       simulationDomain_SI.zMin() + domainOffset, simulationDomain_SI.xMax() - domainOffset,
@@ -124,15 +124,15 @@ int main(int argc, char** argv)
    {
       auto diameter = math::realRandom< real_t >(minDiameter_SI, maxDiameter_SI);
 
-      if (!domain->isContainedInLocalSubdomain(pt, real_t(0))) continue;
+      if (!domain->isContainedInLocalSubdomain(pt, real_t{0})) continue;
       auto p                       = ps->create();
       p->getPositionRef()          = pt;
-      p->getInteractionRadiusRef() = diameter * real_t(0.5);
+      p->getInteractionRadiusRef() = diameter * real_t{0.5};
       p->getBaseShapeRef()         = std::make_shared< data::Sphere >(p->getInteractionRadius());
       p->getBaseShapeRef()->updateMassAndInertia(densityParticle_SI);
 
-      p->setLinearVelocity(Vec3(real_t(0.1) * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
-                                real_t(0.1) * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
+      p->setLinearVelocity(Vec3(real_t{0.1} * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
+                                real_t{0.1} * math::realRandom(-initialVelocity_SI, initialVelocity_SI),
                                 -initialVelocity_SI));
       p->getOwnerRef() = walberla::mpi::MPIManager::instance()->rank();
       p->getTypeRef()  = 0;
@@ -141,8 +141,8 @@ int main(int argc, char** argv)
    uint_t numParticles = ps->size();
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
 
-   createPlane(*ps, simulationDomain_SI.minCorner(), Vec3(real_t(0), real_t(0), real_t(1)));
-   createPlane(*ps, simulationDomain_SI.maxCorner(), Vec3(real_t(0), real_t(0), real_t(-1)));
+   createPlane(*ps, simulationDomain_SI.minCorner(), Vec3(real_t{0}, real_t{0}, real_t{1}));
+   createPlane(*ps, simulationDomain_SI.maxCorner(), Vec3(real_t{0}, real_t{0}, real_t{-1}));
 
    if (!isPeriodic[0])
    {
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
    dem.setFrictionCoefficientDynamic(0, 0, frictionCoefficient);
    // Use friction between spheres and planes to speed up the settling
    dem.setFrictionCoefficientDynamic(0, 1, frictionCoefficient);
-   real_t kappa = real_t(2) * (real_t(1) - poissonsRatio) / (real_t(2) - poissonsRatio); // from Thornton et al
+   real_t kappa = real_t{2} * (real_t{1} - poissonsRatio) / (real_t{2} - poissonsRatio); // from Thornton et al
 
    kernel::AssocToBlock assoc(forest);
    mesa_pd::mpi::ReduceProperty RP;
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
             {
                if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
                {
-                  auto meff = real_t(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
+                  auto meff = real_t{1} / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
                   dem.setStiffnessAndDamping(ac.getType(idx1), ac.getType(idx2), restitutionCoefficient,
                                              collisionTime_SI, kappa, meff);
                   dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(),
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
       timeloopTiming["RPD forEachParticle vvIntegratorPostForce"].end();
 
       // Log particle velocities every 10% of progress. Turn logging off for benchmark run (i.e., no vtk output).
-      if (i % (timeSteps / uint_t(10)) == 0 && visSpacing != 0)
+      if (i % (timeSteps / uint_t{10}) == 0 && visSpacing != 0)
       {
          real_t maxVelocity;
          real_t averageVelocity;
@@ -284,7 +284,7 @@ int main(int argc, char** argv)
    WALBERLA_ROOT_SECTION()
    {
       WALBERLA_LOG_INFO_ON_ROOT(*timer_reduced);
-      real_t PUpS = real_t(numParticles) * real_t(timeSteps) / real_t(timer_reduced->max());
+      real_t PUpS = static_cast< real_t >(numParticles) * static_cast< real_t >(timeSteps) / static_cast< real_t >(timer_reduced->max());
       WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
    }
 

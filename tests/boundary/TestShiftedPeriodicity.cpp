@@ -135,20 +135,20 @@ int main( int argc, char **argv ) {
       Vector3<real_t> domainCorner{};
       for(uint_t d = 0; d < 3; ++d) {
          domainSize[d] = real_c(nBlocks[d] * cellsPerBlock[d]);
-         domainCorner[d] = zeroCenteredDomain ? real_t(0) : - domainSize[d] / real_t(2);
+         domainCorner[d] = zeroCenteredDomain ? real_t{0} : - domainSize[d] / real_t{2};
       }
 
       auto blocks = blockforest::createUniformBlockGrid(
          AABB(domainCorner, domainCorner + domainSize),         // AABB spanning the entire domain
          nBlocks[0], nBlocks[1], nBlocks[2],                    // number of blocks in x/y/z direction
          cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2],  // cells per block in x/y/z direction
-         uint_t(0),                                             // maximum number of blocks per process
+         uint_t{0},                                             // maximum number of blocks per process
          true, false,                                           // include but don't force Metis
          periodicity[0], periodicity[1], periodicity[2],        // periodicity
          true                                                   // keep global block information
       );
 
-      const auto fieldID = field::addToStorage< Field_T >(blocks, "test field", real_t(0), field::Layout::fzyx, fieldGhostLayers);
+      const auto fieldID = field::addToStorage< Field_T >(blocks, "test field", real_t{0}, field::Layout::fzyx, fieldGhostLayers);
       FieldInitialiser< Field_T > initialiser(blocks, fieldID);
 
       // re-initialise fields
@@ -184,10 +184,10 @@ int main( int argc, char **argv ) {
       const uint_t remSize   = blocks->getNumberOfCells(remDir);
       const uint_t sizeSlice = shiftSize * remSize * Field_T::F_SIZE;
 
-      std::vector<ValueType_T> innerMin(sizeSlice, ValueType_T(0));
-      std::vector<ValueType_T> innerMax(sizeSlice, ValueType_T(0));
-      std::vector<ValueType_T> glMin(sizeSlice, ValueType_T(0));
-      std::vector<ValueType_T> glMax(sizeSlice, ValueType_T(0));
+      std::vector<ValueType_T> innerMin(sizeSlice, ValueType_T{0});
+      std::vector<ValueType_T> innerMax(sizeSlice, ValueType_T{0});
+      std::vector<ValueType_T> glMin(sizeSlice, ValueType_T{0});
+      std::vector<ValueType_T> glMax(sizeSlice, ValueType_T{0});
 
       auto getIdx = [&remSize](const cell_idx_t shiftIdx, const cell_idx_t remIdx){
          return shiftIdx * cell_idx_c(Field_T::F_SIZE * remSize)

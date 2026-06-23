@@ -49,25 +49,25 @@ inline real_t levelDependentRelaxationParameter( const uint_t targetLevel, const
 {
    real_t powFactor(1);
    if( level < targetLevel )
-      powFactor = real_c( uint_t(1) << ( targetLevel - level ) );
+      powFactor = real_c( uint_t{1} << ( targetLevel - level ) );
    else if( level == targetLevel )
       return parameter_level;
    else
-      powFactor = real_t(1) / real_c( uint_t(1) << ( level - targetLevel ) );
+      powFactor = real_t{1} / real_c( uint_t{1} << ( level - targetLevel ) );
 
    const real_t parameter_level_half = real_c(0.5) * parameter_level;
-   return parameter_level / ( parameter_level_half + powFactor * ( real_t(1) - parameter_level_half ) );
+   return parameter_level / ( parameter_level_half + powFactor * ( real_t{1} - parameter_level_half ) );
 }
 
 inline real_t viscosityFromOmega( const real_t omega )
 {
-   static const real_t one_third = real_t(1) / real_t(3);
-   return ( real_t(1) / omega - real_t(0.5) ) * one_third;
+   static const real_t one_third = real_t{1} / real_t{3};
+   return ( real_t{1} / omega - real_t{0.5} ) * one_third;
 }
 
 inline real_t omegaFromViscosity( const real_t viscosity )
 {
-   return real_t(1) / ( real_t(0.5) + real_t(3) * viscosity );
+   return real_t{1} / ( real_t{0.5} + real_t{3} * viscosity );
 }
 
 
@@ -84,7 +84,7 @@ public:
    using tag = SRT_tag;
    static const bool constant = true;
    
-   SRT( const real_t _omega, const uint_t _level = uint_t(0) ) :
+   SRT( const real_t _omega, const uint_t _level = uint_t{0} ) :
       omega_( _omega ), viscosity_( viscosityFromOmega( _omega ) ), level_( _level ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << omega_ << viscosity_ << level_; }
@@ -101,7 +101,7 @@ public:
 
    /// Only call this function if you know what you're doing (changes the viscosity!)
    /// "_omega_level" is the level that corresponds to "_omega"
-   void reset( const real_t _omega, const uint_t _omega_level = uint_t(0) )
+   void reset( const real_t _omega, const uint_t _omega_level = uint_t{0} )
    {
       omega_ = levelDependentRelaxationParameter( level_, _omega, _omega_level );
       viscosity_ = viscosityFromOmega( omega_ );
@@ -113,7 +113,7 @@ public:
    real_t viscosity() const { return viscosity_; }
 
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega_; }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t{1} ) const { return omega_; }
    real_t viscosity( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/ ) const { return viscosity_; }
 
    real_t viscosity( const uint_t _level ) const
@@ -143,12 +143,12 @@ public:
    static const bool constant = false;
 
    SRTField() :
-      omegaFieldId_(), omegaField_( NULL ), level_( uint_t(0) ) {}
+      omegaFieldId_(), omegaField_( NULL ), level_( uint_t{0} ) {}
 
-   SRTField( const BlockDataID & omegaFieldId, const uint_t _level = uint_t(0) ) :
+   SRTField( const BlockDataID & omegaFieldId, const uint_t _level = uint_t{0} ) :
       omegaFieldId_( omegaFieldId ), omegaField_( nullptr ), level_( _level ) {}
 
-   void setFieldId( const BlockDataID & omegaFieldId, const uint_t _level = uint_t(0) )
+   void setFieldId( const BlockDataID & omegaFieldId, const uint_t _level = uint_t{0} )
    {
       omegaFieldId_ = omegaFieldId;
       level_ = _level;
@@ -168,13 +168,13 @@ public:
 
    /// Only call this function if you know what you're doing (changes the viscosity!)
    /// "_omega_level" is the level that corresponds to "_omega"
-   void reset( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const real_t _omega, const uint_t _omega_level = uint_t(0) )
+   void reset( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const real_t _omega, const uint_t _omega_level = uint_t{0} )
    {
       omegaField_->get(x,y,z) = levelDependentRelaxationParameter( level_, _omega, _omega_level );
    }
 
    real_t omega( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t{1} ) const
    {
       return omegaField_->get(x,y,z);
    }
@@ -217,14 +217,14 @@ public:
    
    static const real_t threeSixteenth;
 
-   TRT( const real_t _lambda_e, const real_t _lambda_d, const uint_t _level = uint_t(0) ) :
+   TRT( const real_t _lambda_e, const real_t _lambda_d, const uint_t _level = uint_t{0} ) :
       lambda_e_( _lambda_e ), lambda_d_( _lambda_d ),
       magicNumber_( magicNumber( _lambda_e, _lambda_d ) ),
       viscosity_( viscosityFromOmega( _lambda_e ) ), level_( _level )
    {}
 
    static TRT constructWithMagicNumber( const real_t _omega, const real_t _magicNumber = threeSixteenth,
-                                        const uint_t _level = uint_t(0) )
+                                        const uint_t _level = uint_t{0} )
    {
       TRT trt;
       trt.initWithMagicNumber( _omega, _magicNumber, _level );
@@ -246,7 +246,7 @@ public:
 
    /// Only call this function if you know what you're doing (changes the viscosity!)
    /// "_lambda_level" is the level that corresponds to "_lambda_e" and "_lambda_d"
-   void reset( const real_t _lambda_e, const real_t _lambda_d, const uint_t _lambda_level = uint_t(0) )
+   void reset( const real_t _lambda_e, const real_t _lambda_d, const uint_t _lambda_level = uint_t{0} )
    {
       lambda_e_ = levelDependentRelaxationParameter( level_, _lambda_e, _lambda_level );
       magicNumber_ = magicNumber( _lambda_e, _lambda_d );
@@ -256,7 +256,7 @@ public:
 
    /// Only call this function if you know what you're doing (changes the viscosity!)
    /// "omega_level" is the level that corresponds to "omega"
-   void resetWithMagicNumber( const real_t _omega, const real_t _magicNumber = threeSixteenth, const uint_t omega_level = uint_t(0) )
+   void resetWithMagicNumber( const real_t _omega, const real_t _magicNumber = threeSixteenth, const uint_t omega_level = uint_t{0} )
    {
       lambda_e_ = levelDependentRelaxationParameter( level_, lambda_e( _omega ), omega_level );
       lambda_d_ = lambda_d( lambda_e_, _magicNumber );
@@ -272,7 +272,7 @@ public:
 
    real_t omega() const { return lambda_e_; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t{1} ) const { return omega(); }
 
    inline real_t omega_bulk() const { return omega(); }
    inline real_t omega_odd() const { return lambda_d(); }
@@ -280,11 +280,11 @@ public:
    static real_t lambda_e( const real_t _omega ) { return _omega; }
    static real_t lambda_d( const real_t _omega, const real_t _magicNumber = threeSixteenth )
    {
-      return ( real_t(4) - real_t(2) * _omega ) / ( real_t(4) * _magicNumber * _omega + real_t(2) - _omega );
+      return ( real_t{4} - real_t{2} * _omega ) / ( real_t{4} * _magicNumber * _omega + real_t{2} - _omega );
    }
    static real_t magicNumber( const real_t _lambda_e, const real_t _lambda_d )
    {
-      return ( ( real_t(2) - _lambda_e ) * ( real_t(2) - _lambda_d ) ) / ( real_t(4) * _lambda_e * _lambda_d );
+      return ( ( real_t{2} - _lambda_e ) * ( real_t{2} - _lambda_d ) ) / ( real_t{4} * _lambda_e * _lambda_d );
    }
 
    real_t viscosity( const uint_t _level ) const
@@ -297,7 +297,7 @@ public:
 
 private:
 
-   TRT() : lambda_e_( real_t(0) ), lambda_d_( real_t(0) ), magicNumber_( real_t(0) ), viscosity_( real_t(0) ), level_( uint_t(0) ) {}
+   TRT() : lambda_e_( real_t{0} ), lambda_d_( real_t{0} ), magicNumber_( real_t{0} ), viscosity_( real_t{0} ), level_( uint_t{0} ) {}
    
    void initWithMagicNumber( const real_t _omega, const real_t _magicNumber, const uint_t _level )
    {
@@ -341,17 +341,17 @@ public:
    /// { 0, _s1, _s2,   0, _s4, 0, _s4, 0, _s4, _s9,  _s10, _s9,  _s10, _s9,  _s9,  _s9,  _s16, _s16, _s16 }
    /// { 0, s_e, s_eps, 0, s_q, 0, s_q, 0, s_q, s_nu, s_pi, s_nu, s_pi, s_nu, s_nu, s_nu, s_m,  s_m,  s_m  }
    D3Q19MRT( const real_t _s1, const real_t _s2, const real_t _s4, const real_t _s9, const real_t _s10, const real_t _s16,
-             const uint_t _level = uint_t(0) ) :
+             const uint_t _level = uint_t{0} ) :
       viscosity_( viscosityFromOmega( _s9 ) ), level_( _level )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = real_t{0};
       s_[1]  = _s1;
       s_[2]  = _s2;
-      s_[3]  = real_t(0);
+      s_[3]  = real_t{0};
       s_[4]  = _s4;
-      s_[5]  = real_t(0);
+      s_[5]  = real_t{0};
       s_[6]  = _s4;
-      s_[7]  = real_t(0);
+      s_[7]  = real_t{0};
       s_[8]  = _s4;
       s_[9]  = _s9;
       s_[10] = _s10;
@@ -365,7 +365,7 @@ public:
       s_[18] = _s16;
    }
 
-   static D3Q19MRT constructPan( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
+   static D3Q19MRT constructPan( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t{0} )
    {
       D3Q19MRT mrt;
       mrt.initPan( lambda_e, lambda_d, _level );
@@ -373,7 +373,7 @@ public:
    }
    
    /// Model by Pan et al., An evaluation of lattice Boltzmann schemes for porous medium flow simulation. http://dx.doi.org/10.1016/j.compfluid.2005.03.008
-   static D3Q19MRT constructPanWithMagicNumber( const real_t omega, const real_t magicNumber = threeSixteenth, const uint_t _level = uint_t(0) )
+   static D3Q19MRT constructPanWithMagicNumber( const real_t omega, const real_t magicNumber = threeSixteenth, const uint_t _level = uint_t{0} )
    {
       real_t lambda_e = TRT::lambda_e( omega );
       real_t lambda_d = TRT::lambda_d( omega, magicNumber );
@@ -381,21 +381,21 @@ public:
    }
 
    /// Supposed to be identical to TRT !
-   static D3Q19MRT constructTRT( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
+   static D3Q19MRT constructTRT( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t{0} )
    {
       D3Q19MRT mrt;
       mrt.initTRT( lambda_e, lambda_d, _level );
       return mrt;
    }
-   static D3Q19MRT constructTRTWithMagicNumber( const real_t omega, const real_t magicNumber = threeSixteenth, const uint_t _level = uint_t(0) )
+   static D3Q19MRT constructTRTWithMagicNumber( const real_t omega, const real_t magicNumber = threeSixteenth, const uint_t _level = uint_t{0} )
    {
       real_t lambda_e = TRT::lambda_e( omega );
       real_t lambda_d = TRT::lambda_d( omega, magicNumber );
       return constructTRT( lambda_e, lambda_d, _level );
    }
 
-   void pack( mpi::SendBuffer & buffer ) const { for( uint_t i = uint_t(0); i < uint_t(19); ++i ) buffer << s_[i]; buffer << viscosity_ << level_; }
-   void unpack( mpi::RecvBuffer & buffer ) { for( uint_t i = uint_t(0); i < uint_t(19); ++i ) buffer >> s_[i]; buffer >> viscosity_ >> level_; }
+   void pack( mpi::SendBuffer & buffer ) const { for( uint_t i = uint_t{0}; i < uint_t{19}; ++i ) buffer << s_[i]; buffer << viscosity_ << level_; }
+   void unpack( mpi::RecvBuffer & buffer ) { for( uint_t i = uint_t{0}; i < uint_t{19}; ++i ) buffer >> s_[i]; buffer >> viscosity_ >> level_; }
 
    /// Adapts the relaxation parameters to the "right", level-dependent parameters once "configure" is called
    void configure( IBlock & block, StructuredBlockStorage & sbs )
@@ -448,14 +448,14 @@ public:
       */
    }
 
-   real_t s0()  const { return real_t(0); }
+   real_t s0()  const { return real_t{0}; }
    real_t s1()  const { return s_[1];     }
    real_t s2()  const { return s_[2];     }
-   real_t s3()  const { return real_t(0); }
+   real_t s3()  const { return real_t{0}; }
    real_t s4()  const { return s_[4];     }
-   real_t s5()  const { return real_t(0); }
+   real_t s5()  const { return real_t{0}; }
    real_t s6()  const { return s_[6];     }
-   real_t s7()  const { return real_t(0); }
+   real_t s7()  const { return real_t{0}; }
    real_t s8()  const { return s_[8];     }
    real_t s9()  const { return s_[9];     }
    real_t s10() const { return s_[10];    }
@@ -483,7 +483,7 @@ public:
 
    real_t omega() const { return s_[9]; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t{1} ) const { return omega(); }
 
    real_t omega_bulk() const { return s_[1]; }
    real_t omega_odd() const { return s_[4]; }
@@ -501,24 +501,24 @@ public:
 
 private:
 
-   D3Q19MRT() : viscosity_( real_t(0) ), level_( uint_t(0) )
+   D3Q19MRT() : viscosity_( real_t{0} ), level_( uint_t{0} )
    {
-      s_[0]  = real_t(0); s_[1]  = real_t(0); s_[2]  = real_t(0); s_[3]  = real_t(0); s_[4]  = real_t(0);
-      s_[5]  = real_t(0); s_[6]  = real_t(0); s_[7]  = real_t(0); s_[8]  = real_t(0); s_[9]  = real_t(0);
-      s_[10] = real_t(0); s_[11] = real_t(0); s_[12] = real_t(0); s_[13] = real_t(0); s_[14] = real_t(0);
-      s_[15] = real_t(0); s_[16] = real_t(0); s_[17] = real_t(0); s_[18] = real_t(0);
+      s_[0]  = real_t{0}; s_[1]  = real_t{0}; s_[2]  = real_t{0}; s_[3]  = real_t{0}; s_[4]  = real_t{0};
+      s_[5]  = real_t{0}; s_[6]  = real_t{0}; s_[7]  = real_t{0}; s_[8]  = real_t{0}; s_[9]  = real_t{0};
+      s_[10] = real_t{0}; s_[11] = real_t{0}; s_[12] = real_t{0}; s_[13] = real_t{0}; s_[14] = real_t{0};
+      s_[15] = real_t{0}; s_[16] = real_t{0}; s_[17] = real_t{0}; s_[18] = real_t{0};
    }
 
-   void initTRT( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
+   void initTRT( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t{0} )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = real_t{0};
       s_[1]  = lambda_e;
       s_[2]  = lambda_e;
-      s_[3]  = real_t(0);
+      s_[3]  = real_t{0};
       s_[4]  = lambda_d;
-      s_[5]  = real_t(0);
+      s_[5]  = real_t{0};
       s_[6]  = lambda_d;
-      s_[7]  = real_t(0);
+      s_[7]  = real_t{0};
       s_[8]  = lambda_d;
       s_[9]  = lambda_e;
       s_[10] = lambda_e;
@@ -535,16 +535,16 @@ private:
       level_     = _level;
    }
    
-   void initPan( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t(0) )
+   void initPan( const real_t lambda_e, const real_t lambda_d, const uint_t _level = uint_t{0} )
    {
-      s_[0]  = real_t(0);
+      s_[0]  = real_t{0};
       s_[1]  = lambda_d;
       s_[2]  = lambda_d;
-      s_[3]  = real_t(0);
+      s_[3]  = real_t{0};
       s_[4]  = lambda_d;
-      s_[5]  = real_t(0);
+      s_[5]  = real_t{0};
       s_[6]  = lambda_d;
-      s_[7]  = real_t(0);
+      s_[7]  = real_t{0};
       s_[8]  = lambda_d;
       s_[9]  = lambda_e;
       s_[10] = lambda_d;
@@ -587,18 +587,18 @@ public:
    using tag = Cumulant_tag;
 
    /// Initializes all omegas to one except omega1
-   D3Q27Cumulant( const real_t _omega1, const uint_t _level = uint_t(0) ) :
+   D3Q27Cumulant( const real_t _omega1, const uint_t _level = uint_t{0} ) :
       viscosity_( viscosityFromOmega(_omega1) ), level_( _level )
    {
       omega_[0] = _omega1;
-      for( uint_t i = uint_t(1); i < uint_t(10); ++i )
-         omega_[i] = real_t(1);
+      for( uint_t i = uint_t{1}; i < uint_t{10}; ++i )
+         omega_[i] = real_t{1};
    }
 
    /// Initializes all omegas separately
    D3Q27Cumulant( const real_t _omega1, const real_t _omega2, const real_t _omega3, const real_t _omega4, const real_t _omega5,
                   const real_t _omega6, const real_t _omega7, const real_t _omega8, const real_t _omega9, const real_t _omega10,
-                  const uint_t _level = uint_t(0) ) :
+                  const uint_t _level = uint_t{0} ) :
       viscosity_( viscosityFromOmega(_omega1) ), level_( _level )
    {
       omega_[0]= _omega1;
@@ -614,13 +614,13 @@ public:
    }
 
    void pack( mpi::SendBuffer &buffer ) const {
-      for( uint_t i = uint_t(0); i < uint_t(10); ++i )
+      for( uint_t i = uint_t{0}; i < uint_t{10}; ++i )
          buffer << omega_[i];
       buffer << viscosity_ << level_ ;
    }
 
    void unpack( mpi::RecvBuffer &buffer ) {
-      for( uint_t i = uint_t(0); i < uint_t(10); ++i )
+      for( uint_t i = uint_t{0}; i < uint_t{10}; ++i )
          buffer >> omega_[i] ;
       buffer >> viscosity_ >> level_ ;
    }
@@ -647,7 +647,7 @@ public:
 
    real_t omega() const { return omega_[0]; }
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t{1} ) const { return omega(); }
 
    real_t omega( uint_t idx ) const { return omega_[idx]; }
 

@@ -49,7 +49,7 @@ static void test() {
 #ifndef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
          const uint_t branches = walberla::math::intRandom<uint8_t>();
 #else
-         const uint_t branches = walberla::math::intRandom( uint_t(0), uint_c( ( math::UINT_BITS - i - 1 ) / 3 ) );
+         const uint_t branches = walberla::math::intRandom( uint_t{0}, uint_c( ( math::UINT_BITS - i - 1 ) / 3 ) );
 #endif
          std::vector< uint_t > branch;
          for( uint_t b = 0; b != branches; ++b )
@@ -101,7 +101,7 @@ static void test() {
 #ifndef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
          const uint_t branches = walberla::math::intRandom<uint8_t>();
 #else
-         const uint_t branches = walberla::math::intRandom( uint_t(0), uint_c( ( math::UINT_BITS - i - 1 ) / 3 ) );
+         const uint_t branches = walberla::math::intRandom( uint_t{0}, uint_c( ( math::UINT_BITS - i - 1 ) / 3 ) );
 #endif
          BlockID id( treeIndex, bit );
          for( uint_t b = 0; b != branches; ++b )

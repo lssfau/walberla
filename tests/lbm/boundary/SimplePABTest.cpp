@@ -92,7 +92,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t channelWi
    return blockforest::createUniformBlockGrid(
       processes[0], processes[1], processes[2],  // blocks/processes in x/y/z direction
       blockSize[0], blockSize[1], blockSize[2], // cells per block in x/y/z direction
-      real_t(1),                                 // cell size
+      real_t{1},                                 // cell size
       true,                                      // one block per process
       false,        false,        false,         // periodicity
       false );
@@ -236,7 +236,7 @@ int main( int argc, char **argv )
 
    BlockDataID boundaryHandling = blockStorage->addStructuredBlockData( "Boundary Handling" )
       << StructuredBlockDataCreator<BoundaryHandlingCreator::BoundaryHandlingT>(
-      BoundaryHandlingCreator(flagField, pdfField, real_t(1), real_t(1) + deltaDensity, channelLength, channelWidth, omega ) );
+      BoundaryHandlingCreator(flagField, pdfField, real_t{1}, real_t{1} + deltaDensity, channelLength, channelWidth, omega ) );
 
    SweepTimeloop timeloop( blockStorage->getBlockStorage(), numTimesteps );
 

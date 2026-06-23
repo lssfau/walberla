@@ -159,7 +159,7 @@ private:
 */
 //**********************************************************************************************************************
 template< typename REAL_TYPE = real_t >
-REAL_TYPE realRandom( const REAL_TYPE min = REAL_TYPE(0), const REAL_TYPE max = REAL_TYPE(1), std::mt19937 & generator = internal::getGenerator() )
+REAL_TYPE realRandom( const REAL_TYPE min = REAL_TYPE{0}, const REAL_TYPE max = REAL_TYPE{1}, std::mt19937 & generator = internal::getGenerator() )
 {
    static_assert( std::numeric_limits<REAL_TYPE>::is_specialized && !std::numeric_limits<REAL_TYPE>::is_integer, "Floating point type required/expected!" );
    WALBERLA_ASSERT_LESS( min, max );
@@ -193,7 +193,7 @@ private:
 
 
 inline bool boolRandom() { ///< Randomly returns 'true' or 'false'
-   return realRandom<real_t>() >= real_t(0.5);
+   return realRandom<real_t>() >= real_t{0.5};
 }
 
 

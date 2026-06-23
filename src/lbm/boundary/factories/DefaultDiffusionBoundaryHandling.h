@@ -109,7 +109,7 @@ private:
          SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID1(), getSimpleDiffusionDirichletFlagUID1(), pdfField ),
          SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID2(), getSimpleDiffusionDirichletFlagUID2(), pdfField ) );
 
-      if( initFlagUIDs.size() > size_t(0u) )
+      if( initFlagUIDs.size() > size_t{0u} )
       {
          flag_t initMask(0u);
          for(auto initFlagUID : initFlagUIDs)
@@ -117,7 +117,7 @@ private:
                field::addMask( initMask, flagField->getFlag( initFlagUID ) );
             else
                WALBERLA_ABORT( "Try to init flag field with a non registered flag: " << initFlagUID );
-         handling->fillWithDomain( initMask, uint_t(0u) );
+         handling->fillWithDomain( initMask, uint_t{0u} );
       }
 
       return handling;

@@ -150,7 +150,7 @@ class MyBoundaryHandling
       Type* handling =
          new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag, pdfField),
                   Inflow_T("Inflow", Inflow_Flag, pdfField, inflowVelocity_),
-                  Outflow_T("Outflow", Outflow_Flag, pdfField, real_t(1)));
+                  Outflow_T("Outflow", Outflow_Flag, pdfField, real_t{1}));
 
       const auto inflow  = flagField->getFlag(Inflow_Flag);
       const auto outflow = flagField->getFlag(Outflow_Flag);
@@ -476,9 +476,9 @@ int main(int argc, char** argv)
    const real_t gravitationalAcceleration = gravitationalAcceleration_SI * dt_SI * dt_SI / dx_SI;
    const real_t particleVolume            = math::pi / 6_r * diameter * diameter * diameter;
 
-   const real_t densityFluid    = real_t(1);
+   const real_t densityFluid    = real_t{1};
    const real_t densityParticle = densityRatio;
-   const real_t dx              = real_t(1);
+   const real_t dx              = real_t{1};
 
    const uint_t numTimeSteps        = uint_c(std::ceil(runtime_SI / dt_SI));
    const uint_t infoSpacing         = uint_c(std::ceil(infoSpacing_SI / dt_SI));
@@ -487,8 +487,8 @@ int main(int argc, char** argv)
 
    const Vector3< real_t > inflowVec(0_r, 0_r, uInflow);
 
-   const real_t poissonsRatio         = real_t(0.22);
-   const real_t kappa                 = real_t(2) * (real_t(1) - poissonsRatio) / (real_t(2) - poissonsRatio);
+   const real_t poissonsRatio         = real_t{0.22};
+   const real_t kappa                 = real_t{2} * (real_t{1} - poissonsRatio) / (real_t{2} - poissonsRatio);
    const real_t particleCollisionTime = 4_r * diameter;
 
    WALBERLA_LOG_INFO_ON_ROOT("Simulation setup:");
@@ -536,7 +536,7 @@ int main(int argc, char** argv)
    const real_t planeOffsetFromOutflow = dx;
    createPlaneSetup(ps, ss, simulationDomain, periodicInX, periodicInY, planeOffsetFromInflow, planeOffsetFromOutflow);
 
-   auto sphereShape = ss->create< mesa_pd::data::Sphere >(diameter * real_t(0.5));
+   auto sphereShape = ss->create< mesa_pd::data::Sphere >(diameter * real_t{0.5});
    ss->shapes[sphereShape]->updateMassAndInertia(densityParticle);
 
    // create spheres
@@ -547,7 +547,7 @@ int main(int argc, char** argv)
       {
          mesa_pd::data::Particle&& p = *ps->create();
          p.setPosition(pt);
-         p.setInteractionRadius(diameter * real_t(0.5));
+         p.setInteractionRadius(diameter * real_t{0.5});
          p.setOwner(mpi::MPIManager::instance()->rank());
          p.setShapeID(sphereShape);
          p.setType(0);
@@ -564,7 +564,7 @@ int main(int argc, char** argv)
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >(blocks, "pdf field", latticeModel, inflowVec,
-                                                                        densityFluid, uint_t(1), field::fzyx);
+                                                                        densityFluid, uint_t{1}, field::fzyx);
 
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -578,14 +578,14 @@ int main(int argc, char** argv)
    // set up RPD functionality
    std::function< void(void) > syncCall = [&ps, &rpdDomain]() {
       // keep overlap for lubrication
-      const real_t overlap = real_t(1.5);
+      const real_t overlap = real_t{1.5};
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
       syncNextNeighborFunc(*ps, *rpdDomain, overlap);
    };
 
    syncCall();
 
-   real_t timeStepSizeRPD = real_t(1) / real_t(numberOfParticleSubCycles);
+   real_t timeStepSizeRPD = real_t{1} / static_cast< real_t >(numberOfParticleSubCycles);
    mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(timeStepSizeRPD);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeRPD);
    mesa_pd::kernel::LinearSpringDashpot collisionResponse(1);
@@ -594,13 +594,13 @@ int main(int argc, char** argv)
    mesa_pd::mpi::ReduceContactHistory reduceAndSwapContactHistory;
 
    // set up coupling functionality
-   Vector3< real_t > gravitationalForce(real_t(0), real_t(0),
+   Vector3< real_t > gravitationalForce(real_t{0}, real_t{0},
                                         -(densityParticle - densityFluid) * gravitationalAcceleration * particleVolume);
    lbm_mesapd_coupling::AddForceOnParticlesKernel addGravitationalForce(gravitationalForce);
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
    lbm_mesapd_coupling::LubricationCorrectionKernel lubricationCorrectionKernel(
-      viscosity, [](real_t r) { return (real_t(0.001 + real_t(0.00007) * r)) * r; });
+      viscosity, [](real_t r) { return (real_t{0.001} + real_t{0.00007} * r) * r; });
 
    ///////////////
    // TIME LOOP //
@@ -631,7 +631,7 @@ int main(int argc, char** argv)
    timeloop.addFuncBeforeTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
 
    // vtk output
-   if (vtkSpacingParticles != uint_t(0))
+   if (vtkSpacingParticles != uint_t{0})
    {
       // sphere
       auto particleVtkOutput = make_shared< mesa_pd::vtk::ParticleVtkOutput >(ps);
@@ -648,15 +648,15 @@ int main(int argc, char** argv)
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(particleVtkWriter), "VTK (sphere data)");
    }
 
-   if (vtkSpacingFluid != uint_t(0))
+   if (vtkSpacingFluid != uint_t{0})
    {
       // velocity field, only a slice
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid", vtkSpacingFluid, 0, false, vtkFolder);
 
       pdfFieldVTK->addBeforeFunction(optimizedPDFCommunicationScheme);
 
-      AABB sliceAABB(real_t(0), real_c(domainSize[1]) * real_t(0.5) - real_t(1), real_t(0), real_c(domainSize[0]),
-                     real_c(domainSize[1]) * real_t(0.5) + real_t(1), real_c(domainSize[2]));
+      AABB sliceAABB(real_t{0}, real_c(domainSize[1]) * real_t{0.5} - real_t{1}, real_t{0}, real_c(domainSize[0]),
+                     real_c(domainSize[1]) * real_t{0.5} + real_t{1}, real_c(domainSize[2]));
       vtk::AABBCellFilter aabbSliceFilter(sliceAABB);
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
@@ -704,7 +704,7 @@ int main(int argc, char** argv)
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(fractionFieldVTK), "VTK (fraction field data");
    }
 
-   if (vtkSpacingFluid != uint_t(0) || vtkSpacingParticles != uint_t(0))
+   if (vtkSpacingFluid != uint_t{0} || vtkSpacingParticles != uint_t{0})
    {
       vtk::writeDomainDecomposition(blocks, "domain_decomposition", vtkFolder);
    }
@@ -746,7 +746,7 @@ int main(int argc, char** argv)
       ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque,
                           *accessor);
 
-      for (auto subCycle = uint_t(0); subCycle < numberOfParticleSubCycles; ++subCycle)
+      for (auto subCycle = uint_t{0}; subCycle < numberOfParticleSubCycles; ++subCycle)
       {
          timeloopTiming["RPD"].start();
 
@@ -787,7 +787,7 @@ int main(int argc, char** argv)
                {
                   if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *rpdDomain))
                   {
-                     auto meff = real_t(1) / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
+                     auto meff = real_t{1} / (ac.getInvMass(idx1) + ac.getInvMass(idx2));
                      collisionResponse.setStiffnessAndDamping(0, 0, coefficientOfRestitution, particleCollisionTime,
                                                               kappa, meff);
                      collisionResponse(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(),

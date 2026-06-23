@@ -86,8 +86,8 @@ splitGhostLayerField(const GhostLayerField<T,fs> & fieldToSplit,
 void singleField()
 {
    const uint_t radius = 20;
-   const uint_t fieldSize = uint_t(2.6 * radius);
-   const uint_t midpoint  = uint_t(1.3 * radius);
+   const uint_t fieldSize = static_cast< uint_t >(2.6 * radius);
+   const uint_t midpoint  = static_cast< uint_t >(1.3 * radius);
 
    GhostLayerField<real_t,1> f (fieldSize,fieldSize,fieldSize,1,0);
 
@@ -111,8 +111,8 @@ void multipleFields()
    const uint_t radius = 20;
    // the expectedDoubles where determined by an external tool (blender) and depend on the radius
    const uint_t expectedDoubles = 474;
-   const uint_t fieldSize = uint_t(3 * radius);
-   const uint_t midpoint  = uint_t(1.5 * radius);
+   const uint_t fieldSize = static_cast< uint_t >(3 * radius);
+   const uint_t midpoint  = static_cast< uint_t >(1.5 * radius);
 
    using GlF = GhostLayerField<real_t,1>;
    GlF f (fieldSize,fieldSize,fieldSize,1,0);
@@ -132,11 +132,11 @@ void multipleFields()
    TriangleMesh m;
    for( Field<shared_ptr<GlF>,1 >::iterator i = arr->begin(); i != arr->end(); ++i) {
       Vector3<real_t> offset(0);
-      offset[0] = i.x() ? fieldSize * real_c(0.5) : real_t(0);
-      offset[1] = i.y() ? fieldSize * real_c(0.5) : real_t(0);
-      offset[2] = i.z() ? fieldSize * real_c(0.5) : real_t(0);
+      offset[0] = i.x() ? fieldSize * real_c(0.5) : real_t{0};
+      offset[1] = i.y() ? fieldSize * real_c(0.5) : real_t{0};
+      offset[2] = i.z() ? fieldSize * real_c(0.5) : real_t{0};
 
-      generateIsoSurface( **i, real_c(0.5), m, Vector3<real_t>(real_t(1)), uint_t(0), offset );
+      generateIsoSurface( **i, real_c(0.5), m, Vector3<real_t>(real_t{1}), uint_t{0}, offset );
    }
 
    //std::ofstream file1("meshWithDoubles.obj");

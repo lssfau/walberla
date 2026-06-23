@@ -44,10 +44,10 @@ public:
    { return invMass_; }
 
    const auto getInvInertiaBF(const size_t /*p_idx*/) const // dummy
-   { return Mat3(real_t(0)); }
+   { return Mat3(real_t{0}); }
 
    const auto getInertiaBF(const size_t /*p_idx*/) const // dummy
-   { return Mat3(real_t(0)); }
+   { return Mat3(real_t{0}); }
 
 private:
    real_t invMass_;
@@ -159,8 +159,8 @@ AccuracyResult checkIntegrator(const Oscillator& osc)
    particle.setPosition(0, Vec3(0, 0, osc.analyticalPos(0_r)));
    particle.setLinearVelocity(0, Vec3(0, 0, osc.analyticalVel(0_r)));
    particle.setInvMass(0, 1_r / osc.mass);
-   particle.setForce(0, osc.getForce(Vec3(0, 0, osc.analyticalPos(real_t(0))),
-                                        Vec3(0, 0, osc.analyticalVel(real_t(0)))));
+   particle.setForce(0, osc.getForce(Vec3(0, 0, osc.analyticalPos(real_t{0})),
+                                        Vec3(0, 0, osc.analyticalVel(real_t{0}))));
    particle.setOldForce(0, osc.getForce(Vec3(0, 0, osc.analyticalPos(-osc.dt)),
                                            Vec3(0, 0, osc.analyticalVel(-osc.dt))));
 
@@ -171,7 +171,7 @@ AccuracyResult checkIntegrator(const Oscillator& osc)
    real_t maxVelDeviation = 0_r;
    real_t maxEneDeviation = 0_r;
 
-   for (auto i = uint_t(0); i <= osc.timeSteps; ++i)
+   for (auto i = uint_t{0}; i <= osc.timeSteps; ++i)
    {
       real_t refPos = osc.analyticalPos(real_c(i) * osc.dt);
       real_t refVel = osc.analyticalVel(real_c(i) * osc.dt);

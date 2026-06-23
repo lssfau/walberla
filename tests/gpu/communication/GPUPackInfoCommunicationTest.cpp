@@ -63,7 +63,7 @@ FieldType* createField(IBlock* const block, StructuredBlockStorage* const storag
                         storage->getNumberOfYCells(*block),                  // number of cells in y direction per block
                         storage->getNumberOfZCells(*block),                  // number of cells in z direction per block
                         1,                                                   // one ghost layer
-                        DataType(0),                                         // initial value
+                        DataType{0},                                         // initial value
                         fieldLayouts[fieldLayoutIndex],                      // layout
                         make_shared< gpu::HostFieldAllocator< DataType > >() // allocator for host pinned memory
    );

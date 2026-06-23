@@ -121,7 +121,7 @@ inline void ConvexPolyhedron::updateMassAndInertia(const real_t density) {
    const Mat3 I = unitInertiaBF_ * density;
 
    mass_ = m;
-   invMass_ = real_t(1.) / m;
+   invMass_ = real_t{1.} / m;
 
    inertiaBF_ = I;
    invInertiaBF_ = I.getInverse();
@@ -133,17 +133,17 @@ inline void ConvexPolyhedron::updateMeshQuantities() {
    mesh_.request_face_normals();
    mesh_.update_face_normals();
 
-   octandVertices_[0] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(1), real_t(1)), *mesh_.vertices_begin());
-   octandVertices_[1] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(1), real_t(-1)), *mesh_.vertices_begin());
-   octandVertices_[2] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(-1), real_t(1)), *mesh_.vertices_begin());
-   octandVertices_[3] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(-1), real_t(-1)), *mesh_.vertices_begin());
-   octandVertices_[4] = supportVertex(mesh::TriangleMesh::Normal(real_t(-1), real_t(1), real_t(1)), *mesh_.vertices_begin());
-   octandVertices_[5] = supportVertex(mesh::TriangleMesh::Normal(real_t(-1), real_t(1), real_t(-1)), *mesh_.vertices_begin());
-   octandVertices_[6] = supportVertex(mesh::TriangleMesh::Normal(real_t(-1), real_t(-1), real_t(1)), *mesh_.vertices_begin());
-   octandVertices_[7] = supportVertex(mesh::TriangleMesh::Normal(real_t(-1), real_t(-1), real_t(-1)), *mesh_.vertices_begin());
+   octandVertices_[0] = supportVertex(mesh::TriangleMesh::Normal(real_t{1}, real_t{1}, real_t{1}), *mesh_.vertices_begin());
+   octandVertices_[1] = supportVertex(mesh::TriangleMesh::Normal(real_t{1}, real_t{1}, real_t{-1}), *mesh_.vertices_begin());
+   octandVertices_[2] = supportVertex(mesh::TriangleMesh::Normal(real_t{1}, real_t{-1}, real_t{1}), *mesh_.vertices_begin());
+   octandVertices_[3] = supportVertex(mesh::TriangleMesh::Normal(real_t{1}, real_t{-1}, real_t{-1}), *mesh_.vertices_begin());
+   octandVertices_[4] = supportVertex(mesh::TriangleMesh::Normal(real_t{-1}, real_t{1}, real_t{1}), *mesh_.vertices_begin());
+   octandVertices_[5] = supportVertex(mesh::TriangleMesh::Normal(real_t{-1}, real_t{1}, real_t{-1}), *mesh_.vertices_begin());
+   octandVertices_[6] = supportVertex(mesh::TriangleMesh::Normal(real_t{-1}, real_t{-1}, real_t{1}), *mesh_.vertices_begin());
+   octandVertices_[7] = supportVertex(mesh::TriangleMesh::Normal(real_t{-1}, real_t{-1}, real_t{-1}), *mesh_.vertices_begin());
 
    Vec3 centroid;
-   mesh::computeMassProperties(mesh_, real_t(1), centroid, unitInertiaBF_, unitMass_);
+   mesh::computeMassProperties(mesh_, real_t{1}, centroid, unitInertiaBF_, unitMass_);
    WALBERLA_CHECK_FLOAT_EQUAL(centroid, Vector3<real_t>(0,0,0), "The mesh has to have its centroid at the origin of its coordinate system! Use mesh::computeCentroid and mesh::translate.");
 
    real_t maxSqRadius(0);
@@ -165,32 +165,32 @@ inline Vec3 ConvexPolyhedron::support( const Vec3& d ) const {
    WALBERLA_CHECK(meshQuantitiesAvailable, "Octand vertices of this mesh first have to be initialized using updateMeshQuantities!");
    // taken from pe implementation
 
-   if (math::equal(d.length(), real_t(0))) return Vec3(0,0,0);
+   if (math::equal(d.length(), real_t{0})) return Vec3(0,0,0);
 
    // d is already in the mesh coordinate system, as the origins of the particle and the mesh COS overlap
    mesh::TriangleMesh::Normal d_loc = mesh::toOpenMesh(d);
 
    mesh::TriangleMesh::VertexHandle startVertex;
-   if(d_loc[0] >= real_t( 0 ))
+   if(d_loc[0] >= real_t{ 0 })
    {
-      if(d_loc[1] >= real_t( 0 ))
+      if(d_loc[1] >= real_t{ 0 })
       {
-         startVertex = d_loc[2] >= real_t( 0 ) ? octandVertices_[0] : octandVertices_[1];
+         startVertex = d_loc[2] >= real_t{ 0 } ? octandVertices_[0] : octandVertices_[1];
       }
       else // d_loc[1] < 0
       {
-         startVertex = d_loc[2] >= real_t( 0 ) ? octandVertices_[2] : octandVertices_[3];
+         startVertex = d_loc[2] >= real_t{ 0 } ? octandVertices_[2] : octandVertices_[3];
       }
    }
    else // d_loc[0] < 0
    {
-      if(d_loc[1] >= real_t( 0 ))
+      if(d_loc[1] >= real_t{ 0 })
       {
-         startVertex = d_loc[2] >= real_t( 0 ) ? octandVertices_[4] : octandVertices_[5];
+         startVertex = d_loc[2] >= real_t{ 0 } ? octandVertices_[4] : octandVertices_[5];
       }
       else // d_loc[1] < 0
       {
-         startVertex = d_loc[2] >= real_t( 0 ) ? octandVertices_[6] : octandVertices_[7];
+         startVertex = d_loc[2] >= real_t{ 0 } ? octandVertices_[6] : octandVertices_[7];
       }
    }
 
@@ -271,7 +271,7 @@ inline void ConvexPolyhedron::unpack(walberla::mpi::RecvBuffer& buf){
    for(size_t i = 0; i < numVertices; ++i) {
       mesh::TriangleMesh::Point p;
       buf >> p;
-      vertexHandles[size_t(i)] = mesh_.add_vertex( p );
+      vertexHandles[static_cast< size_t >(i)] = mesh_.add_vertex( p );
    }
 
    size_t numFaces;
@@ -288,7 +288,7 @@ inline void ConvexPolyhedron::unpack(walberla::mpi::RecvBuffer& buf){
       WALBERLA_ASSERT_LESS( v1, numVertices );
       WALBERLA_ASSERT_LESS( v2, numVertices );
 
-      mesh_.add_face( vertexHandles[size_t(v0)], vertexHandles[size_t(v1)], vertexHandles[size_t(v2)] );
+      mesh_.add_face( vertexHandles[static_cast< size_t >(v0)], vertexHandles[static_cast< size_t >(v1)], vertexHandles[static_cast< size_t >(v2)] );
    }
 
    updateMeshQuantities();

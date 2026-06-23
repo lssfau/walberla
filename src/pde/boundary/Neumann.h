@@ -69,8 +69,8 @@ public:
       for( uint_t i = 0; i != stencil::D3Q6::Size; ++i )
       {
          includeBoundary_[i] = true;
-         order_[i] = uint_t(1);
-         value_[i] = real_t(0);
+         order_[i] = uint_t{1};
+         value_[i] = real_t{0};
       }
       dx_[ stencil::D3Q6::idx[ stencil::W ] ] = blocks.dx();
       dx_[ stencil::D3Q6::idx[ stencil::E ] ] = blocks.dx();
@@ -123,46 +123,46 @@ void NeumannDomainBoundary< PdeField >::operator()()
 
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::W ] ] && blocks_.atDomainXMinBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_t(-1), cell_idx_t(0), cell_idx_t(0),
-                                 cell_idx_t(-1), cell_idx_c(p->ySize()) - cell_idx_t(1), cell_idx_c(p->zSize()) - cell_idx_t(1) ),
-                cell_idx_t(1), cell_idx_t(0), cell_idx_t(0),
+         apply( p, CellInterval( cell_idx_t{-1}, cell_idx_t{0}, cell_idx_t{0},
+                                 cell_idx_t{-1}, cell_idx_c(p->ySize()) - cell_idx_t{1}, cell_idx_c(p->zSize()) - cell_idx_t{1} ),
+                cell_idx_t{1}, cell_idx_t{0}, cell_idx_t{0},
                 order_[ stencil::D3Q6::idx[ stencil::W ] ], value_[ stencil::D3Q6::idx[ stencil::W ] ], dx_[ stencil::D3Q6::idx[ stencil::W ] ] );
       }
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::E ] ] && blocks_.atDomainXMaxBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_c(p->xSize()), cell_idx_t(0), cell_idx_t(0),
-                                 cell_idx_c(p->xSize()), cell_idx_c(p->ySize()) - cell_idx_t(1), cell_idx_c(p->zSize()) - cell_idx_t(1) ),
-                cell_idx_t(-1), cell_idx_t(0), cell_idx_t(0),
+         apply( p, CellInterval( cell_idx_c(p->xSize()), cell_idx_t{0}, cell_idx_t{0},
+                                 cell_idx_c(p->xSize()), cell_idx_c(p->ySize()) - cell_idx_t{1}, cell_idx_c(p->zSize()) - cell_idx_t{1} ),
+                cell_idx_t{-1}, cell_idx_t{0}, cell_idx_t{0},
                 order_[ stencil::D3Q6::idx[ stencil::E ] ], value_[ stencil::D3Q6::idx[ stencil::E ] ], dx_[ stencil::D3Q6::idx[ stencil::E ] ] );
       }
 
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::S ] ] && blocks_.atDomainYMinBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_t(0), cell_idx_t(-1), cell_idx_t(0),
-                                 cell_idx_c(p->xSize()) - cell_idx_t(1), cell_idx_t(-1), cell_idx_c(p->zSize()) - cell_idx_t(1) ),
-                cell_idx_t(0), cell_idx_t(1), cell_idx_t(0),
+         apply( p, CellInterval( cell_idx_t{0}, cell_idx_t{-1}, cell_idx_t{0},
+                                 cell_idx_c(p->xSize()) - cell_idx_t{1}, cell_idx_t{-1}, cell_idx_c(p->zSize()) - cell_idx_t{1} ),
+                cell_idx_t{0}, cell_idx_t{1}, cell_idx_t{0},
                 order_[ stencil::D3Q6::idx[ stencil::S ] ], value_[ stencil::D3Q6::idx[ stencil::S ] ], dx_[ stencil::D3Q6::idx[ stencil::S ] ] );
       }
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::N ] ] && blocks_.atDomainYMaxBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_t(0), cell_idx_c(p->ySize()), cell_idx_t(0),
-                                 cell_idx_c(p->xSize()) - cell_idx_t(1), cell_idx_c(p->ySize()), cell_idx_c(p->zSize()) - cell_idx_t(1) ),
-                cell_idx_t(0), cell_idx_t(-1), cell_idx_t(0),
+         apply( p, CellInterval( cell_idx_t{0}, cell_idx_c(p->ySize()), cell_idx_t{0},
+                                 cell_idx_c(p->xSize()) - cell_idx_t{1}, cell_idx_c(p->ySize()), cell_idx_c(p->zSize()) - cell_idx_t{1} ),
+                cell_idx_t{0}, cell_idx_t{-1}, cell_idx_t{0},
                 order_[ stencil::D3Q6::idx[ stencil::N ] ], value_[ stencil::D3Q6::idx[ stencil::N ] ], dx_[ stencil::D3Q6::idx[ stencil::N ] ] );
       }
 
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::B ] ] && blocks_.atDomainZMinBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_t(0), cell_idx_t(0), cell_idx_t(-1),
-                                 cell_idx_c(p->xSize()) - cell_idx_t(1), cell_idx_c(p->ySize()) - cell_idx_t(1), cell_idx_t(-1) ),
-                cell_idx_t(0), cell_idx_t(0), cell_idx_t(1),
+         apply( p, CellInterval( cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{-1},
+                                 cell_idx_c(p->xSize()) - cell_idx_t{1}, cell_idx_c(p->ySize()) - cell_idx_t{1}, cell_idx_t{-1} ),
+                cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{1},
                 order_[ stencil::D3Q6::idx[ stencil::B ] ], value_[ stencil::D3Q6::idx[ stencil::B ] ], dx_[ stencil::D3Q6::idx[ stencil::B ] ] );
       }
       if( includeBoundary_[ stencil::D3Q6::idx[ stencil::T ] ] && blocks_.atDomainZMaxBorder( *block ) )
       {
-         apply( p, CellInterval( cell_idx_t(0), cell_idx_t(0), cell_idx_c(p->zSize()),
-                                 cell_idx_c(p->xSize()) - cell_idx_t(1), cell_idx_c(p->ySize()) - cell_idx_t(1), cell_idx_c(p->zSize()) ),
-                cell_idx_t(0), cell_idx_t(0), cell_idx_t(-1),
+         apply( p, CellInterval( cell_idx_t{0}, cell_idx_t{0}, cell_idx_c(p->zSize()),
+                                 cell_idx_c(p->xSize()) - cell_idx_t{1}, cell_idx_c(p->ySize()) - cell_idx_t{1}, cell_idx_c(p->zSize()) ),
+                cell_idx_t{0}, cell_idx_t{0}, cell_idx_t{-1},
                 order_[ stencil::D3Q6::idx[ stencil::T ] ], value_[ stencil::D3Q6::idx[ stencil::T ] ], dx_[ stencil::D3Q6::idx[ stencil::T ] ] );
       }
    }
@@ -175,9 +175,9 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
                                                const cell_idx_t cx, const cell_idx_t cy, const cell_idx_t cz,
                                                const uint_t order, const real_t value, const real_t dx ) const
 {
-   if( order == uint_t(1) )
+   if( order == uint_t{1} )
    {
-      if( isIdentical( value, real_t(0) ) )
+      if( isIdentical( value, real_t{0} ) )
       {
          WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
             p->get(x,y,z) = p->get( x + cx, y + cy, z + cz );  // (dp / dx) == 0 _on_ the boundary
@@ -193,18 +193,18 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
    }
    else
    {
-      WALBERLA_ASSERT_EQUAL( order, uint_t(2) );
+      WALBERLA_ASSERT_EQUAL( order, uint_t{2} );
 
-      if( isIdentical( value, real_t(0) ) )
+      if( isIdentical( value, real_t{0} ) )
       {      
          WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
 
             const real_t pBoundary = p->get( x + cx, y + cy, z + cz );
-            const real_t pInner    = p->get( x + cell_idx_t(2) * cx, y + cell_idx_t(2) * cy, z + cell_idx_t(2) * cz );
+            const real_t pInner    = p->get( x + cell_idx_t{2} * cx, y + cell_idx_t{2} * cy, z + cell_idx_t{2} * cz );
 
             const real_t boundaryValue = pBoundary + real_c(0.5) * ( pBoundary - pInner ); // extrapolation of value _on_ the boundary
 
-            p->get(x,y,z) = real_t(2) * boundaryValue - pBoundary;  // (d^2 p / dx^2) == 0 _on_ the boundary
+            p->get(x,y,z) = real_t{2} * boundaryValue - pBoundary;  // (d^2 p / dx^2) == 0 _on_ the boundary
          )
       }
       else
@@ -213,11 +213,11 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
          WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
 
             const real_t pBoundary = p->get( x + cx, y + cy, z + cz );
-            const real_t pInner    = p->get( x + cell_idx_t(2) * cx, y + cell_idx_t(2) * cy, z + cell_idx_t(2) * cz );
+            const real_t pInner    = p->get( x + cell_idx_t{2} * cx, y + cell_idx_t{2} * cy, z + cell_idx_t{2} * cz );
 
             const real_t boundaryValue = pBoundary + real_c(0.5) * ( pBoundary - pInner ); // extrapolation of value _on_ the boundary
 
-            p->get(x,y,z) = vdx + real_t(2) * boundaryValue - pBoundary;  // (d^2 p / dx^2) == value _on_ the boundary
+            p->get(x,y,z) = vdx + real_t{2} * boundaryValue - pBoundary;  // (d^2 p / dx^2) == value _on_ the boundary
          )
       }
    }
@@ -350,7 +350,7 @@ inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, c
    )
 #endif
 
-   neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::fzyx );
+   neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t{1}, field::fzyx );
 
    for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
       dx_[d.toIdx()] = Vector3<real_t>(real_c(stencil::cx[d.toIdx()])*blocks.dx(), real_c(stencil::cy[d.toIdx()])*blocks.dy(), real_c(stencil::cz[d.toIdx()])*blocks.dz() ).sqrLength();

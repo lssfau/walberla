@@ -56,7 +56,7 @@ void NormalSweep< Stencil_T, FlagField_T, ScalarField_T, VectorField_T >::operat
 
    // evaluate flags in D2Q19 neighborhood for 2D, and in D3Q27 neighborhood for 3D simulations
    using NeighborhoodStencil_T =
-      typename std::conditional_t< Stencil_T::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+      typename std::conditional_t< Stencil_T::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
 
    // include ghost layer because solid cells might be located in the (outermost global) ghost layer
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(normalField, uint_c(1), {
@@ -376,7 +376,7 @@ void computeNormalNearSolidBoundary(vector_t& normal, const ScalarFieldIt_T& fil
       if (isPartOfMaskSet(flagFieldIt.neighbor(*dir), validNeighborFlagMask) &&
           isPartOfMaskSet(flagFieldIt.neighbor(dir.inverseDir()), obstacleFlagMask))
       {
-         if constexpr (Stencil_T::D == uint_t(2))
+         if constexpr (Stencil_T::D == uint_t{2})
          {
             midPoint[0] += real_c(dir.cx()) *
                            real_c(stencil::gaussianMultipliers[stencil::D3Q27::idx[stencil::map2Dto3D[2][*dir]]]);
@@ -437,7 +437,7 @@ void computeNormalNearSolidBoundary(vector_t& normal, const ScalarFieldIt_T& fil
       if (isPartOfMaskSet(flagFieldIt.neighbor(modCx, modCy, modCz), validNeighborFlagMask))
       {
          // compute normal with formula from regular Parker-Youngs approximation
-         if constexpr (Stencil_T::D == uint_t(2))
+         if constexpr (Stencil_T::D == uint_t{2})
          {
             fill = fillFieldIt.neighbor(modCx, modCy, modCz) *
                    real_c(stencil::gaussianMultipliers[stencil::D3Q27::idx[stencil::map2Dto3D[2][*dir]]]);

@@ -29,14 +29,14 @@ Permeability<PdfField_T, BoundaryHandling_T>::Permeability( real_t viscosity, co
    : nu_( viscosity ), pdfFieldId_( pdfFieldId ), boundaryHandlingId_( boundaryHandlingId ), fluid_( fluid ), blocks_( blocks ), time_( 0 ), lastU_( 0 )
 {
    delta_               = std::numeric_limits<real_t>::max();
-   k_                   = real_t(0);
+   k_                   = real_t{0};
 
-   numSampleFluidNodes_ = uint_t(0);
-   numC0FluidNodes_     = uint_t(0);
-   numC1FluidNodes_     = uint_t(0); 
-   flowAxis_            = uint_t(0);
-   convCrit_            = real_t(0);
-   interval_            = uint_t(0);
+   numSampleFluidNodes_ = uint_t{0};
+   numC0FluidNodes_     = uint_t{0};
+   numC1FluidNodes_     = uint_t{0}; 
+   flowAxis_            = uint_t{0};
+   convCrit_            = real_t{0};
+   interval_            = uint_t{0};
 
    initialized_  = false;
 }
@@ -170,14 +170,14 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
      p1  /= real_c( numC1FluidNodes_ );         // average density in cross section c1
 
      // convert density to pressure (P = rho / 3) and calculate average gradient
-     const real_t pressureGradient = ( p0 - p1 ) / ( real_t(3) * real_c( sampleVolume_.size( flowAxis_ ) - 1 ) );
+     const real_t pressureGradient = ( p0 - p1 ) / ( real_t{3} * real_c( sampleVolume_.size( flowAxis_ ) - 1 ) );
 
      if( math::isnan( u ) || math::isinf( u ) )
      {
         WALBERLA_LOG_WARNING( "Cannot determine permeability. Invalid mean fluid velocity " << u );
 
         delta_ = std::numeric_limits<real_t>::max();
-        k_     = real_t(0);
+        k_     = real_t{0};
      }
 
      else
@@ -223,7 +223,7 @@ void Permeability<PdfField_T, BoundaryHandling_T>::operator()()
 template< typename PdfField_T, typename BoundaryHandling_T >
 void Permeability<PdfField_T, BoundaryHandling_T>::initSampleVolume()
 {
-   if( flowAxis_ == uint_t(0) ) // X AXIS
+   if( flowAxis_ == uint_t{0} ) // X AXIS
    {
       c0_ = CellInterval( sampleVolume_.xMin(), sampleVolume_.yMin(), sampleVolume_.zMin(),
                           sampleVolume_.xMin(), sampleVolume_.yMax(), sampleVolume_.zMax() );
@@ -231,7 +231,7 @@ void Permeability<PdfField_T, BoundaryHandling_T>::initSampleVolume()
       c1_ = CellInterval( sampleVolume_.xMax(), sampleVolume_.yMin(), sampleVolume_.zMin(),                           
                           sampleVolume_.xMax(), sampleVolume_.yMax(), sampleVolume_.zMax() );
    }
-   else if( flowAxis_ == uint_t(1) ) // Y AXIS
+   else if( flowAxis_ == uint_t{1} ) // Y AXIS
    {
       c0_ = CellInterval( sampleVolume_.xMin(), sampleVolume_.yMin(), sampleVolume_.zMin(),
                           sampleVolume_.xMax(), sampleVolume_.yMin(), sampleVolume_.zMax() );
@@ -239,7 +239,7 @@ void Permeability<PdfField_T, BoundaryHandling_T>::initSampleVolume()
       c1_ = CellInterval( sampleVolume_.xMin(), sampleVolume_.yMax(), sampleVolume_.zMin(),
                           sampleVolume_.xMax(), sampleVolume_.yMax(), sampleVolume_.zMax() );
    }
-   else if( flowAxis_ == uint_t(2) ) // Z AXIS
+   else if( flowAxis_ == uint_t{2} ) // Z AXIS
    {
       c0_ = CellInterval( sampleVolume_.xMin(), sampleVolume_.yMin(), sampleVolume_.zMin(),
                           sampleVolume_.xMax(), sampleVolume_.yMax(), sampleVolume_.zMin() );

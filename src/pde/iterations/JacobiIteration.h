@@ -42,7 +42,7 @@ public:
                     const std::function< void () > & communication,
                     const std::function< void ( IBlock * ) > & jacobi,
                     const std::function< real_t () > & residualNorm,
-                    const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
+                    const real_t residualNormThreshold = real_t{0}, const uint_t residualCheckFrequency = uint_t{1},
                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), iterations_( iterations ),

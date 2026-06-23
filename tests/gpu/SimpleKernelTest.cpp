@@ -44,7 +44,7 @@ GhostLayerField<double,1> * createCPUField( IBlock* const block, StructuredBlock
       storage->getNumberOfYCells( *block ), // number of cells in y direction
       storage->getNumberOfZCells( *block ), // number of cells in z direction
       1,                                    // number of ghost layers
-      double(1),                            // initial value
+      1.0,                                  // initial value
       field::fzyx);
 }
 
@@ -66,8 +66,8 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
 
    shared_ptr< StructuredBlockForest > const blocks = blockforest::createUniformBlockGrid (
-      uint_t(1),   uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
-      uint_t(14),  uint_t(14), uint_t(14), // how many cells per block (x,y,z)
+      uint_t{1},   uint_t{1},  uint_t{1},  // number of blocks in x,y,z direction
+      uint_t{14},  uint_t{14}, uint_t{14}, // how many cells per block (x,y,z)
       real_c(0.5),                         // dx: length of one cell in physical coordinates
       false,                               // one block per process - "false" means all blocks to one process
       false, false, false );               // no periodicity
@@ -96,7 +96,7 @@ int main( int argc, char ** argv )
 
       gpu::fieldCpy( *cpuField, *gpuField );
 
-      WALBERLA_ASSERT_FLOAT_EQUAL( cpuField->get(0,0,0), real_t(2) )
+      WALBERLA_ASSERT_FLOAT_EQUAL( cpuField->get(0,0,0), real_t{2} )
    }
 
    return EXIT_SUCCESS;

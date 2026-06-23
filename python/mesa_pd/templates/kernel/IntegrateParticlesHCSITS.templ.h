@@ -127,7 +127,7 @@ inline void IntegrateParticlesHCSITS::integratePositions(PAccessor& ac, size_t b
          v = v * (edge * getSpeedLimitFactor() / dt / speed);
       }
 
-      const real_t maxPhi = real_t(2) * math::pi * getSpeedLimitFactor();
+      const real_t maxPhi = real_t{2} * math::pi * getSpeedLimitFactor();
       const real_t phi = w.length() * dt;
       if (phi > maxPhi) {
          w = w / phi * maxPhi;

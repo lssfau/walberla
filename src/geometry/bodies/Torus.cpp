@@ -33,9 +33,9 @@ namespace geometry {
    
    void Torus::update()
    {
-      WALBERLA_ASSERT_GREATER( distnc_, real_t(0) );
+      WALBERLA_ASSERT_GREATER( distnc_, real_t{0} );
       WALBERLA_ASSERT_GREATER( radius_, distnc_   );
-      WALBERLA_ASSERT_GREATER( normal_.sqrLength(), real_t(1e-16) );
+      WALBERLA_ASSERT_GREATER( normal_.sqrLength(), real_t{1e-16} );
 
       math::normalize( normal_ );
       math::normals( normal_, defTan_, comTan_ );
@@ -65,7 +65,7 @@ namespace geometry {
    {
       const auto dir = point - torus.midPnt();
       const auto tan = (dir*torus.defTan())*torus.defTan() + (dir*torus.comTan())*torus.comTan();
-      if( tan.sqrLength() < real_t(1e-16) )
+      if( tan.sqrLength() < real_t{1e-16} )
          return false;
       const auto pnt = torus.midPnt() + tan.getNormalized()*torus.radius();
       const auto len = ( pnt - point ).sqrLength();

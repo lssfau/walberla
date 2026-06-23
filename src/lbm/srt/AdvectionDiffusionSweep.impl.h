@@ -70,8 +70,8 @@ public:
 
    void operator() ( IBlock * block );
    
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
 
 protected:
    const ConstBlockDataID velID_;
@@ -110,7 +110,7 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
    dst->resetLatticeModel( lm ); // required so that the member function 'getDensity' can be called for dst!
 
    const real_t omega_eq = lm.collisionModel( ).omega( );
-   const real_t omega_st = real_t( 1 ) - omega_eq;
+   const real_t omega_st = real_t{ 1 } - omega_eq;
 
    const cell_idx_t xSize = cell_idx_c( src->xSize( ) );
    const cell_idx_t ySize = cell_idx_c( src->ySize( ) );
@@ -198,7 +198,7 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
    WALBERLA_ASSERT_EQUAL( vel->zSize( ), src->zSize( ) );
 
    const real_t omega_eq = src->latticeModel( ).collisionModel( ).omega( );
-   const real_t omega_st = real_t( 1 ) - omega_eq;
+   const real_t omega_st = real_t{ 1 } - omega_eq;
 
    const cell_idx_t start = -cell_idx_c( numberOfGhostLayersToInclude );
 
@@ -262,8 +262,8 @@ public:
    
    void operator() ( IBlock * block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
 
 protected:
    const ConstBlockDataID velID_;
@@ -328,7 +328,7 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
                const real_t scalar = dst->getDensity( x, y, z );
 
                const real_t omega_eq = lm.collisionModel( ).omega( x, y, z );
-               const real_t omega_st = real_t( 1 ) - omega_eq;
+               const real_t omega_st = real_t{ 1 } - omega_eq;
 
                // collide
                for( auto d = Stencil::begin( ); d != Stencil::end( ); ++d )
@@ -414,7 +414,7 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
                const real_t scalar = src->getDensity( x, y, z );
 
                const real_t omega_eq = src->latticeModel( ).collisionModel( ).omega( x, y, z );
-               const real_t omega_st = real_t( 1 ) - omega_eq;
+               const real_t omega_st = real_t{ 1 } - omega_eq;
 
                // collide
                for( auto d = Stencil::begin( ); d != Stencil::end( ); ++d )
@@ -455,8 +455,8 @@ public:
 
    void operator() ( IBlock * block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
    
 protected:
    const ConstBlockDataID velID_;
@@ -506,8 +506,8 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
    dst->resetLatticeModel( lm ); // required so that the member function 'getDensity' can be called for dst!
 
    const real_t omega_eq = lm.collisionModel( ).omega( );
-   const real_t omega_st = real_t( 1 ) - omega_eq;
-   const real_t omega_dt = real_t( 3 ) - real_c( 1.5 )*omega_eq;
+   const real_t omega_st = real_t{ 1 } - omega_eq;
+   const real_t omega_dt = real_t{ 3 } - real_c( 1.5 )*omega_eq;
 
 #ifdef _OPENMP
    const int izSize = int_c( zSize );
@@ -605,8 +605,8 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
    WALBERLA_ASSERT_EQUAL( oldMomDensityField->zSize( ), src->zSize( ) );
 
    const real_t omega_eq = src->latticeModel( ).collisionModel( ).omega( );
-   const real_t omega_st = real_t( 1 ) - omega_eq;
-   const real_t omega_dt = real_t( 3 ) - real_c( 1.5 )*omega_eq;
+   const real_t omega_st = real_t{ 1 } - omega_eq;
+   const real_t omega_dt = real_t{ 3 } - real_c( 1.5 )*omega_eq;
 
    const cell_idx_t start = -cell_idx_c( numberOfGhostLayersToInclude );
 
@@ -686,8 +686,8 @@ public:
    
    void operator()( IBlock * const block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
 
 protected:
    const ConstBlockDataID velID_;
@@ -725,11 +725,11 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 
    const real_t omega = src->latticeModel( ).collisionModel( ).omega( );
 
-   const real_t omega_trm( real_t( 1 ) - omega );
-   const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-   const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-   const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
-   const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+   const real_t omega_trm( real_t{ 1 } - omega );
+   const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+   const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+   const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
+   const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
    // stream & collide
 
@@ -887,11 +887,11 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 
    const real_t omega = src->latticeModel( ).collisionModel( ).omega( );
 
-   const real_t omega_trm( real_t( 1 ) - omega );
-   const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-   const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-   const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
-   const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+   const real_t omega_trm( real_t{ 1 } - omega );
+   const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+   const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+   const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
+   const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
    // collide
    const cell_idx_t start = -cell_idx_c( numberOfGhostLayersToInclude );
@@ -1033,8 +1033,8 @@ public:
    
    void operator()( IBlock * const block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
 
 protected:
    const ConstBlockDataID velID_;
@@ -1092,11 +1092,11 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
                // constants used during stream/collide
                const real_t omega = src->latticeModel( ).collisionModel( ).omega( x, y, z );
 
-               const real_t omega_trm( real_t( 1 ) - omega );
-               const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-               const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-               const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
-               const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+               const real_t omega_trm( real_t{ 1 } - omega );
+               const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+               const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+               const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
+               const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
                const auto   tmp = vel->get( x, y, z );
                const real_t velX = tmp[0];
@@ -1254,11 +1254,11 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
                // constants used during collide
                const real_t omega = src->latticeModel( ).collisionModel( ).omega( x, y, z );
 
-               const real_t omega_trm( real_t( 1 ) - omega );
-               const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-               const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-               const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
-               const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+               const real_t omega_trm( real_t{ 1 } - omega );
+               const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+               const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+               const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
+               const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
                const auto   tmp = vel->get( x, y, z );
                const real_t velX = tmp[0];
@@ -1377,8 +1377,8 @@ public:
 
    void operator()( IBlock * const block );
 
-   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
-   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t( 0u ) );
+   void stream ( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
+   void collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{ 0u } );
 
 protected:
    const ConstBlockDataID velID_;
@@ -1424,15 +1424,15 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
 
    const real_t omega = src->latticeModel( ).collisionModel( ).omega( );
 
-   const real_t omega_trm( real_t( 1 ) - omega );
-   const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-   const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-   const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
+   const real_t omega_trm( real_t{ 1 } - omega );
+   const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+   const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+   const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
 
-   const real_t omega_dt1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * ( real_t( 1 ) - ( real_t( 1 ) / real_t( 2 ) ) * omega ) );
-   const real_t omega_dt2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * ( real_t( 1 ) - ( real_t( 1 ) / real_t( 2 ) ) * omega ) );
+   const real_t omega_dt1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * ( real_t{ 1 } - ( real_t{ 1 } / real_t{ 2 } ) * omega ) );
+   const real_t omega_dt2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * ( real_t{ 1 } - ( real_t{ 1 } / real_t{ 2 } ) * omega ) );
 
-   const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+   const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
    // stream & collide
 
@@ -1611,15 +1611,15 @@ collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 
    const real_t omega = src->latticeModel( ).collisionModel( ).omega( );
 
-   const real_t omega_trm( real_t( 1 ) - omega );
-   const real_t  omega_w0( real_t( 3 ) * ( real_t( 1 ) / real_t( 3 ) ) * omega );
-   const real_t  omega_w1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * omega );
-   const real_t  omega_w2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * omega );
+   const real_t omega_trm( real_t{ 1 } - omega );
+   const real_t  omega_w0( real_t{ 3 } * ( real_t{ 1 } / real_t{ 3 } ) * omega );
+   const real_t  omega_w1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * omega );
+   const real_t  omega_w2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * omega );
 
-   const real_t omega_dt1( real_t( 3 ) * ( real_t( 1 ) / real_t( 18 ) ) * ( real_t( 1 ) - ( real_t( 1 ) / real_t( 2 ) ) * omega ) );
-   const real_t omega_dt2( real_t( 3 ) * ( real_t( 1 ) / real_t( 36 ) ) * ( real_t( 1 ) - ( real_t( 1 ) / real_t( 2 ) ) * omega ) );
+   const real_t omega_dt1( real_t{ 3 } * ( real_t{ 1 } / real_t{ 18 } ) * ( real_t{ 1 } - ( real_t{ 1 } / real_t{ 2 } ) * omega ) );
+   const real_t omega_dt2( real_t{ 3 } * ( real_t{ 1 } / real_t{ 36 } ) * ( real_t{ 1 } - ( real_t{ 1 } / real_t{ 2 } ) * omega ) );
 
-   const real_t one_third( real_t( 1 ) / real_t( 3 ) );
+   const real_t one_third( real_t{ 1 } / real_t{ 3 } );
 
    // collide
    const cell_idx_t start = -cell_idx_c( numberOfGhostLayersToInclude );

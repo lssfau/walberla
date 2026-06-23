@@ -96,7 +96,7 @@ int main( int argc, char ** argv )
      sLengthOld = sLength;
   }
 
-  auto testVolume = aabb.getScaled( real_t(1.5) ); // AABB containing the test points
+  auto testVolume = aabb.getScaled( real_t{1.5} ); // AABB containing the test points
 
   auto triDist = make_shared< mesh::TriangleDistance<mesh::TriangleMesh> >( mesh );
   auto distanceOctree = make_shared< DistanceOctree<mesh::TriangleMesh> >( triDist );

@@ -86,10 +86,10 @@ template< typename DistanceObject, typename T, typename U, typename V >
 std::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance );
 
 template< typename MeshType, typename InputIterator >
-typename MeshType::Point principalComponent( const MeshType & mesh, InputIterator beginFh, InputIterator endFh, const uint_t iterations = uint_t(10) );
+typename MeshType::Point principalComponent( const MeshType & mesh, InputIterator beginFh, InputIterator endFh, const uint_t iterations = uint_t{10} );
 
 template< typename MeshType >
-typename MeshType::Point principalComponent( const MeshType & mesh, const uint_t iterations = uint_t( 10 ) );
+typename MeshType::Point principalComponent( const MeshType & mesh, const uint_t iterations = uint_t{ 10 } );
 
 /**
 * \brief Color the faces of a mesh according to its vertices

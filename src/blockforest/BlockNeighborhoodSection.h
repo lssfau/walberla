@@ -42,8 +42,8 @@ inline uint_t getBlockNeighborhoodSectionIndex( const int x, const int y, const 
 
    const uint_t index = uint_c( (z+1) * 9 + (y+1) * 3 + x+1 );
 
-   if( index > uint_t(13) )
-      return index - uint_t(1);
+   if( index > uint_t{13} )
+      return index - uint_t{1};
    return index;
 }
 
@@ -57,10 +57,10 @@ inline uint_t getBlockNeighborhoodSectionIndex( const uint_t x, const uint_t y, 
 
    WALBERLA_ASSERT( !( x == 1 && y == 1 && z == 1 ) )
 
-   const uint_t index = z * uint_t(9) + y * uint_t(3) + x;
+   const uint_t index = z * uint_t{9} + y * uint_t{3} + x;
 
-   if( index > uint_t(13) )
-      return index - uint_t(1);
+   if( index > uint_t{13} )
+      return index - uint_t{1};
    return index;
 }
 
@@ -78,41 +78,41 @@ inline uint_t getBlockNeighborhoodSectionIndex( const stencil::Direction & d )
 
 inline uint_t getBlockMaxNeighborhoodSectionSize( const uint_t sectionIndex )
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_t(26) )
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_t{26} )
 
    // faces
-   if( sectionIndex == uint_t( 4) || sectionIndex == uint_t(10) || sectionIndex == uint_t(12) ||
-       sectionIndex == uint_t(13) || sectionIndex == uint_t(15) || sectionIndex == uint_t(21) )
-      return uint_t(4);
+   if( sectionIndex == uint_t{ 4} || sectionIndex == uint_t{10} || sectionIndex == uint_t{12} ||
+       sectionIndex == uint_t{13} || sectionIndex == uint_t{15} || sectionIndex == uint_t{21} )
+      return uint_t{4};
    // corners
-   if( sectionIndex == uint_t( 0) || sectionIndex == uint_t( 2) || sectionIndex == uint_t( 6) || sectionIndex == uint_t( 8) ||
-       sectionIndex == uint_t(17) || sectionIndex == uint_t(19) || sectionIndex == uint_t(23) || sectionIndex == uint_t(25) )
-      return uint_t(1);
+   if( sectionIndex == uint_t{ 0} || sectionIndex == uint_t{ 2} || sectionIndex == uint_t{ 6} || sectionIndex == uint_t{ 8} ||
+       sectionIndex == uint_t{17} || sectionIndex == uint_t{19} || sectionIndex == uint_t{23} || sectionIndex == uint_t{25} )
+      return uint_t{1};
    // edges
-   return uint_t(2);
+   return uint_t{2};
 }
 
 
 
 inline const std::array<uint_t, 6> & getFaceNeighborhoodSectionIndices()
 {
-   static std::array<uint_t, 6> faces{ { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) } };
+   static std::array<uint_t, 6> faces{ { uint_t{4}, uint_t{10}, uint_t{12}, uint_t{13}, uint_t{15}, uint_t{21} } };
    return faces;
 }
 
 
 inline const std::array<uint_t,12> & getEdgeNeighborhoodSectionIndices()
 {
-   static std::array<uint_t,12> edges{{ uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
-                                        uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) }};
+   static std::array<uint_t,12> edges{{ uint_t{ 1}, uint_t{ 3}, uint_t{ 5}, uint_t{ 7}, uint_t{ 9}, uint_t{11},
+                                        uint_t{14}, uint_t{16}, uint_t{18}, uint_t{20}, uint_t{22}, uint_t{24} }};
    return edges;
 }
 
 
 inline const std::array<uint_t, 8> & getCornerNeighborhoodSectionIndices()
 {
-   static std::array<uint_t, 8> corners {{ uint_t( 0), uint_t( 2), uint_t( 6), uint_t( 8),
-                                           uint_t(17), uint_t(19), uint_t(23), uint_t(25) }};
+   static std::array<uint_t, 8> corners {{ uint_t{ 0}, uint_t{ 2}, uint_t{ 6}, uint_t{ 8},
+                                           uint_t{17}, uint_t{19}, uint_t{23}, uint_t{25} }};
    return corners;
 }
 

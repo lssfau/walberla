@@ -668,7 +668,7 @@ void Config::listParameters() const
 inline void Config::convertToLowerCase( std::string& s )
 {
    for(char & i : s) {
-      i = (char)std::tolower( i );
+      i = static_cast< char >(std::tolower( i ));
    }
 }
 //**********************************************************************************************************************

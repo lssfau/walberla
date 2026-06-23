@@ -59,11 +59,11 @@ int main(int argc, char **argv)
    WALBERLA_UNUSED(env);
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
-   auto dt = real_t(0.001);
-   auto cor = real_t(0.2);
-   auto ct = dt * real_t(20);
-   auto radius = real_t(1);
-   auto density = real_t(2700);
+   auto dt = real_t{0.001};
+   auto cor = real_t{0.2};
+   auto ct = dt * real_t{20};
+   auto radius = real_t{1};
+   auto density = real_t{2700};
    auto simSteps = 100000;
 
    //init data structures
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
    // create sphere
    createSphere(*ps, Vec3(0, 0, 0));
    createSphere(*ps, Vec3(2, 0, 0));
-   auto sp = createSphere(*ps, Vec3(1, 0, std::sqrt(real_t(4) - real_t(1))));
+   auto sp = createSphere(*ps, Vec3(1, 0, std::sqrt(real_t{4} - real_t{1})));
 
    // create plane
    data::Particle &&p0 = *ps->create(true);
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
                           {
                              if (ac->getShape(idx1)->getShapeType() == data::Sphere::SHAPE_TYPE)
                              {
-                                ac->setForce(idx1, Vec3(0,0,-1) * real_t(9.81) / ac->getInvMass(idx1));
+                                ac->setForce(idx1, Vec3(0,0,-1) * real_t{9.81} / ac->getInvMass(idx1));
                              }
                           });
       ps->forEachParticlePairHalf(false,
@@ -133,9 +133,9 @@ int main(int argc, char **argv)
                                         if (double_cast(idx1, idx2, *ac, acd, *ac))
                                         {
                                            //WALBERLA_LOG_DEVEL_VAR(acd.getPenetrationDepth());
-                                           auto meff = real_t(1) / (ac->getInvMass(idx1) + ac->getInvMass(idx2));
+                                           auto meff = real_t{1} / (ac->getInvMass(idx1) + ac->getInvMass(idx2));
                                            sds.setParametersFromCOR(0, 0, cor, ct, meff);
-                                           sds.setCoefficientOfFriction(0,0, real_t(0.4));
+                                           sds.setCoefficientOfFriction(0,0, real_t{0.4});
                                            sds.setStiffnessT(0,0, sds.getStiffnessN(0,0));
                                            sds(acd.getIdx1(), acd.getIdx2(), *ac, acd.getContactPoint(),
                                                       acd.getContactNormal(), acd.getPenetrationDepth(), dt);
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
                     *ac);
    }
    WALBERLA_LOG_DEVEL_VAR(sp->getPosition());
-   WALBERLA_CHECK_GREATER(sp->getPosition()[2], real_t(1));
+   WALBERLA_CHECK_GREATER(sp->getPosition()[2], real_t{1});
 
    for (auto i = 0; i < simSteps; ++i)
    {
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
                           {
                              if (ac->getShape(idx1)->getShapeType() == data::Sphere::SHAPE_TYPE)
                              {
-                                ac->setForce(idx1, Vec3(0,0,-1) * real_t(9.81) / ac->getInvMass(idx1));
+                                ac->setForce(idx1, Vec3(0,0,-1) * real_t{9.81} / ac->getInvMass(idx1));
                              }
                           });
       ps->forEachParticlePairHalf(false,
@@ -179,9 +179,9 @@ int main(int argc, char **argv)
                                         if (double_cast(idx1, idx2, *ac, acd, *ac))
                                         {
                                            //WALBERLA_LOG_DEVEL_VAR(acd.getPenetrationDepth());
-                                           auto meff = real_t(1) / (ac->getInvMass(idx1) + ac->getInvMass(idx2));
+                                           auto meff = real_t{1} / (ac->getInvMass(idx1) + ac->getInvMass(idx2));
                                            sd.setParametersFromCOR(0, 0, cor, ct, meff);
-                                           sd.setFriction(0,0, real_t(0.4));
+                                           sd.setFriction(0,0, real_t{0.4});
                                            sd.setDampingT(0,0, sd.getDampingN(0,0));
                                            sd(acd.getIdx1(), acd.getIdx2(), *ac, acd.getContactPoint(),
                                               acd.getContactNormal(), acd.getPenetrationDepth());
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
                     *ac);
    }
    WALBERLA_LOG_DEVEL_VAR(sp->getPosition());
-   WALBERLA_CHECK_LESS(sp->getPosition()[2], real_t(1));
+   WALBERLA_CHECK_LESS(sp->getPosition()[2], real_t{1});
 
    return EXIT_SUCCESS;
 }

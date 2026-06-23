@@ -44,7 +44,7 @@ using FlagField_T = FlagField< flag_t >;
 
 auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage* const storage) {
    return new PdfField_T(storage->getNumberOfXCells(*block), storage->getNumberOfYCells(*block),
-                         storage->getNumberOfZCells(*block), uint_t(1), field::fzyx,
+                         storage->getNumberOfZCells(*block), uint_t{1}, field::fzyx,
                          make_shared< field::AllocateAligned< real_t, 64 > >());
 };
 

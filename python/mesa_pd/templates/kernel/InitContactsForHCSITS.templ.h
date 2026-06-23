@@ -60,7 +60,7 @@ public:
    {
 
       {% for param in material_parameters %}
-      {{param}}_.resize(numParticleTypes * numParticleTypes, real_t(0));
+      {{param}}_.resize(numParticleTypes * numParticleTypes, real_t{0});
       {%- endfor %}
    }
 
@@ -150,7 +150,7 @@ inline void InitContactsForHCSITS::operator()(size_t c, CAccessor &ca, PAccessor
    // completely fixed anyway and the error reduction will introduce artificial restitution.
    // However, if the distance is positive then it is not about error correction but the distance that
    // can still be overcome without penetration and thus no error correction parameter should be applied.
-   if (ca.getDistance(c) < real_t(0.0)) {
+   if (ca.getDistance(c) < real_t{0.0}) {
       setMaximumPenetration(std::max(getMaximumPenetration(), -ca.getDistance(c)));
       ca.getDistanceRef(c) *= erp_;
    }

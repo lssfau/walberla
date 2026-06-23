@@ -72,31 +72,31 @@ protected:
 
 template< typename CM, bool C, typename FM, int EAO > const char*  D2Q9<CM,C,FM,EAO>::NAME = "D2Q9";
 
-template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_0 = real_t(4.0) / real_t( 9.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_1 = real_t(1.0) / real_t( 9.0);
-template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_2 = real_t(1.0) / real_t(36.0);
+template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_0 = real_t{4.0} / real_t{ 9.0};
+template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_1 = real_t{1.0} / real_t{ 9.0};
+template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w_2 = real_t{1.0} / real_t{36.0};
 
 // must match with the static array 'dir' in stencil::D2Q9
-template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w[9] = { real_t(4.0) / real_t( 9.0),   // C
-                                                                                               real_t(1.0) / real_t( 9.0),   // N
-                                                                                               real_t(1.0) / real_t( 9.0),   // S
-                                                                                               real_t(1.0) / real_t( 9.0),   // W
-                                                                                               real_t(1.0) / real_t( 9.0),   // E
-                                                                                               real_t(1.0) / real_t(36.0),   // NW
-                                                                                               real_t(1.0) / real_t(36.0),   // NE
-                                                                                               real_t(1.0) / real_t(36.0),   // SW
-                                                                                               real_t(1.0) / real_t(36.0) }; // SE
+template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::w[9] = { real_t{4.0} / real_t{ 9.0},   // C
+                                                                                               real_t{1.0} / real_t{ 9.0},   // N
+                                                                                               real_t{1.0} / real_t{ 9.0},   // S
+                                                                                               real_t{1.0} / real_t{ 9.0},   // W
+                                                                                               real_t{1.0} / real_t{ 9.0},   // E
+                                                                                               real_t{1.0} / real_t{36.0},   // NW
+                                                                                               real_t{1.0} / real_t{36.0},   // NE
+                                                                                               real_t{1.0} / real_t{36.0},   // SW
+                                                                                               real_t{1.0} / real_t{36.0} }; // SE
 
 // must match with the static array 'dir' in stencil::D2Q9
-template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::wInv[9] = { real_t(9.0) / real_t( 4.0),   // C
-                                                                                                  real_t( 9.0),                 // N
-                                                                                                  real_t( 9.0),                 // S
-                                                                                                  real_t( 9.0),                 // W
-                                                                                                  real_t( 9.0),                 // E
-                                                                                                  real_t(36.0),                 // NW
-                                                                                                  real_t(36.0),                 // NE
-                                                                                                  real_t(36.0),                 // SW
-                                                                                                  real_t(36.0) };               // SE
+template< typename CM, bool C, typename FM, int EAO > const real_t D2Q9<CM,C,FM,EAO>::wInv[9] = { real_t{9.0} / real_t{ 4.0},   // C
+                                                                                                  real_t{ 9.0},                 // N
+                                                                                                  real_t{ 9.0},                 // S
+                                                                                                  real_t{ 9.0},                 // W
+                                                                                                  real_t{ 9.0},                 // E
+                                                                                                  real_t{36.0},                 // NW
+                                                                                                  real_t{36.0},                 // NE
+                                                                                                  real_t{36.0},                 // SW
+                                                                                                  real_t{36.0} };               // SE
 
 } // namespace lbm
 } // namespace walberla

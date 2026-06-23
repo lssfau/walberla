@@ -49,12 +49,12 @@ struct Setup
    Setup( int argc, char ** argv )
    {
       epsilon = real_c( 0.01 );
-      omega = real_t( 0.3 );
-      rhoDiff = real_t( 0.00001 );
-      kappa = real_t( 0.85 );
-      length = uint_t( 32 );
-      timesteps = uint_t( 10000 );
-      checkFrequency = uint_t( 100 );
+      omega = real_t{ 0.3 };
+      rhoDiff = real_t{ 0.00001 };
+      kappa = real_t{ 0.85 };
+      length = uint_t{ 32 };
+      timesteps = uint_t{ 10000 };
+      checkFrequency = uint_t{ 100 };
       scenario = BCC;
       collisionModel = std::string( "TRT" );
 
@@ -101,13 +101,13 @@ real_t permeability( Setup setup )
 {
    // BCC implementation
    const real_t L = real_c(setup.length);
-   const real_t r = real_c(std::sqrt(real_t(3.0))) / real_t(4) * L * setup.kappa;
+   const real_t r = real_c(std::sqrt(real_t{3.0})) / real_t{4} * L * setup.kappa;
 
    real_t drag( 0.0 );
    for( uint_t i = 0; i < 31; i++ )
       drag += real_c(qs[i]) * real_c(std::pow( setup.kappa, real_c(i) ));
 
-   return ( L * L * L ) / ( real_t(6) * math::pi * r * real_t(2) * drag );
+   return ( L * L * L ) / ( real_t{6} * math::pi * r * real_t{2} * drag );
 }
 
 
@@ -120,7 +120,7 @@ BlockDataID initPdfField< lbm::collision_model::SRT >( const shared_ptr<Structur
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (SRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (SRT)", latticeModel, Vector3<real_t>(), real_t{1} );
 }
 
 template< >
@@ -129,7 +129,7 @@ BlockDataID initPdfField< lbm::collision_model::TRT >( const shared_ptr<Structur
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (TRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (TRT)", latticeModel, Vector3<real_t>(), real_t{1} );
 }
 
 template< >
@@ -138,7 +138,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q19MRT >( const shared_ptr<Str
    using LatticeModel_T = lbm::D3Q19<lbm::collision_model::D3Q19MRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT::constructPanWithMagicNumber( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (MRT)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (MRT)", latticeModel, Vector3<real_t>(), real_t{1} );
 }
 
 template< >
@@ -147,7 +147,7 @@ BlockDataID initPdfField< lbm::collision_model::D3Q27Cumulant >( const shared_pt
    using LatticeModel_T = lbm::D3Q27< lbm::collision_model::D3Q27Cumulant, true >;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q27Cumulant( omega ) );
-   return lbm::addPdfFieldToStorage( blocks, "PDF Field (Cumulant)", latticeModel, Vector3<real_t>(), real_t(1) );
+   return lbm::addPdfFieldToStorage( blocks, "PDF Field (Cumulant)", latticeModel, Vector3<real_t>(), real_t{1} );
 }
 
 
@@ -248,7 +248,7 @@ int setupAndExecute( Setup setup )
 
    using Permeability_T = lbm::evaluations::Permeability< PdfField_T, BoundaryHandling_T >;
    shared_ptr< Permeability_T > permEval = make_shared< Permeability_T >( nu, pdfFieldId, boundaryHandlingId, fluid, blocks );
-   permEval->init( blocks->getDomainCellBB(), uint_t(2), setup.checkFrequency );
+   permEval->init( blocks->getDomainCellBB(), uint_t{2}, setup.checkFrequency );
 
    // add permeability evaluation to timeloop
    timeloop.addFuncAfterTimeStep( SharedFunctor< Permeability_T >( permEval ), "Permeability Evaluation" );

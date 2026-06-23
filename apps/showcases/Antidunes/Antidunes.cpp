@@ -106,7 +106,7 @@ using PdfCommunication_T    = blockforest::SimpleCommunication< LatticeModelSten
 // the geometry computations in SurfaceGeometryHandler require meaningful values in the ghost layers in corner
 // directions (flag field and fill level field); this holds, even if the lattice model uses a D3Q19 stencil
 using CommunicationStencil_T =
-   std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+   std::conditional_t< LatticeModel_T::Stencil::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
 using Communication_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
 using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithBaseShape;
@@ -1079,7 +1079,7 @@ int main(int argc, char** argv)
     public:
       CollideSweep(const typename LatticeModel_T::Sweep& sweep) : sweep_(sweep){};
 
-      void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0))
+      void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t{0})
       {
          sweep_.collide(block, numberOfGhostLayersToInclude);
       }
@@ -1210,7 +1210,7 @@ int main(int argc, char** argv)
    surfaceMeshWriter(); // write initial mesh
    timeloop.addFuncAfterTimeStep(surfaceMeshWriter, "Writer: surface mesh");
 
-   if (vtkSpacingParticles != uint_t(0))
+   if (vtkSpacingParticles != uint_t{0})
    {
       // particle field
       auto particleFieldVTK =
@@ -1219,8 +1219,8 @@ int main(int argc, char** argv)
       const Vector3< uint_t > cellBB_filterMin = cellBB_filterParameters.getParameter< Vector3< uint_t > >("min");
       const Vector3< uint_t > cellBB_filterMax = cellBB_filterParameters.getParameter< Vector3< uint_t > >("max");
       AABB sliceAABB(real_c(cellBB_filterMin[0]), real_c(cellBB_filterMin[1]), real_c(cellBB_filterMin[2]),
-                     real_c(cellBB_filterMax[0] + uint_t(1)), real_c(cellBB_filterMax[1] + uint_t(1)),
-                     real_c(cellBB_filterMax[2] + uint_t(1)));
+                     real_c(cellBB_filterMax[0] + uint_t{1}), real_c(cellBB_filterMax[1] + uint_t{1}),
+                     real_c(cellBB_filterMax[2] + uint_t{1}));
 
       particleFieldVTK->addCellInclusionFilter(vtk::AABBCellFilter(sliceAABB));
       particleFieldVTK->addCellDataWriter(
@@ -1229,7 +1229,7 @@ int main(int argc, char** argv)
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(particleFieldVTK), "VTK (particle field data");
    }
 
-   if (vtkSpacingParticles != uint_t(0))
+   if (vtkSpacingParticles != uint_t{0})
    {
       // sphere
       auto particleVtkOutput = make_shared< mesa_pd::vtk::ParticleVtkOutput >(particleStorage);
@@ -1313,7 +1313,7 @@ int main(int argc, char** argv)
    mesa_pd::kernel::VelocityVerletPreForceUpdate vvIntegratorPreForce(timeStepSizeParticles);
    mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeParticles);
    mesa_pd::kernel::LinearSpringDashpot collisionResponse(1);
-   collisionResponse.setFrictionCoefficientDynamic(size_t(0), size_t(0), particleFrictionCoefficient);
+   collisionResponse.setFrictionCoefficientDynamic(size_t{0}, size_t{0}, particleFrictionCoefficient);
    mesa_pd::mpi::ReduceProperty reduceProperty;
    mesa_pd::mpi::ReduceContactHistory reduceAndSwapContactHistory;
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
@@ -1379,7 +1379,7 @@ int main(int argc, char** argv)
       particleStorage->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *particleAccessor,
                                        averageHydrodynamicForceTorque, *particleAccessor);
 
-      for (auto subCycle = uint_t(0); subCycle < particleNumSubCycles; ++subCycle)
+      for (auto subCycle = uint_t{0}; subCycle < particleNumSubCycles; ++subCycle)
       {
          particleStorage->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *particleAccessor,
                                           vvIntegratorPreForce, *particleAccessor);

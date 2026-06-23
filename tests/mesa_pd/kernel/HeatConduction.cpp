@@ -57,7 +57,7 @@ int main( int argc, char ** argv )
 
    // Init kernels
    kernel::HeatConduction heatConduction(1);
-   heatConduction.setConductance(0, 0, real_t(0.2));
+   heatConduction.setConductance(0, 0, real_t{0.2});
 
    // single contact test
    heatConduction(0,
@@ -65,7 +65,7 @@ int main( int argc, char ** argv )
                   ac);
 
    WALBERLA_CHECK_FLOAT_EQUAL( ps->getHeatFlux(0), -ps->getHeatFlux(1) );
-   WALBERLA_CHECK_FLOAT_EQUAL( ps->getHeatFlux(0), real_t(2) );
+   WALBERLA_CHECK_FLOAT_EQUAL( ps->getHeatFlux(0), real_t{2} );
 
    return EXIT_SUCCESS;
 }

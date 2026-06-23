@@ -32,12 +32,12 @@ int main( int /*argc*/, char ** /*argv*/ )
 {
    debug::enterTestMode();
 
-   const math::Matrix3<real_t> m( real_t(2), real_t(3), real_t(4),
-                                  real_t(5), real_t(6), real_t(7),
-                                  real_t(8), real_t(9), real_t(10) );
+   const math::Matrix3<real_t> m( real_t{2}, real_t{3}, real_t{4},
+                                  real_t{5}, real_t{6}, real_t{7},
+                                  real_t{8}, real_t{9}, real_t{10} );
 
-   const math::Vector3<real_t> vwb( real_t(2), real_t(3), real_t(4) );
-   const OpenMesh::VectorT<real_t, 3> vom( real_t(2), real_t(3), real_t(4) );
+   const math::Vector3<real_t> vwb( real_t{2}, real_t{3}, real_t{4} );
+   const OpenMesh::VectorT<real_t, 3> vom( real_t{2}, real_t{3}, real_t{4} );
 
    WALBERLA_CHECK_EQUAL( vwb, toWalberla( vom ) );
    WALBERLA_CHECK_EQUAL( toOpenMesh(vwb), vom );
@@ -48,10 +48,10 @@ int main( int /*argc*/, char ** /*argv*/ )
    WALBERLA_CHECK_EQUAL( m * vwb, toWalberla(m * vom) );
 
 
-   const math::Vector3<double> vwbd( double(2), double(3), double(4) );
-   const OpenMesh::VectorT<double, 3> vomd( double(2), double(3), double(4) );
-   const math::Vector3<float> vwbf( float(2), float(3), float(4) );
-   const OpenMesh::VectorT<float, 3> vomf( float(2), float(3), float(4) );
+   const math::Vector3<double> vwbd( double{2}, double{3}, double{4} );
+   const OpenMesh::VectorT<double, 3> vomd( double{2}, double{3}, double{4} );
+   const math::Vector3<float> vwbf( float{2}, float{3}, float{4} );
+   const OpenMesh::VectorT<float, 3> vomf( float{2}, float{3}, float{4} );
 
    WALBERLA_CHECK_LESS( ( vwbd - toWalberlaNumericCast<double>(vomf) ).length(), real_comparison::Epsilon<float>::value );
    WALBERLA_CHECK_LESS( ( vomd - toOpenMeshNumericCast<double>(vwbf) ).length(), real_comparison::Epsilon<float>::value );

@@ -208,7 +208,7 @@ class BufferIndexing
    template< size_t... Coords >
    WALBERLA_HOST_DEVICE index_type linearIndexImpl(std::index_sequence< Coords... >, std::convertible_to< index_type > auto... indices) const
    {
-      return (index_type(0) + ... + (static_cast< index_type >(indices) * static_cast< index_type >(strides_[Coords])));
+      return (index_type{0} + ... + (static_cast< index_type >(indices) * static_cast< index_type >(strides_[Coords])));
    }
 
    stdlib::array< size_t, RANK > shape_;

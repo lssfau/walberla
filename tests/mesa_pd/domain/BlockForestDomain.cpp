@@ -50,7 +50,7 @@ void main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT( "Balancing " << sforest->getNumberOfBlocks() << " blocks for " << 2 << " processes...");
 
-   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), 2, real_t(0), memory_t(0), false, true );
+   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), 2, real_t{0}, memory_t{0}, false, true );
 
    auto forest = std::make_shared< BlockForest >( uint_c( walberla::MPIManager::instance()->rank() ), *sforest, false );
 
@@ -66,41 +66,41 @@ void main( int argc, char ** argv )
    WALBERLA_CHECK(domain.isContainedInProcessSubdomain(0, Vec3(2,2,2)));
    WALBERLA_CHECK(domain.isContainedInProcessSubdomain(1, Vec3(7,7,7)));
 
-   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(2,2,2), real_t(1)), rank == 0);
-   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(7,7,7), real_t(1)), rank != 0);
+   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(2,2,2), real_t{1}), rank == 0);
+   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(7,7,7), real_t{1}), rank != 0);
 
-   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(real_t(4.5),2,2), real_t(1)), rank == 0 ? false : false);
-   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(real_t(5.5),7,7), real_t(1)), rank == 0 ? false : false);
-
-   if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(2),2,2), real_t(1)), true);
-   if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(2),2,2), real_t(1)), false);
+   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(real_t{4.5},2,2), real_t{1}), rank == 0 ? false : false);
+   WALBERLA_CHECK_EQUAL(domain.isContainedInProcessSubdomain(Vec3(real_t{5.5},7,7), real_t{1}), rank == 0 ? false : false);
 
    if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(7),2,2), real_t(1)), false);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{2},2,2), real_t{1}), true);
    if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(7),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{2},2,2), real_t{1}), false);
 
    if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(5.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{7},2,2), real_t{1}), false);
    if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(5.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{7},2,2), real_t{1}), true);
 
    if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(4.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{5.5},2,2), real_t{1}), true);
    if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(4.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{5.5},2,2), real_t{1}), true);
 
    if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(9.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{4.5},2,2), real_t{1}), true);
    if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(9.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{4.5},2,2), real_t{1}), true);
 
    if (rank != 0)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t(0.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{9.5},2,2), real_t{1}), true);
    if (rank != 1)
-      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t(0.5),2,2), real_t(1)), true);
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{9.5},2,2), real_t{1}), true);
+
+   if (rank != 0)
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(0, Vec3(real_t{0.5},2,2), real_t{1}), true);
+   if (rank != 1)
+      WALBERLA_CHECK_EQUAL(domain.intersectsWithProcessSubdomain(1, Vec3(real_t{0.5},2,2), real_t{1}), true);
 }
 
 }

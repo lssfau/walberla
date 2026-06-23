@@ -375,7 +375,7 @@ template< typename T    // Element type
           , typename G >  // Growth policy
 inline size_t GenericSendBuffer<T,G>::maxSize() const
 {
-   return size_t(-1) / sizeof(T);
+   return static_cast< size_t >(-1) / sizeof(T);
 }
 //**********************************************************************************************************************
 

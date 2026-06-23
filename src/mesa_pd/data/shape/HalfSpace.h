@@ -35,9 +35,9 @@ namespace data {
 class HalfSpace : public BaseShape
 {
 public:
-   explicit HalfSpace(const Vec3& normal = Vec3(real_t(1), real_t(0), real_t(0)))
+   explicit HalfSpace(const Vec3& normal = Vec3(real_t{1}, real_t{0}, real_t{0}))
       : BaseShape(HalfSpace::SHAPE_TYPE), normal_(normal.getNormalized())
-   { updateMassAndInertia(real_t(1.0)); }
+   { updateMassAndInertia(real_t{1.0}); }
 
    void updateMassAndInertia(const real_t density) override;
 
@@ -62,10 +62,10 @@ inline
 void HalfSpace::updateMassAndInertia(const real_t /*density*/)
 {
    mass_         = std::numeric_limits<real_t>::infinity();
-   invMass_      = real_t(0);
+   invMass_      = real_t{0};
 
    inertiaBF_    = Mat3(std::numeric_limits<real_t>::infinity());
-   invInertiaBF_ = Mat3(real_t(0));
+   invInertiaBF_ = Mat3(real_t{0});
 }
 
 inline

@@ -89,16 +89,16 @@ struct StokesNumberBasedSphereSelector
             if(contactHistories.empty()) return true; // no active contacts
 
             // find maximum impact velocity among all active contacts
-            real_t maximumImpactVelocity = real_t(0);
+            real_t maximumImpactVelocity = real_t{0};
             for( auto & history : contactHistories )
             {
                maximumImpactVelocity = std::max(maximumImpactVelocity, history.second.getImpactVelocityMagnitude());
             }
 
             auto sphereShape = *static_cast< mesa_pd::data::Sphere*>(ac.getShape(particleIdx));
-            real_t diameter = real_t(2) * sphereShape.getRadius();
+            real_t diameter = real_t{2} * sphereShape.getRadius();
 
-            real_t St = (densityParticle_ / densityFluid_) * (maximumImpactVelocity *  diameter / kinematicViscosity_) / real_t(9);
+            real_t St = (densityParticle_ / densityFluid_) * (maximumImpactVelocity *  diameter / kinematicViscosity_) / real_t{9};
 
             if( St < StCrit_) return true;
          }

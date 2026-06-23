@@ -50,8 +50,8 @@ public:
    DynamicParMetis( const Algorithm algorithm = PARMETIS_PART_GEOM_KWAY,
                     const WeightsToUse weightsToUse = PARMETIS_BOTH_WEIGHTS,
                     const EdgeSource edgeSource = PARMETIS_EDGES_FROM_EDGE_WEIGHTS,
-                    const uint_t ncon = uint_t(1))
-      : algorithm_( algorithm ), weightsToUse_( weightsToUse ), edgeSource_( edgeSource ), ncon_( ncon ), ubvec_( ncon, real_t(1.05) ) {}
+                    const uint_t ncon = uint_t{1})
+      : algorithm_( algorithm ), weightsToUse_( weightsToUse ), edgeSource_( edgeSource ), ncon_( ncon ), ubvec_( ncon, real_t{1.05} ) {}
 
    bool operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                     std::set< uint_t > & processesToRecvFrom,
@@ -62,7 +62,7 @@ public:
    void   setipc2redist(double val) {ipc2redist_ = val;}
    double getipc2redist() const {return ipc2redist_;}
 
-   void setImbalanceTolerances(const std::vector<double> & tolerances){ WALBERLA_ASSERT_EQUAL(tolerances.size(), ncon_-uint_t(1)); ubvec_ = tolerances; }
+   void setImbalanceTolerances(const std::vector<double> & tolerances){ WALBERLA_ASSERT_EQUAL(tolerances.size(), ncon_-uint_t{1}); ubvec_ = tolerances; }
    void setImbalanceTolerance(double tolerance, const uint_t con = 0){ WALBERLA_ASSERT_LESS(con, ncon_); ubvec_[con] = tolerance; }
    double getImbalanceTolerance(const uint_t con = 0) const { WALBERLA_ASSERT_LESS(con, ncon_); return ubvec_[con]; }
 
@@ -83,9 +83,9 @@ protected:
    WeightsToUse weightsToUse_;
    EdgeSource edgeSource_;
 
-   uint_t ncon_ = uint_t(1); ///< number of constraints
+   uint_t ncon_ = uint_t{1}; ///< number of constraints
    std::vector<double> ubvec_; ///< imbalance tolerance for each constraint, value between 1 (perfect balance) and number of subdomains (= number of processes, perfect imbalance)
-   double ipc2redist_ = real_t( 1000.0 ); ///< compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
+   double ipc2redist_ = real_t{ 1000.0 }; ///< compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
 };
 
 class DynamicParMetisBlockInfo

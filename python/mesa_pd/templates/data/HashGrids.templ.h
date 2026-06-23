@@ -188,7 +188,7 @@ public:
     *
     * Possible settings: any floating point value that is greater than 1.0.
     */
-   static constexpr real_t hierarchyFactor = real_t(2);
+   static constexpr real_t hierarchyFactor = real_t{2};
    //*************************************************************************************************
 
 private:

@@ -34,7 +34,7 @@ public:
 
    StreamSweep( const shared_ptr< Kernel > & kernel ) : kernel_( kernel ) {}
 
-   void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    {
       kernel_->stream( block, numberOfGhostLayersToInclude );
    }
@@ -56,7 +56,7 @@ public:
 
    CollideSweep( const shared_ptr< Kernel > & kernel ) : kernel_( kernel ) {}
 
-   void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t(0) )
+   void operator()( IBlock * const block, const uint_t numberOfGhostLayersToInclude = uint_t{0} )
    {
       kernel_->collide( block, numberOfGhostLayersToInclude );
    }

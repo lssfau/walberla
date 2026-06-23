@@ -65,12 +65,12 @@ namespace field {
          const CellInterval size = field_.xyzSizeWithGhostLayer();
 
          validRegion_ = AABB( real_c(size.xMin())             + real_c(0.5), real_c(size.yMin())             + real_c(0.5), real_c(size.zMin())             + real_c(0.5),
-                              real_c(size.xMax()) + real_t(1) - real_c(0.5), real_c(size.yMax()) + real_t(1) - real_c(0.5), real_c(size.zMax()) + real_t(1) - real_c(0.5) );
+                              real_c(size.xMax()) + real_t{1} - real_c(0.5), real_c(size.yMax()) + real_t{1} - real_c(0.5), real_c(size.zMax()) + real_t{1} - real_c(0.5) );
       }
 
       inline ResType operator()( real_t x, real_t y, real_t z ) const
       {
-         WALBERLA_ASSERT( F_SIZE == uint_t(1u) );
+         WALBERLA_ASSERT( F_SIZE == uint_t{1u} );
          return (*this)(x,y,z,0);
       }
 

@@ -86,8 +86,8 @@ Ellipsoid ellipsoidFromConfig ( const Config::BlockHandle & block )
    Vector3<real_t> const radii = block.getParameter<Vector3<real_t> > ( "radii" );
 
    return Ellipsoid( block.getParameter<Vector3<real_t> >( "midpoint" ),
-                     block.getParameter<Vector3<real_t> >( "axis1", Vector3<real_t>( real_t(1),real_t(0),real_t(0) ) ),
-                     block.getParameter<Vector3<real_t> >( "axis2", Vector3<real_t>( real_t(0),real_t(1),real_t(0) ) ),
+                     block.getParameter<Vector3<real_t> >( "axis1", Vector3<real_t>( real_t{1},real_t{0},real_t{0} ) ),
+                     block.getParameter<Vector3<real_t> >( "axis2", Vector3<real_t>( real_t{0},real_t{1},real_t{0} ) ),
                      radii );
 }
 

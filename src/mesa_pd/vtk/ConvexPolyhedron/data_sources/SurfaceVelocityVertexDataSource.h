@@ -39,7 +39,7 @@ public:
    SurfaceVelocityVertexDataSource(const std::string& name, const Accessor & ac) : Base(name), ac_(ac) { }
 
    virtual uint_t numComponents() {
-      return uint_t(3);
+      return uint_t{3};
    }
 
    using Base::getData;

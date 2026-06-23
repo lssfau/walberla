@@ -60,13 +60,13 @@ int main( int argc, char ** argv )
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
    data::ParticleAccessorWithShape accessor(ps, ss);
-   data::LinkedCells      lc(math::AABB(-1,-1,-1,4,4,4), real_t(1.3));
+   data::LinkedCells      lc(math::AABB(-1,-1,-1,4,4,4), real_t{1.3});
 
    //initialize particles
-   const real_t radius  = real_t(0.6);
-   const real_t spacing = real_t(1.0);
+   const real_t radius  = real_t{0.6};
+   const real_t spacing = real_t{1.0};
    auto smallSphere = ss->create<data::Sphere>( radius );
-   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t{2707});
 
    WALBERLA_CHECK_EQUAL(forest->size(), 1);
    const Block& blk = *static_cast<blockforest::Block*>(&*forest->begin());

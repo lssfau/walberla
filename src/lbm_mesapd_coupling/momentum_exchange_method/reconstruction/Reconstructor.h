@@ -90,20 +90,20 @@ uint_t getNumberOfExtrapolationCells( IBlock * const block, const BlockDataID & 
    BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID );
    WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
 
-   if( extrapolationDirection == cell_idx_t(0) ) return uint_t(0);
+   if( extrapolationDirection == cell_idx_t{0} ) return uint_t{0};
 
    CellInterval localDomain = (useDataFromGhostLayers) ? boundaryHandling->getFlagField()->xyzSizeWithGhostLayer() : boundaryHandling->getFlagField()->xyzSize();
 
-   for( auto numCells = uint_t(1); numCells <= maximumNumberOfNeededExtrapolationCells; ++numCells )
+   for( auto numCells = uint_t{1}; numCells <= maximumNumberOfNeededExtrapolationCells; ++numCells )
    {
       Cell checkCell( x + cell_idx_c(numCells) * extrapolationDirection[0], y + cell_idx_c(numCells) * extrapolationDirection[1], z + cell_idx_c(numCells) * extrapolationDirection[2] );
 
       // check if cell is inside domain & fluid
       if( !localDomain.contains( checkCell ) )
-         return numCells - uint_t(1);
+         return numCells - uint_t{1};
 
       if( !boundaryHandling->isDomain( checkCell ) )
-         return numCells - uint_t(1);
+         return numCells - uint_t{1};
    }
    return maximumNumberOfNeededExtrapolationCells;
 }
@@ -158,8 +158,8 @@ private:
 
       CellInterval localDomain = useDataFromGhostLayers_ ? pdfField->xyzSizeWithGhostLayer() : pdfField->xyzSize();
 
-      auto nAverage = uint_t(0);
-      auto averageDensity = real_t(0);
+      auto nAverage = uint_t{0};
+      auto averageDensity = real_t{0};
       for( auto neighborDir = stencil::D3Q27::beginNoCenter(); neighborDir != stencil::D3Q27::end(); ++neighborDir )
       {
          Cell neighbor( x + neighborDir.cx(), y + neighborDir.cy(), z + neighborDir.cz() );
@@ -177,7 +177,7 @@ private:
          }
       }
 
-      return ( nAverage > uint_t( 0 ) ) ? averageDensity / real_c( nAverage ) : real_t(1.0);
+      return ( nAverage > uint_t{ 0 } ) ? averageDensity / real_c( nAverage ) : real_t{1.0};
    }
 
 
@@ -195,14 +195,14 @@ public:
 
    EquilibriumAndNonEquilibriumReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                                               const shared_ptr<ExtrapolationDirectionFinder_T> & extrapolationDirectionFinder,
-                                              uint_t maximumNumberOfExtrapolationCells = uint_t(3),
+                                              uint_t maximumNumberOfExtrapolationCells = uint_t{3},
                                               bool useDataFromGhostLayers = false)
    : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
      extrapolationDirectionFinder_( extrapolationDirectionFinder ),
      maximumNumberOfExtrapolationCells_( maximumNumberOfExtrapolationCells ), useDataFromGhostLayers_( useDataFromGhostLayers ),
      equilibriumReconstructor_( EquilibriumReconstructor< BoundaryHandling_T >( blockStorage, boundaryHandlingID, useDataFromGhostLayers ) )
    {
-      WALBERLA_ASSERT_LESS_EQUAL(maximumNumberOfExtrapolationCells, uint_t(3), "Only supports up to quadratic extrapolation!");
+      WALBERLA_ASSERT_LESS_EQUAL(maximumNumberOfExtrapolationCells, uint_t{3}, "Only supports up to quadratic extrapolation!");
    }
 
    template< typename PdfField_T, typename ParticleAccessor_T >
@@ -249,7 +249,7 @@ private:
       WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
       WALBERLA_ASSERT_LESS_EQUAL(numberOfCellsForExtrapolation, maximumNumberOfExtrapolationCells_);
-      WALBERLA_ASSERT_GREATER(numberOfCellsForExtrapolation, uint_t(0), "Requires at least one point for extrapolation!");
+      WALBERLA_ASSERT_GREATER(numberOfCellsForExtrapolation, uint_t{0}, "Requires at least one point for extrapolation!");
 
       if( enoughCellsForQuadraticExtrapolation( numberOfCellsForExtrapolation ) )
       {
@@ -267,17 +267,17 @@ private:
 
    bool enoughCellsForQuadraticExtrapolation(uint_t numberOfCellsForExtrapolation )
    {
-      return numberOfCellsForExtrapolation >= uint_t(3);
+      return numberOfCellsForExtrapolation >= uint_t{3};
    }
 
    bool enoughCellsForLinearExtrapolation(uint_t numberOfCellsForExtrapolation )
    {
-      return numberOfCellsForExtrapolation >= uint_t(2);
+      return numberOfCellsForExtrapolation >= uint_t{2};
    }
 
    bool enoughCellsForExtrapolation(uint_t numberOfCellsForExtrapolation )
    {
-      return numberOfCellsForExtrapolation >= uint_t(1);
+      return numberOfCellsForExtrapolation >= uint_t{1};
    }
 
    template< typename PdfField_T >
@@ -294,7 +294,7 @@ private:
 
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) += real_t(3) * pdfsXf[d.toIdx()] - real_t(3) * pdfsXff[d.toIdx()] + pdfsXfff[d.toIdx()];
+         pdfField->get( x, y, z, d.toIdx() ) += real_t{3} * pdfsXf[d.toIdx()] - real_t{3} * pdfsXff[d.toIdx()] + pdfsXfff[d.toIdx()];
       }
    }
 
@@ -311,7 +311,7 @@ private:
 
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) += real_t(2) * pdfsXf[d.toIdx()] - pdfsXff[d.toIdx()];
+         pdfField->get( x, y, z, d.toIdx() ) += real_t{2} * pdfsXf[d.toIdx()] - pdfsXff[d.toIdx()];
       }
    }
 
@@ -365,15 +365,15 @@ public:
 
    ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                                const shared_ptr<ExtrapolationDirectionFinder_T> & extrapolationDirectionFinder,
-                               uint_t maximumNumberOfExtrapolationCells = uint_t(3),
+                               uint_t maximumNumberOfExtrapolationCells = uint_t{3},
                                bool useDataFromGhostLayers = false)
    : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
      extrapolationDirectionFinder_( extrapolationDirectionFinder ),
      maximumNumberOfExtrapolationCells_(maximumNumberOfExtrapolationCells), useDataFromGhostLayers_(useDataFromGhostLayers),
      alternativeReconstructor_( EquilibriumAndNonEquilibriumReconstructor< BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-      ( blockStorage, boundaryHandlingID, extrapolationDirectionFinder, uint_t(1), useDataFromGhostLayers ) )
+      ( blockStorage, boundaryHandlingID, extrapolationDirectionFinder, uint_t{1}, useDataFromGhostLayers ) )
    {
-      WALBERLA_ASSERT_LESS_EQUAL(maximumNumberOfExtrapolationCells, uint_t(3), "Only supports up to quadratic extrapolation!");
+      WALBERLA_ASSERT_LESS_EQUAL(maximumNumberOfExtrapolationCells, uint_t{3}, "Only supports up to quadratic extrapolation!");
    }
 
    template< typename PdfField_T, typename ParticleAccessor_T >
@@ -414,7 +414,7 @@ private:
 
    bool enoughCellsForExtrapolation( uint_t numberOfCellsForExtrapolation )
    {
-      return numberOfCellsForExtrapolation >= uint_t(2);
+      return numberOfCellsForExtrapolation >= uint_t{2};
    }
 
    template< typename PdfField_T >
@@ -425,20 +425,20 @@ private:
 
       using LatticeModel_T = typename PdfField_T::LatticeModel;
 
-      if( numberOfCellsForExtrapolation == uint_t(3) )
+      if( numberOfCellsForExtrapolation == uint_t{3} )
       {
          // quadratic normal extrapolation
          for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
          {
-            pdfField->get( x, y, z, d.toIdx() ) =   real_t(3) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
-                                                  - real_t(3) * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
+            pdfField->get( x, y, z, d.toIdx() ) =   real_t{3} * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+                                                  - real_t{3} * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
                                                   +             pdfField->get( x + 3*extrapolationDirection[0], y + 3*extrapolationDirection[1], z + 3*extrapolationDirection[2], d.toIdx() );
          }
       } else { // numberOfCellsForExtrapolation == 2
          // linear normal extrapolation
          for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
          {
-            pdfField->get( x, y, z, d.toIdx() ) =   real_t(2) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+            pdfField->get( x, y, z, d.toIdx() ) =   real_t{2} * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
                                                   -             pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() );
          }
       }
@@ -455,18 +455,18 @@ private:
       WALBERLA_ASSERT( !math::isnan(localParticleVelocity) );
 
       // transforms to moment space (see MRT collision model) to set the particle's velocity in cell without affecting other moments
-      const real_t _1_2  = real_t(1) / real_t(2);
-      const real_t _1_3  = real_t(1) / real_t(3);
-      const real_t _1_4  = real_t(1) / real_t(4);
-      const real_t _1_6  = real_t(1) / real_t(6);
-      const real_t _1_8  = real_t(1) / real_t(8);
-      const real_t _1_12 = real_t(1) / real_t(12);
-      const real_t _1_16 = real_t(1) / real_t(16);
-      const real_t _1_18 = real_t(1) / real_t(18);
-      const real_t _1_24 = real_t(1) / real_t(24);
-      const real_t _1_36 = real_t(1) / real_t(36);
-      const real_t _1_48 = real_t(1) / real_t(48);
-      const real_t _1_72 = real_t(1) / real_t(72);
+      const real_t _1_2  = real_t{1} / real_t{2};
+      const real_t _1_3  = real_t{1} / real_t{3};
+      const real_t _1_4  = real_t{1} / real_t{4};
+      const real_t _1_6  = real_t{1} / real_t{6};
+      const real_t _1_8  = real_t{1} / real_t{8};
+      const real_t _1_12 = real_t{1} / real_t{12};
+      const real_t _1_16 = real_t{1} / real_t{16};
+      const real_t _1_18 = real_t{1} / real_t{18};
+      const real_t _1_24 = real_t{1} / real_t{24};
+      const real_t _1_36 = real_t{1} / real_t{36};
+      const real_t _1_48 = real_t{1} / real_t{48};
+      const real_t _1_72 = real_t{1} / real_t{72};
 
       // restriction to D3Q19!
       const real_t vC  = pdfField->get( x, y, z, LatticeModel_T::Stencil::idx[stencil::C]  );
@@ -492,17 +492,17 @@ private:
       // transform to moment space and change momentum to particle's velocity ( * rho_0 )
       const real_t m0  = vC + vN + vS + vW + vE + vT + vB + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
       const real_t m1  = -vC  + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
-      const real_t m2  = vC - real_t(2) * ( vN + vS + vW + vE + vT + vB ) + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
+      const real_t m2  = vC - real_t{2} * ( vN + vS + vW + vE + vT + vB ) + vNW + vNE + vSW + vSE + vTN + vTS + vTW + vTE + vBN + vBS + vBW + vBE;
       const real_t m3  = localParticleVelocity[0];
-      const real_t m4  = real_t(2) * vW - real_t(2) * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE;
+      const real_t m4  = real_t{2} * vW - real_t{2} * vE - vNW + vNE - vSW + vSE - vTW + vTE - vBW + vBE;
       const real_t m5  = localParticleVelocity[1];
-      const real_t m6  = real_t(-2) * vN + real_t(2) * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS;
+      const real_t m6  = real_t{-2} * vN + real_t{2} * vS + vNW + vNE - vSW - vSE + vTN - vTS + vBN - vBS;
       const real_t m7  = localParticleVelocity[2];
-      const real_t m8  = real_t(-2) * vT + real_t(2) * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE;
-      const real_t m9  = -vN - vS + real_t(2) * vW + real_t(2) * vE - vT - vB + vNW + vNE + vSW + vSE - real_t(2) * vTN
-                         - real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE;
-      const real_t m10 = vN + vS - real_t(2) * vW - real_t(2) * vE + vT + vB + vNW + vNE + vSW + vSE - real_t(2) * vTN
-                         - real_t(2) * vTS + vTW + vTE - real_t(2) * vBN - real_t(2) * vBS + vBW + vBE;
+      const real_t m8  = real_t{-2} * vT + real_t{2} * vB + vTN + vTS + vTW + vTE - vBN - vBS - vBW - vBE;
+      const real_t m9  = -vN - vS + real_t{2} * vW + real_t{2} * vE - vT - vB + vNW + vNE + vSW + vSE - real_t{2} * vTN
+                         - real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE;
+      const real_t m10 = vN + vS - real_t{2} * vW - real_t{2} * vE + vT + vB + vNW + vNE + vSW + vSE - real_t{2} * vTN
+                         - real_t{2} * vTS + vTW + vTE - real_t{2} * vBN - real_t{2} * vBS + vBW + vBE;
       const real_t m11 = vN  + vS  - vT  - vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE;
       const real_t m12 = -vN - vS  + vT  + vB  + vNW + vNE + vSW + vSE - vTW - vTE - vBW - vBE;
       const real_t m13 = -vNW + vNE + vSW - vSE;
@@ -612,11 +612,11 @@ public:
 
       std::vector<bool> availableStencilIndices(Stencil::Size, false);
 
-      auto nAverage = uint_t(0);
-      auto averageDensity = real_t(0);
+      auto nAverage = uint_t{0};
+      auto averageDensity = real_t{0};
 
       // density and velocity used in the reconstruction
-      auto targetDensity = real_t(0);
+      auto targetDensity = real_t{0};
       Vector3<real_t> targetVelocity;
 
       real_t cx, cy, cz;
@@ -640,7 +640,7 @@ public:
             availableStencilIndices[neighborDir.toIdx()] = true;
          }
       }
-      averageDensity = ( nAverage > uint_t( 0 ) ) ? averageDensity / real_c( nAverage ) : real_t(1.0);
+      averageDensity = ( nAverage > uint_t{ 0 } ) ? averageDensity / real_c( nAverage ) : real_t{1.0};
 
       // 2. evaluate target velocity
       // we simply use the body velocity in the cell center here since the cell center is probably not far from the particle surface so this is a valid approximation
@@ -671,11 +671,11 @@ public:
                targetDensity += pdfField->get(neighbor, q.inverseDir()); // "bounce back part"
                if(LatticeModel::compressible)
                {
-                  targetDensity += real_t(6) * averageDensity * LatticeModel::w[ Stencil::idx[*q] ] * ( real_c( stencil::cx[ *q ] ) * targetVelocity[0] +
+                  targetDensity += real_t{6} * averageDensity * LatticeModel::w[ Stencil::idx[*q] ] * ( real_c( stencil::cx[ *q ] ) * targetVelocity[0] +
                                                                                                         real_c( stencil::cy[ *q ] ) * targetVelocity[1] +
                                                                                                         real_c( stencil::cz[ *q ] ) * targetVelocity[2] ); //TODO use wall velocity here?
                } else {
-                  targetDensity += real_t(6) * LatticeModel::w[ Stencil::idx[*q] ] * ( real_c( stencil::cx[ *q ] ) * targetVelocity[0] +
+                  targetDensity += real_t{6} * LatticeModel::w[ Stencil::idx[*q] ] * ( real_c( stencil::cx[ *q ] ) * targetVelocity[0] +
                                                                                        real_c( stencil::cy[ *q ] ) * targetVelocity[1] +
                                                                                        real_c( stencil::cz[ *q ] ) * targetVelocity[2] ); //TODO use wall velocity here?
                }
@@ -688,7 +688,7 @@ public:
       } else {
          // alternatively, we can simply use the average density from the surrounding fluid cells
          // only minor differences have been seen in comparison to recomputing
-         targetDensity = (LatticeModel::compressible) ? averageDensity : averageDensity - real_t(1);
+         targetDensity = (LatticeModel::compressible) ? averageDensity : averageDensity - real_t{1};
       }
 
       // 4. compute pressure tensor from eq and neq parts
@@ -704,19 +704,19 @@ public:
       // else first-order finite differences if available if other neighbor is available
       // else we assume gradient of 0 (if no fluid neighbors available in respective direction)
 
-      Matrix3<real_t> velocityGradient(real_t(0));
+      Matrix3<real_t> velocityGradient(real_t{0});
       // check if both neighbors are available for central differences
       if(useCentralDifferences_ && availableStencilIndices[Stencil::idx[stencil::E]] && availableStencilIndices[Stencil::idx[stencil::W]])
       {
          auto neighborVelocity1 = pdfField->getVelocity(Cell(x,y,z)+stencil::E);
          auto neighborVelocity2 = pdfField->getVelocity(Cell(x,y,z)+stencil::W);
-         velocityGradient[0] = real_t(0.5) * ( neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
-         velocityGradient[1] = real_t(0.5) * ( neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
-         velocityGradient[2] = real_t(0.5) * ( neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
+         velocityGradient[0] = real_t{0.5} * ( neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
+         velocityGradient[1] = real_t{0.5} * ( neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
+         velocityGradient[2] = real_t{0.5} * ( neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
 
       } else {
          //upwinding
-         stencil::Direction upwindingXDirection = (targetVelocity[0] > real_t(0) ) ? stencil::W : stencil::E;
+         stencil::Direction upwindingXDirection = (targetVelocity[0] > real_t{0} ) ? stencil::W : stencil::E;
          stencil::Direction sourceXDirection = (availableStencilIndices[Stencil::idx[upwindingXDirection]]) ? upwindingXDirection
                                                                                                             : ((availableStencilIndices[Stencil::idx[stencil::inverseDir[upwindingXDirection]]]) ? stencil::inverseDir[upwindingXDirection]
                                                                                                                                                                                                  : stencil::C );
@@ -741,12 +741,12 @@ public:
       if(useCentralDifferences_ && availableStencilIndices[Stencil::idx[stencil::N]] && availableStencilIndices[Stencil::idx[stencil::S]]) {
          auto neighborVelocity1 = pdfField->getVelocity(Cell(x, y, z) + stencil::N);
          auto neighborVelocity2 = pdfField->getVelocity(Cell(x, y, z) + stencil::S);
-         velocityGradient[3] = real_t(0.5) * (neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
-         velocityGradient[4] = real_t(0.5) * (neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
-         velocityGradient[5] = real_t(0.5) * (neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
+         velocityGradient[3] = real_t{0.5} * (neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
+         velocityGradient[4] = real_t{0.5} * (neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
+         velocityGradient[5] = real_t{0.5} * (neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
       } else {
          //upwinding
-         stencil::Direction upwindingYDirection = (targetVelocity[1] > real_t(0) ) ? stencil::S : stencil::N;
+         stencil::Direction upwindingYDirection = (targetVelocity[1] > real_t{0} ) ? stencil::S : stencil::N;
          stencil::Direction sourceYDirection = (availableStencilIndices[Stencil::idx[upwindingYDirection]]) ? upwindingYDirection
                                                                                                             : ((availableStencilIndices[Stencil::idx[stencil::inverseDir[upwindingYDirection]]]) ? stencil::inverseDir[upwindingYDirection]
                                                                                                                                                                                                  : stencil::C );
@@ -774,12 +774,12 @@ public:
          if(useCentralDifferences_ && availableStencilIndices[Stencil::idx[stencil::T]] && availableStencilIndices[Stencil::idx[stencil::B]]) {
             auto neighborVelocity1 = pdfField->getVelocity(Cell(x, y, z) + stencil::T);
             auto neighborVelocity2 = pdfField->getVelocity(Cell(x, y, z) + stencil::B);
-            velocityGradient[6] = real_t(0.5) * (neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
-            velocityGradient[7] = real_t(0.5) * (neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
-            velocityGradient[8] = real_t(0.5) * (neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
+            velocityGradient[6] = real_t{0.5} * (neighborVelocity1[0] - neighborVelocity2[0]); // assuming dx = 1
+            velocityGradient[7] = real_t{0.5} * (neighborVelocity1[1] - neighborVelocity2[1]); // assuming dx = 1
+            velocityGradient[8] = real_t{0.5} * (neighborVelocity1[2] - neighborVelocity2[2]); // assuming dx = 1
          } else {
             //upwinding
-            stencil::Direction upwindingZDirection = (targetVelocity[2] > real_t(0)) ? stencil::B : stencil::T;
+            stencil::Direction upwindingZDirection = (targetVelocity[2] > real_t{0}) ? stencil::B : stencil::T;
             stencil::Direction sourceZDirection = (availableStencilIndices[Stencil::idx[upwindingZDirection]]) ? upwindingZDirection
                                                                                                                : ((availableStencilIndices[Stencil::idx[stencil::inverseDir[upwindingZDirection]]]) ? stencil::inverseDir[upwindingZDirection]
                                                                                                                                                                                                     : stencil::C);
@@ -800,11 +800,11 @@ public:
       }
 
 
-      Matrix3<real_t> pressureTensorNeq(real_t(0)); // without prefactor of rho, added later
-      const real_t preFac = - real_t(1)  / (real_t(3) * omegaShear_); // 2 * beta (in Chikatamarla et al) = omega related to kinematic viscosity
-      for(auto j = uint_t(0); j <= uint_t(2); ++j)
+      Matrix3<real_t> pressureTensorNeq(real_t{0}); // without prefactor of rho, added later
+      const real_t preFac = - real_t{1}  / (real_t{3} * omegaShear_); // 2 * beta (in Chikatamarla et al) = omega related to kinematic viscosity
+      for(auto j = uint_t{0}; j <= uint_t{2}; ++j)
       {
-         for(auto i = uint_t(0); i <= uint_t(2); ++i)
+         for(auto i = uint_t{0}; i <= uint_t{2}; ++i)
          {
             pressureTensorNeq(i,j) += preFac * (velocityGradient(i,j)+velocityGradient(j,i));
          }
@@ -818,18 +818,18 @@ public:
          {
             const real_t velci = lbm::internal::multiplyVelocityDirection( *q, targetVelocity );
 
-            auto contributionFromPneq = real_t(0);
-            for(auto j = uint_t(0); j <= uint_t(2); ++j) {
-               for (auto i = uint_t(0); i <= uint_t(2); ++i) {
+            auto contributionFromPneq = real_t{0};
+            for(auto j = uint_t{0}; j <= uint_t{2}; ++j) {
+               for (auto i = uint_t{0}; i <= uint_t{2}; ++i) {
                   //Pneq_a,b * c_q,a * c_q,b
                   contributionFromPneq += pressureTensorNeq(i,j) * real_c(stencil::c[i][*q]) * real_c(stencil::c[j][*q]);
                }
             }
             //- Pneq_a,b * cs**2 * delta_a,b
-            contributionFromPneq -= (pressureTensorNeq(0,0) + pressureTensorNeq(1,1) + pressureTensorNeq(2,2)) / real_t(3);
+            contributionFromPneq -= (pressureTensorNeq(0,0) + pressureTensorNeq(1,1) + pressureTensorNeq(2,2)) / real_t{3};
 
             // all terms are multiplied with the density
-            real_t fGrad = LatticeModel::w[ q.toIdx() ] * targetDensity * (real_t(1) + real_t(3) * velci - real_t(1.5) * targetVelocity.sqrLength() + real_t(4.5) * velci * velci + real_t(4.5) * contributionFromPneq); // standard comp. feq + comp. Pneq
+            real_t fGrad = LatticeModel::w[ q.toIdx() ] * targetDensity * (real_t{1} + real_t{3} * velci - real_t{1.5} * targetVelocity.sqrLength() + real_t{4.5} * velci * velci + real_t{4.5} * contributionFromPneq); // standard comp. feq + comp. Pneq
             pdfField->get(x,y,z,*q) = fGrad;
          }
       }else{
@@ -838,18 +838,18 @@ public:
          {
             const real_t velci = lbm::internal::multiplyVelocityDirection( *q, targetVelocity );
 
-            auto contributionFromPneq = real_t(0);
-            for(auto j = uint_t(0); j <= uint_t(2); ++j) {
-               for (auto i = uint_t(0); i <= uint_t(2); ++i) {
+            auto contributionFromPneq = real_t{0};
+            for(auto j = uint_t{0}; j <= uint_t{2}; ++j) {
+               for (auto i = uint_t{0}; i <= uint_t{2}; ++i) {
                   //Pneq_a,b * c_q,a * c_q,b
                   contributionFromPneq += pressureTensorNeq(i,j) * real_c(stencil::c[i][*q]) * real_c(stencil::c[j][*q]);
                }
             }
             //- Pneq_a,b * cs**2 * delta_a,b
-            contributionFromPneq -= (pressureTensorNeq(0,0) + pressureTensorNeq(1,1) + pressureTensorNeq(2,2)) / real_t(3);
+            contributionFromPneq -= (pressureTensorNeq(0,0) + pressureTensorNeq(1,1) + pressureTensorNeq(2,2)) / real_t{3};
 
             // density deviation just appears as the leading order term
-            real_t fGrad = LatticeModel::w[ q.toIdx() ] * ( targetDensity + real_t(3) * velci - real_t(1.5) * targetVelocity.sqrLength() + real_t(4.5) * velci * velci + real_t(4.5) * contributionFromPneq); // standard incomp. feq + incomp Pneq
+            real_t fGrad = LatticeModel::w[ q.toIdx() ] * ( targetDensity + real_t{3} * velci - real_t{1.5} * targetVelocity.sqrLength() + real_t{4.5} * velci * velci + real_t{4.5} * contributionFromPneq); // standard incomp. feq + incomp Pneq
             pdfField->get(x,y,z,*q) = fGrad;
          }
       }
@@ -890,7 +890,7 @@ makeEquilibriumReconstructor(const shared_ptr<StructuredBlockStorage> & blockSto
 template< typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 shared_ptr<EquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T,ExtrapolationDirectionFinder_T> >
 makeEquilibriumAndNonEquilibriumReconstructor(const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, const shared_ptr<ExtrapolationDirectionFinder_T> & extrapolationDirectionFinder,
-                                              uint_t maximumNumberOfExtrapolationCells = uint_t(3), bool useDataFromGhostLayers = false)
+                                              uint_t maximumNumberOfExtrapolationCells = uint_t{3}, bool useDataFromGhostLayers = false)
 {
    using Rec_T = EquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T,ExtrapolationDirectionFinder_T>;
    return make_shared<Rec_T>(blockStorage, boundaryHandlingID, extrapolationDirectionFinder, maximumNumberOfExtrapolationCells, useDataFromGhostLayers);
@@ -899,7 +899,7 @@ makeEquilibriumAndNonEquilibriumReconstructor(const shared_ptr<StructuredBlockSt
 template< typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T, bool EnforceNoSlipConstraintAfterExtrapolation = false >
 shared_ptr<ExtrapolationReconstructor<BoundaryHandling_T,ExtrapolationDirectionFinder_T, EnforceNoSlipConstraintAfterExtrapolation> >
 makeExtrapolationReconstructor(const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, const shared_ptr<ExtrapolationDirectionFinder_T> & extrapolationDirectionFinder,
-                               uint_t maximumNumberOfExtrapolationCells = uint_t(3), bool useDataFromGhostLayers = false)
+                               uint_t maximumNumberOfExtrapolationCells = uint_t{3}, bool useDataFromGhostLayers = false)
 {
    using Rec_T = ExtrapolationReconstructor<BoundaryHandling_T,ExtrapolationDirectionFinder_T, EnforceNoSlipConstraintAfterExtrapolation>;
    return make_shared<Rec_T>(blockStorage, boundaryHandlingID, extrapolationDirectionFinder, maximumNumberOfExtrapolationCells, useDataFromGhostLayers);

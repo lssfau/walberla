@@ -115,7 +115,7 @@ namespace gpu
 
          if (dst.layout() == fzyx)
          {
-            p.srcPtr = make_gpuPitchedPtr((void*) (src.data()),         // pointer
+            p.srcPtr = make_gpuPitchedPtr(static_cast< void* >(const_cast< T * >(src.data())),         // pointer
                                           sizeof(T) * src.xAllocSize(), // pitch
                                           src.xAllocSize(),             // inner dimension size
                                           src.yAllocSize());            // next outer dimension size
@@ -126,7 +126,7 @@ namespace gpu
          }
          else
          {
-            p.srcPtr = make_gpuPitchedPtr((void*) (src.data()),         // pointer
+            p.srcPtr = make_gpuPitchedPtr(static_cast< void* >(const_cast< T * >(src.data())),         // pointer
                                           sizeof(T) * src.fAllocSize(), // pitch
                                           src.fAllocSize(),             // inner dimension size
                                           src.xAllocSize());            // next outer dimension size
@@ -164,7 +164,7 @@ namespace gpu
 
          if (dst.layout() == fzyx)
          {
-            p.dstPtr = make_gpuPitchedPtr((void*) (dst.data()),         // pointer
+            p.dstPtr = make_gpuPitchedPtr(static_cast< void* > (dst.data()),         // pointer
                                           sizeof(T) * dst.xAllocSize(), // pitch
                                           dst.xAllocSize(),             // inner dimension size
                                           dst.yAllocSize());            // next outer dimension size
@@ -175,7 +175,7 @@ namespace gpu
          }
          else
          {
-            p.dstPtr = make_gpuPitchedPtr((void*) (dst.data()),         // pointer
+            p.dstPtr = make_gpuPitchedPtr(static_cast< void* > (dst.data()),         // pointer
                                           sizeof(T) * dst.fAllocSize(), // pitch
                                           dst.fAllocSize(),             // inner dimension size
                                           dst.xAllocSize());            // next outer dimension size

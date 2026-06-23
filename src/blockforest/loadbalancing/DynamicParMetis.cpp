@@ -54,7 +54,7 @@ std::pair<uint_t, uint_t> getBlockSequenceRange( uint_t numLocalBlocks, MPI_Comm
    size_t sequenceStartOnProcess = 0;
    MPI_Exscan( &numLocalBlocks, &sequenceStartOnProcess, 1, MPITrait<uint_t>::type(), MPI_SUM, comm );
    if( rank == 0 )
-      sequenceStartOnProcess = uint_t( 0 );
+      sequenceStartOnProcess = uint_t{ 0 };
 
    return std::make_pair( sequenceStartOnProcess, sequenceStartOnProcess + numLocalBlocks );
 }
@@ -138,7 +138,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       const std::map< blockforest::BlockID, uint_t > mapping = getBlockIdToSequenceMapping( phantomForest, targetProcess, blockSequenceRange, subComm ); //blockid to vertex id
 
       std::vector<int64_t> vtxdist = mpi::allGather( int64_c( blockSequenceRange.second ), subComm );
-      vtxdist.insert( vtxdist.begin(), uint_t( 0 ) );
+      vtxdist.insert( vtxdist.begin(), uint_t{ 0 } );
       WALBERLA_CHECK_EQUAL( vtxdist.size(), subSize + 1 );
       for (size_t i = 1; i < vtxdist.size(); ++i)
       {
@@ -173,7 +173,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
                adjncy.push_back( int64_c( mapIt->second ) );
                auto edgeWeightIt = bi.getEdgeWeights().find( nit.getId() );
                WALBERLA_CHECK_GREATER_EQUAL( edgeWeightIt->second, 0 );
-               adjwgt.push_back( edgeWeightIt == bi.getEdgeWeights().end() ? int64_t( 1 ) : edgeWeightIt->second );
+               adjwgt.push_back( edgeWeightIt == bi.getEdgeWeights().end() ? int64_t{ 1 } : edgeWeightIt->second );
             }
             break;
          case PARMETIS_EDGES_FROM_EDGE_WEIGHTS:
@@ -192,7 +192,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
 
          WALBERLA_CHECK_EQUAL(ncon, int64_c(bi.getNcon()), "Number of constraints on block does not fit to specified number of constraints in ParMetis setup!");
 
-         for( uint_t con = uint_t(0); con < bi.getNcon(); ++con )
+         for( uint_t con = uint_t{0}; con < bi.getNcon(); ++con )
          {
             WALBERLA_CHECK_GREATER_EQUAL( bi.getVertexWeight(con), 0 );
             vwgt.push_back( bi.getVertexWeight(con) );
@@ -206,7 +206,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       }
       xadj.push_back( int64_c( adjncy.size() ) );
 
-      WALBERLA_CHECK_EQUAL( vtxdist.size(), numSubProcesses + uint_t( 1 ) );
+      WALBERLA_CHECK_EQUAL( vtxdist.size(), numSubProcesses + uint_t{ 1 } );
       WALBERLA_CHECK_EQUAL( xadj.size(), targetProcess.size() + 1 );
       WALBERLA_CHECK_EQUAL( xadj.front(), 0);
       WALBERLA_CHECK_EQUAL( xadj.back(), adjncy.size() );
@@ -228,14 +228,14 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       double ipc2redist         = double_c(ipc2redist_);
       MPI_Comm comm             = subComm; //MPIManager::instance()->comm();
       std::vector<double> tpwgts( uint_c(nparts * ncon), 1.0 / double_c( nparts ) ); // vertex weight fraction that is stored in a subdomain
-      std::vector<int64_t> options = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };
+      std::vector<int64_t> options = { int64_t{ 1 }, int64_t{ 0 }, int64_t{ 23 }, int64_t{ 1 } };
 
       int metisResult = core::METIS_OK;
 
       switch( algorithm_ )
       {
       case PARMETIS_PART_GEOM:
-         WALBERLA_ASSERT_EQUAL(ncon, int64_t(1), "Chosen algorithm can only work with single constraints!");
+         WALBERLA_ASSERT_EQUAL(ncon, int64_t{1}, "Chosen algorithm can only work with single constraints!");
          parmetisTimer.start();
          metisResult = core::ParMETIS_V3_PartGeom( vtxdist.data(), &ndims, xyz.data(), part.data(), &comm );
          parmetisTimer.end();
@@ -268,19 +268,19 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    }
 
    // Determine which processes will receive a block from this process
-   std::vector<uint8_t> isSendingBlockToProcess( uint_c(MPIManager::instance()->numProcesses()), uint8_t( 0 ) );
+   std::vector<uint8_t> isSendingBlockToProcess( uint_c(MPIManager::instance()->numProcesses()), uint8_t{ 0 } );
    for( auto proc : part )
    {
       WALBERLA_ASSERT_GREATER_EQUAL( proc, 0 );
       WALBERLA_ASSERT_LESS( proc, MPIManager::instance()->numProcesses() );
-      isSendingBlockToProcess[uint_c(proc)] = uint8_t( 1 );
+      isSendingBlockToProcess[uint_c(proc)] = uint8_t{ 1 };
    }
-   isSendingBlockToProcess[uint_c(MPIManager::instance()->rank())] = uint8_t( 0 );
+   isSendingBlockToProcess[uint_c(MPIManager::instance()->rank())] = uint8_t{ 0 };
 
-   std::vector<uint8_t> isReceivingBlockFromProcess( uint_c(MPIManager::instance()->numProcesses()), uint8_t( 0 ) );
+   std::vector<uint8_t> isReceivingBlockFromProcess( uint_c(MPIManager::instance()->numProcesses()), uint8_t{ 0 } );
    MPI_Alltoall( isSendingBlockToProcess.data(), 1, MPITrait<uint8_t>::type(), isReceivingBlockFromProcess.data(), 1, MPITrait<uint8_t>::type(), MPIManager::instance()->comm() );
    for( uint_t i = 0; i < isReceivingBlockFromProcess.size(); ++i )
-      if( isReceivingBlockFromProcess[i] == uint8_t( 1 ) )
+      if( isReceivingBlockFromProcess[i] == uint8_t{ 1 } )
          processesToRecvFrom.insert( i );
 
    // assign target processes to blocks

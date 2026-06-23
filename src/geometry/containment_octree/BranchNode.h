@@ -72,7 +72,7 @@ template< typename ContainmentOctreeT >
 BranchNode<ContainmentOctreeT>::BranchNode( const shared_ptr<const DistanceObject> & distanceObject, const AABB & aabb, const Scalar epsilon,
                                             const uint_t maxDepth, const Scalar minAABBVolume ) : center_( this->toPoint( aabb.center() ) )
 {
-   for( uint_t i = 0; i < uint_t(8); ++i )
+   for( uint_t i = 0; i < uint_t{8}; ++i )
       children_[i] = nullptr;
 
    const auto & min = aabb.minCorner();

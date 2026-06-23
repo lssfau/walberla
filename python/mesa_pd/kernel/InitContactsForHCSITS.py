@@ -23,7 +23,7 @@ class InitContactsForHCSITS:
     def __init__(self):
         self.context = {'properties': [], 'interface': []}
 
-        self.context['properties'].append(create_property("erp", "real_t", defValue="real_t(0.8)"))
+        self.context['properties'].append(create_property("erp", "real_t", defValue="real_t{0.8}"))
         self.context['properties'].append(create_property("maximumPenetration", "real_t", defValue="0"))
 
         self.context['interface'].append(create_access("uid", "walberla::id_t", access="g"))

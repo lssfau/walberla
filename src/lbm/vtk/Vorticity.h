@@ -38,11 +38,11 @@ class VorticityComponentVTKWriter : public vtk::BlockCellDataWriter< OutputType,
 public:
    VorticityComponentVTKWriter(const shared_ptr<StructuredBlockStorage> blockStorage, Filter_T & filter,
          const ConstBlockDataID & velocityFieldId, const uint_t componentIdx, const std::string & id,
-         const real_t normalizationConstant = real_t(1)) :
+         const real_t normalizationConstant = real_t{1}) :
          vtk::BlockCellDataWriter< OutputType, 1 >(id), blockStorage_(blockStorage), filter_(filter),
          velocityFieldId_(velocityFieldId), componentIdx_(componentIdx), velocityField_(nullptr),
          normalizationConstant_(normalizationConstant) {
-      WALBERLA_ASSERT(componentIdx < uint_t(3),
+      WALBERLA_ASSERT(componentIdx < uint_t{3},
             "The vorticity vector only has three components, i.e. the highest possible component index is 2.");
    }
 

@@ -51,8 +51,8 @@ class ParticleStorage():
         self.add_include("mesa_pd/data/Flags.h")
 
         self.add_property("uid", "walberla::id_t", defValue="UniqueID<data::Particle>::invalidID()", syncMode="ALWAYS")
-        self.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-        self.add_property("interactionRadius", "walberla::real_t", defValue="real_t(0)", syncMode="ON_GHOST_CREATION")
+        self.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t{0}", syncMode="ALWAYS")
+        self.add_property("interactionRadius", "walberla::real_t", defValue="real_t{0}", syncMode="ON_GHOST_CREATION")
         self.add_property("flags", "walberla::mesa_pd::data::particle_flags::FlagT", defValue="",
                           syncMode="ON_GHOST_CREATION")
         self.add_property("owner", "int", defValue="-1", syncMode="ON_GHOST_CREATION")

@@ -53,7 +53,7 @@ public:
    //@{
    real_t doGJK( const Support &geom1, const Support &geom2, Vec3& normal, Vec3& contactPoint );
 
-   bool doGJKmargin( const Support &geom1, const Support &geom2, const real_t margin = real_t(0));
+   bool doGJKmargin( const Support &geom1, const Support &geom2, const real_t margin = real_t{0});
    //@}
    //**********************************************************************************************
 
@@ -76,7 +76,7 @@ private:
    bool simplex4(Vec3& d);
 
    /// Checks if two vectors roughly point in the same direction
-   inline bool sameDirection   ( const Vec3& vec1, const Vec3& vec2 ) const { return vec1 * vec2 > real_t(0.0); }
+   inline bool sameDirection   ( const Vec3& vec1, const Vec3& vec2 ) const { return vec1 * vec2 > real_t{0.0}; }
    /// Checks if the length of a vector is zero or as close to zero that it can not be distinguished form zero
    inline bool zeroLengthVector( const Vec3& vec )                    const { return vec.sqrLength() < math::Limits<real_t>::fpuAccuracy(); }
    real_t calcDistance    ( Vec3& normal, Vec3& contactPoint );

@@ -35,9 +35,9 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
    mpi::MPIManager::instance()->useWorldComm();
 
-   data::LinkedCells lc(math::AABB(real_t(0),real_t(0),real_t(0),
-                                   real_t(4.5),real_t(5.5),real_t(6.5)),
-                        real_t(1));
+   data::LinkedCells lc(math::AABB(real_t{0},real_t{0},real_t{0},
+                                   real_t{4.5},real_t{5.5},real_t{6.5}),
+                        real_t{1});
 
    WALBERLA_CHECK_EQUAL(lc.numCellsPerDim_[0], 5);
    WALBERLA_CHECK_EQUAL(lc.numCellsPerDim_[1], 6);

@@ -78,11 +78,11 @@ const FlagUID  Fluid_Flag( "fluid" );
 const FlagUID    UBB_Flag( "velocity bounce back" );
 const FlagUID NoSlip_Flag( "no slip" );
 
-const uint_t FieldSize        = uint_t(10);
-const uint_t FieldGhostLayers = uint_t(1);
-const real_t GlobalOmega      = real_t(1.4);
-const real_t GlobalLambdaE    = real_t(1.8);
-const real_t GlobalLambdaD    = real_t(1.7);
+const uint_t FieldSize        = uint_t{10};
+const uint_t FieldGhostLayers = uint_t{1};
+const real_t GlobalOmega      = real_t{1.4};
+const real_t GlobalLambdaE    = real_t{1.8};
+const real_t GlobalLambdaD    = real_t{1.7};
 
 
 
@@ -163,7 +163,7 @@ void addTest( shared_ptr< StructuredBlockForest > & blocks, SweepTimeloop & time
               const char * fieldName )
 {
    fieldIds.push_back( lbm::addPdfFieldToStorage( blocks, std::string("pdf field ") + std::string(fieldName),
-                                                  latticeModel, Vector3<real_t>( velocity, velocity / real_t(2), velocity / real_t(4) ), real_t(1),
+                                                  latticeModel, Vector3<real_t>( velocity, velocity / real_t{2}, velocity / real_t{4} ), real_t{1},
                                                   FieldGhostLayers, layout ) );
 
    BlockDataID boundaryHandlingId = blocks->addStructuredBlockData< typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T >(
@@ -270,9 +270,9 @@ void check( const shared_ptr< StructuredBlockForest > & blocks, const BlockDataI
       math::Sample samples[4];
       #endif
 
-      for( cell_idx_t z = cell_idx_t(0); z < cell_idx_c(FieldSize); ++z )
-         for( cell_idx_t y = cell_idx_t(0); y < cell_idx_c(FieldSize); ++y )
-            for( cell_idx_t x = cell_idx_t(0); x < cell_idx_c(FieldSize); ++x )
+      for( cell_idx_t z = cell_idx_t{0}; z < cell_idx_c(FieldSize); ++z )
+         for( cell_idx_t y = cell_idx_t{0}; y < cell_idx_c(FieldSize); ++y )
+            for( cell_idx_t x = cell_idx_t{0}; x < cell_idx_c(FieldSize); ++x )
             {
                Vector3< real_t > velocityReference;
                Vector3< real_t > velocity;
@@ -335,7 +335,7 @@ int main( int argc, char ** argv )
    if( MPIManager::instance()->numProcesses() != 1 )
       WALBERLA_ABORT( "The number of processes must be equal to 1!" );
 
-   auto blocks = blockforest::createUniformBlockGrid( uint_t(1), uint_t(1), uint_t(1),
+   auto blocks = blockforest::createUniformBlockGrid( uint_t{1}, uint_t{1}, uint_t{1},
                                                       FieldSize, FieldSize, FieldSize,
                                                       real_c(1.0), true,
                                                       true, true, false ); // periodicity
@@ -343,17 +343,17 @@ int main( int argc, char ** argv )
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    #ifdef TEST_USES_VTK_OUTPUT
-   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t(101) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t{101} );
    #else
-   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t(10) );
+   SweepTimeloop timeloop( blocks->getBlockStorage(), uint_t{10} );
    #endif
 
    std::vector< std::vector< BlockDataID > > fieldIds;
 
-   const real_t velocity = real_t(0.05);
+   const real_t velocity = real_t{0.05};
 
    #ifdef TEST_USES_VTK_OUTPUT
-   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "pdf_field", uint_t(10) );
+   auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, "pdf_field", uint_t{10} );
    #endif
 
    ///////////////////////////

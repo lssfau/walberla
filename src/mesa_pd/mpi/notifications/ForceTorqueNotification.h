@@ -59,8 +59,8 @@ public:
 template <>
 inline void reset<ForceTorqueNotification>(data::Particle& p)
 {
-   p.setForce( Vec3(real_t(0)) );
-   p.setTorque( Vec3(real_t(0)) );
+   p.setForce( Vec3(real_t{0}) );
+   p.setTorque( Vec3(real_t{0}) );
 }
 
 inline void reduce(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)

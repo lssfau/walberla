@@ -45,7 +45,7 @@ public:
    OutputSelectorFaceDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
    uint_t numComponents() override {
-      return uint_t(1);
+      return uint_t{1};
    }
 
    using Base::getData;
@@ -80,7 +80,7 @@ public:
    OutputSelectorFaceDataSource(const std::string& name, Selector selector) : Base(name), selector_(selector) { }
 
    uint_t numComponents() override {
-      return uint_t(3);
+      return uint_t{3};
    }
 
    using Base::getData;

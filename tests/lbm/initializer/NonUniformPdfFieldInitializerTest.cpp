@@ -61,7 +61,7 @@ struct LinearDensityCellProfile
 {
    real_t operator()( const Cell & globalCell ) const
    {
-      return real_t(1.0) + real_t(0.5) * real_c( globalCell.x() );
+      return real_t{1.0} + real_t{0.5} * real_c( globalCell.x() );
    }
 };
 
@@ -69,7 +69,7 @@ struct LinearDensityCenterProfile
 {
    real_t operator()( const Vector3<real_t> & center ) const
    {
-      return real_t(1.0) + real_t(0.5) * center[0];
+      return real_t{1.0} + real_t{0.5} * center[0];
    }
 };
 
@@ -85,8 +85,8 @@ void testCellInit( const BlockDataID & pdfFieldId, const shared_ptr<StructuredBl
    /// check for cells in ghost layers between coarse and fine blocks
 
    // get neighbouring coarse and fine block
-   auto coarseBlock = blocks->getBlock(real_t(15), real_t(5), real_t(5));
-   auto   fineBlock = blocks->getBlock(real_t(7.5), real_t(2.5), real_t(2.5));
+   auto coarseBlock = blocks->getBlock(real_t{15}, real_t{5}, real_t{5});
+   auto   fineBlock = blocks->getBlock(real_t{7.5}, real_t{2.5}, real_t{2.5});
 
    // retrieve fields
    auto coarsePdfField = coarseBlock->getData<PdfField_T>(pdfFieldId);
@@ -109,7 +109,7 @@ void testCellInit( const BlockDataID & pdfFieldId, const shared_ptr<StructuredBl
    Cell coarseCell {coarseGL.xMin(), coarseGL.yMin(), coarseGL.zMin()};
    auto coarseVal = coarsePdfField->getDensity(coarseCell);
 
-   WALBERLA_CHECK_FLOAT_EQUAL(coarseVal, real_t(0.5) * (fineValXMin + fineValXMax))
+   WALBERLA_CHECK_FLOAT_EQUAL(coarseVal, real_t{0.5} * (fineValXMin + fineValXMax))
 }
 
 int main( int argc, char ** argv )

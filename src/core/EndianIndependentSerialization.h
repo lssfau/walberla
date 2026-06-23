@@ -101,9 +101,9 @@ uint_t realToByteArray( const REAL_T value, std::vector< uint8_t >& array, const
 
    int exp;
    const REAL_T x = std::frexp( value, &exp );
-   const REAL_T sign = ( x < REAL_T(0) ) ? REAL_T(-1) : REAL_T(1);
+   const REAL_T sign = ( x < real_t{0} ) ? real_t{-1} : real_t{1};
 
-   uint_t signByte = ( ( exp >= 0 ) ? uint_c(0) : uint_c(1) ) + ( ( sign < REAL_T(0) ) ? uint_c(2) : uint_c(0) );
+   uint_t signByte = ( ( exp >= 0 ) ? uint_c(0) : uint_c(1) ) + ( ( sign < real_t{0} ) ? uint_c(2) : uint_c(0) );
    array[ offset ] = uint8_c( signByte );
 
    uint32_t uexp = ( exp >= 0 ) ? uint32_c( exp ) : uint32_c( -1 * exp );
@@ -140,7 +140,7 @@ REAL_T byteArrayToReal( const std::vector< uint8_t >& array, const uint_t offset
    for( uint_t i = 0; i != sizeof( REAL_T ); ++i )
       mant |= uint64_c( array[ offset + 3 + i ] ) << ( i * 8 );
 
-   const REAL_T sign = ( ( uint_c( array[ offset ] ) & uint_c(2) ) == uint_c(0) ) ? REAL_T(1) : REAL_T(-1);
+   const REAL_T sign = ( ( uint_c( array[ offset ] ) & uint_c(2) ) == uint_c(0) ) ? real_t{1} : real_t{-1};
    return std::ldexp( sign * numeric_cast<REAL_T>( mant ) / numeric_cast<REAL_T>( uint64_c(1) << uint64_c( 1 + std::numeric_limits<REAL_T>::digits ) ), exp );
 }
 
@@ -149,7 +149,7 @@ inline void boolVectorToByteArray( const std::vector< bool >& boolVec, std::vect
 {
    static const std::array< uint_t, 8 > bit = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
-   WALBERLA_ASSERT_EQUAL( boolVec.size() % 8, uint_t(0) );
+   WALBERLA_ASSERT_EQUAL( boolVec.size() % 8, uint_t{0} );
    const uint_t bytes =  uint_c(boolVec.size() / 8);
 
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
@@ -171,7 +171,7 @@ inline std::vector< bool > byteArrayToBoolVector( const std::vector< uint8_t >& 
 
    for( uint_t i = 0; i != bytes; ++i )
       for( uint_t j = 0; j != 8; ++j )
-         boolVec[i * 8 + j] = (array[offset + i] & bit[j]) != uint8_t(0);
+         boolVec[i * 8 + j] = (array[offset + i] & bit[j]) != uint8_t{0};
 
    return boolVec;
 }

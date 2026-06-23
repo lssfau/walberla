@@ -43,7 +43,7 @@ public:
    ///Convenience typedef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    using PhantomBlockWeightPackUnpackFunctor = blockforest::DynamicParMetisBlockInfoPackUnpack;
 
-   MetisAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
+   MetisAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t{10.0} ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, std::any > > & blockData,
                     const PhantomBlockForest & forest )
@@ -66,7 +66,7 @@ public:
          info.setVertexWeight( int64_c(weight) );
          info.setVertexSize( int64_c( weight ) );
          info.setVertexCoords( block->getAABB().center() );
-         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+         for( uint_t nb = uint_t{0}; nb < block->getNeighborhoodSize(); ++nb )
          {
             const real_t dx(1.0);
             info.setEdgeWeight( block->getNeighborId(nb),

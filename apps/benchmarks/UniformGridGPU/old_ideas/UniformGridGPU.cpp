@@ -75,8 +75,8 @@ int main( int argc, char **argv )
       const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", true);
 
       // Creating fields
-      BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t(0), field::fzyx);
-      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >( blocks, "vel", real_t(0), field::fzyx);
+      BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t{0}, field::fzyx);
+      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >( blocks, "vel", real_t{0}, field::fzyx);
 
       if( timeStepStrategy != "kernelOnlyNoInit")
       {

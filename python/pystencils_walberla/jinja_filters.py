@@ -44,9 +44,9 @@ delete_loop = """
 standard_parameter_registration = """
 for (uint_t level = 0; level < blocks->getNumberOfLevels(); level++)
 {{
-    const {dtype} level_scale_factor = {dtype}(uint_t(1) << level);
-    const {dtype} one                = {dtype}(1.0);
-    const {dtype} half               = {dtype}(0.5);
+    const {dtype} level_scale_factor = {dtype}(uint_t{{1}} << level);
+    const {dtype} one                = {dtype}{{1.0}};
+    const {dtype} half               = {dtype}{{0.5}};
     
     {name}Vector.push_back( {dtype}({name} / (level_scale_factor * (-{name} * half + one) + {name} * half)) );
 }}

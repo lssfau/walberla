@@ -33,7 +33,7 @@ void TwoBlockForestsTest()
    Vector3<uint_t> procs   (2,2,2);
    Vector3<bool>   periodic(true, true, true);
 
-   uint_t peDomainFactor = uint_t(20);
+   uint_t peDomainFactor = uint_t{20};
 
    AABB lbmDomainAABB( real_c(0), real_c(0), real_c(0), real_c(cells[0]), real_c(cells[1]), real_c(cells[2]) );
    AABB peDomainAABB ( real_c(0), real_c(0), real_c(0), real_c(cells[0]), real_c(cells[1]), real_c(cells[2]*peDomainFactor) );

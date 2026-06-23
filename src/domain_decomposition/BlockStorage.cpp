@@ -171,7 +171,7 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
 //**********************************************************************************************************************
 void BlockStorage::saveBlockData( const std::string & file, const BlockDataID & id, const bool forceSerialIO)
 {
-   WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
+   WALBERLA_CHECK_LESS( static_cast< uint_t >(id), blockDataItem_.size() );
 
    mpi::SendBuffer buffer;
    serializeBlockData(id, buffer);
@@ -186,14 +186,14 @@ void BlockStorage::saveBlockData( const std::string & file, const BlockDataID & 
 //**********************************************************************************************************************
 void BlockStorage::serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer )
 {
-   WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
+   WALBERLA_CHECK_LESS( static_cast< uint_t >(id), blockDataItem_.size() );
 
    std::vector< IBlock * > blocks;
    for( auto &block : *this )
       blocks.push_back( &block );
    std::ranges::sort( blocks, internal::sortBlocksByID );
 
-   auto & item = blockDataItem_[ uint_t(id) ];
+   auto & item = blockDataItem_[ static_cast< uint_t >(id) ];
 
    for(auto *block : blocks)
    {
@@ -212,14 +212,14 @@ void BlockStorage::serializeBlockData( const BlockDataID & id, mpi::SendBuffer &
 //**********************************************************************************************************************
 void BlockStorage::deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer )
 {
-   WALBERLA_CHECK_LESS( uint_t(id), blockDataItem_.size() );
+   WALBERLA_CHECK_LESS( static_cast< uint_t >(id), blockDataItem_.size() );
 
    std::vector< IBlock * > blocks;
    for( auto &block : *this )
       blocks.push_back( &block );
    std::ranges::sort( blocks, internal::sortBlocksByID );
 
-   auto & item = blockDataItem_[ uint_t(id) ];
+   auto & item = blockDataItem_[ static_cast< uint_t >(id) ];
 
    for(auto block : blocks)
    {
@@ -248,13 +248,13 @@ MPI_Comm BlockStorage::processesWithBlocksCommunicator()
    {
       if( rebuildProcessesWithBlocksCommunicator_ )
       {
-         const int8_t hasBlocks = ( getNumberOfBlocks() > uint_t(0) ) ? int8_t(1) : int8_t(0);
+         const int8_t hasBlocks = ( getNumberOfBlocks() > uint_t{0} ) ? int8_t{1} : int8_t{0};
 
          std::vector<int8_t> processHasBlocks = mpi::allGather( hasBlocks );
 
          std::vector<int> excludedProcesses;
          for( uint_t i=0; i < processHasBlocks.size(); ++i )
-            if( processHasBlocks[i] == int8_t(0) )
+            if( processHasBlocks[i] == int8_t{0} )
                excludedProcesses.push_back( int_c(i) );
 
          if( processesWithBlocksCommunicator_ != MPI_COMM_NULL )

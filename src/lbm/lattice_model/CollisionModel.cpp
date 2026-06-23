@@ -25,8 +25,8 @@ namespace walberla {
 namespace lbm {
 namespace collision_model {
 
-const real_t      TRT::threeSixteenth = real_t(3) / real_t(16);
-const real_t D3Q19MRT::threeSixteenth = real_t(3) / real_t(16);
+const real_t      TRT::threeSixteenth = real_t{3} / real_t{16};
+const real_t D3Q19MRT::threeSixteenth = real_t{3} / real_t{16};
 
 } // namespace collision_model
 } // namespace lbm

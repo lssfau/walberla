@@ -115,7 +115,7 @@ inline LinearSpringDashpot::LinearSpringDashpot(const uint_t numParticleTypes)
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
-   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t(0));
+   {{param}}_.resize(numParticleTypes * numParticleTypes, real_t{0});
    {%- endfor %}
 }
 
@@ -155,10 +155,10 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
    if (p_idx1 != p_idx2)
    {
 
-      WALBERLA_ASSERT_FLOAT_EQUAL(math::sqrLength(contactNormal), real_t(1));
+      WALBERLA_ASSERT_FLOAT_EQUAL(math::sqrLength(contactNormal), real_t{1});
 
       real_t delta = -penetrationDepth;
-      if (delta < real_t(0)) return;
+      if (delta < real_t{0}) return;
 
 
       const Vec3 relVel ( -(getVelocityAtWFPoint(p_idx1, ac, contactPoint) - getVelocityAtWFPoint(p_idx2, ac, contactPoint)) );
@@ -172,8 +172,8 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
 
 
       // get further collision properties from the contact history or initialize them
-      Vec3 tangentialSpringDisplacement( real_t(0) );
-      real_t impactVelocityMagnitude(real_t(0));
+      Vec3 tangentialSpringDisplacement( real_t{0} );
+      real_t impactVelocityMagnitude(real_t{0});
       bool isSticking = false;
       auto contactHistory = ac.getOldContactHistoryRef(p_idx1).find(ac.getUid(p_idx2)); //TODO assert symmetry
       if(contactHistory != ac.getOldContactHistoryRef(p_idx1).end())
@@ -191,8 +191,8 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
 
       //TODO: move to own tangential displacement integration kernel
       Vec3 rotatedTangentialDisplacement = tangentialSpringDisplacement - contactNormal * (contactNormal * tangentialSpringDisplacement);
-      Vec3 newTangentialSpringDisplacement = rotatedTangentialDisplacement.sqrLength() <= real_t(0) ? // avoid division by zero
-                                             Vec3(real_t(0)) :
+      Vec3 newTangentialSpringDisplacement = rotatedTangentialDisplacement.sqrLength() <= real_t{0} ? // avoid division by zero
+                                             Vec3(real_t{0}) :
                                              ( rotatedTangentialDisplacement * std::sqrt((tangentialSpringDisplacement.sqrLength() / rotatedTangentialDisplacement.sqrLength())));
       newTangentialSpringDisplacement = newTangentialSpringDisplacement + dt * relVelT;
 
@@ -208,7 +208,7 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
       const real_t fFrictionAbsStatic = getFrictionCoefficientStatic(ac.getType(p_idx1), ac.getType(p_idx2)) * fN.length(); // sticking, rolling
       const real_t fFrictionAbsDynamic = getFrictionCoefficientDynamic(ac.getType(p_idx1), ac.getType(p_idx2)) * fN.length(); // sliding
 
-      const real_t tangentialVelocityThreshold = real_t(1e-8);
+      const real_t tangentialVelocityThreshold = real_t{1e-8};
 
       real_t fFrictionAbs;
       if( isSticking && relVelT.length() < tangentialVelocityThreshold && fTLS.length() < fFrictionAbsStatic  )
@@ -228,7 +228,7 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
          isSticking = false;
 
          // reset displacement vector
-         if(stiffnessT > real_t(0) ) newTangentialSpringDisplacement = ( fFrictionAbs * t - dampingT * relVelT ) / stiffnessT;
+         if(stiffnessT > real_t{0} ) newTangentialSpringDisplacement = ( fFrictionAbs * t - dampingT * relVelT ) / stiffnessT;
 
          // if tangential force falls below coulomb limit, we are back in sticking
          if( fTLS.length() < fFrictionAbsDynamic )
@@ -278,7 +278,7 @@ inline real_t LinearSpringDashpot::calcCoefficientOfRestitution(const size_t typ
                                                                 const size_t type2,
                                                                 const real_t effectiveMass)
 {
-   auto a = real_t(0.5) * getDampingN(type1, type2) / effectiveMass;
+   auto a = real_t{0.5} * getDampingN(type1, type2) / effectiveMass;
    return std::exp(-a * math::pi / std::sqrt(getStiffnessN(type1, type2) / effectiveMass - a*a));
 }
 
@@ -286,7 +286,7 @@ inline real_t LinearSpringDashpot::calcCollisionTime(const size_t type1,
                                                      const size_t type2,
                                                      const real_t effectiveMass)
 {
-   auto a = real_t(0.5) * getDampingN(type1, type2) / effectiveMass;
+   auto a = real_t{0.5} * getDampingN(type1, type2) / effectiveMass;
    return math::pi / std::sqrt( getStiffnessN(type1, type2)/effectiveMass - a*a);
 }
 
@@ -300,7 +300,7 @@ inline void LinearSpringDashpot::setStiffnessAndDamping(const size_t type1,
    const real_t lnDryResCoeff = std::log(coefficientOfRestitution);
 
    setStiffnessN(type1, type2, effectiveMass * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime) );
-   setDampingN  (type1, type2, - real_t(2) * effectiveMass * lnDryResCoeff / collisionTime );
+   setDampingN  (type1, type2, - real_t{2} * effectiveMass * lnDryResCoeff / collisionTime );
 
    setStiffnessT(type1, type2, kappa * getStiffnessN(type1, type2) );
    setDampingT  (type1, type2, std::sqrt(kappa) * getDampingN(type1, type2) );

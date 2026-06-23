@@ -37,11 +37,11 @@ void testBufferIndexing()
       testing::assert_range_equal(bufView.allocOffsets(), std::array< size_t, 3 >{ 0, 0, 0 });
       testing::assert_range_equal(bufView.strides(), std::array< size_t, 3 >{ 16, 4, 1 });
 
-      testing::assert_equal(std::addressof(bufView(0, 0, 1)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t(1));
+      testing::assert_equal(std::addressof(bufView(0, 0, 1)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t{1});
 
-      testing::assert_equal(std::addressof(bufView(0, 1, 0)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t(4));
+      testing::assert_equal(std::addressof(bufView(0, 1, 0)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t{4});
 
-      testing::assert_equal(std::addressof(bufView(1, 0, 0)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t(16));
+      testing::assert_equal(std::addressof(bufView(1, 0, 0)) - std::addressof(bufView(0, 0, 0)), std::ptrdiff_t{16});
 
       const size_t bufAllocSize = buffers.buffer(block).linearAllocSize();
       testing::assert_equal(bufAllocSize, indexing.linearBufferAllocSize());
@@ -60,12 +60,12 @@ void testBufferIndexing()
       double* bData = buffers.buffer(block).data();
 
       sweeper.forAllCells([&](auto cell) {
-         bView(cell.x(), cell.y(), cell.z()) = double(cell.x()) + 10. * double(cell.y()) + 100. * double(cell.z());
+         bView(cell.x(), cell.y(), cell.z()) = static_cast< double >(cell.x()) + 10. * static_cast< double >(cell.y()) + 100. * static_cast< double >(cell.z());
       });
 
       sweeper.forAllCells([&](auto cell) {
-         const size_t linearIndex{ size_t(cell.x()) * 16UL + size_t(cell.y()) * 4UL + size_t(cell.z()) };
-         const double expectedValue{ double(cell.x()) + 10. * double(cell.y()) + 100. * double(cell.z()) };
+         const size_t linearIndex{ uint_c(cell.x()) * 16UL + uint_c(cell.y()) * 4UL + uint_c(cell.z()) };
+         const double expectedValue{ static_cast< double >(cell.x()) + 10. * static_cast< double >(cell.y()) + 100. * static_cast< double >(cell.z()) };
          testing::assert_close(bData[linearIndex], expectedValue);
       });
    }
@@ -159,11 +159,11 @@ void testConstCorrectness()
    // non-const to const copy init
    [[maybe_unused]] ConstBSysType cbuffers{ buffers };
 
-   testing::assert_equal(uint_t(buffers.buffersId()), uint_t(cbuffers.buffersId()));
+   testing::assert_equal(static_cast< uint_t >(buffers.buffersId()), static_cast< uint_t >(cbuffers.buffersId()));
 
    // non-const to const assignment
    cbuffers = buffers2;
-   testing::assert_equal(uint_t(buffers2.buffersId()), uint_t(cbuffers.buffersId()));
+   testing::assert_equal(static_cast< uint_t >(buffers2.buffersId()), static_cast< uint_t >(cbuffers.buffersId()));
 
    for (auto& block : *blocks)
    {
@@ -173,12 +173,12 @@ void testConstCorrectness()
       // non-const to const copy init
       [[maybe_unused]] ConstBViewType cbView{ bView };
 
-      testing::assert_equal((const double*) bView.data(), cbView.data());
+      testing::assert_equal(const_cast< const double * >(bView.data()), cbView.data());
 
       // non-const to const assignment
       cbView = b2View;
 
-      testing::assert_equal((const double*) b2View.data(), cbView.data());
+      testing::assert_equal(const_cast< const double * >(b2View.data()), cbView.data());
    }
 }
 

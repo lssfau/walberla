@@ -78,7 +78,7 @@ public:
    real_t get{{param | capFirst}}(const size_t type) const;
    {%- endfor %}
 private:
-   real_t dt_ = real_t(0.0);
+   real_t dt_ = real_t{0.0};
 
    uint_t numParticleTypes_;
    {% for param in parameters %}
@@ -91,7 +91,7 @@ inline TemperatureIntegration::TemperatureIntegration(const real_t dt, const uin
 {
    numParticleTypes_ = numParticleTypes;
    {% for param in parameters %}
-   {{param}}_.resize(numParticleTypes, real_t(0));
+   {{param}}_.resize(numParticleTypes, real_t{0});
    {%- endfor %}
 }
 
@@ -119,7 +119,7 @@ inline void TemperatureIntegration::operator()(const size_t p_idx,
 
    //formula for heat capacity
    ac.setTemperature(p_idx, getInvSpecificHeat(ac.getType(p_idx)) * ac.getInvMass(p_idx) * ac.getHeatFlux(p_idx) * dt_ + ac.getTemperature(p_idx));
-   ac.setHeatFlux   (p_idx, real_t(0));
+   ac.setHeatFlux   (p_idx, real_t{0});
 }
 
 } //namespace kernel

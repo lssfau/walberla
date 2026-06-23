@@ -143,7 +143,7 @@ void PdfReconstructionManager< PdfField_T, BoundaryHandling_T, ParticleAccessor_
 
    if( optimizeForSmallObstacleFraction_ )
    {
-      const uint_t numberOfGhostLayersToInclude = uint_t(0);
+      const uint_t numberOfGhostLayersToInclude = uint_t{0};
 
       for( size_t idx = 0; idx < ac_->size(); ++idx )
       {

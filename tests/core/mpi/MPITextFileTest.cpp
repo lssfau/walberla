@@ -43,8 +43,8 @@ void testSameSizeFile(const std::string& filename, const size_t chunkSize)
    std::ostringstream oss;
    oss << rank;
 
-   std::string chunk(chunkSize, char('A' + static_cast< char >(rank % 26)));
-   chunk[chunk.size() - size_t(1)] = '\n';
+   std::string chunk(chunkSize, static_cast< char >('A' + static_cast< char >(rank % 26)));
+   chunk[chunk.size() - size_t{1}] = '\n';
 
    mpi::writeMPITextFile(filename, chunk);
 
@@ -77,8 +77,8 @@ void testDifferentSizeFile(const std::string& filename, const size_t minChunkSiz
 
    const size_t chunkSize = minChunkSize * uint_c(rank + 1);
 
-   std::string chunk(chunkSize, char('A' + static_cast< char >(rank % 26)));
-   chunk[chunk.size() - size_t(1)] = '\n';
+   std::string chunk(chunkSize, static_cast< char >('A' + static_cast< char >(rank % 26)));
+   chunk[chunk.size() - size_t{1}] = '\n';
 
    mpi::writeMPITextFile(filename, chunk);
 

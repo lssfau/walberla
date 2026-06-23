@@ -128,7 +128,7 @@ public:
       }
       else
       {
-         const auto velocity = AdaptVelocityToExternalForce ? internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity_, real_t(1) ) :
+         const auto velocity = AdaptVelocityToExternalForce ? internal::AdaptVelocityToForce<LatticeModel_T>::get( x, y, z, pdfField_->latticeModel(), velocity_, real_t{1} ) :
                                                               velocity_;
 
          pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) ) = pdfField_->get( x, y, z, Stencil::idx[dir] ) -

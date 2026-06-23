@@ -34,7 +34,7 @@ void JacobiIteration::operator()()
 {
    WALBERLA_LOG_PROGRESS_ON_ROOT( "Starting Jacobi iteration with a maximum number of " << iterations_ << " iterations" );
 
-   uint_t i( uint_t(0) );
+   uint_t i( uint_t{0} );
    while( i < iterations_ )
    {
       if( boundary_ )
@@ -44,9 +44,9 @@ void JacobiIteration::operator()()
       for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
          jacobi_( block.get() );
 
-      if( residualNormThreshold_ > real_t(0) && residualCheckFrequency_ > uint_t(0) )
+      if( residualNormThreshold_ > real_t{0} && residualCheckFrequency_ > uint_t{0} )
       {
-         if( (i % residualCheckFrequency_) == uint_t(0) )
+         if( (i % residualCheckFrequency_) == uint_t{0} )
          {
             if( boundary_ )
                boundary_();

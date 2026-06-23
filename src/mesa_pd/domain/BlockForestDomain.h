@@ -90,7 +90,7 @@ inline real_t sqDistanceLineToPoint( const real_t& pt, const real_t& min, const 
       return (min - pt) * (min - pt);
    if (pt > max)
       return (pt - max) * (pt - max);
-   return real_t(0);
+   return real_t{0};
 }
 
 inline real_t sqDistancePointToAABB( const Vec3& pt, const math::AABB& aabb )
@@ -109,7 +109,7 @@ inline real_t sqDistancePointToAABBPeriodic( Vec3 pt,
                                              const math::AABB& domain,
                                              const std::array< bool, 3 >& periodic )
 {
-   auto size = domain.sizes() * real_t(0.5);
+   auto size = domain.sizes() * real_t{0.5};
    auto d = pt - aabb.center();
 
    if (periodic[0] && (d[0] < -size[0])) pt[0] += domain.sizes()[0];

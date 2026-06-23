@@ -31,7 +31,7 @@ namespace data {
 class Sphere : public BaseShape
 {
 public:
-   explicit Sphere(const real_t& radius = real_t(1))
+   explicit Sphere(const real_t& radius = real_t{1})
       : BaseShape(Sphere::SHAPE_TYPE), radius_(radius)
    {}
 
@@ -39,7 +39,7 @@ public:
 
    void updateMassAndInertia(const real_t density) override;
 
-   real_t getVolume() const override { return (real_t(4) / real_t(3)) * math::pi * getRadius() * getRadius() * getRadius(); }
+   real_t getVolume() const override { return (real_t{4} / real_t{3}) * math::pi * getRadius() * getRadius() * getRadius(); }
 
    Vec3 support( const Vec3& d ) const override;
 
@@ -59,7 +59,7 @@ void Sphere::updateMassAndInertia(const real_t density)
    const Mat3   I = Mat3::makeDiagonalMatrix( real_c(0.4) * m * getRadius() * getRadius() );
 
    mass_         = m;
-   invMass_      = real_t(1.0) / m;
+   invMass_      = real_t{1.0} / m;
 
    inertiaBF_    = I;
    invInertiaBF_ = I.getInverse();

@@ -78,7 +78,7 @@ struct DensityAndVelocityInit
 
 void writeVTK( const std::string & identifier, const shared_ptr<StructuredBlockForest> & blocks, const BlockDataID & pdfFieldId )
 {
-    auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, identifier, 1u, uint_t(1) );
+    auto pdfFieldVTKWriter = vtk::createVTKOutput_BlockData( blocks, identifier, 1u, uint_t{1} );
 
     blockforest::communication::UniformBufferedScheme<stencil::D3Q27> pdfGhostLayerSync( blocks );
     pdfGhostLayerSync.addPackInfo( make_shared< field::communication::PackInfo<PdfField_T> >( pdfFieldId ) );

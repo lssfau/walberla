@@ -58,7 +58,7 @@ namespace field {
 template< typename FlagField_T, typename BlockStorage_T >
 BlockDataID addFlagFieldToStorage( const shared_ptr< BlockStorage_T > & blocks,
                                    const std::string & identifier,
-                                   const uint_t nrOfGhostLayers = uint_t(1),
+                                   const uint_t nrOfGhostLayers = uint_t{1},
                                    const bool alwaysInitialize = false,
                                    const std::function< void ( FlagField_T * field, IBlock * const block ) > & initFunction =
                                       std::function< void ( FlagField_T * field, IBlock * const block ) >(),
@@ -152,7 +152,7 @@ BlockDataID addToStorage( const shared_ptr< BlockStorage_T > & blocks,
                           const std::string & identifier,
                           const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
                           const Layout layout = fzyx,
-                          const uint_t nrOfGhostLayers = uint_t(1),
+                          const uint_t nrOfGhostLayers = uint_t{1},
                           const bool alwaysInitialize = false,
                           const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
                              std::function< void ( GhostLayerField_T * field, IBlock * const block ) >(),
@@ -205,7 +205,7 @@ BlockDataID addToStorage( const shared_ptr< BlockStorage_T > & blocks,
                           const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) >& calculateSize,
                           const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
                           const Layout layout = fzyx,
-                          const uint_t nrOfGhostLayers = uint_t(1),
+                          const uint_t nrOfGhostLayers = uint_t{1},
                           const bool alwaysInitialize = false,
                           const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
                           std::function< void ( GhostLayerField_T * field, IBlock * const block ) >(),
@@ -317,7 +317,7 @@ struct Creator : public domain_decomposition::BlockDataCreator< GhostLayerField_
             const Set<SUID> & incompatibleSelectors,
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
             const Layout layout = fzyx,
-            const uint_t nrOfGhostLayers = uint_t(1),
+            const uint_t nrOfGhostLayers = uint_t{1},
             const bool /*alwaysInitialize*/ = false,
             const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
                std::function< void ( GhostLayerField_T * field, IBlock * const block ) >() ) :
@@ -335,7 +335,7 @@ struct Creator : public domain_decomposition::BlockDataCreator< GhostLayerField_
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
             const typename GhostLayerField_T::value_type &  /*initValue*/ = typename GhostLayerField_T::value_type(),
             const Layout  /*layout*/ = fzyx,
-            const uint_t  /*nrOfGhostLayers*/ = uint_t(1) ) :
+            const uint_t  /*nrOfGhostLayers*/ = uint_t{1} ) :
       domain_decomposition::BlockDataCreator< GhostLayerField_T >( shared_ptr< DefaultBlockDataHandling< GhostLayerField_T > >(),
                                                                    identifier, requiredSelectors, incompatibleSelectors )
    {
@@ -356,7 +356,7 @@ struct Creator< GhostLayerField_T >
             const Set<SUID> & incompatibleSelectors,
             const typename GhostLayerField_T::value_type & initValue = typename GhostLayerField_T::value_type(),
             const Layout layout = fzyx,
-            const uint_t nrOfGhostLayers = uint_t(1),
+            const uint_t nrOfGhostLayers = uint_t{1},
             const bool alwaysInitialize = false,
             const std::function< void ( GhostLayerField_T * field, IBlock * const block ) > & initFunction =
                std::function< void ( GhostLayerField_T * field, IBlock * const block ) >() ) :
@@ -382,7 +382,7 @@ struct Creator< GhostLayerField_T >
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
             const typename GhostLayerField_T::value_type &  /*initValue*/ = typename GhostLayerField_T::value_type(),
             const Layout  /*layout*/ = fzyx,
-            const uint_t  /*nrOfGhostLayers*/ = uint_t(1) ) :
+            const uint_t  /*nrOfGhostLayers*/ = uint_t{1} ) :
       domain_decomposition::BlockDataCreator< GhostLayerField_T >( shared_ptr< DefaultBlockDataHandling< GhostLayerField_T > >(),
                                                                    identifier, requiredSelectors, incompatibleSelectors )
    {
@@ -401,7 +401,7 @@ struct Creator< FlagField<T> > : public domain_decomposition::BlockDataCreator< 
             const std::string & identifier,
             const Set<SUID> & requiredSelectors,
             const Set<SUID> & incompatibleSelectors,
-            const uint_t nrOfGhostLayers = uint_t(1),
+            const uint_t nrOfGhostLayers = uint_t{1},
             const bool alwaysInitialize = false,
             const std::function< void ( FlagField<T> * field, IBlock * const block ) > & initFunction =
                std::function< void ( FlagField<T> * field, IBlock * const block ) >() ) :
@@ -425,7 +425,7 @@ struct Creator< FlagField<T> > : public domain_decomposition::BlockDataCreator< 
    Creator( const std::string & identifier = std::string(),
             const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet(),
-            const uint_t  /*nrOfGhostLayers*/ = uint_t(1) ) :
+            const uint_t  /*nrOfGhostLayers*/ = uint_t{1} ) :
       domain_decomposition::BlockDataCreator< FlagField<T> >( shared_ptr< DefaultBlockDataHandling< FlagField<T> > >(),
                                                               identifier, requiredSelectors, incompatibleSelectors )
    {

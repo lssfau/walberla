@@ -67,7 +67,7 @@ public:
 
    class SingleScalarConfiguration : public ScalarConfiguration {
    public:
-             SingleScalarConfiguration( const real_t _val = real_t(0) ) : val_( _val ) {}
+             SingleScalarConfiguration( const real_t _val = real_t{0} ) : val_( _val ) {}
       inline SingleScalarConfiguration( const Config::BlockHandle & config ){ val_ = ( config && config.isDefined( "val" ) ) ? config.getParameter< real_t >( "val" ) : real_c( 0. ); }
 
       const real_t & val() const { return val_; }
@@ -189,7 +189,7 @@ inline void DiffusionDirichlet< LatticeModel_T, flag_t >::treatDirection( const 
    const real_t & bndVal = sclField_->get( nx, ny, nz );
    real_t &       target = pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) );
 
-   target = - pdfField_->get( x, y, z, Stencil::idx[dir] ) + real_t(2) * bndVal * LatticeModel_T::w[Stencil::idx[dir]];
+   target = - pdfField_->get( x, y, z, Stencil::idx[dir] ) + real_t{2} * bndVal * LatticeModel_T::w[Stencil::idx[dir]];
 }
 
 

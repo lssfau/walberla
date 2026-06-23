@@ -54,7 +54,7 @@ using PdfCommunication_T    = blockforest::SimpleCommunication< LatticeModelSten
 // the geometry computations in SurfaceGeometryHandler require meaningful values in the ghost layers in corner
 // directions (flag field and fill level field); this holds, even if the lattice model uses a D3Q19 stencil
 using CommunicationStencil_T =
-   std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+   std::conditional_t< LatticeModel_T::Stencil::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
 using Communication_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
 using flag_t                        = uint32_t;
@@ -119,7 +119,7 @@ class SurfaceYPositionEvaluator
             const ScalarField_T* const fillField = blockIt->template getData< const ScalarField_T >(fillFieldID_);
 
             // searching from top ensures that the interface cell with the greatest y-coordinate is found first
-            for (cell_idx_t y = cell_idx_c((flagField)->ySize() - uint_c(1)); y >= cell_idx_t(0); --y)
+            for (cell_idx_t y = cell_idx_c((flagField)->ySize() - uint_c(1)); y >= cell_idx_t{0}; --y)
             {
                if (flagInfo.isInterface(flagField->get(localEvalCell[0], y, cell_idx_c(0))))
                {

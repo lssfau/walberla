@@ -62,7 +62,7 @@ using PdfCommunication_T    = blockforest::SimpleCommunication< LatticeModelSten
 // the geometry computations in SurfaceGeometryHandler require meaningful values in the ghost layers in corner
 // directions (flag field and fill level field); this holds, even if the lattice model uses a D3Q19 stencil
 using CommunicationStencil_T =
-   typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t(2), stencil::D2Q9, stencil::D3Q27 >;
+   typename std::conditional_t< LatticeModel_T::Stencil::D == uint_t{2}, stencil::D2Q9, stencil::D3Q27 >;
 using Communication_T = blockforest::SimpleCommunication< CommunicationStencil_T >;
 
 using flag_t                        = uint32_t;
@@ -83,7 +83,7 @@ inline Vector3< real_t > velocityProfile(Cell globalCell, real_t timePeriod, uin
    const real_t tmp   = real_c(1) - real_c(2) * r;
    const real_t rTerm = tmp * tmp;
 
-   const real_t timeTerm = real_c(std::cos(math::pi * real_t(timestep) / timePeriod));
+   const real_t timeTerm = real_c(std::cos(math::pi * static_cast< real_t >(timestep) / timePeriod));
 
    const real_t sinpix = real_c(std::sin(math::pi * x));
    const real_t sinpiy = real_c(std::sin(math::pi * y));

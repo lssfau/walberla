@@ -65,7 +65,7 @@ bool detectSphereBoxCollision( const Vec3&   pos1,
                                const real_t& contactThreshold)
 {
    //WALBERLA_ABORT(s << b);
-   const Vec3  l( real_t(0.5)*edgeLength2 );  // Box half side lengths
+   const Vec3  l( real_t{0.5}*edgeLength2 );  // Box half side lengths
    const Mat3& R( rot2.getMatrix() );         // Rotation of the box
 
    bool outside( false );
@@ -131,7 +131,7 @@ bool detectSphereBoxCollision( const Vec3&   pos1,
    {
       contactPoint     = pos2+q;
       contactNormal    = n.getNormalizedIfNotZero();
-      if (contactNormal.sqrLength() < real_t(0.1))
+      if (contactNormal.sqrLength() < real_t{0.1})
       {
          contactNormal = Vec3(1,0,0);
       }
@@ -152,7 +152,7 @@ bool detectSphereCylindricalBoundaryCollision( const Vec3&   pos1,
                                                real_t&       penetrationDepth,
                                                const real_t& contactThreshold)
 {
-   WALBERLA_ASSERT_FLOAT_EQUAL( axis2.sqrLength(), real_t(1));
+   WALBERLA_ASSERT_FLOAT_EQUAL( axis2.sqrLength(), real_t{1});
    WALBERLA_ASSERT_GREATER( radius2, radius1 );
 
    const Vec3   dist      = (pos1 - pos2) - ((pos1 - pos2) * axis2) * axis2;

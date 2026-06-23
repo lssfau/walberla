@@ -50,7 +50,7 @@ void testAABBDistance( const Vector3<real_t> & translationVector = Vector3<real_
 
    auto aabb = computeAABB( *mesh ); // works since the mesh is a cube
 
-   auto testVolume = aabb.getScaled( real_t(2) ); // AABB containing the test points
+   auto testVolume = aabb.getScaled( real_t{2} ); // AABB containing the test points
 
    TriangleDistance<MeshType> triDist( mesh );
 
@@ -71,13 +71,13 @@ int main( int argc, char ** argv )
    mpi::MPIManager::instance()->useWorldComm();
 
    testAABBDistance<mesh::TriangleMesh>();
-   testAABBDistance<mesh::TriangleMesh>( Vector3<real_t>( real_t(-0.5), real_t(-0.5), real_t(-0.5) ) );
+   testAABBDistance<mesh::TriangleMesh>( Vector3<real_t>( real_t{-0.5}, real_t{-0.5}, real_t{-0.5} ) );
 
    testAABBDistance<mesh::FloatTriangleMesh>();
-   testAABBDistance<mesh::FloatTriangleMesh>( Vector3<real_t>( real_t(-0.5), real_t(-0.5), real_t(-0.5) ) );
+   testAABBDistance<mesh::FloatTriangleMesh>( Vector3<real_t>( real_t{-0.5}, real_t{-0.5}, real_t{-0.5} ) );
 
    testAABBDistance<mesh::PythonTriangleMesh>();
-   testAABBDistance<mesh::PythonTriangleMesh>( Vector3<real_t>( real_t(-0.5), real_t(-0.5), real_t(-0.5) ) );
+   testAABBDistance<mesh::PythonTriangleMesh>( Vector3<real_t>( real_t{-0.5}, real_t{-0.5}, real_t{-0.5} ) );
 
    return EXIT_SUCCESS;
 }

@@ -31,7 +31,7 @@ namespace data {
 class Box : public BaseShape
 {
 public:
-   explicit Box(const Vec3& edgeLength = Vec3(real_t(1)))
+   explicit Box(const Vec3& edgeLength = Vec3(real_t{1}))
       : BaseShape(Box::SHAPE_TYPE)
       , edgeLength_(edgeLength)
    {}
@@ -62,7 +62,7 @@ void Box::updateMassAndInertia(const real_t density)
          edgeLength_[0]*edgeLength_[0] + edgeLength_[1]*edgeLength_[1] ) * (m / static_cast<real_t>( 12 ));
 
    mass_ = m;
-   invMass_      = real_t(1.0) / m;
+   invMass_      = real_t{1.0} / m;
 
    inertiaBF_ = I;
    invInertiaBF_ = I.getInverse();
@@ -72,9 +72,9 @@ inline
 Vec3 Box::support( const Vec3& bfD ) const
 {
    //As it is save to say we have atleast one component of the d-vector != 0 we can use
-   Vec3 relativSupport = Vec3( math::sign(bfD[0])*edgeLength_[0]*real_t(0.5),
-                               math::sign(bfD[1])*edgeLength_[1]*real_t(0.5),
-                               math::sign(bfD[2])*edgeLength_[2]*real_t(0.5) );
+   Vec3 relativSupport = Vec3( math::sign(bfD[0])*edgeLength_[0]*real_t{0.5},
+                               math::sign(bfD[1])*edgeLength_[1]*real_t{0.5},
+                               math::sign(bfD[2])*edgeLength_[2]*real_t{0.5} );
 
    return relativSupport;
 }

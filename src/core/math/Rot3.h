@@ -68,7 +68,7 @@ inline Rot3<Type>::Rot3()
    : quat_(Vector3<Type>(Type(1),Type(0),Type(0)), Type(0))
    , mat_(quat_.toRotationMatrix())
 {
-   WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+   WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t{1}, "Corrupted rotation matrix determinant" );
 }
 
 template< typename Type >  // floating point type
@@ -100,7 +100,7 @@ inline void Rot3<Type>::rotate(const Vector3<Type>& phi)
       auto q = Quaternion<Type>( phi, len );
       quat_ = q * quat_;
       mat_  = quat_.toRotationMatrix();
-      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t{1}, "Corrupted rotation matrix determinant" );
    }
 }
 
@@ -112,7 +112,7 @@ inline void Rot3<Type>::rotate(const Vector3<Type>& axis, const real_t& angle)
       auto q = Quaternion<Type>( axis, angle );
       quat_ = q * quat_;
       mat_  = quat_.toRotationMatrix();
-      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t{1}, "Corrupted rotation matrix determinant" );
    }
 }
 
@@ -121,7 +121,7 @@ inline void Rot3<Type>::rotate(const Rot3<Type>& rot)
 {
    quat_ = rot.quat_ * quat_;
    mat_  = quat_.toRotationMatrix();
-   WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+   WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t{1}, "Corrupted rotation matrix determinant" );
 }
 
 template< typename Type >  // floating point type

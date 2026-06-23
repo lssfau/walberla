@@ -34,13 +34,13 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       std::vector<int64_t> metisVertexWeights(weightEvaluationFctVector_.size());
 
-      for( auto con = uint_t(0); con < weightEvaluationFctVector_.size(); ++con )
+      for( auto con = uint_t{0}; con < weightEvaluationFctVector_.size(); ++con )
       {
          real_t vertexWeight = std::max(weightEvaluationFctVector_[con](block), blockBaseWeight_);
 
          int64_t metisVertexWeight = int64_c( weightMultiplicator_ * vertexWeight );
 
-         WALBERLA_ASSERT_GREATER(metisVertexWeight, int64_t(0));
+         WALBERLA_ASSERT_GREATER(metisVertexWeight, int64_t{0});
          metisVertexWeights[con] = metisVertexWeight;
       }
 
@@ -56,12 +56,12 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
       int64_t cornerNeighborWeight = int64_c( 1 ); //common corner
 
       int64_t vertexSize = int64_c(blockVolume);
-      WALBERLA_ASSERT_GREATER(vertexSize, int64_t(0));
+      WALBERLA_ASSERT_GREATER(vertexSize, int64_t{0});
       info.setVertexSize( vertexSize );
 
       for( const uint_t idx : blockforest::getFaceNeighborhoodSectionIndices() )
       {
-         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t{0}; nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
             auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, faceNeighborWeight );
@@ -70,7 +70,7 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       for( const uint_t idx : blockforest::getEdgeNeighborhoodSectionIndices() )
       {
-         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t{0}; nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
             auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, edgeNeighborWeight );
@@ -79,7 +79,7 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       for( const uint_t idx : blockforest::getCornerNeighborhoodSectionIndices() )
       {
-         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t{0}; nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
             auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, cornerNeighborWeight );
