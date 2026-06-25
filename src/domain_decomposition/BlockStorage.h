@@ -206,7 +206,7 @@ public:
       { return { iBlocks_.begin(), iBlocks_.end(), requiredSelectors, incompatibleSelectors }; }
    const_iterator   end() const { return { iBlocks_.end(), iBlocks_.end() }; } ///< iterator for traversing all locally allocated blocks
 
-   uint_t getNumberOfBlocks() const { return iBlocks_.size(); } ///< number of locally allocated blocks
+   virtual uint_t getNumberOfBlocks() const { return iBlocks_.size(); } ///< number of locally allocated blocks
    uint_t size()              const { return iBlocks_.size(); } ///< number of locally allocated blocks
    bool   empty()             const { return iBlocks_.empty(); }
 
@@ -470,7 +470,7 @@ public:
    ///
    /// Usage: BlockDataID id = blockStorage.addBlockData( "[optional block data identifier]" ) << BlockDataCreator( ... )
    ///                                                                                         << BlockDataCreator( ... ) << ... ;
-   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; }
+   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; } // NOLINT(bugprone-derived-method-shadowing-base-method) // Fix would require a even more convoluted wrapper of wrapper structure.
 
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,
@@ -484,7 +484,7 @@ public:
                                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
-   BlockDataID addBlockData( const internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() );
+   virtual BlockDataID addBlockData( const internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() );
 
    template< typename T >
    inline BlockDataID loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling,
@@ -493,7 +493,7 @@ public:
                                      const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
-   BlockDataID loadBlockData( const std::string & file,
+   virtual BlockDataID loadBlockData( const std::string & file,
                               const internal::SelectableBlockDataHandlingWrapper & dataHandling,
                               const std::string & identifier = std::string(),
                               const bool forceSerialIO = true );
@@ -523,7 +523,7 @@ protected:
 
    virtual bool equal( const BlockStorage* rhs ) const = 0;
 
-   inline void addBlockData( IBlock * const block, const BlockDataID & index, internal::BlockData * const data );
+   virtual inline void addBlockData( IBlock * const block, const BlockDataID & index, internal::BlockData * const data );
 
 
 

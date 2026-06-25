@@ -57,6 +57,7 @@ namespace timeloop {
    template <typename FuncType>
    struct SelectableFunction
    {
+      virtual ~SelectableFunction() = default;
       SelectableFunction() = default;
 
       SelectableFunction ( std::function< FuncType > fct,
@@ -67,7 +68,7 @@ namespace timeloop {
          selectableFunc_.add( fct, requiredSelectors, incompatibleSelectors, identifier );
       }
 
-      SelectableFunction& operator<<( const FuncCreator<FuncType> & fct )
+      virtual SelectableFunction& operator<<( const FuncCreator<FuncType> & fct )
       {
          selectableFunc_.add( fct.function_, fct.requiredSelectors_, fct.incompatibleSelectors_, fct.identifier_ );
          return *this;
@@ -87,7 +88,7 @@ namespace timeloop {
          : SelectableFunction<void ()> (fct, id, req, incomp )
       {}
 
-      BeforeFunction& operator<<( const FuncCreator< void () > & fct )
+      BeforeFunction& operator<<( const FuncCreator< void () > & fct ) override
       {
          SelectableFunction<void()> ::operator<<( fct );
          return *this;
@@ -105,7 +106,7 @@ namespace timeloop {
          : SelectableFunction<void ()> (fct, id, req, incomp )
       {}
 
-      AfterFunction& operator<<( const FuncCreator< void () > & fct )
+      AfterFunction& operator<<( const FuncCreator< void () > & fct ) override
       {
          SelectableFunction<void()> ::operator<<( fct );
          return *this;

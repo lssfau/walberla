@@ -267,7 +267,7 @@ public:
 
 
 
-   inline uint_t getNumberOfBlocks() const { WALBERLA_ASSERT_EQUAL( BlockStorage::getNumberOfBlocks(), blocks_.size() ); return blocks_.size(); }
+   inline uint_t getNumberOfBlocks() const override { WALBERLA_ASSERT_EQUAL( BlockStorage::getNumberOfBlocks(), blocks_.size() ); return blocks_.size(); }
    inline uint_t getNumberOfBlocks( const uint_t level ) const;
 
    inline const std::map< BlockID, shared_ptr< Block > > & getBlockMap() const { return blocks_; }
@@ -344,7 +344,7 @@ public:
 
 
    
-   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; }
+   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return { *this, identifier }; } // NOLINT(bugprone-derived-method-shadowing-base-method) // Fix would require a even more convoluted wrapper of wrapper structure.
 
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,
@@ -359,7 +359,7 @@ public:
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
    { return BlockStorage::addBlockData( function, identifier, requiredSelectors, incompatibleSelectors ); }
                                     
-   BlockDataID addBlockData( const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string& identifier = std::string() )
+   BlockDataID addBlockData( const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string& identifier = std::string() ) override
    { return BlockStorage::addBlockData( dataHandling, identifier ); }
    
    template< typename T >
@@ -372,7 +372,7 @@ public:
    BlockDataID loadBlockData( const std::string & file,
                               const domain_decomposition::internal::SelectableBlockDataHandlingWrapper & dataHandling,
                               const std::string & identifier = std::string(),
-                              const bool forceSerialIO = true )
+                              const bool forceSerialIO = true ) override
    { return BlockStorage::loadBlockData( file, dataHandling, identifier, forceSerialIO ); }
 
 
@@ -489,7 +489,7 @@ protected:
 
    bool equal( const BlockStorage* rhs ) const override;
    
-   void addBlockData( IBlock * const block, const BlockDataID & index, domain_decomposition::internal::BlockData * const data )
+   void addBlockData( IBlock * const block, const BlockDataID & index, domain_decomposition::internal::BlockData * const data ) override
    { BlockStorage::addBlockData( block, index, data ); }
 
 private:

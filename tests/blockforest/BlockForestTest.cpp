@@ -140,14 +140,14 @@ class Base
 public:
    virtual ~Base() = default;
    bool operator==( const Base& /*rhs*/ ) const { return true; }
-           uint_t override() const { return 1; }
+           uint_t override() const { return 1; } // NOLINT(bugprone-derived-method-shadowing-base-method) //  can not be virtual, as the test requires the function to work on a Base* of a Derived object
    virtual uint_t func()     const { return 2; }
 };
 
 class Derived : public Base
 {
 public:
-   uint_t override() const { return 10; }
+   uint_t override() const { return 10; } // NOLINT(bugprone-derived-method-shadowing-base-method) //  can not override, as the test requires the function to work on a Base* of a Derived object
    uint_t func()     const override { return 20; }
 };
 
@@ -170,14 +170,14 @@ class SecondBase
 public:
    virtual ~SecondBase() = default;
    bool operator==( const SecondBase& /*rhs*/ ) const { return true; }
-   uint_t override() const { return 100; }
+   uint_t override() const { return 100; } // NOLINT(bugprone-derived-method-shadowing-base-method) //  can not be virtual, as the test requires the function to work on a SecondBase* of a Derived object
 };
 
 class Multi : public Base, public SecondBase
 {
 public:
    bool operator==( const Multi& /*rhs*/ ) const { return true; }
-   uint_t override() const { return 1000; }
+   uint_t override() const { return 1000; } // NOLINT(bugprone-derived-method-shadowing-base-method) //  can not override, as the test requires the function to work on a Base* of a Multi object
    uint_t func()     const override { return 2000; }
 };
 

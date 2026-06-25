@@ -138,7 +138,7 @@ public:
     const shared_ptr<       BlockStorage > & getBlockStoragePointer()       { return blockStorage_; }
           shared_ptr< const BlockStorage >   getBlockStoragePointer() const { return blockStorage_; }
 
-    uint_t getNumberOfLevels() const { return levels_; }
+    virtual uint_t getNumberOfLevels() const { return levels_; }
 
    inline bool operator==( const StructuredBlockStorage& rhs ) const;
    inline bool operator!=( const StructuredBlockStorage& rhs ) const { return !operator==( rhs ); }
@@ -170,7 +170,7 @@ public:
       { return blockStorage_->begin( requiredSelectors, incompatibleSelectors); }
    const_iterator   end() const { return blockStorage_->end();   }
 
-   uint_t getNumberOfBlocks() const { return blockStorage_->getNumberOfBlocks(); }
+   virtual uint_t getNumberOfBlocks() const { return blockStorage_->getNumberOfBlocks(); }
    uint_t size()              const { return blockStorage_->size(); }
    bool   empty()             const { return blockStorage_->empty(); }
 
@@ -241,7 +241,7 @@ public:
    std::map< uint_t, std::vector< Vector3<real_t> > > getNeighboringProcessOffsets() const
       { return blockStorage_->getNeighboringProcessOffsets(); }
 
-   internal::BlockDataHandlingAdder addBlockData( const std::string& identifier = std::string() ) { return blockStorage_->addBlockData( identifier ); }
+   internal::BlockDataHandlingAdder addBlockData( const std::string& identifier = std::string() ) { return blockStorage_->addBlockData( identifier ); } // NOLINT(bugprone-derived-method-shadowing-base-method) // Fix would require a even more convoluted wrapper of wrapper structure.
 
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,

@@ -93,11 +93,11 @@ public:
    bool storesUniformBlockGrid() const { return blockForest_->storesUniformBlockGrid(); }
 
    uint_t getDepth()          const { return blockForest_->getDepth(); }
-   uint_t getNumberOfLevels() const { return blockForest_->getNumberOfLevels(); }
+   uint_t getNumberOfLevels() const override { return blockForest_->getNumberOfLevels(); }
    uint_t getTreeIdDigits()   const { return blockForest_->getTreeIdDigits(); }
    uint_t getBlockIdBytes()   const { return blockForest_->getBlockIdBytes(); }
 
-   uint_t getNumberOfBlocks() const { return blockForest_->getNumberOfBlocks(); }
+   uint_t getNumberOfBlocks() const override { return blockForest_->getNumberOfBlocks(); }
    uint_t getNumberOfBlocks( const uint_t level ) const { return blockForest_->getNumberOfBlocks( level ); }
 
    using StructuredBlockStorage::getBlocks;
@@ -129,7 +129,7 @@ public:
 
    const std::vector< uint_t >& getNeighborhood() const { return blockForest_->getNeighborhood(); }
 
-   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return blockForest_->addBlockData( identifier ); }
+   internal::BlockDataHandlingAdder addBlockData( const std::string & identifier = std::string() ) { return blockForest_->addBlockData( identifier ); }  // NOLINT(bugprone-derived-method-shadowing-base-method) // Fix would require a even more convoluted wrapper of wrapper structure.
    
    template< typename T >
    inline BlockDataID addBlockData( const shared_ptr< T > & dataHandling,
