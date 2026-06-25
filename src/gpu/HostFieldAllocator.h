@@ -49,6 +49,7 @@ namespace gpu
    public:
       ~HostFieldAllocator() override = default;
 
+   protected:
       T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
                             uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3 ) override
       {

@@ -52,19 +52,16 @@ class GeneratedNonUniformGPUFieldPackInfo : public walberla::gpu::GeneratedNonUn
    bool constantDataExchange() const override { return true; };
    bool threadsafeReceiving() const override { return false; };
 
-   void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
    void unpackDataEqualLevel( Block * receiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) override;
    void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir, gpuStream_t stream) override;
 
    void addForLocalEqualLevelComm(const Block* /*sender*/, Block* /*receiver*/, stencil::Direction /*dir*/) override {};
    void communicateLocalEqualLevel(uint64_t /*level*/, uint8_t /*timestep*/, gpuStream_t /*stream*/) override {};
 
-   void packDataCoarseToFineImpl(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
    void unpackDataCoarseToFine      (       Block * fineReceiver, const BlockID & coarseSender, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) override;
    void communicateLocalCoarseToFine( const Block * /*coarseSender*/, Block * /*fineReceiver*/, stencil::Direction /*dir*/, gpuStream_t /*stream*/) override {};
    void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) override;
 
-   void packDataFineToCoarseImpl(const Block* fineSender, const BlockID& coarseReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
    void unpackDataFineToCoarse      (       Block * coarseReceiver, const BlockID & fineSender,     stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) override;
    void communicateLocalFineToCoarse( const Block * /*fineSender*/, Block * /*coarseReceiver*/, stencil::Direction /*dir*/, gpuStream_t /*stream*/) override {};
    void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) override;
@@ -75,6 +72,11 @@ class GeneratedNonUniformGPUFieldPackInfo : public walberla::gpu::GeneratedNonUn
    uint_t sizeFineToCoarseSend ( const Block * fineSender, stencil::Direction dir) const override;
 
    void sync() override {};
+
+ protected:
+   void packDataEqualLevelImpl(const Block* sender, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
+   void packDataCoarseToFineImpl(const Block* coarseSender, const BlockID& fineReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
+   void packDataFineToCoarseImpl(const Block* fineSender, const BlockID& coarseReceiver, stencil::Direction dir, GpuBuffer_T & byte_buffer, gpuStream_t stream) const override;
 
  private:
 
