@@ -178,7 +178,7 @@ int main( int argc, char ** argv )
 
    for( int i = 1; i < argc; ++i )
    {
-      if( std::strcmp( argv[i], "--timesteps" )           == 0 ) { timesteps = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--timesteps" )           == 0 ) { timesteps = uint_c( std::stoul( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--noForceAveraging" )    == 0 ) { averageForceTorqueOverTwoTimeSteps = false; continue; }
       if( std::strcmp( argv[i], "--useVV" )               == 0 ) { useVelocityVerlet = true; continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);

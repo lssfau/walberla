@@ -63,7 +63,7 @@
 
 #include <iostream>
 #include <vector>
-
+#include <string>
 #include "Utility.h"
 
 namespace drag_force_sphere_psm
@@ -311,17 +311,17 @@ int main(int argc, char** argv)
       }
       if (std::strcmp(argv[i], "--tau") == 0)
       {
-         tau = real_c(std::atof(argv[++i]));
+         tau = real_c(std::stod(argv[++i]));
          continue;
       }
       if (std::strcmp(argv[i], "--length") == 0)
       {
-         length = uint_c(std::atof(argv[++i]));
+         length = uint_c(std::stoul(argv[++i]));
          continue;
       }
       if (std::strcmp(argv[i], "--vtkFrequency") == 0)
       {
-         vtkFrequency = uint_c(std::atof(argv[++i]));
+         vtkFrequency = uint_c(std::stoul(argv[++i]));
          continue;
       }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);

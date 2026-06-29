@@ -393,8 +393,8 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--funcTest"  ) == 0 ) { funcTest  = true; continue; }
       if( std::strcmp( argv[i], "--logging"   ) == 0 ) { logging   = true; continue; }
       if( std::strcmp( argv[i], "--MEMVariant") == 0 ) { method    = to_MEMVariant( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--tau"       ) == 0 ) { tau       = real_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--length"    ) == 0 ) { length    = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--tau"       ) == 0 ) { tau       = real_c( std::stod( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--length"    ) == 0 ) { length    = uint_c( std::stoul( argv[++i] ) ); continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 

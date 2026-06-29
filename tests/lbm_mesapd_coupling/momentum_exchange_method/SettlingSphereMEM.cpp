@@ -373,10 +373,10 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--shortrun" )            == 0 ) { shortrun = true; continue; }
       if( std::strcmp( argv[i], "--funcTest" )            == 0 ) { funcTest = true; continue; }
       if( std::strcmp( argv[i], "--fileIO" )              == 0 ) { fileIO = true; continue; }
-      if( std::strcmp( argv[i], "--vtkIOFreq" )           == 0 ) { vtkIOFreq = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--fluidType" )           == 0 ) { fluidType = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--numRPDSubCycles" )     == 0 ) { numRPDSubCycles = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--resolution" )          == 0 ) { numberOfCellsInHorizontalDirection = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--vtkIOFreq" )           == 0 ) { vtkIOFreq = uint_c( std::stoul( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--fluidType" )           == 0 ) { fluidType = uint_c( std::stoul( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--numRPDSubCycles" )     == 0 ) { numRPDSubCycles = uint_c( std::stoul( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--resolution" )          == 0 ) { numberOfCellsInHorizontalDirection = uint_c( std::stoul( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--noForceAveraging" )    == 0 ) { averageForceTorqueOverTwoTimeSteps = false; continue; }
       if( std::strcmp( argv[i], "--baseFolder" )          == 0 ) { baseFolder = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--useVV" )               == 0 ) { useVelocityVerlet = true; continue; }

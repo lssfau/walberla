@@ -25,6 +25,7 @@
 #include "core/math/Random.h"
 #include "core/timing/TimingPool.h"
 
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -233,9 +234,11 @@ int main(int argc, char ** argv)
          cerr << "Usage: " << argv[0] << " xSize ySize zSize" << endl;
          return 1;
       }
-      xs = uint_c( atoi(argv[1]) );
-      ys = uint_c( atoi(argv[2]) );
-      zs = uint_c( atoi(argv[3]) );
+     
+         xs = uint_c(std::stoi(argv[1]) );
+         ys = uint_c(std::stoi(argv[2]) );
+         zs = uint_c(std::stoi(argv[3]) );
+   
    }
 
    Field<double,fSize > field (xs,ys,zs,zyxf);

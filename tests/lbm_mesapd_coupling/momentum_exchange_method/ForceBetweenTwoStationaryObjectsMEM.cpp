@@ -70,6 +70,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 namespace force_between_two_stationary_objects
 {
@@ -310,10 +311,10 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--useCompressible"  ) == 0 ) { useCompressible  = true; continue;}
       if( std::strcmp( argv[i], "--useSBB"  ) == 0 ) { useSBB  = true; continue;}
       if( std::strcmp( argv[i], "--useSphereWallSetup"  ) == 0 ) { useSphereWallSetup  = true; continue;}
-      if( std::strcmp( argv[i], "--surfaceDistance"    ) == 0 ) { surfaceDistance = real_c(std::atof( argv[++i])); continue;}
-      if( std::strcmp( argv[i], "--systemVelocity"    ) == 0 ) { systemVelocity = real_c(std::atof( argv[++i])); continue;}
-      if( std::strcmp( argv[i], "--radius"    ) == 0 ) { radius = real_c(std::atof( argv[++i])); continue;}
-      if( std::strcmp( argv[i], "--timesteps"    ) == 0 ) { timesteps = uint_c(std::atof( argv[++i])); continue;}
+      if( std::strcmp( argv[i], "--surfaceDistance"    ) == 0 ) { surfaceDistance = real_c(std::stod( argv[++i])); continue;}
+      if( std::strcmp( argv[i], "--systemVelocity"    ) == 0 ) { systemVelocity = real_c(std::stod( argv[++i])); continue;}
+      if( std::strcmp( argv[i], "--radius"    ) == 0 ) { radius = real_c(std::stod( argv[++i])); continue;}
+      if( std::strcmp( argv[i], "--timesteps"    ) == 0 ) { timesteps = uint_c(std::stoul( argv[++i])); continue;}
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
