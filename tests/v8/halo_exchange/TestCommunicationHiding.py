@@ -18,11 +18,14 @@ from lbmpy import (
     Method,
 )
 
+import pystencils as ps
 import sympy as sp
 
 from pystencilssfg import SourceFileGenerator
 from sweepgen import Sweep
+from sweepgen.build_config import get_build_config
 from sweepgen.prefabs import LbmBulk
+from sweepgen.symbolic import cell
 
 with SourceFileGenerator() as sfg:
     Sweep.use_v8core_fields()
@@ -38,5 +41,14 @@ with SourceFileGenerator() as sfg:
 
     lbm_bulk = LbmBulk(sfg, "LBM", lbm_config)
     sfg.generate(lbm_bulk)
+
+    dtype = get_build_config(sfg).get_pystencils_config().get_option("default_dtype")
+    cell_center = ps.fields(f"cellCenter(3): {dtype}[3D]")
+    set_cell_center = [
+        ps.Assignment(cell_center(0), cell.local_x()),
+        ps.Assignment(cell_center(1), cell.local_y()),
+        ps.Assignment(cell_center(2), cell.local_z()),
+    ]
+    sfg.generate(Sweep("SetCellCenter", set_cell_center))
 
 

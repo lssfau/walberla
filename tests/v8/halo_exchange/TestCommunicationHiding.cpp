@@ -50,8 +50,7 @@ void TestCommunicationHiding()
    Vector3< uint_t > cellsPerBlock = Vector3< uint_t >(10, 10, 10);
 
    const uint_t numProcs = uint_t(mpi::MPIManager::instance()->numProcesses());
-   std::vector< uint_t > blocksVec = math::getFactors( numProcs, 3 );
-   Vector3< uint_t > numBlocks     = Vector3< uint_t >(blocksVec[0], blocksVec[1], blocksVec[2]);
+   const Vector3< uint_t > numBlocks = math::getFactors3D(numProcs);
 
    AABB domainAabb{ 0., 0., 0., 1., 1., real_c(cellsPerBlock[2]) / real_c(cellsPerBlock[0]) };
    std::array< bool, 3 > periodic{ true, true, true };
@@ -110,11 +109,79 @@ void TestCommunicationHiding()
       FieldView uv{ u, block };
       sweep::forAllCells(exectag::Serial{}, *blocks, [&](Cell c) {
          testing::assert_close(uv(c, 0), maxVelocity);
-         testing::with_tolerance{ 1e-12, 1e-5 }.assert_close(uv(c, 1), 0.);
-         testing::with_tolerance{ 1e-12, 1e-5 }.assert_close(uv(c, 2), 0.);
+         testing::with_tolerance{ 1e-12, 1e-5 }.assert_close(uv(c, 1), real_c(0.));
+         testing::with_tolerance{ 1e-12, 1e-5 }.assert_close(uv(c, 2), real_c(0.));
       });
    }
 }
+
+void TestInnerOuterSweep()
+{
+   const Vector3< uint_t > cellsPerBlock(5, 6, 7);
+
+   const uint_t numProcs = uint_t(mpi::MPIManager::instance()->numProcesses());
+   const Vector3< uint_t > numBlocks = math::getFactors3D(numProcs);
+
+   auto blocks = blockforest::createUniformBlockGrid(numBlocks[0], numBlocks[1], numBlocks[2], cellsPerBlock[0],
+                                                     cellsPerBlock[1], cellsPerBlock[2], 1., true, true, true, true);
+
+   const real_t unsetValue = real_c(-1);
+   VectorField_T field{ *blocks, 1, unsetValue };
+
+   auto sweepFactory = sweep::SweepFactory(blocks);
+   const Cell innerOuterSplit(1, 1, 1);
+   gen::SetCellCenter setCenterSweep(blocks, field);
+   auto innerSweep = sweepFactory.commHidingSweep< sweep::INNER >(setCenterSweep, innerOuterSplit);
+   auto outerSweep = sweepFactory.commHidingSweep< sweep::OUTER >(setCenterSweep, innerOuterSplit);
+
+   const auto isInnerCell = [innerOuterSplit, cellsPerBlock](Cell c) {
+      return c.x() >= innerOuterSplit.x() && c.x() < cell_idx_c(cellsPerBlock[0]) - innerOuterSplit.x() &&
+             c.y() >= innerOuterSplit.y() && c.y() < cell_idx_c(cellsPerBlock[1]) - innerOuterSplit.y() &&
+             c.z() >= innerOuterSplit.z() && c.z() < cell_idx_c(cellsPerBlock[2]) - innerOuterSplit.z();
+   };
+
+   for (auto& block : *blocks)
+   {
+      innerSweep(&block);
+   }
+
+   for (auto& block : *blocks)
+   {
+      FieldView fView{ field, block };
+      sweep::forAllCells(exectag::Serial{}, *blocks, [&](Cell c) {
+         if (isInnerCell(c))
+         {
+            const auto center = blocks->getBlockLocalCellCenter(block, c);
+            testing::assert_close(fView(c, 0), center[0]);
+            testing::assert_close(fView(c, 1), center[1]);
+            testing::assert_close(fView(c, 2), center[2]);
+         }
+         else
+         {
+            testing::assert_close(fView(c, 0), unsetValue);
+            testing::assert_close(fView(c, 1), unsetValue);
+            testing::assert_close(fView(c, 2), unsetValue);
+         }
+      });
+   }
+
+   for (auto& block : *blocks)
+   {
+      outerSweep(&block);
+   }
+
+   for (auto& block : *blocks)
+   {
+      FieldView fView{ field, block };
+      sweep::forAllCells(exectag::Serial{}, *blocks, [&](Cell c) {
+         const auto center = blocks->getBlockLocalCellCenter(block, c);
+         testing::assert_close(fView(c, 0), center[0]);
+         testing::assert_close(fView(c, 1), center[1]);
+         testing::assert_close(fView(c, 2), center[2]);
+      });
+   }
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -122,5 +189,6 @@ int main(int argc, char** argv)
    walberla::mpi::Environment env{ argc, argv };
 
    return walberla::v8::testing::TestsRunner({
-      { "testCommunicationHiding", &TestCommunicationHiding::TestCommunicationHiding }}).run(argc, argv);
+      { "testCommunicationHiding", &TestCommunicationHiding::TestCommunicationHiding },
+      { "testInnerOuterSplit", &TestCommunicationHiding::TestInnerOuterSweep }}).run(argc, argv);
 }
