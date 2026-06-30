@@ -41,8 +41,8 @@ using namespace walberla;
 using ScalarField_T = field::GhostLayerField<real_t, 1>;
 using VectorField_T = field::GhostLayerField<Vector3<real_t>, 1>;
 
-const real_t          scalarValue( real_c(23) );
-const Vector3<real_t> vectorValue( real_c(23), real_c(42), real_c(5) );
+constexpr real_t          scalarValue( 23.0 );
+constexpr Vector3<real_t> vectorValue( 23.0, 42.0, 5.0 );
 
 
 real_t scalarSolution( const Vector3<real_t> & )

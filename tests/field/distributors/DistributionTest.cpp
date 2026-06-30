@@ -46,12 +46,12 @@ using Vec3Field_T = GhostLayerField<Vector3<real_t>, 1>;
 using MultiComponentField_T = GhostLayerField<real_t, 3>;
 
 
-const FlagUID Domain_Flag ( "domain" );
-const FlagUID Boundary_Flag ( "boundary" );
+const FlagUID & Domain_Flag() { static const FlagUID flag( "domain" ); return flag; }
+const FlagUID & Boundary_Flag() { static const FlagUID flag( "boundary" ); return flag; }
 
 void initFlagField( FlagField_T * field, IBlock * const /*block*/ )
 {
-   auto domainFlag = field->getOrRegisterFlag( Domain_Flag );
+   auto domainFlag = field->getOrRegisterFlag( Domain_Flag() );
    WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ( field, field->addFlag( x, y, z, domainFlag ); );
 }
 
@@ -100,8 +100,8 @@ void setBoundaryFlags( const shared_ptr<StructuredBlockStorage> & blocks,
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto flagField = blockIt->getData<FlagField_T>( flagFieldID );
-      auto domainFlag = flagField->getOrRegisterFlag( Domain_Flag );
-      auto boundaryFlag = flagField->getOrRegisterFlag( Boundary_Flag );
+      auto domainFlag = flagField->getOrRegisterFlag( Domain_Flag() );
+      auto boundaryFlag = flagField->getOrRegisterFlag( Boundary_Flag() );
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(flagField,
                                                        if( x == 2)
                                                        {
@@ -123,7 +123,7 @@ void getScalarFieldQuantities( const shared_ptr<StructuredBlockStorage> & blocks
    {
       auto field = blockIt->getData<ScalarField_T>( fieldID );
       auto flagField = blockIt->getData<FlagField_T>( flagFieldID );
-      auto domainFlag = flagField->getFlag( Domain_Flag );
+      auto domainFlag = flagField->getFlag( Domain_Flag() );
 
       CellInterval xyzSizeWithGhostLayers = field->xyzSizeWithGhostLayer();
       for(const auto& cellIt : xyzSizeWithGhostLayers)
@@ -160,7 +160,7 @@ void getVectorFieldQuantities( const shared_ptr<StructuredBlockStorage> & blocks
    {
       auto field = blockIt->getData<Vec3Field_T>( fieldID );
       auto flagField = blockIt->getData<FlagField_T>( flagFieldID );
-      auto domainFlag = flagField->getFlag( Domain_Flag );
+      auto domainFlag = flagField->getFlag( Domain_Flag() );
       CellInterval xyzSizeWithGhostLayers = field->xyzSizeWithGhostLayer();
       for(const auto& cellIt : xyzSizeWithGhostLayers)
       {
@@ -200,7 +200,7 @@ void getMultiCompFieldQuantities( const shared_ptr<StructuredBlockStorage> & blo
    {
       auto field = blockIt->getData<MultiComponentField_T>( fieldID );
       auto flagField = blockIt->getData<FlagField_T>( flagFieldID );
-      auto domainFlag = flagField->getFlag( Domain_Flag );
+      auto domainFlag = flagField->getFlag( Domain_Flag() );
       CellInterval xyzSizeWithGhostLayers = field->xyzSizeWithGhostLayer();
       for(const auto& cellIt : xyzSizeWithGhostLayers)
       {
@@ -240,9 +240,9 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
    using ScalarDistributor_T = field::NearestNeighborDistributor<ScalarField_T, FlagField_T>;
    using Vec3Distributor_T = field::NearestNeighborDistributor<Vec3Field_T, FlagField_T>;
    using MultiComponentDistributor_T = field::NearestNeighborDistributor<MultiComponentField_T, FlagField_T>;
-   BlockDataID scalarDistributorID         = field::addDistributor< ScalarDistributor_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag );
-   BlockDataID vectorDistributorID         = field::addDistributor< Vec3Distributor_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag );
-   BlockDataID multiComponentDistributorID = field::addDistributor< MultiComponentDistributor_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag );
+   BlockDataID scalarDistributorID         = field::addDistributor< ScalarDistributor_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag() );
+   BlockDataID vectorDistributorID         = field::addDistributor< Vec3Distributor_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag() );
+   BlockDataID multiComponentDistributorID = field::addDistributor< MultiComponentDistributor_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag() );
 
    // check scalar distribution
    {
@@ -325,9 +325,9 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
    using ScalarDistributor_T = field::KernelDistributor<ScalarField_T, FlagField_T>;
    using Vec3Distributor_T = field::KernelDistributor<Vec3Field_T, FlagField_T>;
    using MultiComponentDistributor_T = field::KernelDistributor<MultiComponentField_T, FlagField_T>;
-   BlockDataID scalarDistributorID         = field::addDistributor< ScalarDistributor_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag );
-   BlockDataID vectorDistributorID         = field::addDistributor< Vec3Distributor_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag );
-   BlockDataID multiComponentDistributorID = field::addDistributor< MultiComponentDistributor_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag );
+   BlockDataID scalarDistributorID         = field::addDistributor< ScalarDistributor_T, FlagField_T >( blocks, scalarFieldID, flagFieldID, Domain_Flag() );
+   BlockDataID vectorDistributorID         = field::addDistributor< Vec3Distributor_T, FlagField_T >( blocks, vectorFieldID, flagFieldID, Domain_Flag() );
+   BlockDataID multiComponentDistributorID = field::addDistributor< MultiComponentDistributor_T, FlagField_T >( blocks, multiComponentFieldID, flagFieldID, Domain_Flag() );
 
    // check scalar distribution
    {
@@ -408,7 +408,7 @@ void testNearestNeighborDistributorAtBoundary( const shared_ptr<StructuredBlockS
 {
    // distributor
    using ScalarDistributor_T = field::NearestNeighborDistributor<ScalarField_T, FlagField_T>;
-   BlockDataID scalarDistributorID = field::addDistributor<ScalarDistributor_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag);
+   BlockDataID scalarDistributorID = field::addDistributor<ScalarDistributor_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag());
 
    // check scalar interpolation close to boundary
    {
@@ -452,7 +452,7 @@ void testKernelDistributorAtBoundary( const shared_ptr<StructuredBlockStorage> &
 {
    // distributor
    using ScalarDistributor_T = field::KernelDistributor<ScalarField_T, FlagField_T>;
-   BlockDataID scalarDistributorID = field::addDistributor<ScalarDistributor_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag);
+   BlockDataID scalarDistributorID = field::addDistributor<ScalarDistributor_T, FlagField_T>(blocks, scalarFieldID, flagFieldID, Domain_Flag());
 
    // check scalar interpolation close to boundary
    {

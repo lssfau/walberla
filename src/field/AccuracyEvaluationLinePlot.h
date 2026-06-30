@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 
@@ -436,7 +437,7 @@ makeAccuracyEvaluationLinePlot( const weak_ptr< StructuredBlockStorage > & block
 
 namespace internal {
 
-const std::string accuracyEvaluationLinePlotConfigBlock("AccuracyEvaluationLinePlot");
+constexpr std::string_view accuracyEvaluationLinePlotConfigBlock = "AccuracyEvaluationLinePlot";
 
 inline void accuracyEvaluationLinePlotConfigParser( const Config::BlockHandle & parentBlockHandle, const std::string & configBlockName,
                                                     bool & defaultYAxis, Vector3<real_t> & defaultRelLinePoint,
@@ -486,7 +487,7 @@ shared_ptr< AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T > >
 makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const weak_ptr< StructuredBlockStorage > & blocks,
                                 const ConstBlockDataID & fieldId, const SolutionFunction_T & solution,
-                                const std::string & configBlockName = internal::accuracyEvaluationLinePlotConfigBlock,
+                                const std::string & configBlockName = std::string(internal::accuracyEvaluationLinePlotConfigBlock),
                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -502,7 +503,7 @@ makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const weak_ptr< StructuredBlockStorage > & blocks,
                                 const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
                                 const SolutionFunction_T & solution,
-                                const std::string & configBlockName = internal::accuracyEvaluationLinePlotConfigBlock,
+                                const std::string & configBlockName = std::string(internal::accuracyEvaluationLinePlotConfigBlock),
                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -518,7 +519,7 @@ shared_ptr< AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, Filter_T > 
 makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
                                 const SolutionFunction_T & solution, const Filter_T & filter,
-                                const std::string & configBlockName = internal::accuracyEvaluationLinePlotConfigBlock,
+                                const std::string & configBlockName = std::string(internal::accuracyEvaluationLinePlotConfigBlock),
                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -539,9 +540,9 @@ makeAccuracyEvaluationLinePlot( const Config_T & config,
    
 namespace internal {
 
-const std::string accuracyEvaluationLinePlotterFilename("linePlot");
-const std::string accuracyEvaluationLinePlotterExtension("dat");
-const std::string accuracyEvaluationLinePlotterConfigBlock("AccuracyEvaluationLinePlotter");
+constexpr std::string_view accuracyEvaluationLinePlotterFilename = "linePlot";
+constexpr std::string_view accuracyEvaluationLinePlotterExtension = "dat";
+constexpr std::string_view accuracyEvaluationLinePlotterConfigBlock = "AccuracyEvaluationLinePlotter";
 
 }
 
@@ -599,8 +600,8 @@ public:
 
    AccuracyEvaluationLinePlotter( const shared_ptr< AccuracyEvaluationLinePlot_T > & plot,
                                   const uint_t evaluationFrequency,
-                                  const std::string & filename = internal::accuracyEvaluationLinePlotterFilename,
-                                  const std::string & fileExtension = internal::accuracyEvaluationLinePlotterExtension ) :
+                                  const std::string & filename = std::string(internal::accuracyEvaluationLinePlotterFilename),
+                                  const std::string & fileExtension = std::string(internal::accuracyEvaluationLinePlotterExtension) ) :
       plot_( plot ), executionCounter_( uint_t{0} ), evaluationFrequency_( evaluationFrequency ),
       filename_( filename ), fileExtension_( fileExtension )
    {}
@@ -639,8 +640,8 @@ template< typename AccuracyEvaluationLinePlot_T >
 shared_ptr< AccuracyEvaluationLinePlotter< AccuracyEvaluationLinePlot_T > >
 makeAccuracyEvaluationLinePlotter( const shared_ptr< AccuracyEvaluationLinePlot_T > & plot,
                                    const uint_t evaluationFrequency,
-                                   const std::string & filename = internal::accuracyEvaluationLinePlotterFilename,
-                                   const std::string & fileExtension = internal::accuracyEvaluationLinePlotterExtension )
+                                   const std::string & filename = std::string(internal::accuracyEvaluationLinePlotterFilename),
+                                   const std::string & fileExtension = std::string(internal::accuracyEvaluationLinePlotterExtension) )
 {
    using AE_T = AccuracyEvaluationLinePlotter<AccuracyEvaluationLinePlot_T>;
    return shared_ptr< AE_T >( new AE_T( plot, evaluationFrequency, filename, fileExtension ) );
@@ -680,7 +681,7 @@ template< typename Config_T, typename AccuracyEvaluationLinePlot_T > // Config_T
 shared_ptr< AccuracyEvaluationLinePlotter< AccuracyEvaluationLinePlot_T > >
 makeAccuracyEvaluationLinePlotter( const Config_T & config,
                                    const shared_ptr< AccuracyEvaluationLinePlot_T > & plot,
-                                   const std::string & configBlockName = internal::accuracyEvaluationLinePlotterConfigBlock )
+                                   const std::string & configBlockName = std::string(internal::accuracyEvaluationLinePlotterConfigBlock) )
 {
    uint_t defaultEvaluationFrequency( uint_t{0} );
    std::string defaultFilename( internal::accuracyEvaluationLinePlotterFilename );

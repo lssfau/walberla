@@ -33,6 +33,7 @@
 #include <iterator>
 #include <numeric>
 #include <set>
+#include <string_view>
 
 
 namespace walberla {
@@ -78,12 +79,14 @@ public:
    real_t cummulativeDistributionFunction(const real_t x) const { WALBERLA_ASSERT(!empty()); return real_c(std::distance(begin(), upper_bound(x))) / real_c(size()); }
    real_t quantile(const real_t p) const;
 
-   std::string format(const std::string & formatString = DEFAULT_FORMAT_STRING) const;
+   std::string format(const std::string & formatString = std::string(DEFAULT_FORMAT_STRING)) const;
 
 private:
    real_t variance( real_t mean ) const;
    
-   static const std::string DEFAULT_FORMAT_STRING;
+   static constexpr std::string_view DEFAULT_FORMAT_STRING = "Sample has %size values in [%min, %max], "
+                                                             "sum = %sum, mean = %mean, med = %med, "
+                                                             "stddev = %stddev (relative: %relstddev), mad = %mad";
 };
 
 std::ostream & operator<<( std::ostream & os, const Sample & statReal );

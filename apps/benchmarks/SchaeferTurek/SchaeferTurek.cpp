@@ -170,21 +170,21 @@ const uint_t FieldGhostLayers  = uint_t{4};
 // FLAGS //
 ///////////
 
-const FlagUID          Fluid_Flag( "fluid" );
-const FlagUID         NoSlip_Flag( "no slip" );
-const FlagUID       Obstacle_Flag( "obstacle (staircase)" );
-const FlagUID         Curved_Flag( "obstacle (curved)" );
-const FlagUID            UBB_Flag( "velocity bounce back" );
-const FlagUID PressureOutlet_Flag( "pressure outlet" );
-const FlagUID       Outlet21_Flag( "outlet (2/1)" );
-const FlagUID       Outlet43_Flag( "outlet (4/3)" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag( "fluid" ); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag( "no slip" ); return flag; }
+const FlagUID & Obstacle_Flag() { static const FlagUID flag( "obstacle (staircase)" ); return flag; }
+const FlagUID & Curved_Flag() { static const FlagUID flag( "obstacle (curved)" ); return flag; }
+const FlagUID & UBB_Flag() { static const FlagUID flag( "velocity bounce back" ); return flag; }
+const FlagUID & PressureOutlet_Flag() { static const FlagUID flag( "pressure outlet" ); return flag; }
+const FlagUID & Outlet21_Flag() { static const FlagUID flag( "outlet (2/1)" ); return flag; }
+const FlagUID & Outlet43_Flag() { static const FlagUID flag( "outlet (4/3)" ); return flag; }
 
 ///////////
 // SUIDS //
 ///////////
 
-const SUID Empty( "empty" );
-const Set<SUID> None( Set<SUID>::emptySet() );
+const SUID & Empty() { static const SUID suid( "empty" ); return suid; }
+const Set<SUID> & None() { static const Set<SUID> set( Set<SUID>::emptySet() ); return set; }
 
 ////////
 // 2D //
@@ -631,7 +631,7 @@ static void workloadMemoryAndSUIDAssignment( SetupBlockForest & forest, const me
          {
             block->setWorkload( workload_t{0} );
             block->setMemory( memory_t{0} );
-            block->addState( Empty );
+            block->addState( Empty() );
          }
       }
    }
@@ -839,7 +839,7 @@ MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
 
-   const flag_t fluid = flagField->registerFlag( Fluid_Flag );
+   const flag_t fluid = flagField->registerFlag( Fluid_Flag() );
 
    auto blocks = blocks_.lock();
    WALBERLA_CHECK_NOT_NULLPTR( blocks );
@@ -847,13 +847,13 @@ MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
    SinusInflowVelocity<Is2D< LatticeModel_T >::value> velocity( setup_.inflowVelocity_L, setup_.raisingTime_L, setup_.sinPeriod_L, setup_.H );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                    NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                  Obstacle_T( "obstacle (staircase)", Obstacle_Flag, pdfField ),
-                                    Curved_T( "obstacle (curved)", Curved_Flag, pdfField, flagField, fluid ),
-                                DynamicUBB_T( "velocity bounce back", UBB_Flag, pdfField, timeTracker_, blocks->getLevel(*block), velocity, block->getAABB() ),
-                                  Outlet21_T( "outlet (2/1)", Outlet21_Flag, pdfField, flagField, fluid ),
-                                  Outlet43_T( "outlet (4/3)", Outlet43_Flag, pdfField, flagField, fluid ),
-                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag, pdfField, real_t{1} ) );
+                                    NoSlip_T( "no slip", NoSlip_Flag(), pdfField ),
+                                  Obstacle_T( "obstacle (staircase)", Obstacle_Flag(), pdfField ),
+                                    Curved_T( "obstacle (curved)", Curved_Flag(), pdfField, flagField, fluid ),
+                                DynamicUBB_T( "velocity bounce back", UBB_Flag(), pdfField, timeTracker_, blocks->getLevel(*block), velocity, block->getAABB() ),
+                                  Outlet21_T( "outlet (2/1)", Outlet21_Flag(), pdfField, flagField, fluid ),
+                                  Outlet43_T( "outlet (4/3)", Outlet43_Flag(), pdfField, flagField, fluid ),
+                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag(), pdfField, real_t{1} ) );
 }
 
 
@@ -966,44 +966,44 @@ void BoundarySetter< LatticeModel_T >::operator()()
          CurvedDeltaValueCalculation< LatticeModel_T > deltaCalculation( blocks, *block, cylinder );
 
          lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
-                                                                           boundaryHandlingId_, Curved_Flag, cylinder, deltaCalculation );
+                                                                           boundaryHandlingId_, Curved_Flag(), cylinder, deltaCalculation );
       }
       else // staircase
       {
          lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
-                                                                           boundaryHandlingId_, Obstacle_Flag, cylinder );
+                                                                           boundaryHandlingId_, Obstacle_Flag(), cylinder );
       }
 
       // inflow WEST
 
       CellInterval west( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( UBB_Flag, west );
+      boundaryHandling->forceBoundary( UBB_Flag(), west );
 
       // outlet EAST
 
       CellInterval east( domainBB.xMax(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
       if( outletType_ == 0 )
-         boundaryHandling->forceBoundary( PressureOutlet_Flag, east );
+         boundaryHandling->forceBoundary( PressureOutlet_Flag(), east );
       else if( outletType_ == 1 )
-         boundaryHandling->forceBoundary( Outlet21_Flag, east );
+         boundaryHandling->forceBoundary( Outlet21_Flag(), east );
       else
-         boundaryHandling->forceBoundary( Outlet43_Flag, east );
+         boundaryHandling->forceBoundary( Outlet43_Flag(), east );
 
       // no slip SOUTH
       CellInterval south( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, south );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), south );
 
       // no slip NORTH
       CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, north );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), north );
 
       // no slip BOTTOM
       CellInterval bottom( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMin() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, bottom );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), bottom );
 
       // no slip TOP
       CellInterval top( domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, top );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), top );
    }
 }
 
@@ -1260,17 +1260,17 @@ void MyVTKOutput<LatticeModel_T>::operator()( std::vector< shared_ptr<vtk::Block
    // cell filters
 
    field::FlagFieldCellFilter<FlagField_T> fluidFilter( flagField_ );
-   fluidFilter.addFlag( Fluid_Flag );
+   fluidFilter.addFlag( Fluid_Flag() );
    filters[ "FluidFilter" ] = fluidFilter;
 
    field::FlagFieldCellFilter<FlagField_T> obstacleFilter( flagField_ );
-   obstacleFilter.addFlag(         NoSlip_Flag );
-   obstacleFilter.addFlag(       Obstacle_Flag );
-   obstacleFilter.addFlag(         Curved_Flag );
-   obstacleFilter.addFlag(            UBB_Flag );
-   obstacleFilter.addFlag( PressureOutlet_Flag );
-   obstacleFilter.addFlag(       Outlet21_Flag );
-   obstacleFilter.addFlag(       Outlet43_Flag );
+   obstacleFilter.addFlag(         NoSlip_Flag() );
+   obstacleFilter.addFlag(       Obstacle_Flag() );
+   obstacleFilter.addFlag(         Curved_Flag() );
+   obstacleFilter.addFlag(            UBB_Flag() );
+   obstacleFilter.addFlag( PressureOutlet_Flag() );
+   obstacleFilter.addFlag(       Outlet21_Flag() );
+   obstacleFilter.addFlag(       Outlet43_Flag() );
    filters[ "ObstacleFilter" ] = obstacleFilter;
 
    // before functions
@@ -2249,7 +2249,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
 {
    using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
-   auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId, None, Empty );
+   auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId, None(), Empty() );
    ts->asynchronousCommunication( !syncComm );
    ts->optimizeCommunication( !fullComm );
    ts->performLinearExplosion( linearExplosion );
@@ -2286,7 +2286,7 @@ struct AddRefinementTimeStep
          else
          {
             using Sweep_T = lbm::SplitSweep<LatticeModel_T, FlagField_T>;
-            auto mySweep = make_shared< Sweep_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+            auto mySweep = make_shared< Sweep_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                               syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (split LB sweep)",
@@ -2295,7 +2295,7 @@ struct AddRefinementTimeStep
       }
       else
       {                                         
-         auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+         auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
          addRefinementTimeStep< LatticeModel_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                   syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (cell-wise LB sweep)",
@@ -2318,7 +2318,7 @@ struct AddRefinementTimeStep< LatticeModel_T >
                     const shared_ptr< Evaluation< LatticeModel_T > > & evaluation,
                     const shared_ptr< lbm::TimeTracker > & timeTracker )
    {
-      auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+      auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
       addRefinementTimeStep< LatticeModel_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (cell-wise LB sweep)",
@@ -2353,48 +2353,48 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    BlockDataID pdfFieldId = fzyx ? lbm::addPdfFieldToStorage( blocks, "pdf field (fzyx)", latticeModel,
                                                               Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
-                                                              FieldGhostLayers, field::fzyx, None, Empty ) :
+                                                              FieldGhostLayers, field::fzyx, None(), Empty() ) :
                                    lbm::addPdfFieldToStorage( blocks, "pdf field (zyxf)", latticeModel,
                                                               Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t{1},
-                                                              FieldGhostLayers, field::zyxf, None, Empty );
+                                                              FieldGhostLayers, field::zyxf, None(), Empty() );
 
    // add density adaptor
 
    using DensityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::Density;
-   BlockDataID densityAdaptorId = field::addFieldAdaptor< DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor", None, Empty );
+   BlockDataID densityAdaptorId = field::addFieldAdaptor< DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor", None(), Empty() );
    
    // add velocity field + initialize velocity field writer (only used for simulations with an adaptive block structure)
 
    using VelocityField_T = field::GhostLayerField<Vector3<real_t>, 1>;
-   BlockDataID velocityFieldId = field::addToStorage< VelocityField_T >( blocks, "velocity", Vector3<real_t>(0), field::fzyx, FieldGhostLayers, true, None, Empty );
+   BlockDataID velocityFieldId = field::addToStorage< VelocityField_T >( blocks, "velocity", Vector3<real_t>(0), field::fzyx, FieldGhostLayers, true, None(), Empty() );
 
    using VelocityFieldWriter_T = lbm::VelocityFieldWriter<typename Types<LatticeModel_T>::PdfField_T, VelocityField_T>;
-   BlockSweepWrapper< VelocityFieldWriter_T > velocityFieldWriter( blocks, VelocityFieldWriter_T( pdfFieldId, velocityFieldId ), None, Empty );
+   BlockSweepWrapper< VelocityFieldWriter_T > velocityFieldWriter( blocks, VelocityFieldWriter_T( pdfFieldId, velocityFieldId ), None(), Empty() );
    velocityFieldWriter();
 
    // add flag field to blocks
 
-   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field", FieldGhostLayers, true, None, Empty );
+   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field", FieldGhostLayers, true, None(), Empty() );
 
-   field::FlagFieldEvaluationFilter<FlagField_T> flagFieldFilter( flagFieldId, Fluid_Flag );
+   field::FlagFieldEvaluationFilter<FlagField_T> flagFieldFilter( flagFieldId, Fluid_Flag() );
 
    // add LB boundary handling to blocks
 
    shared_ptr< lbm::TimeTracker > timeTracker = make_shared< lbm::TimeTracker >();
 
    BlockDataID boundaryHandlingId = blocks->addBlockData( make_shared< MyBoundaryHandling< LatticeModel_T > >( flagFieldId, pdfFieldId, blocks, setup, timeTracker ),
-                                                          "boundary handling", None, Empty );
+                                                          "boundary handling", None(), Empty() );
 
    const int obstacleBoundary = configBlock.getParameter< int >( "obstacleBoundary", 0 );
    const int outletType       = configBlock.getParameter< int >( "outletType", 0 );
 
-   BoundarySetter<LatticeModel_T> boundarySetter( blocks, boundaryHandlingId, setup, obstacleBoundary, outletType, None, Empty );
+   BoundarySetter<LatticeModel_T> boundarySetter( blocks, boundaryHandlingId, setup, obstacleBoundary, outletType, None(), Empty() );
    boundarySetter();
 
    // add 'bool' field to every block (required for LB post processing when blocks split/merge in order to keep boundaries consistent)
 
    BlockDataID markerDataId = blocks->addBlockData( make_shared< lbm::MarkerData< LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> > >( pdfFieldId, flagFieldFilter ),
-                                                    "LBM marker data (for dynamic refinement post processing)", None, Empty );
+                                                    "LBM marker data (for dynamic refinement post processing)", None(), Empty() );
 
    // creating the time loop
 
@@ -2420,7 +2420,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // VTK
 
-   blockforest::communication::NonUniformBufferedScheme< typename lbm::NeighborsStencil<LatticeModel_T>::type > pdfGhostLayerSync( blocks, None, Empty );
+   blockforest::communication::NonUniformBufferedScheme< typename lbm::NeighborsStencil<LatticeModel_T>::type > pdfGhostLayerSync( blocks, None(), Empty() );
    pdfGhostLayerSync.addPackInfo( make_shared< lbm::refinement::PdfFieldSyncPackInfo< LatticeModel_T > >( pdfFieldId ) );
 
    MyVTKOutput< LatticeModel_T > myVTKOutput( pdfFieldId, flagFieldId, pdfGhostLayerSync );
@@ -2443,10 +2443,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    const bool        evaluationLogToFile      = configBlock.getParameter< bool >( "evaluationLogToFile", true );
    const std::string evaluationFilename       = configBlock.getParameter< std::string >( "evaluationFilename", std::string("SchaeferTurek.txt") );
 
-   shared_ptr< Evaluation< LatticeModel_T > > evaluation( new Evaluation< LatticeModel_T >( blocks, evaluationCheckFrequency, pdfFieldId, flagFieldId, Fluid_Flag,
-                                                                                            ( obstacleBoundary == 1 ) ? Curved_Flag : Obstacle_Flag,
+   shared_ptr< Evaluation< LatticeModel_T > > evaluation( new Evaluation< LatticeModel_T >( blocks, evaluationCheckFrequency, pdfFieldId, flagFieldId, Fluid_Flag(),
+                                                                                            ( obstacleBoundary == 1 ) ? Curved_Flag() : Obstacle_Flag(),
                                                                                             setup, evaluationLogToStream, evaluationLogToFile, evaluationFilename,
-                                                                                            None, Empty ) );
+                                                                                            None(), Empty() ) );
    // block structure refresh (rebalance + redistribute blocks -> dynamic load balancing)
 
    auto & blockforest = blocks->getBlockForest();
@@ -2541,8 +2541,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          
          if( Is2D< LatticeModel_T >::value )
          {
-            blockforest.setRefreshBlockStateDeterminationFunction( Pseudo2DBlockStateDetermination( blockforest, Empty ) );
-            blockforest.setRefreshPhantomBlockDataAssignmentFunction( Pseudo2DPhantomWeightAssignment( Empty ) );
+            blockforest.setRefreshBlockStateDeterminationFunction( Pseudo2DBlockStateDetermination( blockforest, Empty() ) );
+            blockforest.setRefreshPhantomBlockDataAssignmentFunction( Pseudo2DPhantomWeightAssignment( Empty() ) );
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
                      blockforest::DynamicCurveBalance< Pseudo2DPhantomWeight >( hilbert, allGather ) );
          }
@@ -2557,8 +2557,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
          if( Is2D< LatticeModel_T >::value )
          {
-            blockforest.setRefreshBlockStateDeterminationFunction( Pseudo2DBlockStateDetermination( blockforest, Empty ) );
-            blockforest.setRefreshPhantomBlockDataAssignmentFunction( Pseudo2DPhantomWeightAssignment( Empty ) );
+            blockforest.setRefreshBlockStateDeterminationFunction( Pseudo2DBlockStateDetermination( blockforest, Empty() ) );
+            blockforest.setRefreshPhantomBlockDataAssignmentFunction( Pseudo2DPhantomWeightAssignment( Empty() ) );
             blockforest.setRefreshPhantomBlockDataPackFunction( Pseudo2DPhantomWeightPackUnpack() );
             blockforest.setRefreshPhantomBlockDataUnpackFunction( Pseudo2DPhantomWeightPackUnpack() );
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
@@ -2606,7 +2606,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    timeloop.addFuncBeforeTimeStep( SharedFunctor< Evaluation< LatticeModel_T > >(evaluation), "evaluation" );
                                                                                        
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( lbm::makeMassEvaluation< DensityAdaptor_T, FlagField_T, Is2D< LatticeModel_T >::value >(
-            configBlock, blocks, uint_t{0}, densityAdaptorId, flagFieldId, Fluid_Flag, "MassEvaluation", None, Empty ) ), "mass evaluation" );
+            configBlock, blocks, uint_t{0}, densityAdaptorId, flagFieldId, Fluid_Flag(), "MassEvaluation", None(), Empty() ) ), "mass evaluation" );
 
    // VTK
 
@@ -2619,7 +2619,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // stability check (non-finite values in the PDF field?)
 
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >(
-                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag, "StabilityChecker", None, Empty ) ),
+                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag(), "StabilityChecker", None(), Empty() ) ),
                                   "LBM stability check" );
 
    // remaining time logger
@@ -2630,11 +2630,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // logging right before the simulation starts
 
    uint_t lbBlockForestEvaluationStamp = blockforest.getModificationStamp();
-   lbm::BlockForestEvaluation< FlagField_T, Is2D< LatticeModel_T >::value > lbBlockForestEvaluation( blocks, flagFieldId, Fluid_Flag, None, Empty );
+   lbm::BlockForestEvaluation< FlagField_T, Is2D< LatticeModel_T >::value > lbBlockForestEvaluation( blocks, flagFieldId, Fluid_Flag(), None(), Empty() );
    lbBlockForestEvaluation.logInfoOnRoot();
 
    uint_t fluidCellsEvaluationStamp = blockforest.getModificationStamp();
-   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag, None, Empty );
+   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag(), None(), Empty() );
    fluidCells();
 
    const real_t Re = Is2D< LatticeModel_T >::value ? ( ( real_c(4) * setup.inflowVelocity * setup.cylinderRadius ) / ( real_c(3) * setup.viscosity ) ) : 
@@ -2675,7 +2675,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // run the simulation
 
    uint_t performanceEvaluationStamp = blockforest.getModificationStamp();
-   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag, None, Empty );
+   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag(), None(), Empty() );
 
    for( uint_t outerRun = 0; outerRun < outerTimeSteps; ++outerRun )
    {

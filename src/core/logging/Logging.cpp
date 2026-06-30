@@ -30,19 +30,6 @@ namespace walberla {
 namespace logging {
 
 
-
-const std::string Logging::ERROR_TAG    = std::string( "[ERROR   ]" );
-const std::string Logging::DEVEL_TAG    = std::string( "[DEVEL   ]" );
-const std::string Logging::RESULT_TAG   = std::string( "[RESULT  ]" );
-const std::string Logging::WARNING_TAG  = std::string( "[WARNING ]" );
-const std::string Logging::INFO_TAG     = std::string( "[INFO    ]" );
-const std::string Logging::PROGRESS_TAG = std::string( "[PROGRESS]" );
-const std::string Logging::DETAIL_TAG   = std::string( "[DETAIL  ]" );
-const std::string Logging::TRACING_TAG  = std::string( "[TRACING ]" );
-
-const uint_t Logging::TAG_WIDTH       = uint_t{10};
-const uint_t Logging::TIMESTAMP_WIDTH = uint_t{17};
-
 void Logging::setStreamLogLevel( LogLevel logLevel )
 {
 #ifndef WALBERLA_LOGLEVEL_INFO
@@ -190,7 +177,7 @@ std::string Logging::getHeaderFooter( bool header )
 
 
 
-std::string Logging::createLog( const std::string & type, const std::string & message,
+std::string Logging::createLog( std::string_view type, const std::string & message,
                                 const std::string & callerPath, const int line ) const
 {
    std::ostringstream log;

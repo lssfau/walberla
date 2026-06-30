@@ -16,8 +16,3 @@ target_sources( walberla_boundary
         BoundaryUID.h
         ShiftedPeriodicity.h
 )
-
-target_sources( walberla_boundary
-        PRIVATE
-        Boundary.cpp
-)

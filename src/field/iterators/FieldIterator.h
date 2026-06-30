@@ -161,7 +161,7 @@ namespace field {
       /*!\name Constructor/Destructor */
       //@{
 
-      explicit FieldIterator();
+      explicit FieldIterator() noexcept;
 
       explicit FieldIterator(const FieldType * f,
                              cell_idx_t xBeg, cell_idx_t yBeg, cell_idx_t zBeg, cell_idx_t fBeg,
@@ -240,7 +240,7 @@ namespace field {
          : FieldIterator<T,fieldFSize>( field, xBeg, yBeg,zBeg, fBeg,xs ,ys, zs, fs, true ) {}
 
 
-      explicit ForwardFieldIterator()
+      explicit ForwardFieldIterator() noexcept
          : FieldIterator<T,fieldFSize> ()  {}
       //@}
       //****************************************************************************************************************
@@ -283,7 +283,7 @@ namespace field {
           : FieldIterator<T,fieldFSize>( field, xBeg, yBeg,zBeg, fBeg,xs ,ys, zs, fs, false )
       { }
 
-      explicit ReverseFieldIterator()
+      explicit ReverseFieldIterator() noexcept
          : FieldIterator<T,fieldFSize> ()  {}
       //@}
       //****************************************************************************************************************

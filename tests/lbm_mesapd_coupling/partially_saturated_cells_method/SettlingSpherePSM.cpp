@@ -113,8 +113,8 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag("fluid");
-const FlagUID NoSlip_Flag("no slip");
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -139,10 +139,10 @@ class MyBoundaryHandling
       auto* pdfField  = block->getData< PdfField_T >(pdfFieldID_);
 
       const auto fluid =
-         flagField->flagExists(Fluid_Flag) ? flagField->getFlag(Fluid_Flag) : flagField->registerFlag(Fluid_Flag);
+         flagField->flagExists(Fluid_Flag()) ? flagField->getFlag(Fluid_Flag()) : flagField->registerFlag(Fluid_Flag());
 
       Type* handling =
-         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag, pdfField));
+         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag(), pdfField));
 
       handling->fillWithDomain(FieldGhostLayers);
 
@@ -623,7 +623,7 @@ int main(int argc, char** argv)
 
    // map planes into the LBM simulation -> act as no-slip boundaries
    ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel,
-                       *accessor, NoSlip_Flag);
+                       *accessor, NoSlip_Flag());
 
    // map particles into the LBM simulation
    BlockDataID particleAndVolumeFractionFieldID =
@@ -655,7 +655,7 @@ int main(int argc, char** argv)
 
    auto bhSweep  = BoundaryHandling_T::getBlockSweep(boundaryHandlingID);
    auto lbmSweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, FlagField_T, 1, 1 >(
-      pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor, flagFieldID, Fluid_Flag);
+      pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor, flagFieldID, Fluid_Flag());
 
    timeloop.addFuncBeforeTimeStep(RemainingTimeLogger(timeloop.getNrOfTimeSteps()), "Remaining Time Logger");
 
@@ -683,7 +683,7 @@ int main(int argc, char** argv)
       pdfFieldVTK->addBeforeFunction(pdfGhostLayerSync);
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
-      fluidFilter.addFlag(Fluid_Flag);
+      fluidFilter.addFlag(Fluid_Flag());
       pdfFieldVTK->addCellInclusionFilter(fluidFilter);
 
       pdfFieldVTK->addCellDataWriter(

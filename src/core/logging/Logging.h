@@ -39,6 +39,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -67,17 +68,17 @@ public:
 
    enum LogLevel { WARNING = 0, INFO = 1, PROGRESS = 2, DETAIL = 3, TRACING = 4 };
 
-   static const std::string ERROR_TAG;
-   static const std::string DEVEL_TAG;
-   static const std::string RESULT_TAG;
-   static const std::string WARNING_TAG;
-   static const std::string INFO_TAG;
-   static const std::string PROGRESS_TAG;
-   static const std::string DETAIL_TAG;
-   static const std::string TRACING_TAG;
+   static constexpr std::string_view ERROR_TAG    = "[ERROR   ]";
+   static constexpr std::string_view DEVEL_TAG    = "[DEVEL   ]";
+   static constexpr std::string_view RESULT_TAG   = "[RESULT  ]";
+   static constexpr std::string_view WARNING_TAG  = "[WARNING ]";
+   static constexpr std::string_view INFO_TAG     = "[INFO    ]";
+   static constexpr std::string_view PROGRESS_TAG = "[PROGRESS]";
+   static constexpr std::string_view DETAIL_TAG   = "[DETAIL  ]";
+   static constexpr std::string_view TRACING_TAG  = "[TRACING ]";
 
-   static const uint_t TAG_WIDTH;
-   static const uint_t TIMESTAMP_WIDTH;
+   static constexpr uint_t TAG_WIDTH       = uint_t{10};
+   static constexpr uint_t TIMESTAMP_WIDTH = uint_t{17};
 
    class CustomStamp
    {
@@ -160,7 +161,7 @@ private:
    inline std::string getTimeStamp() const;
    static std::string getHeaderFooter( bool header );
 
-   std::string createLog( const std::string & type, const std::string & message,
+   std::string createLog( std::string_view type, const std::string & message,
                           const std::string & callerPath, const int line ) const;
 
 

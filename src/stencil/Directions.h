@@ -17,6 +17,7 @@
 // STL includes
 #include <array>
 #include <string>
+#include <string_view>
 #include <numbers>
 
 namespace walberla {
@@ -198,7 +199,7 @@ namespace stencil {
    } };
 
    /// String representation for each direction \ingroup stencil
-   inline const std::array< std::string, NR_OF_DIRECTIONS > dirToString {
+   inline constexpr std::array< std::string_view, NR_OF_DIRECTIONS > dirToString {
       "C", "N", "S", "W", "E", "T", "B",
       "NW", "NE", "SW", "SE", "TN", "TS", "TW", "TE", "BN", "BS", "BW","BE",
       "TNE", "TNW", "TSE", "TSW", "BNE", "BNW", "BSE", "BSW",

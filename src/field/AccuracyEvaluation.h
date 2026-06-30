@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 
@@ -48,8 +49,8 @@ namespace field {
 
 namespace internal {
 
-const std::string accuracyEvaluationFilename("accuracy.dat");
-const std::string accuracyEvaluationConfigBlock("AccuracyEvaluation");
+constexpr std::string_view accuracyEvaluationFilename = "accuracy.dat";
+constexpr std::string_view accuracyEvaluationConfigBlock = "AccuracyEvaluation";
 
 template< typename T >
 inline real_t accuracyEvaluationAbsError( const T & error ) { return std::abs( error ); }
@@ -401,7 +402,7 @@ inline void accuracyEvaluationConfigParser( const shared_ptr< Config > & config,
 #define WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_CONFIG_PARSER( config ) \
    uint_t defaultPlotFrequency = uint_t{0}; \
    uint_t defaultLogFrequency = uint_t{0}; \
-   std::string defaultFilename = internal::accuracyEvaluationFilename; \
+   std::string defaultFilename = std::string(internal::accuracyEvaluationFilename); \
    real_t defaultNormalizationFactor = uint_t{1}; \
    internal::accuracyEvaluationConfigParser( config, configBlockName, defaultPlotFrequency, defaultLogFrequency, defaultFilename, defaultNormalizationFactor );
 
@@ -414,7 +415,7 @@ template< typename Field_T, typename SolutionFunction_T, typename Config_T > // 
 shared_ptr< AccuracyEvaluation< Field_T, SolutionFunction_T > > makeAccuracyEvaluation( const Config_T & config,
                                                                                         const weak_ptr< StructuredBlockStorage > & blocks,
                                                                                         const ConstBlockDataID & fieldId, const SolutionFunction_T & solution,
-                                                                                        const std::string & configBlockName = internal::accuracyEvaluationConfigBlock,
+                                                                                        const std::string & configBlockName = std::string(internal::accuracyEvaluationConfigBlock),
                                                                                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -430,7 +431,7 @@ makeAccuracyEvaluation( const Config_T & config,
                         const weak_ptr< StructuredBlockStorage > & blocks,
                         const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
                         const SolutionFunction_T & solution,
-                        const std::string & configBlockName = internal::accuracyEvaluationConfigBlock,
+                        const std::string & configBlockName = std::string(internal::accuracyEvaluationConfigBlock),
                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -446,7 +447,7 @@ shared_ptr< AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T > >
 makeAccuracyEvaluation( const Config_T & config,
                         const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
                         const SolutionFunction_T & solution, const Filter_T & filter,
-                        const std::string & configBlockName = internal::accuracyEvaluationConfigBlock,
+                        const std::string & configBlockName = std::string(internal::accuracyEvaluationConfigBlock),
                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {

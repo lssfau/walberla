@@ -313,7 +313,7 @@ namespace walberla {
       void createBoundaryConfig(const SimulationParameters & parameters, Config::Block & boundaryBlock) {
 
          auto & bottomWall = boundaryBlock.createBlock("Border");
-         bottomWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]);
+         bottomWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]));
          bottomWall.addParameter("walldistance", "-1");
          if(parameters.boundaryCondition == "NoSlip") {
             bottomWall.addParameter("flag", "NoSlip");
@@ -322,7 +322,7 @@ namespace walberla {
          }
 
          auto & topWall = boundaryBlock.createBlock("Border");
-         topWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]);
+         topWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]));
          topWall.addParameter("walldistance", "-1");
          if(parameters.fullChannel) {
             if (parameters.boundaryCondition == "NoSlip") {

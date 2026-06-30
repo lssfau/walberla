@@ -26,6 +26,7 @@
 
 #include <type_traits>
 #include <iterator>
+#include <string_view>
 #include <vector>
 
 
@@ -79,7 +80,7 @@ public:
 
    uint_t size() { return size_; }
 
-   std::string format( const std::string & formatString = DEFAULT_FORMAT_STRING ) const;
+   std::string format( const std::string & formatString = std::string(DEFAULT_FORMAT_STRING) ) const;
 
 private:
    
@@ -92,7 +93,9 @@ private:
    real_t mean_;
    real_t variance_;
 
-   static const std::string DEFAULT_FORMAT_STRING;
+   static constexpr std::string_view DEFAULT_FORMAT_STRING = "Sample has %size values in [%min, %max], "
+                                                             "sum = %sum, mean = %mean, "
+                                                             "stddev = %stddev (relative: %relstddev)";
 };
 
 

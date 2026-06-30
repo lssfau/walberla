@@ -112,10 +112,10 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag("fluid");
-const FlagUID NoSlip_Flag("no slip");
-const FlagUID Inflow_Flag("inflow");
-const FlagUID Outflow_Flag("outflow");
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
+const FlagUID & Inflow_Flag() { static const FlagUID flag("inflow"); return flag; }
+const FlagUID & Outflow_Flag() { static const FlagUID flag("outflow"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -145,16 +145,16 @@ class MyBoundaryHandling
       auto* pdfField  = block->getData< PdfField_T >(pdfFieldID_);
 
       const auto fluid =
-         flagField->flagExists(Fluid_Flag) ? flagField->getFlag(Fluid_Flag) : flagField->registerFlag(Fluid_Flag);
+         flagField->flagExists(Fluid_Flag()) ? flagField->getFlag(Fluid_Flag()) : flagField->registerFlag(Fluid_Flag());
 
       Type* handling =
-         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag, pdfField),
-                  Inflow_T("Inflow", Inflow_Flag, pdfField, inflowVelocity_),
-                  Outflow_T("Outflow", Outflow_Flag, pdfField, real_t{1}));
+         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag(), pdfField),
+                  Inflow_T("Inflow", Inflow_Flag(), pdfField, inflowVelocity_),
+                  Outflow_T("Outflow", Outflow_Flag(), pdfField, real_t{1}));
 
-      const auto inflow  = flagField->getFlag(Inflow_Flag);
-      const auto outflow = flagField->getFlag(Outflow_Flag);
-      const auto noslip  = flagField->getFlag(NoSlip_Flag);
+      const auto inflow  = flagField->getFlag(Inflow_Flag());
+      const auto outflow = flagField->getFlag(Outflow_Flag());
+      const auto noslip  = flagField->getFlag(NoSlip_Flag());
 
       CellInterval domainBB = storage->getDomainCellBB();
 
@@ -660,7 +660,7 @@ int main(int argc, char** argv)
       vtk::AABBCellFilter aabbSliceFilter(sliceAABB);
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
-      fluidFilter.addFlag(Fluid_Flag);
+      fluidFilter.addFlag(Fluid_Flag());
 
       vtk::ChainedFilter combinedSliceFilter;
       combinedSliceFilter.addFilter(fluidFilter);
@@ -716,7 +716,7 @@ int main(int argc, char** argv)
 
    // stream + collide LBM step
    auto lbmSweep = lbm_mesapd_coupling::psm::makePSMSweep< LatticeModel_T, FlagField_T, 1, 1 >(
-      pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor, flagFieldID, Fluid_Flag);
+      pdfFieldID, particleAndVolumeFractionFieldID, blocks, accessor, flagFieldID, Fluid_Flag());
    // update particle mapping before PSM sweep
    timeloop.add() << BeforeFunction(particleMapping, "particle mapping")
                   << Sweep(makeSharedSweep(lbmSweep), "LBM stream / collide");

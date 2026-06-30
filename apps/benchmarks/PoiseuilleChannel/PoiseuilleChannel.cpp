@@ -142,9 +142,9 @@ const uint_t FieldGhostLayers  = uint_t{4};
 // FLAGS //
 ///////////
 
-const FlagUID  Fluid_Flag( "fluid" );
-const FlagUID NoSlip_Flag( "no slip" );
-const FlagUID Curved_Flag( "curved" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag( "fluid" ); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag( "no slip" ); return flag; }
+const FlagUID & Curved_Flag() { static const FlagUID flag( "curved" ); return flag; }
 
 /////////////////////
 // OUTPUT HELPERS  //
@@ -483,11 +483,11 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
 
-   const flag_t fluid = flagField->registerFlag( Fluid_Flag );
+   const flag_t fluid = flagField->registerFlag( Fluid_Flag() );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                   NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                   Curved_T( "curved", Curved_Flag, pdfField, flagField, fluid ) );
+                                   NoSlip_T( "no slip", NoSlip_Flag(), pdfField ),
+                                   Curved_T( "curved", Curved_Flag(), pdfField, flagField, fluid ) );
 }
 
 
@@ -554,12 +554,12 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
          CurvedDeltaValueCalculation< LatticeModel_T > deltaCalculation( blocks, *block, channel );
 
          lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
-                                                                           boundaryHandlingId, Curved_Flag, channel, deltaCalculation );
+                                                                           boundaryHandlingId, Curved_Flag(), channel, deltaCalculation );
       }
       else // staircase (1st order bounce back no-slip boundary condition)
       {
          lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
-                                                                           boundaryHandlingId, NoSlip_Flag, channel );
+                                                                           boundaryHandlingId, NoSlip_Flag(), channel );
       }
 
       // fluid
@@ -694,11 +694,11 @@ void MyVTKOutput<LatticeModel_T>::operator()( std::vector< shared_ptr<vtk::Block
    // cell filters
 
    field::FlagFieldCellFilter<FlagField_T> fluidFilter( flagField_ );
-   fluidFilter.addFlag( Fluid_Flag );
+   fluidFilter.addFlag( Fluid_Flag() );
    filters[ "FluidFilter" ] = fluidFilter;
 
    field::FlagFieldCellFilter<FlagField_T> obstacleFilter( flagField_ );
-   obstacleFilter.addFlag( NoSlip_Flag );
+   obstacleFilter.addFlag( NoSlip_Flag() );
    filters[ "ObstacleFilter" ] = obstacleFilter;
 
    // before functions
@@ -835,7 +835,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
-   auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+   auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, mySweep, pdfFieldId, boundaryHandlingId );
    ts->asynchronousCommunication( !syncComm );
    ts->optimizeCommunication( !fullComm );
@@ -852,7 +852,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    const auto exactSolutionFunction = setup.circularProfile ? exactPipeFunction : exactPlateFunction;
 
    auto volumetricFlowRate = field::makeVolumetricFlowRateEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
-                                                                                                        flagFieldId, Fluid_Flag,
+                                                                                                        flagFieldId, Fluid_Flag(),
                                                                                                         [flowRate = setup.flowRate_L] { return exactFlowRate(flowRate); },
                                                                                                         exactSolutionFunction );
    volumetricFlowRate->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
@@ -861,25 +861,25 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( volumetricFlowRate ), "volumetric flow rate evaluation" );
 
    auto accuracyEvaluation = field::makeAccuracyEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
-                                                                                              flagFieldId, Fluid_Flag, exactSolutionFunction );
+                                                                                              flagFieldId, Fluid_Flag(), exactSolutionFunction );
    accuracyEvaluation->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( accuracyEvaluation ), "accuracy evaluation" );
    
    auto linePlot = field::makeAccuracyEvaluationLinePlot< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
-                                                                                            flagFieldId, Fluid_Flag, exactSolutionFunction );
+                                                                                            flagFieldId, Fluid_Flag(), exactSolutionFunction );
    linePlot->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( field::makeAccuracyEvaluationLinePlotter( configBlock, linePlot ) ), "accuracy evaluation (line plot)" );
    
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( lbm::makeMassEvaluation< DensityAdaptor_T, FlagField_T >( configBlock, blocks, uint_t{0},
-                                                                                                                densityAdaptorId, flagFieldId, Fluid_Flag ) ),
+                                                                                                                densityAdaptorId, flagFieldId, Fluid_Flag() ) ),
                                    "mass evaluation" );
    
    // stability check (non-finite values in the PDF field?)
 
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >(
-                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag ) ),
+                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag() ) ),
                                   "LBM stability check" );
 
    // VTK
@@ -897,10 +897,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // logging right before the simulation starts
 
-   lbm::BlockForestEvaluation< FlagField_T > blockForest( blocks, flagFieldId, Fluid_Flag );
+   lbm::BlockForestEvaluation< FlagField_T > blockForest( blocks, flagFieldId, Fluid_Flag() );
    blockForest.logInfoOnRoot();
 
-   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag );
+   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag() );
    fluidCells();
 
    WALBERLA_LOG_INFO_ON_ROOT( "Benchmark run data:"
@@ -927,7 +927,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // run the simulation
 
-   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag );
+   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag() );
 
    for( uint_t outerRun = 0; outerRun < outerTimeSteps; ++outerRun )
    {

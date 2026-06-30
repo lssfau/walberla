@@ -353,22 +353,22 @@ namespace walberla {
       void createBoundaryConfig(const SimulationParameters & parameters,  Config::Block & boundaryBlock, const bool & scalar_config = false) {
          if ( !scalar_config ){
             auto & bottomWall = boundaryBlock.createBlock("Border");
-            bottomWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]);
+            bottomWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]));
             bottomWall.addParameter("walldistance", "-1");
             bottomWall.addParameter("flag", "FreeSlip");
 
             auto & topWall = boundaryBlock.createBlock("Border");
-            topWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]);
+            topWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]));
             topWall.addParameter("walldistance", "-1");
             topWall.addParameter("flag", "FreeSlip");
          } else {
             auto & bottomWall = boundaryBlock.createBlock("Border");
-            bottomWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]);
+            bottomWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, true)]));
             bottomWall.addParameter("walldistance", "-1");
             bottomWall.addParameter("flag", "Neumann");
 
             auto & topWall = boundaryBlock.createBlock("Border");
-            topWall.addParameter("direction", stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]);
+            topWall.addParameter("direction", std::string(stencil::dirToString[stencil::directionFromAxis(parameters.wallAxis, false)]));
             topWall.addParameter("walldistance", "-1");
             topWall.addParameter("flag", "Neumann");
          }

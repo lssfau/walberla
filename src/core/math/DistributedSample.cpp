@@ -200,9 +200,5 @@ std::string DistributedSample::format( const std::string & formatString ) const
    return result;
 }
 
-const std::string DistributedSample::DEFAULT_FORMAT_STRING = "Sample has %size values in [%min, %max], "
-                                                             "sum = %sum, mean = %mean, "
-                                                             "stddev = %stddev (relative: %relstddev)";
-
 } // namespace math
 } // namespace walberla

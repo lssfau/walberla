@@ -83,8 +83,8 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag( "fluid" );
-const FlagUID MO_Flag( "moving obstacle" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & MO_Flag() { static const FlagUID flag("moving obstacle"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -110,10 +110,10 @@ public:
       auto *  pdfField     = block->getData< PdfField_T > ( pdfFieldID_ );
       auto * particleField = block->getData< lbm_mesapd_coupling::ParticleField_T > ( particleFieldID_ );
 
-      const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+      const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
-                                  MO_T( "MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  MO_T( "MO", MO_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -198,7 +198,7 @@ int main( int argc, char **argv )
 
    // map sphere
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
-   ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_Flag);
+   ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_Flag());
 
    Vector3<real_t> probeLocation = centerPosition - Vector3<real_t>(radius + real_t{1}, real_t{0}, real_t{0});
    lbm_mesapd_coupling::InspectionProbe<PdfField_T, BoundaryHandling_T, ParticleAccessor_T> probe(probeLocation, blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, printToScreen, printSurroundingState, outputFileName );

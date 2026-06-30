@@ -29,10 +29,9 @@ namespace math {
 
 namespace internal {
 
-static std::mt19937 generator; // static std::mt19937_64 generator;
-
 std::mt19937 & getGenerator() // std::mt19937_64
 {
+   static std::mt19937 generator; // static std::mt19937_64 generator;
    return generator;
 }
 

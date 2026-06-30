@@ -85,7 +85,7 @@ using FlagField_T = FlagField< flag_t >;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag("fluid");
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
 
 ////////////////
 // PARAMETERS //

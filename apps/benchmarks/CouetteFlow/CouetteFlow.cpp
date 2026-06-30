@@ -150,9 +150,9 @@ const uint_t FieldGhostLayers  = uint_t{4};
 // FLAGS //
 ///////////
 
-const FlagUID  Fluid_Flag( "fluid" );
-const FlagUID    UBB_Flag( "velocity bounce back" );
-const FlagUID NoSlip_Flag( "no slip" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag( "fluid" ); return flag; }
+const FlagUID & UBB_Flag() { static const FlagUID flag( "velocity bounce back" ); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag( "no slip" ); return flag; }
 
 /////////////////////
 // OUTPUT HELPERS  //
@@ -403,11 +403,11 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
 
-   const flag_t fluid = flagField->registerFlag( Fluid_Flag );
+   const flag_t fluid = flagField->registerFlag( Fluid_Flag() );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                  NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                  UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_t{0}, real_t{0} ) );
+                                  NoSlip_T( "no slip", NoSlip_Flag(), pdfField ),
+                                  UBB_T( "velocity bounce back", UBB_Flag(), pdfField, topVelocity_, real_t{0}, real_t{0} ) );
 }
 
 
@@ -432,11 +432,11 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
 
       // no slip BOTTOM
       CellInterval south( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, south );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), south );
 
       // velocity TOP
       CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( UBB_Flag, north );
+      boundaryHandling->forceBoundary( UBB_Flag(), north );
       
       boundaryHandling->fillWithDomain( domainBB );
    }
@@ -540,12 +540,12 @@ void MyVTKOutput<LatticeModel_T>::operator()( std::vector< shared_ptr<vtk::Block
    // cell filters
 
    field::FlagFieldCellFilter<FlagField_T> fluidFilter( flagField_ );
-   fluidFilter.addFlag( Fluid_Flag );
+   fluidFilter.addFlag( Fluid_Flag() );
    filters[ "FluidFilter" ] = fluidFilter;
 
    field::FlagFieldCellFilter<FlagField_T> obstacleFilter( flagField_ );
-   obstacleFilter.addFlag( NoSlip_Flag );
-   obstacleFilter.addFlag(    UBB_Flag );
+   obstacleFilter.addFlag( NoSlip_Flag() );
+   obstacleFilter.addFlag(    UBB_Flag() );
    filters[ "ObstacleFilter" ] = obstacleFilter;
 
    // before functions
@@ -620,7 +620,7 @@ struct AddRefinementTimeStep
          else
          {
             using Sweep_T = lbm::SplitSweep<LatticeModel_T, FlagField_T>;
-            auto mySweep = make_shared< Sweep_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+            auto mySweep = make_shared< Sweep_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                               syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (split LB sweep)" );
@@ -628,7 +628,7 @@ struct AddRefinementTimeStep
       }
       else
       {
-         auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+         auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
          addRefinementTimeStep< LatticeModel_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                   syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (default LB sweep)" );
@@ -647,7 +647,7 @@ struct AddRefinementTimeStep< LatticeModel_T >
                     const shared_ptr<WcTimingPool> & timingPool, const shared_ptr<WcTimingPool> & levelwiseTimingPool,
                     const bool /*split*/, const bool /*pure*/, const bool syncComm, const bool fullComm, const bool linearExplosion )
    {
-      auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
+      auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() );
 
       addRefinementTimeStep< LatticeModel_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
                                                syncComm, fullComm, linearExplosion, mySweep, "LBM refinement time step (default LB sweep)" );
@@ -738,7 +738,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    const auto exactSolutionFunction = [domain = blocks->getDomain(), maxVel = setup.maxVelocity_L](auto & p) { return exactVelocity(p, domain, maxVel); };
 
    auto volumetricFlowRate = field::makeVolumetricFlowRateEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
-                                                                                                        flagFieldId, Fluid_Flag,
+                                                                                                        flagFieldId, Fluid_Flag(),
                                                                                                         [flowRate = setup.flowRate_L] { return exactFlowRate(flowRate); },
                                                                                                         exactSolutionFunction );
    volumetricFlowRate->setNormalizationFactor( real_t{1} / setup.maxVelocity_L );
@@ -761,7 +761,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    // stability check (non-finite values in the PDF field?)
 
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< lbm::PdfField< LatticeModel_T >, FlagField_T >(
-                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag ) ),
+                                                        configBlock, blocks, pdfFieldId, flagFieldId, Fluid_Flag() ) ),
                                   "LBM stability check" );
 
    // VTK
@@ -779,10 +779,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // logging right before the simulation starts
 
-   lbm::BlockForestEvaluation< FlagField_T > blockForest( blocks, flagFieldId, Fluid_Flag );
+   lbm::BlockForestEvaluation< FlagField_T > blockForest( blocks, flagFieldId, Fluid_Flag() );
    blockForest.logInfoOnRoot();
 
-   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag );
+   field::CellCounter< FlagField_T > fluidCells( blocks, flagFieldId, Fluid_Flag() );
    fluidCells();
 
    WALBERLA_LOG_INFO_ON_ROOT( "Benchmark run data:"
@@ -807,7 +807,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // run the simulation
 
-   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag );
+   lbm::PerformanceEvaluation< FlagField_T > performance( blocks, flagFieldId, Fluid_Flag() );
 
    for( uint_t outerRun = 0; outerRun < outerTimeSteps; ++outerRun )
    {

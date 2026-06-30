@@ -301,10 +301,6 @@ std::string Sample::format(const std::string & formatString) const
    return result;
 }
 
-const std::string Sample::DEFAULT_FORMAT_STRING = "Sample has %size values in [%min, %max], "
-                                                  "sum = %sum, mean = %mean, med = %med, "
-                                                  "stddev = %stddev (relative: %relstddev), mad = %mad";
-
 /*******************************************************************************************************************//**
  * \brief   Stream output operator for class Sample
  **********************************************************************************************************************/

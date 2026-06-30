@@ -40,6 +40,7 @@
 #include "vtk/DumpBlockStructureProcess.h"
 #include "vtk/VTKOutput.h"
 
+#include <string_view>
 #include <type_traits>
 
 namespace walberla {
@@ -47,16 +48,16 @@ namespace field {
 
 namespace internal {
 
-const std::string stabilityCheckerVTKBase("vtk_out");
-const std::string stabilityCheckerVTKFolder("output");
-const std::string stabilityCheckerVTKIdentifier("error_field");
+constexpr std::string_view stabilityCheckerVTKBase = "vtk_out";
+constexpr std::string_view stabilityCheckerVTKFolder = "output";
+constexpr std::string_view stabilityCheckerVTKIdentifier = "error_field";
 
 const bool stabilityCheckerVTKBinary( true );
 const bool stabilityCheckerVTKLittleEndian( true );
 const bool stabilityCheckerVTKMPIIO( true );
 const bool stabilityCheckerVTKForcePVTU( false );
 
-const std::string stabilityCheckerConfigBlock("StabilityChecker");
+constexpr std::string_view stabilityCheckerConfigBlock = "StabilityChecker";
 
 template< typename T >
 inline bool stabilityCheckerIsFinite( const T & value ) { return math::finite( value ); }
@@ -673,9 +674,9 @@ inline void stabilityCheckerConfigParser( const shared_ptr< Config > & config, c
    uint_t defaultCheckFrequency = uint_t{0}; \
    bool defaultOutputToStream = true; \
    bool defaultOutputVTK = true; \
-   std::string defaultVTKBaseFolder = internal::stabilityCheckerVTKBase; \
-   std::string defaultVTKExecutionFolder = internal::stabilityCheckerVTKFolder; \
-   std::string defaultVTKIdentifier = internal::stabilityCheckerVTKIdentifier; \
+   std::string defaultVTKBaseFolder = std::string(internal::stabilityCheckerVTKBase); \
+   std::string defaultVTKExecutionFolder = std::string(internal::stabilityCheckerVTKFolder); \
+   std::string defaultVTKIdentifier = std::string(internal::stabilityCheckerVTKIdentifier); \
    bool defaultVTKBinary = internal::stabilityCheckerVTKBinary; \
    bool defaultVTKLittleEndian = internal::stabilityCheckerVTKLittleEndian; \
    bool defaultVTKMPIIO = internal::stabilityCheckerVTKMPIIO; \
@@ -697,7 +698,7 @@ inline void stabilityCheckerConfigParser( const shared_ptr< Config > & config, c
 template< typename Field_T, typename Config_T > // Config_T may be 'shared_ptr< Config >' or 'Config::BlockHandle'
 shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const Config_T & config,
                                                                 const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
-                                                                const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                                                                const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                                                                 const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -711,7 +712,7 @@ template< typename Field_T, typename Config_T, typename CheckFunction_T = std::f
 shared_ptr< StabilityChecker< Field_T > > makeStabilityChecker( const Config_T & config,
                                                                const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
                                                                CheckFunction_T checkFunction,
-                                                               const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                                                               const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                                                                const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                                                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -726,7 +727,7 @@ shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > 
 makeStabilityChecker( const Config_T & config,
                       const weak_ptr< StructuredBlockStorage > & blocks,
                       const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
-                      const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                      const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                       const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                       const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -743,7 +744,7 @@ shared_ptr< StabilityChecker< Field_T, FlagFieldEvaluationFilter<FlagField_T> > 
                         const weak_ptr< StructuredBlockStorage > & blocks,
                         const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
                         CheckFunction_T checkFunction,
-                        const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                        const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -758,7 +759,7 @@ template< typename Field_T, typename Filter_T, typename Config_T > // Config_T m
 shared_ptr< StabilityChecker< Field_T, Filter_T > >
 makeStabilityChecker( const Config_T & config,
                       const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId, const Filter_T & filter,
-                      const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                      const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                       const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                       const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -774,7 +775,7 @@ shared_ptr< StabilityChecker< Field_T, Filter_T > >
    makeStabilityChecker( const Config_T & config,
                         const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId, const Filter_T & filter,
                         CheckFunction_T checkFunction,
-                        const std::string & configBlockName = internal::stabilityCheckerConfigBlock,
+                        const std::string & configBlockName = std::string(internal::stabilityCheckerConfigBlock),
                         const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {

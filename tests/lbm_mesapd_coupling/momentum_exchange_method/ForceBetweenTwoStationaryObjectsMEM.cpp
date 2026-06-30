@@ -95,9 +95,9 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag   ( "fluid" );
-const FlagUID BB_Flag   ( "obstacle BB" );
-const FlagUID CLI_Flag  ( "obstacle CLI" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & BB_Flag() { static const FlagUID flag("obstacle BB"); return flag; }
+const FlagUID & CLI_Flag() { static const FlagUID flag("obstacle CLI"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -126,11 +126,11 @@ public:
       auto *  pdfField     = block->getData< PdfField_T > ( pdfFieldID_ );
       auto * particleField = block->getData< lbm_mesapd_coupling::ParticleField_T > ( particleFieldID_ );
 
-      const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+      const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
-                                  SBB_T("SBB_BB", BB_Flag,  pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
-                                  CLI_T("CLI_BB", CLI_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  SBB_T("SBB_BB", BB_Flag(),  pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
+                                  CLI_T("CLI_BB", CLI_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -233,16 +233,16 @@ void createSimulationSetup( shared_ptr< StructuredBlockForest > blocks, shared_p
    timeloop.add() << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
    // LBM
-   auto sweep = lbm::makeCellwiseSweep< LM_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   auto sweep = lbm::makeCellwiseSweep< LM_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag() );
    timeloop.add() << Sweep( makeSharedSweep(sweep), "cell-wise LB sweep" );
 
    // map particles
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
    if( useSBB )
    {
-      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, BB_Flag);
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, BB_Flag());
    }else{
-      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag());
    }
 }
 

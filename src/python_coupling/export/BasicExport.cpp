@@ -596,7 +596,7 @@ void exportStencilDirections(py::module_ &m)
          cx.append(stencil::cx[i]);
          cy.append(stencil::cy[i]);
          cz.append(stencil::cz[i]);
-         dirStrings.append(stencil::dirToString[i]);
+         dirStrings.append(std::string(stencil::dirToString[i]));
       }
       py::list c;
       c.append(cx);

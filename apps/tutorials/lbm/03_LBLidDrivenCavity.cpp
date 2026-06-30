@@ -85,9 +85,9 @@ using BoundaryHandling_T = BoundaryHandling<FlagField_T, Stencil_T, NoSlip_T, UB
 // FLAGS //
 ///////////
 
-const FlagUID  Fluid_Flag( "fluid" );                // flag used for marking fluid cells as being fluid cells
-const FlagUID    UBB_Flag( "velocity bounce back" ); // flag used for marking all cells at the top as being an obstacle (boundary condition = velocity bounce back)
-const FlagUID NoSlip_Flag( "no slip" );              // flag used for marking all remaining domain borders as being an obstacle (boundary condition = no slip)
+const FlagUID & Fluid_Flag() { static const FlagUID flag( "fluid" ); return flag; }                // flag used for marking fluid cells as being fluid cells
+const FlagUID & UBB_Flag() { static const FlagUID flag( "velocity bounce back" ); return flag; }   // flag used for marking all cells at the top as being an obstacle (boundary condition = velocity bounce back)
+const FlagUID & NoSlip_Flag() { static const FlagUID flag( "no slip" ); return flag; }             // flag used for marking all remaining domain borders as being an obstacle (boundary condition = no slip)
 
 
 
@@ -129,7 +129,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
 
-   const flag_t fluid = flagField->registerFlag( Fluid_Flag ); // register the fluid flag at the flag field
+   const flag_t fluid = flagField->registerFlag( Fluid_Flag() ); // register the fluid flag at the flag field
 
    // A new boundary handling instance that uses the just fetched flag field is created:
    // Additional, internal flags used by the boundary handling will be stored in this flag field.
@@ -139,8 +139,8 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    // must be identical to the order of the template arguments of 'BoundaryHandling_T'!).
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                  NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                     UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_c(0), real_c(0) ) );
+                                  NoSlip_T( "no slip", NoSlip_Flag(), pdfField ),
+                                     UBB_T( "velocity bounce back", UBB_Flag(), pdfField, topVelocity_, real_c(0), real_c(0) ) );
 }
 
 
@@ -192,29 +192,29 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       // already set for those cells are safely overwritten by this call.
 
       CellInterval west( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, west );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), west );
 
       // no slip EAST
       CellInterval east( domainBB.xMax(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, east );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), east );
 
       // no slip SOUTH
       CellInterval south( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, south );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), south );
 
       // no slip NORTH
       CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, north );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), north );
 
       // no slip BOTTOM
       CellInterval bottom( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMin() );
-      boundaryHandling->forceBoundary( NoSlip_Flag, bottom );
+      boundaryHandling->forceBoundary( NoSlip_Flag(), bottom );
 
       // Finally, we mark the entire TOP plane with the velocity bounce back flag.
       // This finalizes our boundary setup.
 
       CellInterval top( domainBB.xMin(), domainBB.yMin(), domainBB.zMax(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
-      boundaryHandling->forceBoundary( UBB_Flag, top );
+      boundaryHandling->forceBoundary( UBB_Flag(), top );
 
       // All the remaining cells need to be marked as being fluid. The 'fillWithDomain' call does just that.
 
@@ -263,7 +263,7 @@ shared_ptr< vtk::VTKOutput> createFluidFieldVTKWriter( shared_ptr< StructuredBlo
    // that is set up to filter only those cells marked with our fluid flag (-> 'fluidFlag').
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldId );
-   fluidFilter.addFlag( Fluid_Flag );
+   fluidFilter.addFlag( Fluid_Flag() );
    pdfFieldVTKWriter->addCellInclusionFilter( fluidFilter );
 
    // We are still left with telling the VTK output to actually output any data. We can do so by calling the 'addCellDataWriter' and
@@ -384,7 +384,7 @@ int main( int argc, char ** argv )
    // For this simulation, we selected the cell-wise LB sweep which, because of providing flag field data, ignores cells not marked as fluid
    // cells and performs the LB stream and collide operation only on cells marked as being fluid.
 
-   timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag ) ), "LB stream & collide" );
+   timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag() ) ), "LB stream & collide" );
 
    // Finally, we create a VTK output instance which is set up to generate VTK files that include information about the lattice velocity and
    // lattice density of our lid driven cavity simulation.

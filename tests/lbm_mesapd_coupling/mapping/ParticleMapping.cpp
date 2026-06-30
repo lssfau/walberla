@@ -82,8 +82,8 @@ using BoundaryHandling_T = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T >;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag ( "fluid" );
-const FlagUID NoSlip_Flag  ( "no slip" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
 
 
 /////////////////////////////////////
@@ -114,10 +114,10 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    FlagField_T * flagField       = block->getData< FlagField_T >( flagFieldID_ );
    PdfField_T *  pdfField        = block->getData< PdfField_T > ( pdfFieldID_ );
 
-   const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+   const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "fixed obstacle boundary handling", flagField, fluid,
-                                                           NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) );
+                                                           NoSlip_T( "NoSlip", NoSlip_Flag(), pdfField ) );
 
    handling->fillWithDomain( FieldGhostLayers );
 
@@ -475,7 +475,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -508,7 +508,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -544,7 +544,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -583,7 +583,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -617,7 +617,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -654,7 +654,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -694,7 +694,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -736,7 +736,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::FixedParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 
@@ -779,7 +779,7 @@ int main( int argc, char **argv )
       syncNextNeighborFunc(*ps, domain, overlap);
 
       // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag() );
 
       if( writeVTK ) flagFieldVTK->write();
 

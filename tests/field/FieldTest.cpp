@@ -273,7 +273,7 @@ void ghostlayerIterators(field::Layout layout)
 
    for( auto dir = D3Q27::begin(); dir != D3Q27::end(); ++dir )
       for( auto i = field.beginGhostLayerOnly(*dir); i != field.end(); ++i )
-         *i = dirToString[*dir];
+         *i = std::string(dirToString[*dir]);
 
    WALBERLA_CHECK_EQUAL( field(-1,-1,-1), "BSW" );
    WALBERLA_CHECK_EQUAL( field(-1,-1, 0),  "SW" );

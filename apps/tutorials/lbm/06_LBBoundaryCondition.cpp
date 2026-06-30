@@ -48,17 +48,17 @@ using FlagField_T = FlagField< flag_t >;
 const uint_t FieldGhostLayers = uint_t{1};
 
 // unique identifiers for flags
-const FlagUID FluidFlagUID("Fluid Flag");
-const FlagUID NoSlipFlagUID("NoSlip Flag");
-const FlagUID FreeSlipFlagUID("FreeSlip Flag");
-const FlagUID SimpleUBBFlagUID("SimpleUBB Flag");
-const FlagUID UBBFlagUID("UBB Flag");
-const FlagUID DynamicUBBFlagUID("DynamicUBB Flag");
-const FlagUID ParserUBBFlagUID("ParserUBB Flag");
-const FlagUID SimplePressureFlagUID("SimplePressure Flag");
-const FlagUID PressureFlagUID("Pressure Flag");
-const FlagUID OutletFlagUID("Outlet Flag");
-const FlagUID SimplePABFlagUID("SimplePAB Flag");
+const FlagUID & FluidFlagUID() { static const FlagUID flag("Fluid Flag"); return flag; }
+const FlagUID & NoSlipFlagUID() { static const FlagUID flag("NoSlip Flag"); return flag; }
+const FlagUID & FreeSlipFlagUID() { static const FlagUID flag("FreeSlip Flag"); return flag; }
+const FlagUID & SimpleUBBFlagUID() { static const FlagUID flag("SimpleUBB Flag"); return flag; }
+const FlagUID & UBBFlagUID() { static const FlagUID flag("UBB Flag"); return flag; }
+const FlagUID & DynamicUBBFlagUID() { static const FlagUID flag("DynamicUBB Flag"); return flag; }
+const FlagUID & ParserUBBFlagUID() { static const FlagUID flag("ParserUBB Flag"); return flag; }
+const FlagUID & SimplePressureFlagUID() { static const FlagUID flag("SimplePressure Flag"); return flag; }
+const FlagUID & PressureFlagUID() { static const FlagUID flag("Pressure Flag"); return flag; }
+const FlagUID & OutletFlagUID() { static const FlagUID flag("Outlet Flag"); return flag; }
+const FlagUID & SimplePABFlagUID() { static const FlagUID flag("SimplePAB Flag"); return flag; }
 //! [variableDefines]
 
 ///////////////////////////
@@ -177,43 +177,43 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    FlagField_T* flagField = block->getData< FlagField_T >(flagFieldID_);
    PdfField_T* pdfField   = block->getData< PdfField_T >(pdfFieldID_);
 
-   const auto fluidFlag = flagField->getOrRegisterFlag(FluidFlagUID);
+   const auto fluidFlag = flagField->getOrRegisterFlag(FluidFlagUID());
    //! [boundaryHandling_T fields]
 
    BoundaryHandling_T* handling = new BoundaryHandling_T(
       "Boundary Handling", flagField, fluidFlag,
       //! [handling_NoSlip]
-      NoSlip_T("NoSlip", NoSlipFlagUID, pdfField),
+      NoSlip_T("NoSlip", NoSlipFlagUID(), pdfField),
       //! [handling_NoSlip]
       //! [handling_FreeSlip]
-      FreeSlip_T("FreeSlip", FreeSlipFlagUID, pdfField, flagField, fluidFlag),
+      FreeSlip_T("FreeSlip", FreeSlipFlagUID(), pdfField, flagField, fluidFlag),
       //! [handling_FreeSlip]
       //! [handling_SimpleUBB]
-      SimpleUBB_T("SimpleUBB", SimpleUBBFlagUID, pdfField, setup_.inflowVelocity),
+      SimpleUBB_T("SimpleUBB", SimpleUBBFlagUID(), pdfField, setup_.inflowVelocity),
       //! [handling_SimpleUBB]
       //! [handling_UBB]
-      UBB_T("UBB", UBBFlagUID, pdfField),
+      UBB_T("UBB", UBBFlagUID(), pdfField),
       //! [handling_UBB]
       //! [handling_DynamicUBB]
-      DynamicUBB_T("DynamicUBB", DynamicUBBFlagUID, pdfField, timeTracker_, storage->getLevel(*block), velocity,
+      DynamicUBB_T("DynamicUBB", DynamicUBBFlagUID(), pdfField, timeTracker_, storage->getLevel(*block), velocity,
                    block->getAABB()),
       //! [handling_DynamicUBB]
       //! [handling_ParserUBB]
-      ParserUBB_T("ParserUBB", ParserUBBFlagUID, pdfField, flagField, timeTracker_, storage->getLevel(*block),
+      ParserUBB_T("ParserUBB", ParserUBBFlagUID(), pdfField, flagField, timeTracker_, storage->getLevel(*block),
                   block->getAABB()),
       //! [handling_ParserUBB]
       //! [handling_SimplePressure]
-      SimplePressure_T("SimplePressure", SimplePressureFlagUID, pdfField, setup_.outflowPressure),
+      SimplePressure_T("SimplePressure", SimplePressureFlagUID(), pdfField, setup_.outflowPressure),
       //! [handling_SimplePressure]
       //! [handling_Pressure]
-      Pressure_T("Pressure", PressureFlagUID, pdfField),
+      Pressure_T("Pressure", PressureFlagUID(), pdfField),
       //! [handling_Pressure]
       //! [handling_Outlet]
-      Outlet_T("Outlet", OutletFlagUID, pdfField, flagField, fluidFlag),
+      Outlet_T("Outlet", OutletFlagUID(), pdfField, flagField, fluidFlag),
       //! [handling_Outlet]
       //! [handling_SimplePAB]
-      SimplePAB_T("SimplePAB", SimplePABFlagUID, pdfField, flagField, setup_.outflowPressure, setup_.omega,
-                  FluidFlagUID, NoSlipFlagUID));
+      SimplePAB_T("SimplePAB", SimplePABFlagUID(), pdfField, flagField, setup_.outflowPressure, setup_.omega,
+                  FluidFlagUID(), NoSlipFlagUID()));
       //! [handling_SimplePAB]
 
    //! [domainBB]
@@ -236,7 +236,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
 
    if (setup_.inflowType == "SimpleUBB") {
       //! [forceBoundary_SimpleUBB]
-      handling->forceBoundary(SimpleUBBFlagUID, west);
+      handling->forceBoundary(SimpleUBBFlagUID(), west);
       //! [forceBoundary_SimpleUBB]
    }
    else if (setup_.inflowType == "UBB")
@@ -253,14 +253,14 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
          Vector3< real_t > ubbVel(0);
          ubbVel[0] = -real_t{4} * y * (y - H) / (H * H) * setup_.inflowVelocity[0];
 
-         handling->forceBoundary(UBBFlagUID, cellIt.x(), cellIt.y(), cellIt.z(), UBB_T::Velocity(ubbVel));
+         handling->forceBoundary(UBBFlagUID(), cellIt.x(), cellIt.y(), cellIt.z(), UBB_T::Velocity(ubbVel));
       }
       //! [forceBoundary_UBB]
    }
    else if (setup_.inflowType == "DynamicUBB")
    {
       //! [forceBoundary_DynamicUBB]
-      handling->forceBoundary(DynamicUBBFlagUID, west);
+      handling->forceBoundary(DynamicUBBFlagUID(), west);
       //! [forceBoundary_DynamicUBB]
    }
    else if (setup_.inflowType == "ParserUBB")
@@ -271,11 +271,11 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
       snprintf(x_eq.data(), maxSize, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
 
       std::array< std::string, 3 > eqs = { x_eq.data(), "0", "0" };
-      handling->forceBoundary(ParserUBBFlagUID, west, ParserUBB_T::Parser(eqs));
+      handling->forceBoundary(ParserUBBFlagUID(), west, ParserUBB_T::Parser(eqs));
       //! [forceBoundary_ParserUBB_eqs]
 
       //! [forceBoundary_ParserUBB_config]
-      handling->forceBoundary(ParserUBBFlagUID, west, ParserUBB_T::Parser(setup_.parser));
+      handling->forceBoundary(ParserUBBFlagUID(), west, ParserUBB_T::Parser(setup_.parser));
       //! [forceBoundary_ParserUBB_config]
    }
    else
@@ -290,7 +290,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
 
    if (setup_.outflowType == "SimplePressure") {
       //! [forceBoundary_SimplePressure]
-      handling->forceBoundary(SimplePressureFlagUID, east);
+      handling->forceBoundary(SimplePressureFlagUID(), east);
       //! [forceBoundary_SimplePressure]
    }
    else if (setup_.outflowType == "Pressure")
@@ -307,7 +307,7 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
          real_t local_density =
             setup_.outflowPressure * (real_t{1.0} + real_t{0.01} * std::sin(real_t{2.0 * 3.1415926538} * y / H));
 
-         handling->forceBoundary(PressureFlagUID, cellIt.x(), cellIt.y(), cellIt.z(),
+         handling->forceBoundary(PressureFlagUID(), cellIt.x(), cellIt.y(), cellIt.z(),
                                  Pressure_T::LatticeDensity(local_density));
       }
       //! [forceBoundary_Pressure]
@@ -315,13 +315,13 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    else if (setup_.outflowType == "Outlet")
    {
       //! [forceBoundary_Outlet]
-      handling->forceBoundary(OutletFlagUID, east);
+      handling->forceBoundary(OutletFlagUID(), east);
       //! [forceBoundary_Outlet]
    }
    else if (setup_.outflowType == "SimplePAB")
    {
       //! [forceBoundary_SimplePAB]
-      handling->forceBoundary(SimplePABFlagUID, east);
+      handling->forceBoundary(SimplePABFlagUID(), east);
       //! [forceBoundary_SimplePAB]
    }
    else
@@ -345,16 +345,16 @@ BoundaryHandling_T* MyBoundaryHandling::operator()(IBlock* const block,
    if (setup_.wallType == "NoSlip")
    {
       //! [forceBoundary_NoSlip]
-      handling->forceBoundary(NoSlipFlagUID, south);
+      handling->forceBoundary(NoSlipFlagUID(), south);
       //! [forceBoundary_NoSlip]
-      handling->forceBoundary(NoSlipFlagUID, north);
+      handling->forceBoundary(NoSlipFlagUID(), north);
    }
    else if (setup_.wallType == "FreeSlip")
    {
       //! [forceBoundary_FreeSlip]
-      handling->forceBoundary(FreeSlipFlagUID, south);
+      handling->forceBoundary(FreeSlipFlagUID(), south);
       //! [forceBoundary_FreeSlip]
-      handling->forceBoundary(FreeSlipFlagUID, north);
+      handling->forceBoundary(FreeSlipFlagUID(), north);
    }
    else
    {
@@ -429,7 +429,7 @@ int main(int argc, char** argv)
                   << Sweep(BoundaryHandling_T::getBlockSweep(boundaryHandlingID), "boundary handling");
    //! [boundarySweep]
    timeloop.add() << Sweep(
-      makeSharedSweep(lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >(pdfFieldID, flagFieldID, FluidFlagUID)),
+      makeSharedSweep(lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >(pdfFieldID, flagFieldID, FluidFlagUID())),
       "LB stream & collide");
 
    // increment time step counter
@@ -439,7 +439,7 @@ int main(int argc, char** argv)
 
    // LBM stability check
    timeloop.addFuncAfterTimeStep(makeSharedFunctor(field::makeStabilityChecker< PdfField_T, FlagField_T >(
-                                    walberlaEnv.config(), blocks, pdfFieldID, flagFieldID, FluidFlagUID)),
+                                    walberlaEnv.config(), blocks, pdfFieldID, flagFieldID, FluidFlagUID())),
                                  "LBM stability check");
 
    // log remaining time
@@ -448,7 +448,7 @@ int main(int argc, char** argv)
 
    // add VTK output to time loop
    //   lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop(timeloop, blocks, walberlaEnv.config(), pdfFieldID,
-   //                                                                flagFieldID, FluidFlagUID);
+   //                                                                flagFieldID, FluidFlagUID());
 
    auto vtkConfig = walberlaEnv.config()->getBlock("VTK");
 

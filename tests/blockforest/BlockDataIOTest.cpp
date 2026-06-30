@@ -37,8 +37,8 @@ namespace block_data_io_test
 using namespace walberla;
 using walberla::uint8_t;
 
-const SUID Empty("empty");
-const Set< SUID > None(Set< SUID >::emptySet());
+const SUID & Empty() { static const SUID suid("empty"); return suid; }
+const Set< SUID > & None() { static const Set< SUID > set(Set< SUID >::emptySet()); return set; }
 
 static void refinementSelectionFunction(SetupBlockForest& forest)
 {
@@ -53,7 +53,7 @@ static void workloadMemorySUIDAssignmentFunction(SetupBlockForest& forest)
    {
       block.setMemory(memory_t{1});
       block.setWorkload(workload_t{1});
-      if (block.getAABB().contains(Vector3< real_t >(real_c(25.0)))) block.addState(Empty);
+      if (block.getAABB().contains(Vector3< real_t >(real_c(25.0)))) block.addState(Empty());
    }
 }
 
@@ -82,11 +82,11 @@ void test(const bool forceSerialIO)
    // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::fzyx, uint_t{3}, false,
    // None, Empty );
    auto dataHandling    = make_shared< field::DefaultBlockDataHandling< FieldType > >(sbf, uint_c(3), 0.0, field::fzyx);
-   auto originalFieldId = sbf->addBlockData(dataHandling, "OriginalField", None, Empty);
+   auto originalFieldId = sbf->addBlockData(dataHandling, "OriginalField", None(), Empty());
 
    math::seedRandomGenerator(numeric_cast< std::mt19937::result_type >(MPIManager::instance()->rank()));
 
-   for (auto it = sbf->begin(None, Empty); it != sbf->end(); ++it)
+   for (auto it = sbf->begin(None(), Empty()); it != sbf->end(); ++it)
    {
       auto field = it->getData< FieldType >(originalFieldId);
 
@@ -98,9 +98,9 @@ void test(const bool forceSerialIO)
       
    WALBERLA_MPI_BARRIER()
 
-   auto readFieldId = forceSerialIO ? sbf->loadBlockData("block.data", dataHandling, "ReadField", true, None, Empty) : sbf->loadBlockData("blockMPIIO.data", dataHandling, "ReadField", false, None, Empty);
+   auto readFieldId = forceSerialIO ? sbf->loadBlockData("block.data", dataHandling, "ReadField", true, None(), Empty()) : sbf->loadBlockData("blockMPIIO.data", dataHandling, "ReadField", false, None(), Empty());
 
-   for (auto it = sbf->begin(None, Empty); it != sbf->end(); ++it)
+   for (auto it = sbf->begin(None(), Empty()); it != sbf->end(); ++it)
    {
       auto originalField = it->getData< FieldType >(originalFieldId);
       auto readField     = it->getData< FieldType >(readFieldId);

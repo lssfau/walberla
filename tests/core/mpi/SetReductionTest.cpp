@@ -90,8 +90,6 @@ void testRankSet()
    }   
 }
 
-static const int         NUM_FRUITS = 5;
-static const std::array< std::string, 5 > FRUITS = { "apple", "banana", "pear", "melon", "grapefruit" };
 
 void testStrings()
 {
@@ -99,6 +97,9 @@ void testStrings()
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
    
    std::vector< std::string > values;
+   const int         NUM_FRUITS = 5;
+   const std::array< std::string, 5 > FRUITS = { "apple", "banana", "pear", "melon", "grapefruit" };
+   
    values.push_back( FRUITS[static_cast< size_t >(rank % NUM_FRUITS)] );
 
    std::vector< std::string > reducedValuesUnion = mpi::allReduceSet( values, mpi::UNION );

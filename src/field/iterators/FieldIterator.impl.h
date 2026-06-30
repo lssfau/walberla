@@ -113,7 +113,7 @@ FieldIterator<T,fs>::FieldIterator( const typename FieldIterator<T,fs>::FieldTyp
 /*!\brief Constructs an end iterator, which is represented by NULL pointers
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
-FieldIterator<T,fs>::FieldIterator()
+FieldIterator<T,fs>::FieldIterator() noexcept
    : linePtr_(nullptr), lineEnd_(nullptr), f_(nullptr)
 {
 }

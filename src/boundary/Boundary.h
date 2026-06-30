@@ -37,10 +37,11 @@ namespace boundary {
 class BoundaryConfiguration {
 public:
    virtual ~BoundaryConfiguration() = default;
-   static const BoundaryConfiguration& null()                { return *boundaryNullPtr; }
-   static const shared_ptr<BoundaryConfiguration> nullPtr()  { return  boundaryNullPtr; }
-private:
-   static const shared_ptr<BoundaryConfiguration> boundaryNullPtr;
+   static const BoundaryConfiguration& null()                { return *nullPtr(); }
+   static const shared_ptr<BoundaryConfiguration> nullPtr()  {
+      static const shared_ptr<BoundaryConfiguration> boundaryNullPtr = make_shared<BoundaryConfiguration>();
+      return boundaryNullPtr;
+   }
 };
 
 

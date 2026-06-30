@@ -80,10 +80,10 @@ using FlagField_T = FlagField<flag_t>;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag ( "fluid" );
-const FlagUID MO_Flag ( "moving obstacle" );
-const FlagUID FormerMO_Flag ( "former moving obstacle" );
-const FlagUID NoSlip_Flag( "no slip" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & MO_Flag() { static const FlagUID flag("moving obstacle"); return flag; }
+const FlagUID & FormerMO_Flag() { static const FlagUID flag("former moving obstacle"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
 
 
 /////////////////////////////////////
@@ -112,11 +112,11 @@ public:
       auto *  pdfField     = block->getData< PdfField_T > ( pdfFieldID_ );
       auto * particleField = block->getData< lbm_mesapd_coupling::ParticleField_T > ( particleFieldID_ );
 
-      const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+      const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
-                                  NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                  MO_T("MO_BB",  MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  NoSlip_T( "NoSlip", NoSlip_Flag(), pdfField ),
+                                  MO_T("MO_BB",  MO_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -312,7 +312,7 @@ int main( int argc, char **argv )
    auto bhBlockSweep = BoundaryHandling_T::getBlockSweep( boundaryHandlingID );
 
    // reconstructor
-   auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, false);
+   auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag(), Fluid_Flag(), false);
 
    // vtk
    auto flagFieldVTK = vtk::createVTKOutput_BlockData( blocks, "flag_field" );
@@ -323,8 +323,8 @@ int main( int argc, char **argv )
    MappingResetter<BoundaryHandling_T> mappingResetter(blocks, boundaryHandlingID, particleFieldID, accessor->getInvalidUid());
 
    // mapping functors
-   auto regularParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, lbm_mesapd_coupling::RegularParticlesSelector(), true );
-   auto globalParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, lbm_mesapd_coupling::GlobalParticlesSelector(), true );
+   auto regularParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag(), FormerMO_Flag(), lbm_mesapd_coupling::RegularParticlesSelector(), true );
+   auto globalParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag(), FormerMO_Flag(), lbm_mesapd_coupling::GlobalParticlesSelector(), true );
 
    /////////////////////////////
    // SPHERE - SPHERE MAPPING //
@@ -572,7 +572,7 @@ int main( int argc, char **argv )
 
       // map
       lbm_mesapd_coupling::ParticleMappingKernel<BoundaryHandling_T> particleMappingKernel(blocks, boundaryHandlingID);
-      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag);
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag());
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) (regularParticleMapper)(&(*blockIt));
 
       if( writeVTK ) flagFieldVTK->write();

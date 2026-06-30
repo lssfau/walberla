@@ -113,12 +113,12 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag("fluid");
-const FlagUID NoSlip_Flag("no slip");
-const FlagUID MO_Flag("moving obstacle");
-const FlagUID FormerMO_Flag("former moving obstacle");
-const FlagUID Inflow_Flag("inflow");
-const FlagUID Outflow_Flag("outflow");
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
+const FlagUID & MO_Flag() { static const FlagUID flag("moving obstacle"); return flag; }
+const FlagUID & FormerMO_Flag() { static const FlagUID flag("former moving obstacle"); return flag; }
+const FlagUID & Inflow_Flag() { static const FlagUID flag("inflow"); return flag; }
+const FlagUID & Outflow_Flag() { static const FlagUID flag("outflow"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -150,17 +150,17 @@ class MyBoundaryHandling
       auto* particleField = block->getData< lbm_mesapd_coupling::ParticleField_T >(particleFieldID_);
 
       const auto fluid =
-         flagField->flagExists(Fluid_Flag) ? flagField->getFlag(Fluid_Flag) : flagField->registerFlag(Fluid_Flag);
+         flagField->flagExists(Fluid_Flag()) ? flagField->getFlag(Fluid_Flag()) : flagField->registerFlag(Fluid_Flag());
 
       Type* handling =
-         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag, pdfField),
-                  MO_T("MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block),
-                  Inflow_T("Inflow", Inflow_Flag, pdfField, inflowVelocity_),
-                  Outflow_T("Outflow", Outflow_Flag, pdfField, real_t{1}));
+         new Type("moving obstacle boundary handling", flagField, fluid, NoSlip_T("NoSlip", NoSlip_Flag(), pdfField),
+                  MO_T("MO", MO_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block),
+                  Inflow_T("Inflow", Inflow_Flag(), pdfField, inflowVelocity_),
+                  Outflow_T("Outflow", Outflow_Flag(), pdfField, real_t{1}));
 
-      const auto inflow  = flagField->getFlag(Inflow_Flag);
-      const auto outflow = flagField->getFlag(Outflow_Flag);
-      const auto noslip  = flagField->getFlag(NoSlip_Flag);
+      const auto inflow  = flagField->getFlag(Inflow_Flag());
+      const auto outflow = flagField->getFlag(Outflow_Flag());
+      const auto noslip  = flagField->getFlag(NoSlip_Flag());
 
       CellInterval domainBB = storage->getDomainCellBB();
 
@@ -624,7 +624,7 @@ int main(int argc, char** argv)
    // note: planes are not mapped and are thus only visible to the particles, not to the fluid
    // instead, the respective boundary conditions for the fluid are explicitly set, see the boundary handling
    ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, movingParticleMappingKernel,
-                       *accessor, MO_Flag);
+                       *accessor, MO_Flag());
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
    blockforest::communication::UniformBufferedScheme< Stencil_T > optimizedPDFCommunicationScheme(blocks);
@@ -671,7 +671,7 @@ int main(int argc, char** argv)
       vtk::AABBCellFilter aabbSliceFilter(sliceAABB);
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldID);
-      fluidFilter.addFlag(Fluid_Flag);
+      fluidFilter.addFlag(Fluid_Flag());
 
       vtk::ChainedFilter combinedSliceFilter;
       combinedSliceFilter.addFilter(fluidFilter);
@@ -698,7 +698,7 @@ int main(int argc, char** argv)
                   << Sweep(BoundaryHandling_T::getBlockSweep(boundaryHandlingID), "Boundary Handling");
 
    // stream + collide LBM step
-   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >(pdfFieldID, flagFieldID, Fluid_Flag);
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >(pdfFieldID, flagFieldID, Fluid_Flag());
    timeloop.add() << Sweep(makeSharedSweep(lbmSweep), "LBM stream / collide");
 
    // this is carried out after the particle integration, it corrects the flag field and restores missing PDF
@@ -710,7 +710,7 @@ int main(int argc, char** argv)
    bool strictlyConserveMomentum = false;
    timeloopAfterParticles.add() << Sweep(
       lbm_mesapd_coupling::makeMovingParticleMapping< PdfField_T, BoundaryHandling_T >(
-         blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag,
+         blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag(), FormerMO_Flag(),
          lbm_mesapd_coupling::RegularParticlesSelector(), strictlyConserveMomentum),
       "Particle Mapping");
 
@@ -722,7 +722,7 @@ int main(int argc, char** argv)
    timeloopAfterParticles.add()
       << BeforeFunction(fullPDFCommunicationScheme, "PDF Communication")
       << Sweep(makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager< PdfField_T, BoundaryHandling_T >(
-                  blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag,
+                  blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag(), Fluid_Flag(),
                   gradReconstructor, strictlyConserveMomentum)),
                "PDF Restore");
 

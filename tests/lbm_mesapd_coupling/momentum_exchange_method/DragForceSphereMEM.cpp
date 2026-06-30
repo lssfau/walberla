@@ -97,9 +97,9 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag   ( "fluid" );
-const FlagUID MO_BB_Flag   ( "moving obstacle BB" );
-const FlagUID MO_CLI_Flag  ( "moving obstacle CLI" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & MO_BB_Flag() { static const FlagUID flag("moving obstacle BB"); return flag; }
+const FlagUID & MO_CLI_Flag() { static const FlagUID flag("moving obstacle CLI"); return flag; }
 
 ////////////////
 // PARAMETERS //
@@ -158,11 +158,11 @@ public:
       auto *  pdfField     = block->getData< PdfField_T > ( pdfFieldID_ );
       auto * particleField = block->getData< lbm_mesapd_coupling::ParticleField_T > ( particleFieldID_ );
 
-      const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+      const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
-                                  SBB_T("SBB_BB", MO_BB_Flag,  pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
-                                  CLI_T("CLI_BB", MO_CLI_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  SBB_T("SBB_BB", MO_BB_Flag(),  pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
+                                  CLI_T("CLI_BB", MO_CLI_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -292,7 +292,7 @@ private:
          FlagField_T * flagField = blockIt->getData< FlagField_T >( flagFieldID_ );
 
          // get the flag that marks a cell as being fluid
-         auto fluid = flagField->getFlag( Fluid_Flag );
+         auto fluid = flagField->getFlag( Fluid_Flag() );
 
          auto xyzField = pdfField->xyzSize();
          for (auto cell : xyzField) {
@@ -511,16 +511,16 @@ int main( int argc, char **argv )
    if( method == MEMVariant::CLI )
    {
       // uses a higher order boundary condition (CLI)
-      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_CLI_Flag);
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_CLI_Flag());
    }else{
       // uses standard bounce back boundary conditions
-      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_BB_Flag);
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_BB_Flag());
    }
 
    // since external forcing is applied, the evaluation of the velocity has to be carried out directly after the streaming step
    // however, the default sweep is a  stream - collide step, i.e. after the sweep, the velocity evaluation is not correct
    // solution: split the sweep explicitly into collide and stream
-   auto sweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   auto sweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag() );
 
    // collision sweep
    timeloop.add() << Sweep( lbm::makeCollideSweep( sweep ), "cell-wise LB sweep (collide)" );

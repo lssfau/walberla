@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 
@@ -47,8 +48,8 @@ namespace walberla {
 namespace field {
 
 namespace internal {
-const std::string massEvaluationFilename("mass.dat");
-const std::string massEvaluationConfigBlock("MassEvaluation");
+constexpr std::string_view massEvaluationFilename = "mass.dat";
+constexpr std::string_view massEvaluationConfigBlock = "MassEvaluation";
 }
 
 
@@ -130,7 +131,7 @@ public:
    MassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                    const ConstBlockDataID & fieldId, const Filter_T & filter,
                    const uint_t plotFrequency, const uint_t logFrequency,
-                   const std::string & filename = internal::massEvaluationFilename,
+                   const std::string & filename = std::string(internal::massEvaluationFilename),
                    const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), filter_( filter ),
@@ -147,7 +148,7 @@ public:
    MassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                    const ConstBlockDataID & fieldId,
                    const uint_t plotFrequency, const uint_t logFrequency,
-                   const std::string & filename = internal::massEvaluationFilename,
+                   const std::string & filename = std::string(internal::massEvaluationFilename),
                    const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       blocks_( blocks ), filter_( Filter_T() ),
@@ -293,7 +294,7 @@ template< typename DensityField_T >
 shared_ptr< MassEvaluation< DensityField_T > > makeMassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                                                                    const ConstBlockDataID & fieldId,
                                                                    const uint_t plotFrequency, const uint_t logFrequency,
-                                                                   const std::string & filename = internal::massEvaluationFilename,
+                                                                   const std::string & filename = std::string(internal::massEvaluationFilename),
                                                                    const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -306,7 +307,7 @@ shared_ptr< MassEvaluation< DensityField_T, FlagFieldEvaluationFilter<FlagField_
 makeMassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
                     const uint_t plotFrequency, const uint_t logFrequency,
-                    const std::string & filename = internal::massEvaluationFilename,
+                    const std::string & filename = std::string(internal::massEvaluationFilename),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -319,7 +320,7 @@ template< typename DensityField_T, typename Filter_T >
 shared_ptr< MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                                                                              const ConstBlockDataID & fieldId, const Filter_T & filter,
                                                                              const uint_t plotFrequency, const uint_t logFrequency,
-                                                                             const std::string & filename = internal::massEvaluationFilename,
+                                                                             const std::string & filename = std::string(internal::massEvaluationFilename),
                                                                              const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                              const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -366,7 +367,7 @@ inline void massEvaluationConfigParser( const shared_ptr< Config > & config, con
 #define WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER( config ) \
    uint_t defaultPlotFrequency = uint_t{0}; \
    uint_t defaultLogFrequency = uint_t{0}; \
-   std::string defaultFilename = internal::massEvaluationFilename; \
+   std::string defaultFilename = std::string(internal::massEvaluationFilename); \
    auto _blocks = blocks.lock(); \
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to execute 'makeMassEvaluation' for a block storage object that doesn't exist anymore" ); \
    Vector3<real_t> defaultDomainNormalization( _blocks->getDomain().sizes() ); \
@@ -380,7 +381,7 @@ template< typename DensityField_T, typename Config_T > // Config_T may be 'share
 shared_ptr< MassEvaluation< DensityField_T > > makeMassEvaluation( const Config_T & config,
                                                                    const weak_ptr< StructuredBlockStorage > & blocks,
                                                                    const ConstBlockDataID & fieldId,
-                                                                   const std::string & configBlockName = internal::massEvaluationConfigBlock,
+                                                                   const std::string & configBlockName = std::string(internal::massEvaluationConfigBlock),
                                                                    const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -396,7 +397,7 @@ shared_ptr< MassEvaluation< DensityField_T, FlagFieldEvaluationFilter<FlagField_
 makeMassEvaluation( const Config_T & config,
                     const weak_ptr< StructuredBlockStorage > & blocks,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
-                    const std::string & configBlockName = internal::massEvaluationConfigBlock,
+                    const std::string & configBlockName = std::string(internal::massEvaluationConfigBlock),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -411,7 +412,7 @@ template< typename DensityField_T, typename Filter_T, typename Config_T > // Con
 shared_ptr< MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( const Config_T & config,
                                                                              const weak_ptr< StructuredBlockStorage > & blocks,
                                                                              const ConstBlockDataID & fieldId, const Filter_T & filter,
-                                                                             const std::string & configBlockName = internal::massEvaluationConfigBlock,
+                                                                             const std::string & configBlockName = std::string(internal::massEvaluationConfigBlock),
                                                                              const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                              const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {

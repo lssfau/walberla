@@ -92,7 +92,7 @@ template< typename DensityField_T >
 shared_ptr< walberla::field::MassEvaluation< DensityField_T > > makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                                                                                     const ConstBlockDataID & fieldId,
                                                                                     const uint_t plotFrequency, const uint_t logFrequency,
-                                                                                    const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                                                                                    const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                                                                                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -107,7 +107,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, walberla::field::Fl
 makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
                     const uint_t plotFrequency, const uint_t logFrequency,
-                    const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                    const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -122,7 +122,7 @@ template< typename DensityField_T, typename Filter_T >
 shared_ptr< walberla::field::MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                                                                                               const ConstBlockDataID & fieldId, const Filter_T & filter,
                                                                                               const uint_t plotFrequency, const uint_t logFrequency,
-                                                                                              const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                                                                                              const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                                                                                               const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                               const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -139,7 +139,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, field::DefaultEvalu
 makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId,
                     const uint_t plotFrequency, const uint_t logFrequency,
-                    const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                    const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -154,7 +154,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, walberla::field::Fl
 makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
                     const uint_t plotFrequency, const uint_t logFrequency,
-                    const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                    const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -170,7 +170,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, Filter_T, Pseudo2D 
 makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const Filter_T & filter,
                     const uint_t plotFrequency, const uint_t logFrequency,
-                    const std::string & filename = walberla::field::internal::massEvaluationFilename,
+                    const std::string & filename = std::string(walberla::field::internal::massEvaluationFilename),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -189,7 +189,7 @@ makeMassEvaluation( const shared_ptr< StructuredBlockStorage > & blocks, const u
 #define WALBERLA_LBM_MAKE_MASS_EVALUATION_CONFIG_PARSER( config ) \
    uint_t defaultPlotFrequency = uint_t{0}; \
    uint_t defaultLogFrequency = uint_t{0}; \
-   std::string defaultFilename = walberla::field::internal::massEvaluationFilename; \
+   std::string defaultFilename = std::string(walberla::field::internal::massEvaluationFilename); \
    Vector3<real_t> defaultDomainNormalization( internal::massEvaluationDomain( blocks, level ) ); \
    walberla::field::internal::massEvaluationConfigParser( config, configBlockName, defaultPlotFrequency, defaultLogFrequency, defaultFilename, defaultDomainNormalization );
 
@@ -197,7 +197,7 @@ template< typename DensityField_T, typename Config_T > // Config_T may be 'share
 shared_ptr< walberla::field::MassEvaluation< DensityField_T > > makeMassEvaluation( const Config_T & config,
                                                                                     const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                                                                                     const ConstBlockDataID & fieldId,
-                                                                                    const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                                                                                    const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                                                                                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -212,7 +212,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, walberla::field::Fl
 makeMassEvaluation( const Config_T & config,
                     const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
-                    const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                    const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -227,7 +227,7 @@ template< typename DensityField_T, typename Filter_T, typename Config_T > // Con
 shared_ptr< walberla::field::MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( const Config_T & config,
                                                                                               const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                                                                                               const ConstBlockDataID & fieldId, const Filter_T & filter,
-                                                                                              const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                                                                                              const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                                                                                               const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                               const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -244,7 +244,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, field::DefaultEvalu
 makeMassEvaluation( const Config_T & config,
                     const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId,
-                    const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                    const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -259,7 +259,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, walberla::field::Fl
 makeMassEvaluation( const Config_T & config,
                     const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
-                    const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                    const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -275,7 +275,7 @@ shared_ptr< walberla::field::MassEvaluation< DensityField_T, Filter_T, Pseudo2D 
 makeMassEvaluation( const Config_T & config,
                     const shared_ptr< StructuredBlockStorage > & blocks, const uint_t level,
                     const ConstBlockDataID & fieldId, const Filter_T & filter,
-                    const std::string & configBlockName = walberla::field::internal::massEvaluationConfigBlock,
+                    const std::string & configBlockName = std::string(walberla::field::internal::massEvaluationConfigBlock),
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {

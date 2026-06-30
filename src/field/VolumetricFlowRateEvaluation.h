@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 
@@ -51,12 +52,12 @@ namespace internal {
 using FlowRateSolution_T = std::function<real_t ()>;
 using FlowRateVelocitySolution_T = std::function<Vector3<real_t> (const Vector3<real_t> &)>;
 
-const std::string     volumetricFlowRateEvaluationFilename("flowrate.dat");
-const real_t          volumetricFlowRateEvaluationNormalization( real_t{1} );
-const Vector3<bool>   volumetricFlowRateEvaluationAxis( Vector3<bool>( true, false, false ) );
-const Vector3<real_t> volumetricFlowRateEvaluationPoint( Vector3<real_t>( real_c(0.5) ) );
+constexpr std::string_view    volumetricFlowRateEvaluationFilename = "flowrate.dat";
+constexpr real_t          volumetricFlowRateEvaluationNormalization( real_t{1} );
+constexpr Vector3<bool>   volumetricFlowRateEvaluationAxis( Vector3<bool>( true, false, false ) );
+constexpr Vector3<real_t> volumetricFlowRateEvaluationPoint( Vector3<real_t>( 0.5 ) );
 
-const std::string volumetricFlowRateEvaluationConfigBlock("VolumetricFlowRateEvaluation");
+constexpr std::string_view    volumetricFlowRateEvaluationConfigBlock = "VolumetricFlowRateEvaluation";
 
 }
 
@@ -567,7 +568,7 @@ inline void volumetricFlowRateEvaluationConfigParser( const shared_ptr< Config >
 #define WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_CONFIG_PARSER( config ) \
    uint_t defaultPlotFrequency = uint_t{0}; \
    uint_t defaultLogFrequency = uint_t{0}; \
-   std::string defaultFilename = internal::volumetricFlowRateEvaluationFilename; \
+   std::string defaultFilename = std::string(internal::volumetricFlowRateEvaluationFilename); \
    real_t defaultNormalizationFactor = internal::volumetricFlowRateEvaluationNormalization; \
    auto _blocks = blocks.lock(); \
    WALBERLA_CHECK_NOT_NULLPTR( _blocks, "Trying to execute 'makeVolumetricFlowRateEvaluation' for a block storage object that doesn't exist anymore" ); \
@@ -591,7 +592,7 @@ shared_ptr< VolumetricFlowRateEvaluation< VelocityField_T > > makeVolumetricFlow
                                                                                                 const ConstBlockDataID & velocityFieldId,
                                                                                                 const internal::FlowRateSolution_T & solution = internal::FlowRateSolution_T(),
                                                                                                 const internal::FlowRateVelocitySolution_T & velocitySolution = internal::FlowRateVelocitySolution_T(),
-                                                                                                const std::string & configBlockName = internal::volumetricFlowRateEvaluationConfigBlock,
+                                                                                                const std::string & configBlockName = std::string(internal::volumetricFlowRateEvaluationConfigBlock),
                                                                                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -609,7 +610,7 @@ makeVolumetricFlowRateEvaluation( const Config_T & config,
                                   const ConstBlockDataID & velocityFieldId, const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate,
                                   const internal::FlowRateSolution_T & solution = internal::FlowRateSolution_T(),
                                   const internal::FlowRateVelocitySolution_T & velocitySolution = internal::FlowRateVelocitySolution_T(),
-                                  const std::string & configBlockName = internal::volumetricFlowRateEvaluationConfigBlock,
+                                  const std::string & configBlockName = std::string(internal::volumetricFlowRateEvaluationConfigBlock),
                                   const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
@@ -627,7 +628,7 @@ makeVolumetricFlowRateEvaluation( const Config_T & config,
                                   const ConstBlockDataID & velocityFieldId, const Filter_T & filter,
                                   const internal::FlowRateSolution_T & solution = internal::FlowRateSolution_T(),
                                   const internal::FlowRateVelocitySolution_T & velocitySolution = internal::FlowRateVelocitySolution_T(),
-                                  const std::string & configBlockName = internal::volumetricFlowRateEvaluationConfigBlock,
+                                  const std::string & configBlockName = std::string(internal::volumetricFlowRateEvaluationConfigBlock),
                                   const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {

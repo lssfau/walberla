@@ -25,6 +25,8 @@
 #include "Directions.h"
 #include "core/debug/Debug.h"
 
+#include <string_view>
+
 namespace walberla {
 namespace stencil {
 
@@ -68,7 +70,7 @@ public:
                                                             return stencil::c[d][Stencil::dir[i_]];        }
    constexpr real_t             length()            const { return stencil::dirLength[Stencil::dir[i_]];   }
    constexpr BinaryDirection    binaryDir()         const { return stencil::dirToBinary[Stencil::dir[i_]]; }
-   constexpr const std::string& dirString()         const { return stencil::dirToString[Stencil::dir[i_]]; }
+   constexpr std::string_view   dirString()         const { return stencil::dirToString[Stencil::dir[i_]]; }
    constexpr Direction          mirrorX()           const { return stencil::mirrorX[Stencil::dir[i_]];     }
    constexpr Direction          mirrorY()           const { return stencil::mirrorY[Stencil::dir[i_]];     }
    constexpr Direction          mirrorZ()           const { return stencil::mirrorZ[Stencil::dir[i_]];     }

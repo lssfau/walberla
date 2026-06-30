@@ -114,10 +114,10 @@ const uint_t FieldGhostLayers = 1;
 // FLAGS //
 ///////////
 
-const FlagUID Fluid_Flag( "fluid" );
-const FlagUID NoSlip_Flag( "no slip" );
-const FlagUID MO_Flag( "moving obstacle" );
-const FlagUID FormerMO_Flag( "former moving obstacle" );
+const FlagUID & Fluid_Flag() { static const FlagUID flag("fluid"); return flag; }
+const FlagUID & NoSlip_Flag() { static const FlagUID flag("no slip"); return flag; }
+const FlagUID & MO_Flag() { static const FlagUID flag("moving obstacle"); return flag; }
+const FlagUID & FormerMO_Flag() { static const FlagUID flag("former moving obstacle"); return flag; }
 
 /////////////////////////////////////
 // BOUNDARY HANDLING CUSTOMIZATION //
@@ -144,11 +144,11 @@ public:
       auto *  pdfField     = block->getData< PdfField_T > ( pdfFieldID_ );
       auto * particleField = block->getData< lbm_mesapd_coupling::ParticleField_T > ( particleFieldID_ );
 
-      const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
+      const auto fluid = flagField->flagExists( Fluid_Flag() ) ? flagField->getFlag( Fluid_Flag() ) : flagField->registerFlag( Fluid_Flag() );
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
-                                  NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                  MO_T( "MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  NoSlip_T( "NoSlip", NoSlip_Flag(), pdfField ),
+                                  MO_T( "MO", MO_Flag(), pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -609,10 +609,10 @@ int main( int argc, char **argv )
    ///////////////
 
    // map planes into the LBM simulation -> act as no-slip boundaries
-   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag);
+   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag());
 
    // map particles into the LBM simulation
-   ps->forEachParticle(false, sphereSelector, *accessor, movingParticleMappingKernel, *accessor, MO_Flag);
+   ps->forEachParticle(false, sphereSelector, *accessor, movingParticleMappingKernel, *accessor, MO_Flag());
 
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
@@ -625,7 +625,7 @@ int main( int argc, char **argv )
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
    auto bhSweep = BoundaryHandling_T::getBlockSweep( boundaryHandlingID );
-   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag() );
 
    timeloop.addFuncBeforeTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
@@ -652,7 +652,7 @@ int main( int argc, char **argv )
       pdfFieldVTK->addBeforeFunction( pdfGhostLayerSync );
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
-      fluidFilter.addFlag( Fluid_Flag );
+      fluidFilter.addFlag( Fluid_Flag() );
       pdfFieldVTK->addCellInclusionFilter( fluidFilter );
 
       pdfFieldVTK->addCellDataWriter( make_shared< lbm::VelocityVTKWriter< LatticeModel_T, float > >( pdfFieldID, "VelocityFromPDF" ) );
@@ -662,7 +662,7 @@ int main( int argc, char **argv )
    }
 
    // sweep for updating the particle mapping into the LBM simulation
-   timeloop.add() << Sweep( lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, sphereSelector, conserveMomentum), "Particle Mapping" );
+   timeloop.add() << Sweep( lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag(), FormerMO_Flag(), sphereSelector, conserveMomentum), "Particle Mapping" );
 
 
 
@@ -672,7 +672,7 @@ int main( int argc, char **argv )
 
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
       auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder);
-      auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum);
+      auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag(), Fluid_Flag(), equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum);
 
       timeloop.add() << Sweep( makeSharedSweep(reconstructionManager), "PDF Restore" );
 
@@ -680,10 +680,10 @@ int main( int argc, char **argv )
    {
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
       auto extrapolationSphereNormalReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, true);
-      timeloop.add() << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationSphereNormalReconstructor, conserveMomentum) ), "PDF Restore" );
+      timeloop.add() << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag(), Fluid_Flag(), extrapolationSphereNormalReconstructor, conserveMomentum) ), "PDF Restore" );
    } else
    {
-      timeloop.add() << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, conserveMomentum) ), "PDF Restore" );
+      timeloop.add() << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag(), Fluid_Flag(), conserveMomentum) ), "PDF Restore" );
    }
 
 
