@@ -14,7 +14,7 @@ stages:
 #       Every-Commit Test Suite & Coverage Collection
 ####################################################################################################
 
-clang [cpu-hybrid]:
+clang-22 [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: Testsuite
   extends: .testsuite-base-linux
@@ -26,7 +26,7 @@ clang [cpu-hybrid]:
     CC: clang
     CXX: clang++
 
-icx [cpu-hybrid]:
+icx-2025 [cpu-hybrid]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-icx-2025
   stage: Testsuite
   extends: .testsuite-base-linux
@@ -35,7 +35,7 @@ icx [cpu-hybrid]:
     CC: icx
     CXX: icpx
 
-gcc [cuda-hybrid-coverage]:
+gcc-15 [cuda-hybrid-coverage]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-gcc-15
   stage: Testsuite
   extends: .testsuite-base-linux-cuda
@@ -76,7 +76,7 @@ gcc [cuda-hybrid-coverage]:
 #       Code Quality
 ####################################################################################################
 
-clang-tidy:
+clang-tidy [llvm22-cuda-hybrid-debug]:
   image: $CI_CONTAINER_REPOSITORY:i10ci-walberla-clang-22
   stage: "Code Quality"
   needs: []
@@ -116,7 +116,7 @@ clang-tidy:
 clang-tidy:preview:
   stage: "Code Quality Preview"
   needs:
-    - job: clang-tidy
+    - job: "clang-tidy [llvm22-cuda-hybrid-debug]"
       artifacts: true
   variables:
     # Constructing the URL using the ID from the build job (exported via dotenv)
@@ -295,7 +295,7 @@ documentation:preview:stop:
 pages:
   image: alpine:latest
   stage: deploy
-  needs: ["documentation", "gcc [cuda-hybrid-coverage]"]
+  needs: ["documentation", "gcc-15 [cuda-hybrid-coverage]"]
   script:
     - mv build/documentation/doc/html public
     - mv coverage public/coverage

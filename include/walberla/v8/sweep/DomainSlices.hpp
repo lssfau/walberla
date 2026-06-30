@@ -225,6 +225,12 @@ enum CommHidingIntervall {
    OUTER,
 };
 
+
+template< typename T >
+concept FieldSwapOnlySweep = requires(T sweep, IBlock* block) {
+   { sweep.swapShadowBuffers(block) } -> std::same_as< void >;
+};
+
 template< CommHidingIntervall Intervall_T, CellIntervalSweep Sweep_T >
 class CommHidingSweep
 {
@@ -237,12 +243,11 @@ public:
    void operator()(IBlock* block)
    {
       for (const auto& ci : getCellIntervals()) {
-         if constexpr ((Intervall_T == OUTER || Intervall_T == ALL)) {
-            sweep_.runOnCellInterval(block, ci, true);
-         }
-         else {
-            sweep_.runOnCellInterval(block, ci, false);
-         }
+         sweep_.runOnCellInterval(block, ci);
+      }
+      if constexpr ((Intervall_T == OUTER || Intervall_T == ALL) && FieldSwapOnlySweep< Sweep_T >)
+      {
+         sweep_.swapShadowBuffers(block);
       }
    }
 
