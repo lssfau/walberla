@@ -1,5 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Frederik Hennig <frederik.hennig@fau.de>
+
 import pystencils as ps
+import sympy as sp
 from pystencilssfg import SourceFileGenerator, SfgComposer
+
+import sweepgen as sg
 
 from sweepgen import Sweep
 from sweepgen.symbolic import cell
@@ -70,6 +76,21 @@ def test_field_swaps(sfg: SfgComposer):
             sfg.generate(sweep)
 
 
+def test_tensor_fields_and_constraints(sfg: SfgComposer):
+    with sfg.namespace("TestTensorFields"):
+        with Sweep.use_v8core_fields():
+            f = ps.grids.TensorField(
+                "f", 3, (), ghost_layers=2, dtype="double", layout="fzyx"
+            )
+            g = ps.grids.TensorField(
+                "g", 3, (3,), ghost_layers=1, dtype="double", layout="zyxf"
+            )
+
+            @sg.flow.generate_sweep(sfg)
+            def SetF(_eq):
+                _eq.store[f()] = sp.sqrt(g(0) ** 2 + g(1) ** 2 + g(2) ** 2)
+
+
 with SourceFileGenerator() as sfg:
     get_build_config(sfg).target = ps.Target.CPU
 
@@ -78,3 +99,4 @@ with SourceFileGenerator() as sfg:
         test_experimental_fields(sfg)
         test_1d_2d_fields_v8(sfg)
         test_field_swaps(sfg)
+        test_tensor_fields_and_constraints(sfg)

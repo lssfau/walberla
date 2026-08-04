@@ -1,15 +1,5 @@
-# This file is part of waLBerla. waLBerla is free software: you can
-# redistribute it and/or modify it under the terms of the GNU General Public
-# License as published by the Free Software Foundation, either version 3 of
-# the License, or (at your option) any later version.
-#
-# waLBerla is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Frederik Hennig <frederik.hennig@fau.de>
 
 from __future__ import annotations
 
@@ -32,6 +22,7 @@ from pystencils import (
 from pystencils.types import deconstify, PsCustomType, PsStructType, PsType
 from pystencils.codegen.driver import SymbolicKernel
 from pystencils.flow import FlowgraphNode, Flowgraph, tie
+from pystencils.grids import TensorField, IField, MemoryLayout
 
 from pystencilssfg import SfgComposer
 from pystencilssfg.lang import (
@@ -60,16 +51,21 @@ from .api import (
     MemTags,
     sweep_parts,
     v8,
+    Layout,
 )
 
-from .core.properties import PropertiesContainerBuilder, PropertiesContainer
+from .core.properties import (
+    PropertiesContainerBuilder,
+    PropertiesContainer,
+    PropertyConstraint,
+)
 from .core.blockforest_extraction import BlockforestParamExtraction
 from .core.suppress_diagnostics import SuppressDiagnostics
 
 
 @dataclass
 class FieldInfo(ABC):
-    field: Field
+    field: Field | TensorField
 
     @property
     @abstractmethod
@@ -81,6 +77,14 @@ class FieldInfo(ABC):
 
     @abstractmethod
     def create_view(self, block: IBlockPtr) -> AugExpr: ...
+
+    @property
+    def _spatial_rank(self) -> int:
+        match self.field:
+            case Field():
+                return self.field.spatial_dimensions
+            case TensorField():
+                return self.field.spatial_rank
 
     def view_extraction(self) -> SupportsFieldExtraction:
         assert isinstance(self.view, SupportsFieldExtraction)
@@ -151,14 +155,14 @@ class V8FieldInfo(DomainFieldInfo, FieldInfo):
         return v8.BufferKernelParamsAdaptor(
             self.buffer_view,
             cell_interval=None,
-            emulate_spatial_rank=self.field.spatial_dimensions,
+            emulate_spatial_rank=self._spatial_rank,
         )
 
     def with_cell_interval(self, ci: CellInterval | None) -> SupportsFieldExtraction:
         return v8.BufferKernelParamsAdaptor(
             self.buffer_view,
             cell_interval=ci,
-            emulate_spatial_rank=self.field.spatial_dimensions,
+            emulate_spatial_rank=self._spatial_rank,
         )
 
 
@@ -339,9 +343,9 @@ class Sweep(CustomGenerator):
             override options from the `WalberlaBuildConfig`.
     """
 
-    _use_experimental_fields: bool = False
+    _use_v8_fields: bool = False
 
-    class _UseExperimentalFields:
+    class _UseV8Fields:
         def __init__(self, reset_to: bool):
             self._reset_to = reset_to
 
@@ -349,14 +353,14 @@ class Sweep(CustomGenerator):
             pass
 
         def __exit__(self, exc_type, exc_value, traceback):
-            Sweep._use_experimental_fields = self._reset_to
+            Sweep._use_v8_fields = self._reset_to
 
     @staticmethod
     def use_v8core_fields(use: bool = True):
         """Generate code for the experimental field system in ``walberla::v8::memory``."""
-        prev_value = Sweep._use_experimental_fields
-        Sweep._use_experimental_fields = use
-        return Sweep._UseExperimentalFields(prev_value)
+        prev_value = Sweep._use_v8_fields
+        Sweep._use_v8_fields = use
+        return Sweep._UseV8Fields(prev_value)
 
     def __init__(
         self,
@@ -481,24 +485,49 @@ class Sweep(CustomGenerator):
                 f"Cannot generate sweep for target {self._gen_config.target}"
             )
 
-    def _make_field_info(self, f: Field, target: Target) -> FieldInfo:
-        match f.field_type:
-            case FieldType.GENERIC | FieldType.CUSTOM:
-                if self._use_experimental_fields:
-                    ex_field = v8.Field.from_field(f, self._memtag_t)
-                    buffer_view = ex_field.bufferViewType().var(f.name + "_view")
-                    return V8FieldInfo(f, ex_field, buffer_view)
-                else:
-                    glfield = self._glfield_type.create(f)
-                    data_id = BlockDataID().var(f"{f.name}Id")
-                    return GlFieldInfo(f, glfield, data_id)
-            case FieldType.INDEXED:
-                assert isinstance(f.dtype, PsStructType)
-                idx_list = SparseIndexList.from_field(f, target=target)
-                view = idx_list.view_type().var(f"{f.name}_view")
-                return IndexListInfo(f, idx_list, view)
+    def _make_field_info(self, f: Field | IField, target: Target) -> FieldInfo:
+        match f:
+            case Field():
+                match f.field_type:
+                    case FieldType.GENERIC | FieldType.CUSTOM:
+                        if self._use_v8_fields:
+                            ex_field = v8.Field.from_field(f, self._memtag_t)
+                            buffer_view = ex_field.bufferViewType().var(
+                                f.name + "_view"
+                            )
+                            return V8FieldInfo(f, ex_field, buffer_view)
+                        else:
+                            glfield = self._glfield_type.create(f)
+                            data_id = BlockDataID().var(f"{f.name}Id")
+                            return GlFieldInfo(f, glfield, data_id)
+                    case FieldType.INDEXED:
+                        assert isinstance(f.dtype, PsStructType)
+                        idx_list = SparseIndexList.from_field(f, target=target)
+                        view = idx_list.view_type().var(f"{f.name}_view")
+                        return IndexListInfo(f, idx_list, view)
+                    case _:
+                        raise ValueError(
+                            f"Unexpected field type: {f.field_type} at field  {f}"
+                        )
+            case TensorField():
+                if not self._use_v8_fields:
+                    raise RuntimeError(
+                        "Can only use new-style algebraic fields together with V8 core fields.\n"
+                        "Call `Sweep.use_v8core_fields()` first."
+                    )
+
+                if f.layout not in (MemoryLayout.FZYX, MemoryLayout.ZYXF):
+                    raise ValueError(
+                        f"Invalid field memory layout {f.layout} of field {f}"
+                    )
+
+                ex_field = v8.Field.from_field(f, self._memtag_t)
+                buffer_view = ex_field.bufferViewType().var(f.name + "_view")
+                return V8FieldInfo(f, ex_field, buffer_view)
             case _:
-                raise ValueError(f"Unexpected field type: {f.field_type} at field  {f}")
+                raise ValueError(
+                    f"Algebraic field type {type(f)} not supported by SweepGen"
+                )
 
     def _render_invocation(
         self,
@@ -606,7 +635,32 @@ class Sweep(CustomGenerator):
         vector_groups = combine_vectors(parameters)
 
         for fi in block_fields:
-            props_builder.add_property(fi.entity, setter=False, getter=True)
+            constraints: tuple[PropertyConstraint, ...]
+            if isinstance(fi, V8FieldInfo) and isinstance(fi.field, TensorField):
+                assert isinstance(fi.entity, v8.Field)
+
+                expected_layout = (
+                    Layout.fzyx if fi.field.layout == MemoryLayout.FZYX else Layout.zyxf
+                )
+
+                constraints = (
+                    PropertyConstraint.equals(
+                        fi.entity.numGhostLayers(),
+                        str(fi.field.ghost_layers),
+                        f"Invalid number of ghost layers on field {fi.field.name}. Expected {fi.field.ghost_layers}",
+                    ),
+                    PropertyConstraint.equals(
+                        fi.entity.layout(),
+                        expected_layout,
+                        f"Invalid memory layout of field {fi.field.name}. Expected {expected_layout}",
+                    ),
+                )
+            else:
+                constraints = ()
+
+            props_builder.add_property(
+                fi.entity, setter=False, getter=True, constraints=constraints
+            )
 
         for s in sorted(parameters, key=lambda p: p.name):
             props_builder.add_property(s, setter=True, getter=True)

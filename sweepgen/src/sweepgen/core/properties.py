@@ -1,15 +1,5 @@
-# This file is part of waLBerla. waLBerla is free software: you can
-# redistribute it and/or modify it under the terms of the GNU General Public
-# License as published by the Free Software Foundation, either version 3 of
-# the License, or (at your option) any later version.
-#
-# waLBerla is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Frederik Hennig <frederik.hennig@fau.de>
 
 from __future__ import annotations
 
@@ -30,11 +20,34 @@ from pystencilssfg.lang import (
     Ref,
     CppClass,
     cpptype,
+    ExprLike,
 )
+from pystencilssfg.ir import SfgSequence
+
 from ..api import (
     StructuredBlockForest,
     SharedPtr,
+    SweepConstraintError,
 )
+
+
+@dataclass(frozen=True)
+class PropertyConstraint:
+    """Constraint on a property's values"""
+
+    condition: AugExpr
+    message: str
+
+    @staticmethod
+    def equals(a: ExprLike, b: ExprLike, msg: str):
+        return PropertyConstraint(AugExpr.format("{} == {}", a, b), msg)
+
+    def render(self, sfg: SfgComposer) -> SfgSequence:
+        return sfg.seq(
+            sfg.branch(sfg.expr("!({})", self.condition))(
+                sfg.expr("throw {};", SweepConstraintError().ctor(f'"{self.message}"'))
+            )
+        )
 
 
 @dataclass(frozen=True)
@@ -44,6 +57,7 @@ class Property:
     getter: bool
     setter: bool
     initializer: tuple[AugExpr, ...] | None = None
+    constraints: tuple[PropertyConstraint, ...] = ()
 
     def __post_init__(self):
         if self.dtype.const and self.setter:
@@ -83,7 +97,20 @@ class PropertiesContainer(CppClass):
     def render_forwarding_ctor(
         self, sfg: SfgComposer
     ) -> SfgComposer.ConstructorBuilder:
-        ctor = sfg.constructor(*self.ctor_params).init(self)(*self.ctor_params)
+        ctor = (
+            sfg.constructor(*self.ctor_params)
+            .init(self)(*self.ctor_params)
+            .body(
+                *(
+                    chain.from_iterable(
+                        (
+                            (constr.render(sfg) for constr in prop.constraints)
+                            for prop in self.properties.values()
+                        )
+                    )
+                )
+            )
+        )
         return ctor
 
     def render_public_interface(
@@ -132,6 +159,7 @@ class PropertiesContainerBuilder:
         setter: bool = True,
         getter: bool = True,
         initializer: tuple[AugExpr, ...] | None = None,
+        constraints: tuple[PropertyConstraint, ...] = (),
     ):
         prop_var = asvar(prop)
         if prop_var.name in self._properties:
@@ -140,7 +168,7 @@ class PropertiesContainerBuilder:
         dtype = constify(prop_var.dtype) if const else deconstify(prop_var.dtype)
 
         self._properties[prop_var.name] = Property(
-            prop_var.name, dtype, getter, setter, initializer
+            prop_var.name, dtype, getter, setter, initializer, constraints
         )
 
     def add_blockforest_shared_ptr(self) -> SharedPtr:

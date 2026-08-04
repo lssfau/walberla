@@ -14,6 +14,7 @@ walberla_v8_add_tests(
     testV8FieldSwaps
     test1DFieldV8
     test2DFieldV8
+    testTensorFieldsAndConstraints
 )
 
 add_executable( TestBlockforestGeometry TestBlockforestGeometry.cpp )
