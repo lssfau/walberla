@@ -523,6 +523,42 @@ class with_tolerance
    }
 
    /**
+    * @brief Check if the elements of a waLBerla field are equal to a constant up to the set tolerances.
+    */
+   template< memory::IFieldView TFieldView >
+   void assert_allclose(const TFieldView& actual, typename TFieldView::value_type desired, bool withGhostLayers = false,
+                        const std::source_location loc = std::source_location::current()) const
+   {
+      const cell_idx_t gls{ withGhostLayers ? cell_idx_c(actual.numGhostLayers()) : 0 };
+      const CellInterval ci{ { -gls, -gls, -gls },
+                             {
+                                cell_idx_c(actual.shape()[0]) + gls - 1, //
+                                cell_idx_c(actual.shape()[1]) + gls - 1, //
+                                cell_idx_c(actual.shape()[2]) + gls - 1,
+                             } };
+
+      const size_t totalEntries{ ci.numCells() * TFieldView::F_SIZE };
+      size_t numMismatched{ 0 };
+
+      sweep::forAllCells(exectag::Serial{}, ci, [&](Cell cell) {
+         for (cell_idx_t q = 0; q < cell_idx_c(TFieldView::F_SIZE); ++q)
+         {
+            auto& actualValue{ actual(cell, q) };
+
+            if (!this->isclose(actualValue, desired)) { numMismatched++; }
+         }
+      });
+
+      if (numMismatched > 0)
+      {
+         const std::string err =
+            std::format("Field entries not equal to atol={}, rtol={}. Number of mismatched entries: {} / {}", atol_,
+                        rtol_, numMismatched, totalEntries);
+         throw AssertionError(err, loc);
+      }
+   }
+
+   /**
     * @brief Check if the elements of two waLBerla fields are equal up to the set tolerances.
     */
    template< memory::IFieldView TFieldView >
@@ -595,6 +631,14 @@ void assert_allclose(const R1& actual, std::ranges::range_value_t< R1 > desired,
  */
 template< memory::IFieldView TFieldView >
 void assert_allclose(const TFieldView& actual, const TFieldView& desired, bool withGhostLayers = false,
+                     const std::source_location loc = std::source_location::current())
+{ with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, withGhostLayers, loc); }
+
+/**
+ * See `with_tolerance::assert_allclose`.
+ */
+template< memory::IFieldView TFieldView >
+void assert_allclose(const TFieldView& actual, typename TFieldView::value_type desired, bool withGhostLayers = false,
                      const std::source_location loc = std::source_location::current())
 { with_tolerance(0.0, 1e-7).assert_allclose(actual, desired, withGhostLayers, loc); }
 

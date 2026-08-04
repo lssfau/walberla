@@ -1,21 +1,12 @@
-# This file is part of waLBerla. waLBerla is free software: you can
-# redistribute it and/or modify it under the terms of the GNU General Public
-# License as published by the Free Software Foundation, either version 3 of
-# the License, or (at your option) any later version.
-#
-# waLBerla is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Frederik Hennig <frederik.hennig@fau.de>
 
 from __future__ import annotations
 
 from typing import cast
 
 from pystencils import Field, DynamicType, FieldType, Target
+from pystencils.grids import TensorField
 from pystencils.types import (
     UserTypeSpec,
     create_type,
@@ -130,6 +121,17 @@ class Direction(_PlainCppClass):
         from pystencils.stencil import offset_to_direction_string
 
         return f"walberla::stencil::Direction::{offset_to_direction_string(offset)}"
+
+
+class Layout(_PlainCppClass):
+    _type = cpptype("walberla::field::Layout", "field/Layout.h")
+
+    fzyx: Layout
+    zyxf: Layout
+
+
+Layout.fzyx = Layout().bind("walberla::field::Layout::fzyx")
+Layout.zyxf = Layout().bind("walberla::field::Layout::zyxf")
 
 
 class BlockDataID(_PlainCppClass):
@@ -530,6 +532,15 @@ CellIdx = PsStructType(
 #   SweepGen internal apis
 
 
+class SweepConstraintError(CppClass):
+    template = cpptype(
+        "walberla::sweepgen::SweepConstraintError", "walberla/sweepgen/Exceptions.hpp"
+    )
+
+    def ctor(self, message: str) -> SweepConstraintError:
+        return self.ctor_bind(message)
+
+
 class sweep_parts:
     class ShadowBufferCache(CppClass):
         template = cpptype(
@@ -759,9 +770,18 @@ class v8:
                 "{}.bufferSystem()", self
             )
 
+        def numGhostLayers(self) -> AugExpr:
+            return AugExpr.format("{}.numGhostLayers()", self)
+
+        def layout(self) -> AugExpr:
+            return AugExpr.format("{}.layout()", self)
+
         @staticmethod
         def from_field(
-            field: Field, memtag_t: PsType, const: bool = False, ref: bool = False
+            field: Field | TensorField,
+            memtag_t: PsType,
+            const: bool = False,
+            ref: bool = False,
         ) -> v8.Field:
             """Create an `walberla::v8::Field` instance from a pystencils field"""
 
@@ -771,15 +791,18 @@ class v8:
                 )
 
             element_type = field.dtype
+            index_shape = (
+                field.index_shape if isinstance(field, Field) else field.tensor_shape
+            )
 
-            match field.index_shape:
+            match index_shape:
                 case []:
                     f_size = 1
                 case [q]:
                     f_size = q
                 case _:
                     raise ValueError(
-                        f"Cannot map field with index shape {field.index_shape} to a waLBerla field"
+                        f"Cannot map field with index shape {index_shape} to a waLBerla field"
                     )
 
             return v8.Field(element_type, f_size, memtag_t, const=const, ref=ref).var(

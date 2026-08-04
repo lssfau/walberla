@@ -4,12 +4,17 @@
 
 #include "core/all.h"
 
+#include "field/Layout.h"
 #include "field/all.h"
+#include <algorithm>
 
 #include "walberla/v8/Domain.hpp"
 #include "walberla/v8/Memory.hpp"
 #include "walberla/v8/Sweep.hpp"
 #include "walberla/v8/Testing.hpp"
+#include "walberla/v8/sweep/ExecutionTags.hpp"
+#include "walberla/v8/sweep/Sweeper.hpp"
+#include "walberla/v8/testing/Testutils.hpp"
 
 namespace
 {
@@ -283,6 +288,37 @@ void test2DFieldV8()
    }
 }
 
+void testTensorFieldsAndConstraints()
+{
+   using ScalarField = memory::Field< double, 1, memtag::host >;
+   using VectorField = memory::Field< double, 3, memtag::host >;
+
+   auto blocks = blockforest::createUniformBlockGrid(1, 1, 1, 32, 32, 1, 1.0, true);
+
+   ScalarField f{ *blocks, 2, 0., field::Layout::fzyx };
+   VectorField g{ *blocks, 1, 1., field::Layout::zyxf };
+
+   ScalarField f_wrongLayout{ *blocks, 1, 0., field::Layout::zyxf };
+   VectorField g_wrongGhostLayers{ *blocks, 0, 0., field::Layout::zyxf };
+
+   // Violated constraints
+   testing::throws< sweepgen::SweepConstraintError >(
+      [&]() { [[maybe_unused]] gen::TestTensorFields::SetF sweep{ f_wrongLayout, g }; });
+
+   testing::throws< sweepgen::SweepConstraintError >(
+      [&]() { [[maybe_unused]] gen::TestTensorFields::SetF sweep{ f, g_wrongGhostLayers }; });
+
+   gen::TestTensorFields::SetF sweep( f, g );
+   
+   for(auto& b: *blocks) {
+      sweep(&b);
+
+      memory::FieldView fView { f, b };
+      testing::assert_allclose(fView, std::sqrt(3.));
+   }
+
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -290,13 +326,12 @@ int main(int argc, char** argv)
    walberla::mpi::Environment env{ argc, argv };
 
    return walberla::v8::testing::TestsRunner( //
-             {
-                { "test1DField", &test1DField },
-                { "test2DField", &test2DField },
-                { "testV8Fields", &testV8Fields },
-                { "testV8FieldSwaps", &testV8FieldSwaps },
-                { "test1DFieldV8", &test1DFieldV8 },
-                { "test2DFieldV8", &test2DFieldV8 },
-             })
+             { { "test1DField", &test1DField },
+               { "test2DField", &test2DField },
+               { "testV8Fields", &testV8Fields },
+               { "testV8FieldSwaps", &testV8FieldSwaps },
+               { "test1DFieldV8", &test1DFieldV8 },
+               { "test2DFieldV8", &test2DFieldV8 },
+               { "testTensorFieldsAndConstraints", &testTensorFieldsAndConstraints } })
       .run(argc, argv);
 }
